@@ -1,0 +1,7 @@
+FROM postgres:15-alpine
+
+ENV POSTGRES_USER postgres
+ENV POSTGRES_PASSWORD RLcb!!Dk
+ENV POSTGRES_DB eq_db
+
+EXPOSE 5432
