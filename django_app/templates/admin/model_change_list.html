@@ -1,0 +1,8 @@
+{% extends 'admin/change_list.html' %}
+
+{% block object-tools %}
+    <a href="/core/import_orders/">
+        <input type="button" value="Импорт заказов" style="margin-bottom: 10px"/>
+    </a>
+    {{ block.super }}
+{% endblock %}
