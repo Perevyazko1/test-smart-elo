@@ -12,38 +12,39 @@ services:
     env_file:
       - .env
 
-  django_app:
-    build:
-      context: ./django_app
-      dockerfile: Dockerfile
-    container_name: django_app
-    restart: always
-    depends_on:
-      - postgres_db
-      - redis
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    command: >
-      sh -c "python manage.py makemigrations &&
-             python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"
+#  django_app:
+#    build:
+#      context: ./django_app
+#      dockerfile: Dockerfile
+#    container_name: django_app
+#    restart: always
+#    depends_on:
+#      - postgres_db
+#      - redis
+#    ports:
+#      - "8000:8000"
+#    env_file:
+#      - .env
+#    command: >
+#      sh -c "python manage.py makemigrations &&
+#             python manage.py migrate &&
+#             python manage.py runserver 0.0.0.0:8000"
 
-  pgadmin:
-    build:
-      context: ./pgadmin
-      dockerfile: Dockerfile
-    container_name: pgadmin
-    restart: always
-    depends_on:
-      - postgres_db
-    ports:
-      - "5050:80"
-    env_file:
-      - ./.env
-    volumes:
-      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
+
+#  pgadmin:
+#    build:
+#      context: ./pgadmin
+#      dockerfile: Dockerfile
+#    container_name: pgadmin
+#    restart: always
+#    depends_on:
+#      - postgres_db
+#    ports:
+#      - "5050:80"
+#    env_file:
+#      - ./.env
+#    volumes:
+#      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   redis:
     container_name: redis
@@ -52,10 +53,13 @@ services:
     ports:
       - "6379:6379"
 
-  nginx:
-    container_name: nginx
-    build: ./nginx
-    volumes:
-      - ./react_app/build/:/usr/share/nginx/html
-    ports:
-      - "80:80"
+#  nginx:
+#    container_name: nginx
+#    build: ./nginx
+#    restart: always
+#    depends_on:
+#      - django_app
+#    volumes:
+#      - ./react_app/build/:/usr/share/nginx/html
+#    ports:
+#      - "80:80"
