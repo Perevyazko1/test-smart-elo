@@ -1,3 +1,50 @@
-from django.shortcuts import render
+from django.contrib.auth import authenticate
+from django.core import serializers
+from django.http import HttpResponse, JsonResponse
 
-# Create your views here.
+from rest_framework.decorators import api_view
+from rest_framework.request import Request
+from rest_framework.response import Response
+from rest_framework import viewsets
+
+from src.query_debugger import query_debugger
+
+from .models import Employee, Department, Transaction
+from .serializers import EmployeeSerializer, DepartmentSerializer, TransactionSerializer
+
+
+class EmployeeViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeSerializer
+
+
+class DepartmentViewSet(viewsets.ModelViewSet):
+    queryset = Department.objects.all()
+    serializer_class = DepartmentSerializer
+
+
+class TransactionViewSet(viewsets.ModelViewSet):
+    queryset = Transaction.objects.all()
+    serializer_class = TransactionSerializer
+
+
+@api_view(['GET'])
+@query_debugger
+def test(request):
+    queryset = Employee.objects.prefetch_related('departments').all()
+    serializer = EmployeeSerializer(queryset, many=True, context={'request': request})
+    return Response(serializer.data)
+
+
+@api_view(['GET', 'POST'])
+def pin_code_authorisation(request):
+    if request.method == 'POST':
+        pin_code = request.data.get('pin_code')
+        print(pin_code)
+
+        try:
+            user = Employee.objects.get(pin_code=pin_code)
+            serialized_user = EmployeeSerializer(user, context={'request': request})
+            return JsonResponse(serialized_user.data)
+        except:
+            return Response('Пользователь не найден', status=401)

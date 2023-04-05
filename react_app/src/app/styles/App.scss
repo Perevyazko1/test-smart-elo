@@ -1,0 +1,16 @@
+@font-face {
+  font-family: 'Verdana';
+  font-style: normal;
+  src: url('Verdana.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Motserrat-Light';
+  font-style: normal;
+  src: url('Montserrat-Light.ttf') format('truetype');
+}
+
+$font-family-sans-serif: "Verdana", sans-serif;
+$font-family-monospace: "Motserrat-Light", monospace;
+
+@import "~bootstrap/scss/bootstrap";

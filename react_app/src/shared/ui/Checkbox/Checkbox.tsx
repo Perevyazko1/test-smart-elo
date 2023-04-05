@@ -1,0 +1,41 @@
+import {memo, ReactNode} from 'react';
+import {classNames, Mods} from "shared/lib/classNames/classNames";
+import cls from './Checkbox.module.scss'
+
+interface CheckboxProps {
+    id: string
+    className?: string
+    children?: ReactNode
+}
+
+
+export const Checkbox = memo((props: CheckboxProps) => {
+    const {
+        className,
+        children,
+        id,
+        ...otherProps
+    } = props
+
+    const mods: Mods = {
+        [cls.largeSize]: true
+    };
+
+    return (
+        <div>
+            <input
+                className={classNames('form-check-input', mods, [className])}
+                type="checkbox"
+                id={id}
+                {...otherProps}
+            />
+            <label
+                className="form-check-label fw-bold mx-xl-3 my-xl-0"
+                htmlFor={id}
+            >
+                {children}
+            </label>
+        </div>
+
+    );
+});

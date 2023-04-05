@@ -21,7 +21,7 @@ class Product(models.Model):
     ]
 
     status = models.CharField('Статус', max_length=25, choices=STATUS_CHOICES, default='1')
-    product_ID = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
+    product_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Наименование официальное', max_length=250, blank=True, unique=True)
 
     # Возможность устанавливать внутреннее, не официальное наименование
@@ -85,7 +85,6 @@ class Fabric(models.Model):
 
     name = models.CharField('Название ткани', max_length=255)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/products/", blank=True, null=True)
-    quantity = models.IntegerField('Количество', default=1)
 
     def __str__(self):
         return '{}'.format(f'{self.name}')
@@ -245,7 +244,9 @@ class ProductionStep(models.Model):
     next_step = models.ManyToManyField(
         "ProductionStep",
         verbose_name="Последующие этапы",
-        related_name="production_steps")
+        related_name="production_steps",
+        blank=True
+    )
 
     tax = models.IntegerField("Производственный тариф", default=0)
 

@@ -1,10 +1,14 @@
 import React from 'react';
+import './styles/App.scss'
+
+import {LoginPage} from "pages/LoginPage";
+
 function App() {
-  return (
-    <div style={{background: "darkblue", width: "300px", height: "70px"}}>
-      <h1>HI BROOOO!!!</h1>
-    </div>
-  );
+    return (
+        <>
+            <LoginPage/>
+        </>
+    );
 }
 
 export default App;
