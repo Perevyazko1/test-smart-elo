@@ -1,8 +1,8 @@
-import {memo, ReactNode} from 'react';
+import {memo, ReactNode, InputHTMLAttributes} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import cls from './Checkbox.module.scss'
 
-interface CheckboxProps {
+interface CheckboxProps extends InputHTMLAttributes<HTMLInputElement>{
     id: string
     className?: string
     children?: ReactNode

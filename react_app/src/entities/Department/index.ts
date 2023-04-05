@@ -1,0 +1,1 @@
+export {Department} from './model/type/department'

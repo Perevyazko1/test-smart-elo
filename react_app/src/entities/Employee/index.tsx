@@ -1,0 +1,1 @@
+export type {EmployeeSchema} from './model/types/employeeSchema'

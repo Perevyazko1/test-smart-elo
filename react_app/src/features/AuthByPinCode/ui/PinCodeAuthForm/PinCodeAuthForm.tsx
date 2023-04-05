@@ -1,17 +1,34 @@
+import {useDispatch, useSelector} from "react-redux";
+import React, {memo} from 'react';
+
 import axios, {AxiosError} from "axios";
 
-import React, {memo, useState} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Input} from "shared/ui/Input/Input";
 import {Checkbox} from "shared/ui/Checkbox/Checkbox";
 import {Button, ButtonTypes} from "shared/ui/Button/Button";
+
+import {authByPinCodeActions} from "../../model/slice/authByPinCodeSlice";
+import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
 
 export interface PinCodeAuthFormProps {
     className?: string
 }
 
 const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
-    const [pin_code, setPinCode] = useState('');
+    const dispatch = useDispatch()
+    const pin_code = useSelector(getPinCode)
+
+    const {className, ...otherProps} = props
+    const mods: Mods = {};
+
+    const setPinCode = (event: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(authByPinCodeActions.setPinCode(event.target.value))
+    }
+
+    const setRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(authByPinCodeActions.setRememberMe(event.target.checked))
+    }
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -25,10 +42,6 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
         }
     };
 
-    const {className, ...otherProps} = props
-
-    const mods: Mods = {};
-
     return (
         <form
             className={classNames('', mods, [className])}
@@ -40,9 +53,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
 
             <div className="mb-3">
                 <Input
-                    onChange={(event) => {
-                        setPinCode(event.target.value)
-                    }}
+                    onChange={setPinCode}
                     type="password"
                     placeholder="ПИН-код"
                     autoFocus
@@ -58,6 +69,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
             >
                 <Checkbox
                     id={"check-box-login-page-1"}
+                    onChange={setRememberMe}
                 >
                     Оставаться в системе
                 </Checkbox>
