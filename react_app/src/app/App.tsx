@@ -5,6 +5,7 @@ import {LoginPage} from "pages/LoginPage";
 import {useDispatch, useSelector} from "react-redux";
 import {employeeActions, getEmployeeAuthData} from "../entities/Employee";
 import {Button, ButtonTypes} from "../shared/ui/Button/Button";
+import {Loader} from "../shared/ui/Loader/Loader";
 
 function App() {
     const dispatch = useDispatch()
@@ -30,7 +31,7 @@ function App() {
 
     return (
         // TODO сделать красивый загрузчик
-        <Suspense fallback={<div>Загрузка...</div>}>
+        <Suspense fallback={<Loader/>}>
             <LoginPage/>
         </Suspense>
     );
