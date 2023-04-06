@@ -1,5 +1,6 @@
-import {createSlice} from '@reduxjs/toolkit';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {AuthByPinCodeSchema} from "../types/authByPinCodeSchema";
+import {authByPinCode} from "../services/authByPinCode/authByPinCode";
 
 
 const initialState: AuthByPinCodeSchema = {
@@ -13,13 +14,25 @@ export const authByPinCodeSlice = createSlice({
     name: 'authByPinCode',
     initialState,
     reducers: {
-        setPinCode: (state, action) => {
-            console.log(action.payload)
+        setPinCode: (state, action: PayloadAction<number>) => {
             state.pinCode = action.payload
         },
-        setRememberMe: (state, action) => {
+        setRememberMe: (state, action: PayloadAction<boolean>) => {
             state.rememberMe = action.payload
         }
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(authByPinCode.pending, (state) => {
+                state.error = undefined;
+                state.isLoading = true;
+            })
+            .addCase(authByPinCode.fulfilled, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(authByPinCode.rejected, (state, action) => {
+                state.error = action.payload
+            })
     }
 })
 

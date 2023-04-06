@@ -40,7 +40,7 @@ def test(request):
 def pin_code_authorisation(request):
     if request.method == 'POST':
         pin_code = request.data.get('pin_code')
-        print(pin_code)
+        print(request.data)
 
         try:
             user = Employee.objects.get(pin_code=pin_code)

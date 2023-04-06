@@ -1,6 +1,7 @@
 import {Department} from "entities/Department";
 
-export interface EmployeeSchema {
+export interface Employee {
+    id?: number,
     username?: string,
     first_name?: string,
     last_name?: string,
@@ -8,5 +9,11 @@ export interface EmployeeSchema {
     current_department?: Department,
     departments?: [Department],
     groups?: [string],
+}
 
+
+export interface EmployeeSchema {
+    authData?: Employee;
+
+    _inited: boolean;
 }

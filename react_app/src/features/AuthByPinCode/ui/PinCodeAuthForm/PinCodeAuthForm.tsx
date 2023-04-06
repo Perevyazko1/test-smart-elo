@@ -1,7 +1,5 @@
-import {useDispatch, useSelector} from "react-redux";
-import React, {memo} from 'react';
-
-import axios, {AxiosError} from "axios";
+import {useSelector} from "react-redux";
+import React, {memo, useCallback} from 'react';
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Input} from "shared/ui/Input/Input";
@@ -10,37 +8,41 @@ import {Button, ButtonTypes} from "shared/ui/Button/Button";
 
 import {authByPinCodeActions} from "../../model/slice/authByPinCodeSlice";
 import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
+import {authByPinCode} from "../../model/services/authByPinCode/authByPinCode";
+import {getAuthByPinCodeState} from "../../model/selectors/getAuthByPinCodeState/getAuthByPinCodeState";
+import {getRememberMe} from "../../model/selectors/getRememberMe/getRememberMe";
+import {useAppDispatch} from "../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 export interface PinCodeAuthFormProps {
     className?: string
 }
 
 const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
-    const dispatch = useDispatch()
+    const dispatch = useAppDispatch()
     const pin_code = useSelector(getPinCode)
+    const rememberMe = useSelector(getRememberMe)
+    const authState = useSelector(getAuthByPinCodeState)
 
     const {className, ...otherProps} = props
-    const mods: Mods = {};
 
-    const setPinCode = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(authByPinCodeActions.setPinCode(event.target.value))
-    }
-
-    const setRememberMe = (event: React.ChangeEvent<HTMLInputElement>) => {
-        dispatch(authByPinCodeActions.setRememberMe(event.target.checked))
-    }
-
-    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        try {
-            const response = await axios.post('http://localhost:8000/api/v1/staff/pin_code_authentification',
-                {pin_code: pin_code})
-            console.log(response.data)
-        } catch (error) {
-            const err = error as AxiosError
-            console.log(err.response?.data)
+    const setPinCode = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        if (!!Number(event.target.value)) {
+            dispatch(authByPinCodeActions.setPinCode(Number(event.target.value)))
         }
-    };
+    }, [dispatch])
+
+
+    const setRememberMe = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        dispatch(authByPinCodeActions.setRememberMe(event.target.checked))
+    }, [dispatch])
+
+
+    const handleSubmit = useCallback((event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        dispatch(authByPinCode({pin_code, rememberMe}))
+    }, [dispatch, pin_code, rememberMe]);
+
+        const mods: Mods = {};
 
     return (
         <form
@@ -49,13 +51,15 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
             onSubmit={handleSubmit}
             {...otherProps}
         >
-            <div className="mb-3"></div>
+            <div className="mb-3">{authState.error}</div>
 
             <div className="mb-3">
                 <Input
                     onChange={setPinCode}
                     type="password"
                     placeholder="ПИН-код"
+                    title="Разрешено использовать только цифры"
+                    pattern="[0-9]+$"
                     autoFocus
                     inputMode="numeric"
                     maxLength={6}
@@ -78,6 +82,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
             <div className="mb-3">
                 <Button
                     type={ButtonTypes.SUBMIT}
+                    disabled={authState.isLoading}
                     className={"btn-primary d-block w-100"}
                 >
                     Войти
