@@ -1,11 +1,11 @@
-import React, {Suspense, useCallback, useEffect} from 'react';
+import React, {Suspense, useEffect} from 'react';
 import './styles/App.scss'
 
 import {LoginPage} from "pages/LoginPage";
 import {useDispatch, useSelector} from "react-redux";
 import {employeeActions, getEmployeeAuthData} from "../entities/Employee";
-import {Button, ButtonTypes} from "../shared/ui/Button/Button";
 import {Loader} from "../shared/ui/Loader/Loader";
+import {EQPage} from "../pages/EQPage/index.";
 
 function App() {
     const dispatch = useDispatch()
@@ -15,22 +15,15 @@ function App() {
         dispatch(employeeActions.initAuthData())
     }, [dispatch])
 
-    const logout = useCallback(() => {
-        dispatch(employeeActions.logout())
-    }, [dispatch])
-
     if (authData) {
         return (
-            <div>
-                <Button type={ButtonTypes.BUTTON} onClick={logout}>
-                    {authData.first_name}
-                </Button>
-            </div>
+            <Suspense fallback={<Loader/>}>
+                <EQPage/>
+            </Suspense>
         )
     }
 
     return (
-        // TODO сделать красивый загрузчик
         <Suspense fallback={<Loader/>}>
             <LoginPage/>
         </Suspense>
