@@ -1,8 +1,3 @@
-import {createSelector} from "@reduxjs/toolkit";
-import {AuthByPinCodeSchema} from "../../types/authByPinCodeSchema";
-import {getAuthByPinCodeState} from "../getAuthByPinCodeState/getAuthByPinCodeState";
+import {StateSchema} from "app/providers/StoreProvider";
 
-export const getRememberMe = createSelector(
-    getAuthByPinCodeState,
-    (getAuthByPinCode: AuthByPinCodeSchema) => getAuthByPinCode.rememberMe
-)
+export const getRememberMe = (state: StateSchema) => state?.authByPinCode?.rememberMe || false;

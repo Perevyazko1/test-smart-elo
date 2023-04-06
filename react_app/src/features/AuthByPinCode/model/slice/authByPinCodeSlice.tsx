@@ -31,7 +31,8 @@ export const authByPinCodeSlice = createSlice({
                 state.isLoading = false;
             })
             .addCase(authByPinCode.rejected, (state, action) => {
-                state.error = action.payload
+                state.isLoading = false;
+                state.error = action.payload;
             })
     }
 })

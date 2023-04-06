@@ -1,20 +1,30 @@
+import { CombinedState, Reducer } from 'redux';
 import {configureStore, ReducersMapObject} from "@reduxjs/toolkit";
+
+import {employeeReducer} from "entities/Employee";
+
 import {StateSchema} from "./StateSchema";
-import {authByPinCodeReducer} from "features/AuthByPinCode";
-import {employeeReducer} from "../../../../entities/Employee/model/slice/employeeSlice";
+import {createReducerManager} from "./reducerManager";
 
 
 export function createReduxStore(initialState?: StateSchema) {
     const rootReducers: ReducersMapObject<StateSchema> = {
-        authByPinCode: authByPinCodeReducer,
         employee: employeeReducer,
     }
 
-    return configureStore<StateSchema>({
-        reducer: rootReducers,
+    const reducerManager = createReducerManager(rootReducers)
+
+    // @ts-ignore
+    const store = configureStore<StateSchema>({
+        reducer: reducerManager.reduce as Reducer<CombinedState<StateSchema>>,
         preloadedState: initialState,
         devTools: true
     })
+
+    // @ts-ignore
+    store.reducerManager = reducerManager
+
+    return store
 }
 
 export type AppDispatch = ReturnType<typeof createReduxStore>['dispatch'];

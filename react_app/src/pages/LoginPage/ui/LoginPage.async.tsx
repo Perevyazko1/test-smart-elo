@@ -1,3 +1,3 @@
-import { lazy } from 'react';
+import {FC, lazy} from 'react';
 
-export const LoginPageAsync = lazy(() => import('./LoginPage'));
+export const LoginPageAsync = lazy<FC>(() => import('./LoginPage'));

@@ -2,7 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 import {Employee} from "entities/Employee";
 import {USER_LOCALSTORAGE_KEY} from 'shared/const/localstorage'
-import {employeeActions} from "../../../../../entities/Employee/model/slice/employeeSlice";
+import {employeeActions} from "entities/Employee/model/slice/employeeSlice";
 
 interface authByPinCodeProps {
     pin_code: number,
@@ -17,9 +17,7 @@ export const authByPinCode = createAsyncThunk<Employee, authByPinCodeProps, {rej
                 ...authData
             });
             if (response.data) {
-                console.log(authData.rememberMe)
                 if (authData.rememberMe) {
-                    console.log('SetItem')
                     localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(response.data))
                 }
                 thunkAPI.dispatch(employeeActions.setEmployee(response.data))

@@ -14,7 +14,6 @@ export const employeeSlice = createSlice({
     initialState,
     reducers: {
         setEmployee: (state, action: PayloadAction<Employee>) => {
-            console.log(action.payload)
             state.authData = action.payload
         },
         initAuthData: (state) => {
@@ -22,6 +21,7 @@ export const employeeSlice = createSlice({
             if (employee) {
                 state.authData = JSON.parse(employee)
             }
+            state._inited = true
         },
         logout: (state) => {
             state.authData = undefined;

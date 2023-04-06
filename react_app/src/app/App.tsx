@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect} from 'react';
+import React, {Suspense, useCallback, useEffect} from 'react';
 import './styles/App.scss'
 
 import {LoginPage} from "pages/LoginPage";
@@ -22,16 +22,17 @@ function App() {
         return (
             <div>
                 <Button type={ButtonTypes.BUTTON} onClick={logout}>
-                    Выход
+                    {authData.first_name}
                 </Button>
             </div>
         )
     }
 
     return (
-        <>
+        // TODO сделать красивый загрузчик
+        <Suspense fallback={<div>Загрузка...</div>}>
             <LoginPage/>
-        </>
+        </Suspense>
     );
 }
 
