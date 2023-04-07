@@ -1,13 +1,14 @@
 from django.shortcuts import redirect
 from rest_framework import viewsets
+
+from .api_moy_sklad.services.import_orders import ImportOrders
 from .eq_serializers.eq_card_serializers import EQCardSerializer
-from .models import *
 from .serializers import *
-from .eq_serializers.eq_card_serializers import EQCardSerializer
 
 
 def import_orders(request):
     # TODO Добавить импорт заказов
+    ImportOrders().execute()
     return redirect(request.META.get('HTTP_REFERER'))
 
 

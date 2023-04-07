@@ -1,4 +1,7 @@
 export type {Employee} from './model/types/employee';
 
 export {employeeActions, employeeReducer} from "./model/slice/employeeSlice";
+
 export {getEmployeeAuthData} from './model/selectors/getEmployeeAuthData/getEmployeeAuthData';
+export {getCurrentDepartment} from "./model/selectors/getCurrentDepartment/getCurrentDepartment";
+export {getEmployeeDepartments} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";

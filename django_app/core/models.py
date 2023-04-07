@@ -71,6 +71,8 @@ class ProductPicture(models.Model):
         related_name='product_pictures',
         on_delete=models.CASCADE,
     )
+
+    image_filename = models.CharField('Имя файла', max_length=120, blank=True, null=True)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/products/", blank=True, null=True)
 
     def __str__(self):
@@ -83,7 +85,10 @@ class Fabric(models.Model):
         verbose_name = "Ткань"
         verbose_name_plural = "Ткани"
 
+    fabric_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Название ткани', max_length=255)
+
+    image_filename = models.CharField('Имя файла', max_length=120, blank=True, null=True)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/products/", blank=True, null=True)
 
     def __str__(self):

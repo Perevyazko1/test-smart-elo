@@ -1,6 +1,6 @@
 import React from 'react';
 
-import logo from 'shared/assets/images/SZMK Logo Dark Horizontal.png';
+import logo from 'shared/assets/images/SZMK Logo Dark Horizontal 900x350.png';
 import {PinCodeAuthForm} from "features/AuthByPinCode";
 
 const LoginPage = () => {
