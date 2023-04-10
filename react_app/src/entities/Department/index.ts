@@ -1,1 +1,1 @@
-export {Department} from './model/type/department'
+export {department} from './model/type/department'

@@ -1,19 +1,20 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
-import {Employee} from "entities/Employee";
+import {employee} from "entities/Employee";
 import {USER_LOCALSTORAGE_KEY} from 'shared/const/localstorage'
 import {employeeActions} from "entities/Employee/model/slice/employeeSlice";
+import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
 
 interface authByPinCodeProps {
     pin_code: number,
     rememberMe: boolean,
 }
 
-export const authByPinCode = createAsyncThunk<Employee, authByPinCodeProps, {rejectValue: string}>(
+export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, {rejectValue: string}>(
     'auth/authByPicCode',
     async (authData: authByPinCodeProps, thunkAPI) => {
         try {
-            const response = await axios.post('http://localhost:8000/api/v1/staff/pin_code_authentification', {
+            const response = await axios.post(`${SERVER_HTTP_ADDRESS}/api/v1/staff/pin_code_authentication`, {
                 ...authData
             });
             if (response.data) {

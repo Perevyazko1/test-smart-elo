@@ -12,5 +12,5 @@ router.register(r'transactions', TransactionViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('test', test),
-    path('pin_code_authentification', pin_code_authorisation),
+    path('pin_code_authentication', pin_code_authentication),
 ]

@@ -1,54 +1,77 @@
-import {memo} from 'react';
+import React, {memo, useEffect} from 'react';
+import {useSelector} from "react-redux";
 
+import {getEmployeeAuthData} from "entities/Employee";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import 'shared/assets/fonts/fontawesome-all.min.css';
-import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 
+import {fetchEqOrderProductList, StatusList,} from "../model/service/fetchEqOrderProductList/fetchEqOrderProductList";
+import {eqReducer} from "../model/slice/eqSlice";
 import {EqNavBar} from "./EQNavBar/EQNavBar";
+import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
+import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
+import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
+import {EqReadyBlock} from "./EQReadyBlovk/EqReadyBlock";
+import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
 
+
+const initialReducers: ReducersList = {
+    eq: eqReducer
+}
 
 const EqPage = memo(() => {
+    const employee = useSelector(getEmployeeAuthData)
+    const eqUpdated = useSelector(getEqUpdated)
+
+    const dispatch = useAppDispatch()
+
+    useEffect(() => {
+        dispatch(fetchEqOrderProductList({
+            status_list: StatusList.AWAIT_LIST,
+            department_number: employee?.current_department?.number
+        }))
+
+        dispatch(fetchEqOrderProductList({
+            status_list: StatusList.IN_WORK_LIST,
+            department_number: employee?.current_department?.number
+        }))
+
+        dispatch(fetchEqOrderProductList({
+            status_list: StatusList.READY_LIST,
+            department_number: employee?.current_department?.number
+        }))
+    }, [employee, dispatch, eqUpdated])
 
     return (
-        <div className="container-fluid p-0" style={{height: "100vh", background: "#f8f9fa"}}>
-            <EqNavBar/>
+        <DynamicModuleLoader reducers={initialReducers}>
+            <div className="container-fluid p-0" style={{height: "100vh", background: "#f8f9fa"}}>
+                <EqNavBar/>
 
-            <section style={{height: "93vh", background: "#929292"}}>
+                <section style={{height: "93vh", background: "#929292"}}>
+                    <div className="row" style={{height: "100%", margin: "0"}}>
 
-                <div className="row" style={{height: "100%", margin: "0"}}>
-                    {/*Левый блок*/}
-                    <div className="col-xl-6" style={{width: "50%", padding: "0"}}>
-                        {/*<EqInWorkBlock/>*/}
-                        <div>Список в работе</div>
+                        {/*<--------------- Левый блок --------------->*/}
+                        <div className="col-xl-6" style={{width: "50%", padding: "0"}}>
 
-                        {/*<EqWeekBlock/>*/}
-                        <div>Контролер недель</div>
+                            {/*<--------------- В работе блок --------------->*/}
+                           <EqInWorkBlock/>
 
-                        {/*<EqReadyBlock/>*/}
-                        <div>Список готовых</div>
-                    </div>
+                            {/*<--------------- Недели блок --------------->*/}
+                            <EqWeekBlock/>
 
-                    {/*<--------------- Правый блок --------------->*/}
-                    <div
-                        className="col p-1 m-0"
-                        style={{
-                            width: "50%",
-                            height: "93vh",
-                            overflow: "auto",
-                            overflowX: "auto",
-                            overflowY: "auto",
-                            borderLeftWidth: "4px",
-                            borderLeftStyle: "solid"
-                        }}
-                    >
+                            {/*<--------------- Готовые изделия блок --------------->*/}
+                            <EqReadyBlock/>
 
-                        {/*<EqAwaitBlock/>*/}
-                        <StickyHeader>Список изделий в очереди</StickyHeader>
-                        <div>Список очереди</div>
+                        </div>
+
+                        {/*<--------------- Правый блок --------------->*/}
+                            <EqAwaitBlock/>
 
                     </div>
-                </div>
-            </section>
-        </div>
+                </section>
+            </div>
+        </DynamicModuleLoader>
     );
 });
 

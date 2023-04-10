@@ -37,7 +37,7 @@ def test(request):
 
 
 @api_view(['GET', 'POST'])
-def pin_code_authorisation(request):
+def pin_code_authentication(request):
     if request.method == 'POST':
         pin_code = request.data.get('pin_code')
         print(request.data)

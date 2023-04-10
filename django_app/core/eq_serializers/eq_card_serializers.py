@@ -11,6 +11,7 @@ class EQOrderProductInfoSerializer(serializers.Serializer):
     count_in_work = serializers.IntegerField()
     count_ready = serializers.IntegerField()
     count_await = serializers.IntegerField()
+    tax = serializers.IntegerField()
 
 
 class EQDepartmentSerializer(serializers.ModelSerializer):
@@ -127,7 +128,11 @@ class EQCardSerializer(serializers.ModelSerializer):
         return EQAssignmentsSerializer(obj.assignments.all(), many=True).data
 
     def get_count_data(self, obj: OrderProduct):
-        department_number = self.context.get('request').query_params.get('department_number')
+        department_number = self.context.get('department_number')
+        tax = ProductionStep.objects.get(
+            product=obj.product,
+            department__number=department_number
+        ).tax
         count_all = obj.quantity,
         queryset = obj.assignments.filter(department__number=department_number) \
             .annotate(
@@ -137,6 +142,7 @@ class EQCardSerializer(serializers.ModelSerializer):
         )
 
         return (
+            tax,
             count_all[0],
             queryset.values_list('count_in_work', flat=True).first() or 0,
             queryset.values_list('count_ready', flat=True).first() or 0,
@@ -145,11 +151,12 @@ class EQCardSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        count_all, count_in_work, count_ready, count_await = self.get_count_data(instance)
+        tax, count_all, count_in_work, count_ready, count_await = self.get_count_data(instance)
 
         representation['count_all'] = count_all
         representation['count_in_work'] = count_in_work
         representation['count_ready'] = count_ready
         representation['count_await'] = count_await
+        representation['tax'] = tax
 
         return representation

@@ -1,5 +1,3 @@
-import { EQPageAsync } from './ui/EQPage.async';
+export {EQPageAsync as EQPage} from './ui/EQPage.async';
 
-export {
-    EQPageAsync as EQPage,
-};
+export type {EqSchema} from './model/types/eqSchema';

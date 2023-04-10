@@ -1,19 +1,19 @@
-import {Department} from "entities/Department";
+import {department} from "entities/Department";
 
-export interface Employee {
+export interface employee {
     id?: number,
     username?: string,
     first_name?: string,
     last_name?: string,
     pin_code?: number,
-    current_department?: Department,
-    departments?: [Department],
+    current_department?: department,
+    departments?: [department],
     groups?: [string],
 }
 
 
 export interface EmployeeSchema {
-    authData?: Employee;
+    authData?: employee;
 
     _inited: boolean;
 }

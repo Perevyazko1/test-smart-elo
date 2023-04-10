@@ -197,14 +197,14 @@ class Assignment(models.Model):
         OrderProduct,
         related_name='assignments',
         verbose_name='Позиция заказа',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True
     )
     department = models.ForeignKey(
         Department,
         related_name='assignments',
         verbose_name='Отдел',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         null=True
     )
     executor = models.ForeignKey(

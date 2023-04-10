@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {Employee, EmployeeSchema} from "../types/employee";
+import {employee, EmployeeSchema} from "../types/employee";
 import {USER_LOCALSTORAGE_KEY} from "../../../../shared/const/localstorage";
 
 
@@ -13,7 +13,7 @@ export const employeeSlice = createSlice({
     name: 'employee',
     initialState,
     reducers: {
-        setEmployee: (state, action: PayloadAction<Employee>) => {
+        setEmployee: (state, action: PayloadAction<employee>) => {
             state.authData = action.payload
         },
         initAuthData: (state) => {

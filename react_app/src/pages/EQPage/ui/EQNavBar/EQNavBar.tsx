@@ -5,6 +5,7 @@ import logo from 'shared/assets/images/SZMK Logo White Horizontal 141x55.png';
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {ChangeCurrentDepartment} from "widgets/ChangeCurrentDepartment/ui/ChangeCurrentDepartment";
 import {employeeActions, getEmployeeAuthData} from "entities/Employee";
+import {eqActions} from "../../model/slice/eqSlice";
 
 
 export const EqNavBar = memo(() => {
@@ -14,6 +15,10 @@ export const EqNavBar = memo(() => {
     const logout = useCallback(() => {
         dispatch(employeeActions.logout())
     }, [dispatch])
+
+    const update_eq = () => {
+        dispatch(eqActions.eqUpdated())
+    }
 
     return (
         <section
@@ -29,6 +34,7 @@ export const EqNavBar = memo(() => {
                 justify-content-xl-center align-items-xl-center my-auto ms-2"
                 type="button"
                 style={{height: "40px", width: "60px"}}
+                onClick={update_eq}
             >
                 <i className="fas fa-sync-alt fs-5 d-xl-flex align-items-xl-center py-xl-0 mx-xl-0 me-xl-0"/>
             </button>

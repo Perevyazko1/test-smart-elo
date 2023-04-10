@@ -1,4 +1,4 @@
-export interface Department {
+export interface department {
     name: string,
     number: number,
     single: boolean,

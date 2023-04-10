@@ -1,4 +1,4 @@
-export type {Employee} from './model/types/employee';
+export type {employee} from './model/types/employee';
 
 export {employeeActions, employeeReducer} from "./model/slice/employeeSlice";
 

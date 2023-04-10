@@ -1,7 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {AuthByPinCodeSchema} from "../types/authByPinCodeSchema";
 import {authByPinCode} from "../services/authByPinCode/authByPinCode";
-import {USER_LOCALSTORAGE_KEY} from "../../../../shared/const/localstorage";
 
 
 const initialState: AuthByPinCodeSchema = {

@@ -1,6 +1,9 @@
+import {AnyAction, CombinedState, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
+
 import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
-import {AnyAction, CombinedState, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
+import {EqSchema} from "pages/EQPage/model/types/eqSchema";
+import {AxiosInstance} from "axios";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -8,6 +11,7 @@ export interface StateSchema {
 
     // Асинхронные редюсеры
     authByPinCode?: AuthByPinCodeSchema,
+    eq?: EqSchema,
 }
 
 export type StateSchemaKey = keyof StateSchema;
@@ -25,4 +29,14 @@ export type MountedReducers = Partial<Record<StateSchemaKey, boolean>>;
 
 export interface ReduxStoreWithManager extends EnhancedStore<StateSchema> {
     reducerManager: ReducerManager;
+}
+
+export interface ThunkExtraArg {
+    api: AxiosInstance;
+}
+
+export interface ThunkConfig<T> {
+    rejectValue: T;
+    extra: ThunkExtraArg;
+    state: StateSchema;
 }
