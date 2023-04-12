@@ -1,19 +1,20 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
 
-import {getEmployeeAuthData} from "entities/Employee";
-import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import 'shared/assets/fonts/fontawesome-all.min.css';
 
-import {fetchEqOrderProductList, StatusList,} from "../model/service/fetchEqOrderProductList/fetchEqOrderProductList";
 import {eqReducer} from "../model/slice/eqSlice";
 import {EqNavBar} from "./EQNavBar/EQNavBar";
 import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
-import {EqReadyBlock} from "./EQReadyBlovk/EqReadyBlock";
+import {fetchAwaitList} from "../model/service/fetchAwaitList/fetchAwaitList";
 import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
+import {fetchInWorkList} from "../model/service/fetchInWorkList/fetchInWorkList";
+import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
+import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";
 
 
 const initialReducers: ReducersList = {
@@ -21,27 +22,26 @@ const initialReducers: ReducersList = {
 }
 
 const EqPage = memo(() => {
-    const employee = useSelector(getEmployeeAuthData)
+    const dispatch = useAppDispatch()
     const eqUpdated = useSelector(getEqUpdated)
 
-    const dispatch = useAppDispatch()
-
     useEffect(() => {
-        dispatch(fetchEqOrderProductList({
-            status_list: StatusList.AWAIT_LIST,
-            department_number: employee?.current_department?.number
+        dispatch(fetchAwaitList({
+            department_number: 1,
+            project: 'all',
+            pin_code: 123123,
+            view_mode: 'all',
+            series_size: 1
         }))
-
-        dispatch(fetchEqOrderProductList({
-            status_list: StatusList.IN_WORK_LIST,
-            department_number: employee?.current_department?.number
+        dispatch(fetchInWorkList({
+            department_number: 1,
+            project: 'all',
+            pin_code: 123123,
+            view_mode: 'all',
+            series_size: 1
         }))
-
-        dispatch(fetchEqOrderProductList({
-            status_list: StatusList.READY_LIST,
-            department_number: employee?.current_department?.number
-        }))
-    }, [employee, dispatch, eqUpdated])
+        dispatch(fetchProjectFilters({}))
+    }, [dispatch, eqUpdated])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
@@ -55,7 +55,7 @@ const EqPage = memo(() => {
                         <div className="col-xl-6" style={{width: "50%", padding: "0"}}>
 
                             {/*<--------------- В работе блок --------------->*/}
-                           <EqInWorkBlock/>
+                            <EqInWorkBlock/>
 
                             {/*<--------------- Недели блок --------------->*/}
                             <EqWeekBlock/>
@@ -66,7 +66,7 @@ const EqPage = memo(() => {
                         </div>
 
                         {/*<--------------- Правый блок --------------->*/}
-                            <EqAwaitBlock/>
+                        <EqAwaitBlock/>
 
                     </div>
                 </section>

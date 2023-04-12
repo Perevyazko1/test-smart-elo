@@ -2,9 +2,12 @@ import {memo} from 'react';
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {eqActions} from "pages/EQPage/model/slice/eqSlice";
 import {order_product} from "entities/OrderProduct/model/types/orderProduct";
 
 import {CardContentWrapper} from "./CardContentWrapper/CardContentWrapper";
+import {Actions, fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
 import cls from './OrderProductCard.module.scss'
 
 export enum CardType {
@@ -21,6 +24,7 @@ interface OrderProductCardProps {
 
 export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const {card_type, className, order_product, ...otherProps} = props
+    const dispatch = useAppDispatch()
 
     const getSliderImages = () => {
         const result = []
@@ -65,6 +69,34 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
         return "btn-success"
     }
 
+    const getButtonAction = (first: boolean) => {
+        if (card_type === CardType.AWAIT_CARD) {
+            return Actions.AWAIT_TO_IN_WORK
+        } else if (card_type === CardType.IN_WORK_CARD && first) {
+            return Actions.IN_WORK_TO_READY
+        } else if (card_type === CardType.IN_WORK_CARD && !first) {
+            return Actions.IN_WORK_TO_AWAIT
+        } else if (card_type === CardType.READY_CARD && first) {
+            return Actions.CONFIRMED
+        } else if (card_type === CardType.READY_CARD && !first) {
+            return Actions.READY_TO_IN_WORK
+        } else new Error('Неопознанный action')
+    }
+
+    const updateAssignments = async (first: boolean = true) => {
+        console.log('update start')
+
+        await dispatch(fetchUpdateAssignments({
+            numbers: [1],
+            department_number: 1,
+            series_id: order_product.series_id,
+            // @ts-ignore
+            action: getButtonAction(first),
+            pin_code: 123123
+        }))
+        dispatch(eqActions.eqUpdated())
+    }
+
     const mods: Mods = {
         [cls.card_active]: order_product.assignments.length > 0,
         [cls.card_disabled]: order_product.assignments.length === 0
@@ -83,6 +115,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     <button
                         className={getButtonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                         type="button" style={{width: "39px", height: "90px"}}
+                        onClick={() => updateAssignments()}
                     >
                         {getButtonIcon()}
                     </button>
@@ -163,6 +196,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                         <button
                             className={getButtonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
+                            onClick={() => updateAssignments(false)}
                         >
                             {getButtonIcon(false)}
                         </button>

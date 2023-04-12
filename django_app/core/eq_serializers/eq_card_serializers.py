@@ -1,9 +1,7 @@
-from rest_framework import serializers
 from django.db.models import Count, Case, When
+from rest_framework import serializers
 
-from src.query_debugger import query_debugger
 from ..models import *
-from staff.models import Employee, Department
 
 
 class EQOrderProductInfoSerializer(serializers.Serializer):
@@ -160,3 +158,22 @@ class EQCardSerializer(serializers.ModelSerializer):
         representation['tax'] = tax
 
         return representation
+#
+#
+# class EQDataSerializer(serializers.Serializer):
+#     await_list = EQCardSerializer(context={'status_list': ['await', 'in_work']}, many=True)
+#     in_work_list = EQCardSerializer(context={'status_list': ['in_work']}, many=True)
+#     ready_list = EQCardSerializer(context={'status_list': ['ready']}, many=True)
+#     week_info = serializers.DictField()
+#     project_filters = serializers.ListField()
+#     view_modes = serializers.ListField()
+#
+#     class Meta:
+#         fields = (
+#             'await_list',
+#             'in_work_list',
+#             'ready_list'
+#             'week_info'
+#             'project_filters'
+#             'view_modes'
+#         )

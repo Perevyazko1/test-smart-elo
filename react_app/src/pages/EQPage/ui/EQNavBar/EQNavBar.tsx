@@ -6,6 +6,9 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {ChangeCurrentDepartment} from "widgets/ChangeCurrentDepartment/ui/ChangeCurrentDepartment";
 import {employeeActions, getEmployeeAuthData} from "entities/Employee";
 import {eqActions} from "../../model/slice/eqSlice";
+import {EqSetSeriesSize} from "./EQSetSeriesSize";
+import {EqSetProject} from "./EQSetProject";
+import {EqSetViewMode} from "./EQSetViewMode";
 
 
 export const EqNavBar = memo(() => {
@@ -29,15 +32,23 @@ export const EqNavBar = memo(() => {
 
             <ChangeCurrentDepartment className={"my-auto mx-2"}/>
 
+            <EqSetProject className={"my-auto mx-2"}/>
+
+            <EqSetViewMode className={"my-auto mx-2"}/>
+
+            <EqSetSeriesSize className={"my-auto mx-2"}/>
+
             <button
                 className="btn btn-outline-light btn-sm d-xl-flex
                 justify-content-xl-center align-items-xl-center my-auto ms-2"
                 type="button"
-                style={{height: "40px", width: "60px"}}
+                style={{height: "38px", width: "60px"}}
                 onClick={update_eq}
             >
                 <i className="fas fa-sync-alt fs-5 d-xl-flex align-items-xl-center py-xl-0 mx-xl-0 me-xl-0"/>
             </button>
+
+
 
             <h6 className="text-light d-xl-flex justify-content-xl-center align-items-xl-center"
                 style={{marginLeft: "auto", height: "100%"}}>
