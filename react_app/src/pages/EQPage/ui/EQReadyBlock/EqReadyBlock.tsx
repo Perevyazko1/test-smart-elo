@@ -1,15 +1,17 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
+import {TransitionGroup, CSSTransition} from "react-transition-group";
 
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard/ui/OrderProductCard";
+import {getCurrentDepartment} from "entities/Employee";
 
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";
 import {getEqUpdated} from "../../model/selectors/getEqUpdated/getEqUpdated";
 import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
 import {getReadyList} from "../../model/selectors/getReadyList/getReadyList";
-import {getCurrentDepartment} from "../../../../entities/Employee";
+
 
 export const EqReadyBlock = memo(() => {
     const ready_list = useSelector(getReadyList)
@@ -38,17 +40,26 @@ export const EqReadyBlock = memo(() => {
             <div className="col m-0 p-1">
                 <StickyHeader>Список готовых изделий</StickyHeader>
 
-                {ready_list?.results?.length
-                    ?
-                    ready_list.results.map((order_product) => (
-                        <OrderProductCard
-                            order_product={order_product}
+                <TransitionGroup>
+
+                    {ready_list?.results?.map((order_product) => (
+                        <CSSTransition
                             key={order_product.series_id}
-                            card_type={CardType.READY_CARD}
-                        />
-                    ))
-                    : <div>Нет нарядов</div>
-                }
+                            timeout={500}
+                            classNames="fade"
+                        >
+                            <div>
+                                <OrderProductCard
+                                    order_product={order_product}
+                                    key={order_product.series_id}
+                                    card_type={CardType.READY_CARD}
+                                />
+                            </div>
+                        </CSSTransition>
+                    ))}
+
+                </TransitionGroup>
+
             </div>
         </div>
     );

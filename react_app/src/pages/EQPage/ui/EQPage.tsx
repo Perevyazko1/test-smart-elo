@@ -1,6 +1,7 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
 
+import {getCurrentDepartment} from "entities/Employee";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import 'shared/assets/fonts/fontawesome-all.min.css';
@@ -15,7 +16,6 @@ import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
-import {getCurrentDepartment} from "../../../entities/Employee";
 
 
 const initialReducers: ReducersList = {

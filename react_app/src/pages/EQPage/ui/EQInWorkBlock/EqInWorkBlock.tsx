@@ -5,6 +5,7 @@ import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard/ui/OrderProductCard";
 
 import {getInWorkList} from "../../model/selectors/getInWorkList/getInWorkList";
+import {TransitionGroup, CSSTransition} from "react-transition-group";
 
 
 export const EqInWorkBlock = memo(() => {
@@ -15,17 +16,25 @@ export const EqInWorkBlock = memo(() => {
             <div className="col p-1 m-0">
                 <StickyHeader>Список изделий в работе</StickyHeader>
 
-                {in_work_list?.results?.length
-                    ?
-                    in_work_list.results.map((order_product) => (
-                        <OrderProductCard
-                            order_product={order_product}
+                <TransitionGroup>
+
+                    {in_work_list?.results?.map((order_product) => (
+                        <CSSTransition
                             key={order_product.series_id}
-                            card_type={CardType.IN_WORK_CARD}
-                        />
-                    ))
-                    : <div>Нет нарядов</div>
-                }
+                            timeout={500}
+                            classNames="fade"
+                        >
+                            <div>
+                                <OrderProductCard
+                                    order_product={order_product}
+                                    key={order_product.series_id}
+                                    card_type={CardType.IN_WORK_CARD}
+                                />
+                            </div>
+                        </CSSTransition>
+                    ))}
+
+                </TransitionGroup>
             </div>
         </div>
     );

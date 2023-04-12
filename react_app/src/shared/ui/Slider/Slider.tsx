@@ -7,19 +7,17 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 interface SliderProps {
     price?: number
     images?: string[]
-    className?: string
 }
 
 
 export const Slider = memo((props: SliderProps) => {
     const {
         price,
-        images
+        images,
     } = props
 
     return (

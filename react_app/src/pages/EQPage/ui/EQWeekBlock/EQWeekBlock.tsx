@@ -1,4 +1,4 @@
-import React, {memo, useEffect} from 'react';
+import React, {memo, useCallback, useEffect} from 'react';
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {fetchWeekInfo} from "../../model/service/fetchWeekInfo/fetchWeekInfo";
@@ -10,16 +10,16 @@ export const EqWeekBlock = memo(() => {
     const dispatch = useAppDispatch()
     const week_info = useSelector(getWeekInfo)
 
-    useEffect(() => {
-        changeWeek()
-    }, [])
-
-    const changeWeek = (week: number | undefined = undefined, year: number | undefined = undefined) => {
+    const changeWeek = useCallback((week: number | undefined = undefined, year: number | undefined = undefined) => {
         dispatch(fetchWeekInfo({
             week: week,
             year: year
         }))
-    }
+    }, [dispatch])
+
+    useEffect(() => {
+        changeWeek()
+    }, [changeWeek])
 
     return (
         <div className="row m-0"
