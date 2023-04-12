@@ -8,12 +8,12 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 
-interface ChangeCurrentDepartmentProps {
+interface ChangeDepartmentProps {
     className?: string;
 }
 
 
-export const EQSetCurrentDepartment = memo((props: ChangeCurrentDepartmentProps) => {
+export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
     const {className, ...otherProps} = props
 
     const dispatch = useAppDispatch()
@@ -49,6 +49,7 @@ export const EQSetCurrentDepartment = memo((props: ChangeCurrentDepartmentProps)
             {departments?.map((department) => (
                 <Dropdown.Item
                     key={department.number}
+                    active={department.name===currentDepartment?.name}
                     onClick={() => change_current_department(department.number)}
                 >
                     {department.name}

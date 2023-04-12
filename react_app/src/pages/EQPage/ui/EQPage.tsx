@@ -16,6 +16,7 @@ import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
+import {getCurrentProject} from "../model/selectors/getCurrentProject/getCurrentProject";
 
 
 const initialReducers: ReducersList = {
@@ -26,26 +27,27 @@ const EqPage = memo(() => {
     const dispatch = useAppDispatch()
     const eqUpdated = useSelector(getEqUpdated)
     const currentDepartment = useSelector(getCurrentDepartment)
+    const current_project = useSelector(getCurrentProject)
 
     useEffect(() => {
         if (currentDepartment?.number) {
             dispatch(fetchAwaitList({
                 department_number: currentDepartment.number,
-                project: 'all',
+                project: current_project,
                 pin_code: 123123,
                 view_mode: 'all',
                 series_size: 1
             }))
             dispatch(fetchInWorkList({
                 department_number: currentDepartment.number,
-                project: 'all',
+                project: current_project,
                 pin_code: 123123,
                 view_mode: 'all',
                 series_size: 1
             }))
             dispatch(fetchProjectFilters({}))
         }
-    }, [currentDepartment?.number, dispatch, eqUpdated])
+    }, [current_project, currentDepartment?.number, dispatch, eqUpdated])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>

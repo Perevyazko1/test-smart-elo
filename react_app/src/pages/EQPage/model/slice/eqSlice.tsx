@@ -30,9 +30,15 @@ export const eqSlice = createSlice({
             setViewMods: (state, action: PayloadAction<any>) => {
                 state.week_info = action.payload
             },
+
             setProjectFilters: (state, action: PayloadAction<string[]>) => {
                 state.project_filters = action.payload
             },
+            setCurrentProject: (state, action: PayloadAction<string>) => {
+                state.current_project = action.payload
+            },
+
+
             setSeriesSize: (state, action: PayloadAction<number>) => {
                 state.series_size = action.payload
             },

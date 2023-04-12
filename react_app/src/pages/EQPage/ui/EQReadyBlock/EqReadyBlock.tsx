@@ -11,6 +11,7 @@ import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList"
 import {getEqUpdated} from "../../model/selectors/getEqUpdated/getEqUpdated";
 import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
 import {getReadyList} from "../../model/selectors/getReadyList/getReadyList";
+import {getCurrentProject} from "../../model/selectors/getCurrentProject/getCurrentProject";
 
 
 export const EqReadyBlock = memo(() => {
@@ -19,13 +20,14 @@ export const EqReadyBlock = memo(() => {
     const eqUpdated = useSelector(getEqUpdated)
     const week_info = useSelector(getWeekInfo)
     const currentDepartment = useSelector(getCurrentDepartment)
+    const current_project = useSelector(getCurrentProject)
 
 
     useEffect(() => {
         if (currentDepartment?.number) {
             dispatch(fetchReadyList({
                 department_number: currentDepartment.number,
-                project: 'all',
+                project: current_project,
                 pin_code: 123123,
                 view_mode: 'all',
                 series_size: 1,
@@ -33,7 +35,7 @@ export const EqReadyBlock = memo(() => {
                 year: week_info?.year
             }))
         }
-    }, [currentDepartment?.number, eqUpdated, week_info, dispatch])
+    }, [current_project, currentDepartment?.number, eqUpdated, week_info, dispatch])
 
     return (
         <div className="row m-0" style={{height: "43vh", overflowX: "auto"}}>

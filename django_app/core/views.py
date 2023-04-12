@@ -42,29 +42,6 @@ def update_assignments(request):
         return JsonResponse({"data": 'okay'})
 
 
-@api_view(['GET'])
-def get_await_list(request):
-    serializer = EQCardSerializer
-    department_number = request.query_params.get('department_number')
-
-    status_list = ['await', 'in_work']
-
-    queryset = OrderProduct.objects.filter(
-        assignments__status__in=status_list,
-        assignments__department__number=request.query_params.get('department_number')
-    )
-
-    context = {
-        'request': request,
-        'status_list': status_list,
-        'department_number': department_number,
-    }
-
-    data = serializer(queryset, context=context, many=True).data
-
-    return Response(data)
-
-
 class GetAwaitList(viewsets.ModelViewSet):
     queryset = OrderProduct.objects.all()
     serializer_class = EQCardSerializer
@@ -77,10 +54,16 @@ class GetAwaitList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        project = self.request.query_params.get('project')
+        if not project == 'Все проекты':
+            qs = qs.filter(order__project=project)
+
         qs = qs.filter(
             assignments__status__in=['await', 'in_work'],
             assignments__department__number=self.request.query_params.get('department_number')
         )
+
         return qs
 
 
@@ -96,6 +79,11 @@ class GetInWorkList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        project = self.request.query_params.get('project')
+        if not project == 'Все проекты':
+            qs = qs.filter(order__project=project)
+
         qs = qs.filter(
             assignments__status__in=['in_work'],
             assignments__department__number=self.request.query_params.get('department_number')
@@ -115,6 +103,11 @@ class GetReadyList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
+
+        project = self.request.query_params.get('project')
+        if not project == 'Все проекты':
+            qs = qs.filter(order__project=project)
+
         week = self.request.query_params.get('week')
         year = self.request.query_params.get('year')
         if week and week.isdigit():
