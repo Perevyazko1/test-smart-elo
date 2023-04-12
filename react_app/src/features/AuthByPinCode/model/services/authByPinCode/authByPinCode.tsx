@@ -14,7 +14,7 @@ export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, {rej
     'auth/authByPicCode',
     async (authData: authByPinCodeProps, thunkAPI) => {
         try {
-            const response = await axios.post(`${SERVER_HTTP_ADDRESS}/api/v1/staff/pin_code_authentication`, {
+            const response = await axios.post(`${SERVER_HTTP_ADDRESS}/api/v1/staff/pin_code_authentication/`, {
                 ...authData
             });
             if (response.data) {

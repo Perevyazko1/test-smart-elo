@@ -9,6 +9,8 @@ import {order_product} from "entities/OrderProduct/model/types/orderProduct";
 import {CardContentWrapper} from "./CardContentWrapper/CardContentWrapper";
 import {Actions, fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
 import cls from './OrderProductCard.module.scss'
+import {useSelector} from "react-redux";
+import {getEmployeeAuthData} from "../../../entities/Employee";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -25,6 +27,7 @@ interface OrderProductCardProps {
 export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const {card_type, className, order_product, ...otherProps} = props
     const dispatch = useAppDispatch()
+    const authData = useSelector(getEmployeeAuthData)
 
     const getSliderImages = () => {
         const result = []
@@ -84,17 +87,17 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     }
 
     const updateAssignments = async (first: boolean = true) => {
-        console.log('update start')
-
-        await dispatch(fetchUpdateAssignments({
-            numbers: [1],
-            department_number: 1,
-            series_id: order_product.series_id,
-            // @ts-ignore
-            action: getButtonAction(first),
-            pin_code: 123123
-        }))
-        dispatch(eqActions.eqUpdated())
+        if (authData?.pin_code && authData?.current_department) {
+            await dispatch(fetchUpdateAssignments({
+                numbers: [1],
+                department_number: authData.current_department.number,
+                series_id: order_product.series_id,
+                // @ts-ignore
+                action: getButtonAction(first),
+                pin_code: authData.pin_code
+            }))
+            dispatch(eqActions.eqUpdated())
+        }
     }
 
     const mods: Mods = {

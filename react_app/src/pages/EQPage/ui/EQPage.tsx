@@ -17,6 +17,8 @@ import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
 import {getCurrentProject} from "../model/selectors/getCurrentProject/getCurrentProject";
+import {fetchViewModsList} from "../model/service/fetchViewMods/fetchViewMods";
+import {getCurrentViewMod} from "../model/selectors/getCurrentViewMod/getCurrentViewMod";
 
 
 const initialReducers: ReducersList = {
@@ -28,6 +30,7 @@ const EqPage = memo(() => {
     const eqUpdated = useSelector(getEqUpdated)
     const currentDepartment = useSelector(getCurrentDepartment)
     const current_project = useSelector(getCurrentProject)
+    const view_mode = useSelector(getCurrentViewMod)
 
     useEffect(() => {
         if (currentDepartment?.number) {
@@ -35,19 +38,20 @@ const EqPage = memo(() => {
                 department_number: currentDepartment.number,
                 project: current_project,
                 pin_code: 123123,
-                view_mode: 'all',
+                view_mode: view_mode.key,
                 series_size: 1
             }))
             dispatch(fetchInWorkList({
                 department_number: currentDepartment.number,
                 project: current_project,
                 pin_code: 123123,
-                view_mode: 'all',
+                view_mode: view_mode.key,
                 series_size: 1
             }))
             dispatch(fetchProjectFilters({}))
+            dispatch(fetchViewModsList({}))
         }
-    }, [current_project, currentDepartment?.number, dispatch, eqUpdated])
+    }, [view_mode, current_project, currentDepartment, dispatch, eqUpdated])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>

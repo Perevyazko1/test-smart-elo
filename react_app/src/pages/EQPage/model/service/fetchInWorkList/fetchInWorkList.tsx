@@ -10,7 +10,7 @@ interface fetchInWorkListProps {
     department_number: number,
     pin_code: number,
     project: string,
-    view_mode: string,
+    view_mode: number,
     series_size: number,
 }
 

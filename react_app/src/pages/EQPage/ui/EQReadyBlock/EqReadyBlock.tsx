@@ -1,17 +1,18 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
-import {TransitionGroup, CSSTransition} from "react-transition-group";
+import {CSSTransition, TransitionGroup} from "react-transition-group";
 
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard/ui/OrderProductCard";
-import {getCurrentDepartment} from "entities/Employee";
+import {getEmployeeAuthData} from "entities/Employee";
 
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";
 import {getEqUpdated} from "../../model/selectors/getEqUpdated/getEqUpdated";
 import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
 import {getReadyList} from "../../model/selectors/getReadyList/getReadyList";
 import {getCurrentProject} from "../../model/selectors/getCurrentProject/getCurrentProject";
+import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
 
 
 export const EqReadyBlock = memo(() => {
@@ -19,23 +20,22 @@ export const EqReadyBlock = memo(() => {
     const dispatch = useAppDispatch()
     const eqUpdated = useSelector(getEqUpdated)
     const week_info = useSelector(getWeekInfo)
-    const currentDepartment = useSelector(getCurrentDepartment)
     const current_project = useSelector(getCurrentProject)
-
+    const authData = useSelector(getEmployeeAuthData)
+    const view_mode = useSelector(getCurrentViewMod)
 
     useEffect(() => {
-        if (currentDepartment?.number) {
+        if (authData?.current_department && authData?.pin_code && view_mode) {
             dispatch(fetchReadyList({
-                department_number: currentDepartment.number,
+                department_number: authData?.current_department?.number,
                 project: current_project,
-                pin_code: 123123,
-                view_mode: 'all',
-                series_size: 1,
+                pin_code: authData?.pin_code,
+                view_mode: view_mode.key,
                 week: week_info?.week,
                 year: week_info?.year
             }))
         }
-    }, [current_project, currentDepartment?.number, eqUpdated, week_info, dispatch])
+    }, [authData, view_mode, current_project, eqUpdated, week_info, dispatch])
 
     return (
         <div className="row m-0" style={{height: "43vh", overflowX: "auto"}}>

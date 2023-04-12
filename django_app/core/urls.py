@@ -15,5 +15,6 @@ urlpatterns = [
     path('update_assignments/', update_assignments),
     path('get_week_info/', get_week_info),
     path('get_project_filters/', get_project_filters),
+    path('get_view_modes/', get_view_modes),
     path('', include(router.urls)),
 ]

@@ -1,13 +1,7 @@
-from django.contrib.auth import authenticate
-from django.core import serializers
-from django.http import HttpResponse, JsonResponse
-
-from rest_framework.decorators import api_view
-from rest_framework.request import Request
-from rest_framework.response import Response
+from django.http import JsonResponse
 from rest_framework import viewsets
-
-from src.query_debugger import query_debugger
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from .models import Employee, Department, Transaction
 from .serializers import EmployeeSerializer, DepartmentSerializer, TransactionSerializer

@@ -1,4 +1,4 @@
-import React, {memo} from 'react';
+import React, {memo, useCallback} from 'react';
 import {useSelector} from "react-redux";
 import {Dropdown, DropdownButton} from "react-bootstrap";
 
@@ -21,14 +21,14 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
     const currentDepartment = useSelector(getCurrentDepartment)
     const departments = useSelector(getEmployeeDepartments)
 
-    const change_current_department = (department_number: number) => {
+    const change_current_department = useCallback((department_number: number) => {
         if (auth_data?.pin_code) {
             dispatch(fetchCurrentDepartment({
                 pin_code: auth_data?.pin_code,
                 department_number: department_number
             }))
         }
-    }
+    },[auth_data?.pin_code, dispatch])
 
     const mods: Mods = {};
 

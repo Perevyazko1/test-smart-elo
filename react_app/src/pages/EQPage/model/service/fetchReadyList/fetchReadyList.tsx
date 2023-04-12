@@ -10,8 +10,7 @@ interface fetchReadyListProps {
     department_number: number,
     pin_code: number,
     project: string,
-    view_mode: string,
-    series_size: number,
+    view_mode: number,
     week: number | undefined,
     year: number | undefined,
 }

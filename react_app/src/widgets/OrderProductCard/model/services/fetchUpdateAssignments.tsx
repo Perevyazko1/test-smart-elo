@@ -17,7 +17,6 @@ interface fetchUpdateAssignmentsProps {
     numbers: number[],
     pin_code: number,
     department_number: number,
-
 }
 
 export const fetchUpdateAssignments = createAsyncThunk<any, fetchUpdateAssignmentsProps, {rejectValue: string}>(

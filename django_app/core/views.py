@@ -6,6 +6,7 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from staff.models import Employee
 from .api_moy_sklad.services.import_orders import ImportOrders
 from .eq_serializers.eq_card_serializers import EQCardSerializer
 from .methods.get_week_info import GetWeekInfo
@@ -22,24 +23,23 @@ def import_orders(request):
 
 @api_view(['POST'])
 def update_assignments(request):
-    if request.method == 'POST':
-        series_id: str = request.data.get('series_id')
-        department_number: int = request.data.get('department_number')
-        numbers: list[int] = request.data.get('numbers')
-        action: str = request.data.get('action')
-        pin_code = request.data.get('pin_code')
+    series_id: str = request.data.get('series_id')
+    department_number: int = request.data.get('department_number')
+    numbers: list[int] = request.data.get('numbers')
+    action: str = request.data.get('action')
+    pin_code = request.data.get('pin_code')
 
-        print(series_id, department_number, numbers, action, pin_code)
+    print(series_id, department_number, numbers, action, pin_code)
 
-        UpdateAssignments.execute(
-            series_id=series_id,
-            department_number=department_number,
-            numbers=numbers,
-            action=action,
-            pin_code=pin_code,
-        )
+    UpdateAssignments.execute(
+        series_id=series_id,
+        department_number=department_number,
+        numbers=numbers,
+        action=action,
+        pin_code=pin_code,
+    )
 
-        return JsonResponse({"data": 'okay'})
+    return JsonResponse({"data": 'okay'})
 
 
 class GetAwaitList(viewsets.ModelViewSet):
@@ -105,11 +105,11 @@ class GetReadyList(viewsets.ModelViewSet):
         qs = super().get_queryset()
 
         project = self.request.query_params.get('project')
-        if not project == 'Все проекты':
-            qs = qs.filter(order__project=project)
-
         week = self.request.query_params.get('week')
         year = self.request.query_params.get('year')
+        pin_code = self.request.query_params.get('pin_code')
+        view_mode = self.request.query_params.get('view_mode')
+
         if week and week.isdigit():
             week = int(week)
         else:
@@ -121,12 +121,22 @@ class GetReadyList(viewsets.ModelViewSet):
 
         week_info = GetWeekInfo(week=week, year=year).execute()
 
+        if len(view_mode) == 6:
+            pin_code = view_mode
+
+        if not view_mode == '1':
+            qs = qs.filter(assignments__executor__pin_code=pin_code)
+
+        if not project == 'Все проекты':
+            qs = qs.filter(order__project=project)
+
         qs = qs.filter(
             assignments__status__in=['ready'],
             assignments__department__number=self.request.query_params.get('department_number'),
             assignments__date_completion__gte=week_info.date_range[0],
             assignments__date_completion__lt=week_info.date_range[1],
         )
+
         return qs
 
 
@@ -158,6 +168,17 @@ def get_project_filters(request):
 
     return JsonResponse({"data": result}, json_dumps_params={"ensure_ascii": False})
 
+
+@api_view(['GET'])
+def get_view_modes(request):
+    result = [{'name': 'Личные наряды', 'key': 0}, {'name': 'Режим бригадира', 'key': 1}]
+
+    users = Employee.objects.all()
+
+    for user in users:
+        result.append({'name': f'{user.first_name} {user.last_name}', 'key': user.pin_code})
+
+    return JsonResponse({"view_modes": result}, json_dumps_params={"ensure_ascii": False})
 
 #
 #     def _get_status_list(self) -> list[str]:

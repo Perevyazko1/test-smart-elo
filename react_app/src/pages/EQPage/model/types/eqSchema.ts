@@ -1,6 +1,10 @@
 import {order_product_list} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
 
+export interface ViewMode {
+    name: string,
+    key: number
+}
 
 
 export interface EqSchema {
@@ -11,7 +15,8 @@ export interface EqSchema {
     week_info?: week_info,
     project_filters?: string[],
     current_project?: string,
-    view_modes?: any,
+    view_modes?: ViewMode[],
+    current_view_mode?: ViewMode,
     series_size: number,
     eq_updated: boolean
 }

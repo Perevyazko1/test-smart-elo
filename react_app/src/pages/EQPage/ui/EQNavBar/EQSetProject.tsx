@@ -7,7 +7,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {getProjectFilters} from "../../model/selectors/getProjectFilters/getProjectFilters";
 import {getCurrentProject} from "../../model/selectors/getCurrentProject/getCurrentProject";
-import {eqActions} from "../../model/slice/eqSlice";
+import {eqActions, initialState} from "../../model/slice/eqSlice";
 
 interface EqSetProjectProps {
     className?: string
@@ -29,7 +29,7 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
 
     return (
         <DropdownButton
-            variant={"outline-light"}
+            variant={current_project===initialState.current_project ? "outline-light" : "outline-light active" }
             menuVariant="dark"
             title={current_project}
             className={classNames('', mods, [className])}
