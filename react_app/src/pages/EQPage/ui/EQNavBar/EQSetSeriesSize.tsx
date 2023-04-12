@@ -46,7 +46,7 @@ export const EqSetSeriesSize = memo((props: EqSetSeriesSizeProps) => {
         <DropdownButton
             variant={initial_value === series_size ? "outline-light" : "outline-light active"}
             menuVariant="dark"
-            title={`Размер серии Х ${series_size}`}
+            title={`Серия Х ${series_size}`}
             className={classNames('', mods, [className])}
             {...otherProps}
         >

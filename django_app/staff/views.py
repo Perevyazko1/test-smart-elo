@@ -28,23 +28,29 @@ class TransactionViewSet(viewsets.ModelViewSet):
     serializer_class = TransactionSerializer
 
 
-@api_view(['GET'])
-@query_debugger
-def test(request):
-    queryset = Employee.objects.prefetch_related('departments').all()
-    serializer = EmployeeSerializer(queryset, many=True, context={'request': request})
-    return Response(serializer.data)
-
-
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def pin_code_authentication(request):
-    if request.method == 'POST':
-        pin_code = request.data.get('pin_code')
-        print(request.data)
+    pin_code = request.data.get('pin_code')
+    print(request.data)
 
-        try:
-            user = Employee.objects.get(pin_code=pin_code)
-            serialized_user = EmployeeSerializer(user, context={'request': request})
-            return JsonResponse(serialized_user.data)
-        except:
-            return Response('Пользователь не найден', status=401)
+    try:
+        user = Employee.objects.get(pin_code=pin_code)
+        serialized_user = EmployeeSerializer(user, context={'request': request})
+        return JsonResponse(serialized_user.data)
+    except:
+        return Response('Пользователь не найден', status=401)
+
+
+@api_view(['POST'])
+def change_current_department(request):
+    pin_code = request.data.get('pin_code')
+    department_number = request.data.get('department_number')
+
+    try:
+        user = Employee.objects.get(pin_code=pin_code)
+        user.current_department = Department.objects.get(number=department_number)
+        user.save()
+        serialized_user = EmployeeSerializer(user, context={'request': request})
+        return JsonResponse(serialized_user.data)
+    except:
+        return Response('Пользователь не найден', status=401)

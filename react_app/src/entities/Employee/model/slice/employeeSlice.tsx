@@ -1,6 +1,7 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {employee, EmployeeSchema} from "../types/employee";
 import {USER_LOCALSTORAGE_KEY} from "../../../../shared/const/localstorage";
+import {department} from "../../../Department";
 
 
 const initialState: EmployeeSchema = {
@@ -16,6 +17,12 @@ export const employeeSlice = createSlice({
         setEmployee: (state, action: PayloadAction<employee>) => {
             state.authData = action.payload
         },
+        setCurrentDepartment: (state, action: PayloadAction<department>) => {
+            if (state.authData) {
+                state.authData.current_department = action.payload
+            }
+        },
+
         initAuthData: (state) => {
             const employee = localStorage.getItem(USER_LOCALSTORAGE_KEY);
             if (employee) {
@@ -23,6 +30,7 @@ export const employeeSlice = createSlice({
             }
             state._inited = true
         },
+
         logout: (state) => {
             state.authData = undefined;
             localStorage.removeItem(USER_LOCALSTORAGE_KEY);

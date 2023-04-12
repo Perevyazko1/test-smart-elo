@@ -3,12 +3,12 @@ import {useSelector} from "react-redux";
 
 import logo from 'shared/assets/images/SZMK Logo White Horizontal 141x55.png';
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {ChangeCurrentDepartment} from "widgets/ChangeCurrentDepartment/ui/ChangeCurrentDepartment";
 import {employeeActions, getEmployeeAuthData} from "entities/Employee";
 import {eqActions} from "../../model/slice/eqSlice";
 import {EqSetSeriesSize} from "./EQSetSeriesSize";
 import {EqSetProject} from "./EQSetProject";
 import {EqSetViewMode} from "./EQSetViewMode";
+import {EQSetCurrentDepartment} from "./EQSetCurrentDepartment";
 
 
 export const EqNavBar = memo(() => {
@@ -30,7 +30,7 @@ export const EqNavBar = memo(() => {
         >
             <img className="py-xl-1 pb-xl-1 px-xl-4 mx-xl-3 my-xl-0" src={logo} alt={"СЗМК"}/>
 
-            <ChangeCurrentDepartment className={"my-auto mx-2"}/>
+            <EQSetCurrentDepartment className={"my-auto mx-2"}/>
 
             <EqSetProject className={"my-auto mx-2"}/>
 

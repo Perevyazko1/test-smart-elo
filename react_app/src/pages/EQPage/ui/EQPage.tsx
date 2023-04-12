@@ -6,15 +6,16 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import 'shared/assets/fonts/fontawesome-all.min.css';
 
 import {eqReducer} from "../model/slice/eqSlice";
+import {fetchAwaitList} from "../model/service/fetchAwaitList/fetchAwaitList";
+import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
+import {fetchInWorkList} from "../model/service/fetchInWorkList/fetchInWorkList";
+import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";
 import {EqNavBar} from "./EQNavBar/EQNavBar";
 import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
-import {fetchAwaitList} from "../model/service/fetchAwaitList/fetchAwaitList";
-import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
-import {fetchInWorkList} from "../model/service/fetchInWorkList/fetchInWorkList";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
-import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";
+import {getCurrentDepartment} from "../../../entities/Employee";
 
 
 const initialReducers: ReducersList = {
@@ -24,24 +25,27 @@ const initialReducers: ReducersList = {
 const EqPage = memo(() => {
     const dispatch = useAppDispatch()
     const eqUpdated = useSelector(getEqUpdated)
+    const currentDepartment = useSelector(getCurrentDepartment)
 
     useEffect(() => {
-        dispatch(fetchAwaitList({
-            department_number: 1,
-            project: 'all',
-            pin_code: 123123,
-            view_mode: 'all',
-            series_size: 1
-        }))
-        dispatch(fetchInWorkList({
-            department_number: 1,
-            project: 'all',
-            pin_code: 123123,
-            view_mode: 'all',
-            series_size: 1
-        }))
-        dispatch(fetchProjectFilters({}))
-    }, [dispatch, eqUpdated])
+        if (currentDepartment?.number) {
+            dispatch(fetchAwaitList({
+                department_number: currentDepartment.number,
+                project: 'all',
+                pin_code: 123123,
+                view_mode: 'all',
+                series_size: 1
+            }))
+            dispatch(fetchInWorkList({
+                department_number: currentDepartment.number,
+                project: 'all',
+                pin_code: 123123,
+                view_mode: 'all',
+                series_size: 1
+            }))
+            dispatch(fetchProjectFilters({}))
+        }
+    }, [currentDepartment?.number, dispatch, eqUpdated])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>

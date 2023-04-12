@@ -2,22 +2,33 @@ import React, {memo} from 'react';
 import {useSelector} from "react-redux";
 import {Dropdown, DropdownButton} from "react-bootstrap";
 
-import {getCurrentDepartment, getEmployeeDepartments} from "entities/Employee/";
+import {getCurrentDepartment, getEmployeeAuthData, getEmployeeDepartments} from "entities/Employee";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+
+import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 
 interface ChangeCurrentDepartmentProps {
     className?: string;
 }
 
 
-export const ChangeCurrentDepartment = memo((props: ChangeCurrentDepartmentProps) => {
-    const {
-        className,
-        ...otherProps
-    } = props
+export const EQSetCurrentDepartment = memo((props: ChangeCurrentDepartmentProps) => {
+    const {className, ...otherProps} = props
 
+    const dispatch = useAppDispatch()
+    const auth_data = useSelector(getEmployeeAuthData)
     const currentDepartment = useSelector(getCurrentDepartment)
     const departments = useSelector(getEmployeeDepartments)
+
+    const change_current_department = (department_number: number) => {
+        if (auth_data?.pin_code) {
+            dispatch(fetchCurrentDepartment({
+                pin_code: auth_data?.pin_code,
+                department_number: department_number
+            }))
+        }
+    }
 
     const mods: Mods = {};
 
@@ -38,6 +49,7 @@ export const ChangeCurrentDepartment = memo((props: ChangeCurrentDepartmentProps
             {departments?.map((department) => (
                 <Dropdown.Item
                     key={department.number}
+                    onClick={() => change_current_department(department.number)}
                 >
                     {department.name}
                 </Dropdown.Item>
