@@ -1,12 +1,13 @@
-import React, {memo, useEffect} from 'react';
+import React, {memo, useCallback, useEffect} from 'react';
 import {useSelector} from "react-redux";
 
 import {getCurrentDepartment} from "entities/Employee";
+import {OrderProductModal} from "widgets/OrderProductInfo";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import 'shared/assets/fonts/fontawesome-all.min.css';
 
-import {eqReducer} from "../model/slice/eqSlice";
+import {eqActions, eqReducer} from "../model/slice/eqSlice";
 import {fetchAwaitList} from "../model/service/fetchAwaitList/fetchAwaitList";
 import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
 import {fetchInWorkList} from "../model/service/fetchInWorkList/fetchInWorkList";
@@ -19,6 +20,7 @@ import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
 import {getCurrentProject} from "../model/selectors/getCurrentProject/getCurrentProject";
 import {fetchViewModsList} from "../model/service/fetchViewMods/fetchViewMods";
 import {getCurrentViewMod} from "../model/selectors/getCurrentViewMod/getCurrentViewMod";
+import {getShowCardInfo} from "../model/selectors/getShowCardInfo/getShowCardInfo";
 
 
 const initialReducers: ReducersList = {
@@ -31,6 +33,7 @@ const EqPage = memo(() => {
     const currentDepartment = useSelector(getCurrentDepartment)
     const current_project = useSelector(getCurrentProject)
     const view_mode = useSelector(getCurrentViewMod)
+    const showCardInfo = useSelector(getShowCardInfo)
 
     useEffect(() => {
         if (currentDepartment?.number) {
@@ -53,8 +56,15 @@ const EqPage = memo(() => {
         }
     }, [view_mode, current_project, currentDepartment, dispatch, eqUpdated])
 
+    const hide_card_info = useCallback(() => {
+        dispatch(eqActions.clearCardInfo())
+    }, [dispatch])
+
     return (
         <DynamicModuleLoader reducers={initialReducers}>
+
+            {showCardInfo && <OrderProductModal onHide={hide_card_info} card_info={showCardInfo}/>}
+
             <div className="container-fluid p-0" style={{height: "100vh", background: "#f8f9fa"}}>
                 <EqNavBar/>
 

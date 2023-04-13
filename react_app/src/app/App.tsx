@@ -5,7 +5,7 @@ import {LoginPage} from "pages/LoginPage";
 import {useDispatch, useSelector} from "react-redux";
 import {employeeActions, getEmployeeAuthData} from "../entities/Employee";
 import {Loader} from "../shared/ui/Loader/Loader";
-import {EQPage} from "../pages/EQPage/index.";
+import {EQPage} from "../pages/EQPage";
 
 function App() {
     const dispatch = useDispatch()

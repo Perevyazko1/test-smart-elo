@@ -3,14 +3,14 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {order_product_list} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
 
-import {EqSchema, ViewMode} from "../types/eqSchema";
+import {EqSchema, OrderProductCardContext, ViewMode} from "../types/eqSchema";
 
 
 export const initialState: EqSchema = {
     series_size: 1,
     current_view_mode: {name: "Личные наряды", key: 0},
     current_project: "Все проекты",
-    eq_updated: false
+    eq_updated: false,
 }
 
 
@@ -50,6 +50,19 @@ export const eqSlice = createSlice({
                 state.series_size = action.payload
             },
 
+            setDefaultFilters: (state) => {
+                state.current_view_mode = initialState.current_view_mode;
+                state.current_project = initialState.current_project;
+                state.series_size = initialState.series_size;
+            },
+
+            showCardInfo: (state, action: PayloadAction<OrderProductCardContext>) => {
+                state.show_card_info = action.payload
+            },
+
+            clearCardInfo: (state) => {
+                state.show_card_info = undefined
+            },
 
             eqUpdated: (state) => {
                 state.eq_updated = !state.eq_updated

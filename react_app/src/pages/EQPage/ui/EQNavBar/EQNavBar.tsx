@@ -19,8 +19,8 @@ export const EqNavBar = memo(() => {
         dispatch(employeeActions.logout())
     }, [dispatch])
 
-    const update_eq = () => {
-        dispatch(eqActions.eqUpdated())
+    const set_default_filters = () => {
+        dispatch(eqActions.setDefaultFilters())
     }
 
     return (
@@ -43,7 +43,7 @@ export const EqNavBar = memo(() => {
                 justify-content-xl-center align-items-xl-center my-auto ms-2"
                 type="button"
                 style={{height: "38px", width: "60px"}}
-                onClick={update_eq}
+                onClick={() => set_default_filters()}
             >
                 <i className="fas fa-sync-alt fs-5 d-xl-flex align-items-xl-center py-xl-0 mx-xl-0 me-xl-0"/>
             </button>
@@ -65,7 +65,6 @@ export const EqNavBar = memo(() => {
                     Выйти
                 </h6>
             </div>
-
 
         </section>
     );

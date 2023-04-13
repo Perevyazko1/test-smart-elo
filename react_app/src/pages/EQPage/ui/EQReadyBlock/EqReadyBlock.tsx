@@ -4,7 +4,7 @@ import {CSSTransition, TransitionGroup} from "react-transition-group";
 
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {CardType, OrderProductCard} from "widgets/OrderProductCard/ui/OrderProductCard";
+import {CardType, OrderProductCard} from "widgets/OrderProductCard";
 import {getEmployeeAuthData} from "entities/Employee";
 
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";

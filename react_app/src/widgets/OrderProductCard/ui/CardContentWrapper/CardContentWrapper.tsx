@@ -1,4 +1,4 @@
-import {memo, ReactNode} from 'react';
+import {memo, ReactNode, MouseEventHandler} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 interface CardContentWrapperProps {
@@ -6,6 +6,7 @@ interface CardContentWrapperProps {
     flexFill?: boolean
     className?: string
     children?: ReactNode
+    onClick?: MouseEventHandler<HTMLDivElement>
 }
 
 
@@ -15,6 +16,7 @@ export const CardContentWrapper = memo((props: CardContentWrapperProps) => {
         className,
         children,
         flexFill = false,
+        onClick,
         ...otherProps
     } = props
 
@@ -31,6 +33,7 @@ export const CardContentWrapper = memo((props: CardContentWrapperProps) => {
                 height: "100px",
                 width: width
             }}
+            onClick={onClick}
         >
             {children}
         </div>

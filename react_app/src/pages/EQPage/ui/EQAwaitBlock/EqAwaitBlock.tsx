@@ -2,7 +2,7 @@ import React, {memo} from 'react';
 import {useSelector} from "react-redux";
 
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
-import {CardType, OrderProductCard} from "widgets/OrderProductCard/ui/OrderProductCard";
+import {CardType, OrderProductCard} from "widgets/OrderProductCard";
 
 import {getAwaitList} from "../../model/selectors/getAwaitList/getAwaitList";
 

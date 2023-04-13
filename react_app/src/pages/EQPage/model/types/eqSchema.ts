@@ -6,6 +6,11 @@ export interface ViewMode {
     key: number
 }
 
+export interface OrderProductCardContext {
+    department_number: number,
+    order_product_id: string,
+}
+
 
 export interface EqSchema {
     // TODO Рассмотреть добавление индикатора загрузки при инициализации
@@ -18,5 +23,6 @@ export interface EqSchema {
     view_modes?: ViewMode[],
     current_view_mode?: ViewMode,
     series_size: number,
-    eq_updated: boolean
+    eq_updated: boolean,
+    show_card_info?: OrderProductCardContext | undefined,
 }

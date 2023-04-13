@@ -4,6 +4,7 @@ import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
 import {EqSchema} from "pages/EQPage/model/types/eqSchema";
 import {AxiosInstance} from "axios";
+import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -12,6 +13,7 @@ export interface StateSchema {
     // Асинхронные редюсеры
     authByPinCode?: AuthByPinCodeSchema,
     eq?: EqSchema,
+    orderProductInfo?: OrderProductInfoSchema,
 }
 
 export type StateSchemaKey = keyof StateSchema;

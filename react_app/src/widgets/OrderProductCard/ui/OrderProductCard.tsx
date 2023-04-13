@@ -4,7 +4,7 @@ import {useSelector} from "react-redux";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {eqActions} from "pages/EQPage/model/slice/eqSlice";
+import {eqActions, getSeriesSize} from "pages/EQPage";
 import {order_product} from "entities/OrderProduct";
 import {getEmployeeAuthData} from "entities/Employee";
 
@@ -16,7 +16,6 @@ import {getButtonIcon} from "../lib/getButtonIcon";
 import {getButtonBg} from "../lib/getButtonBg";
 import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
-import {getSeriesSize} from "../../../pages/EQPage/model/selectors/getSeriesSize/getSeriesSize";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -39,6 +38,16 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const sliderImages = createImageUrls(order_product)
 
     const assignments_lists = createNumberLists(order_product, series_size)
+
+    const showCardInfoWidget = () => {
+        if (authData?.current_department?.number) {
+            dispatch(eqActions.showCardInfo({
+                department_number: authData.current_department.number,
+                order_product_id: order_product.series_id
+            }))
+        }
+    }
+
     const buttonIcon = (first: boolean = true) => {
         return getButtonIcon(first, card_type)
     }
@@ -75,6 +84,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             className={classNames('card bg-dark my-1 p-1', mods, [className])}
             {...otherProps}
         >
+
             <div
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}
@@ -94,7 +104,11 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     <Slider price={order_product.tax} images={sliderImages}/>
                 </CardContentWrapper>
 
-                <CardContentWrapper width={"90px"} className={'me-1'}>
+                <CardContentWrapper
+                    width={"90px"}
+                    className={'me-1'}
+                    onClick={showCardInfoWidget}
+                >
                     <h1 className="fw-bold m-0 p-0 pb-1" style={{fontSize: "12px"}}>
                         Всего:{order_product.count_all}
                     </h1>
