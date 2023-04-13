@@ -1,16 +1,22 @@
 import {memo} from 'react';
+import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {eqActions} from "pages/EQPage/model/slice/eqSlice";
-import {order_product} from "entities/OrderProduct/model/types/orderProduct";
+import {order_product} from "entities/OrderProduct";
+import {getEmployeeAuthData} from "entities/Employee";
 
 import {CardContentWrapper} from "./CardContentWrapper/CardContentWrapper";
-import {Actions, fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
+import {fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
 import cls from './OrderProductCard.module.scss'
-import {useSelector} from "react-redux";
-import {getEmployeeAuthData} from "../../../entities/Employee";
+import {createImageUrls} from "../lib/createImageUrls";
+import {getButtonIcon} from "../lib/getButtonIcon";
+import {getButtonBg} from "../lib/getButtonBg";
+import {getButtonAction} from "../lib/getButtonAction";
+import {createNumberLists} from "../lib/createNumberLists";
+import {getSeriesSize} from "../../../pages/EQPage/model/selectors/getSeriesSize/getSeriesSize";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -28,72 +34,31 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const {card_type, className, order_product, ...otherProps} = props
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
+    const series_size = useSelector(getSeriesSize)
 
-    const getSliderImages = () => {
-        const result = []
-        order_product.product.product_pictures?.map((product_picture) => (
-            result.push(product_picture.image)
-        ))
-        order_product.main_fabric && result.push(order_product.main_fabric?.image);
-        order_product.second_fabric && result.push(order_product.second_fabric?.image);
-        order_product.third_fabric && result.push(order_product.third_fabric?.image);
-        return result
+    const sliderImages = createImageUrls(order_product)
+
+    const assignments_lists = createNumberLists(order_product, series_size)
+    const buttonIcon = (first: boolean = true) => {
+        return getButtonIcon(first, card_type)
     }
 
-    const getButtonIcon = (first: boolean = true) => {
-        if (card_type === CardType.AWAIT_CARD) {
-            return <i className="fas fa-angle-double-left fs-2"/>
-        } else if (card_type === CardType.IN_WORK_CARD && first) {
-            return <i className="fas fa-check fs-3"/>
-        } else if (card_type === CardType.IN_WORK_CARD && !first) {
-            return <i className="fas fa-angle-double-right fs-2"/>
-        } else if (card_type === CardType.READY_CARD && first) {
-            return <i className="fas fa-check-double fs-3"/>
-        } else if (card_type === CardType.READY_CARD && !first) {
-            return <i className="fas fa-angle-double-up fs-2"/>
-        }
+    const buttonBg = (first: boolean = true) => {
+        return getButtonBg(first, card_type, order_product)
     }
 
-    const getButtonBg = (first: boolean = true) => {
-        if (card_type === CardType.AWAIT_CARD || (card_type === CardType.IN_WORK_CARD && !first)) {
-            switch (order_product.urgency) {
-                case 1:
-                    return "btn-danger"
-                case 2:
-                    return "btn-warning"
-                case 3:
-                    return "btn-success"
-                case 4:
-                    return "btn-secondary"
-                default:
-                    return "btn-success"
-            }
-        }
-        return "btn-success"
-    }
-
-    const getButtonAction = (first: boolean) => {
-        if (card_type === CardType.AWAIT_CARD) {
-            return Actions.AWAIT_TO_IN_WORK
-        } else if (card_type === CardType.IN_WORK_CARD && first) {
-            return Actions.IN_WORK_TO_READY
-        } else if (card_type === CardType.IN_WORK_CARD && !first) {
-            return Actions.IN_WORK_TO_AWAIT
-        } else if (card_type === CardType.READY_CARD && first) {
-            return Actions.CONFIRMED
-        } else if (card_type === CardType.READY_CARD && !first) {
-            return Actions.READY_TO_IN_WORK
-        } else new Error('Неопознанный action')
+    const buttonAction = (first: boolean) => {
+        return getButtonAction(first, card_type)
     }
 
     const updateAssignments = async (first: boolean = true) => {
         if (authData?.pin_code && authData?.current_department) {
             await dispatch(fetchUpdateAssignments({
-                numbers: [1],
+                numbers: assignments_lists.primary,
                 department_number: authData.current_department.number,
                 series_id: order_product.series_id,
                 // @ts-ignore
-                action: getButtonAction(first),
+                action: buttonAction(first),
                 pin_code: authData.pin_code
             }))
             dispatch(eqActions.eqUpdated())
@@ -116,17 +81,17 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             >
                 <CardContentWrapper width={"50px"} className={'me-1'}>
                     <button
-                        className={getButtonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
+                        className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                         type="button" style={{width: "39px", height: "90px"}}
                         onClick={() => updateAssignments()}
                     >
-                        {getButtonIcon()}
+                        {buttonIcon()}
                     </button>
                 </CardContentWrapper>
 
 
                 <CardContentWrapper width={"100px"} className={'me-1'}>
-                    <Slider price={order_product.tax} images={getSliderImages()}/>
+                    <Slider price={order_product.tax} images={sliderImages}/>
                 </CardContentWrapper>
 
                 <CardContentWrapper width={"90px"} className={'me-1'}>
@@ -160,17 +125,23 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className="d-flex w-50 h-100 m-0 p-0 align-items-center"
                             style={{overflow: "auto", overflowY: "hidden", borderRightStyle: "ridge"}}
                         >
-                            {order_product.assignments?.map((assignment) => (
-                                <div key={assignment.number}>
-                                    {assignment.status === card_type &&
-                                        <button
-                                            className={`btn btn-primary me-1`}
-                                            type="button"
-                                        >
-                                            {assignment.number}
-                                        </button>
-                                    }
-                                </div>
+                            {assignments_lists.primary?.map((number) => (
+                                <button
+                                    className={`btn btn-primary me-1`}
+                                    type="button"
+                                    key={number}
+                                >
+                                    {number}
+                                </button>
+                            ))}
+                            {assignments_lists.secondary?.map((number) => (
+                                <button
+                                    className={`btn btn-secondary me-1`}
+                                    type="button"
+                                    key={number}
+                                >
+                                    {number}
+                                </button>
                             ))}
                         </div>
 
@@ -197,11 +168,11 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 {card_type !== CardType.AWAIT_CARD &&
                     <CardContentWrapper width={"50px"} className={"ms-1"}>
                         <button
-                            className={getButtonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
+                            className={buttonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
                             onClick={() => updateAssignments(false)}
                         >
-                            {getButtonIcon(false)}
+                            {buttonIcon(false)}
                         </button>
                     </CardContentWrapper>
                 }
