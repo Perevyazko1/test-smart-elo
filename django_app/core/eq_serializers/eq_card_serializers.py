@@ -44,6 +44,12 @@ class EQProductPicturesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class EQTechProcessSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TechnologicalProcess
+        fields = ["id", "name", "image"]
+
+
 class EQFabricSerializer(serializers.ModelSerializer):
     class Meta:
         model = Fabric
@@ -51,6 +57,7 @@ class EQFabricSerializer(serializers.ModelSerializer):
 
 
 class EQProductSerializer(serializers.ModelSerializer):
+    technological_process = EQTechProcessSerializer()
     product_pictures = EQProductPicturesSerializer(many=True)
     technological_process_confirmed = EQEmployeeSerializer()
 
@@ -58,6 +65,7 @@ class EQProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'name',
+            'technological_process',
             'product_pictures',
             'technological_process_confirmed',
         ]
@@ -121,8 +129,12 @@ class EQCardSerializer(serializers.ModelSerializer):
 
     def get_assignments(self, obj):
         status_list: list = self.context.get('status_list')
+        department_number: list = self.context.get('department_number')
         if status_list:
-            return EQAssignmentsSerializer(obj.assignments.filter(status=status_list[0]), many=True).data
+            return EQAssignmentsSerializer(obj.assignments.filter(
+                status=status_list[0],
+                department__number=department_number,
+            ), many=True).data
         return EQAssignmentsSerializer(obj.assignments.all(), many=True).data
 
     def get_count_data(self, obj: OrderProduct):

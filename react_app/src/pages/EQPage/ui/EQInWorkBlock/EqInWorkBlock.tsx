@@ -12,7 +12,7 @@ export const EqInWorkBlock = memo(() => {
     const in_work_list = useSelector(getInWorkList)
 
     return (
-        <div className="row m-0" style={{height: "43vh", overflowX: "auto"}}>
+        <div className="row m-0" style={{height: "43vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
             <div className="col p-1 m-0">
                 <StickyHeader>Список изделий в работе</StickyHeader>
 

@@ -1,3 +1,5 @@
+import {employee} from "../../../Employee";
+
 export interface product_picture {
     id: number;
     image_filename: string;
@@ -6,11 +8,17 @@ export interface product_picture {
 
 }
 
+export interface technological_process {
+    id: number;
+    name: string;
+    image: string;
+}
 
 export interface product {
     name: string;
     product_pictures: product_picture[];
-    technological_process_confirmed: number | null;
+    technological_process: technological_process;
+    technological_process_confirmed: employee | null;
 }
 
 export interface fabric {
@@ -51,6 +59,7 @@ export interface order_product {
     count_in_work: number;
     count_ready: number;
     count_await: number;
+
 }
 
 export interface order_product_list {

@@ -4,14 +4,14 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
 
 from staff.models import Employee
+
 from .api_moy_sklad.services.import_orders import ImportOrders
-from .eq_serializers.eq_card_serializers import EQCardSerializer
+from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
 from .methods.get_week_info import GetWeekInfo
 from .methods.update_assignments import UpdateAssignments
-from .models import OrderProduct, Order
+from .models import OrderProduct, Order, TechnologicalProcess
 
 
 def import_orders(request):
@@ -31,7 +31,7 @@ def update_assignments(request):
 
     print(series_id, department_number, numbers, action, pin_code)
 
-    UpdateAssignments.execute(
+    UpdateAssignments().execute(
         series_id=series_id,
         department_number=department_number,
         numbers=numbers,
@@ -62,7 +62,7 @@ class GetAwaitList(viewsets.ModelViewSet):
         qs = qs.filter(
             assignments__status__in=['await', 'in_work'],
             assignments__department__number=self.request.query_params.get('department_number')
-        )
+        ).distinct()
 
         return qs
 
@@ -164,7 +164,6 @@ def get_project_filters(request):
     projects = list(Order.objects.all().distinct('project').values_list('project', flat=True))
 
     result += projects
-    print(result)
 
     return JsonResponse({"data": result}, json_dumps_params={"ensure_ascii": False})
 
@@ -180,83 +179,28 @@ def get_view_modes(request):
 
     return JsonResponse({"view_modes": result}, json_dumps_params={"ensure_ascii": False})
 
-#
-#     def _get_status_list(self) -> list[str]:
-#         status_param: str = self.request.query_params.get('status_list')
-#         if status_param:
-#             return list(status_param.split(','))
-#         return []
-#
-#
-# class ProductViewSet(viewsets.ModelViewSet):
-#     queryset = Product.objects.all()
-#     serializer_class = ProductSerializer
-#
-#
-# class ProductPictureViewSet(viewsets.ModelViewSet):
-#     queryset = ProductPicture.objects.all()
-#     serializer_class = ProductPictureSerializer
-#
-#
-# class FabricViewSet(viewsets.ModelViewSet):
-#     queryset = Fabric.objects.all()
-#     serializer_class = FabricSerializer
-#
-#
-# class OrderViewSet(viewsets.ModelViewSet):
-#     queryset = Order.objects.all()
-#     serializer_class = OrderSerializer
-#
-#
-# class OrderProductViewSet(viewsets.ModelViewSet):
-#     queryset = OrderProduct.objects.all()
-#     serializer_class = OrderProductSerializer
-#
-#
-# class AssignmentViewSet(viewsets.ModelViewSet):
-#     queryset = Assignment.objects.all()
-#     serializer_class = AssignmentSerializer
-#
-#
-# class ProductionStepViewSet(viewsets.ModelViewSet):
-#     queryset = ProductionStep.objects.all()
-#     serializer_class = ProductionStepSerializer
-#
-#
-# class TechnologicalProcessViewSet(viewsets.ModelViewSet):
-#     queryset = TechnologicalProcess.objects.all()
-#     serializer_class = TechnologicalProcessSerializer
-#
-#
 
-#
-#
-# @api_view(['GET'])
-# def get_eq_data(request):
-#     filters = ["Все изделия", "Серийная мебель", "Novembry"]
-#
-#     qs_await_list = OrderProduct.objects.filter(
-#         assignments__status__in=['await', 'in_work'],
-#         assignments__department__number=request.query_params.get('department_number')
-#     )
-#
-#     qs_in_work_list = OrderProduct.objects.filter(
-#         assignments__status='in_work',
-#         assignments__department__number=request.query_params.get('department_number')
-#     )
-#
-#     qs_ready_list = OrderProduct.objects.filter(
-#         assignments__status='ready',
-#         assignments__department__number=request.query_params.get('department_number')
-#     )
-#
-#     serializer = EQDataSerializer({
-#         'await_list': qs_await_list,
-#         'in_work_list': qs_in_work_list,
-#         'ready_list': qs_ready_list,
-#         'week_info': {'week_info': 'info1'},
-#         'project_filters': filters,
-#         'view_modes': {'view_modes': 'mode1'},
-#     }, context={'request': request})
-#
-#     return Response(serializer.data)
+@api_view(['GET'])
+def get_tech_process_info(request):
+    qs = TechnologicalProcess.objects.all()
+    serializer = EQTechProcessSerializer
+    data = serializer(qs, many=True, context={"request": request}).data
+
+    return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def set_tech_process(request):
+    series_id = request.data.get('series_id')
+    tech_process_id = request.data.get('tech_process_id')
+    serializer = EQTechProcessSerializer
+
+    product = OrderProduct.objects.get(series_id=series_id).product
+    technological_process = TechnologicalProcess.objects.get(pk=tech_process_id)
+
+    product.technological_process = technological_process
+    product.save()
+
+    data = serializer(technological_process, context={'request': request}).data
+
+    return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})

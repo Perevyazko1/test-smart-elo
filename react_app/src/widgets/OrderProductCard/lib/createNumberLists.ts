@@ -9,11 +9,10 @@ export const createNumberLists = (order_product: order_product, series_size: num
         const assignment = assignments[i];
         const assignmentsNumber = assignment.number;
 
-        // If the target series number is odd, add the task to the primary list; otherwise, add it to the secondary list.
-        if (i > series_size) {
-            secondary.push(assignmentsNumber);
-        } else {
+        if (i < series_size) {
             primary.push(assignmentsNumber);
+        } else {
+            secondary.push(assignmentsNumber);
         }
     }
 

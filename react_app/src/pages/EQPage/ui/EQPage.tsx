@@ -63,7 +63,7 @@ const EqPage = memo(() => {
     return (
         <DynamicModuleLoader reducers={initialReducers}>
 
-            {showCardInfo && <OrderProductModal onHide={hide_card_info} card_info={showCardInfo}/>}
+            {showCardInfo && <OrderProductModal onHide={hide_card_info} order_product={showCardInfo}/>}
 
             <div className="container-fluid p-0" style={{height: "100vh", background: "#f8f9fa"}}>
                 <EqNavBar/>

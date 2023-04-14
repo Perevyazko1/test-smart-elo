@@ -1,9 +1,9 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
-import {order_product_list} from "entities/OrderProduct";
+import {order_product, order_product_list} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
 
-import {EqSchema, OrderProductCardContext, ViewMode} from "../types/eqSchema";
+import {EqSchema, ViewMode} from "../types/eqSchema";
 
 
 export const initialState: EqSchema = {
@@ -56,7 +56,7 @@ export const eqSlice = createSlice({
                 state.series_size = initialState.series_size;
             },
 
-            showCardInfo: (state, action: PayloadAction<OrderProductCardContext>) => {
+            showCardInfo: (state, action: PayloadAction<order_product>) => {
                 state.show_card_info = action.payload
             },
 

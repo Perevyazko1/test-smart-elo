@@ -1,10 +1,10 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 import {OrderProductInfoSchema} from "../type/OrderProductInfoSchema";
+import {technological_process} from "entities/OrderProduct";
 
 
 export const initialState: OrderProductInfoSchema = {
-    show_modal: false,
 }
 
 
@@ -12,8 +12,11 @@ export const orderProductInfoSlice = createSlice({
         name: 'orderProductInfo',
         initialState,
         reducers: {
-            setShowModal: (state, action: PayloadAction<boolean>) => {
-                state.show_modal = action.payload
+            setTechProcessList: (state, action: PayloadAction<technological_process[]>) => {
+                state.tech_process_list = action.payload
+            },
+            setCurrentTechProcess: (state, action: PayloadAction<technological_process>) => {
+                state.current_tech_process = action.payload
             },
         }
     }

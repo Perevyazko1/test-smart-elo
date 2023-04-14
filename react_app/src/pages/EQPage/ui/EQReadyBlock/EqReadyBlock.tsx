@@ -38,7 +38,7 @@ export const EqReadyBlock = memo(() => {
     }, [authData, view_mode, current_project, eqUpdated, week_info, dispatch])
 
     return (
-        <div className="row m-0" style={{height: "43vh", overflowX: "auto"}}>
+        <div className="row m-0" style={{height: "43vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
             <div className="col m-0 p-1">
                 <StickyHeader>Список готовых изделий</StickyHeader>
 

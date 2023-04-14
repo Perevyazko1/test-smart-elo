@@ -1,4 +1,4 @@
-import {memo} from 'react';
+import {memo, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -16,6 +16,7 @@ import {getButtonIcon} from "../lib/getButtonIcon";
 import {getButtonBg} from "../lib/getButtonBg";
 import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
+import {setTargetNumber} from "../lib/setTargetNumber";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -37,14 +38,11 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
 
     const sliderImages = createImageUrls(order_product)
 
-    const assignments_lists = createNumberLists(order_product, series_size)
+    const [assignmentsLists, setAssignmentsLists] = useState(createNumberLists(order_product, series_size))
 
     const showCardInfoWidget = () => {
         if (authData?.current_department?.number) {
-            dispatch(eqActions.showCardInfo({
-                department_number: authData.current_department.number,
-                order_product_id: order_product.series_id
-            }))
+            dispatch(eqActions.showCardInfo(order_product))
         }
     }
 
@@ -60,10 +58,15 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
         return getButtonAction(first, card_type)
     }
 
+    const set_target_number = (assignment_number: number) => {
+        dispatch(eqActions.setSeriesSize(1))
+        setAssignmentsLists(setTargetNumber(assignmentsLists.primary, assignmentsLists.secondary, assignment_number))
+    }
+
     const updateAssignments = async (first: boolean = true) => {
         if (authData?.pin_code && authData?.current_department) {
             await dispatch(fetchUpdateAssignments({
-                numbers: assignments_lists.primary,
+                numbers: assignmentsLists.primary,
                 department_number: authData.current_department.number,
                 series_id: order_product.series_id,
                 // @ts-ignore
@@ -73,6 +76,10 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             dispatch(eqActions.eqUpdated())
         }
     }
+
+    useEffect(() => {
+        setAssignmentsLists(createNumberLists(order_product, series_size))
+    }, [order_product, series_size])
 
     const mods: Mods = {
         [cls.card_active]: order_product.assignments.length > 0,
@@ -139,20 +146,22 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className="d-flex w-50 h-100 m-0 p-0 align-items-center"
                             style={{overflow: "auto", overflowY: "hidden", borderRightStyle: "ridge"}}
                         >
-                            {assignments_lists.primary?.map((number) => (
+                            {assignmentsLists.primary?.map((number) => (
                                 <button
                                     className={`btn btn-primary me-1`}
                                     type="button"
                                     key={number}
+                                    onClick={() => set_target_number(number)}
                                 >
                                     {number}
                                 </button>
                             ))}
-                            {assignments_lists.secondary?.map((number) => (
+                            {assignmentsLists.secondary?.map((number) => (
                                 <button
                                     className={`btn btn-secondary me-1`}
                                     type="button"
                                     key={number}
+                                    onClick={() => set_target_number(number)}
                                 >
                                     {number}
                                 </button>

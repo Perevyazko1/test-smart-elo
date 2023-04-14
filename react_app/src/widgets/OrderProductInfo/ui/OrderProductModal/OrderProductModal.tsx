@@ -4,9 +4,10 @@ import {Accordion, Button, Modal} from "react-bootstrap";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
 import {orderProductInfoReducer} from "../../model/slice/OrderProductInfoSlice";
-import {OrderProductCardContext} from "../../../../pages/EQPage/model/types/eqSchema";
 import {OPProductionInfoTable} from "../OPDepartmentInfoTable/OPProductionInfoTable";
 import {OPTechProcessTable} from "../OPTechProcessTable/OPTechProcessTable";
+import {OpBaseInfo} from "../OPBaseInfo/OPBaseInfo";
+import {order_product} from "../../../../entities/OrderProduct";
 
 
 const initialReducers: ReducersList = {
@@ -15,7 +16,7 @@ const initialReducers: ReducersList = {
 
 export interface OrderProductModalProps {
     onHide: () => void,
-    card_info: OrderProductCardContext,
+    order_product: order_product,
 }
 
 export const OrderProductModal = memo((props: OrderProductModalProps) => {
@@ -32,9 +33,12 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
         <DynamicModuleLoader reducers={initialReducers}>
             <Modal show={showModal} onHide={hide_modal} size={'xl'} scrollable={true}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Информация по изделию {props.card_info.order_product_id}</Modal.Title>
+                    <Modal.Title>Информация по изделию {props.order_product.product.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
+
+                    <OpBaseInfo order_product={props.order_product}/>
+
                     <Accordion alwaysOpen>
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Просмотреть информацию по отделу</Accordion.Header>
@@ -51,7 +55,7 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                         <Accordion.Item eventKey="2">
                             <Accordion.Header>Просмотреть информацию по технологическому процессу</Accordion.Header>
                             <Accordion.Body>
-                                <OPTechProcessTable/>
+                                <OPTechProcessTable order_product={props.order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
                     </Accordion>
