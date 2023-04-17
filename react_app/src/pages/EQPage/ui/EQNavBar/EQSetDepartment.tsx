@@ -7,6 +7,7 @@ import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
+import {eqActions} from "../../model/slice/eqSlice";
 
 interface ChangeDepartmentProps {
     className?: string;
@@ -27,6 +28,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
                 pin_code: auth_data?.pin_code,
                 department_number: department_number
             }))
+            dispatch(eqActions.setDefaultFilters())
         }
     },[auth_data?.pin_code, dispatch])
 

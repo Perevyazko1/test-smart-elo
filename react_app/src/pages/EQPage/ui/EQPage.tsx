@@ -52,7 +52,9 @@ const EqPage = memo(() => {
                 series_size: 1
             }))
             dispatch(fetchProjectFilters({}))
-            dispatch(fetchViewModsList({}))
+            dispatch(fetchViewModsList({
+                department_number: currentDepartment.number
+            }))
         }
     }, [view_mode, current_project, currentDepartment, dispatch, eqUpdated])
 

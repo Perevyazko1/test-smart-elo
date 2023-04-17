@@ -17,10 +17,11 @@ interface fetchUpdateAssignmentsProps {
     numbers: number[],
     pin_code: number,
     department_number: number,
+    view_mode: number,
 }
 
 export const fetchUpdateAssignments = createAsyncThunk<any, fetchUpdateAssignmentsProps, {rejectValue: string}>(
-    'eq/fetchEqOrderProductList',
+    'eq/fetchUpdateAssignments',
     async (params: fetchUpdateAssignmentsProps, thunkAPI) => {
         try {
             const response = await axios.post(`${SERVER_HTTP_ADDRESS}/api/v1/core/update_assignments/`, {
@@ -28,7 +29,6 @@ export const fetchUpdateAssignments = createAsyncThunk<any, fetchUpdateAssignmen
             });
 
             if (response.data) {
-                console.log(response.data)
                 return response.data;
             } else {
                 throw new Error();

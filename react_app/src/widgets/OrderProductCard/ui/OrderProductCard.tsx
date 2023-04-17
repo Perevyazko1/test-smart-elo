@@ -17,6 +17,7 @@ import {getButtonBg} from "../lib/getButtonBg";
 import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
+import {getCurrentViewMod} from "../../../pages/EQPage/model/selectors/getCurrentViewMod/getCurrentViewMod";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -35,6 +36,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
     const series_size = useSelector(getSeriesSize)
+    const view_mode = useSelector(getCurrentViewMod)
 
     const tech_process_changed = !order_product?.product?.technological_process
 
@@ -88,7 +90,8 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 series_id: order_product.series_id,
                 // @ts-ignore
                 action: buttonAction(first),
-                pin_code: authData.pin_code
+                pin_code: authData.pin_code,
+                view_mode: view_mode.key,
             }))
             dispatch(eqActions.eqUpdated())
         }

@@ -24,12 +24,11 @@ def import_orders(request):
 @api_view(['POST'])
 def update_assignments(request):
     series_id: str = request.data.get('series_id')
+    view_mode: str = request.data.get('view_mode')
     department_number: int = request.data.get('department_number')
     numbers: list[int] = request.data.get('numbers')
     action: str = request.data.get('action')
     pin_code = request.data.get('pin_code')
-
-    print(series_id, department_number, numbers, action, pin_code)
 
     UpdateAssignments().execute(
         series_id=series_id,
@@ -37,6 +36,7 @@ def update_assignments(request):
         numbers=numbers,
         action=action,
         pin_code=pin_code,
+        view_mode=view_mode,
     )
 
     return JsonResponse({"data": 'okay'})
@@ -94,6 +94,9 @@ class GetInWorkList(viewsets.ModelViewSet):
         project = self.request.query_params.get('project')
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
+
+        if view_mode not in ['1', '0']:
+            pin_code = view_mode
 
         if not view_mode == '1':
             qs = qs.filter(assignments__executor__pin_code=pin_code)
@@ -184,9 +187,10 @@ def get_project_filters(request):
 
 @api_view(['GET'])
 def get_view_modes(request):
+    department_number = request.query_params.get('department_number')
     result = [{'name': 'Личные наряды', 'key': 0}, {'name': 'Режим бригадира', 'key': 1}]
 
-    users = Employee.objects.all()
+    users = Employee.objects.filter(departments__number=department_number)
 
     for user in users:
         result.append({'name': f'{user.first_name} {user.last_name}', 'key': user.pin_code})

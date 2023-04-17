@@ -7,6 +7,7 @@ import {eqActions} from "../../slice/eqSlice";
 import {ViewMode} from "../../types/eqSchema";
 
 interface fetchViewModsListProps {
+    department_number: number,
 }
 
 export const fetchViewModsList = createAsyncThunk<ViewMode[], fetchViewModsListProps, {rejectValue: string}>(

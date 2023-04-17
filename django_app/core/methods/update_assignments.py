@@ -12,9 +12,11 @@ class UpdateAssignments:
             numbers: list[int],
             department_number: int,
             action: str,
-            pin_code: int):
-
-        print('Обновление нарядов')
+            pin_code: int,
+            view_mode: str,
+    ):
+        if not view_mode == 1 and not view_mode == 0:
+            pin_code = view_mode
 
         for number in numbers:
             assignment = Assignment.objects.get(
