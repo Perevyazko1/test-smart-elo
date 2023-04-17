@@ -144,19 +144,14 @@ class EQCardSerializer(serializers.ModelSerializer):
             department__number=department_number
         ).tax
         count_all = obj.quantity,
-        queryset = obj.assignments.filter(department__number=department_number) \
-            .annotate(
-            count_in_work=Count(Case(When(status='in_work', then=1))),
-            count_ready=Count(Case(When(status='ready', then=1))),
-            count_await=Count(Case(When(status='await', then=1))),
-        )
+        queryset = obj.assignments.filter(department__number=department_number)
 
         return (
             tax,
             count_all[0],
-            queryset.values_list('count_in_work', flat=True).first() or 0,
-            queryset.values_list('count_ready', flat=True).first() or 0,
-            queryset.values_list('count_await', flat=True).first() or 0,
+            queryset.filter(status='in_work').count(),
+            queryset.filter(status='ready').count(),
+            queryset.filter(status='await').count(),
         )
 
     def to_representation(self, instance):
@@ -170,22 +165,3 @@ class EQCardSerializer(serializers.ModelSerializer):
         representation['tax'] = tax
 
         return representation
-#
-#
-# class EQDataSerializer(serializers.Serializer):
-#     await_list = EQCardSerializer(context={'status_list': ['await', 'in_work']}, many=True)
-#     in_work_list = EQCardSerializer(context={'status_list': ['in_work']}, many=True)
-#     ready_list = EQCardSerializer(context={'status_list': ['ready']}, many=True)
-#     week_info = serializers.DictField()
-#     project_filters = serializers.ListField()
-#     view_modes = serializers.ListField()
-#
-#     class Meta:
-#         fields = (
-#             'await_list',
-#             'in_work_list',
-#             'ready_list'
-#             'week_info'
-#             'project_filters'
-#             'view_modes'
-#         )

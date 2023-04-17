@@ -58,8 +58,6 @@ class GetAwaitList(viewsets.ModelViewSet):
         department_number = self.request.query_params.get('department_number')
         project = self.request.query_params.get('project')
 
-        print(department_number, project)
-
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
@@ -73,8 +71,6 @@ class GetAwaitList(viewsets.ModelViewSet):
                 product__production_steps__department=Department.objects.get(number=department_number),
                 status="0",
             )
-
-            print(qs)
 
         return qs
 
