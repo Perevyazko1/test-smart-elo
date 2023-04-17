@@ -36,6 +36,8 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const authData = useSelector(getEmployeeAuthData)
     const series_size = useSelector(getSeriesSize)
 
+    const tech_process_changed = !order_product?.product?.technological_process
+
     const sliderImages = createImageUrls(order_product)
 
     const [assignmentsLists, setAssignmentsLists] = useState(createNumberLists(order_product, series_size))
@@ -58,9 +60,24 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
         return getButtonAction(first, card_type)
     }
 
+    const assignmentConfirmed = (assignment_number: number) => {
+        return order_product.assignments.filter(
+            assignment => assignment.number === assignment_number && assignment.inspector
+        ).length > 0
+    }
+
     const set_target_number = (assignment_number: number) => {
+        if (assignmentConfirmed(assignment_number) || !assignment_number) {
+            return false;
+        }
         dispatch(eqActions.setSeriesSize(1))
-        setAssignmentsLists(setTargetNumber(assignmentsLists.primary, assignmentsLists.secondary, assignment_number))
+        // @ts-ignore
+        setAssignmentsLists(setTargetNumber(
+            assignmentsLists.primary,
+            assignmentsLists.secondary,
+            assignmentsLists.confirmed,
+            assignment_number,
+        ))
     }
 
     const updateAssignments = async (first: boolean = true) => {
@@ -96,15 +113,17 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}
             >
-                <CardContentWrapper width={"50px"} className={'me-1'}>
-                    <button
-                        className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
-                        type="button" style={{width: "39px", height: "90px"}}
-                        onClick={() => updateAssignments()}
-                    >
-                        {buttonIcon()}
-                    </button>
-                </CardContentWrapper>
+                {(assignmentsLists?.primary?.length > 0  && !tech_process_changed) &&
+                    <CardContentWrapper width={"50px"} className={'me-1'}>
+                        <button
+                            className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
+                            type="button" style={{width: "39px", height: "90px"}}
+                            onClick={() => updateAssignments()}
+                        >
+                            {buttonIcon()}
+                        </button>
+                    </CardContentWrapper>
+                }
 
 
                 <CardContentWrapper width={"100px"} className={'me-1'}>
@@ -115,6 +134,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     width={"90px"}
                     className={'me-1'}
                     onClick={showCardInfoWidget}
+                    warning={tech_process_changed}
                 >
                     <h1 className="fw-bold m-0 p-0 pb-1" style={{fontSize: "12px"}}>
                         Всего:{order_product.count_all}
@@ -166,6 +186,15 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                                     {number}
                                 </button>
                             ))}
+                            {assignmentsLists.confirmed?.map((number) => (
+                                <button
+                                    className={'btn btn-success me-1'}
+                                    type="button"
+                                    key={number}
+                                >
+                                    {number}
+                                </button>
+                            ))}
                         </div>
 
                         <div
@@ -188,7 +217,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     </div>
                 </CardContentWrapper>
 
-                {card_type !== CardType.AWAIT_CARD &&
+                {(card_type !== CardType.AWAIT_CARD && assignmentsLists?.primary?.length !== 0) &&
                     <CardContentWrapper width={"50px"} className={"ms-1"}>
                         <button
                             className={buttonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}

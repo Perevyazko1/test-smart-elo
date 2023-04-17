@@ -1,4 +1,4 @@
-export const setTargetNumber = (primary: number[], secondary: number[], value: number) => {
+export const setTargetNumber = (primary: number[], secondary: number[], confirmed: number[], value: number) => {
     if (!primary.includes(value) && !secondary.includes(value)) {
         return {primary, secondary};
     }
@@ -22,5 +22,5 @@ export const setTargetNumber = (primary: number[], secondary: number[], value: n
     }
 
     // Возвращаем оба массива
-    return {primary: newArray1, secondary: newArray2};
+    return {primary: newArray1, secondary: newArray2, confirmed: confirmed};
 }

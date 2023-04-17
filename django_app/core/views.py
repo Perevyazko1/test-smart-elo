@@ -54,15 +54,27 @@ class GetAwaitList(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-
+        view_mode = self.request.query_params.get('view_mode')
+        department_number = self.request.query_params.get('department_number')
         project = self.request.query_params.get('project')
+
+        print(department_number, project)
+
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
-        qs = qs.filter(
-            assignments__status__in=['await', 'in_work'],
-            assignments__department__number=self.request.query_params.get('department_number')
-        ).distinct()
+        if not view_mode == '1':
+            qs = qs.filter(
+                assignments__status__in=['await', 'in_work'],
+                assignments__department__number=self.request.query_params.get('department_number')
+            ).distinct()
+        else:
+            qs = qs.filter(
+                product__production_steps__department=Department.objects.get(number=department_number),
+                status="0",
+            )
+
+            print(qs)
 
         return qs
 
@@ -80,14 +92,20 @@ class GetInWorkList(viewsets.ModelViewSet):
     def get_queryset(self):
         qs = super().get_queryset()
 
+        view_mode = self.request.query_params.get('view_mode')
+        pin_code = self.request.query_params.get('pin_code')
+
         project = self.request.query_params.get('project')
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
+        if not view_mode == '1':
+            qs = qs.filter(assignments__executor__pin_code=pin_code)
+
         qs = qs.filter(
             assignments__status__in=['in_work'],
             assignments__department__number=self.request.query_params.get('department_number')
-        )
+        ).distinct()
         return qs
 
 
@@ -135,7 +153,7 @@ class GetReadyList(viewsets.ModelViewSet):
             assignments__department__number=self.request.query_params.get('department_number'),
             assignments__date_completion__gte=week_info.date_range[0],
             assignments__date_completion__lt=week_info.date_range[1],
-        )
+        ).distinct()
 
         return qs
 

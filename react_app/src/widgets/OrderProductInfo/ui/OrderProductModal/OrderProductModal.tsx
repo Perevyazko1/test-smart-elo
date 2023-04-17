@@ -30,6 +30,8 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
         }, 300)
     }
 
+    const tech_process_confirmed = !props.order_product?.product?.technological_process
+
     return (
         <DynamicModuleLoader reducers={initialReducers}>
             <Modal show={showModal} onHide={hide_modal} size={'xl'} scrollable={true}>
@@ -53,8 +55,19 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                                 <OPProductionInfoTable order_product={props.order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
-                        <Accordion.Item eventKey="2">
-                            <Accordion.Header>Просмотреть информацию по технологическому процессу</Accordion.Header>
+                        <Accordion.Item eventKey="2" className={'gb-dark'}>
+                            <Accordion.Header>
+                                {tech_process_confirmed
+                                    ?
+                                    <div className={'bg-warning mx-2 fw-bold'}>
+                                        Технологический процесс не выбран!
+                                    </div>
+                                    :
+                                    <div>
+                                        Просмотреть информацию по технологическому процессу
+                                    </div>
+                                }
+                            </Accordion.Header>
                             <Accordion.Body>
                                 <OPTechProcessTable order_product={props.order_product}/>
                             </Accordion.Body>
@@ -62,11 +75,8 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                     </Accordion>
                 </Modal.Body>
                 <Modal.Footer>
-                    <Button variant="secondary" onClick={hide_modal}>
-                        Закрыть
-                    </Button>
                     <Button variant="primary" onClick={hide_modal}>
-                        Сохранить
+                        Закрыть
                     </Button>
                 </Modal.Footer>
             </Modal>
