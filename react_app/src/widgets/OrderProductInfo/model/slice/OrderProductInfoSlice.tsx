@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
-import {OrderProductInfoSchema} from "../type/OrderProductInfoSchema";
+import {order_product_tables_data, OrderProductInfoSchema} from "../type/OrderProductInfoSchema";
 import {technological_process} from "entities/OrderProduct";
 
 
@@ -17,6 +17,9 @@ export const orderProductInfoSlice = createSlice({
             },
             setCurrentTechProcess: (state, action: PayloadAction<technological_process>) => {
                 state.current_tech_process = action.payload
+            },
+            setOPTablesData: (state, action: PayloadAction<order_product_tables_data>) => {
+                state.order_product_tables_data = action.payload
             },
         }
     }

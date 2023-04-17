@@ -2,12 +2,13 @@ import React, {memo, useState} from 'react';
 import {Accordion, Button, Modal} from "react-bootstrap";
 
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
+import {order_product} from "entities/OrderProduct";
 
 import {orderProductInfoReducer} from "../../model/slice/OrderProductInfoSlice";
-import {OPProductionInfoTable} from "../OPDepartmentInfoTable/OPProductionInfoTable";
+import {OPProductionInfoTable} from "../OPProductionInfoTable/OPProductionInfoTable";
 import {OPTechProcessTable} from "../OPTechProcessTable/OPTechProcessTable";
 import {OpBaseInfo} from "../OPBaseInfo/OPBaseInfo";
-import {order_product} from "../../../../entities/OrderProduct";
+import {OpDepartmentInfoTable} from "../OPDepartmentInfoTable/OPDepartmentInfoTable";
 
 
 const initialReducers: ReducersList = {
@@ -43,13 +44,13 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Просмотреть информацию по отделу</Accordion.Header>
                             <Accordion.Body>
-                                <OPProductionInfoTable/>
+                                <OpDepartmentInfoTable order_product={props.order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
                         <Accordion.Item eventKey="1">
                             <Accordion.Header>Просмотреть информацию по производству</Accordion.Header>
                             <Accordion.Body>
-                                <OPProductionInfoTable/>
+                                <OPProductionInfoTable order_product={props.order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
                         <Accordion.Item eventKey="2">

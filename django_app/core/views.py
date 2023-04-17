@@ -5,13 +5,13 @@ from django.shortcuts import redirect
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
-from staff.models import Employee
+from staff.models import Employee, Department
 
 from .api_moy_sklad.services.import_orders import ImportOrders
 from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
 from .methods.get_week_info import GetWeekInfo
 from .methods.update_assignments import UpdateAssignments
-from .models import OrderProduct, Order, TechnologicalProcess
+from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, Assignment
 
 
 def import_orders(request):
@@ -204,3 +204,62 @@ def set_tech_process(request):
     data = serializer(technological_process, context={'request': request}).data
 
     return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_order_product_info(request):
+    series_id = request.query_params.get('series_id')
+    department_number = request.query_params.get('department_number')
+
+    order_product = OrderProduct.objects.get(series_id=series_id)
+
+    employees = Employee.objects.filter(
+        departments__number=department_number
+    )
+
+    production_steps = ProductionStep.objects.filter(
+        product=order_product.product,
+    ).exclude(department__number=0).exclude(department__number=50)
+
+    department_info = []
+    production_info = []
+
+    for employee in employees:
+        employee_assignments = Assignment.objects.filter(
+            order_product=order_product,
+            executor=employee,
+            department__number=department_number,
+        )
+        department_info.append(
+            {
+                "full_name": f"{employee.first_name} {employee.last_name}",
+                "in_work": employee_assignments.filter(status="in_work").count(),
+                "ready": employee_assignments.filter(status="ready").count(),
+                "confirmed": employee_assignments.filter(
+                    inspector__isnull=False,
+                    status="ready"
+                ).count(),
+            }
+        )
+
+    for production_step in production_steps:
+        department_assignments = Assignment.objects.filter(
+            order_product=order_product,
+            department=production_step.department,
+        )
+        production_info.append(
+            {
+                "department_name": production_step.department.name,
+                "in_work": department_assignments.filter(status="in_work").count(),
+                "ready": department_assignments.filter(status="ready").count(),
+                "confirmed": department_assignments.filter(
+                    inspector__isnull=False,
+                    status="ready",
+                ).count(),
+            }
+        )
+
+    return JsonResponse({
+        "department_info": department_info,
+        "production_info": production_info,
+    }, json_dumps_params={"ensure_ascii": False})

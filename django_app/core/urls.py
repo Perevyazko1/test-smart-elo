@@ -18,5 +18,6 @@ urlpatterns = [
     path('get_view_modes/', get_view_modes),
     path('get_tech_process_info/', get_tech_process_info),
     path('set_tech_process/', set_tech_process),
+    path('get_order_product_info/', get_order_product_info),
     path('', include(router.urls)),
 ]
