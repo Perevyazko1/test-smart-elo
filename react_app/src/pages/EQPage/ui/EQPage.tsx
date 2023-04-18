@@ -8,18 +8,13 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import 'shared/assets/fonts/fontawesome-all.min.css';
 
 import {eqActions, eqReducer} from "../model/slice/eqSlice";
-import {fetchAwaitList} from "../model/service/fetchAwaitList/fetchAwaitList";
-import {getEqUpdated} from "../model/selectors/getEqUpdated/getEqUpdated";
-import {fetchInWorkList} from "../model/service/fetchInWorkList/fetchInWorkList";
 import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";
 import {EqNavBar} from "./EQNavBar/EQNavBar";
 import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
-import {getCurrentProject} from "../model/selectors/getCurrentProject/getCurrentProject";
 import {fetchViewModsList} from "../model/service/fetchViewMods/fetchViewMods";
-import {getCurrentViewMod} from "../model/selectors/getCurrentViewMod/getCurrentViewMod";
 import {getShowCardInfo} from "../model/selectors/getShowCardInfo/getShowCardInfo";
 
 
@@ -29,34 +24,17 @@ const initialReducers: ReducersList = {
 
 const EqPage = memo(() => {
     const dispatch = useAppDispatch()
-    const eqUpdated = useSelector(getEqUpdated)
-    const currentDepartment = useSelector(getCurrentDepartment)
-    const current_project = useSelector(getCurrentProject)
-    const view_mode = useSelector(getCurrentViewMod)
+    const current_department = useSelector(getCurrentDepartment)
     const showCardInfo = useSelector(getShowCardInfo)
 
     useEffect(() => {
-        if (currentDepartment?.number) {
-            dispatch(fetchAwaitList({
-                department_number: currentDepartment.number,
-                project: current_project,
-                pin_code: 123123,
-                view_mode: view_mode.key,
-                series_size: 1
-            }))
-            dispatch(fetchInWorkList({
-                department_number: currentDepartment.number,
-                project: current_project,
-                pin_code: 123123,
-                view_mode: view_mode.key,
-                series_size: 1
-            }))
+        if (current_department?.number) {
             dispatch(fetchProjectFilters({}))
             dispatch(fetchViewModsList({
-                department_number: currentDepartment.number
+                department_number: current_department.number
             }))
         }
-    }, [view_mode, current_project, currentDepartment, dispatch, eqUpdated])
+    }, [current_department, dispatch])
 
     const hide_card_info = useCallback(() => {
         dispatch(eqActions.clearCardInfo())

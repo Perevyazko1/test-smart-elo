@@ -9,7 +9,6 @@ import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurr
 import {getViewMods} from "../../model/selectors/getViewMods/getViewMods";
 import {ViewMode} from "../../model/types/eqSchema";
 import {eqActions, initialState} from "../../model/slice/eqSlice";
-import {getEqUpdated} from "../../model/selectors/getEqUpdated/getEqUpdated";
 
 interface EqSetViewModeProps {
     className?: string

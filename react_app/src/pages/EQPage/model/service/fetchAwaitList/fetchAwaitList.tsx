@@ -11,7 +11,6 @@ interface fetchAwaitListProps {
     pin_code: number,
     project: string,
     view_mode: number,
-    series_size: number,
 }
 
 export const fetchAwaitList = createAsyncThunk<order_product_list, fetchAwaitListProps, {rejectValue: string}>(

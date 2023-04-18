@@ -18,6 +18,7 @@ import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
 import {getCurrentViewMod} from "../../../pages/EQPage/model/selectors/getCurrentViewMod/getCurrentViewMod";
+import {updateTargetList} from "../lib/updateTargetList";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -93,7 +94,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 pin_code: authData.pin_code,
                 view_mode: view_mode.key,
             }))
-            dispatch(eqActions.eqUpdated())
+            updateTargetList(first, card_type, dispatch)
         }
     }
 

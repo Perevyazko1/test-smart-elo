@@ -11,7 +11,6 @@ interface fetchInWorkListProps {
     pin_code: number,
     project: string,
     view_mode: number,
-    series_size: number,
 }
 
 export const fetchInWorkList = createAsyncThunk<order_product_list, fetchInWorkListProps, {rejectValue: string}>(

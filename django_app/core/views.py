@@ -7,7 +7,6 @@ from rest_framework.decorators import api_view
 
 from staff.models import Employee, Department
 
-from .api_moy_sklad.services.import_orders import ImportOrders
 from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
 from .methods.get_week_info import GetWeekInfo
 from .methods.update_assignments import UpdateAssignments
@@ -17,7 +16,13 @@ from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, A
 def import_orders(request):
     # from .methods.init_departments import init_departments
     # init_departments()
-    ImportOrders().execute()
+    # from .api_moy_sklad.services.import_orders import ImportOrders
+    # ImportOrders().execute()
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)("1", {"type": "chat_message", "message": "HI BROOO"})
+
     return redirect(request.META.get('HTTP_REFERER'))
 
 
@@ -90,8 +95,8 @@ class GetInWorkList(viewsets.ModelViewSet):
 
         view_mode = self.request.query_params.get('view_mode')
         pin_code = self.request.query_params.get('pin_code')
-
         project = self.request.query_params.get('project')
+
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
@@ -105,6 +110,7 @@ class GetInWorkList(viewsets.ModelViewSet):
             assignments__status__in=['in_work'],
             assignments__department__number=self.request.query_params.get('department_number')
         ).distinct()
+
         return qs
 
 

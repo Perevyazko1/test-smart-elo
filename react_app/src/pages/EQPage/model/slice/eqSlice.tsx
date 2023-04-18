@@ -4,13 +4,23 @@ import {order_product, order_product_list} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
 
 import {EqSchema, ViewMode} from "../types/eqSchema";
+import {fetchAwaitList} from "../service/fetchAwaitList/fetchAwaitList";
+import {fetchInWorkList} from "../service/fetchInWorkList/fetchInWorkList";
+import {fetchReadyList} from "../service/fetchReadyList/fetchReadyList";
 
 
 export const initialState: EqSchema = {
     series_size: 1,
     current_view_mode: {name: "Личные наряды", key: 0},
     current_project: "Все проекты",
-    eq_updated: false,
+
+    await_list_updated: false,
+    in_work_list_updated: false,
+    ready_list_updated: false,
+
+    await_list_is_loading: false,
+    in_work_list_is_loading: false,
+    ready_list_is_loading: false,
 }
 
 
@@ -64,9 +74,58 @@ export const eqSlice = createSlice({
                 state.show_card_info = undefined
             },
 
-            eqUpdated: (state) => {
-                state.eq_updated = !state.eq_updated
+            awaitListUpdated: (state) => {
+                state.await_list_updated = !state.await_list_updated
             },
+            inWorkListUpdated: (state) => {
+                state.in_work_list_updated = !state.in_work_list_updated
+            },
+            readyListUpdated: (state) => {
+                state.ready_list_updated = !state.ready_list_updated
+            },
+            eqUpdated: (state) => {
+                state.await_list_updated = !state.await_list_updated
+                state.in_work_list_updated = !state.in_work_list_updated
+                state.ready_list_updated = !state.ready_list_updated
+            }
+        },
+        extraReducers: (builder) => {
+            builder
+                .addCase(fetchAwaitList.pending, (state) => {
+                    state.await_list_is_loading = true;
+                    // state.error = undefined;
+                })
+                .addCase(fetchAwaitList.fulfilled, (state) => {
+                    state.await_list_is_loading = false;
+                })
+                .addCase(fetchAwaitList.rejected, (state, action) => {
+                    state.await_list_is_loading = false;
+                    // state.error = action.payload;
+                })
+
+                .addCase(fetchInWorkList.pending, (state) => {
+                    state.in_work_list_is_loading = true;
+                    // state.error = undefined;
+                })
+                .addCase(fetchInWorkList.fulfilled, (state) => {
+                    state.in_work_list_is_loading = false;
+                })
+                .addCase(fetchInWorkList.rejected, (state, action) => {
+                    state.in_work_list_is_loading = false;
+                    // state.error = action.payload;
+                })
+
+                .addCase(fetchReadyList.pending, (state) => {
+                    state.ready_list_is_loading = true;
+                    // state.error = undefined;
+                })
+                .addCase(fetchReadyList.fulfilled, (state) => {
+                    state.ready_list_is_loading = false;
+                })
+                .addCase(fetchReadyList.rejected, (state, action) => {
+                    state.ready_list_is_loading = false;
+                    // state.error = action.payload;
+                })
         }
     }
 )

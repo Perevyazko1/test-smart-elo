@@ -17,6 +17,13 @@ export interface EqSchema {
     view_modes?: ViewMode[],
     current_view_mode?: ViewMode,
     series_size: number,
-    eq_updated: boolean,
+    await_list_updated: boolean,
+    in_work_list_updated: boolean,
+    ready_list_updated: boolean,
+
+    await_list_is_loading: boolean,
+    in_work_list_is_loading: boolean,
+    ready_list_is_loading: boolean,
+
     show_card_info?: order_product | undefined,
 }
