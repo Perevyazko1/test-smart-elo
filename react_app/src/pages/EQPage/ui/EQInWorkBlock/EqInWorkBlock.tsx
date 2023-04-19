@@ -56,6 +56,7 @@ export const EqInWorkBlock = memo(() => {
                                     order_product={order_product}
                                     key={order_product.series_id}
                                     card_type={CardType.IN_WORK_CARD}
+                                    disabled={in_work_list_is_loading}
                                 />
                             </div>
                         </CSSTransition>

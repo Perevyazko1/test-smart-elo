@@ -1,21 +1,31 @@
 import React, {memo, useCallback, useEffect} from 'react';
+import {useSelector} from "react-redux";
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
+
 import {fetchWeekInfo} from "../../model/service/fetchWeekInfo/fetchWeekInfo";
-import {useSelector} from "react-redux";
 import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
 
 
 export const EqWeekBlock = memo(() => {
     const dispatch = useAppDispatch()
     const week_info = useSelector(getWeekInfo)
+    const pin_code = useSelector(getEmployeePinCode)
+    const current_department = useSelector(getCurrentDepartment)
+
+    const get_earned_sum = (Math.trunc(week_info?.earned || 0)).toLocaleString()
 
     const changeWeek = useCallback((week: number | undefined = undefined, year: number | undefined = undefined) => {
-        dispatch(fetchWeekInfo({
-            week: week,
-            year: year
-        }))
-    }, [dispatch])
+        if (pin_code && current_department?.number) {
+            dispatch(fetchWeekInfo({
+                department_number: current_department?.number,
+                pin_code: pin_code,
+                week: week,
+                year: year
+            }))
+        }
+    }, [current_department, pin_code, dispatch])
 
     useEffect(() => {
         changeWeek()
@@ -50,7 +60,7 @@ export const EqWeekBlock = memo(() => {
                             "Неделя " + week_info?.week +
                             " с " + week_info?.str_dates[0] +
                             " по " + week_info?.str_dates[6] +
-                            " | Зараб.: 20 000"
+                            " | Зараб.: " + get_earned_sum
                         }
                     </>
                 </div>

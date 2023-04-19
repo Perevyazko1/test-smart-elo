@@ -7,6 +7,8 @@ import {week_info} from "entities/WeekInfo";
 import {eqActions} from "../../slice/eqSlice";
 
 interface fetchWeekInfoProps {
+    department_number: number,
+    pin_code: number,
     week: number | undefined,
     year: number | undefined,
 }

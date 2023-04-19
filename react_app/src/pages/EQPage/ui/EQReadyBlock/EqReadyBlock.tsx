@@ -60,6 +60,7 @@ export const EqReadyBlock = memo(() => {
                                     order_product={order_product}
                                     key={order_product.series_id}
                                     card_type={CardType.READY_CARD}
+                                    disabled={ready_list_is_loading}
                                 />
                             </div>
                         </CSSTransition>

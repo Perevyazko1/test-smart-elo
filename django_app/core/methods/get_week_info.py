@@ -10,6 +10,7 @@ class WeekInfo:
     date_range: list[str]
     previous_week_data: dict
     next_week_data: dict
+    earned: int = 0
 
 
 class GetWeekInfo:

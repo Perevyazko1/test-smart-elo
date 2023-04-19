@@ -29,11 +29,12 @@ export enum CardType {
 interface OrderProductCardProps {
     card_type: CardType
     order_product: order_product
+    disabled?: boolean
     className?: string
 }
 
 export const OrderProductCard = memo((props: OrderProductCardProps) => {
-    const {card_type, className, order_product, ...otherProps} = props
+    const {card_type, className, order_product, disabled=false, ...otherProps} = props
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
     const series_size = useSelector(getSeriesSize)
@@ -123,6 +124,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
                             onClick={() => updateAssignments()}
+                            disabled={disabled}
                         >
                             {buttonIcon()}
                         </button>
@@ -227,6 +229,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className={buttonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
                             onClick={() => updateAssignments(false)}
+                            disabled={disabled}
                         >
                             {buttonIcon(false)}
                         </button>

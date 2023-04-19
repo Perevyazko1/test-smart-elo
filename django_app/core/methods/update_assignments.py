@@ -1,11 +1,15 @@
 import datetime
 
+from core.consumers import ws_group_updates
 from core.methods.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
 from staff.models import Employee, Department
 
 
 class UpdateAssignments:
+    def __init__(self):
+        self.groups: dict = {}
+
     def execute(
             self,
             series_id: str,
@@ -30,6 +34,7 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.executor = Employee.objects.get(pin_code=pin_code)
                         assignment.save()
+                        self.groups[department_number] = ['await', 'in_work']
                     continue
 
                 case 'in_work_to_ready':
@@ -37,6 +42,7 @@ class UpdateAssignments:
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
+                        self.groups[department_number] = ['await', 'in_work', 'ready']
                     continue
 
                 case 'ready_to_in_work':
@@ -44,6 +50,7 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
+                        self.groups[department_number] = ['await', 'in_work', 'ready']
                     continue
 
                 case 'in_work_to_await':
@@ -51,16 +58,19 @@ class UpdateAssignments:
                         assignment.status = 'await'
                         assignment.executor = None
                         assignment.save()
+                        self.groups[department_number] = ['await', 'in_work']
                     continue
 
                 case 'confirmed':
                     if assignment.status == 'ready':
                         assignment.inspector = Employee.objects.get(pin_code=pin_code)
                         assignment.save()
+                        self.groups[department_number] = ['ready']
                     continue
 
                 case _:
                     raise Exception()
+
         if action == "confirmed":
             order_product = OrderProduct.objects.get(series_id=series_id)
             if department_number == 1 and order_product.product.technological_process is not None:
@@ -77,6 +87,8 @@ class UpdateAssignments:
                     order_product=order_product,
                     department=Department.objects.get(number=department_number)
                 )
+
+        ws_group_updates(groups_and_data=self.groups, pin_code=pin_code)
 
     @staticmethod
     def _create_production_step_schema(order_product: OrderProduct):
@@ -109,8 +121,7 @@ class UpdateAssignments:
                     )[0].id
                 )
 
-    @staticmethod
-    def _create_related_assignments(order_product: OrderProduct, department: Department):
+    def _create_related_assignments(self, order_product: OrderProduct, department: Department):
         """Получаем список последующих этапов"""
         next_steps = ProductionStep.objects.get(
             product=order_product.product,
@@ -173,6 +184,8 @@ class UpdateAssignments:
                 break
 
             if target_size:
+                self.groups[next_step.department.number] = ['await']
+
                 AssignmentGenerator.create_new_assignments(
                     order_product=order_product,
                     department=next_step.department,

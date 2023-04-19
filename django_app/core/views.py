@@ -1,5 +1,6 @@
 from dataclasses import asdict
 
+from django.db.models import Sum
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework import viewsets
@@ -16,12 +17,8 @@ from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, A
 def import_orders(request):
     # from .methods.init_departments import init_departments
     # init_departments()
-    # from .api_moy_sklad.services.import_orders import ImportOrders
-    # ImportOrders().execute()
-    from channels.layers import get_channel_layer
-    from asgiref.sync import async_to_sync
-    channel_layer = get_channel_layer()
-    async_to_sync(channel_layer.group_send)("1", {"type": "chat_message", "message": "HI BROOO"})
+    from .api_moy_sklad.services.import_orders import ImportOrders
+    ImportOrders().execute()
 
     return redirect(request.META.get('HTTP_REFERER'))
 
@@ -166,6 +163,8 @@ class GetReadyList(viewsets.ModelViewSet):
 @api_view(['GET'])
 def get_week_info(request):
     week = request.query_params.get('week')
+    pin_code = request.query_params.get('pin_code')
+    department_number = request.query_params.get('department_number')
     if week and week.isdigit():
         week = int(week)
     else:
@@ -177,6 +176,16 @@ def get_week_info(request):
         year = None
 
     week_info = GetWeekInfo(week=week, year=year).execute()
+
+    earned = Assignment.objects.filter(
+        executor__pin_code=pin_code,
+        department__number=department_number,
+        inspector__isnull=False,
+        date_completion__gte=week_info.date_range[0],
+        date_completion__lt=week_info.date_range[1],
+    ).aggregate(Sum('price')).get('price__sum')
+
+    week_info.earned = earned
 
     return JsonResponse(asdict(week_info))
 

@@ -60,6 +60,7 @@ export const EqAwaitBlock = memo(() => {
                                 <OrderProductCard
                                     order_product={order_product}
                                     card_type={CardType.AWAIT_CARD}
+                                    disabled={await_list_is_loading}
                                 />
                             </div>
                         </CSSTransition>

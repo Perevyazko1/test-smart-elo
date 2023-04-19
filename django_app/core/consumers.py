@@ -1,6 +1,9 @@
 import json
-from asgiref.sync import async_to_sync
+from dataclasses import dataclass, asdict
+
 from channels.generic.websocket import WebsocketConsumer
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class MainConsumer(WebsocketConsumer):
@@ -27,18 +30,28 @@ class MainConsumer(WebsocketConsumer):
                 self.group_name, self.channel_name
             )
 
-    def receive(self, text_data, **kwargs):
-        text_data_json = json.loads(text_data)
-        message = text_data_json["message"]
-
-        # Send message to room group
-        async_to_sync(self.channel_layer.group_send)(
-            self.group_name, {"type": "chat_message", "message": message}
-        )
-
-    # Receive message from room group
-    def chat_message(self, event):
+    def client_message(self, event):
         message = event["message"]
 
         # Send message to WebSocket
-        self.send(text_data=json.dumps({"message": message}))
+        self.send(text_data=json.dumps(message, ensure_ascii=False))
+
+
+@dataclass
+class EqNotification:
+    initiator: int
+    action: str
+    data: dict
+
+
+def ws_group_updates(groups_and_data: dict, pin_code: int):
+    channel_layer = get_channel_layer()
+    print(groups_and_data)
+
+    for group_name, data in groups_and_data.items():
+        result = EqNotification(
+            action='update_eq_lists',
+            initiator=pin_code,
+            data=data
+        )
+        async_to_sync(channel_layer.group_send)(str(group_name), {"type": "client_message", "message": asdict(result)})

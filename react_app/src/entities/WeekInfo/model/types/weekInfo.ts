@@ -10,4 +10,5 @@ export interface week_info {
     date_range: string[]
     previous_week_data: week_data
     next_week_data: week_data
+    earned: number
 }
