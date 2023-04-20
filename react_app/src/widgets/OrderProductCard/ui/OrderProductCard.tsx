@@ -118,7 +118,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}
             >
-                {(assignmentsLists?.primary?.length > 0  && !tech_process_changed) &&
+                {(assignmentsLists?.primary?.length > 0 && !(card_type===CardType.READY_CARD && !tech_process_changed)) &&
                     <CardContentWrapper width={"50px"} className={'me-1'}>
                         <button
                             className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
