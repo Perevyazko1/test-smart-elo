@@ -20,4 +20,6 @@ urlpatterns = [
     path('set_tech_process/', set_tech_process),
     path('get_order_product_info/', get_order_product_info),
     path('', include(router.urls)),
+
+    path('init/', init_data),
 ]

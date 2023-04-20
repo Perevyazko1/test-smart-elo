@@ -15,12 +15,17 @@ from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, A
 
 
 def import_orders(request):
-    # from .methods.init_departments import init_departments
-    # init_departments()
     from .api_moy_sklad.services.import_orders import ImportOrders
     ImportOrders().execute()
 
     return redirect(request.META.get('HTTP_REFERER'))
+
+
+def init_data(request):
+    from .methods.init_departments import init_departments
+    init_departments()
+
+    return JsonResponse({"result": 'inited'})
 
 
 @api_view(['POST'])
