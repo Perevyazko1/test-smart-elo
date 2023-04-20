@@ -13,6 +13,8 @@ departments = {
     'Малярка': [9, False, False],
     'Упаковка': [10, False, False],
     'Подрядчики': [11, False, False],
+    'Пила': [12, False, False],
+    'Готово': [50, False, False],
 }
 
 
