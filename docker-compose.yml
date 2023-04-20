@@ -23,11 +23,12 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    volumes:
+      - product_images:/app/media/images/products
     command: >
       sh -c "python manage.py makemigrations &&
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
-
 
   pgadmin:
     build:
@@ -61,4 +62,6 @@ services:
       - "80:80"
 volumes:
   db:
+    driver: local
+  product_images:
     driver: local

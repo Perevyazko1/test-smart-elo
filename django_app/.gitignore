@@ -2,3 +2,4 @@
 /venv/
 /.idea/
 /staff/migrations/
+/core/migrations/
