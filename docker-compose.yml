@@ -1,14 +1,14 @@
 version: "3.8"
 
 services:
-  postgres_db:
-    build: ./postgres_db
-    container_name: postgres_db_eq
-    restart: always
-    volumes:
-      - ./postgres_db/PGDATA:/var/lib/postgresql/data
-    env_file:
-      - .env
+#  postgres_db:
+#    build: ./postgres_db
+#    container_name: postgres_db_eq
+#    restart: always
+#    volumes:
+#      - ./postgres_db/PGDATA:/var/lib/postgresql/data
+#    env_file:
+#      - .env
 
   django_app:
     build:
@@ -17,7 +17,6 @@ services:
     container_name: django_app_eq
     restart: always
     depends_on:
-      - postgres_db
       - redis
     ports:
       - "8000:8000"
@@ -29,20 +28,20 @@ services:
              python manage.py runserver 0.0.0.0:8000"
 
 
-  pgadmin:
-    build:
-      context: ./pgadmin
-      dockerfile: Dockerfile
-    container_name: pgadmin_eq
-    restart: always
-    depends_on:
-      - postgres_db
-    ports:
-      - "5050:80"
-    env_file:
-      - ./.env
-    volumes:
-      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
+#  pgadmin:
+#    build:
+#      context: ./pgadmin
+#      dockerfile: Dockerfile
+#    container_name: pgadmin_eq
+#    restart: always
+#    depends_on:
+#      - postgres_db
+#    ports:
+#      - "5050:80"
+#    env_file:
+#      - ./.env
+#    volumes:
+#      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   redis:
     container_name: redis_eq
