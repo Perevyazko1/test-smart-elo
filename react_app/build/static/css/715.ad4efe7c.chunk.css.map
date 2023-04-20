@@ -1,0 +1,1 @@
+{"version":3,"file":"static/css/715.ad4efe7c.chunk.css","mappings":"AAAA,2BACE","sources":["shared/ui/Checkbox/Checkbox.module.scss"],"sourcesContent":[".largeSize {\r\n  transform: scale(1.5);\r\n}"],"names":[],"sourceRoot":""}

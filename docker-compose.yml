@@ -59,7 +59,6 @@ services:
       - ./react_app/build/:/usr/share/nginx/html
     ports:
       - "80:80"
-      -
 volumes:
   db:
     driver: local

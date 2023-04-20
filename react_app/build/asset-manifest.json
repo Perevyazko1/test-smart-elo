@@ -1,0 +1,43 @@
+{
+  "files": {
+    "main.css": "/static/css/main.e2a8646f.css",
+    "main.js": "/static/js/main.321681f5.js",
+    "static/js/847.4dbbde59.chunk.js": "/static/js/847.4dbbde59.chunk.js",
+    "static/css/140.c9c0bdf2.chunk.css": "/static/css/140.c9c0bdf2.chunk.css",
+    "static/js/140.f5f74149.chunk.js": "/static/js/140.f5f74149.chunk.js",
+    "static/css/715.ad4efe7c.chunk.css": "/static/css/715.ad4efe7c.chunk.css",
+    "static/js/715.55df84e8.chunk.js": "/static/js/715.55df84e8.chunk.js",
+    "static/js/581.37f5c6bd.chunk.js": "/static/js/581.37f5c6bd.chunk.js",
+    "static/media/fa-solid-900.svg": "/static/media/fa-solid-900.0ec0cc5685d258116325.svg",
+    "static/media/fa-brands-400.svg": "/static/media/fa-brands-400.6c7693a31ea2d2dc6fe9.svg",
+    "static/media/Montserrat-Light.ttf": "/static/media/Montserrat-Light.02afb26fe72fcc052988.ttf",
+    "static/media/fa-solid-900.eot": "/static/media/fa-solid-900.d12229bd491638fa106a.eot",
+    "static/media/fa-solid-900.ttf": "/static/media/fa-solid-900.c4e5551b39a7d5c61027.ttf",
+    "static/media/Verdana.ttf": "/static/media/Verdana.06356c47838279a6fe85.ttf",
+    "static/media/fa-regular-400.svg": "/static/media/fa-regular-400.d18055720cc5bab12c36.svg",
+    "static/media/fa-brands-400.eot": "/static/media/fa-brands-400.39c1e33ca5d67754117c.eot",
+    "static/media/fa-brands-400.ttf": "/static/media/fa-brands-400.4d5ec63961cae00e3536.ttf",
+    "static/media/fa-solid-900.woff": "/static/media/fa-solid-900.6ccf0adaba47375248a9.woff",
+    "static/media/fa-brands-400.woff": "/static/media/fa-brands-400.a7cb8a53a882fd128ae0.woff",
+    "static/media/fa-solid-900.woff2": "/static/media/fa-solid-900.23a7efd8d0ef4f232f2b.woff2",
+    "static/media/fa-brands-400.woff2": "/static/media/fa-brands-400.38168200fbb96276baf9.woff2",
+    "static/media/fa-regular-400.eot": "/static/media/fa-regular-400.d099731ecd1c83c2be63.eot",
+    "static/media/fa-regular-400.ttf": "/static/media/fa-regular-400.a403036f8820a4a4273d.ttf",
+    "static/media/SZMK Logo Dark Horizontal 900x350.png": "/static/media/SZMK Logo Dark Horizontal 900x350.b2e550229cf9f6acdcb7.png",
+    "static/media/fa-regular-400.woff": "/static/media/fa-regular-400.b3759c28ef0607075578.woff",
+    "static/media/fa-regular-400.woff2": "/static/media/fa-regular-400.a28b95d3e799579ba1dd.woff2",
+    "index.html": "/index.html",
+    "main.e2a8646f.css.map": "/static/css/main.e2a8646f.css.map",
+    "main.321681f5.js.map": "/static/js/main.321681f5.js.map",
+    "847.4dbbde59.chunk.js.map": "/static/js/847.4dbbde59.chunk.js.map",
+    "140.c9c0bdf2.chunk.css.map": "/static/css/140.c9c0bdf2.chunk.css.map",
+    "140.f5f74149.chunk.js.map": "/static/js/140.f5f74149.chunk.js.map",
+    "715.ad4efe7c.chunk.css.map": "/static/css/715.ad4efe7c.chunk.css.map",
+    "715.55df84e8.chunk.js.map": "/static/js/715.55df84e8.chunk.js.map",
+    "581.37f5c6bd.chunk.js.map": "/static/js/581.37f5c6bd.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e2a8646f.css",
+    "static/js/main.321681f5.js"
+  ]
+}
