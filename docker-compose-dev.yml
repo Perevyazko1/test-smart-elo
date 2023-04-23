@@ -1,0 +1,39 @@
+version: "3.8"
+
+services:
+  postgres_db:
+    build: ./postgres_db
+    container_name: postgres_db_eq
+    restart: always
+    volumes:
+      - ./postgres_db/PGDATA:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+  pgadmin:
+    build:
+      context: ./pgadmin
+      dockerfile: Dockerfile
+    container_name: pgadmin_eq
+    restart: always
+    depends_on:
+      - postgres_db
+    ports:
+      - "5050:80"
+    env_file:
+      - ./.env
+    volumes:
+      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
+
+  redis:
+    container_name: redis_eq
+    build: ./redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+volumes:
+  db:
+    driver: local

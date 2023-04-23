@@ -155,12 +155,17 @@ class GetReadyList(viewsets.ModelViewSet):
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
+        print(qs, 'До')
+        print(week_info.date_range[0], week_info.date_range[1], self.request.query_params.get('department_number'))
+
         qs = qs.filter(
-            assignments__status__in=['ready'],
-            assignments__department__number=self.request.query_params.get('department_number'),
             assignments__date_completion__gte=week_info.date_range[0],
             assignments__date_completion__lt=week_info.date_range[1],
+            assignments__status='ready',
+            assignments__department__number=self.request.query_params.get('department_number'),
         ).distinct()
+
+        print(qs, 'После')
 
         return qs
 

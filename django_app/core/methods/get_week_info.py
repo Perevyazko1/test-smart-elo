@@ -7,7 +7,7 @@ class WeekInfo:
     week: int
     year: int
     str_dates: [str]
-    date_range: list[str]
+    date_range: list[datetime]
     previous_week_data: dict
     next_week_data: dict
     earned: int = 0
@@ -38,12 +38,12 @@ class GetWeekInfo:
 
         str_dates = []
         dt_dates = []
-        for day in range(7):
+        for day in range(8):
             str_dates.append((first_day + datetime.timedelta(days=day)).strftime('%d.%m'))
             dt_dates.append(first_day + datetime.timedelta(days=day))
 
-        range_first = f'{dt_dates[0].strftime("%Y-%m-%d")}'
-        range_last = f'{dt_dates[-1].strftime("%Y-%m-%d")}'
+        range_first = dt_dates[0]
+        range_last = dt_dates[-1]
         date_range = [range_first, range_last]
 
         prev_week = (first_day - datetime.timedelta(days=7)).isocalendar()[1]
