@@ -1,5 +1,9 @@
 import {department} from "entities/Department";
 
+export interface group {
+    name: string
+}
+
 export interface employee {
     id?: number,
     username?: string,
@@ -8,7 +12,7 @@ export interface employee {
     pin_code?: number,
     current_department?: department,
     departments?: [department],
-    groups?: [string],
+    groups?: [group],
 }
 
 

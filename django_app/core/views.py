@@ -1,3 +1,4 @@
+import datetime
 from dataclasses import asdict
 
 from django.db.models import Sum
@@ -117,6 +118,8 @@ class GetReadyList(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['status_list'] = ['ready']
         context['department_number'] = self.request.query_params.get('department_number')
+        context['week'] = self.request.query_params.get('week')
+        context['year'] = self.request.query_params.get('year')
         return context
 
     def get_queryset(self):
@@ -128,37 +131,24 @@ class GetReadyList(viewsets.ModelViewSet):
         pin_code = self.request.query_params.get('pin_code')
         view_mode = self.request.query_params.get('view_mode')
 
-        if week and week.isdigit():
-            week = int(week)
-        else:
-            week = None
-        if year and year.isdigit():
-            year = int(year)
-        else:
-            year = None
-
         week_info = GetWeekInfo(week=week, year=year).execute()
 
         if len(view_mode) == 6:
             pin_code = view_mode
 
         if not view_mode == '1':
+            print('HERE!!!')
             qs = qs.filter(assignments__executor__pin_code=pin_code)
 
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
-        print(qs, 'До')
-        print(week_info.date_range[0], week_info.date_range[1], self.request.query_params.get('department_number'))
-
         qs = qs.filter(
-            assignments__date_completion__gte=week_info.date_range[0],
-            assignments__date_completion__lt=week_info.date_range[1],
             assignments__status='ready',
             assignments__department__number=self.request.query_params.get('department_number'),
+            assignments__date_completion__gt=week_info.date_range[0],
+            assignments__date_completion__lte=week_info.date_range[1],
         ).distinct()
-
-        print(qs, 'После')
 
         return qs
 
@@ -166,17 +156,9 @@ class GetReadyList(viewsets.ModelViewSet):
 @api_view(['GET'])
 def get_week_info(request):
     week = request.query_params.get('week')
+    year = request.query_params.get('year')
     pin_code = request.query_params.get('pin_code')
     department_number = request.query_params.get('department_number')
-    if week and week.isdigit():
-        week = int(week)
-    else:
-        week = None
-    year = request.query_params.get('year')
-    if year and year.isdigit():
-        year = int(year)
-    else:
-        year = None
 
     week_info = GetWeekInfo(week=week, year=year).execute()
 

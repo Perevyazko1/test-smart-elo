@@ -4,8 +4,8 @@ from dataclasses import dataclass
 
 @dataclass
 class WeekInfo:
-    week: int
-    year: int
+    week: str
+    year: str
     str_dates: [str]
     date_range: list[datetime]
     previous_week_data: dict
@@ -14,20 +14,15 @@ class WeekInfo:
 
 
 class GetWeekInfo:
-    def __init__(self, week: int = None, year: int = None):
+    def __init__(self, week: str = None, year: str = None):
         self.week = week
         self.year = year
 
     def _get_initial_values(self):
-        if self.week is None:
+        if not self.week or not self.week.isdigit():
             self.week = datetime.datetime.today().isocalendar()[1]
 
-        if self.year is None:
-            self.year = datetime.datetime.now().year
-
-        if 0 > self.week > 53 or 1970 > self.year > 2100:
-            print(f'GET_WEEK_INFO: Incorrect input. Week:{self.week}. Year:{self.year}')
-            self.week = datetime.datetime.today().isocalendar()[1]
+        if not self.year or not self.year.isdigit():
             self.year = datetime.datetime.now().year
 
     def execute(self) -> WeekInfo:

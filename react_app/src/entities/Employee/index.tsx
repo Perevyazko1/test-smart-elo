@@ -7,3 +7,4 @@ export {getCurrentDepartment} from "./model/selectors/getCurrentDepartment/getCu
 export {getEmployeeDepartments} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";
 export {getEmployeePinCode} from "./model/selectors/getEmployeePinCode/getEmployeePinCode";
 export {getEmployeeInited} from "./model/selectors/getEmployeeInited/getEmployeeInited";
+export {getEmployeeIsBoss} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";

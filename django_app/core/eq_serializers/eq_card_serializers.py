@@ -1,6 +1,7 @@
 from django.db.models import Count, Case, When
 from rest_framework import serializers
 
+from ..methods.get_week_info import GetWeekInfo
 from ..models import *
 
 
@@ -130,12 +131,27 @@ class EQCardSerializer(serializers.ModelSerializer):
     def get_assignments(self, obj):
         status_list: list = self.context.get('status_list')
         department_number: list = self.context.get('department_number')
+
+        week = self.context.get('week')
+        year = self.context.get('year')
+
+        week_info = GetWeekInfo(week=week, year=year).execute()
+
+        qs = obj.assignments.all()
+
         if status_list:
-            return EQAssignmentsSerializer(obj.assignments.filter(
+            qs = obj.assignments.filter(
                 status=status_list[0],
                 department__number=department_number,
-            ), many=True).data
-        return EQAssignmentsSerializer(obj.assignments.all(), many=True).data
+            )
+
+        if status_list == ['ready']:
+            qs = qs.filter(
+                date_completion__gt=week_info.date_range[0],
+                date_completion__lte=week_info.date_range[1],
+            )
+
+        return EQAssignmentsSerializer(qs, many=True).data
 
     def get_count_data(self, obj: OrderProduct):
         department_number = self.context.get('department_number')

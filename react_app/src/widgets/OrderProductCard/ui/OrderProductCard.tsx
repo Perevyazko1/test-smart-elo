@@ -1,4 +1,4 @@
-import {memo, useEffect, useState} from 'react';
+import {memo, useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -6,7 +6,7 @@ import {Slider} from "shared/ui/Slider/Slider";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {eqActions, getSeriesSize} from "pages/EQPage";
 import {order_product} from "entities/OrderProduct";
-import {getEmployeeAuthData} from "entities/Employee";
+import {getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
 
 import {CardContentWrapper} from "./CardContentWrapper/CardContentWrapper";
 import {fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
@@ -34,13 +34,14 @@ interface OrderProductCardProps {
 }
 
 export const OrderProductCard = memo((props: OrderProductCardProps) => {
-    const {card_type, className, order_product, disabled=false, ...otherProps} = props
+    const {card_type, className, order_product, disabled = false, ...otherProps} = props
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
     const series_size = useSelector(getSeriesSize)
+    const employeeIsBoss = useSelector(getEmployeeIsBoss)
     const view_mode = useSelector(getCurrentViewMod)
 
-    const tech_process_changed = !order_product?.product?.technological_process
+    const tech_process_not_changed = !order_product?.product?.technological_process
 
     const sliderImages = createImageUrls(order_product)
 
@@ -84,6 +85,19 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
         ))
     }
 
+    const show_first_button = useCallback(() => {
+        if (assignmentsLists?.primary?.length > 0) {
+            if (card_type !== CardType.READY_CARD) {
+                return true;
+            } else if (tech_process_not_changed) {
+                return false;
+            } else if (employeeIsBoss) {
+                return true;
+            }
+        }
+        return false;
+    }, [assignmentsLists?.primary?.length, card_type, employeeIsBoss, tech_process_not_changed])
+
     const updateAssignments = async (first: boolean = true) => {
         if (authData?.pin_code && authData?.current_department) {
             await dispatch(fetchUpdateAssignments({
@@ -118,7 +132,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}
             >
-                {(assignmentsLists?.primary?.length > 0 && (card_type!==CardType.READY_CARD || !tech_process_changed)) &&
+                {show_first_button() &&
                     <CardContentWrapper width={"50px"} className={'me-1'}>
                         <button
                             className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
@@ -140,7 +154,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     width={"90px"}
                     className={'me-1'}
                     onClick={showCardInfoWidget}
-                    warning={tech_process_changed}
+                    warning={tech_process_not_changed}
                 >
                     <h1 className="fw-bold m-0 p-0 pb-1" style={{fontSize: "12px"}}>
                         Всего:{order_product.count_all}
