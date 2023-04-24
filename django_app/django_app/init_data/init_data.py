@@ -1,4 +1,5 @@
 from staff.models import Department
+from django.contrib.auth.models import Group
 
 departments = {
     'Старт': [0, False, False],
@@ -17,8 +18,11 @@ departments = {
     'Готово': [50, False, False],
 }
 
+groups = ['Бригадиры', 'Администраторы', 'Работники']
 
-def init_departments():
+
+def init_data():
+    """Инициализация базовых данных приложения"""
     for department_name, department_params in departments.items():
         Department.objects.update_or_create(
             name=department_name,
@@ -27,4 +31,9 @@ def init_departments():
                 "single": department_params[1],
                 "piecework_wages": department_params[2]
             }
+        )
+
+    for group_name in groups:
+        Group.objects.update_or_create(
+            name=group_name
         )

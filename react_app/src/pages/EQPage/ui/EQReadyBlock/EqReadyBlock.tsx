@@ -39,7 +39,7 @@ export const EqReadyBlock = memo(() => {
                 year: week_info?.year
             }))
         }
-    }, [ready_list_updated, view_mode, current_project, week_info, dispatch, current_department, pin_code])
+    }, [ready_list_updated, view_mode, current_project, week_info, dispatch, pin_code])
 
     return (
         <div className="row m-0" style={{height: "43vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>

@@ -21,13 +21,6 @@ def import_orders(request):
     return redirect(request.META.get('HTTP_REFERER'))
 
 
-def init_data(request):
-    from .methods.init_departments import init_departments
-    init_departments()
-
-    return JsonResponse({"result": 'inited'})
-
-
 @api_view(['POST'])
 def update_assignments(request):
     series_id: str = request.data.get('series_id')

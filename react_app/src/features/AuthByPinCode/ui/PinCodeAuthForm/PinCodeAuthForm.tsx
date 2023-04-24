@@ -13,13 +13,14 @@ import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
 import {authByPinCode} from "../../model/services/authByPinCode/authByPinCode";
 import {getAuthByPinCodeState} from "../../model/selectors/getAuthByPinCodeState/getAuthByPinCodeState";
 import {getRememberMe} from "../../model/selectors/getRememberMe/getRememberMe";
+import {employeeReducer} from "../../../../entities/Employee";
 
 export interface PinCodeAuthFormProps {
     className?: string
 }
 
 const initialReducers: ReducersList = {
-    authByPinCode: authByPinCodeReducer
+    authByPinCode: authByPinCodeReducer,
 }
 
 const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {

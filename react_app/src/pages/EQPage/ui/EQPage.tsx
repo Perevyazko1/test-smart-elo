@@ -19,7 +19,7 @@ import {getShowCardInfo} from "../model/selectors/getShowCardInfo/getShowCardInf
 
 
 const initialReducers: ReducersList = {
-    eq: eqReducer
+    eq: eqReducer,
 }
 
 const EqPage = memo(() => {

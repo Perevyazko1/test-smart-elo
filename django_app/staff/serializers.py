@@ -1,5 +1,16 @@
-from .models import Employee, Department, Transaction
+from django.contrib.auth.models import Group
+
 from rest_framework import serializers
+
+from .models import Employee, Department, Transaction
+
+
+class GroupSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = Group
+        fields = [
+            'name'
+        ]
 
 
 class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
@@ -17,6 +28,7 @@ class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
 class EmployeeSerializer(serializers.ModelSerializer):
     departments = DepartmentSerializer(many=True)
     current_department = DepartmentSerializer(many=False)
+    groups = GroupSerializer(many=True)
 
     class Meta:
         model = Employee
@@ -27,12 +39,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'username',
             'departments',
             'current_department',
-            'pin_code'
+            'pin_code',
+            'groups',
         ]
         read_only_fields = [
             'id',
             'username',
-            'pin_code'
+            'pin_code',
+            'groups',
         ]
 
 

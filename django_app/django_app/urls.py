@@ -14,15 +14,26 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.http import JsonResponse
 from django.urls import path, include
 from django.conf.urls.static import static
 
 from django_app.settings import MEDIA_URL, MEDIA_ROOT
+from django_app.init_data.init_data import init_data
+
+
+def init_app_data(request):
+    init_data()
+
+    return JsonResponse({"result": 'inited'})
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/core/', include('core.urls')),
     path('api/v1/staff/', include('staff.urls')),
+
+    path('init/', init_app_data),
 ]
 
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)
