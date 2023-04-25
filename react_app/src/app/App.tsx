@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect} from 'react';
+import React, {Suspense, useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 
 import {LoginPage} from "pages/LoginPage";
@@ -18,13 +18,18 @@ function App() {
     const employee_inited = useSelector(getEmployeeInited)
     const pin_code = useSelector(getEmployeePinCode)
     const current_department = useSelector(getCurrentDepartment)
+    const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
         if (!employee_inited) {
             dispatch(employeeActions.initAuthData())
         }
         if (pin_code && current_department) {
-            newWsConnection(pin_code, current_department.number, dispatch)
+            if (socketRef) {
+                socketRef.current?.close()
+                socketRef.current = null
+            }
+            socketRef.current = newWsConnection(pin_code, current_department.number, dispatch)
         }
     }, [employee_inited, pin_code, current_department, dispatch])
 

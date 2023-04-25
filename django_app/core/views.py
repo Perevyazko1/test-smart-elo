@@ -1,4 +1,3 @@
-import datetime
 from dataclasses import asdict
 
 from django.db.models import Sum
@@ -11,11 +10,12 @@ from staff.models import Employee, Department
 
 from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
 from .methods.get_week_info import GetWeekInfo
-from .methods.update_assignments import UpdateAssignments
+from core.methods.update_assignments import UpdateAssignments
 from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, Assignment
 
 
 def import_orders(request):
+    """Импорт заказов из МойСклад"""
     from .api_moy_sklad.services.import_orders import ImportOrders
     ImportOrders().execute()
 
@@ -31,14 +31,14 @@ def update_assignments(request):
     action: str = request.data.get('action')
     pin_code = request.data.get('pin_code')
 
-    UpdateAssignments().execute(
+    UpdateAssignments(
         series_id=series_id,
         department_number=department_number,
         numbers=numbers,
         action=action,
         pin_code=pin_code,
-        view_mode=view_mode,
-    )
+        view_mode=view_mode
+    ).execute()
 
     return JsonResponse({"data": 'okay'})
 
@@ -137,7 +137,6 @@ class GetReadyList(viewsets.ModelViewSet):
             pin_code = view_mode
 
         if not view_mode == '1':
-            print('HERE!!!')
             qs = qs.filter(assignments__executor__pin_code=pin_code)
 
         if not project == 'Все проекты':

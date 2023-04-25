@@ -1,5 +1,6 @@
 import datetime
 
+from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates
 from core.methods.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
@@ -7,34 +8,37 @@ from staff.models import Employee, Department
 
 
 class UpdateAssignments:
-    def __init__(self):
+    def __init__(self, series_id, numbers, department_number, action, pin_code, view_mode):
+        self.series_id: str = series_id
+        self.numbers: list[int] = numbers
+        self.department_number: int = department_number
+        self.action: str = action
+        self.pin_code: int = pin_code
+        self.view_mode: str = view_mode
+
         self.groups: dict = {}
+        self.order_product: OrderProduct | None = None
+        self.department: Department | None = None
 
-    def execute(
-            self,
-            series_id: str,
-            numbers: list[int],
-            department_number: int,
-            action: str,
-            pin_code: int,
-            view_mode: str,
-    ):
-        if not view_mode == 1 and not view_mode == 0:
-            pin_code = view_mode
+    def _check_pin_code_in_view_mode(self):
+        if not self.view_mode == 1 and not self.view_mode == 0:
+            self.pin_code = self.view_mode
 
-        for number in numbers:
+    def _update_target_numbers(self):
+        """Изменение нарядов/поручений с переданным списком номеров"""
+        for number in self.numbers:
             assignment = Assignment.objects.get(
                 number=number,
-                order_product__series_id=series_id,
-                department__number=department_number,
+                order_product__series_id=self.series_id,
+                department__number=self.department_number,
             )
-            match action:
+            match self.action:
                 case 'await_to_in_work':
                     if assignment.status == 'await':
                         assignment.status = 'in_work'
-                        assignment.executor = Employee.objects.get(pin_code=pin_code)
+                        assignment.executor = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
-                        self.groups[department_number] = ['await', 'in_work']
+                        self.groups[self.department_number] = ['await', 'in_work']
                     continue
 
                 case 'in_work_to_ready':
@@ -42,7 +46,7 @@ class UpdateAssignments:
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
-                        self.groups[department_number] = ['await', 'in_work', 'ready']
+                        self.groups[self.department_number] = ['await', 'in_work', 'ready']
                     continue
 
                 case 'ready_to_in_work':
@@ -50,7 +54,7 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
-                        self.groups[department_number] = ['await', 'in_work', 'ready']
+                        self.groups[self.department_number] = ['await', 'in_work', 'ready']
                     continue
 
                 case 'in_work_to_await':
@@ -58,136 +62,180 @@ class UpdateAssignments:
                         assignment.status = 'await'
                         assignment.executor = None
                         assignment.save()
-                        self.groups[department_number] = ['await', 'in_work']
+                        self.groups[self.department_number] = ['await', 'in_work']
                     continue
 
                 case 'confirmed':
                     if assignment.status == 'ready':
-                        assignment.inspector = Employee.objects.get(pin_code=pin_code)
+                        assignment.inspector = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
-                        self.groups[department_number] = ['ready']
+                        self.groups[self.department_number] = ['ready']
                     continue
 
                 case _:
                     raise Exception()
 
-        if action == "confirmed":
-            order_product = OrderProduct.objects.get(series_id=series_id)
-            if department_number == 1 and order_product.product.technological_process is not None:
-                order_product.product.technological_process_confirmed = Employee.objects.get(pin_code=pin_code)
-                order_product.product.save()
+    def _init_production_step_schema(self):
+        """Итерируемся по JSON схеме технологического процесса и создаем этапы производства"""
+        schema = self.order_product.product.technological_process.schema
 
-                self._create_production_step_schema(order_product)
-                self._create_related_assignments(
-                    order_product=order_product,
-                    department=Department.objects.get(name="Старт")
+        for target_department_name, related_department_names in schema.items():
+            production_step = ProductionStep.objects.get_or_create(
+                department=Department.objects.get(name=target_department_name),
+                product=self.order_product.product,
+            )[0]
+
+            for department_name in related_department_names:
+                production_step.next_step.add(
+                    ProductionStep.objects.get_or_create(
+                        department=Department.objects.get(name=department_name),
+                        product=self.order_product.product,
+                    )[0].id
                 )
-            else:
-                self._create_related_assignments(
-                    order_product=order_product,
-                    department=Department.objects.get(number=department_number)
-                )
 
-        ws_group_updates(groups_and_data=self.groups, pin_code=pin_code)
+    def _set_technological_process_confirmed(self):
+        self.order_product.product.technological_process_confirmed = Employee.objects.get(pin_code=self.pin_code)
+        self.order_product.product.save()
 
-    @staticmethod
-    def _create_production_step_schema(order_product: OrderProduct):
-        """Создание последовательностей производства на основании технологического процесса товара"""
-        tech_process = order_product.product.technological_process
-        schema = tech_process.schema
-
+    def _delete_constructor_relations(self):
         first_production_step = ProductionStep.objects.get(
             department=Department.objects.get(name="Старт"),
-            product=order_product.product
+            product=self.order_product.product
         )
 
         first_production_step.next_step.remove(
             ProductionStep.objects.get(
                 department=Department.objects.get(name="Конструктора"),
-                product=order_product.product
+                product=self.order_product.product
             ))
 
-        for target_department_name, related_department_names in schema.items():
-            print(target_department_name, related_department_names)
-            production_step = ProductionStep.objects.get_or_create(
-                department=Department.objects.get(name=target_department_name),
-                product=order_product.product,
-            )[0]
-            for department_name in related_department_names:
-                production_step.next_step.add(
-                    ProductionStep.objects.get_or_create(
-                        department=Department.objects.get(name=department_name),
-                        product=order_product.product,
-                    )[0].id
-                )
+    def _create_api_enter(self):
+        CreateEnterDocument.execute(
+            product=self.order_product.product,
+            quantity=len(self.numbers),
+        )
 
-    def _create_related_assignments(self, order_product: OrderProduct, department: Department):
+    def _get_unconfirmed_assignments_exists(self) -> bool:
+        return Assignment.objects.filter(
+            order_product=self.order_product,
+            inspector__isnull=True,
+        ).exists()
+
+    def _get_order_all_ready(self) -> bool:
+        target_order = self.order_product.order
+
+        for related_order_product in target_order.order_products.all():
+            if related_order_product.status != 'Изготовлен':
+                return False
+        return True
+
+    def _ready_department_instruction(self):
+        self._create_api_enter()
+
+        if not self._get_unconfirmed_assignments_exists():
+            self.order_product.status = 'Изготовлен'
+            self.order_product.save()
+
+        if self._get_order_all_ready():
+            # TODO Сделать логику по изменению статуса заказа в МоемСкладе
+            print("Сделать логику по изменению статуса заказа в МоемСкладе")
+
+    def _get_related_assignments_confirmed_minimum_count(self, next_step: ProductionStep) -> int:
+        """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""
+        related_steps = ProductionStep.objects.filter(
+            product=self.order_product.product,
+            next_step=next_step
+        )
+
+        result = self.order_product.quantity
+
+        for related_step in related_steps:
+            if related_step.department.name == "Старт":
+                continue
+
+            assignment_ready_size = Assignment.objects.filter(
+                order_product=self.order_product,
+                department=related_step.department,
+                status='ready',
+                executor__isnull=False
+            ).count()
+
+            if related_step.department.single and assignment_ready_size:
+                continue
+
+            result = min(result, assignment_ready_size)
+
+        return result
+
+    def _get_next_step_assignments_count(self, next_step: ProductionStep):
+        return Assignment.objects.filter(
+            order_product=self.order_product,
+            department=next_step.department
+        ).count()
+
+    def _get_target_size_for_create_assignments(self, next_step: ProductionStep) -> int:
+        related_assignments_confirmed_minimum_count = self._get_related_assignments_confirmed_minimum_count(next_step)
+        next_step_assignments_count = self._get_next_step_assignments_count(next_step)
+        if next_step.department.single and \
+                related_assignments_confirmed_minimum_count and \
+                not next_step_assignments_count:
+            return 1
+        return related_assignments_confirmed_minimum_count - next_step_assignments_count
+
+    def _create_related_assignments(self):
         """Получаем список последующих этапов"""
+        self.department = Department.objects.get(number=self.department_number)
+
         next_steps = ProductionStep.objects.get(
-            product=order_product.product,
-            department=department
+            product=self.order_product.product,
+            department=self.department
         ).next_step.all()
 
         for next_step in next_steps:
-            """Получаем список всех связанных предыдущих этапов"""
-            related_steps = ProductionStep.objects.filter(
-                product=order_product.product,
-                next_step=next_step
-            )
-
-            """Если изначальный отдел единичный исполнитель и последующий не единичный - """
-            """ - устанавливаем минимальное значение в размере полной серии"""
-            if department.single and not next_step.department.single:
-                min_ready_size = order_product.quantity
-            elif department.name == "Старт" and not next_step.department.single:
-                min_ready_size = order_product.quantity
-            elif department.name == "Старт" and next_step.department.single:
-                min_ready_size = 1
-            else:
-                """Иначе исходным значением будет количество подтвержденных нарядов исходного отдела"""
-                min_ready_size = Assignment.objects.filter(
-                    order_product=order_product,
-                    department=department,
-                    status='ready',
-                    executor__isnull=False
-                ).count()
-
-            for related_step in related_steps:
-                """Итерируемся по связанным процессам, проверяем количество готовых нарядов"""
-                assignment_ready_size = Assignment.objects.filter(
-                    order_product=order_product,
-                    department=related_step.department,
-                    status='ready',
-                    executor__isnull=False
-                ).count()
-
-                """Если связанный отдел единичный и у него все готово - переходим к следующему этапу"""
-                if related_step.department.single and assignment_ready_size:
-                    continue
-
-                """Если наряд стартовый - переходим к следующему этапу"""
-                if related_step.department.name == "Старт":
-                    continue
-
-                """Если количество готовых нарядов меньше чем минимальное значение, записываем новый минимум"""
-                min_ready_size = min(min_ready_size, assignment_ready_size)
-
-            target_size = min_ready_size - Assignment.objects.filter(
-                order_product=order_product,
-                department=next_step.department
-            ).count()
-
-            # TODO Декомпозировать всю эту жесть
-
-            if next_step.department.name == "Готово" and target_size:
-                print("СОЗДАЕТСЯ ПРИХОДИНК В МОЕМ СКЛАДЕ")
+            if next_step.department.name == "Готово":
+                self._ready_department_instruction()
                 break
+
+            target_size = self._get_target_size_for_create_assignments(next_step)
 
             if target_size:
                 self.groups[next_step.department.number] = ['await']
 
                 AssignmentGenerator.create_new_assignments(
-                    order_product=order_product,
+                    order_product=self.order_product,
                     department=next_step.department,
                     quantity=target_size
                 )
+
+    def _confirmation_instructions(self):
+        """Действия при визировании бригадиром наряда"""
+        self.order_product = OrderProduct.objects.get(series_id=self.series_id)
+
+        """Проверяем условие, что происходит подтверждение в отделе конструкторов и тех-процесс выбран"""
+        if self.department_number == 1 and self.order_product.product.technological_process is not None:
+            self._set_technological_process_confirmed()
+            self._delete_constructor_relations()
+            self._init_production_step_schema()
+
+            """Переопределяем контекст номера отдела т.к. дальнейшее создание нарядов пойдет со стартового отдела"""
+            self.department_number = 0
+            self._create_related_assignments()
+
+        else:
+            self._create_related_assignments()
+
+    def execute(self):
+        """Произвести обновление переданных нарядов и создать последующие"""
+
+        """Проверить был ли передан ПИН-код в режиме просмотра и при необходимости переопределяем его"""
+        self._check_pin_code_in_view_mode()
+
+        """Производим обновление переданных номеров"""
+        self._update_target_numbers()
+
+        """В случае если происходит подтверждение наряда создаем связанные наряды"""
+        if self.action == "confirmed":
+            self._confirmation_instructions()
+
+        """Делаем рассылку на обновление данных в WS"""
+        ws_group_updates(groups_and_data=self.groups, pin_code=self.pin_code)

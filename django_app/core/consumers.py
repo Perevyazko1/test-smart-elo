@@ -46,7 +46,6 @@ class EqNotification:
 
 def ws_group_updates(groups_and_data: dict, pin_code: int):
     channel_layer = get_channel_layer()
-    print(groups_and_data)
 
     for group_name, data in groups_and_data.items():
         result = EqNotification(

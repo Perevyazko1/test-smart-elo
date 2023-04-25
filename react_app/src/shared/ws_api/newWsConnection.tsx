@@ -20,13 +20,18 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
             reconnectAttempts = 0;
         };
 
-        socket.onclose = () => {
-            console.log('WS disconnected');
-            if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
-                setTimeout(connect, RECONNECT_INTERVAL_MS);
-                reconnectAttempts++;
+        socket.onclose = (event) => {
+            if (event.wasClean) {
+                console.log('WS closed');
+
             } else {
-                console.error('Превышено количество попыток восстановления соединения: ', MAX_RECONNECT_ATTEMPTS);
+                console.log('Соединение потерянно, попытка восстановить...');
+                if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
+                    setTimeout(connect, RECONNECT_INTERVAL_MS);
+                    reconnectAttempts++;
+                } else {
+                    console.error('Превышено количество попыток восстановления соединения: ', MAX_RECONNECT_ATTEMPTS);
+                }
             }
         };
 
@@ -53,4 +58,5 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
         }
     }
     connect();
+    return socket;
 }

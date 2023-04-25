@@ -1,7 +1,7 @@
 import json
 import requests
 
-from ..metas import META_UL_SZMK, STORE_K_TRAKT_FABRIKA, get_product_meta, get_variant_meta
+from ..metadata import META_UL_SZMK, STORE_K_TRAKT_FABRIKA, get_product_meta, get_variant_meta
 from ..config import POST_AUTH
 from ...models import Product
 
