@@ -9,8 +9,10 @@ import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
 
 interface SliderProps {
-    price?: number
-    images?: string[]
+    price?: number,
+    images?: string[],
+    width?: string,
+    height?: string,
 }
 
 
@@ -18,6 +20,8 @@ export const Slider = memo((props: SliderProps) => {
     const {
         price,
         images,
+        width = '100px',
+        height = '100px',
     } = props
 
     return (
@@ -29,7 +33,7 @@ export const Slider = memo((props: SliderProps) => {
             pagination={{
                 type: "progressbar",
             }}
-            style={{width: "100%", height: "100%"}}
+            style={{width: width, height: height}}
             className={"d-flex justify-content-center align-items-xl-center"}
         >
             <>
@@ -52,13 +56,13 @@ export const Slider = memo((props: SliderProps) => {
 
             {images?.length && images.map((image_url) => (
                 <SwiperSlide
-                    style={{width: "100%", height: "100%"}}
+                    style={{width: width, height: height}}
                     className={"d-flex justify-content-center align-items-center py-1"}
                     key={image_url}
                 >
                     <img
                         src={image_url}
-                        style={{maxWidth: "100%", maxHeight: "100%"}}
+                        style={{maxWidth: width, maxHeight: height}}
                         className="rounded m-0 p-0"
                         alt={"Slide"}
                         loading={"lazy"}

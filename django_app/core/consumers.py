@@ -39,12 +39,12 @@ class MainConsumer(WebsocketConsumer):
 
 @dataclass
 class EqNotification:
-    initiator: int
+    initiator: str
     action: str
     data: dict
 
 
-def ws_group_updates(groups_and_data: dict, pin_code: int):
+def ws_group_updates(groups_and_data: dict, pin_code: str):
     channel_layer = get_channel_layer()
 
     for group_name, data in groups_and_data.items():

@@ -40,33 +40,36 @@ export const EqAwaitBlock = memo(() => {
     }, [pin_code, current_department, await_list_updated, dispatch, current_project, view_mode.key])
 
     return (
-        <div className="col p-1 m-0 w-50"
+        <div className="col m-0"
              style={{
                  height: "93vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",
                  borderLeftWidth: "4px", borderLeftStyle: "solid"
              }}
         >
-            <StickyHeader loading={await_list_is_loading}>Список изделий в очереди</StickyHeader>
+            <div className="p-1">
 
-            <TransitionGroup>
-                {
-                    await_list?.results?.map((order_product) => (
-                        <CSSTransition
-                            key={order_product.series_id}
-                            timeout={500}
-                            classNames="fade"
-                        >
-                            <div>
-                                <OrderProductCard
-                                    order_product={order_product}
-                                    card_type={CardType.AWAIT_CARD}
-                                    disabled={await_list_is_loading}
-                                />
-                            </div>
-                        </CSSTransition>
-                    ))
-                }
-            </TransitionGroup>
+                <StickyHeader loading={await_list_is_loading}>Список изделий в очереди</StickyHeader>
+
+                <TransitionGroup>
+                    {
+                        await_list?.results?.map((order_product) => (
+                            <CSSTransition
+                                key={order_product.series_id}
+                                timeout={500}
+                                classNames="fade"
+                            >
+                                <div>
+                                    <OrderProductCard
+                                        order_product={order_product}
+                                        card_type={CardType.AWAIT_CARD}
+                                        disabled={await_list_is_loading}
+                                    />
+                                </div>
+                            </CSSTransition>
+                        ))
+                    }
+                </TransitionGroup>
+            </div>
         </div>
     );
 });

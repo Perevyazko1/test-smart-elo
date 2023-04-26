@@ -151,7 +151,7 @@ class EQCardSerializer(serializers.ModelSerializer):
                 date_completion__lte=week_info.date_range[1],
             )
 
-        return EQAssignmentsSerializer(qs, many=True).data
+        return EQAssignmentsSerializer(qs[:50], many=True).data
 
     def get_count_data(self, obj: OrderProduct):
         department_number = self.context.get('department_number')

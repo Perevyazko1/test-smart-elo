@@ -17,26 +17,30 @@ $font-family-monospace: "Motserrat-Light", monospace;
 
 
 .fade-enter {
-    opacity: 0;
-    transform: translateX(30%);
+  opacity: 0;
+  transform: translateX(30%);
 }
 
 .fade-enter-active {
-    opacity: 1;
-    transform: translateX(0%);
+  opacity: 1;
+  transform: translateX(0%);
 }
 
 .fade-exit {
-    opacity: 1;
-    transform: translateX(0%);
+  opacity: 1;
+  transform: translateX(0%);
 }
 
 .fade-exit-active {
-    opacity: 0;
-    transform: translateX(30%);
+  opacity: 0;
+  transform: translateX(30%);
 }
 
 .fade-enter-active,
 .fade-exit-active {
-    transition: opacity 500ms, transform 500ms;
+  transition: opacity 500ms, transform 500ms;
+}
+
+a {
+  text-decoration: none;
 }

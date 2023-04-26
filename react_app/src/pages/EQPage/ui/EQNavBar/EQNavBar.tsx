@@ -1,9 +1,10 @@
-import React, {memo, useCallback} from 'react';
+import React, {memo} from 'react';
 import {useSelector} from "react-redux";
 
 import logo from 'shared/assets/images/SZMK Logo White Horizontal 141x55.png';
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {employeeActions, getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
+import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
+import {getEmployeeIsBoss} from "entities/Employee";
 import {eqActions} from "../../model/slice/eqSlice";
 import {EqSetSeriesSize} from "./EQSetSeriesSize";
 import {EqSetProject} from "./EQSetProject";
@@ -12,13 +13,8 @@ import {EQSetDepartment} from "./EQSetDepartment";
 
 
 export const EqNavBar = memo(() => {
-    const employee = useSelector(getEmployeeAuthData)
     const employeeIsBoss = useSelector(getEmployeeIsBoss)
     const dispatch = useAppDispatch()
-
-    const logout = useCallback(() => {
-        dispatch(employeeActions.logout())
-    }, [dispatch])
 
     const set_default_filters = () => {
         dispatch(eqActions.setDefaultFilters())
@@ -53,22 +49,7 @@ export const EqNavBar = memo(() => {
                 <i className="fas fa-sync-alt fs-5 d-xl-flex align-items-xl-center py-xl-0 mx-xl-0 me-xl-0"/>
             </button>
 
-
-            <h6 className="text-light d-xl-flex justify-content-xl-center align-items-xl-center"
-                style={{marginLeft: "auto", height: "100%"}}>
-                {employee?.first_name + " " + employee?.last_name}
-            </h6>
-
-            <h4 className="text-light d-xl-flex justify-content-xl-center align-items-xl-center ps-xl-0 mx-xl-3"
-                style={{height: "100%"}}>
-                |
-            </h4>
-            <div onClick={logout}>
-                <h6 className="text-light d-xl-flex justify-content-xl-center align-items-xl-center me-xl-4"
-                    style={{height: "100%"}}>
-                    Выйти
-                </h6>
-            </div>
+            <UserInfoWithRouts className={'ms-auto h-100 d-xl-flex justify-content-xl-center align-items-xl-center'}/>
 
         </section>
     );

@@ -14,7 +14,9 @@ export const Input = memo((props: InputProps) => {
         ...otherProps
     } = props
 
-    const mods: Mods = {};
+    const mods: Mods = {
+
+    };
 
     return (
         <input

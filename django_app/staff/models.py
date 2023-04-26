@@ -104,3 +104,32 @@ class Transaction(models.Model):
             f'{self.get_transaction_type_display()} '
             f'{self.get_details_display()} '
             f'в пользу {self.employee}')
+
+
+class Audit(models.Model):
+    """Класс для сохранения истории действий пользователя"""
+    class Meta:
+        verbose_name = 'Действие пользователя'
+        verbose_name_plural = 'Действия пользователей'
+
+    TYPE_CHOICES = [
+        ("error", "Ошибка"),
+        ("edit", "Изменения"),
+        ("authentication", "Аутентификация"),
+        ("other", "Другое"),
+    ]
+
+    date = models.DateTimeField('Дата / Время действия', auto_now=True)
+    employee = models.ForeignKey(
+        Employee,
+        verbose_name='Пользователь',
+        related_name='audits',
+        on_delete=models.CASCADE,
+    )
+    audit_type = models.CharField('Тип события', max_length=250, choices=TYPE_CHOICES, default='edit')
+    details = models.TextField('Детали', max_length=5000)
+
+    def __str__(self):
+        return '{}'.format(f'{self.date.strftime("%m.%d.%Y - %H:%M")} '
+                           f'| {self.employee.first_name} {self.employee.last_name} | {self.get_audit_type_display()} |'
+                           f' {self.details[:100]}')

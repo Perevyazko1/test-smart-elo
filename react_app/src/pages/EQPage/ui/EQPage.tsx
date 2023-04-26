@@ -49,10 +49,10 @@ const EqPage = memo(() => {
                 <EqNavBar/>
 
                 <section style={{height: "93vh", background: "#929292"}}>
-                    <div className="row" style={{height: "100%", margin: "0"}}>
+                    <div className="row h-100 m-0">
 
                         {/*<--------------- Левый блок --------------->*/}
-                        <div className="col-xl-6" style={{width: "50%", padding: "0"}}>
+                        <div className="col-xl-6 p-0">
 
                             {/*<--------------- В работе блок --------------->*/}
                             <EqInWorkBlock/>
@@ -66,7 +66,9 @@ const EqPage = memo(() => {
                         </div>
 
                         {/*<--------------- Правый блок --------------->*/}
-                        <EqAwaitBlock/>
+                        <div className="col-xl-6 p-0">
+                            <EqAwaitBlock/>
+                        </div>
 
                     </div>
                 </section>

@@ -4,7 +4,7 @@ from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates
 from core.methods.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
-from staff.models import Employee, Department
+from staff.models import Employee, Department, Audit
 
 
 class UpdateAssignments:
@@ -13,15 +13,18 @@ class UpdateAssignments:
         self.numbers: list[int] = numbers
         self.department_number: int = department_number
         self.action: str = action
-        self.pin_code: int = pin_code
-        self.view_mode: str = view_mode
+        self.pin_code: str = pin_code
+        self.view_mode: int = view_mode
 
         self.groups: dict = {}
         self.order_product: OrderProduct | None = None
         self.department: Department | None = None
+        self.action_name: str = ''
+        self.original_user: Employee | None = None
 
     def _check_pin_code_in_view_mode(self):
         if not self.view_mode == 1 and not self.view_mode == 0:
+            self.original_user = Employee.objects.get(pin_code=self.pin_code)
             self.pin_code = self.view_mode
 
     def _update_target_numbers(self):
@@ -35,6 +38,8 @@ class UpdateAssignments:
             match self.action:
                 case 'await_to_in_work':
                     if assignment.status == 'await':
+                        self.action_name = 'Взял в работу'
+
                         assignment.status = 'in_work'
                         assignment.executor = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
@@ -43,6 +48,8 @@ class UpdateAssignments:
 
                 case 'in_work_to_ready':
                     if assignment.status == 'in_work':
+                        self.action_name = 'Отметил готовыми'
+
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
@@ -51,6 +58,8 @@ class UpdateAssignments:
 
                 case 'ready_to_in_work':
                     if assignment.status == 'ready':
+                        self.action_name = 'Вернул в работу'
+
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
@@ -59,6 +68,8 @@ class UpdateAssignments:
 
                 case 'in_work_to_await':
                     if assignment.status == 'in_work':
+                        self.action_name = 'Вернул в ожидание'
+
                         assignment.status = 'await'
                         assignment.executor = None
                         assignment.save()
@@ -67,6 +78,8 @@ class UpdateAssignments:
 
                 case 'confirmed':
                     if assignment.status == 'ready':
+                        self.action_name = 'Подтвердил готовность'
+
                         assignment.inspector = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
                         self.groups[self.department_number] = ['ready']
@@ -224,6 +237,26 @@ class UpdateAssignments:
         else:
             self._create_related_assignments()
 
+    def _get_audit_details(self) -> str:
+        if self.original_user:
+            employee = self.original_user
+        else:
+            employee = Employee.objects.get(pin_code=self.pin_code)
+
+        order_product = OrderProduct.objects.get(series_id=self.series_id)
+
+        result = ''
+
+        if self.view_mode == 1:
+            result += 'В режиме бригадира'
+        if len(str(self.view_mode)) == 6:
+            view_mode_user = Employee.objects.get(pin_code=self.pin_code)
+            result += f'В режиме, от имени пользователя ' \
+                      f'{view_mode_user.first_name} {view_mode_user.last_name}'
+        result += f' {self.action_name} изделия под номерами: {self.numbers}.'
+        result += f'Номер серии: {order_product.series_id}. Изделие: {order_product.product.name}'
+        return result
+
     def execute(self):
         """Произвести обновление переданных нарядов и создать последующие"""
 
@@ -236,6 +269,11 @@ class UpdateAssignments:
         """В случае если происходит подтверждение наряда создаем связанные наряды"""
         if self.action == "confirmed":
             self._confirmation_instructions()
+
+        Audit.objects.create(
+            employee=self.original_user or Employee.objects.get(pin_code=self.pin_code),
+            details=self._get_audit_details()
+        )
 
         """Делаем рассылку на обновление данных в WS"""
         ws_group_updates(groups_and_data=self.groups, pin_code=self.pin_code)

@@ -147,7 +147,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
 
 
                 <CardContentWrapper width={"100px"} className={'me-1'}>
-                    <Slider price={order_product.tax} images={sliderImages}/>
+                    <Slider price={order_product.tax} images={sliderImages} width={'100%'} height={'100%'}/>
                 </CardContentWrapper>
 
                 <CardContentWrapper

@@ -1,7 +1,9 @@
 import React, {Suspense, useEffect, useRef} from 'react';
 import {useDispatch, useSelector} from "react-redux";
+import {Route, Routes} from "react-router-dom";
 
 import {LoginPage} from "pages/LoginPage";
+import {TaxControlPage} from "pages/TaxConrtolPage";
 import {EQPage} from "pages/EQPage";
 import {Loader} from "shared/ui/Loader/Loader";
 import {newWsConnection} from "shared/ws_api/newWsConnection";
@@ -9,7 +11,7 @@ import {employeeActions, getCurrentDepartment, getEmployeeAuthData} from "entiti
 import {getEmployeeInited} from "entities/Employee";
 import {getEmployeePinCode} from "entities/Employee";
 
-import './styles/App.scss'
+import './styles/App.scss';
 
 
 function App() {
@@ -33,19 +35,36 @@ function App() {
         }
     }, [employee_inited, pin_code, current_department, dispatch])
 
-    if (authData) {
-        return (
-            <Suspense fallback={<Loader/>}>
-                <EQPage/>
-            </Suspense>
-        )
-    }
 
     return (
-        <Suspense fallback={<Loader/>}>
+        <>
+            {authData
+                ?
+                <Routes>
+                    <Route path="/eq" element={
+                        <Suspense fallback={<Loader/>}>
+                            <EQPage/>
+                        </Suspense>
+                    }/>
 
-            <LoginPage/>
-        </Suspense>
+                    <Route path="/tax_control" element={
+                        <Suspense fallback={<Loader/>}>
+                            <TaxControlPage/>
+                        </Suspense>
+                    }/>
+
+                    <Route path="/*" element={
+                        <Suspense fallback={<Loader/>}>
+                            <EQPage/>
+                        </Suspense>
+                    }/>
+                </Routes>
+                :
+                <Suspense fallback={<Loader/>}>
+                    <LoginPage/>
+                </Suspense>
+            }
+        </>
     );
 }
 
