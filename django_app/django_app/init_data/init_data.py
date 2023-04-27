@@ -1,5 +1,7 @@
+from core.models import TechnologicalProcess
 from staff.models import Department
 from django.contrib.auth.models import Group
+from .technological_processes import technological_processes
 
 departments = {
     'Старт': [0, False, False],
@@ -17,6 +19,7 @@ departments = {
     'Пила': [12, False, False],
     'Готово': [50, False, False],
 }
+
 
 groups = ['Бригадиры', 'Администраторы', 'Работники']
 
@@ -37,3 +40,12 @@ def init_data():
         Group.objects.update_or_create(
             name=group_name
         )
+
+    for name, schema in technological_processes.items():
+        TechnologicalProcess.objects.update_or_create(
+            name=name,
+            defaults={
+                "schema": schema
+            }
+        )
+

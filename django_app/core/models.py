@@ -267,7 +267,7 @@ class TechnologicalProcess(models.Model):
 
     name = models.CharField('Наименование', max_length=250)
     schema = models.JSONField('Схема', default=None)
-    image = models.ImageField('Изображение схемы процесса', upload_to=f"images/processes/")
+    image = models.ImageField('Изображение схемы процесса', upload_to=f"images/processes/", blank=True, null=True)
 
     def __str__(self):
         return '{}'.format(f'{self.name}')
