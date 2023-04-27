@@ -29,8 +29,22 @@
 
 Поднять проект в docker:
 
-`docker-compose up -d`
+`docker-compose up --build -d`
 
 Удалить папку из GIT
 
 `git rm -r --cached django-app/app/users/migrations`
+
+## Обновление на сервере
+1. Открываешь PowerShell -> Заходим в папку с проектом -> Вводим команду:
+
+`git pull`
+
+2. Проверяем установленные переменные среды
+3. Останавливаем контейнер:
+
+`docker compose down`
+
+4. Запускаем сборку контейнеров:
+
+`docker compose up --build -d`
