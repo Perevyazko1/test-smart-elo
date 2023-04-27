@@ -34,7 +34,7 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
-            <Modal show={showModal} onHide={hide_modal} size={'xl'} scrollable={true}>
+            <Modal show={showModal} onHide={hide_modal} size={'xl'} scrollable={true} className={'d-flex flex-column'}>
                 <Modal.Header closeButton>
                     <Modal.Title>Информация по изделию {props.order_product.product.name}</Modal.Title>
                 </Modal.Header>

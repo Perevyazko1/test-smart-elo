@@ -2,7 +2,7 @@ from django.contrib.auth.models import Group
 
 from rest_framework import serializers
 
-from .models import Employee, Department, Transaction
+from .models import Employee, Department, Transaction, Audit
 
 
 class GroupSerializer(serializers.HyperlinkedModelSerializer):
@@ -60,4 +60,14 @@ class TransactionSerializer(serializers.HyperlinkedModelSerializer):
             'amount',
             'employee',
             'inspector',
+        ]
+
+
+class AuditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Audit
+        fields = [
+            'date',
+            'audit_type',
+            'details'
         ]

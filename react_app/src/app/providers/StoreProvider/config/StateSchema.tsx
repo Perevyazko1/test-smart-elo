@@ -5,6 +5,7 @@ import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
 import {EqSchema} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
+import {AuditWidgetSchema} from "widgets/AuditWidget";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -13,6 +14,7 @@ export interface StateSchema {
     authByPinCode?: AuthByPinCodeSchema,
     eq?: EqSchema,
     orderProductInfo?: OrderProductInfoSchema,
+    auditWidget?: AuditWidgetSchema
 }
 
 export type StateSchemaKey = keyof StateSchema;

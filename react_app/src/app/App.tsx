@@ -7,7 +7,7 @@ import {TaxControlPage} from "pages/TaxConrtolPage";
 import {EQPage} from "pages/EQPage";
 import {Loader} from "shared/ui/Loader/Loader";
 import {newWsConnection} from "shared/ws_api/newWsConnection";
-import {employeeActions, getCurrentDepartment, getEmployeeAuthData} from "entities/Employee";
+import {employeeActions, getCurrentDepartment, getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
 import {getEmployeeInited} from "entities/Employee";
 import {getEmployeePinCode} from "entities/Employee";
 
@@ -20,6 +20,7 @@ function App() {
     const employee_inited = useSelector(getEmployeeInited)
     const pin_code = useSelector(getEmployeePinCode)
     const current_department = useSelector(getCurrentDepartment)
+    const employeeIsBoss = useSelector(getEmployeeIsBoss)
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -47,11 +48,13 @@ function App() {
                         </Suspense>
                     }/>
 
-                    <Route path="/tax_control" element={
-                        <Suspense fallback={<Loader/>}>
-                            <TaxControlPage/>
-                        </Suspense>
-                    }/>
+                    {employeeIsBoss &&
+                        <Route path="/tax_control" element={
+                            <Suspense fallback={<Loader/>}>
+                                <TaxControlPage/>
+                            </Suspense>
+                        }/>
+                    }
 
                     <Route path="/*" element={
                         <Suspense fallback={<Loader/>}>

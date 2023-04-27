@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Employee, Department, Transaction
-from .serializers import EmployeeSerializer, DepartmentSerializer, TransactionSerializer
+from .models import Employee, Department, Transaction, Audit
+from .serializers import EmployeeSerializer, DepartmentSerializer, TransactionSerializer, AuditSerializer
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -48,3 +48,11 @@ def change_current_department(request):
         return JsonResponse(serialized_user.data)
     except:
         return Response('Пользователь не найден', status=401)
+
+
+@api_view(['GET'])
+def get_audit_list(request):
+    pin_code = request.query_params.get('pin_code')
+    audit_list = Audit.objects.filter(employee__pin_code=pin_code)[:100]
+    data = AuditSerializer(audit_list, many=True).data
+    return JsonResponse({'data': data}, json_dumps_params={"ensure_ascii": False})
