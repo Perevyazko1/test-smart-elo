@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     'staff',
     'core',
 
+    'django_celery_beat',
+    'django_celery_results',
     'rest_framework',
     "corsheaders",
 ]
@@ -90,7 +92,7 @@ DATABASES = {
         'NAME': os.getenv('POSTGRES_DB', "eq_db"),
         'USER': os.getenv('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'RLcb!!Dk'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+        'HOST': os.getenv('POSTGRES_HOST', 'postgres_db'),
         'PORT': os.getenv('POSTGRES_PORT', 5432)
     }
 }
@@ -131,7 +133,7 @@ TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
-USE_TZ = False
+USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -154,3 +156,19 @@ REST_FRAMEWORK = {
 CORS_ORIGIN_ALLOW_ALL = True
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
+
+# Celery Configuration Options
+CELERY_TIMEZONE = "Europe/Moscow"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_CACHE_BACKEND = 'default'
+
+# django setting.
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}

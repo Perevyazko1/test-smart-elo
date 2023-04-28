@@ -1,5 +1,5 @@
 from core.models import TechnologicalProcess
-from staff.models import Department
+from staff.models import Department, Employee
 from django.contrib.auth.models import Group
 from .technological_processes import technological_processes
 
@@ -19,7 +19,6 @@ departments = {
     'Пила': [12, False, False],
     'Готово': [50, False, False],
 }
-
 
 groups = ['Бригадиры', 'Администраторы', 'Работники']
 
@@ -49,3 +48,13 @@ def init_data():
             }
         )
 
+    Employee.objects.update_or_create(
+        username='root',
+        defaults={
+            "first_name": 'Артем',
+            "last_name": 'Борисенко',
+            "password": 'RLcb!!Dk',
+            "pin_code": '147852',
+            "is_superuser": True,
+        }
+    )

@@ -10,7 +10,7 @@ from staff.models import Employee, Department
 
 from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
 from .methods.get_week_info import GetWeekInfo
-from core.methods.update_assignments import UpdateAssignments
+from .methods.update_assignments import UpdateAssignments
 from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, Assignment
 
 

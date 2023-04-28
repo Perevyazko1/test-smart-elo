@@ -63,6 +63,30 @@ services:
     env_file:
       - ./.env
 
+  celery_worker:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_worker_eq
+    restart: always
+    depends_on:
+      - django_app
+    ports:
+      - "58231:58231"
+    command: celery -A django_app worker -l info
+
+  celery_beat:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_beat_eq
+    restart: always
+    depends_on:
+      - django_app
+    ports:
+      - "58232:58232"
+    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+
 volumes:
   db:
     driver: local
