@@ -6,7 +6,7 @@ services:
     container_name: postgres_db_eq
     restart: always
     ports:
-      - "5432:5432"
+      - "5432"
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
