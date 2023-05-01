@@ -48,13 +48,13 @@ def init_data():
             }
         )
 
-    Employee.objects.update_or_create(
-        username='root',
-        defaults={
-            "first_name": 'Артем',
-            "last_name": 'Борисенко',
-            "password": 'RLcb!!Dk',
-            "pin_code": '147852',
-            "is_superuser": True,
-        }
-    )
+    if not Employee.objects.filter(username='root').exists():
+        user = Employee.objects.create_superuser(
+            username='root',
+            email='c3mk@mail.ru',
+            password='RLcb!!Dk',
+        )
+        user.first_name = 'Администратор'
+        user.pin_code = 147858
+        user.save()
+

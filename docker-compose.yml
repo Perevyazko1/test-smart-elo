@@ -5,6 +5,8 @@ services:
     build: ./postgres_db
     container_name: postgres_db_eq
     restart: always
+    ports:
+      - "5432:5432"
     volumes:
       - db:/var/lib/postgresql/data
     env_file:
@@ -48,6 +50,8 @@ services:
   redis:
     container_name: redis_eq
     build: ./redis
+    ports:
+      - "6379:6379"
     restart: always
 
   nginx:
@@ -69,8 +73,11 @@ services:
       dockerfile: Dockerfile
     container_name: celery_worker_eq
     restart: always
+    volumes:
+      - product_images:/app/media/images/products
     depends_on:
       - django_app
+      - postgres_db
     ports:
       - "58231:58231"
     command: celery -A django_app worker -l info
@@ -83,6 +90,9 @@ services:
     restart: always
     depends_on:
       - django_app
+      - postgres_db
+    volumes:
+      - product_images:/app/media/images/products
     ports:
       - "58232:58232"
     command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
