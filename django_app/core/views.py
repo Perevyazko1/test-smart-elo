@@ -199,7 +199,7 @@ def get_view_modes(request):
 
 @api_view(['GET'])
 def get_tech_process_info(request):
-    qs = TechnologicalProcess.objects.all()
+    qs = TechnologicalProcess.objects.all().order_by('name')
     serializer = EQTechProcessSerializer
     data = serializer(qs, many=True, context={"request": request}).data
 
