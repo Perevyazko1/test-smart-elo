@@ -1,3 +1,3 @@
 FROM postgres:15-alpine
 
-EXPOSE 5432
+EXPOSE '5432'
