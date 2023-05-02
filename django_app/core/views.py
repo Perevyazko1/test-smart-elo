@@ -9,8 +9,10 @@ from rest_framework.decorators import api_view
 from staff.models import Employee, Department
 
 from .eq_serializers.eq_card_serializers import EQCardSerializer, EQTechProcessSerializer
+from .eq_serializers.eq_production_step_serializer import ProductionStepSerializer
 from .methods.get_week_info import GetWeekInfo
 from .methods.update_assignments import UpdateAssignments
+from .methods.update_product_tax import update_product_tax
 from .models import OrderProduct, Order, TechnologicalProcess, ProductionStep, Assignment
 
 
@@ -92,6 +94,7 @@ class GetInWorkList(viewsets.ModelViewSet):
         view_mode = self.request.query_params.get('view_mode')
         pin_code = self.request.query_params.get('pin_code')
         project = self.request.query_params.get('project')
+        department_number = self.request.query_params.get('department_number')
 
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
@@ -100,12 +103,17 @@ class GetInWorkList(viewsets.ModelViewSet):
             pin_code = view_mode
 
         if not view_mode == '1':
-            qs = qs.filter(assignments__executor__pin_code=pin_code)
+            qs = qs.filter(
+                assignments__executor__pin_code=pin_code,
+                assignments__department__number=department_number
+            )
 
+        print(view_mode, pin_code, '4')
         qs = qs.filter(
             assignments__status__in=['in_work'],
-            assignments__department__number=self.request.query_params.get('department_number')
+            assignments__department__number=department_number
         ).distinct()
+        print(qs)
 
         return qs
 
@@ -130,6 +138,7 @@ class GetReadyList(viewsets.ModelViewSet):
         year = self.request.query_params.get('year')
         pin_code = self.request.query_params.get('pin_code')
         view_mode = self.request.query_params.get('view_mode')
+        department_number = self.request.query_params.get('department_number')
 
         week_info = GetWeekInfo(week=week, year=year).execute()
 
@@ -137,14 +146,15 @@ class GetReadyList(viewsets.ModelViewSet):
             pin_code = view_mode
 
         if not view_mode == '1':
-            qs = qs.filter(assignments__executor__pin_code=pin_code)
+            qs = qs.filter(assignments__executor__pin_code=pin_code,
+                           assignments__department__number=department_number)
 
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
         qs = qs.filter(
             assignments__status='ready',
-            assignments__department__number=self.request.query_params.get('department_number'),
+            assignments__department__number=department_number,
             assignments__date_completion__gt=week_info.date_range[0],
             assignments__date_completion__lte=week_info.date_range[1],
         ).distinct()
@@ -225,6 +235,7 @@ def set_tech_process(request):
 
 @api_view(['GET'])
 def get_order_product_info(request):
+    # TODO декомпозировать функцию
     series_id = request.query_params.get('series_id')
     department_number = request.query_params.get('department_number')
 
@@ -280,3 +291,29 @@ def get_order_product_info(request):
         "department_info": department_info,
         "production_info": production_info,
     }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_production_step_list(request):
+    qs = ProductionStep.objects.filter(department__piecework_wages=True)
+    serializer = ProductionStepSerializer
+    data = serializer(qs, many=True, context={'request': request}).data
+
+    return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def set_production_step_tax(request):
+    product_id = request.data.get('product')
+    pin_code = request.data.get('pin_code')
+    department_number = request.data.get('department')
+    tax = request.data.get('tax')
+
+    update_product_tax(
+        product_id=product_id,
+        pin_code=pin_code,
+        department_number=department_number,
+        tax=tax
+    )
+
+    return JsonResponse({"data": 'data'}, json_dumps_params={"ensure_ascii": False})

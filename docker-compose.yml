@@ -81,6 +81,8 @@ services:
     ports:
       - "58231:58231"
     command: celery -A django_app worker -l info
+    env_file:
+      - .env
 
   celery_beat:
     build:
@@ -96,6 +98,8 @@ services:
     ports:
       - "58232:58232"
     command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env
 
 volumes:
   db:

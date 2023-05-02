@@ -15,6 +15,7 @@ export interface technological_process {
 }
 
 export interface product {
+    id: string;
     name: string;
     product_pictures: product_picture[];
     technological_process: technological_process;

@@ -1,1 +1,1 @@
-export {order_product, order_product_list, technological_process} from './model/types/orderProduct'
+export {order_product, order_product_list, technological_process, product} from './model/types/orderProduct'

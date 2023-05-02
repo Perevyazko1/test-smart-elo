@@ -1,7 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from staff.views import get_audit_list
 from .views import *
 
 
@@ -21,6 +20,8 @@ urlpatterns = [
     path('get_tech_process_info/', get_tech_process_info),
     path('set_tech_process/', set_tech_process),
     path('get_order_product_info/', get_order_product_info),
+    path('get_production_step_list/', get_production_step_list),
+    path('set_production_step_tax/', set_production_step_tax),
 
     path('', include(router.urls)),
 ]

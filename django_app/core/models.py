@@ -255,6 +255,16 @@ class ProductionStep(models.Model):
 
     tax = models.IntegerField("Производственный тариф", default=0)
 
+    confirmation_date = models.DateTimeField('Дата/Время подтверждения', blank=True, null=True)
+    approved_by = models.ForeignKey(
+        Employee,
+        verbose_name='Тарификацию утвердил',
+        related_name='production_steps',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+
     def __str__(self):
         return '{}'.format(f'{self.department} {self.product}')
 

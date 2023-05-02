@@ -1,4 +1,3 @@
-from django.db.models import Count, Case, When
 from rest_framework import serializers
 
 from ..methods.get_week_info import GetWeekInfo
@@ -65,12 +64,14 @@ class EQProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
+            'id',
             'name',
             'technological_process',
             'product_pictures',
             'technological_process_confirmed',
         ]
         read_only_fields = [
+            'id',
             'name',
             'product_pictures',
         ]

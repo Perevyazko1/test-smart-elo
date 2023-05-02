@@ -6,6 +6,8 @@ import {EmployeeSchema} from "entities/Employee/model/types/employee";
 import {EqSchema} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
+import {taxControlSlice} from "../../../../pages/TaxConrtolPage/model/slice/taxControlPageSlice";
+import {TaxControlSchema} from "../../../../pages/TaxConrtolPage/model/types/TaxControlSchema";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -14,7 +16,8 @@ export interface StateSchema {
     authByPinCode?: AuthByPinCodeSchema,
     eq?: EqSchema,
     orderProductInfo?: OrderProductInfoSchema,
-    auditWidget?: AuditWidgetSchema
+    auditWidget?: AuditWidgetSchema,
+    taxControl?: TaxControlSchema,
 }
 
 export type StateSchemaKey = keyof StateSchema;
