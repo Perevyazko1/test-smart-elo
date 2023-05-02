@@ -1,17 +1,6 @@
 version: "3.8"
 
 services:
-  postgres_db:
-    build: ./postgres_db
-    container_name: postgres_db_eq
-    restart: always
-    ports:
-      - "5432:5432"
-    volumes:
-      - db:/var/lib/postgresql/data
-    env_file:
-      - .env
-
   django_app:
     build:
       context: ./django_app
