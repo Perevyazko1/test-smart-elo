@@ -1,4 +1,4 @@
-import {technological_process} from "entities/OrderProduct";
+import {technological_process} from "entities/TechnologicalProcess";
 
 
 export interface department_info {

@@ -1,7 +1,8 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
+import {technological_process} from "entities/TechnologicalProcess";
+
 import {order_product_tables_data, OrderProductInfoSchema} from "../type/OrderProductInfoSchema";
-import {technological_process} from "entities/OrderProduct";
 
 
 export const initialState: OrderProductInfoSchema = {

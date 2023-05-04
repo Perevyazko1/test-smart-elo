@@ -38,7 +38,6 @@ class ProductEntityToDB:
         if product[1]:
             self._assign_to_designers(product[0])
 
-
     @staticmethod
     def _assign_to_designers(product: Product):
         # Привязка изделия к конструкторам

@@ -108,12 +108,10 @@ class GetInWorkList(viewsets.ModelViewSet):
                 assignments__department__number=department_number
             )
 
-        print(view_mode, pin_code, '4')
         qs = qs.filter(
             assignments__status__in=['in_work'],
             assignments__department__number=department_number
         ).distinct()
-        print(qs)
 
         return qs
 
@@ -177,7 +175,7 @@ def get_week_info(request):
         inspector__isnull=False,
         date_completion__gte=week_info.date_range[0],
         date_completion__lt=week_info.date_range[1],
-    ).aggregate(Sum('price')).get('price__sum')
+    ).aggregate(Sum('tariff')).get('tariff__sum')
 
     week_info.earned = earned
 
@@ -209,7 +207,7 @@ def get_view_modes(request):
 
 @api_view(['GET'])
 def get_tech_process_info(request):
-    qs = TechnologicalProcess.objects.all().order_by('name')
+    qs = TechnologicalProcess.objects.all().order_by('id')
     serializer = EQTechProcessSerializer
     data = serializer(qs, many=True, context={"request": request}).data
 

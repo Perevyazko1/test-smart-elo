@@ -1,0 +1,1 @@
+export {technological_process} from './model/type/technological_process'

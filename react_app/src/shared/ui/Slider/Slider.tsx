@@ -7,6 +7,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
+import {SERVER_HOST} from "../../const/server_config";
 
 interface SliderProps {
     price?: number,

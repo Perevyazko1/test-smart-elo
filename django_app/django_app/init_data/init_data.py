@@ -1,7 +1,12 @@
+import os
+
 from core.models import TechnologicalProcess
 from staff.models import Department, Employee
 from django.contrib.auth.models import Group
+from django.core.files import File
 from .technological_processes import technological_processes
+from .employees import employees
+
 
 departments = {
     'Старт': [0, False, False],
@@ -41,12 +46,16 @@ def init_data():
         )
 
     for name, schema in technological_processes.items():
-        TechnologicalProcess.objects.update_or_create(
-            name=name,
-            defaults={
-                "schema": schema
-            }
-        )
+        path_to_image_file = os.path.join(os.path.dirname(__file__), 'images', f'{name}.png')
+        with open(path_to_image_file, 'rb') as f:
+            tech_process = TechnologicalProcess.objects.update_or_create(
+                name=name,
+                defaults={
+                    "schema": schema
+                }
+            )[0]
+            tech_process.image.delete()
+            tech_process.image.save(f'{name}.png', File(f), save=True)
 
     if not Employee.objects.filter(username='root').exists():
         user = Employee.objects.create_superuser(
@@ -58,3 +67,26 @@ def init_data():
         user.pin_code = 147858
         user.save()
 
+    if not Employee.objects.filter(username='Kharchenko_D').exists():
+        user2 = Employee.objects.create_superuser(
+            username='Kharchenko_D',
+            email='lameblas@gmail.com',
+            password='Dmitriy_852',
+        )
+
+    for username, params in employees.items():
+        user = Employee.objects.update_or_create(
+            username=username,
+            defaults={
+                'first_name': params['first_name'],
+                "last_name": params['last_name'],
+                "password": params['password'],
+                "pin_code": params['pin_code'],
+            }
+        )[0]
+
+        for group_name in params['groups']:
+            user.groups.add(Group.objects.get(name=group_name))
+
+        for department_name in params['departments']:
+            user.departments.add(Department.objects.get(name=department_name))

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from core.models import Product, ProductPicture, Fabric, Order, OrderProduct, Assignment, ProductionStep, \
-    TechnologicalProcess
+    TechnologicalProcess, ProductionStepTariff
 
 
 @admin.register(Product)
@@ -67,7 +67,7 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ['number', 'order_product', 'status', 'price', 'department', 'executor', 'inspector']
+    list_display = ['number', 'status', 'department', 'executor', 'inspector']
 
     list_per_page = 20
 
@@ -75,5 +75,6 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ProductionStep)
+admin.site.register(ProductionStepTariff)
 admin.site.register(Fabric)
 admin.site.register(TechnologicalProcess)

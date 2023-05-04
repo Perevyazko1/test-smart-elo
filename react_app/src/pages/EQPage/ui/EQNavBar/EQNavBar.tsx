@@ -1,7 +1,7 @@
 import React, {memo} from 'react';
 import {useSelector} from "react-redux";
 
-import logo from 'shared/assets/images/SZMK Logo White Horizontal 141x55.png';
+import logo from 'shared/assets/images/SZMK Logo White Horizontal 900х352.png';
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 import {getEmployeeIsBoss} from "entities/Employee";

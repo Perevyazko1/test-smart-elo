@@ -9,7 +9,7 @@ class EQOrderProductInfoSerializer(serializers.Serializer):
     count_in_work = serializers.IntegerField()
     count_ready = serializers.IntegerField()
     count_await = serializers.IntegerField()
-    tax = serializers.IntegerField()
+    tariff = serializers.IntegerField()
 
 
 class EQDepartmentSerializer(serializers.ModelSerializer):
@@ -39,21 +39,42 @@ class EQEmployeeSerializer(serializers.ModelSerializer):
 
 
 class EQProductPicturesSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductPicture
-        fields = '__all__'
+        fields = ['id', 'image']
+
+    def get_image(self, obj):
+        return obj.image.url
 
 
 class EQTechProcessSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = TechnologicalProcess
         fields = ["id", "name", "image"]
 
+    def get_image(self, obj):
+        return obj.image.url
+
 
 class EQFabricSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Fabric
-        fields = '__all__'
+        fields = [
+            'id',
+            'fabric_id',
+            'name',
+            'image_filename',
+            'image',
+        ]
+
+    def get_image(self, obj):
+        return obj.image.url
 
 
 class EQProductSerializer(serializers.ModelSerializer):
@@ -156,15 +177,20 @@ class EQCardSerializer(serializers.ModelSerializer):
 
     def get_count_data(self, obj: OrderProduct):
         department_number = self.context.get('department_number')
-        tax = ProductionStep.objects.get(
+        production_step = ProductionStep.objects.get(
             product=obj.product,
             department__number=department_number
-        ).tax
+        )
+
+        if production_step.production_step_tariff:
+            tariff = production_step.production_step_tariff.tariff
+        else:
+            tariff = 0
         count_all = obj.quantity,
         queryset = obj.assignments.filter(department__number=department_number)
 
         return (
-            tax,
+            tariff,
             count_all[0],
             queryset.filter(status='in_work').count(),
             queryset.filter(status='ready').count(),
@@ -173,12 +199,12 @@ class EQCardSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        tax, count_all, count_in_work, count_ready, count_await = self.get_count_data(instance)
+        tariff, count_all, count_in_work, count_ready, count_await = self.get_count_data(instance)
 
         representation['count_all'] = count_all
         representation['count_in_work'] = count_in_work
         representation['count_ready'] = count_ready
         representation['count_await'] = count_await
-        representation['tax'] = tax
+        representation['tariff'] = tariff
 
         return representation

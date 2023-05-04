@@ -1,47 +1,7 @@
-import {employee} from "../../../Employee";
-
-export interface product_picture {
-    id: number;
-    image_filename: string;
-    image: string;
-    product: number;
-
-}
-
-export interface technological_process {
-    id: number;
-    name: string;
-    image: string;
-}
-
-export interface product {
-    id: string;
-    name: string;
-    product_pictures: product_picture[];
-    technological_process: technological_process;
-    technological_process_confirmed: employee | null;
-}
-
-export interface fabric {
-    id: number;
-    fabric_id: string;
-    name: string;
-    image_filename: string;
-    image: string;
-}
-
-export interface order {
-    project: string;
-}
-
-export interface assignment {
-    number: number;
-    notes: string;
-    status: string;
-    department: number;
-    executor: number | null;
-    inspector: number | null;
-}
+import {product} from "entities/Product";
+import {assignment} from "entities/Assignment";
+import {fabric} from "entities/Fabric";
+import {order} from "entities/Order";
 
 
 export interface order_product {
@@ -55,7 +15,7 @@ export interface order_product {
     comment_base: string;
     comment_case: string;
     assignments: assignment[];
-    tax: number;
+    tariff: number;
     count_all: number;
     count_in_work: number;
     count_ready: number;

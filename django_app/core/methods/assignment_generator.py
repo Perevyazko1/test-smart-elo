@@ -5,7 +5,9 @@ from staff.models import Department
 class AssignmentGenerator:
     @staticmethod
     def create_new_assignments(order_product: OrderProduct, department: Department, quantity: int = 1):
-        assignment_price = ProductionStep.objects.get(product=order_product.product, department=department).tax
+        assignment_tariff = ProductionStep.objects.get(
+            product=order_product.product, department=department
+        ).production_step_tariff
 
         if department.single:
             numbers = [1]
@@ -23,7 +25,7 @@ class AssignmentGenerator:
                 order_product=order_product,
                 department=department,
                 defaults={
-                    "price": assignment_price,
+                    "tariff": assignment_tariff,
                     "notes": 'Создан автоматически'
                 }
             )

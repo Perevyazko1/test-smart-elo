@@ -1,16 +1,15 @@
-import {product} from "entities/OrderProduct/model/types/orderProduct";
+import {product} from "entities/Product";
 import {department} from "entities/Department";
-import {employee} from "entities/Employee";
+import {tariff} from "entities/Tariff";
+
 
 export interface TaxControlData {
-    product: product,
-    department: department,
-    tax: number,
-    confirmation_date: string,
-    approved_by: employee,
+    product: product;
+    department: department;
+    tariff: tariff | undefined;
 }
 
 export interface TaxControlSchema {
-    is_loading: boolean,
-    data?: TaxControlData[]
+    is_loading: boolean;
+    data?: TaxControlData[];
 }

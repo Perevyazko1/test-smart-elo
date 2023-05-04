@@ -90,14 +90,14 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
                                             ?
                                             current_tech_process.image
                                             :
-                                            order_product.product.technological_process.image
+                                            order_product.product.technological_process?.image
                                     }
                                     alt={
                                         current_tech_process
                                             ?
                                             current_tech_process.name
                                             :
-                                            order_product.product.technological_process.name
+                                            order_product.product.technological_process?.name
                                     }
                                     style={{maxWidth: "500px", maxHeight: "400px"}}
                                     loading={'lazy'}
@@ -109,7 +109,7 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
                                         ?
                                         current_tech_process.name
                                         :
-                                        order_product.product.technological_process.name
+                                        order_product.product.technological_process?.name
                                 }
                             </td>
                             <td>

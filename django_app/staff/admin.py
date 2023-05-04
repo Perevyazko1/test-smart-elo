@@ -11,7 +11,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = Employee
-    list_display = ['username', 'first_name', "last_name", "date_joined"]
+    list_display = ['username', 'first_name', "last_name", 'pin_code']
     list_display_links = ['username']
 
     fieldsets = (

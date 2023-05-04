@@ -172,60 +172,39 @@ class OrderProduct(models.Model):
         return '{}'.format(f'{self.series_id}: {self.product.name_internal} - {self.status}')
 
 
-class Assignment(models.Model):
-    """Класс хранящий данные о состоянии выполнения нарядов"""
+class ProductionStepTariff(models.Model):
+    """Класс хранящий данные о тарификации этапа производства"""
+
     class Meta:
-        verbose_name = 'Наряд'
-        verbose_name_plural = 'Наряды'
-        ordering = ['id']
+        verbose_name = 'Тарификация этапа'
+        verbose_name_plural = 'Тарификации этапов'
 
-    STATUS_CHOICES = [
-        ("await", "Ожидает назначения"),
-        ("in_work", "В работе"),
-        ("ready", "Выполнен"),
-        ("cancelled", "Отменен"),
-    ]
-
-    number = models.IntegerField('Порядковый номер наряда', default=1)
-    date_completion = models.DateTimeField('Дата завершения', null=True, blank=True)
-
-    notes = models.CharField('Заметки', max_length=250, blank=True)
-    status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")
-    price = models.DecimalField('Тариф', max_digits=8, decimal_places=2, default=0.00)
-
-    order_product = models.ForeignKey(
-        OrderProduct,
-        related_name='assignments',
-        verbose_name='Позиция заказа',
-        on_delete=models.CASCADE,
-        null=True
+    product = models.ForeignKey(
+        Product,
+        verbose_name='Изделие',
+        related_name='production_step_tariffs',
+        on_delete=models.CASCADE
     )
+
     department = models.ForeignKey(
         Department,
-        related_name='assignments',
         verbose_name='Отдел',
-        on_delete=models.CASCADE,
-        null=True
-    )
-    executor = models.ForeignKey(
-        Employee,
-        related_name='assignments_executor',
-        verbose_name='Исполнитель',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-    inspector = models.ForeignKey(
-        Employee,
-        related_name='assignments_inspector',
-        verbose_name='Проверяющий',
-        on_delete=models.SET_NULL,
-        null=True, blank=True,
-        default=None
+        related_name='production_step_tariffs',
+        on_delete=models.CASCADE
     )
 
-    def __str__(self):
-        return '{}'.format(f'№{self.number} - {self.order_product.series_id} {self.status}')
+    tariff = models.IntegerField("Производственный тариф", default=0)
+
+    confirmation_date = models.DateTimeField('Дата/Время подтверждения', auto_now_add=True)
+
+    approved_by = models.ForeignKey(
+        Employee,
+        verbose_name='Тарификацию утвердил',
+        related_name='production_step_tariffs',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
 
 class ProductionStep(models.Model):
@@ -253,20 +232,82 @@ class ProductionStep(models.Model):
         blank=True
     )
 
-    tax = models.IntegerField("Производственный тариф", default=0)
-
-    confirmation_date = models.DateTimeField('Дата/Время подтверждения', blank=True, null=True)
-    approved_by = models.ForeignKey(
-        Employee,
-        verbose_name='Тарификацию утвердил',
-        related_name='production_steps',
+    production_step_tariff = models.ForeignKey(
+        ProductionStepTariff,
+        verbose_name='Тарификация',
+        related_name="production_steps",
         on_delete=models.SET_NULL,
-        blank=True,
         null=True,
+        blank=True,
     )
 
     def __str__(self):
         return '{}'.format(f'{self.department} {self.product}')
+
+
+class Assignment(models.Model):
+    """Класс хранящий данные о состоянии выполнения нарядов"""
+    class Meta:
+        verbose_name = 'Наряд'
+        verbose_name_plural = 'Наряды'
+        ordering = ['id']
+
+    STATUS_CHOICES = [
+        ("await", "Ожидает назначения"),
+        ("in_work", "В работе"),
+        ("ready", "Выполнен"),
+        ("cancelled", "Отменен"),
+    ]
+
+    number = models.IntegerField('Порядковый номер наряда', default=1)
+    date_completion = models.DateTimeField('Дата завершения', null=True, blank=True)
+
+    notes = models.CharField('Заметки', max_length=250, blank=True)
+    status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")
+
+    tariff = models.ForeignKey(
+        ProductionStepTariff,
+        related_name='assignments',
+        verbose_name='Тарификация',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+
+    order_product = models.ForeignKey(
+        OrderProduct,
+        related_name='assignments',
+        verbose_name='Позиция заказа',
+        on_delete=models.CASCADE,
+        null=True
+    )
+
+    department = models.ForeignKey(
+        Department,
+        related_name='assignments',
+        verbose_name='Отдел',
+        on_delete=models.CASCADE,
+        null=True
+    )
+    executor = models.ForeignKey(
+        Employee,
+        related_name='assignments_executor',
+        verbose_name='Исполнитель',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    inspector = models.ForeignKey(
+        Employee,
+        related_name='assignments_inspector',
+        verbose_name='Проверяющий',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        default=None
+    )
+
+    def __str__(self):
+        return '{}'.format(f'№{self.number} - {self.order_product.series_id} {self.status}')
 
 
 class TechnologicalProcess(models.Model):
