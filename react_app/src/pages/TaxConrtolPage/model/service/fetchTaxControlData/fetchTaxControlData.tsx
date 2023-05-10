@@ -2,8 +2,8 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 
 import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
-import {TaxControlData} from "../types/TaxControlSchema";
-import {taxControlActions} from "../slice/taxControlPageSlice";
+import {TaxControlData} from "../../types/TaxControlSchema";
+import {taxControlActions} from "../../slice/taxControlPageSlice";
 
 
 interface fetchTaxControlProps {

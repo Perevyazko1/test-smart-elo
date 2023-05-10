@@ -1,15 +1,20 @@
 import datetime
 
-from core.models import ProductionStep, Assignment, ProductionStepTariff
-from staff.models import Employee
+from core.models import ProductionStep, Assignment, ProductionStepTariff, Product
+from staff.models import Employee, Department
 
 
 def update_product_tax(product_id: int, pin_code: int, department_number: int, tariff: int):
+    product = Product.objects.get(id=product_id)
+    department = Department.objects.get(number=department_number)
+
     production_step = ProductionStep.objects.get(
-        product__id=product_id,
-        department__number=department_number
+        product=product,
+        department=department
     )
     production_step_tariff = ProductionStepTariff.objects.create(
+        product=product,
+        department=department,
         tariff=tariff,
         approved_by=Employee.objects.get(pin_code=pin_code)
     )
@@ -20,5 +25,5 @@ def update_product_tax(product_id: int, pin_code: int, department_number: int, t
     Assignment.objects.filter(
         order_product__product__id=product_id,
         department__number=department_number,
-        price=0,
-    ).update(tariff=tariff)
+        tariff__isnull=True,
+    ).update(tariff=production_step_tariff)

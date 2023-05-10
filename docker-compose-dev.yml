@@ -78,9 +78,3 @@ services:
 #      - "58232:58232"
 #    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
 #
-
-volumes:
-  db:
-    driver: local
-  product_images:
-    driver: local

@@ -5,12 +5,14 @@ import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
 import {week_info} from "entities/WeekInfo";
 
 import {eqActions} from "../../slice/eqSlice";
+import {ViewMode} from "../../types/eqSchema";
 
 interface fetchWeekInfoProps {
     department_number: number,
     pin_code: number,
     week: number | undefined,
     year: number | undefined,
+    view_mode: number,
 }
 
 export const fetchWeekInfo = createAsyncThunk<week_info, fetchWeekInfoProps, {rejectValue: string}>(

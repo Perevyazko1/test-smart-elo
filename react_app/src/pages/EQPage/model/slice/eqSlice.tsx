@@ -7,6 +7,7 @@ import {EqSchema, ViewMode} from "../types/eqSchema";
 import {fetchAwaitList} from "../service/fetchAwaitList/fetchAwaitList";
 import {fetchInWorkList} from "../service/fetchInWorkList/fetchInWorkList";
 import {fetchReadyList} from "../service/fetchReadyList/fetchReadyList";
+import {fetchWeekInfo} from "../service/fetchWeekInfo/fetchWeekInfo";
 
 
 export const initialState: EqSchema = {
@@ -17,10 +18,12 @@ export const initialState: EqSchema = {
     await_list_updated: false,
     in_work_list_updated: false,
     ready_list_updated: false,
+    week_info_updated: false,
 
     await_list_is_loading: false,
     in_work_list_is_loading: false,
     ready_list_is_loading: false,
+    week_info_is_loading: false,
 }
 
 
@@ -83,6 +86,9 @@ export const eqSlice = createSlice({
             readyListUpdated: (state) => {
                 state.ready_list_updated = !state.ready_list_updated
             },
+            weekInfoUpdated: (state) => {
+                state.week_info_updated = !state.week_info_updated
+            },
             eqUpdated: (state) => {
                 state.await_list_updated = !state.await_list_updated
                 state.in_work_list_updated = !state.in_work_list_updated
@@ -124,6 +130,19 @@ export const eqSlice = createSlice({
                 })
                 .addCase(fetchReadyList.rejected, (state, action) => {
                     state.ready_list_is_loading = false;
+                    // state.error = action.payload;
+                })
+
+
+                .addCase(fetchWeekInfo.pending, (state) => {
+                    state.week_info_is_loading = true;
+                    // state.error = undefined;
+                })
+                .addCase(fetchWeekInfo.fulfilled, (state) => {
+                    state.week_info_is_loading = false;
+                })
+                .addCase(fetchWeekInfo.rejected, (state, action) => {
+                    state.week_info_is_loading = false;
                     // state.error = action.payload;
                 })
         }

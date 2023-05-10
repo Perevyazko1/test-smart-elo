@@ -12,6 +12,7 @@ import {getEmployeeInited} from "entities/Employee";
 import {getEmployeePinCode} from "entities/Employee";
 
 import './styles/App.scss';
+import 'shared/assets/fonts/fontawesome-all.min.css';
 
 
 function App() {

@@ -18,6 +18,7 @@ export const updateTargetList = (first: boolean, card_type: CardType, dispatch: 
         return;
     } else if (card_type === CardType.READY_CARD && first) {
         dispatch(eqActions.readyListUpdated())
+        dispatch(eqActions.weekInfoUpdated())
         return;
     } else if (card_type === CardType.READY_CARD && !first) {
         dispatch(eqActions.eqUpdated())

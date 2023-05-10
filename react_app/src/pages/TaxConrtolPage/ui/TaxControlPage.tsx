@@ -1,15 +1,17 @@
 import React, {memo, useEffect} from 'react';
-import {Container} from "react-bootstrap";
-import logo from "shared/assets/images/SZMK Logo White Horizontal 141x55.png";
+import {useSelector} from "react-redux";
+import {Container, OverlayTrigger, Spinner, Tooltip} from "react-bootstrap";
+
+import logo from "shared/assets/images/SZMK Logo White Horizontal 900х352.png";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 
-import {fetchTaxControlList} from "../model/service/fetchTaxControlData";
+import {fetchTaxControlList} from "../model/service/fetchTaxControlData/fetchTaxControlData";
 import {taxControlReducer} from "../model/slice/taxControlPageSlice";
-import {useSelector} from "react-redux";
 import {getTaxControlData} from "../model/selectors/getTaxControlData/getTaxControlData";
 import {TaxControlTable} from "./TaxControlTable/TaxControlTable";
+import {getTaxControlUpdated} from "../model/selectors/getTaxControlUpdated/getTaxControlUpdated";
 
 
 const initialReducers: ReducersList = {
@@ -19,11 +21,11 @@ const initialReducers: ReducersList = {
 const TaxControlPage = memo(() => {
     const dispatch = useAppDispatch()
     const tax_control_data = useSelector(getTaxControlData)
-
+    const page_updated = useSelector(getTaxControlUpdated)
 
     useEffect(() => {
         dispatch(fetchTaxControlList({}))
-    }, [dispatch])
+    }, [dispatch, page_updated])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
@@ -45,14 +47,30 @@ const TaxControlPage = memo(() => {
                     className={'bg-light bg-gradient p-2 rounded h-100'}
                     style={{overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
                 >
-                    <h3>Страница назначения тарификаций</h3>
+                    <div className={'fs-3 d-flex justify-content-start align-items-center'}>
+                        Страница назначения тарификаций
+
+                        <OverlayTrigger
+                            overlay={<Tooltip id="tooltip-disabled">
+                            После назначения тарификации указанный тариф будет применен ко всем ранее не
+                            тарифицированным и всем будущим нарядам.
+                        </Tooltip>}
+                            placement={'bottom'}
+                        >
+                            <i className="far fa-question-circle mx-2 mt-2 fs-5 align-self-stretch"/>
+                        </OverlayTrigger>
+
+                    </div>
+
                     <hr/>
 
                     {tax_control_data
                         ?
                         <TaxControlTable tax_control_data={tax_control_data}/>
                         :
-                        <div>Нет данных</div>
+                        <div className={"w-100 d-flex justify-content-center"}>
+                            <Spinner/>
+                        </div>
                     }
 
                 </Container>

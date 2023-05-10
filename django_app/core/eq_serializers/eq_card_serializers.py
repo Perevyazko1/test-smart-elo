@@ -46,7 +46,9 @@ class EQProductPicturesSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
     def get_image(self, obj):
-        return obj.image.url
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class EQTechProcessSerializer(serializers.ModelSerializer):
@@ -57,7 +59,9 @@ class EQTechProcessSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "image"]
 
     def get_image(self, obj):
-        return obj.image.url
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class EQFabricSerializer(serializers.ModelSerializer):
@@ -74,7 +78,9 @@ class EQFabricSerializer(serializers.ModelSerializer):
         ]
 
     def get_image(self, obj):
-        return obj.image.url
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class EQProductSerializer(serializers.ModelSerializer):

@@ -6,6 +6,7 @@ import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModule
 import {getEmployeeFullName, getEmployeePinCode} from "entities/Employee";
 import {Loader} from "shared/ui/Loader/Loader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime";
 
 import {fetchAuditList} from "../model/service/fetchAuditWidget";
 import {auditWidgetReducer} from "../model/slice/auditWidgetSlice";
@@ -31,21 +32,6 @@ export const AuditWidget = memo((props: AuditWidgetProps) => {
     const audit_list = useSelector(getAuditWidgetData)
     const full_name = useSelector(getEmployeeFullName)
     const is_loading = useSelector(getAuditWidgetIsLoading)
-
-    const get_humans_datetime = (utc_datetime: string) => {
-        const dateTime = new Date(utc_datetime);
-        const date = dateTime.toLocaleDateString(
-            'ru-RU',
-            {day: '2-digit', month: '2-digit', year: 'numeric'}
-        );
-        const time = dateTime.toLocaleTimeString(
-            'ru-RU',
-            {hour: '2-digit', minute: '2-digit', second: '2-digit'}
-        );
-
-        return `${date} - ${time}`
-
-    }
 
     const hide_modal = () => {
         setShowModal(false)
@@ -84,7 +70,7 @@ export const AuditWidget = memo((props: AuditWidgetProps) => {
                                 <tbody>
                                 {audit_list?.map((audit) => (
                                     <tr key={audit.date}>
-                                        <td>{get_humans_datetime(audit.date)}</td>
+                                        <td>{getHumansDatetime(audit.date)}</td>
                                         {/*<td>{audit.audit_type}</td>*/}
                                         <td>{audit.details}</td>
                                     </tr>

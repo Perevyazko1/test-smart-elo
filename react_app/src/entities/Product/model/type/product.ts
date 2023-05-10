@@ -3,7 +3,7 @@ import {employee} from "entities/Employee";
 import {product_picture} from "entities/ProductPicture";
 
 export interface product {
-    id: string;
+    id: number;
     name: string;
     product_pictures: product_picture[] | undefined;
     technological_process: technological_process | undefined;

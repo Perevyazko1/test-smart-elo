@@ -42,7 +42,8 @@ export const TaxControlTable = memo((props: TaxControlTableProps) => {
                 {
                     tax_control_data?.map((tax_control_item) => (
                         <TaxControlTableElement
-                            key={`${tax_control_item.department.name} ${tax_control_item.product.name}`}
+                            key={`${tax_control_item.department.name} 
+                            ${tax_control_item.product.name}`}
                             tax_control_item={tax_control_item}
                         />
                     ))

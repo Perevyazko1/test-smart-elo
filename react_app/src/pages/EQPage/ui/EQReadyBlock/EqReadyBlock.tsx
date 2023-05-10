@@ -29,17 +29,19 @@ export const EqReadyBlock = memo(() => {
     const view_mode = useSelector(getCurrentViewMod)
 
     useEffect(() => {
-        if (current_department && pin_code ) {
-            dispatch(fetchReadyList({
-                department_number: current_department.number,
-                project: current_project,
-                pin_code: pin_code,
-                view_mode: view_mode.key,
-                week: week_info?.week,
-                year: week_info?.year
-            }))
-        }
-    }, [ready_list_updated, view_mode, current_project, week_info, dispatch, pin_code])
+            if (current_department && pin_code) {
+                dispatch(fetchReadyList({
+                    department_number: current_department.number,
+                    project: current_project,
+                    pin_code: pin_code,
+                    view_mode: view_mode.key,
+                    week: week_info?.week,
+                    year: week_info?.year
+                }))
+            }
+        },
+        // eslint-disable-next-line
+        [ready_list_updated, view_mode, current_project, week_info, dispatch, pin_code])
 
     return (
         <div className="row m-0" style={{height: "43vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>

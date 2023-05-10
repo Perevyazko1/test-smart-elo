@@ -2,6 +2,7 @@ import {memo, ReactNode, useEffect, useState} from 'react';
 import {Button, Table} from "react-bootstrap";
 import {useSelector} from "react-redux";
 
+import {GET_STATIC_URL} from "shared/const/server_config";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {order_product} from "entities/OrderProduct";
@@ -88,9 +89,9 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
                                     src={
                                         current_tech_process
                                             ?
-                                            current_tech_process.image
+                                            GET_STATIC_URL() + current_tech_process.image
                                             :
-                                            order_product.product.technological_process?.image
+                                            GET_STATIC_URL() + (order_product.product.technological_process?.image || "")
                                     }
                                     alt={
                                         current_tech_process

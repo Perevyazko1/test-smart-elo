@@ -4,7 +4,8 @@ import {TaxControlData, TaxControlSchema} from "../types/TaxControlSchema";
 
 
 export const initialState: TaxControlSchema = {
-    is_loading: false
+    is_loading: false,
+    updated: false
 }
 
 
@@ -14,6 +15,9 @@ export const taxControlSlice = createSlice({
         reducers: {
             setTaxControlData: (state, action: PayloadAction<TaxControlData[]>) => {
                 state.data = action.payload
+            },
+            setTaxControlUpdated: (state) => {
+                state.updated = !state.updated
             },
         },
 

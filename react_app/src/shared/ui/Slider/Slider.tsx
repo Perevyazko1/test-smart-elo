@@ -7,7 +7,8 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import {SERVER_HOST} from "../../const/server_config";
+
+import {GET_STATIC_URL} from "../../const/server_config";
 
 interface SliderProps {
     price?: number,
@@ -62,7 +63,7 @@ export const Slider = memo((props: SliderProps) => {
                     key={image_url}
                 >
                     <img
-                        src={image_url}
+                        src={GET_STATIC_URL() + image_url}
                         style={{maxWidth: width, maxHeight: height}}
                         className="rounded m-0 p-0"
                         alt={"Slide"}

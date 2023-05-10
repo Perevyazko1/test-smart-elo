@@ -6,10 +6,11 @@ import {tariff} from "entities/Tariff";
 export interface TaxControlData {
     product: product;
     department: department;
-    tariff: tariff | undefined;
+    production_step_tariff: tariff | undefined;
 }
 
 export interface TaxControlSchema {
     is_loading: boolean;
+    updated: boolean;
     data?: TaxControlData[];
 }

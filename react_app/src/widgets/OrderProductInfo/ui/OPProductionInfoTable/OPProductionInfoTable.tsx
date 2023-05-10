@@ -3,10 +3,10 @@ import {Table} from "react-bootstrap";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {order_product} from "entities/OrderProduct";
-import {useAppDispatch} from "../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {useSelector} from "react-redux";
-import {getCurrentDepartment} from "../../../../entities/Employee";
-import {getOPDepartmentInfo} from "../../model/selectors/getOPDepartmentInfo/getOPDepartmentInfo";
+import {getCurrentDepartment} from "entities/Employee";
+
 import {fetchOPTablesData} from "../../model/services/fetchOPTablesData/fetchOPTablesData";
 import {getOPProductionInfo} from "../../model/selectors/getOPProductionInfo/getOPProductionInfo";
 

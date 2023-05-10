@@ -206,6 +206,10 @@ class ProductionStepTariff(models.Model):
         null=True,
     )
 
+    def __str__(self):
+        return '{}'.format(f'{self.tariff} {self.department.name} '
+                           f'{self.confirmation_date.date()} {self.product} {self.approved_by}')
+
 
 class ProductionStep(models.Model):
     """Класс хранящий данные об этапе"""

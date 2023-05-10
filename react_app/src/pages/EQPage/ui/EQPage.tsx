@@ -5,7 +5,6 @@ import {getCurrentDepartment} from "entities/Employee";
 import {OrderProductModal} from "widgets/OrderProductInfo";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import 'shared/assets/fonts/fontawesome-all.min.css';
 
 import {eqActions, eqReducer} from "../model/slice/eqSlice";
 import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";

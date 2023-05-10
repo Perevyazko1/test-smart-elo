@@ -75,15 +75,19 @@ def init_data():
         )
 
     for username, params in employees.items():
-        user = Employee.objects.update_or_create(
-            username=username,
-            defaults={
-                'first_name': params['first_name'],
-                "last_name": params['last_name'],
-                "password": params['password'],
-                "pin_code": params['pin_code'],
-            }
-        )[0]
+        user = Employee.objects.filter(username=username)
+        if user.exists():
+            user = user[0]
+            user.set_password(params['password'])
+            user.save()
+        else:
+            user = Employee.objects.create(
+                username=username,
+                first_name=params['first_name'],
+                last_name=params['last_name'],
+                password=params['password'],
+                pin_code=params['pin_code'],
+            )
 
         for group_name in params['groups']:
             user.groups.add(Group.objects.get(name=group_name))

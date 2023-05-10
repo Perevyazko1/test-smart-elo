@@ -166,6 +166,12 @@ def get_week_info(request):
     year = request.query_params.get('year')
     pin_code = request.query_params.get('pin_code')
     department_number = request.query_params.get('department_number')
+    view_mode = request.query_params.get('view_mode')
+
+    print(request.query_params.get('view_mode'))
+
+    if len(str(view_mode)) == 6:
+        pin_code = view_mode
 
     week_info = GetWeekInfo(week=week, year=year).execute()
 
@@ -175,7 +181,7 @@ def get_week_info(request):
         inspector__isnull=False,
         date_completion__gte=week_info.date_range[0],
         date_completion__lt=week_info.date_range[1],
-    ).aggregate(Sum('tariff')).get('tariff__sum')
+    ).aggregate(Sum('tariff__tariff')).get('tariff__tariff__sum')
 
     week_info.earned = earned
 
@@ -293,7 +299,10 @@ def get_order_product_info(request):
 
 @api_view(['GET'])
 def get_production_step_list(request):
-    qs = ProductionStep.objects.filter(department__piecework_wages=True)
+    qs = ProductionStep.objects.filter(
+        department__piecework_wages=True,
+        production_step_tariff__isnull=True
+    )
     serializer = ProductionStepSerializer
     data = serializer(qs, many=True, context={'request': request}).data
 
@@ -302,16 +311,16 @@ def get_production_step_list(request):
 
 @api_view(['POST'])
 def set_production_step_tax(request):
-    product_id = request.data.get('product')
+    product_id = request.data.get('product_id')
     pin_code = request.data.get('pin_code')
-    department_number = request.data.get('department')
-    tax = request.data.get('tax')
+    department_number = request.data.get('department_number')
+    tariff = request.data.get('tariff')
 
     update_product_tax(
         product_id=product_id,
         pin_code=pin_code,
         department_number=department_number,
-        tax=tax
+        tariff=tariff
     )
 
     return JsonResponse({"data": 'data'}, json_dumps_params={"ensure_ascii": False})
