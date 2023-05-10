@@ -48,7 +48,7 @@ export const EqWeekBlock = memo(() => {
                  borderRadius: "6px",
                  background: "rgba(255,224,115,0.93)"
              }}>
-            <div className="col d-flex align-items-xl-center">
+            <div className="col d-flex align-items-center justify-content-between">
                 <div style={{width: "150px"}} className={'d-flex justify-content-center'}>
                     <button className="btn btn-dark btn-sm fw-bold border rounded border-2 border-dark me-2"
                             type="button"
