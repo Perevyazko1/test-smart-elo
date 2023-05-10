@@ -107,4 +107,4 @@ volumes:
   media:
     driver: local
   db:
-    external: true
+    driver: local
