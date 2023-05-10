@@ -79,6 +79,9 @@ def init_data():
         if user.exists():
             user = user[0]
             user.set_password(params['password'])
+            user.first_name = params['first_name']
+            user.last_name = params['last_name']
+            user.pin_code = params['pin_code']
             user.save()
         else:
             user = Employee.objects.create(
