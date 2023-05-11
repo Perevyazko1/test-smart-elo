@@ -1,10 +1,12 @@
 import React, {memo, useCallback, useState} from 'react';
-import {classNames, Mods} from "shared/lib/classNames/classNames";
-import {Dropdown, DropdownButton} from "react-bootstrap";
-import {useSelector} from "react-redux";
-import {employeeActions, getEmployeeAuthData, getEmployeeIsBoss} from "../../../entities/Employee";
 import {Link} from "react-router-dom";
-import {useAppDispatch} from "../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {useSelector} from "react-redux";
+import {Dropdown, DropdownButton} from "react-bootstrap";
+
+import {employeeActions, getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {classNames, Mods} from "shared/lib/classNames/classNames";
+
 import {AuditWidget} from "../../AuditWidget";
 
 interface UserInfoWithRoutsProps {
@@ -60,15 +62,14 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
                     {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
                 </Dropdown.Item>
 
+                <Dropdown.Divider/>
+
+                <Dropdown.Item onClick={logout}>
+                    Выйти
+                </Dropdown.Item>
+
             </DropdownButton>
 
-            <h4 className={'text-light'}>
-                |
-            </h4>
-
-            <button type={"button"} className={'btn btn-dark'} onClick={logout}>
-                Выйти
-            </button>
         </div>
     );
 });
