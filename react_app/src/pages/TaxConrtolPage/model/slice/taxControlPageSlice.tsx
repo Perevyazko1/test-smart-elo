@@ -2,6 +2,7 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {department} from "entities/Department";
 
 import {TaxControlData, TaxControlSchema} from "../types/TaxControlSchema";
+import {fetchTaxControlList} from "../service/fetchTaxControlData/fetchTaxControlData";
 
 
 export const initialState: TaxControlSchema = {
@@ -48,21 +49,21 @@ export const taxControlSlice = createSlice({
             },
         },
 
-        // extraReducers: (builder) => {
-        //     builder
-        //         .addCase(fetchAwaitList.pending, (state) => {
-        //             state.await_list_is_loading = true;
-        //             // state.error = undefined;
-        //         })
-        //         .addCase(fetchAwaitList.fulfilled, (state) => {
-        //             state.await_list_is_loading = false;
-        //         })
-        //         .addCase(fetchAwaitList.rejected, (state, action) => {
-        //             state.await_list_is_loading = false;
-        //             // state.error = action.payload;
-        //         })
-        //
-        // }
+        extraReducers: (builder) => {
+            builder
+                .addCase(fetchTaxControlList.pending, (state) => {
+                    state.is_loading = true;
+                    // state.error = undefined;
+                })
+                .addCase(fetchTaxControlList.fulfilled, (state) => {
+                    state.is_loading = false;
+                })
+                .addCase(fetchTaxControlList.rejected, (state, action) => {
+                    state.is_loading = false;
+                    // state.error = action.payload;
+                })
+
+        }
     }
 )
 

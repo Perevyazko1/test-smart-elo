@@ -14,6 +14,7 @@ import {fetchTCFilters} from "../model/service/fetchTaxControlFilters/fetchTCFil
 import {getTCCurrentViewMode} from "../model/selectors/getTCCurrentViewMode/getTCCurrentViewMode";
 import {getTCDepartmentFilter} from "../model/selectors/getTCDepartmentFilter/getTCDepartmentFilter";
 import {getTCProductNameFilter} from "../model/selectors/getTCProductNameFilter/getTCProductNameFilter";
+import {getTCIsLoading} from "../model/selectors/getTCIsLoading/getTCIsLoading";
 
 
 const initialReducers: ReducersList = {
@@ -23,6 +24,7 @@ const initialReducers: ReducersList = {
 const TaxControlPage = memo(() => {
     const dispatch = useAppDispatch()
     const tax_control_data = useSelector(getTaxControlData)
+    const page_is_loading = useSelector(getTCIsLoading)
     const page_updated = useSelector(getTaxControlUpdated)
     const current_view_mode = useSelector(getTCCurrentViewMode)
     const current_department = useSelector(getTCDepartmentFilter)
@@ -68,14 +70,26 @@ const TaxControlPage = memo(() => {
 
                     <hr/>
 
-                    {tax_control_data
+                    {page_is_loading
                         ?
-                        <TaxControlTable tax_control_data={tax_control_data}/>
-                        :
-                        <div className={"w-100 d-flex justify-content-center"}>
-                            <Spinner/>
+                        <div className={'w-100 d-flex justify-content-center'}>
+                            <Spinner animation="grow"/>
                         </div>
+                        :
+                        <>
+                            {tax_control_data
+                                ?
+                                <TaxControlTable tax_control_data={tax_control_data}/>
+                                :
+                                <div className={"w-100 d-flex justify-content-center"}>
+                                    <div>
+                                        Нет данных
+                                    </div>
+                                </div>
+                            }
+                        </>
                     }
+
 
                 </Container>
             </section>
