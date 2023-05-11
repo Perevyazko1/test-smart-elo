@@ -1,6 +1,6 @@
 from ..adapters.create_order_product_entities import OrderProductEntity
-from ...methods.assignment_generator import AssignmentGenerator
 from ...models import OrderProduct, Product, Order, Fabric
+from ...services.assignment_generator import AssignmentGenerator
 
 
 class OrderProductEntityToDB:
