@@ -2,26 +2,24 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import axios from "axios";
 
 import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
+
 import {TaxControlData} from "../../types/TaxControlSchema";
 import {taxControlActions} from "../../slice/taxControlPageSlice";
 
 
-interface fetchTaxControlProps {
-    department_number: number,
-    view_mode: string,
-    product_name: string,
+interface fetchTCFiltersProps {
 }
 
-export const fetchTaxControlList = createAsyncThunk<TaxControlData, fetchTaxControlProps, {rejectValue: string}>(
-    'eq/fetchTaxControlList',
-    async (filters: fetchTaxControlProps, thunkAPI) => {
+export const fetchTCFilters = createAsyncThunk<TaxControlData, fetchTCFiltersProps, {rejectValue: string}>(
+    'eq/fetchTCFilters',
+    async (filters: fetchTCFiltersProps, thunkAPI) => {
         try {
-            const response = await axios.get(`${SERVER_HTTP_ADDRESS}/api/v1/core/get_production_step_list/`, {
+            const response = await axios.get(`${SERVER_HTTP_ADDRESS}/api/v1/core/get_tariff_page_filters/`, {
                 params: {...filters}
             });
             if (response.data) {
-                thunkAPI.dispatch(taxControlActions.setTaxControlData(response.data.data))
-                return response.data.data;
+                thunkAPI.dispatch(taxControlActions.setViewModes(response.data.view_modes))
+                return response.data;
             } else {
                 throw new Error();
             }

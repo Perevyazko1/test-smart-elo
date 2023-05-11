@@ -2,7 +2,7 @@ import datetime
 
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates
-from core.methods.assignment_generator import AssignmentGenerator
+from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
 from staff.models import Employee, Department, Audit
 

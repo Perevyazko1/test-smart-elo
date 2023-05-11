@@ -2,10 +2,8 @@ from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path, include, re_path
-from django.conf.urls.static import static
 from django.views.static import serve
 
-from django_app.settings import MEDIA_URL, MEDIA_ROOT
 from django_app.init_data.init_data import init_data
 
 

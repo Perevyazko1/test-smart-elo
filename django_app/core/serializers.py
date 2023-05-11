@@ -1,50 +1,124 @@
 from rest_framework import serializers
+
+from staff.serializers import DepartmentSerializer, EmployeeSerializer
 from .models import *
 
 
-class TechnologicalProcessSerializer(serializers.ModelSerializer):
+class TechProcessSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = TechnologicalProcess
-        fields = '__all__'
+        fields = ["id", "name", "image"]
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
-class ProductPictureSerializer(serializers.ModelSerializer):
+class ProductPicturesSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = ProductPicture
-        fields = '__all__'
+        fields = ['id', 'image']
 
-
-class ProductSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class FabricSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Fabric
-        fields = '__all__'
+        fields = [
+            'id',
+            'fabric_id',
+            'name',
+            'image_filename',
+            'image',
+        ]
+
+    def get_image(self, obj):
+        if obj.image:
+            return obj.image.url
+        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
-        fields = '__all__'
+        fields = [
+            'project'
+        ]
 
 
-class OrderProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(serializers.ModelSerializer):
+    technological_process = TechProcessSerializer()
+    product_pictures = ProductPicturesSerializer(many=True)
+    technological_process_confirmed = EmployeeSerializer()
+
     class Meta:
-        model = OrderProduct
-        fields = '__all__'
+        model = Product
+        fields = [
+            'id',
+            'name',
+            'technological_process',
+            'product_pictures',
+            'technological_process_confirmed',
+        ]
+        read_only_fields = [
+            'id',
+            'name',
+            'product_pictures',
+        ]
 
 
-class AssignmentSerializer(serializers.ModelSerializer):
+class ProductionStepTariffSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    approved_by = EmployeeSerializer(read_only=True)
+
     class Meta:
-        model = Assignment
-        fields = '__all__'
+        model = ProductionStepTariff
+        fields = [
+            'product',
+            'department',
+            'tariff',
+            'confirmation_date',
+            'approved_by',
+        ]
 
 
 class ProductionStepSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+    department = DepartmentSerializer(read_only=True)
+    production_step_tariff = ProductionStepTariffSerializer(read_only=True)
+
     class Meta:
         model = ProductionStep
-        fields = '__all__'
+        fields = [
+            'product',
+            'department',
+            'production_step_tariff',
+        ]
+
+
+class AssignmentsSerializer(serializers.ModelSerializer):
+    executor = EmployeeSerializer()
+    inspector = EmployeeSerializer()
+
+    class Meta:
+        model = Assignment
+        fields = [
+            'number',
+            'notes',
+            'status',
+            'department',
+            'executor',
+            'inspector',
+        ]

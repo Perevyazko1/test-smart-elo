@@ -159,7 +159,7 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
                         <tr key={tech_process.name}>
                             <td>
                                 <img
-                                    src={tech_process.image}
+                                    src={GET_STATIC_URL() + tech_process.image}
                                     alt={tech_process.name}
                                     style={{maxWidth: "500px", maxHeight: "400px"}}
                                     loading={'lazy'}

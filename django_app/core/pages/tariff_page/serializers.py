@@ -1,12 +1,12 @@
 from rest_framework import serializers
 
+from core.models import ProductionStepTariff, ProductionStep
+from core.serializers import ProductSerializer
 from staff.serializers import DepartmentSerializer, EmployeeSerializer
-from .eq_card_serializers import EQProductSerializer
-from ..models import ProductionStep, ProductionStepTariff
 
 
 class ProductionStepTariffSerializer(serializers.ModelSerializer):
-    product = EQProductSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     approved_by = EmployeeSerializer(read_only=True)
 
@@ -22,7 +22,7 @@ class ProductionStepTariffSerializer(serializers.ModelSerializer):
 
 
 class ProductionStepSerializer(serializers.ModelSerializer):
-    product = EQProductSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     production_step_tariff = ProductionStepTariffSerializer(read_only=True)
 

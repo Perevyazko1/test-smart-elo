@@ -1,0 +1,76 @@
+from django.http import JsonResponse
+from rest_framework.decorators import api_view
+
+from core.models import ProductionStep, Order
+from core.pages.tariff_page.services.update_product_tax import update_product_tax
+from core.serializers import ProductionStepSerializer
+
+
+@api_view(['GET'])
+def get_tariff_page_filters(request):
+    view_modes = [
+        'Все тарификации',
+        'Без тарификации',
+        'Тарифицированные'
+    ]
+
+    return JsonResponse(
+        {
+            "view_modes": view_modes,
+        },
+        json_dumps_params={"ensure_ascii": False}
+    )
+
+
+@api_view(['GET'])
+def get_production_step_list(request):
+    view_mode = request.query_params.get('view_mode')
+    product_name = request.query_params.get('product_name')
+    department_number = request.query_params.get('department_number')
+
+    serializer = ProductionStepSerializer
+
+    qs = ProductionStep.objects.filter(
+        department__piecework_wages=True
+    )
+
+    if not product_name == '':
+        qs = qs.filter(
+            product__name__icontains=product_name
+        ).distinct()
+
+    if view_mode == 'Без тарификации':
+        qs = qs.filter(
+            production_step_tariff__isnull=True
+        )
+
+    if view_mode == 'Тарифицированные':
+        qs = qs.filter(
+            production_step_tariff__isnull=False
+        )
+
+    if not department_number == '0':
+        qs = qs.filter(
+            department__number=department_number
+        )
+
+    data = serializer(qs, many=True, context={'request': request}).data
+
+    return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def set_production_step_tax(request):
+    product_id = request.data.get('product_id')
+    pin_code = request.data.get('pin_code')
+    department_number = request.data.get('department_number')
+    tariff = request.data.get('tariff')
+
+    update_product_tax(
+        product_id=product_id,
+        pin_code=pin_code,
+        department_number=department_number,
+        tariff=tariff
+    )
+
+    return JsonResponse({"data": 'data'}, json_dumps_params={"ensure_ascii": False})

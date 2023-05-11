@@ -1,11 +1,16 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {department} from "entities/Department";
 
 import {TaxControlData, TaxControlSchema} from "../types/TaxControlSchema";
 
 
 export const initialState: TaxControlSchema = {
     is_loading: false,
-    updated: false
+    updated: false,
+
+    product_name_filter: '',
+    current_view_mode: 'Все тарификации',
+    department_filter: {name: 'Все отделы', number: 0, piecework_wages: true, single: false}
 }
 
 
@@ -18,6 +23,28 @@ export const taxControlSlice = createSlice({
             },
             setTaxControlUpdated: (state) => {
                 state.updated = !state.updated
+            },
+
+            setDepartmentFilter: (state, action: PayloadAction<department>) => {
+                state.department_filter = action.payload
+            },
+
+            setProductNameFilter: (state, action: PayloadAction<string>) => {
+                state.product_name_filter = action.payload
+            },
+
+            setViewModes: (state, action: PayloadAction<string[]>) => {
+                state.view_modes = action.payload
+            },
+
+            setCurrentViewFilter: (state, action: PayloadAction<string>) => {
+                state.current_view_mode = action.payload
+            },
+
+            setDefaultFilters: (state) => {
+                state.current_view_mode = initialState.current_view_mode;
+                state.department_filter = initialState.department_filter;
+                state.product_name_filter = initialState.product_name_filter;
             },
         },
 
