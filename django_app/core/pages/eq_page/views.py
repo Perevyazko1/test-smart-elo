@@ -182,7 +182,9 @@ def get_view_modes(request):
     department_number = request.query_params.get('department_number')
     result = [{'name': 'Режим бригадира', 'key': 1}, {'name': 'Личные наряды', 'key': 0}]
 
-    users = Employee.objects.filter(departments__number=department_number)
+    users = Employee.objects.filter(departments__number=department_number).exclude(
+        username='root'
+    )
 
     for user in users:
         result.append({'name': f'{user.first_name} {user.last_name}', 'key': user.pin_code})

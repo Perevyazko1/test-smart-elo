@@ -25,7 +25,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
     const current_view_mode = useSelector(getCurrentViewMod)
 
     const change_current_department = useCallback((department_number: number) => {
-        if (auth_data?.pin_code) {
+        if (auth_data?.pin_code && department_number !== currentDepartment?.number) {
             dispatch(fetchCurrentDepartment({
                 pin_code: auth_data?.pin_code,
                 department_number: department_number
@@ -34,8 +34,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
                 dispatch(eqActions.setDefaultFilters())
             }
         }
-        // eslint-disable-next-line
-    }, [auth_data?.pin_code, dispatch])
+    }, [currentDepartment?.number, current_view_mode, auth_data?.pin_code, dispatch])
 
     const mods: Mods = {};
 

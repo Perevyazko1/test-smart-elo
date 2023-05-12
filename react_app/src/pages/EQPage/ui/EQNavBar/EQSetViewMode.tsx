@@ -9,6 +9,7 @@ import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurr
 import {getViewMods} from "../../model/selectors/getViewMods/getViewMods";
 import {ViewMode} from "../../model/types/eqSchema";
 import {eqActions, initialState} from "../../model/slice/eqSlice";
+import {getEmployeePinCode} from "../../../../entities/Employee";
 
 interface EqSetViewModeProps {
     className?: string
@@ -21,6 +22,7 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
     const dispatch = useAppDispatch()
     const current_view_mod = useSelector(getCurrentViewMod)
     const view_mods = useSelector(getViewMods)
+    const pin_code = useSelector(getEmployeePinCode)
 
     const updateCurrentViewMod = (view_mode: ViewMode) => {
         dispatch(eqActions.setCurrentViewMode(view_mode))
@@ -34,7 +36,7 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
                 current_view_mod.name === initialState.current_view_mode?.name ?
                     "outline-light" :
                     "outline-light active"
-        }
+            }
             menuVariant="dark"
             title={current_view_mod.name}
             className={classNames('', mods, [className])}
@@ -47,13 +49,20 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
             <Dropdown.Divider/>
 
             {view_mods?.map((view_mode) => (
-                <Dropdown.Item
-                    key={view_mode.name}
-                    active={view_mode.key === current_view_mod?.key}
-                    onClick={() => updateCurrentViewMod(view_mode)}
-                >
-                    {view_mode.name}
-                </Dropdown.Item>
+                <div key={view_mode.name}>
+                    {view_mode.key !== pin_code
+                        ?
+                        <Dropdown.Item
+                            active={view_mode.key === current_view_mod?.key}
+                            onClick={() => updateCurrentViewMod(view_mode)}
+                        >
+                            {view_mode.name}
+                        </Dropdown.Item>
+                        :
+                        <></>
+                    }
+                </div>
+
             ))}
         </DropdownButton>
     );
