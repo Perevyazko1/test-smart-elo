@@ -24,10 +24,6 @@ export const employeeSlice = createSlice({
         },
 
         initAuthData: (state) => {
-            const employee = localStorage.getItem(USER_LOCALSTORAGE_KEY);
-            if (employee) {
-                state.authData = JSON.parse(employee)
-            }
             state._inited = true
         },
 

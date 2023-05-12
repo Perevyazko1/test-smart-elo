@@ -10,7 +10,7 @@ interface authByPinCodeProps {
     rememberMe: boolean,
 }
 
-export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, {rejectValue: string}>(
+export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, { rejectValue: string }>(
     'auth/authByPicCode',
     async (authData: authByPinCodeProps, thunkAPI) => {
         try {
@@ -22,13 +22,18 @@ export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, {rej
                     localStorage.setItem(USER_LOCALSTORAGE_KEY, JSON.stringify(response.data))
                 }
                 thunkAPI.dispatch(employeeActions.setEmployee(response.data))
+                thunkAPI.dispatch(employeeActions.initAuthData())
                 return response.data;
             } else {
+                thunkAPI.dispatch(employeeActions.logout())
+                thunkAPI.dispatch(employeeActions.initAuthData())
                 throw new Error();
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
             console.log(e)
+            thunkAPI.dispatch(employeeActions.logout())
+            thunkAPI.dispatch(employeeActions.initAuthData())
             return thunkAPI.rejectWithValue('Неверный ПИН-код')
         }
 
