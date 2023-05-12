@@ -3,7 +3,8 @@ import {Link} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {Dropdown, DropdownButton} from "react-bootstrap";
 
-import {employeeActions, getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
+import {getEmployeeTariffAccess} from "entities/Employee";
+import {employeeActions, getEmployeeAuthData} from "entities/Employee";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
@@ -20,7 +21,7 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
     const [showModal, setShowModal] = useState(false)
 
     const dispatch = useAppDispatch()
-    const employeeIsBoss = useSelector(getEmployeeIsBoss)
+    const employeeTariffAccess = useSelector(getEmployeeTariffAccess)
     const employee = useSelector(getEmployeeAuthData)
 
     const logout = useCallback(() => {
@@ -37,19 +38,13 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
                 title={employee?.first_name + " " + employee?.last_name}
                 {...otherProps}
             >
-                <Dropdown.ItemText>
-                    <h6 className={"my-0"}>Разделы</h6>
-                </Dropdown.ItemText>
-
-                <Dropdown.Divider/>
-
                 <Link to={'/eq'}>
                     <Dropdown.ItemText>
-                        Электронная очередь
+                        ЭЛО
                     </Dropdown.ItemText>
                 </Link>
 
-                {employeeIsBoss &&
+                {employeeTariffAccess &&
                     <Link to={'/tax_control'}>
                         <Dropdown.ItemText>
                             Тарификации

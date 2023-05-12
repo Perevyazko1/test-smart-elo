@@ -8,6 +8,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 import {eqActions} from "../../model/slice/eqSlice";
+import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
 
 interface ChangeDepartmentProps {
     className?: string;
@@ -21,6 +22,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
     const auth_data = useSelector(getEmployeeAuthData)
     const currentDepartment = useSelector(getCurrentDepartment)
     const departments = useSelector(getEmployeeDepartments)
+    const current_view_mode = useSelector(getCurrentViewMod)
 
     const change_current_department = useCallback((department_number: number) => {
         if (auth_data?.pin_code) {
@@ -28,9 +30,12 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
                 pin_code: auth_data?.pin_code,
                 department_number: department_number
             }))
-            dispatch(eqActions.setDefaultFilters())
+            if (current_view_mode?.key !== 1) {
+                dispatch(eqActions.setDefaultFilters())
+            }
         }
-    },[auth_data?.pin_code, dispatch])
+        // eslint-disable-next-line
+    }, [auth_data?.pin_code, dispatch])
 
     const mods: Mods = {};
 
@@ -51,7 +56,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
             {departments?.map((department) => (
                 <Dropdown.Item
                     key={department.number}
-                    active={department.name===currentDepartment?.name}
+                    active={department.name === currentDepartment?.name}
                     onClick={() => change_current_department(department.number)}
                 >
                     {department.name}

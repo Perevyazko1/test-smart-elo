@@ -180,7 +180,7 @@ def get_week_info(request):
 @api_view(['GET'])
 def get_view_modes(request):
     department_number = request.query_params.get('department_number')
-    result = [{'name': 'Личные наряды', 'key': 0}, {'name': 'Режим бригадира', 'key': 1}]
+    result = [{'name': 'Режим бригадира', 'key': 1}, {'name': 'Личные наряды', 'key': 0}]
 
     users = Employee.objects.filter(departments__number=department_number)
 

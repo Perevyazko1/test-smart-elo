@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 from core.models import ProductionStep, Order
 from core.pages.tariff_page.services.update_product_tax import update_product_tax
 from core.serializers import ProductionStepSerializer
+from staff.models import Employee
 
 
 @api_view(['GET'])
@@ -27,12 +28,14 @@ def get_production_step_list(request):
     view_mode = request.query_params.get('view_mode')
     product_name = request.query_params.get('product_name')
     department_number = request.query_params.get('department_number')
-
+    pin_code = request.query_params.get('pin_code')
+    user = Employee.objects.get(pin_code=pin_code)
     serializer = ProductionStepSerializer
 
     qs = ProductionStep.objects.filter(
-        department__piecework_wages=True
-    )
+        department__piecework_wages=True,
+        department__in=user.departments.all()
+    ).distinct()
 
     if not product_name == '':
         qs = qs.filter(
@@ -42,17 +45,16 @@ def get_production_step_list(request):
     if view_mode == 'Без тарификации':
         qs = qs.filter(
             production_step_tariff__isnull=True
-        )
+        ).distinct()
 
     if view_mode == 'Тарифицированные':
         qs = qs.filter(
             production_step_tariff__isnull=False
-        )
-
+        ).distinct()
     if not department_number == '0':
         qs = qs.filter(
             department__number=department_number
-        )
+        ).distinct()
 
     data = serializer(qs, many=True, context={'request': request}).data
 

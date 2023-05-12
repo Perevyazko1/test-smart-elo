@@ -1,6 +1,8 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {Container, OverlayTrigger, Spinner, Tooltip} from "react-bootstrap";
+
+import {getEmployeePinCode} from "entities/Employee";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
@@ -28,17 +30,22 @@ const TaxControlPage = memo(() => {
     const page_updated = useSelector(getTaxControlUpdated)
     const current_view_mode = useSelector(getTCCurrentViewMode)
     const current_department = useSelector(getTCDepartmentFilter)
+    const pin_code = useSelector(getEmployeePinCode)
     const current_product_name_filter = useSelector(getTCProductNameFilter)
 
     useEffect(() => {
-        if (current_view_mode && current_department) {
+        if (current_view_mode && current_department && pin_code) {
             dispatch(fetchTaxControlList({
                 department_number: current_department?.number,
                 view_mode: current_view_mode,
                 product_name: current_product_name_filter || '',
+                pin_code: pin_code,
             }))
         }
-    }, [dispatch, page_updated, current_view_mode, current_department, current_product_name_filter])
+    }, [
+        dispatch, page_updated, current_view_mode, current_department, current_product_name_filter,
+        pin_code
+    ])
 
     useEffect(() => {
         dispatch(fetchTCFilters({}))

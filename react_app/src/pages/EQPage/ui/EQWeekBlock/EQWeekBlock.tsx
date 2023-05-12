@@ -1,5 +1,6 @@
 import React, {memo, useCallback, useEffect} from 'react';
 import {useSelector} from "react-redux";
+import {Spinner} from "react-bootstrap";
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
@@ -7,7 +8,6 @@ import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
 import {fetchWeekInfo} from "../../model/service/fetchWeekInfo/fetchWeekInfo";
 import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
 import {getWeekInfoUpdated} from "../../model/selectors/getWeekInfoUpdated/getWeekInfoUpdated";
-import {Spinner} from "react-bootstrap";
 import {getWeekInfoIsLoading} from "../../model/selectors/getWeekInfoIsLoading/getWeekInfoIsLoading";
 import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
 
@@ -33,6 +33,7 @@ export const EqWeekBlock = memo(() => {
                 view_mode: view_mode.key,
             }))
         }
+        // eslint-disable-next-line
     }, [current_department, pin_code, dispatch, week_info_updated, view_mode])
 
     useEffect(() => {

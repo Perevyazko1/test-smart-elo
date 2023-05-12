@@ -1,11 +1,11 @@
-import React, {memo, ReactNode, useCallback, useEffect, useMemo, useState} from 'react';
+import React, {memo, ReactNode, useCallback, useEffect, useState} from 'react';
+import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useDebounce} from "shared/lib/hooks/useDebounce/useDebounce";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {taxControlActions} from "../../model/slice/taxControlPageSlice";
-import {useSelector} from "react-redux";
 import {getTCProductNameFilter} from "../../model/selectors/getTCProductNameFilter/getTCProductNameFilter";
 
 interface TCNameFilterProps {
@@ -43,7 +43,7 @@ export const TCNameFilter = memo((props: TCNameFilterProps) => {
 
     useEffect(() => {
         debouncedSetProductNameFilter(input_value);
-    }, [input_value]);
+    }, [input_value, debouncedSetProductNameFilter]);
 
     return (
         <input placeholder={'Наименование изделия'}

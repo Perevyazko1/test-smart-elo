@@ -7,6 +7,7 @@ import {taxControlActions} from "../../slice/taxControlPageSlice";
 
 
 interface fetchTaxControlProps {
+    pin_code: number,
     department_number: number,
     view_mode: string,
     product_name: string,
