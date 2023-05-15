@@ -1,5 +1,6 @@
 import datetime
 
+from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates
 from core.services.assignment_generator import AssignmentGenerator
@@ -138,20 +139,23 @@ class UpdateAssignments:
         target_order = self.order_product.order
 
         for related_order_product in target_order.order_products.all():
-            if related_order_product.status != 'Изготовлен':
+            if related_order_product.status != '1':
                 return False
         return True
+
+    def _api_change_order_status_to_ready(self):
+        change_order_status(str(self.order_product.order.order_id))
 
     def _ready_department_instruction(self):
         self._create_api_enter()
 
         if not self._get_unconfirmed_assignments_exists():
-            self.order_product.status = 'Изготовлен'
+            self.order_product.status = '1'
             self.order_product.save()
 
         if self._get_order_all_ready():
-            # TODO Сделать логику по изменению статуса заказа в МоемСкладе
-            print("Сделать логику по изменению статуса заказа в МоемСкладе")
+            print('_api_change_order_status_to_ready')
+            self._api_change_order_status_to_ready()
 
     def _get_related_assignments_confirmed_minimum_count(self, next_step: ProductionStep) -> int:
         """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""

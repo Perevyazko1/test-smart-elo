@@ -36,6 +36,13 @@ META_VARIANT = {
     "mediaType": "application/json"
 }
 
+READY_ORDER_METADATA = {
+    "href": "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata/states/5000456a-7921-11ec-0a80-0f27000e1c3b",
+    "mediaType": "application/json",
+    "metadataHref": "https://online.moysklad.ru/api/remap/1.2/entity/customerorder/metadata",
+    "type": "state"
+}
+
 
 def get_product_meta(product_id: str) -> dict:
     return {
