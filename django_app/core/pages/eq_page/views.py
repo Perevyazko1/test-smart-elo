@@ -57,12 +57,12 @@ class GetAwaitList(viewsets.ModelViewSet):
             qs = qs.filter(
                 assignments__status__in=['await', 'in_work'],
                 assignments__department__number=self.request.query_params.get('department_number')
-            ).distinct()
+            ).distinct().order_by('urgency')
         else:
             qs = qs.filter(
                 product__production_steps__department=Department.objects.get(number=department_number),
                 status="0",
-            )
+            ).order_by('urgency')
 
         return qs
 
@@ -100,7 +100,7 @@ class GetInWorkList(viewsets.ModelViewSet):
         qs = qs.filter(
             assignments__status__in=['in_work'],
             assignments__department__number=department_number
-        ).distinct()
+        ).distinct().order_by('urgency')
 
         return qs
 
