@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from django.db.models import Sum
+from django.db.models import Sum, F
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
@@ -144,7 +144,7 @@ class GetReadyList(viewsets.ModelViewSet):
             assignments__department__number=department_number,
             assignments__date_completion__gt=week_info.date_range[0],
             assignments__date_completion__lte=week_info.date_range[1],
-        ).distinct()
+        ).distinct().order_by('-assignments__inspector')
 
         return qs
 
@@ -156,8 +156,6 @@ def get_week_info(request):
     pin_code = request.query_params.get('pin_code')
     department_number = request.query_params.get('department_number')
     view_mode = request.query_params.get('view_mode')
-
-    print(request.query_params.get('view_mode'))
 
     if len(str(view_mode)) == 6:
         pin_code = view_mode

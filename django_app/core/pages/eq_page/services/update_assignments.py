@@ -154,7 +154,6 @@ class UpdateAssignments:
             self.order_product.save()
 
         if self._get_order_all_ready():
-            print('_api_change_order_status_to_ready')
             self._api_change_order_status_to_ready()
 
     def _get_related_assignments_confirmed_minimum_count(self, next_step: ProductionStep) -> int:

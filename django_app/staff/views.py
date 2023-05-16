@@ -25,7 +25,6 @@ class TransactionViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 def pin_code_authentication(request):
     pin_code = request.data.get('pin_code')
-    print(request.data)
 
     try:
         user = Employee.objects.get(pin_code=pin_code)

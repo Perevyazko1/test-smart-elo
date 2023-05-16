@@ -78,7 +78,7 @@ employees = {
         'last_name': 'Кречетов',
         'pin_code': 362357,
         'password': 'Oleg_357',
-        'departments': ['Обивка', 'ППУ'],
+        'departments': ['Обивка', 'ППУ', 'Упаковка'],
         'groups': ['Бригадиры'],
     },
     'Ozhigin_D': {
