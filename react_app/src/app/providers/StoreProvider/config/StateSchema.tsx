@@ -6,8 +6,7 @@ import {EmployeeSchema} from "entities/Employee/model/types/employee";
 import {EqSchema} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
-import {taxControlSlice} from "../../../../pages/TaxConrtolPage/model/slice/taxControlPageSlice";
-import {TaxControlSchema} from "../../../../pages/TaxConrtolPage/model/types/TaxControlSchema";
+import {TaxControlSchema} from "pages/TaxControlPage";
 
 export interface StateSchema {
     employee: EmployeeSchema,

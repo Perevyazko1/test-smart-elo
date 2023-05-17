@@ -1,1 +1,0 @@
-export {TaxControlPageAsync as TaxControlPage} from './ui/TaxControlPage.async';

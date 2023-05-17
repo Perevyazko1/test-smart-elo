@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {Dropdown, DropdownButton} from "react-bootstrap";
 
-import {getEmployeeTariffAccess} from "entities/Employee";
+import {getEmployeeIsAdmin, getEmployeeTariffPageAccess} from "entities/Employee";
 import {employeeActions, getEmployeeAuthData} from "entities/Employee";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -21,7 +21,8 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
     const [showModal, setShowModal] = useState(false)
 
     const dispatch = useAppDispatch()
-    const employeeTariffAccess = useSelector(getEmployeeTariffAccess)
+    const employeeTariffPageAccess = useSelector(getEmployeeTariffPageAccess)
+    const employeeIsAdmin = useSelector(getEmployeeIsAdmin)
     const employee = useSelector(getEmployeeAuthData)
 
     const logout = useCallback(() => {
@@ -44,10 +45,18 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
                     </Dropdown.ItemText>
                 </Link>
 
-                {employeeTariffAccess &&
+                {employeeTariffPageAccess &&
                     <Link to={'/tax_control'}>
                         <Dropdown.ItemText>
                             Тарификации
+                        </Dropdown.ItemText>
+                    </Link>
+                }
+
+                {employeeIsAdmin &&
+                    <Link to={'/test'}>
+                        <Dropdown.ItemText>
+                            Страница разработчика
                         </Dropdown.ItemText>
                     </Link>
                 }

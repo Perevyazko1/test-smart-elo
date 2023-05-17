@@ -9,7 +9,7 @@ class TechProcessSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TechnologicalProcess
-        fields = ["id", "name", "image"]
+        fields = ["id", "name", "image", "schema"]
 
     def get_image(self, obj):
         if obj.image:

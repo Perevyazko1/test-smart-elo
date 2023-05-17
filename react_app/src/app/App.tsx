@@ -3,9 +3,13 @@ import {useSelector} from "react-redux";
 import {Route, Routes} from "react-router-dom";
 
 import {LoginPage} from "pages/LoginPage";
-import {TaxControlPage} from "pages/TaxConrtolPage";
+import {TaxControlPage} from "pages/TaxControlPage";
 import {EQPage} from "pages/EQPage";
+import {authByPinCode} from "features/AuthByPinCode";
+
 import {Loader} from "shared/ui/Loader/Loader";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {USER_LOCALSTORAGE_KEY} from "shared/const/localstorage";
 import {newWsConnection} from "shared/ws_api/newWsConnection";
 import {
     employee,
@@ -14,14 +18,12 @@ import {
     getEmployeeAuthData,
     getEmployeeInited,
     getEmployeePinCode,
-    getEmployeeTariffAccess
+    getEmployeeTariffPageAccess
 } from "entities/Employee";
 
 import './styles/App.scss';
 import 'shared/assets/fonts/fontawesome-all.min.css';
-import {authByPinCode} from "features/AuthByPinCode";
-import {useAppDispatch} from "../shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {USER_LOCALSTORAGE_KEY} from "../shared/const/localstorage";
+import {TestPage} from "../pages/TestPage";
 
 
 function App() {
@@ -30,7 +32,7 @@ function App() {
     const employee_inited = useSelector(getEmployeeInited)
     const pin_code = useSelector(getEmployeePinCode)
     const current_department = useSelector(getCurrentDepartment)
-    const employeeTariffAccess = useSelector(getEmployeeTariffAccess)
+    const employeeTariffPageAccess = useSelector(getEmployeeTariffPageAccess)
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -70,10 +72,18 @@ function App() {
                                 </Suspense>
                             }/>
 
-                            {employeeTariffAccess &&
+                            {employeeTariffPageAccess &&
                                 <Route path="/tax_control" element={
                                     <Suspense fallback={<Loader/>}>
                                         <TaxControlPage/>
+                                    </Suspense>
+                                }/>
+                            }
+
+                            {employeeTariffPageAccess &&
+                                <Route path="/test" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <TestPage/>
                                     </Suspense>
                                 }/>
                             }

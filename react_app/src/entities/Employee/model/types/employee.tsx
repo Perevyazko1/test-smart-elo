@@ -1,7 +1,9 @@
 import {department} from "entities/Department";
 
+import {EmployeeRole} from "../consts/employeeConsts";
+
 export interface group {
-    name: string
+    name: EmployeeRole
 }
 
 export interface employee {
@@ -11,8 +13,8 @@ export interface employee {
     last_name?: string,
     pin_code?: number,
     current_department?: department,
-    departments?: [department],
-    groups?: [group],
+    departments?: department[],
+    groups?: group[],
 }
 
 

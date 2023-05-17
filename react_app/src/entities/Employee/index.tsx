@@ -8,7 +8,13 @@ export {getEmployeeAuthData} from './model/selectors/getEmployeeAuthData/getEmpl
 export {getCurrentDepartment} from "./model/selectors/getCurrentDepartment/getCurrentDepartment";
 export {getEmployeeDepartments} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";
 export {getEmployeePinCode} from "./model/selectors/getEmployeePinCode/getEmployeePinCode";
-export {
-    getEmployeeIsBoss, getEmployeeTariffAccess
-} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";
 export {getEmployeeFullName} from "./model/selectors/getEmployeeFullName/getEmployeeFullName";
+export {EmployeeRole} from './model/consts/employeeConsts';
+export {
+    getEmployeeGroups,
+    getEmployeeTariffPageAccess,
+    getEmployeeIsBoss,
+    getEmployeeTariffConfirm,
+    getEmployeeEQPageAccess,
+    getEmployeeIsAdmin
+} from './model/selectors/getEmployeeAccess/getEmployeeAccess'
