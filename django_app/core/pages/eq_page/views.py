@@ -7,6 +7,8 @@ from django.http import JsonResponse
 
 from core.models import OrderProduct, Assignment, TechnologicalProcess, ProductionStep
 from core.pages.eq_page.serializers import EQCardSerializer
+from core.pages.eq_page.services.check_schema import check_schema
+from core.pages.eq_page.services.create_custom_tech_process import create_custom_tech_process
 from core.pages.eq_page.services.update_assignments import UpdateAssignments
 from core.serializers import TechProcessSerializer
 from core.services.get_week_info import GetWeekInfo
@@ -181,7 +183,7 @@ def get_view_modes(request):
     result = [{'name': 'Режим бригадира', 'key': 1}, {'name': 'Личные наряды', 'key': 0}]
 
     users = Employee.objects.filter(departments__number=department_number).exclude(
-        username='root'
+        groups__name='Администраторы'
     )
 
     for user in users:
@@ -192,7 +194,7 @@ def get_view_modes(request):
 
 @api_view(['GET'])
 def get_tech_process_info(request):
-    qs = TechnologicalProcess.objects.all().order_by('id')
+    qs = TechnologicalProcess.objects.exclude(image='').order_by('id')
     serializer = TechProcessSerializer
     data = serializer(qs, many=True, context={"request": request}).data
 
@@ -274,3 +276,20 @@ def get_order_product_info(request):
         "department_info": department_info,
         "production_info": production_info,
     }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def set_custom_tech_process(request):
+    schema = request.data.get('schema')
+    series_id = request.data.get('series_id')
+
+    if check_schema(schema):
+        technological_process = create_custom_tech_process(schema=schema, series_id=series_id)
+        serializer = TechProcessSerializer
+        data = serializer(technological_process, context={'request': request}).data
+        return JsonResponse({
+            "data": data
+        }, json_dumps_params={"ensure_ascii": False})
+
+    else:
+        return JsonResponse({"error": 'Не корректная схема'}, json_dumps_params={"ensure_ascii": False})

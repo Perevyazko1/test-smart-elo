@@ -8,7 +8,7 @@ import {useSelector} from "react-redux";
 import {getCurrentDepartment} from "entities/Employee";
 
 import {fetchOPTablesData} from "../../model/services/fetchOPTablesData/fetchOPTablesData";
-import {getOPProductionInfo} from "../../model/selectors/getOPProductionInfo/getOPProductionInfo";
+import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 
 interface OPProductionInfoTableProps {
     order_product: order_product
@@ -29,16 +29,16 @@ export const OPProductionInfoTable = memo((props: OPProductionInfoTableProps) =>
 
     const dispatch = useAppDispatch()
     const current_department = useSelector(getCurrentDepartment)
-    const production_info = useSelector(getOPProductionInfo)
+    const opInfoData = useSelector(getOPInfoData)
 
     useEffect(() => {
-        if (current_department?.number && !production_info) {
+        if (current_department?.number && !opInfoData?.order_product_tables_data) {
             dispatch(fetchOPTablesData({
                 series_id: order_product.series_id,
                 department_number: current_department.number
             }))
         }
-    }, [production_info, order_product, current_department, dispatch])
+    }, [opInfoData, order_product, current_department, dispatch])
 
     return (
         <div
@@ -55,7 +55,7 @@ export const OPProductionInfoTable = memo((props: OPProductionInfoTableProps) =>
                 </tr>
                 </thead>
                 <tbody>
-                {production_info?.map((info) => (
+                {opInfoData?.order_product_tables_data?.production_info?.map((info) => (
                     <tr key={info.department_name}>
                         <td>{info.department_name}</td>
                         <td className={"fw-bolder"}>{info.in_work > 0 ? info.in_work : ""}</td>

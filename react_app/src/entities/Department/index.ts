@@ -1,1 +1,2 @@
-export {department} from './model/type/department'
+export {DepartmentConsts} from "./model/consts/departmentConsts";
+export type {department} from './model/type/department';

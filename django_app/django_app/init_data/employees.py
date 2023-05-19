@@ -70,7 +70,7 @@ employees = {
         'last_name': 'Швецова',
         'pin_code': 110304,
         'password': 'Tatiana_304',
-        'departments': ['Крой', 'Пошив'],
+        'departments': ['Крой', 'Пошив', 'Модельер'],
         'groups': ['Бригадиры'],
     },
     'Krechetov_O': {
@@ -86,8 +86,8 @@ employees = {
         'last_name': 'Ожигин',
         'pin_code': 878622,
         'password': 'Dmitriy_622',
-        'departments': ['Упаковка'],
-        'groups': ['Бригадиры'],
+        'departments': [],
+        'groups': [],
     },
     'Sulim_V': {
         'first_name': 'Вадим',
@@ -254,7 +254,7 @@ employees = {
         'last_name': 'Харитонов',
         'pin_code': 454511,
         'password': 'Ivan_511',
-        'departments': ['ППУ'],
+        'departments': ['Обивка'],
         'groups': ['Работники'],
     },
     'Egorov_A': {

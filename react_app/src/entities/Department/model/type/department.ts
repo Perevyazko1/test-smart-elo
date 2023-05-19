@@ -3,5 +3,4 @@ export interface department {
     number: number,
     single: boolean,
     piecework_wages: boolean,
-
 }

@@ -1,4 +1,4 @@
-import {technological_process} from "entities/TechnologicalProcess";
+import {tech_process_schema, technological_process} from "entities/TechnologicalProcess";
 
 
 export interface department_info {
@@ -26,4 +26,8 @@ export interface OrderProductInfoSchema {
     tech_process_list?: technological_process[],
     current_tech_process?: technological_process,
     order_product_tables_data?: order_product_tables_data,
+
+    constructor_schema?: tech_process_schema,
+    show_constructor: boolean,
+    change_tech_process: boolean,
 }

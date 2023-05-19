@@ -1,17 +1,20 @@
-import {memo, ReactNode, useEffect, useState} from 'react';
-import {Button, Table} from "react-bootstrap";
+import {memo, ReactNode, useCallback, useEffect} from 'react';
 import {useSelector} from "react-redux";
 
-import {GET_STATIC_URL} from "shared/const/server_config";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {order_product} from "entities/OrderProduct";
 import {eqActions} from "pages/EQPage";
 
-import {getTechProcessList} from "../../model/selectors/getTechProcessList/getTechProcessList";
 import {fetchTechProcesses} from "../../model/services/fetchTechProcesses/fetchTechProcesses";
 import {fetchSetTechProcess} from "../../model/services/fetchSetTechProcess/fetchSetTechProcess";
-import {getCurrentTechProcess} from "../../model/selectors/getCurrentTechProcess/getCurrentTechProcess";
+import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
+import {orderProductInfoActions} from "../../model/slice/OrderProductInfoSlice";
+import {OpSelectedTechProcess} from "./OPSelectedTechProcess";
+import {OpTechProcessList} from "./OPTechProcessList";
+import {TechProcessWidget} from "../../../TechProcessWidget";
+import {fetchSetCustomTechProcess} from "../../model/services/fetchSetCustomTechProcess/fetchSetCustomTechProcess";
+import {tech_process_schema} from "../../../../entities/TechnologicalProcess";
 
 interface OPTechProcessTableProps {
     order_product: order_product
@@ -27,26 +30,28 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
         ...otherProps
     } = props
 
-    const [changeTechProcess, setChangeTechProcess] = useState(false)
-    const tech_process_list = useSelector(getTechProcessList)
-    const current_tech_process = useSelector(getCurrentTechProcess)
+    const opInfoData = useSelector(getOPInfoData)
     const dispatch = useAppDispatch()
 
-    const techProcessSelected = order_product.product.technological_process || current_tech_process || false
-    const techProcessConfirmed = order_product.product.technological_process_confirmed || false
+    const getProcessConfirmed = useCallback(() => {
+        return !!order_product.product.technological_process_confirmed;
+    }, [order_product.product.technological_process_confirmed])
+
+    const getProcessSelected = useCallback(() => {
+        if (order_product.product.technological_process) {
+            return true
+        } else return !!opInfoData?.current_tech_process;
+    }, [opInfoData?.current_tech_process, order_product.product.technological_process])
 
     useEffect(() => {
-        if (!tech_process_list && !techProcessConfirmed) {
+        if (!opInfoData?.tech_process_list && !getProcessConfirmed()) {
             dispatch(fetchTechProcesses({}))
         }
-        if (!techProcessSelected && !changeTechProcess) {
-            setChangeTechProcess(true)
+        if (!getProcessSelected() && !opInfoData?.change_tech_process && !opInfoData?.show_constructor) {
+            dispatch(orderProductInfoActions.setChangeTP(true))
         }
-    }, [dispatch, tech_process_list, techProcessConfirmed, changeTechProcess, techProcessSelected])
-
-    const change_tech_process = () => {
-        setChangeTechProcess(!changeTechProcess)
-    }
+    }, [dispatch, getProcessConfirmed, getProcessSelected, opInfoData?.change_tech_process,
+        opInfoData?.show_constructor, opInfoData?.tech_process_list])
 
     const set_tech_process = async (tech_process_id: number) => {
         await dispatch(fetchSetTechProcess({
@@ -54,7 +59,22 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
             series_id: order_product.series_id
         }))
         await dispatch(eqActions.eqUpdated())
-        setChangeTechProcess(!changeTechProcess)
+        await dispatch(orderProductInfoActions.setChangeTP(false))
+    }
+
+    const set_custom_tech_process = async (schema: tech_process_schema) => {
+        await dispatch(fetchSetCustomTechProcess({
+            schema: schema,
+            series_id: order_product.series_id
+        }))
+        await dispatch(orderProductInfoActions.setShowConstructor(false))
+        await dispatch(eqActions.eqUpdated())
+        await dispatch(orderProductInfoActions.setChangeTP(false))
+    }
+
+    const on_cancellation_constructor = () => {
+        dispatch(orderProductInfoActions.setShowConstructor(false))
+        dispatch(orderProductInfoActions.setChangeTP(true))
     }
 
     const mods: Mods = {};
@@ -64,121 +84,25 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
             className={classNames('', mods, [className])}
             {...otherProps}
         >
-            {techProcessSelected &&
-                <Table striped bordered hover>
-                    <thead>
-                    <tr>
-                        <td colSpan={3} className={"fw-bold text-center bg-gradient bg-light"}>
-                            Текущий технологический процесс
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>Изображение</th>
-                        <th>Название</th>
-                        <th>
-                            {techProcessConfirmed ? "Подтвердил" : "Изменить"}
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody>
-
-                    {techProcessSelected &&
-                        <tr>
-                            <td>
-                                <img
-                                    src={
-                                        current_tech_process
-                                            ?
-                                            GET_STATIC_URL() + current_tech_process.image
-                                            :
-                                            GET_STATIC_URL() + (order_product.product.technological_process?.image || "")
-                                    }
-                                    alt={
-                                        current_tech_process
-                                            ?
-                                            current_tech_process.name
-                                            :
-                                            order_product.product.technological_process?.name
-                                    }
-                                    style={{maxWidth: "500px", maxHeight: "400px"}}
-                                    loading={'lazy'}
-                                />
-                            </td>
-                            <td>
-                                {
-                                    current_tech_process
-                                        ?
-                                        current_tech_process.name
-                                        :
-                                        order_product.product.technological_process?.name
-                                }
-                            </td>
-                            <td>
-                                {techProcessConfirmed ?
-                                    <div>
-                                        {order_product.product.technological_process_confirmed?.first_name}
-                                        {order_product.product.technological_process_confirmed?.last_name}
-                                    </div> :
-                                    <>
-                                        {changeTechProcess ?
-                                            <Button type={'button'} variant={'warning'} onClick={change_tech_process}>
-                                                Отмена
-                                            </Button> :
-                                            <Button type={'button'} variant={'success'} onClick={change_tech_process}>
-                                                Изменить
-                                            </Button>}
-                                    </>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    </tbody>
-                </Table>
+            {opInfoData?.show_constructor &&
+                <TechProcessWidget
+                    className={'mb-3'}
+                    schema={opInfoData.constructor_schema || {}}
+                    onSubmitData={(data) => set_custom_tech_process(data)}
+                    onCancellation={on_cancellation_constructor}
+                />
             }
 
-            {changeTechProcess &&
-                <Table striped bordered hover>
-                    <thead>
-                    <tr>
-                        <td colSpan={4} className={"fw-bold text-center bg-gradient bg-light"}>
-                            Выберите технологический процесс:
-                        </td>
-                    </tr>
+            {getProcessSelected() && !opInfoData?.show_constructor &&
+                <OpSelectedTechProcess
+                    order_product={order_product}
+                    techProcessConfirmed={getProcessConfirmed()}
+                    techProcessSelected={getProcessSelected()}
+                />
+            }
 
-                    <tr>
-                        <th>Изображение</th>
-                        <th>Название</th>
-                        <th>
-                            Выбрать
-                        </th>
-                    </tr>
-                    </thead>
-
-                    <tbody>
-                    {tech_process_list?.map((tech_process) => (
-                        <tr key={tech_process.name}>
-                            <td>
-                                <img
-                                    src={GET_STATIC_URL() + tech_process.image}
-                                    alt={tech_process.name}
-                                    style={{maxWidth: "500px", maxHeight: "400px"}}
-                                    loading={'lazy'}
-                                />
-                            </td>
-                            <td>{tech_process.name}</td>
-                            <td>
-                                <Button type={'button'}
-                                        variant={'success'}
-                                        onClick={() => set_tech_process(tech_process.id)}
-                                >
-                                    Выбрать
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
-
-                    </tbody>
-                </Table>
+            {opInfoData?.change_tech_process &&
+                <OpTechProcessList set_tech_process={set_tech_process}/>
             }
         </div>
     );

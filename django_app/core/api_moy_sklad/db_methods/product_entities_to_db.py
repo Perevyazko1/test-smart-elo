@@ -20,7 +20,9 @@ class ProductEntityToDB:
     def _save_fabric(product_entity: ProductEntity):
         Fabric.objects.update_or_create(
             fabric_id=product_entity.id,
-            name=product_entity.name,
+            defaults={
+                'name': product_entity.name
+            }
         )
 
     def _save_product(self, product_entity: ProductEntity):

@@ -4,11 +4,11 @@ import {Table} from "react-bootstrap";
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
+import {getCurrentDepartment} from "entities/Employee";
 import {order_product} from 'entities/OrderProduct'
 
-import {getOPDepartmentInfo} from "../../model/selectors/getOPDepartmentInfo/getOPDepartmentInfo";
 import {fetchOPTablesData} from "../../model/services/fetchOPTablesData/fetchOPTablesData";
-import {getCurrentDepartment} from "../../../../entities/Employee";
+import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 
 interface OpDepartmentInfoTableProps {
     order_product: order_product
@@ -26,16 +26,16 @@ export const OpDepartmentInfoTable = memo((props: OpDepartmentInfoTableProps) =>
 
     const dispatch = useAppDispatch()
     const current_department = useSelector(getCurrentDepartment)
-    const department_info = useSelector(getOPDepartmentInfo)
+    const opInfoData = useSelector(getOPInfoData)
 
     useEffect(() => {
-        if (current_department?.number && !department_info) {
+        if (current_department?.number && !opInfoData?.order_product_tables_data?.department_info) {
             dispatch(fetchOPTablesData({
                 series_id: order_product.series_id,
                 department_number: current_department.number
             }))
         }
-    }, [department_info, order_product, current_department, dispatch])
+    }, [order_product, current_department, dispatch, opInfoData?.order_product_tables_data?.department_info])
 
 
     const mods: Mods = {};
@@ -55,7 +55,7 @@ export const OpDepartmentInfoTable = memo((props: OpDepartmentInfoTableProps) =>
                 </tr>
                 </thead>
                 <tbody>
-                {department_info?.map((info) => (
+                {opInfoData?.order_product_tables_data?.department_info?.map((info) => (
                     <tr key={info.full_name}>
                         <td>{info.full_name}</td>
                         <td className={"fw-bolder"}>{info.in_work > 0 ? info.in_work : ""}</td>
