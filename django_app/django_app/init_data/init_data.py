@@ -98,5 +98,3 @@ def init_data():
 
         for department_name in params['departments']:
             user.departments.add(Department.objects.get(name=department_name))
-
-        user.current_department = Department.objects.get(name=params['departments'][0])
