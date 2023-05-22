@@ -45,40 +45,39 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
         <div className={classNames('mx-2', mods, [className])}>
             <DropdownButton
                 variant={"dark"}
-                menuVariant="dark"
+                menuVariant={"dark"}
+                align={'end'}
                 title={employee?.first_name + " " + employee?.last_name}
                 {...otherProps}
             >
-                <>
-                    {eloPageAccess &&
-                        <Dropdown.Item as={NavLink} to={'/eq'}>
-                            ЭЛО
-                        </Dropdown.Item>
-                    }
-
-                    {tariffPageAccess &&
-                        <Dropdown.Item as={NavLink} to={'/tax_control'}>
-                            Тарификации
-                        </Dropdown.Item>
-                    }
-
-                    {isAdmin &&
-                        <Dropdown.Item to={'/test'} as={NavLink}>
-                            Страница разработчика
-                        </Dropdown.Item>
-                    }
-
-                    <Dropdown.Item onClick={() => setShowModal(true)}>
-                        История действий
-                        {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
+                {eloPageAccess &&
+                    <Dropdown.Item as={NavLink} to={'/'}>
+                        ЭЛО
                     </Dropdown.Item>
+                }
 
-                    <Dropdown.Divider/>
-
-                    <Dropdown.Item onClick={logout}>
-                        Выйти
+                {tariffPageAccess &&
+                    <Dropdown.Item as={NavLink} to={'/tax_control'}>
+                        Тарификации
                     </Dropdown.Item>
-                </>
+                }
+
+                {isAdmin &&
+                    <Dropdown.Item to={'/test'} as={NavLink}>
+                        Страница разработчика
+                    </Dropdown.Item>
+                }
+
+                <Dropdown.Item onClick={() => setShowModal(true)}>
+                    История действий
+                    {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
+                </Dropdown.Item>
+
+                <Dropdown.Divider/>
+
+                <Dropdown.Item onClick={logout}>
+                    Выйти
+                </Dropdown.Item>
             </DropdownButton>
 
         </div>

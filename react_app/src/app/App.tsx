@@ -79,7 +79,7 @@ function App() {
                         ?
                         <Routes>
                             {eloPagePermission &&
-                                <Route path="/eq" element={
+                                <Route path="/" element={
                                     <Suspense fallback={<Loader/>}>
                                         <EQPage/>
                                     </Suspense>
