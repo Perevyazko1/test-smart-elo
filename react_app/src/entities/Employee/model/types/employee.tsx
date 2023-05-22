@@ -1,9 +1,9 @@
 import {department} from "entities/Department";
 
-import {EmployeeRole} from "../consts/employeeConsts";
+import {EmployeePermissions} from "../consts/employeeConsts";
 
 export interface group {
-    name: EmployeeRole
+    name: EmployeePermissions;
 }
 
 export interface employee {

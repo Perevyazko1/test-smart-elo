@@ -42,7 +42,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
         <DropdownButton
             variant={"outline-light"}
             menuVariant="dark"
-            title={currentDepartment?.name}
+            title={currentDepartment?.name || 'Выберите отдел'}
             className={classNames('', mods, [className])}
             {...otherProps}
         >

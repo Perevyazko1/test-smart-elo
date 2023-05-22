@@ -9,6 +9,8 @@ import {OPProductionInfoTable} from "../OPProductionInfoTable/OPProductionInfoTa
 import {OPTechProcessTable} from "../OPTechProcessTable/OPTechProcessTable";
 import {OpBaseInfo} from "../OPBaseInfo/OPBaseInfo";
 import {OpDepartmentInfoTable} from "../OPDepartmentInfoTable/OPDepartmentInfoTable";
+import {useSelector} from "react-redux";
+import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 
 
 const initialReducers: ReducersList = {
@@ -22,6 +24,7 @@ export interface OrderProductModalProps {
 
 export const OrderProductModal = memo((props: OrderProductModalProps) => {
     const [showModal, setShowModal] = useState(true)
+    const currentTechProcess = useSelector(getOPInfoData)?.current_tech_process
 
     const hide_modal = () => {
         setShowModal(false)
@@ -57,7 +60,7 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                         </Accordion.Item>
                         <Accordion.Item eventKey="2" className={'gb-dark'}>
                             <Accordion.Header>
-                                {tech_process_confirmed
+                                {tech_process_confirmed && !currentTechProcess
                                     ?
                                     <div className={'bg-warning mx-2 fw-bold'}>
                                         Технологический процесс не выбран!

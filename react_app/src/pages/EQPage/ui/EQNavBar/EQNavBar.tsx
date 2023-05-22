@@ -4,20 +4,26 @@ import {useSelector} from "react-redux";
 import logo from 'shared/assets/images/SZMK Logo White Horizontal 900х352.png';
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
-import {getEmployeeIsBoss} from "entities/Employee";
-import {eqActions} from "../../model/slice/eqSlice";
+
 import {EqSetSeriesSize} from "./EQSetSeriesSize";
 import {EqSetProject} from "./EQSetProject";
 import {EqSetViewMode} from "./EQSetViewMode";
 import {EQSetDepartment} from "./EQSetDepartment";
+import {eqActions} from "../../model/slice/eqSlice";
+import {getFiltersIsDefault} from "../../model/selectors/getFiltersIsDefault/getFiltersIsDefault";
 
 
 export const EqNavBar = memo(() => {
-    const employeeIsBoss = useSelector(getEmployeeIsBoss)
+    const filtersIsDefault = useSelector(getFiltersIsDefault)
     const dispatch = useAppDispatch()
 
+
     const set_default_filters = () => {
-        dispatch(eqActions.setDefaultFilters())
+        if (filtersIsDefault) {
+            dispatch(eqActions.eqUpdated())
+        } else {
+            dispatch(eqActions.setDefaultFilters())
+        }
     }
 
     return (
@@ -31,11 +37,7 @@ export const EqNavBar = memo(() => {
 
             <EqSetProject className={"my-auto mx-2"}/>
 
-            {
-                employeeIsBoss
-                &&
-                <EqSetViewMode className={"my-auto mx-2"}/>
-            }
+            <EqSetViewMode className={"my-auto mx-2"}/>
 
             <EqSetSeriesSize className={"my-auto mx-2"}/>
 

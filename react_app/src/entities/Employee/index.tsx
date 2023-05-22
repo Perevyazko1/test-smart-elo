@@ -9,12 +9,7 @@ export {getCurrentDepartment} from "./model/selectors/getCurrentDepartment/getCu
 export {getEmployeeDepartments} from "./model/selectors/getEmployeeDepartments/getEmployeeDepartments";
 export {getEmployeePinCode} from "./model/selectors/getEmployeePinCode/getEmployeePinCode";
 export {getEmployeeFullName} from "./model/selectors/getEmployeeFullName/getEmployeeFullName";
-export {EmployeeRole} from './model/consts/employeeConsts';
+export {EmployeePermissions} from './model/consts/employeeConsts';
 export {
-    getEmployeeGroups,
-    getEmployeeTariffPageAccess,
-    getEmployeeIsBoss,
-    getEmployeeTariffConfirm,
-    getEmployeeEQPageAccess,
-    getEmployeeIsAdmin
+    getEmployeeGroups, getEmployeeHasPermissions
 } from './model/selectors/getEmployeeAccess/getEmployeeAccess'

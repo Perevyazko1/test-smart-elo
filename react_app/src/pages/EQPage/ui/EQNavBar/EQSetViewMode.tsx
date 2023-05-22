@@ -9,7 +9,7 @@ import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurr
 import {getViewMods} from "../../model/selectors/getViewMods/getViewMods";
 import {ViewMode} from "../../model/types/eqSchema";
 import {eqActions, initialState} from "../../model/slice/eqSlice";
-import {getEmployeePinCode} from "../../../../entities/Employee";
+import {EmployeePermissions, getEmployeeHasPermissions, getEmployeePinCode} from "entities/Employee";
 
 interface EqSetViewModeProps {
     className?: string
@@ -23,6 +23,19 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
     const current_view_mod = useSelector(getCurrentViewMod)
     const view_mods = useSelector(getViewMods)
     const pin_code = useSelector(getEmployeePinCode)
+    const bossModePermission = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ELO_BOSS_VIEW_MODE
+    ]))
+    const behalfPermission = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.BEHALF_ACTIONS
+    ]))
+
+    if (!bossModePermission && !behalfPermission) {
+        return <></>;
+    }
+
+    const bossMode: ViewMode = {'name': 'Режим бригадира', 'key': 1}
+    const normalMode: ViewMode = {'name': 'Личные наряды', 'key': 0}
 
     const updateCurrentViewMod = (view_mode: ViewMode) => {
         dispatch(eqActions.setCurrentViewMode(view_mode))
@@ -42,13 +55,26 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
             className={classNames('', mods, [className])}
             {...otherProps}
         >
-            <Dropdown.ItemText>
-                <h6 className={"my-0"}>Выберите вид</h6>
-            </Dropdown.ItemText>
 
             <Dropdown.Divider/>
 
-            {view_mods?.map((view_mode) => (
+            <Dropdown.Item
+                active={normalMode.key === current_view_mod?.key}
+                onClick={() => updateCurrentViewMod(normalMode)}
+            >
+                {normalMode.name}
+            </Dropdown.Item>
+
+            {bossModePermission &&
+                <Dropdown.Item
+                    active={bossMode.key === current_view_mod?.key}
+                    onClick={() => updateCurrentViewMod(bossMode)}
+                >
+                    {bossMode.name}
+                </Dropdown.Item>
+            }
+
+            {behalfPermission && view_mods?.map((view_mode) => (
                 <div key={view_mode.name}>
                     {view_mode.key !== pin_code
                         ?

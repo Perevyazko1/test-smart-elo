@@ -19,7 +19,16 @@ employees = {
             'Пила',
             'Модельер'
         ],
-        'groups': ['Администраторы', 'Бригадиры', 'Тарификации'],
+        'groups': [
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница ЭЛО',
+            'Администраторы',
+            'Страница тарификаций',
+            'Первичная тарификация',
+            'Подтверждение тарификаций',
+        ],
     },
     'root': {
         'first_name': 'Администратор',
@@ -41,7 +50,15 @@ employees = {
             'Пила',
             'Модельер'
         ],
-        'groups': ['Администраторы', 'Бригадиры', 'Тарификации'],
+        'groups': [
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница ЭЛО',
+            'Администраторы',
+            'Страница тарификаций',
+            'Первичная тарификация',
+            'Подтверждение тарификаций', ],
     },
     'Kharkov_I': {
         'first_name': 'Илья',
@@ -49,7 +66,11 @@ employees = {
         'pin_code': 789453,
         'password': 'Ilia_453',
         'departments': ['Конструктора'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+        ],
     },
     'Velikiy_D': {
         'first_name': 'Денис',
@@ -57,7 +78,14 @@ employees = {
         'pin_code': 658651,
         'password': 'Denis_651',
         'departments': ['Столярка', 'Малярка', 'Лазер', ],
-        'groups': ['Бригадиры'],
+        'groups': [
+            'Страница ЭЛО',
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница тарификаций',
+            'Первичная тарификация',
+        ],
     },
     'Gukov_O': {
         'first_name': 'Олег',
@@ -65,7 +93,14 @@ employees = {
         'pin_code': 426486,
         'password': 'Oleg_486',
         'departments': ['Сборка', 'Пила'],
-        'groups': ['Бригадиры'],
+        'groups': [
+            'Страница ЭЛО',
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница тарификаций',
+            'Первичная тарификация',
+        ],
     },
     'Shvetsova_T': {
         'first_name': 'Татьяна',
@@ -73,7 +108,14 @@ employees = {
         'pin_code': 110304,
         'password': 'Tatiana_304',
         'departments': ['Крой', 'Пошив', 'Модельер'],
-        'groups': ['Бригадиры'],
+        'groups': [
+            'Страница ЭЛО',
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница тарификаций',
+            'Первичная тарификация',
+        ],
     },
     'Krechetov_O': {
         'first_name': 'Олег',
@@ -81,7 +123,14 @@ employees = {
         'pin_code': 362357,
         'password': 'Oleg_357',
         'departments': ['Обивка', 'ППУ', 'Упаковка'],
-        'groups': ['Бригадиры'],
+        'groups': [
+            'Страница ЭЛО',
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+            'Страница тарификаций',
+            'Первичная тарификация',
+        ],
     },
     'Ozhigin_D': {
         'first_name': 'Дмитрий',
@@ -97,7 +146,12 @@ employees = {
         'pin_code': 594281,
         'password': 'Vadim_281',
         'departments': ['Подрядчики', 'Лазер'],
-        'groups': ['Бригадиры'],
+        'groups': [
+            'Страница ЭЛО',
+            'Визирование нарядов',
+            'Режим просмотра бригадира',
+            'Действия от имени сотрудников отдела',
+        ],
     },
     'Sapachuk_E': {
         'first_name': 'Елизавета',
@@ -105,7 +159,9 @@ employees = {
         'pin_code': 594141,
         'password': 'Elizabeth_141',
         'departments': ['Конструктора'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Kamalov_V': {
         'first_name': 'Владимир',
@@ -113,7 +169,9 @@ employees = {
         'pin_code': 528142,
         'password': 'Vladimir_142',
         'departments': ['Конструктора', 'Лазер'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Korobejnikova_A': {
         'first_name': 'Анастасия',
@@ -121,7 +179,9 @@ employees = {
         'pin_code': 128152,
         'password': 'Anastasia_152',
         'departments': ['Крой', 'Пошив'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Reviakina_O': {
         'first_name': 'Ольга',
@@ -129,7 +189,9 @@ employees = {
         'pin_code': 863177,
         'password': 'Olga_177',
         'departments': ['Крой', 'Пошив'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Semenova_O': {
         'first_name': 'Ольга',
@@ -137,7 +199,9 @@ employees = {
         'pin_code': 256778,
         'password': 'Olga_778',
         'departments': ['Крой', 'Пошив'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Malahova_L': {
         'first_name': 'Лариса',
@@ -145,7 +209,9 @@ employees = {
         'pin_code': 996754,
         'password': 'Larisa_754',
         'departments': ['Крой', 'Пошив'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Samsonov_M': {
         'first_name': 'Михаил',
@@ -153,7 +219,9 @@ employees = {
         'pin_code': 922753,
         'password': 'Mihail_753',
         'departments': ['Лазер'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Filatov_V': {
         'first_name': 'Владимир',
@@ -161,7 +229,9 @@ employees = {
         'pin_code': 166842,
         'password': 'Vladimir_842',
         'departments': ['Пила'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Kashtanov_D': {
         'first_name': 'Дмитрий',
@@ -169,7 +239,9 @@ employees = {
         'pin_code': 986432,
         'password': 'Dmitriy_432',
         'departments': ['Сборка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Berezin_E': {
         'first_name': 'Евгений',
@@ -177,7 +249,9 @@ employees = {
         'pin_code': 251369,
         'password': 'Evgeniy_369',
         'departments': ['Пила'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Postnikov_E': {
         'first_name': 'Евгений',
@@ -185,7 +259,9 @@ employees = {
         'pin_code': 474753,
         'password': 'Evgeniy_753',
         'departments': ['Сборка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Ericojnen_B': {
         'first_name': 'Борис',
@@ -193,7 +269,9 @@ employees = {
         'pin_code': 728746,
         'password': 'Boris_746',
         'departments': ['Сборка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Kotenev_S': {
         'first_name': 'Станислав',
@@ -201,7 +279,9 @@ employees = {
         'pin_code': 121189,
         'password': 'Boris_189',
         'departments': ['Сборка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Ilkaev_M': {
         'first_name': 'Михаил',
@@ -209,7 +289,9 @@ employees = {
         'pin_code': 858786,
         'password': 'Mihail_786',
         'departments': ['Сборка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Absalyamov_Y': {
         'first_name': 'Юрий',
@@ -217,7 +299,9 @@ employees = {
         'pin_code': 122353,
         'password': 'Yuri_353',
         'departments': ['Столярка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Zaychenko_I': {
         'first_name': 'Илья',
@@ -225,7 +309,9 @@ employees = {
         'pin_code': 552363,
         'password': 'Ilia_363',
         'departments': ['Столярка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Cheremuhin_A': {
         'first_name': 'Андрей',
@@ -233,7 +319,9 @@ employees = {
         'pin_code': 332411,
         'password': 'Andrey_411',
         'departments': ['Столярка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Borodin_Y': {
         'first_name': 'Ярослав',
@@ -241,7 +329,9 @@ employees = {
         'pin_code': 774545,
         'password': 'Yaroslav_545',
         'departments': ['Столярка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Popov_D': {
         'first_name': 'Денис',
@@ -249,7 +339,9 @@ employees = {
         'pin_code': 333522,
         'password': 'Denis_522',
         'departments': ['Столярка', 'Малярка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Kharitinov_I': {
         'first_name': 'Иван',
@@ -257,7 +349,9 @@ employees = {
         'pin_code': 454511,
         'password': 'Ivan_511',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Egorov_A': {
         'first_name': 'Антон',
@@ -265,7 +359,9 @@ employees = {
         'pin_code': 452226,
         'password': 'Anton_226',
         'departments': ['ППУ'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Levchenko_D': {
         'first_name': 'Дмитрий',
@@ -273,7 +369,9 @@ employees = {
         'pin_code': 177475,
         'password': 'Dmitriy_475',
         'departments': ['ППУ'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Vinogradov_A': {
         'first_name': 'Артем',
@@ -281,7 +379,9 @@ employees = {
         'pin_code': 586963,
         'password': 'Artem_963',
         'departments': ['Упаковка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Yuldashev_S': {
         'first_name': 'Саид',
@@ -289,7 +389,9 @@ employees = {
         'pin_code': 203569,
         'password': 'Said_569',
         'departments': ['Упаковка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Batirov_B': {
         'first_name': 'Бобирбек',
@@ -297,7 +399,9 @@ employees = {
         'pin_code': 305069,
         'password': 'Bobirbek_069',
         'departments': ['Упаковка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Askerov_E': {
         'first_name': 'Эдуард',
@@ -305,7 +409,9 @@ employees = {
         'pin_code': 230256,
         'password': 'Eduard_256',
         'departments': ['Упаковка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Golubev_V': {
         'first_name': 'Валерий',
@@ -313,7 +419,9 @@ employees = {
         'pin_code': 852036,
         'password': 'Valeriy_036',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Krupen_A': {
         'first_name': 'Алексей',
@@ -321,7 +429,9 @@ employees = {
         'pin_code': 255601,
         'password': 'Aleksei_601',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Badulin_D': {
         'first_name': 'Даниил',
@@ -329,7 +439,9 @@ employees = {
         'pin_code': 748605,
         'password': 'Daniil_605',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Prohorenko_D': {
         'first_name': 'Дмитрий',
@@ -337,7 +449,9 @@ employees = {
         'pin_code': 963014,
         'password': 'Dmitriy_014',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Gurenok_P': {
         'first_name': 'Гурёнок',
@@ -345,7 +459,9 @@ employees = {
         'pin_code': 411212,
         'password': 'Dmitriy_212',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Petrov_V': {
         'first_name': 'Виталий',
@@ -353,7 +469,9 @@ employees = {
         'pin_code': 855457,
         'password': 'Vitaliy_457',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
     'Klishin_D': {
         'first_name': 'Денис',
@@ -361,6 +479,8 @@ employees = {
         'pin_code': 112332,
         'password': 'Denis_332',
         'departments': ['Обивка'],
-        'groups': ['Работники'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
     },
 }

@@ -14,16 +14,18 @@ import {newWsConnection} from "shared/ws_api/newWsConnection";
 import {
     employee,
     employeeActions,
+    EmployeePermissions,
     getCurrentDepartment,
     getEmployeeAuthData,
+    getEmployeeHasPermissions,
     getEmployeeInited,
     getEmployeePinCode,
-    getEmployeeTariffPageAccess
 } from "entities/Employee";
 
 import './styles/App.scss';
 import 'shared/assets/fonts/fontawesome-all.min.css';
-import {TestPage} from "../pages/TestPage";
+import {TestPage} from "pages/TestPage";
+import {ForbiddenPage} from "pages/ForbiddenPage";
 
 
 function App() {
@@ -32,7 +34,17 @@ function App() {
     const employee_inited = useSelector(getEmployeeInited)
     const pin_code = useSelector(getEmployeePinCode)
     const current_department = useSelector(getCurrentDepartment)
-    const employeeTariffPageAccess = useSelector(getEmployeeTariffPageAccess)
+
+    const tariffPagePermission = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.TARIFICATION_PAGE
+    ]))
+    const eloPagePermission = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ELO_PAGE
+    ]))
+    const testPagePermission = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ADMIN
+    ]))
+
     const socketRef = useRef<WebSocket | null>(null);
 
     useEffect(() => {
@@ -66,13 +78,15 @@ function App() {
                     {authData
                         ?
                         <Routes>
-                            <Route path="/eq" element={
-                                <Suspense fallback={<Loader/>}>
-                                    <EQPage/>
-                                </Suspense>
-                            }/>
+                            {eloPagePermission &&
+                                <Route path="/eq" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <EQPage/>
+                                    </Suspense>
+                                }/>
+                            }
 
-                            {employeeTariffPageAccess &&
+                            {tariffPagePermission &&
                                 <Route path="/tax_control" element={
                                     <Suspense fallback={<Loader/>}>
                                         <TaxControlPage/>
@@ -80,7 +94,7 @@ function App() {
                                 }/>
                             }
 
-                            {employeeTariffPageAccess &&
+                            {testPagePermission &&
                                 <Route path="/test" element={
                                     <Suspense fallback={<Loader/>}>
                                         <TestPage/>
@@ -88,11 +102,20 @@ function App() {
                                 }/>
                             }
 
-                            <Route path="/*" element={
-                                <Suspense fallback={<Loader/>}>
-                                    <EQPage/>
-                                </Suspense>
-                            }/>
+                            {eloPagePermission
+                                ?
+                                <Route path="/*" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <EQPage/>
+                                    </Suspense>
+                                }/>
+                                :
+                                <Route path="/*" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <ForbiddenPage/>
+                                    </Suspense>
+                                }/>
+                            }
                         </Routes>
                         :
                         <Suspense fallback={<Loader/>}>

@@ -4,9 +4,9 @@ import {useSelector} from "react-redux";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {eqActions, getSeriesSize} from "pages/EQPage";
+import {eqActions, getCurrentViewMod, getSeriesSize} from "pages/EQPage";
 import {order_product} from "entities/OrderProduct";
-import {getEmployeeAuthData, getEmployeeIsBoss} from "entities/Employee";
+import {EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
 
 import {CardContentWrapper} from "./CardContentWrapper/CardContentWrapper";
 import {fetchUpdateAssignments} from "../model/services/fetchUpdateAssignments";
@@ -17,7 +17,6 @@ import {getButtonBg} from "../lib/getButtonBg";
 import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
-import {getCurrentViewMod} from "../../../pages/EQPage/model/selectors/getCurrentViewMod/getCurrentViewMod";
 import {updateTargetList} from "../lib/updateTargetList";
 
 export enum CardType {
@@ -38,7 +37,9 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
     const series_size = useSelector(getSeriesSize)
-    const employeeIsBoss = useSelector(getEmployeeIsBoss)
+    const confirmAssignment = useSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
+    ]))
     const view_mode = useSelector(getCurrentViewMod)
 
     const tech_process_not_changed = !order_product?.product?.technological_process
@@ -91,12 +92,12 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 return true;
             } else if (tech_process_not_changed) {
                 return false;
-            } else if (employeeIsBoss) {
+            } else if (confirmAssignment) {
                 return true;
             }
         }
         return false;
-    }, [assignmentsLists?.primary?.length, card_type, employeeIsBoss, tech_process_not_changed])
+    }, [assignmentsLists?.primary?.length, card_type, confirmAssignment, tech_process_not_changed])
 
     const updateAssignments = async (first: boolean = true) => {
         if (authData?.pin_code && authData?.current_department) {

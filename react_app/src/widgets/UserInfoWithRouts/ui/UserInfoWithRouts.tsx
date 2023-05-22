@@ -1,10 +1,9 @@
 import React, {memo, useCallback, useState} from 'react';
-import {Link} from "react-router-dom";
+import {NavLink} from "react-router-dom";
 import {useSelector} from "react-redux";
 import {Dropdown, DropdownButton} from "react-bootstrap";
 
-import {getEmployeeIsAdmin, getEmployeeTariffPageAccess} from "entities/Employee";
-import {employeeActions, getEmployeeAuthData} from "entities/Employee";
+import {employeeActions, EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
@@ -21,8 +20,19 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
     const [showModal, setShowModal] = useState(false)
 
     const dispatch = useAppDispatch()
-    const employeeTariffPageAccess = useSelector(getEmployeeTariffPageAccess)
-    const employeeIsAdmin = useSelector(getEmployeeIsAdmin)
+
+    const eloPageAccess = useSelector(
+        getEmployeeHasPermissions([
+            EmployeePermissions.TARIFICATION_PAGE])
+    )
+    const tariffPageAccess = useSelector(
+        getEmployeeHasPermissions([
+            EmployeePermissions.TARIFICATION_PAGE])
+    )
+    const isAdmin = useSelector(
+        getEmployeeHasPermissions([
+            EmployeePermissions.ADMIN])
+    )
     const employee = useSelector(getEmployeeAuthData)
 
     const logout = useCallback(() => {
@@ -39,39 +49,36 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
                 title={employee?.first_name + " " + employee?.last_name}
                 {...otherProps}
             >
-                <Link to={'/eq'}>
-                    <Dropdown.ItemText>
-                        ЭЛО
-                    </Dropdown.ItemText>
-                </Link>
+                <>
+                    {eloPageAccess &&
+                        <Dropdown.Item as={NavLink} to={'/eq'}>
+                            ЭЛО
+                        </Dropdown.Item>
+                    }
 
-                {employeeTariffPageAccess &&
-                    <Link to={'/tax_control'}>
-                        <Dropdown.ItemText>
+                    {tariffPageAccess &&
+                        <Dropdown.Item as={NavLink} to={'/tax_control'}>
                             Тарификации
-                        </Dropdown.ItemText>
-                    </Link>
-                }
+                        </Dropdown.Item>
+                    }
 
-                {employeeIsAdmin &&
-                    <Link to={'/test'}>
-                        <Dropdown.ItemText>
+                    {isAdmin &&
+                        <Dropdown.Item to={'/test'} as={NavLink}>
                             Страница разработчика
-                        </Dropdown.ItemText>
-                    </Link>
-                }
+                        </Dropdown.Item>
+                    }
 
-                <Dropdown.Item onClick={() => setShowModal(true)}>
-                    История действий
-                    {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
-                </Dropdown.Item>
+                    <Dropdown.Item onClick={() => setShowModal(true)}>
+                        История действий
+                        {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
+                    </Dropdown.Item>
 
-                <Dropdown.Divider/>
+                    <Dropdown.Divider/>
 
-                <Dropdown.Item onClick={logout}>
-                    Выйти
-                </Dropdown.Item>
-
+                    <Dropdown.Item onClick={logout}>
+                        Выйти
+                    </Dropdown.Item>
+                </>
             </DropdownButton>
 
         </div>
