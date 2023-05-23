@@ -43,12 +43,11 @@ class EQCardSerializer(serializers.ModelSerializer):
 
     def get_assignments(self, obj):
         status_list: list = self.context.get('status_list')
+        view_mode: list = self.context.get('view_mode')
         department_number: list = self.context.get('department_number')
 
         week = self.context.get('week')
         year = self.context.get('year')
-
-        week_info = GetWeekInfo(week=week, year=year).execute()
 
         qs = obj.assignments.all()
 
@@ -58,7 +57,8 @@ class EQCardSerializer(serializers.ModelSerializer):
                 department__number=department_number,
             )
 
-        if status_list == ['ready']:
+        if status_list == ['ready'] and not view_mode == '2':
+            week_info = GetWeekInfo(week=week, year=year).execute()
             qs = qs.filter(
                 date_completion__gt=week_info.date_range[0],
                 date_completion__lte=week_info.date_range[1],

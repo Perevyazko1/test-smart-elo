@@ -99,6 +99,7 @@ class GetReadyList(viewsets.ModelViewSet):
         context['department_number'] = self.request.query_params.get('department_number')
         context['week'] = self.request.query_params.get('week')
         context['year'] = self.request.query_params.get('year')
+        context['view_mode'] = self.request.query_params.get('view_mode')
         return context
 
     def get_queryset(self):
