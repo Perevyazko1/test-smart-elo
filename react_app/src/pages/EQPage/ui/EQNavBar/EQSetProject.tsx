@@ -36,7 +36,7 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
             {...otherProps}
         >
             <Dropdown.ItemText>
-                <h6 className={"my-0"}>Выберите проект</h6>
+                Выбор проекта
             </Dropdown.ItemText>
 
             <Dropdown.Divider/>

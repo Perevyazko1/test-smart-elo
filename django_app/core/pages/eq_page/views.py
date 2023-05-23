@@ -7,8 +7,11 @@ from django.http import JsonResponse
 
 from core.models import OrderProduct, Assignment, TechnologicalProcess, ProductionStep
 from core.pages.eq_page.serializers import EQCardSerializer
+from core.pages.eq_page.services.await_view_mode_filter import await_view_mode_filter
 from core.pages.eq_page.services.check_schema import check_schema
 from core.pages.eq_page.services.create_custom_tech_process import create_custom_tech_process
+from core.pages.eq_page.services.in_work_view_mode_filter import in_work_view_mode_filter
+from core.pages.eq_page.services.ready_view_mode_filter import ready_view_mode_filter
 from core.pages.eq_page.services.update_assignments import UpdateAssignments
 from core.serializers import TechProcessSerializer
 from core.services.get_week_info import GetWeekInfo
@@ -24,14 +27,13 @@ def update_assignments(request):
     action: str = request.data.get('action')
     pin_code = request.data.get('pin_code')
 
-    UpdateAssignments(
-        series_id=series_id,
-        department_number=department_number,
-        numbers=numbers,
-        action=action,
-        pin_code=pin_code,
-        view_mode=view_mode
-    ).execute()
+    UpdateAssignments(series_id=series_id,
+                      department_number=department_number,
+                      numbers=numbers,
+                      action=action,
+                      pin_code=pin_code,
+                      view_mode=view_mode
+                      ).execute()
 
     return JsonResponse({"data": 'okay'})
 
@@ -55,18 +57,9 @@ class GetAwaitList(viewsets.ModelViewSet):
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
-        if not view_mode == '1':
-            qs = qs.filter(
-                assignments__status__in=['await', 'in_work'],
-                assignments__department__number=self.request.query_params.get('department_number')
-            ).distinct().order_by('urgency')
-        else:
-            qs = qs.filter(
-                product__production_steps__department=Department.objects.get(number=department_number),
-                status="0",
-            ).order_by('urgency')
-
-        return qs
+        return await_view_mode_filter(queryset=qs,
+                                      view_mode=view_mode,
+                                      department_number=department_number)
 
 
 class GetInWorkList(viewsets.ModelViewSet):
@@ -90,21 +83,10 @@ class GetInWorkList(viewsets.ModelViewSet):
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
-        if view_mode not in ['1', '0']:
-            pin_code = view_mode
-
-        if not view_mode == '1':
-            qs = qs.filter(
-                assignments__executor__pin_code=pin_code,
-                assignments__department__number=department_number
-            )
-
-        qs = qs.filter(
-            assignments__status__in=['in_work'],
-            assignments__department__number=department_number
-        ).distinct().order_by('urgency')
-
-        return qs
+        return in_work_view_mode_filter(view_mode=view_mode,
+                                        department_number=department_number,
+                                        pin_code=pin_code,
+                                        queryset=qs)
 
 
 class GetReadyList(viewsets.ModelViewSet):
@@ -131,24 +113,14 @@ class GetReadyList(viewsets.ModelViewSet):
 
         week_info = GetWeekInfo(week=week, year=year).execute()
 
-        if len(view_mode) == 6:
-            pin_code = view_mode
-
-        if not view_mode == '1':
-            qs = qs.filter(assignments__executor__pin_code=pin_code,
-                           assignments__department__number=department_number)
-
         if not project == 'Все проекты':
             qs = qs.filter(order__project=project)
 
-        qs = qs.filter(
-            assignments__status='ready',
-            assignments__department__number=department_number,
-            assignments__date_completion__gt=week_info.date_range[0],
-            assignments__date_completion__lte=week_info.date_range[1],
-        ).distinct().order_by('-assignments__inspector')
-
-        return qs
+        return ready_view_mode_filter(queryset=qs,
+                                      view_mode=view_mode,
+                                      pin_code=pin_code,
+                                      department_number=department_number,
+                                      week_info=week_info)
 
 
 @api_view(['GET'])

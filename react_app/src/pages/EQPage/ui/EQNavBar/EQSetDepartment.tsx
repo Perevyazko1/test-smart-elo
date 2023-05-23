@@ -47,7 +47,7 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
             {...otherProps}
         >
             <Dropdown.ItemText>
-                <h6 className={"my-0"}>Выберите отдел</h6>
+                Выбор отдела
             </Dropdown.ItemText>
 
             <Dropdown.Divider/>

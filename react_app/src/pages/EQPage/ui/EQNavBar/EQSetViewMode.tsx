@@ -36,6 +36,7 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
 
     const bossMode: ViewMode = {'name': 'Режим бригадира', 'key': 1}
     const normalMode: ViewMode = {'name': 'Личные наряды', 'key': 0}
+    const unfinishedMode: ViewMode = {'name': 'Режим недоделки', 'key': 2}
 
     const updateCurrentViewMod = (view_mode: ViewMode) => {
         dispatch(eqActions.setCurrentViewMode(view_mode))
@@ -55,6 +56,9 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
             className={classNames('', mods, [className])}
             {...otherProps}
         >
+            <Dropdown.ItemText>
+                Выбор режима
+            </Dropdown.ItemText>
 
             <Dropdown.Divider/>
 
@@ -72,6 +76,19 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
                 >
                     {bossMode.name}
                 </Dropdown.Item>
+            }
+
+            {bossModePermission &&
+                <Dropdown.Item
+                    active={unfinishedMode.key === current_view_mod?.key}
+                    onClick={() => updateCurrentViewMod(unfinishedMode)}
+                >
+                    {unfinishedMode.name}
+                </Dropdown.Item>
+            }
+
+            {bossModePermission &&
+                <Dropdown.Divider/>
             }
 
             {behalfPermission && view_mods?.map((view_mode) => (

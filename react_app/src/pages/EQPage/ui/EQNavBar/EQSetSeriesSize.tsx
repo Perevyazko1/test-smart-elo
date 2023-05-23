@@ -51,8 +51,11 @@ export const EqSetSeriesSize = memo((props: EqSetSeriesSizeProps) => {
             {...otherProps}
         >
             <Dropdown.ItemText>
-                <h5 className={"my-2"}>Установите размер серии</h5>
+                Выбор размера серии
             </Dropdown.ItemText>
+
+            <Dropdown.Divider/>
+
             <div className={"mb-2"}>
                 <h6 className="dropdown-header text-uppercase fs-3 fw-bold text-warning d-xl-flex justify-content-xl-center align-items-xl-center">
                     <button

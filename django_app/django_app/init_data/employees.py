@@ -168,7 +168,7 @@ employees = {
         'last_name': 'Камалов',
         'pin_code': 528142,
         'password': 'Vladimir_142',
-        'departments': ['Конструктора', 'Лазер'],
+        'departments': ['Лазер'],
         'groups': [
             'Страница ЭЛО',
         ],
@@ -479,6 +479,16 @@ employees = {
         'pin_code': 112332,
         'password': 'Denis_332',
         'departments': ['Обивка'],
+        'groups': [
+            'Страница ЭЛО',
+        ],
+    },
+    'Bukin_V': {
+        'first_name': 'Владислав',
+        'last_name': 'Букин',
+        'pin_code': 202987,
+        'password': 'Vladislav_987',
+        'departments': ['Конструктора'],
         'groups': [
             'Страница ЭЛО',
         ],
