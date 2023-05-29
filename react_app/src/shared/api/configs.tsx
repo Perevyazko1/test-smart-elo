@@ -1,0 +1,1 @@
+export const EQ_LIST_PAGINATION_SIZE = 10;

@@ -24,8 +24,8 @@ export interface order_product {
 }
 
 export interface order_product_list {
-    count?: number;
-    next?: string | null;
-    previous?: string | null;
-    results?: order_product[];
+    results: order_product[];
+    count: number;
+    next: string | null;
+    previous: string | null;
 }

@@ -6,26 +6,29 @@ export interface ViewMode {
     key: number
 }
 
+export interface ListControl {
+    data?: order_product_list,
+    is_loading: boolean,
+    has_updated: boolean,
+    current_size?: number,
+}
+
 export interface EqSchema {
-    // TODO Рассмотреть добавление индикатора загрузки при инициализации
-    await_list?: order_product_list;
-    in_work_list?: order_product_list;
-    ready_list?: order_product_list;
+    await_updated: number;
+
+    in_work_data: ListControl;
+
+    ready_data: ListControl;
+
     week_info?: week_info,
+    week_info_is_loading: boolean,
+    week_info_updated: boolean,
+
     project_filters?: string[],
     current_project?: string,
     view_modes?: ViewMode[],
     current_view_mode?: ViewMode,
     series_size: number,
-    await_list_updated: boolean,
-    in_work_list_updated: boolean,
-    ready_list_updated: boolean,
-    week_info_updated: boolean,
-
-    await_list_is_loading: boolean,
-    in_work_list_is_loading: boolean,
-    ready_list_is_loading: boolean,
-    week_info_is_loading: boolean,
 
     show_card_info?: order_product | undefined,
 }

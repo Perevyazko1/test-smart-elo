@@ -7,9 +7,12 @@ import {EqSchema} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
+import {rtkAPI} from "shared/api/rtkAPI";
+import {ListControl} from "../../../../pages/EQPage/model/slice/awaitListSlice";
 
 export interface StateSchema {
     employee: EmployeeSchema,
+    [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
     authByPinCode?: AuthByPinCodeSchema,
@@ -17,6 +20,7 @@ export interface StateSchema {
     orderProductInfo?: OrderProductInfoSchema,
     auditWidget?: AuditWidgetSchema,
     taxControl?: TaxControlSchema,
+    eqAwaitList?: ListControl,
 }
 
 export type StateSchemaKey = keyof StateSchema;

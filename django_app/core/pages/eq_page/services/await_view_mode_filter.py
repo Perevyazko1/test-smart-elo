@@ -46,4 +46,4 @@ def await_view_mode_filter(queryset, view_mode, department_number):
             if not ((department.single and assignments_count) or (order_product.quantity == assignments_count)):
                 queryset = queryset.exclude(series_id=order_product.series_id)
 
-    return queryset.order_by('urgency')
+    return queryset

@@ -125,7 +125,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
 
     return (
         <div
-            className={classNames('card bg-dark my-1 p-1', mods, [className])}
+            className={classNames('card bg-dark mt-1 p-1', mods, [className])}
             {...otherProps}
         >
 

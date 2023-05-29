@@ -1,9 +1,9 @@
 from dataclasses import asdict
 
-from django.db.models import Sum, F
+from django.db.models import Sum
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
 
 from core.models import OrderProduct, Assignment, TechnologicalProcess, ProductionStep
 from core.pages.eq_page.serializers import EQCardSerializer
@@ -15,7 +15,7 @@ from core.pages.eq_page.services.ready_view_mode_filter import ready_view_mode_f
 from core.pages.eq_page.services.update_assignments import UpdateAssignments
 from core.serializers import TechProcessSerializer
 from core.services.get_week_info import GetWeekInfo
-from staff.models import Department, Employee
+from staff.models import Employee
 
 
 @api_view(['POST'])
@@ -59,7 +59,8 @@ class GetAwaitList(viewsets.ModelViewSet):
 
         return await_view_mode_filter(queryset=qs,
                                       view_mode=view_mode,
-                                      department_number=department_number)
+                                      department_number=department_number
+                                      ).order_by('urgency', 'series_id')
 
 
 class GetInWorkList(viewsets.ModelViewSet):
