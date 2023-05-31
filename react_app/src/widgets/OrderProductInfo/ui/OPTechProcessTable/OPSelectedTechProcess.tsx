@@ -1,4 +1,4 @@
-import {memo, useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 import {Button, Table} from "react-bootstrap";
 
@@ -15,7 +15,7 @@ interface OpSelectedTechProcessProps {
 }
 
 
-export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) => {
+export const OpSelectedTechProcess = (props: OpSelectedTechProcessProps) => {
     const {
         order_product,
     } = props
@@ -25,6 +25,7 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
     const [techProcess, setTechProcess] = useState(order_product.product.technological_process)
     
     useEffect(() => {
+        console.log('Сработало обновление техпроцесса')
         setTechProcess(order_product.product.technological_process)
     }, [order_product.product.technological_process])
 
@@ -42,19 +43,19 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
 
     const editTechProcess = () => {
         dispatch(orderProductInfoActions.setConstructorSchema(
-            order_product.product.technological_process?.schema || {})
+            techProcess?.schema || {})
         )
         dispatch(orderProductInfoActions.setShowConstructor(true))
         dispatch(orderProductInfoActions.setChangeTP(true))
     }
 
-    const get_image_src = () => {
+    const get_image_src = useCallback(() => {
         if (techProcess?.image) {
             return GET_STATIC_URL() + techProcess?.image
         } else {
             return null
         }
-    }
+    }, [techProcess?.image])
 
 
     return (
@@ -124,4 +125,4 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
             </tbody>
         </Table>
     );
-});
+};

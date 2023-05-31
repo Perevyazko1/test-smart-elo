@@ -2,6 +2,9 @@ import {Dispatch} from "@reduxjs/toolkit";
 import {eqActions} from "pages/EQPage";
 
 import {SERVER_WS_ADDRESS} from "../const/server_config";
+import {eqAwaitListActions} from "../../pages/EQPage/model/slice/awaitListSlice";
+import {eqInWorkListActions} from "../../pages/EQPage/model/slice/inWorkListSlice";
+import {eqReadyListActions} from "../../pages/EQPage/model/slice/readyListSlice";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -53,13 +56,14 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
                     switch (list_name) {
                         case 'await':
                             // TODO сделать обновления
-                            // dispatch(eqActions.awaitListUpdated())
+                            dispatch(eqAwaitListActions.hasUpdated())
                             return;
                         case 'in_work':
-                            // dispatch(eqActions.inWorkListUpdated())
+                            dispatch(eqInWorkListActions.hasUpdated())
                             return;
                         case 'ready':
-                            // dispatch(eqActions.readyListUpdated())
+                            dispatch(eqReadyListActions.hasUpdated())
+                            dispatch(eqActions.weekInfoUpdated())
                             return;
                         default:
                             console.error('Неопознанная команда для обновления списков')
@@ -72,13 +76,19 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
                 data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {
                         case 'await':
-                            console.log(data.data.data, list_name)
+                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
                             return;
                         case 'in_work':
-                            console.log(data.data.data, list_name)
+                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
                             return;
                         case 'ready':
-                            console.log(data.data.data, list_name)
+                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
                             return;
                         default:
                             console.error('Неопознанная команда для обновления списков')
