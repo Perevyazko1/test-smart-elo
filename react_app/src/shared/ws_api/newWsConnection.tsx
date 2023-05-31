@@ -50,7 +50,6 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
 
         socket.onmessage = (event) => {
             const data: WsMessage = JSON.parse(event.data)
-
             if (data.data.action === 'update_eq_lists' && data.initiator !== pin_code) {
                 data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {

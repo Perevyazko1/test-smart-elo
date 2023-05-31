@@ -57,7 +57,6 @@ def ws_group_updates(pin_code: str, notification_data: dict):
             initiator=pin_code,
             data=data,
         )
-
         async_to_sync(channel_layer.group_send)(
             str(department_number),
             {"type": "client_message", "message": asdict(result)}

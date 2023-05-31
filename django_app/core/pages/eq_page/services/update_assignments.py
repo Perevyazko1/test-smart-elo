@@ -235,7 +235,7 @@ class UpdateAssignments:
             target_size = self._get_target_size_for_create_assignments(next_step)
 
             if target_size:
-                self.notification_data[self.department_number] = {
+                self.notification_data[next_step.department.number] = {
                     'action': EqNotificationActions.UPDATE_TARGET_LIST.value,
                     'data': '',
                     'lists': ['await']
