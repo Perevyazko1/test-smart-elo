@@ -1,20 +1,17 @@
-import React, {memo, useCallback, useEffect} from 'react';
+import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
 
 import {getCurrentDepartment} from "entities/Employee";
-import {OrderProductModal} from "widgets/OrderProductInfo";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
-import {eqActions, eqReducer} from "../model/slice/eqSlice";
-import {fetchProjectFilters} from "../model/service/fetchProjects/fetchProjects";
+import {eqReducer} from "../model/slice/eqSlice";
 import {EqNavBar} from "./EQNavBar/EQNavBar";
 import {EqAwaitBlock} from "./EQAwaitBlock/EqAwaitBlock";
 import {EqInWorkBlock} from "./EQInWorkBlock/EqInWorkBlock";
 import {EqWeekBlock} from "./EQWeekBlock/EQWeekBlock";
 import {EqReadyBlock} from "./EQReadyBlock/EqReadyBlock";
 import {fetchViewModsList} from "../model/service/fetchViewMods/fetchViewMods";
-import {getShowCardInfo} from "../model/selectors/getShowCardInfo/getShowCardInfo";
 
 
 const initialReducers: ReducersList = {
@@ -24,25 +21,18 @@ const initialReducers: ReducersList = {
 const EqPage = memo(() => {
     const dispatch = useAppDispatch()
     const current_department = useSelector(getCurrentDepartment)
-    const showCardInfo = useSelector(getShowCardInfo)
 
     useEffect(() => {
         if (current_department?.number) {
-            dispatch(fetchProjectFilters({}))
             dispatch(fetchViewModsList({
                 department_number: current_department.number
             }))
         }
     }, [current_department, dispatch])
 
-    const hide_card_info = useCallback(() => {
-        dispatch(eqActions.clearCardInfo())
-    }, [dispatch])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
-
-            {showCardInfo && <OrderProductModal onHide={hide_card_info} order_product={showCardInfo}/>}
 
             <div className="container-fluid p-0" style={{height: "100vh", background: "#f8f9fa"}}>
                 <EqNavBar/>

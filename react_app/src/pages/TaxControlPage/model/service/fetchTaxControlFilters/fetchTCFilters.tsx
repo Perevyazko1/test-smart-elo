@@ -25,7 +25,6 @@ export const fetchTCFilters = createAsyncThunk<TaxControlData, fetchTCFiltersPro
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

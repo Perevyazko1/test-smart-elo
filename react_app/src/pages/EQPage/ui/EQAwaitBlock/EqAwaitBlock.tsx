@@ -1,4 +1,4 @@
-import React, {memo, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
@@ -8,40 +8,47 @@ import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard";
-
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
+
 import {eqAwaitListReducer, getEqAwaitList, getEqAwaitListData} from "../../model/slice/awaitListSlice";
-import {eqAwaitListIsLoading} from "../../model/selectors/eqAwaitList";
 import {fetchAwaitList} from "../../model/service/fetchAwaitList/fetchAwaitList";
 import {fetchNextAwaitList} from "../../model/service/fetchAwaitList/fetchNextAwaitList";
+import {fetchAwaitCard} from "../../model/service/fetchAwaitList/fetchAwaitCard";
 
 
 const reducers: ReducersList = {
     'eqAwaitList': eqAwaitListReducer,
 }
 
-export const EqAwaitBlock = memo(() => {
+export const EqAwaitBlock = () => {
     const dispatch = useAppDispatch();
-    const awaitList = useSelector(getEqAwaitList)
-    const cardList = useSelector(getEqAwaitListData.selectAll);
-    const isFetching = useSelector(eqAwaitListIsLoading);
+    const awaitData = useSelector(getEqAwaitList)
+    const awaitList = useSelector(getEqAwaitListData.selectAll);
 
     useEffect(() => {
-        dispatch(fetchAwaitList({
-            limit: EQ_LIST_PAGINATION_SIZE,
-            offset: 0
-        }))
-    }, [dispatch])
+        if (awaitData?.has_updated !== undefined) {
+            dispatch(fetchAwaitList({
+                limit: EQ_LIST_PAGINATION_SIZE,
+                offset: 0
+            }))
+        }
+    }, [dispatch, awaitData?.has_updated])
+
+    useEffect(() => {
+        if (awaitData?.not_relevant_id && awaitData.not_relevant_id.length > 0) {
+            dispatch(fetchAwaitCard({id: awaitData?.not_relevant_id[0]}))
+        }
+    }, [awaitData?.not_relevant_id, dispatch])
 
     const fetchNextPage = () => {
-        if (awaitList?.next) {
-            dispatch(fetchNextAwaitList({url: awaitList.next}))
+        if (awaitData?.next) {
+            dispatch(fetchNextAwaitList({url: awaitData.next}))
         }
     }
 
     return (
         <DynamicModuleLoader reducers={reducers} removeAfterUnmount>
-            <PageWithPagination data={awaitList}
+            <PageWithPagination hasMore={!!awaitData?.next}
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
                                 style={{
@@ -51,14 +58,13 @@ export const EqAwaitBlock = memo(() => {
             >
                 <div className="p-1">
 
-                    <StickyHeader loading={isFetching}>
+                    <StickyHeader loading={awaitData?.is_loading}>
                         Список изделий в очереди
-                        {awaitList?.count && ` (${awaitList.count})`}
                     </StickyHeader>
 
                     <TransitionGroup>
 
-                        {cardList?.map((order_product) => (
+                        {awaitList?.map((order_product) => (
                             <CSSTransition
                                 key={order_product.series_id}
                                 timeout={500}
@@ -68,14 +74,14 @@ export const EqAwaitBlock = memo(() => {
                                     <OrderProductCard
                                         order_product={order_product}
                                         card_type={CardType.AWAIT_CARD}
-                                        disabled={isFetching}
+                                        disabled={awaitData?.not_relevant_id.includes(order_product.id)}
                                     />
                                 </div>
                             </CSSTransition>
                         ))}
 
                     </TransitionGroup>
-                    {isFetching
+                    {awaitData?.is_loading
                         &&
                         <Skeleton width={'100%'}
                                   height={'109px'}
@@ -89,4 +95,4 @@ export const EqAwaitBlock = memo(() => {
             </PageWithPagination>
         </DynamicModuleLoader>
     );
-});
+};

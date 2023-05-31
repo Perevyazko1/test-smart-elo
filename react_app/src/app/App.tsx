@@ -41,9 +41,6 @@ function App() {
     const eloPagePermission = useSelector(getEmployeeHasPermissions([
         EmployeePermissions.ELO_PAGE
     ]))
-    const testPagePermission = useSelector(getEmployeeHasPermissions([
-        EmployeePermissions.ADMIN
-    ]))
 
     const socketRef = useRef<WebSocket | null>(null);
 
@@ -94,7 +91,7 @@ function App() {
                                 }/>
                             }
 
-                            {testPagePermission &&
+                            {authData.username === "root" &&
                                 <Route path="/test" element={
                                     <Suspense fallback={<Loader/>}>
                                         <TestPage/>

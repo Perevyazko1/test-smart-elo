@@ -2,26 +2,40 @@ import {Dispatch} from "@reduxjs/toolkit";
 
 import {eqActions} from "pages/EQPage";
 
-import {CardType} from "../ui/OrderProductCard";
+import {order_product} from "entities/OrderProduct";
+import {eqAwaitListActions} from "pages/EQPage/model/slice/awaitListSlice";
+import {eqInWorkListActions} from "pages/EQPage/model/slice/inWorkListSlice";
 
-export const updateTargetList = (first: boolean, card_type: CardType, dispatch: Dispatch) => {
+import {CardType} from "../ui/OrderProductCard";
+import {eqReadyListActions} from "../../../pages/EQPage/model/slice/readyListSlice";
+
+export const updateTargetData = (
+    first: boolean, card_type: CardType, dispatch: Dispatch, order_product: order_product
+) => {
     if (card_type === CardType.AWAIT_CARD) {
-        dispatch(eqActions.inWorkListUpdated())
-        dispatch(eqActions.awaitListUpdated())
+        // TODO переделать сценарии обновления
+        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
         return;
     } else if (card_type === CardType.IN_WORK_CARD && first) {
-        dispatch(eqActions.eqUpdated())
+        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
         return;
     } else if (card_type === CardType.IN_WORK_CARD && !first) {
-        dispatch(eqActions.inWorkListUpdated())
-        dispatch(eqActions.awaitListUpdated())
+        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
         return;
     } else if (card_type === CardType.READY_CARD && first) {
-        dispatch(eqActions.readyListUpdated())
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
         dispatch(eqActions.weekInfoUpdated())
         return;
     } else if (card_type === CardType.READY_CARD && !first) {
-        dispatch(eqActions.eqUpdated())
+        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
         return;
     } else new Error('Ошибка обработки обновления списков из карточки')
 }

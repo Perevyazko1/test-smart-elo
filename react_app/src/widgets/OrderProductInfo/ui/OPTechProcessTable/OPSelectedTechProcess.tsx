@@ -1,4 +1,4 @@
-import {memo} from 'react';
+import {memo, useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 import {Button, Table} from "react-bootstrap";
 
@@ -12,46 +12,48 @@ import {TechProcessWidget} from "../../../TechProcessWidget";
 
 interface OpSelectedTechProcessProps {
     order_product: order_product;
-    techProcessSelected: boolean;
-    techProcessConfirmed: boolean;
 }
 
 
 export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) => {
     const {
         order_product,
-        techProcessConfirmed,
-        techProcessSelected,
     } = props
 
-    const opInfoData = useSelector(getOPInfoData)
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
+    const opInfoData = useSelector(getOPInfoData);
+    const [techProcess, setTechProcess] = useState(order_product.product.technological_process)
+    
+    useEffect(() => {
+        setTechProcess(order_product.product.technological_process)
+    }, [order_product.product.technological_process])
 
     const change_tech_process = (flag: boolean) => {
         dispatch(orderProductInfoActions.setChangeTP(flag))
     }
 
-    const get_target_tech_process = () => {
-        if (opInfoData?.current_tech_process) {
-            return opInfoData?.current_tech_process
-        } else {
-            return order_product.product.technological_process
-        }
+    const getTPConfirmed = useCallback(() => {
+        return !!order_product.product.technological_process_confirmed
+    }, [order_product.product.technological_process_confirmed])
+
+    const getTPSelected = useCallback(() => {
+        return !!order_product.product.technological_process
+    }, [order_product.product.technological_process])
+
+    const editTechProcess = () => {
+        dispatch(orderProductInfoActions.setConstructorSchema(
+            order_product.product.technological_process?.schema || {})
+        )
+        dispatch(orderProductInfoActions.setShowConstructor(true))
+        dispatch(orderProductInfoActions.setChangeTP(true))
     }
 
     const get_image_src = () => {
-        if (opInfoData?.current_tech_process) {
-            if (opInfoData?.current_tech_process.image) {
-                return GET_STATIC_URL() + opInfoData?.current_tech_process.image
-            } else {
-                return null
-            }
-        } else if (order_product.product.technological_process?.image) {
-            return GET_STATIC_URL() + order_product.product.technological_process?.image
+        if (techProcess?.image) {
+            return GET_STATIC_URL() + techProcess?.image
         } else {
             return null
         }
-
     }
 
 
@@ -67,13 +69,13 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
                 <th>Изображение</th>
                 <th>Название</th>
                 <th>
-                    {techProcessConfirmed ? "Подтвердил" : "Изменить"}
+                    {getTPConfirmed() ? "Подтвердил" : "Изменить"}
                 </th>
             </tr>
             </thead>
             <tbody>
 
-            {techProcessSelected &&
+            {getTPSelected() &&
                 <tr>
                     <td>
                         {get_image_src()
@@ -84,22 +86,24 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
                                  style={{maxHeight: '400px', maxWidth: '500px'}}
                             />
                             :
-                            <TechProcessWidget schema={get_target_tech_process()?.schema}
+                            <TechProcessWidget schema={techProcess?.schema}
                                                disabled={true}
                             />
                         }
                     </td>
                     <td>
-                        {get_target_tech_process()?.name}
+                        {techProcess?.name}
                     </td>
                     <td>
-                        {techProcessConfirmed ?
+                        {getTPConfirmed()
+                            ?
                             <div>
                                 {order_product.product.technological_process_confirmed?.first_name
                                     + " " +
                                     order_product.product.technological_process_confirmed?.last_name
                                 }
-                            </div> :
+                            </div>
+                            :
                             <>
                                 {opInfoData?.change_tech_process ?
                                     <Button type={'button'}
@@ -109,7 +113,7 @@ export const OpSelectedTechProcess = memo((props: OpSelectedTechProcessProps) =>
                                     </Button> :
                                     <Button type={'button'}
                                             variant={'success'}
-                                            onClick={() => change_tech_process(true)}>
+                                            onClick={editTechProcess}>
                                         Изменить
                                     </Button>}
                             </>

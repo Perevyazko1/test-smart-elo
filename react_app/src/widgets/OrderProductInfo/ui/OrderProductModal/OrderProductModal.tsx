@@ -1,16 +1,15 @@
-import React, {memo, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {Accordion, Button, Modal} from "react-bootstrap";
 
-import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {order_product} from "entities/OrderProduct";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
-import {orderProductInfoReducer} from "../../model/slice/OrderProductInfoSlice";
+import {orderProductInfoActions, orderProductInfoReducer} from "../../model/slice/OrderProductInfoSlice";
 import {OPProductionInfoTable} from "../OPProductionInfoTable/OPProductionInfoTable";
 import {OPTechProcessTable} from "../OPTechProcessTable/OPTechProcessTable";
 import {OpBaseInfo} from "../OPBaseInfo/OPBaseInfo";
 import {OpDepartmentInfoTable} from "../OPDepartmentInfoTable/OPDepartmentInfoTable";
-import {useSelector} from "react-redux";
-import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 
 
 const initialReducers: ReducersList = {
@@ -23,17 +22,26 @@ export interface OrderProductModalProps {
 }
 
 export const OrderProductModal = memo((props: OrderProductModalProps) => {
+    const {onHide, order_product} = props
+
+    const dispatch = useAppDispatch()
+    
     const [showModal, setShowModal] = useState(true)
-    const currentTechProcess = useSelector(getOPInfoData)?.current_tech_process
+
+    useEffect(() => {
+        if (!order_product.product.technological_process) {
+            dispatch(orderProductInfoActions.setChangeTP(true))
+        }
+    }, [dispatch, order_product.product.technological_process])
 
     const hide_modal = () => {
         setShowModal(false)
         setTimeout(() => {
-            props.onHide()
+            onHide()
         }, 300)
     }
 
-    const tech_process_confirmed = !props.order_product?.product?.technological_process
+    const tech_process_confirmed = !order_product?.product?.technological_process
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
@@ -41,26 +49,28 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                 <Modal.Header closeButton>
                     <Modal.Title>Информация по изделию {props.order_product.product.name}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>
 
-                    <OpBaseInfo order_product={props.order_product}/>
+                <Modal.Body>
+                    <OpBaseInfo order_product={order_product}/>
 
                     <Accordion alwaysOpen>
                         <Accordion.Item eventKey="0">
                             <Accordion.Header>Просмотреть информацию по отделу</Accordion.Header>
                             <Accordion.Body>
-                                <OpDepartmentInfoTable order_product={props.order_product}/>
+                                <OpDepartmentInfoTable order_product={order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
+
                         <Accordion.Item eventKey="1">
                             <Accordion.Header>Просмотреть информацию по производству</Accordion.Header>
                             <Accordion.Body>
-                                <OPProductionInfoTable order_product={props.order_product}/>
+                                <OPProductionInfoTable order_product={order_product}/>
                             </Accordion.Body>
                         </Accordion.Item>
+
                         <Accordion.Item eventKey="2" className={'gb-dark'}>
                             <Accordion.Header>
-                                {tech_process_confirmed && !currentTechProcess
+                                {tech_process_confirmed
                                     ?
                                     <div className={'bg-warning mx-2 fw-bold'}>
                                         Технологический процесс не выбран!
@@ -71,12 +81,16 @@ export const OrderProductModal = memo((props: OrderProductModalProps) => {
                                     </div>
                                 }
                             </Accordion.Header>
+
                             <Accordion.Body>
-                                <OPTechProcessTable order_product={props.order_product}/>
+                                <OPTechProcessTable order_product={order_product}/>
                             </Accordion.Body>
+
                         </Accordion.Item>
+
                     </Accordion>
                 </Modal.Body>
+
                 <Modal.Footer>
                     <Button variant="primary" onClick={hide_modal}>
                         Закрыть

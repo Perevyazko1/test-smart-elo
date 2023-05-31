@@ -24,7 +24,6 @@ export const fetchCurrentDepartment = createAsyncThunk<employee, fetchCurrentDep
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

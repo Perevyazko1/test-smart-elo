@@ -38,7 +38,8 @@ export const OPProductionInfoTable = memo((props: OPProductionInfoTableProps) =>
                 department_number: current_department.number
             }))
         }
-    }, [opInfoData, order_product, current_department, dispatch])
+        // eslint-disable-next-line
+    }, [dispatch])
 
     return (
         <div

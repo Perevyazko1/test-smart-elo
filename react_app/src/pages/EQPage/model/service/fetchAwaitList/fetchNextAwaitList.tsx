@@ -21,7 +21,6 @@ export const fetchNextAwaitList = createAsyncThunk<order_product_list, fetchNext
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

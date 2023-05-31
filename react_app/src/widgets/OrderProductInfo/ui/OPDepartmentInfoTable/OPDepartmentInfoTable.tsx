@@ -35,8 +35,8 @@ export const OpDepartmentInfoTable = memo((props: OpDepartmentInfoTableProps) =>
                 department_number: current_department.number
             }))
         }
-    }, [order_product, current_department, dispatch, opInfoData?.order_product_tables_data?.department_info])
-
+        //eslint-disable-next-line
+    }, [dispatch])
 
     const mods: Mods = {};
 

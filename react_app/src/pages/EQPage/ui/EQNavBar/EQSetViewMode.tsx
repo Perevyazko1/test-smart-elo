@@ -10,6 +10,9 @@ import {getViewMods} from "../../model/selectors/getViewMods/getViewMods";
 import {ViewMode} from "../../model/types/eqSchema";
 import {eqActions, initialState} from "../../model/slice/eqSlice";
 import {EmployeePermissions, getEmployeeHasPermissions, getEmployeePinCode} from "entities/Employee";
+import {eqAwaitListActions} from "../../model/slice/awaitListSlice";
+import {eqInWorkListActions} from "../../model/slice/inWorkListSlice";
+import {eqReadyListActions} from "../../model/slice/readyListSlice";
 
 interface EqSetViewModeProps {
     className?: string
@@ -20,6 +23,7 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
     const {className, ...otherProps} = props
 
     const dispatch = useAppDispatch()
+
     const current_view_mod = useSelector(getCurrentViewMod)
     const view_mods = useSelector(getViewMods)
     const pin_code = useSelector(getEmployeePinCode)
@@ -40,6 +44,10 @@ export const EqSetViewMode = memo((props: EqSetViewModeProps) => {
 
     const updateCurrentViewMod = (view_mode: ViewMode) => {
         dispatch(eqActions.setCurrentViewMode(view_mode))
+        dispatch(eqAwaitListActions.hasUpdated())
+        dispatch(eqInWorkListActions.hasUpdated())
+        dispatch(eqReadyListActions.hasUpdated())
+        dispatch(eqActions.weekInfoUpdated())
     }
 
     const mods: Mods = {};

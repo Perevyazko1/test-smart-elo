@@ -1,70 +1,99 @@
-import React, {memo, useEffect} from 'react';
+import React, {useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
-import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
-import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard";
-import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
+import {EQ_LIST_PAGINATION_SIZE} from "shared/api/configs";
+import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
+import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
+import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
+import {eqReadyListReducer, getEqReadyList, getEqReadyListData} from "../../model/slice/readyListSlice";
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";
-import {getWeekInfo} from "../../model/selectors/getWeekInfo/getWeekInfo";
-import {getCurrentProject} from "../../model/selectors/getCurrentProject/getCurrentProject";
-import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
-import {getReadyData} from "../../model/selectors/getReadyData/getReadyData";
+import {fetchReadyCard} from "../../model/service/fetchReadyList/fetchReadyCard";
+import {fetchNextReadyList} from "../../model/service/fetchReadyList/fetchNextReadyList";
 
 
-export const EqReadyBlock = memo(() => {
-    const dispatch = useAppDispatch()
+const reducers: ReducersList = {
+    'eqReadyList': eqReadyListReducer,
+}
 
-    const ready_data = useSelector(getReadyData)
-    const week_info = useSelector(getWeekInfo)
-    const current_project = useSelector(getCurrentProject)
-    const pin_code = useSelector(getEmployeePinCode)
-    const current_department = useSelector(getCurrentDepartment)
-    const view_mode = useSelector(getCurrentViewMod)
+export const EqReadyBlock = () => {
+    const dispatch = useAppDispatch();
+    const readyData = useSelector(getEqReadyList)
+    const readyList = useSelector(getEqReadyListData.selectAll);
+
 
     useEffect(() => {
-        if (current_department && pin_code) {
+        if (readyData?.has_updated !== undefined) {
             dispatch(fetchReadyList({
-                department_number: current_department.number,
-                project: current_project,
-                pin_code: pin_code,
-                view_mode: view_mode.key,
-                week: week_info?.week,
-                year: week_info?.year
+                limit: EQ_LIST_PAGINATION_SIZE,
+                offset: 0
             }))
         }
-    }, [ready_data?.has_updated, view_mode, current_project, week_info, dispatch, pin_code, current_department])
+    }, [dispatch, readyData?.has_updated])
+
+
+    useEffect(() => {
+        if (readyData?.not_relevant_id && readyData?.not_relevant_id.length > 0) {
+            dispatch(fetchReadyCard({id: readyData?.not_relevant_id[0]}))
+        }
+    }, [readyData?.not_relevant_id, dispatch])
+
+    const fetchNextPage = () => {
+        if (readyData?.next) {
+            dispatch(fetchNextReadyList({url: readyData.next}))
+        }
+    }
+
 
     return (
-        <div className="row m-0" style={{height: "43vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
-            <div className="col m-0 p-1">
+        <DynamicModuleLoader reducers={reducers} removeAfterUnmount>
+            <PageWithPagination hasMore={!!readyData?.next}
+                                className="col m-0"
+                                scroll_callback={fetchNextPage}
+                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
+                <div className="p-1">
 
-                <StickyHeader loading={ready_data?.is_loading}>Список готовых изделий</StickyHeader>
+                    <StickyHeader loading={readyData?.is_loading}>
+                        Список готовых изделий
+                    </StickyHeader>
 
-                {/*<TransitionGroup>*/}
+                    <TransitionGroup>
 
-                {/*    {ready_data?.data?.entities.getAll((order_product) => (*/}
-                {/*        <CSSTransition*/}
-                {/*            key={order_product.series_id}*/}
-                {/*            timeout={500}*/}
-                {/*            classNames="fade"*/}
-                {/*        >*/}
-                {/*            <div>*/}
-                {/*                <OrderProductCard*/}
-                {/*                    order_product={order_product}*/}
-                {/*                    key={order_product.series_id}*/}
-                {/*                    card_type={CardType.READY_CARD}*/}
-                {/*                    disabled={ready_data?.is_loading}*/}
-                {/*                />*/}
-                {/*            </div>*/}
-                {/*        </CSSTransition>*/}
-                {/*    ))}*/}
+                        {readyList.map((order_product) => (
+                            <CSSTransition
+                                key={order_product.series_id}
+                                timeout={500}
+                                classNames="fade"
+                            >
+                                <div>
+                                    <OrderProductCard
+                                        order_product={order_product}
+                                        key={order_product.series_id}
+                                        card_type={CardType.READY_CARD}
+                                        disabled={readyData?.not_relevant_id.includes(order_product.id)}
+                                    />
+                                </div>
+                            </CSSTransition>
+                        ))}
 
-                {/*</TransitionGroup>*/}
+                    </TransitionGroup>
+                    {readyData?.is_loading
+                        &&
+                        <Skeleton width={'100%'}
+                                  height={'109px'}
+                                  className={'mt-1'}
+                                  rounded
+                                  scaled
+                                  pagination_size={3}
+                        />
+                    }
+                </div>
+            </PageWithPagination>
 
-            </div>
-        </div>
+        </DynamicModuleLoader>
     );
-});
+};

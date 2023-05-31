@@ -23,7 +23,7 @@ export const StickyHeader = memo((props: StickyHeaderProps) => {
         >
             {loading
                 ?
-                <Spinner size={'sm'} className={'m-0 p-0 mx-xl-3'}/>
+                <Spinner size={'sm'} animation={'grow'} className={'m-0 p-0 mx-xl-3'}/>
                 :
                 <i className="far fa-arrow-alt-circle-down mx-xl-3"/>
             }
@@ -32,7 +32,7 @@ export const StickyHeader = memo((props: StickyHeaderProps) => {
 
             {loading
                 ?
-                <Spinner size={'sm'} className={'m-0 p-0 mx-xl-3'}/>
+                <Spinner size={'sm'} animation={'grow'} className={'m-0 p-0 mx-xl-3'}/>
                 :
                 <i className="far fa-arrow-alt-circle-down mx-xl-3"/>
             }

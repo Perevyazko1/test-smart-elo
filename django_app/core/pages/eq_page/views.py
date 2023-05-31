@@ -55,7 +55,7 @@ class GetAwaitList(viewsets.ModelViewSet):
         project = self.request.query_params.get('project')
 
         if not project == 'Все проекты':
-            qs = qs.filter(order__project=project)
+            qs = qs.filter(order__project=project).distinct()
 
         return await_view_mode_filter(queryset=qs,
                                       view_mode=view_mode,
@@ -82,7 +82,7 @@ class GetInWorkList(viewsets.ModelViewSet):
         department_number = self.request.query_params.get('department_number')
 
         if not project == 'Все проекты':
-            qs = qs.filter(order__project=project)
+            qs = qs.filter(order__project=project).distinct()
 
         return in_work_view_mode_filter(view_mode=view_mode,
                                         department_number=department_number,
@@ -116,7 +116,7 @@ class GetReadyList(viewsets.ModelViewSet):
         week_info = GetWeekInfo(week=week, year=year).execute()
 
         if not project == 'Все проекты':
-            qs = qs.filter(order__project=project)
+            qs = qs.filter(order__project=project).distinct()
 
         return ready_view_mode_filter(queryset=qs,
                                       view_mode=view_mode,

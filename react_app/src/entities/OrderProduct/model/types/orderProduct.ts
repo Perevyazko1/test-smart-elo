@@ -5,6 +5,7 @@ import {order} from "entities/Order";
 
 
 export interface order_product {
+    id: number;
     series_id: string;
     product: product;
     main_fabric: fabric;

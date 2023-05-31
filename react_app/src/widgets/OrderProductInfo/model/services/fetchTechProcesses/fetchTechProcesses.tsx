@@ -25,7 +25,6 @@ export const fetchTechProcesses = createAsyncThunk<order_product_list, fetchTech
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

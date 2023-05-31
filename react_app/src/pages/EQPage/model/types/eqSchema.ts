@@ -1,25 +1,24 @@
-import {order_product_list, order_product} from "entities/OrderProduct";
+import {order_product, order_product_list} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
+import {createEntityAdapter, EntityState} from "@reduxjs/toolkit";
 
 export interface ViewMode {
     name: string,
     key: number
 }
 
-export interface ListControl {
-    data?: order_product_list,
-    is_loading: boolean,
-    has_updated: boolean,
-    current_size?: number,
+export interface IOrderProductList extends Omit<order_product_list, 'results'> {
+    results: EntityState<order_product>
 }
 
+export interface ListControl extends IOrderProductList {
+    is_loading: boolean,
+    has_updated: boolean,
+    not_relevant_id: number[],
+}
+
+
 export interface EqSchema {
-    await_updated: number;
-
-    in_work_data: ListControl;
-
-    ready_data: ListControl;
-
     week_info?: week_info,
     week_info_is_loading: boolean,
     week_info_updated: boolean,
@@ -29,6 +28,16 @@ export interface EqSchema {
     view_modes?: ViewMode[],
     current_view_mode?: ViewMode,
     series_size: number,
-
-    show_card_info?: order_product | undefined,
 }
+
+export const eqListAdapter = createEntityAdapter<order_product>({
+    selectId: (order_product) => order_product.id,
+    sortComparer: (a, b) => {
+        const urgencyDiff = a.urgency - b.urgency;
+        if (urgencyDiff !== 0) {
+            return urgencyDiff;
+        }
+
+        return a.series_id.localeCompare(b.series_id);
+    },
+})

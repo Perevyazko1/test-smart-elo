@@ -2,7 +2,7 @@ import datetime
 
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
-from core.consumers import ws_group_updates
+from core.consumers import ws_group_updates, EqNotificationActions
 from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
 from staff.models import Employee, Department, Audit
@@ -17,7 +17,7 @@ class UpdateAssignments:
         self.pin_code: str = pin_code
         self.view_mode: int = view_mode
 
-        self.groups: dict = {}
+        self.notification_data: dict = {}
         self.order_product: OrderProduct | None = None
         self.department: Department | None = None
         self.action_name: str = ''
@@ -44,7 +44,11 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.executor = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
-                        self.groups[self.department_number] = ['await', 'in_work']
+                        self.notification_data[self.department_number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                            'lists': ['await', 'in_work']
+                        }
                     continue
 
                 case 'in_work_to_ready':
@@ -54,7 +58,11 @@ class UpdateAssignments:
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
-                        self.groups[self.department_number] = ['await', 'in_work', 'ready']
+                        self.notification_data[self.department_number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                            'lists': ['await', 'in_work', 'ready']
+                        }
                     continue
 
                 case 'ready_to_in_work':
@@ -64,7 +72,11 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
-                        self.groups[self.department_number] = ['await', 'in_work', 'ready']
+                        self.notification_data[self.department_number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                            'lists': ['await', 'in_work', 'ready']
+                        }
                     continue
 
                 case 'in_work_to_await':
@@ -74,7 +86,11 @@ class UpdateAssignments:
                         assignment.status = 'await'
                         assignment.executor = None
                         assignment.save()
-                        self.groups[self.department_number] = ['await', 'in_work']
+                        self.notification_data[self.department_number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                            'lists': ['await', 'in_work']
+                        }
                     continue
 
                 case 'confirmed':
@@ -83,7 +99,11 @@ class UpdateAssignments:
 
                         assignment.inspector = Employee.objects.get(pin_code=self.pin_code)
                         assignment.save()
-                        self.groups[self.department_number] = ['ready']
+                        self.notification_data[self.department_number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                            'lists': ['ready']
+                        }
                     continue
 
                 case _:
@@ -215,7 +235,11 @@ class UpdateAssignments:
             target_size = self._get_target_size_for_create_assignments(next_step)
 
             if target_size:
-                self.groups[next_step.department.number] = ['await']
+                self.notification_data[self.department_number] = {
+                    'action': EqNotificationActions.UPDATE_TARGET_LIST.value,
+                    'data': '',
+                    'lists': ['await']
+                }
 
                 AssignmentGenerator.create_new_assignments(
                     order_product=self.order_product,
@@ -241,11 +265,6 @@ class UpdateAssignments:
             self._create_related_assignments()
 
     def _get_audit_details(self) -> str:
-        if self.original_user:
-            employee = self.original_user
-        else:
-            employee = Employee.objects.get(pin_code=self.pin_code)
-
         order_product = OrderProduct.objects.get(series_id=self.series_id)
 
         result = ''
@@ -279,4 +298,4 @@ class UpdateAssignments:
         )
 
         """Делаем рассылку на обновление данных в WS"""
-        ws_group_updates(groups_and_data=self.groups, pin_code=self.pin_code)
+        ws_group_updates(pin_code=self.pin_code, notification_data=self.notification_data)

@@ -7,6 +7,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {eqActions, initialState} from "../../model/slice/eqSlice";
 import {getSeriesSize} from "../../model/selectors/getSeriesSize/getSeriesSize";
+import {getCurrentDepartment} from "../../../../entities/Employee";
 
 interface EqSetSeriesSizeProps {
     className?: string
@@ -18,6 +19,8 @@ export const EqSetSeriesSize = memo((props: EqSetSeriesSizeProps) => {
         className,
         ...otherProps
     } = props
+    const current_departments = useSelector(getCurrentDepartment)
+
 
     const dispatch = useAppDispatch()
     const series_size = useSelector(getSeriesSize)
@@ -26,6 +29,10 @@ export const EqSetSeriesSize = memo((props: EqSetSeriesSizeProps) => {
 
     const series_size_input = useRef<HTMLInputElement>(null);
     const [current_series_size, setCurrentSeriesSize] = useState(series_size);
+
+    if (current_departments?.single) {
+        return <></>;
+    }
 
     const confirmSeriesSize = () => {
         dispatch(eqActions.setSeriesSize(current_series_size))

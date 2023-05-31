@@ -38,7 +38,6 @@ export const fetchAwaitList = createAsyncThunk<order_product_list, fetchAwaitLis
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

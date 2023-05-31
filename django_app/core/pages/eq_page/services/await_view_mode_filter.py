@@ -7,16 +7,16 @@ def await_view_mode_filter(queryset, view_mode, department_number):
         queryset = queryset.filter(
             assignments__status__in=['await', 'in_work'],
             assignments__department__number=department_number
-        )
+        ).distinct()
 
     if view_mode == '1':
-        queryset = queryset.filter(status="0")
+        queryset = queryset.filter(status="0").distinct()
         department = Department.objects.get(number=department_number)
 
         if not department_number == '1':
             queryset = queryset.filter(
                 product__technological_process__schema__icontains=department.name,
-            )
+            ).distinct()
 
         for order_product in queryset:
             assignments_count = Assignment.objects.filter(
@@ -29,13 +29,13 @@ def await_view_mode_filter(queryset, view_mode, department_number):
                 queryset = queryset.exclude(series_id=order_product.series_id)
 
     if view_mode == '2':
-        queryset = queryset.filter(status="0")
+        queryset = queryset.filter(status="0").distinct()
         department = Department.objects.get(number=department_number)
 
         if not department_number == '1':
             queryset = queryset.filter(
                 product__technological_process__schema__icontains=department.name,
-            )
+            ).distinct()
 
         for order_product in queryset:
             assignments_count = Assignment.objects.filter(

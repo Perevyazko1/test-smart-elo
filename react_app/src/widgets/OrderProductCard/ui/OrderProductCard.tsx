@@ -1,4 +1,4 @@
-import {memo, useCallback, useEffect, useState} from 'react';
+import React, {memo, useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -17,7 +17,8 @@ import {getButtonBg} from "../lib/getButtonBg";
 import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
-import {updateTargetList} from "../lib/updateTargetList";
+import {updateTargetData} from "../lib/updateTargetList";
+import {OrderProductModal} from "../../OrderProductInfo";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -34,43 +35,46 @@ interface OrderProductCardProps {
 
 export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const {card_type, className, order_product, disabled = false, ...otherProps} = props
+
     const dispatch = useAppDispatch()
     const authData = useSelector(getEmployeeAuthData)
+    const view_mode = useSelector(getCurrentViewMod)
     const series_size = useSelector(getSeriesSize)
     const confirmAssignment = useSelector(getEmployeeHasPermissions([
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
     ]))
-    const view_mode = useSelector(getCurrentViewMod)
-
-    const tech_process_not_changed = !order_product?.product?.technological_process
-
-    const sliderImages = createImageUrls(order_product)
 
     const [assignmentsLists, setAssignmentsLists] = useState(createNumberLists(order_product, series_size))
+    const [showCardInfo, setShowCardInfo] = useState(false)
 
-    const showCardInfoWidget = () => {
-        if (authData?.current_department?.number) {
-            dispatch(eqActions.showCardInfo(order_product))
-        }
-    }
+    const tech_process_not_changed = !order_product?.product?.technological_process
+    const sliderImages = createImageUrls(order_product)
 
-    const buttonIcon = (first: boolean = true) => {
+    const showCardInfoWidget = useCallback(() => {
+        setShowCardInfo(true)
+    }, [])
+        
+    const hide_card_info = useCallback(() => {
+        setShowCardInfo(false)
+    }, [])
+
+    const buttonIcon = useCallback((first: boolean = true) => {
         return getButtonIcon(first, card_type)
-    }
+    },[card_type])
 
-    const buttonBg = (first: boolean = true) => {
+    const buttonBg = useCallback((first: boolean = true) => {
         return getButtonBg(first, card_type, order_product)
-    }
+    },[card_type, order_product])
 
-    const buttonAction = (first: boolean) => {
+    const buttonAction = useCallback((first: boolean) => {
         return getButtonAction(first, card_type)
-    }
+    },[card_type])
 
-    const assignmentConfirmed = (assignment_number: number) => {
+    const assignmentConfirmed = useCallback((assignment_number: number) => {
         return order_product.assignments.filter(
             assignment => assignment.number === assignment_number && assignment.inspector
         ).length > 0
-    }
+    },[order_product.assignments])
 
     const set_target_number = (assignment_number: number) => {
         if (assignmentConfirmed(assignment_number) || !assignment_number) {
@@ -110,13 +114,15 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 pin_code: authData.pin_code,
                 view_mode: view_mode.key,
             }))
-            updateTargetList(first, card_type, dispatch)
+
+            updateTargetData(first, card_type, dispatch, order_product)
         }
     }
 
     useEffect(() => {
         setAssignmentsLists(createNumberLists(order_product, series_size))
     }, [order_product, series_size])
+    
 
     const mods: Mods = {
         [cls.card_active]: order_product.assignments.length > 0,
@@ -128,7 +134,8 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             className={classNames('card bg-dark mt-1 p-1', mods, [className])}
             {...otherProps}
         >
-
+            {showCardInfo && <OrderProductModal onHide={hide_card_info} order_product={order_product}/>}
+            
             <div
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}

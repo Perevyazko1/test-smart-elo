@@ -25,6 +25,7 @@ class EQCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderProduct
         fields = [
+            'id',
             'series_id',
             'product',
             'main_fabric',

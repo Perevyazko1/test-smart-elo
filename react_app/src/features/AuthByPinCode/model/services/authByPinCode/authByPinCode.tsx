@@ -31,7 +31,6 @@ export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, { re
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             thunkAPI.dispatch(employeeActions.logout())
             thunkAPI.dispatch(employeeActions.initAuthData())
             return thunkAPI.rejectWithValue('Неверный ПИН-код')

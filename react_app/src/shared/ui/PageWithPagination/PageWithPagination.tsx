@@ -1,16 +1,16 @@
-import {HTMLAttributes, memo, MutableRefObject, useRef} from 'react';
+import {HTMLAttributes, MutableRefObject, useRef} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useInfiniteScroll} from "../../lib/hooks/useInfiniteScroll/useInfiniteScroll";
 
 interface PageWithPaginationProps extends HTMLAttributes<HTMLDivElement> {
-    data: any,
+    hasMore: boolean,
     scroll_callback: () => void,
 }
 
 
-export const PageWithPagination = memo((props: PageWithPaginationProps) => {
+export const PageWithPagination = (props: PageWithPaginationProps) => {
     const {
-        data,
+        hasMore,
         scroll_callback,
         ...otherProps
     } = props
@@ -19,7 +19,7 @@ export const PageWithPagination = memo((props: PageWithPaginationProps) => {
 
 
     useInfiniteScroll({
-        callback: () => data?.next ? scroll_callback() : false,
+        callback: () => hasMore ? scroll_callback() : false,
         triggerRef: triggerRef,
         wrapperRef: wrapperRef
     })
@@ -36,4 +36,4 @@ export const PageWithPagination = memo((props: PageWithPaginationProps) => {
             <div ref={triggerRef}></div>
         </div>
     );
-});
+};

@@ -18,27 +18,24 @@ $font-family-monospace: "Motserrat-Light", monospace;
 
 .fade-enter {
   opacity: 0;
-  transform: translateX(30%);
 }
 
 .fade-enter-active {
   opacity: 1;
-  transform: translateX(0%);
+  transition: opacity 500ms ease-in;
 }
 
 .fade-exit {
   opacity: 1;
-  transform: translateX(0%);
 }
 
 .fade-exit-active {
   opacity: 0;
-  transform: translateX(30%);
 }
 
 .fade-enter-active,
 .fade-exit-active {
-  transition: opacity 500ms, transform 500ms;
+  transition: opacity 100ms ease-in;
 }
 
 .scaled {

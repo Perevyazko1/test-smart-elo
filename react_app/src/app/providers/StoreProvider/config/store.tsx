@@ -1,13 +1,12 @@
 import {CombinedState, Reducer} from 'redux';
 import {configureStore, ReducersMapObject} from "@reduxjs/toolkit";
 
+import {$api} from "shared/api/api";
 import {rtkAPI} from "shared/api/rtkAPI";
 import {employeeReducer} from "entities/Employee";
 
 import {StateSchema} from "./StateSchema";
 import {createReducerManager} from "./reducerManager";
-import {TypedUseSelectorHook, useSelector} from "react-redux";
-import {$api} from "../../../../shared/api/api";
 
 
 export function createReduxStore(initialState?: StateSchema) {

@@ -2,11 +2,21 @@ import {Dispatch} from "@reduxjs/toolkit";
 import {eqActions} from "pages/EQPage";
 
 import {SERVER_WS_ADDRESS} from "../const/server_config";
-import {EqNotification} from "./wsTypes";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_INTERVAL_MS = 5000;
+
+type WsMessageData = {
+    action: 'update_eq_lists' | 'update_target_item';
+    data: any;
+    lists: ['await' | 'in_work' | 'ready' | ''];
+}
+
+type WsMessage = {
+    initiator: number;
+    data: WsMessageData;
+}
 
 export const newWsConnection = (pin_code: number, department_number: number, dispatch: Dispatch) => {
     let socket: WebSocket | null = null;
@@ -36,25 +46,47 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
         };
 
         socket.onmessage = (event) => {
-            const data: EqNotification = JSON.parse(event.data)
-            if (data.action === 'update_eq_lists' && data.initiator !== pin_code) {
-                data.data.forEach((list_name: string) => {
+            const data: WsMessage = JSON.parse(event.data)
+
+            if (data.data.action === 'update_eq_lists' && data.initiator !== pin_code) {
+                data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {
                         case 'await':
-                            dispatch(eqActions.awaitListUpdated())
+                            // TODO сделать обновления
+                            // dispatch(eqActions.awaitListUpdated())
                             return;
                         case 'in_work':
-                            dispatch(eqActions.inWorkListUpdated())
+                            // dispatch(eqActions.inWorkListUpdated())
                             return;
                         case 'ready':
-                            dispatch(eqActions.readyListUpdated())
+                            // dispatch(eqActions.readyListUpdated())
                             return;
                         default:
                             console.error('Неопознанная команда для обновления списков')
                             return;
                     }
-                })
+                });
             }
+
+            if (data.data.action === 'update_target_item' && data.initiator !== pin_code) {
+                data.data.lists.forEach((list_name: string) => {
+                    switch (list_name) {
+                        case 'await':
+                            console.log(data.data.data, list_name)
+                            return;
+                        case 'in_work':
+                            console.log(data.data.data, list_name)
+                            return;
+                        case 'ready':
+                            console.log(data.data.data, list_name)
+                            return;
+                        default:
+                            console.error('Неопознанная команда для обновления списков')
+                            return;
+                    }
+                });
+            }
+
         }
     }
     connect();

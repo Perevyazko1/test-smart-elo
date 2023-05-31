@@ -3,12 +3,11 @@ import {AxiosInstance} from "axios";
 
 import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
-import {EqSchema} from "pages/EQPage/model/types/eqSchema";
+import {EqSchema, ListControl} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
 import {rtkAPI} from "shared/api/rtkAPI";
-import {ListControl} from "../../../../pages/EQPage/model/slice/awaitListSlice";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -21,6 +20,8 @@ export interface StateSchema {
     auditWidget?: AuditWidgetSchema,
     taxControl?: TaxControlSchema,
     eqAwaitList?: ListControl,
+    eqInWorkList?: ListControl,
+    eqReadyList?: ListControl,
 }
 
 export type StateSchemaKey = keyof StateSchema;

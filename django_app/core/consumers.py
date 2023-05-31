@@ -1,9 +1,21 @@
 import json
 from dataclasses import dataclass, asdict
+from enum import Enum
 
 from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
+
+class EqNotificationActions(Enum):
+    UPDATE_TARGET_LIST = 'update_eq_lists'
+    UPDATE_TARGET_ITEM = 'update_target_item'
+
+
+@dataclass
+class EqNotification:
+    initiator: str
+    data: dict
 
 
 class MainConsumer(WebsocketConsumer):
@@ -37,20 +49,16 @@ class MainConsumer(WebsocketConsumer):
         self.send(text_data=json.dumps(message, ensure_ascii=False))
 
 
-@dataclass
-class EqNotification:
-    initiator: str
-    action: str
-    data: dict
-
-
-def ws_group_updates(groups_and_data: dict, pin_code: str):
+def ws_group_updates(pin_code: str, notification_data: dict):
     channel_layer = get_channel_layer()
 
-    for group_name, data in groups_and_data.items():
+    for department_number, data in notification_data.items():
         result = EqNotification(
-            action='update_eq_lists',
             initiator=pin_code,
-            data=data
+            data=data,
         )
-        async_to_sync(channel_layer.group_send)(str(group_name), {"type": "client_message", "message": asdict(result)})
+
+        async_to_sync(channel_layer.group_send)(
+            str(department_number),
+            {"type": "client_message", "message": asdict(result)}
+        )

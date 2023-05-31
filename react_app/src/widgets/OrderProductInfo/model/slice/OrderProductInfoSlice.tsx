@@ -18,9 +18,7 @@ export const orderProductInfoSlice = createSlice({
             setTechProcessList: (state, action: PayloadAction<technological_process[]>) => {
                 state.tech_process_list = action.payload
             },
-            setCurrentTechProcess: (state, action: PayloadAction<technological_process>) => {
-                state.current_tech_process = action.payload
-            },
+
             setOPTablesData: (state, action: PayloadAction<order_product_tables_data>) => {
                 state.order_product_tables_data = action.payload
             },

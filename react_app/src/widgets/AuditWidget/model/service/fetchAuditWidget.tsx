@@ -25,7 +25,6 @@ export const fetchAuditList = createAsyncThunk<order_product_list, fetchAuditLis
             }
         } catch (e) {
             // TODO написать обработку ошибок на различные статус коды ответа сервера
-            console.log(e)
             return thunkAPI.rejectWithValue('Ошибка запроса')
         }
     }

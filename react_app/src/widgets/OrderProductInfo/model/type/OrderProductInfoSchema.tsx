@@ -24,7 +24,6 @@ export interface order_product_tables_data {
 
 export interface OrderProductInfoSchema {
     tech_process_list?: technological_process[],
-    current_tech_process?: technological_process,
     order_product_tables_data?: order_product_tables_data,
 
     constructor_schema?: tech_process_schema,

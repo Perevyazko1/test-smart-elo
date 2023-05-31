@@ -9,6 +9,9 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 import {eqActions} from "../../model/slice/eqSlice";
 import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
+import {eqAwaitListActions, eqAwaitListReducer} from "../../model/slice/awaitListSlice";
+import {eqInWorkListActions} from "../../model/slice/inWorkListSlice";
+import {eqReadyListActions} from "../../model/slice/readyListSlice";
 
 interface ChangeDepartmentProps {
     className?: string;
@@ -29,7 +32,12 @@ export const EQSetDepartment = memo((props: ChangeDepartmentProps) => {
             dispatch(fetchCurrentDepartment({
                 pin_code: auth_data?.pin_code,
                 department_number: department_number
-            }))
+            })).then(() => {
+                dispatch(eqAwaitListActions.hasUpdated())
+                dispatch(eqInWorkListActions.hasUpdated())
+                dispatch(eqReadyListActions.hasUpdated())
+                dispatch(eqActions.weekInfoUpdated())
+            })
             if (current_view_mode?.key !== 1) {
                 dispatch(eqActions.setDefaultFilters())
             }

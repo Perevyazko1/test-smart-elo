@@ -1,20 +1,20 @@
-import {memo, ReactNode, useCallback, useEffect} from 'react';
+import {memo, ReactNode, useCallback} from 'react';
 import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {tech_process_schema} from "entities/TechnologicalProcess";
 import {order_product} from "entities/OrderProduct";
-import {eqActions} from "pages/EQPage";
+import {eqAwaitListActions} from "pages/EQPage/model/slice/awaitListSlice";
+import {eqReadyListActions} from "pages/EQPage/model/slice/readyListSlice";
+import {eqInWorkListActions} from "pages/EQPage/model/slice/inWorkListSlice";
 
-import {fetchTechProcesses} from "../../model/services/fetchTechProcesses/fetchTechProcesses";
-import {fetchSetTechProcess} from "../../model/services/fetchSetTechProcess/fetchSetTechProcess";
 import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 import {orderProductInfoActions} from "../../model/slice/OrderProductInfoSlice";
 import {OpSelectedTechProcess} from "./OPSelectedTechProcess";
 import {OpTechProcessList} from "./OPTechProcessList";
 import {TechProcessWidget} from "../../../TechProcessWidget";
 import {fetchSetCustomTechProcess} from "../../model/services/fetchSetCustomTechProcess/fetchSetCustomTechProcess";
-import {tech_process_schema} from "../../../../entities/TechnologicalProcess";
 
 interface OPTechProcessTableProps {
     order_product: order_product
@@ -30,51 +30,34 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
         ...otherProps
     } = props
 
-    const opInfoData = useSelector(getOPInfoData)
     const dispatch = useAppDispatch()
-
-    const getProcessConfirmed = useCallback(() => {
-        return !!order_product.product.technological_process_confirmed;
-    }, [order_product.product.technological_process_confirmed])
+    const opInfoData = useSelector(getOPInfoData)
 
     const getProcessSelected = useCallback(() => {
-        if (order_product.product.technological_process) {
-            return true
-        } else return !!opInfoData?.current_tech_process;
-    }, [opInfoData?.current_tech_process, order_product.product.technological_process])
+        return !!order_product.product.technological_process
+    }, [order_product.product.technological_process])
 
-    useEffect(() => {
-        if (!opInfoData?.tech_process_list && !getProcessConfirmed()) {
-            dispatch(fetchTechProcesses({}))
-        }
-        if (!getProcessSelected() && !opInfoData?.change_tech_process && !opInfoData?.show_constructor) {
-            dispatch(orderProductInfoActions.setChangeTP(true))
-        }
-    }, [dispatch, getProcessConfirmed, getProcessSelected, opInfoData?.change_tech_process,
-        opInfoData?.show_constructor, opInfoData?.tech_process_list])
-
-    const set_tech_process = async (tech_process_id: number) => {
-        await dispatch(fetchSetTechProcess({
-            tech_process_id: tech_process_id,
-            series_id: order_product.series_id
-        }))
-        await dispatch(eqActions.eqUpdated())
-        await dispatch(orderProductInfoActions.setChangeTP(false))
-    }
-
-    const set_custom_tech_process = async (schema: tech_process_schema) => {
-        await dispatch(fetchSetCustomTechProcess({
+    const set_custom_tech_process = (schema: tech_process_schema) => {
+        dispatch(fetchSetCustomTechProcess({
             schema: schema,
             series_id: order_product.series_id
         }))
-        await dispatch(orderProductInfoActions.setShowConstructor(false))
-        await dispatch(eqActions.eqUpdated())
-        await dispatch(orderProductInfoActions.setChangeTP(false))
+
+        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
+
+        dispatch(orderProductInfoActions.setShowConstructor(false))
+        dispatch(orderProductInfoActions.setChangeTP(false))
     }
 
     const on_cancellation_constructor = () => {
         dispatch(orderProductInfoActions.setShowConstructor(false))
-        dispatch(orderProductInfoActions.setChangeTP(true))
+        if (getProcessSelected()) {
+            dispatch(orderProductInfoActions.setChangeTP(false))
+        } else {
+            dispatch(orderProductInfoActions.setChangeTP(true))
+        }
     }
 
     const mods: Mods = {};
@@ -96,13 +79,11 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
             {getProcessSelected() && !opInfoData?.show_constructor &&
                 <OpSelectedTechProcess
                     order_product={order_product}
-                    techProcessConfirmed={getProcessConfirmed()}
-                    techProcessSelected={getProcessSelected()}
                 />
             }
 
             {opInfoData?.change_tech_process &&
-                <OpTechProcessList set_tech_process={set_tech_process}/>
+                <OpTechProcessList order_product={order_product}/>
             }
         </div>
     );

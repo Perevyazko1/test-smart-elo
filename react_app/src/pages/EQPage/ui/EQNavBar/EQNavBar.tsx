@@ -9,21 +9,22 @@ import {EqSetSeriesSize} from "./EQSetSeriesSize";
 import {EqSetProject} from "./EQSetProject";
 import {EqSetViewMode} from "./EQSetViewMode";
 import {EQSetDepartment} from "./EQSetDepartment";
-import {eqActions} from "../../model/slice/eqSlice";
 import {getFiltersIsDefault} from "../../model/selectors/getFiltersIsDefault/getFiltersIsDefault";
+import {eqAwaitListActions} from "../../model/slice/awaitListSlice";
+import {eqInWorkListActions} from "../../model/slice/inWorkListSlice";
+import {eqReadyListActions} from "../../model/slice/readyListSlice";
+import {eqActions} from "../../model/slice/eqSlice";
 
 
 export const EqNavBar = memo(() => {
-    const filtersIsDefault = useSelector(getFiltersIsDefault)
     const dispatch = useAppDispatch()
 
-
     const set_default_filters = () => {
-        if (filtersIsDefault) {
-            dispatch(eqActions.eqUpdated())
-        } else {
-            dispatch(eqActions.setDefaultFilters())
-        }
+        dispatch(eqActions.setDefaultFilters())
+        dispatch(eqAwaitListActions.hasUpdated())
+        dispatch(eqInWorkListActions.hasUpdated())
+        dispatch(eqReadyListActions.hasUpdated())
+        dispatch(eqActions.weekInfoUpdated())
     }
 
     return (
