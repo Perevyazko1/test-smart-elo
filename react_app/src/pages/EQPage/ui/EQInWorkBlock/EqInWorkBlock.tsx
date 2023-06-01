@@ -8,12 +8,12 @@ import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
-import {EQ_LIST_PAGINATION_SIZE} from "shared/api/configs";
 
 import {fetchInWorkList} from "../../model/service/fetchInWorkList/fetchInWorkList";
 import {fetchNextInWorkList} from "../../model/service/fetchInWorkList/fetchNextInWorkList";
 import {eqInWorkListReducer, getEqInWorkList, getEqInWorkListData} from "../../model/slice/inWorkListSlice";
 import {fetchInWorkCard} from "../../model/service/fetchInWorkList/fetchInWorkCard";
+import {getPaginationSize} from "../../../../shared/api/configs";
 
 
 const reducers: ReducersList = {
@@ -28,7 +28,7 @@ export const EqInWorkBlock = () => {
     useEffect(() => {
         if (inWorkData?.has_updated !== undefined) {
             dispatch(fetchInWorkList({
-                limit: EQ_LIST_PAGINATION_SIZE,
+                limit: getPaginationSize(window.screen.height, 120),
                 offset: 0
             }))
         }

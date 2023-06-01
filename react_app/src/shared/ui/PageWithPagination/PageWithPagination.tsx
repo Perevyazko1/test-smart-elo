@@ -1,10 +1,11 @@
-import {HTMLAttributes, MutableRefObject, useRef} from 'react';
+import {HTMLAttributes, MutableRefObject, ReactNode, useRef} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useInfiniteScroll} from "../../lib/hooks/useInfiniteScroll/useInfiniteScroll";
 
 interface PageWithPaginationProps extends HTMLAttributes<HTMLDivElement> {
     hasMore: boolean,
     scroll_callback: () => void,
+    sceleton?: ReactNode,
 }
 
 
@@ -12,6 +13,7 @@ export const PageWithPagination = (props: PageWithPaginationProps) => {
     const {
         hasMore,
         scroll_callback,
+        sceleton,
         ...otherProps
     } = props
     const wrapperRef = useRef() as MutableRefObject<HTMLDivElement>
@@ -33,7 +35,14 @@ export const PageWithPagination = (props: PageWithPaginationProps) => {
             {...otherProps}
         >
             {props.children}
-            <div ref={triggerRef}></div>
+
+            <div ref={triggerRef}/>
+
+            {hasMore &&
+                <div>
+                    {sceleton}
+                </div>
+            }
         </div>
     );
 };

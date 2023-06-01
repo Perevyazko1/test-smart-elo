@@ -3,7 +3,6 @@ import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
 import {CardType, OrderProductCard} from "widgets/OrderProductCard";
-import {EQ_LIST_PAGINATION_SIZE} from "shared/api/configs";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
@@ -14,6 +13,7 @@ import {eqReadyListReducer, getEqReadyList, getEqReadyListData} from "../../mode
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";
 import {fetchReadyCard} from "../../model/service/fetchReadyList/fetchReadyCard";
 import {fetchNextReadyList} from "../../model/service/fetchReadyList/fetchNextReadyList";
+import {getPaginationSize} from "../../../../shared/api/configs";
 
 
 const reducers: ReducersList = {
@@ -29,7 +29,7 @@ export const EqReadyBlock = () => {
     useEffect(() => {
         if (readyData?.has_updated !== undefined) {
             dispatch(fetchReadyList({
-                limit: EQ_LIST_PAGINATION_SIZE,
+                limit: getPaginationSize(window.screen.height, 120),
                 offset: 0
             }))
         }

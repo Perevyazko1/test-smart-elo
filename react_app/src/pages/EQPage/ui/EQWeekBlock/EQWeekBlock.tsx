@@ -57,7 +57,7 @@ export const EqWeekBlock = () => {
             {/*</div>*/}
 
             <button className="btn btn-dark btn-sm fw-bold rounded me-2 p-0 d-flex align-items-center
-                    justify-content-center"
+                    justify-content-center h-100"
                     type="button"
                     style={{width: "80px"}}
                     onClick={() => changeWeek(
@@ -87,7 +87,7 @@ export const EqWeekBlock = () => {
             </div>
 
             <button className="btn btn-dark btn-sm fw-bold rounded ms-2 p-0 d-flex align-items-center
-                    justify-content-center"
+                    justify-content-center h-100"
                     type="button"
                     style={{width: "80px"}}
                     onClick={() => changeWeek(week_info?.next_week_data.week, week_info?.next_week_data.year)}

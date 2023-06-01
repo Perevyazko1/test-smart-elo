@@ -1,14 +1,13 @@
 import React, {useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
-
-import {EQ_LIST_PAGINATION_SIZE} from "shared/api/configs";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {CardType, OrderProductCard} from "widgets/OrderProductCard";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
+import {getPaginationSize} from "shared/api/configs";
 
 import {eqAwaitListReducer, getEqAwaitList, getEqAwaitListData} from "../../model/slice/awaitListSlice";
 import {fetchAwaitList} from "../../model/service/fetchAwaitList/fetchAwaitList";
@@ -28,7 +27,7 @@ export const EqAwaitBlock = () => {
     useEffect(() => {
         if (awaitData?.has_updated !== undefined) {
             dispatch(fetchAwaitList({
-                limit: EQ_LIST_PAGINATION_SIZE,
+                limit: getPaginationSize(window.screen.height, 120),
                 offset: 0
             }))
         }
@@ -41,10 +40,21 @@ export const EqAwaitBlock = () => {
     }, [awaitData?.not_relevant_id, dispatch])
 
     const fetchNextPage = () => {
+        console.log(window.screen.height)
         if (awaitData?.next) {
             dispatch(fetchNextAwaitList({url: awaitData.next}))
         }
     }
+
+    const sceleton = (
+        <Skeleton width={'100%'}
+                  height={'109px'}
+                  className={'mt-1'}
+                  rounded
+                  scaled
+                  pagination_size={3}
+        />
+    )
 
     return (
         <DynamicModuleLoader reducers={reducers} removeAfterUnmount>
@@ -55,6 +65,7 @@ export const EqAwaitBlock = () => {
                                     height: "93vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",
                                     borderLeftWidth: "4px", borderLeftStyle: "solid"
                                 }}
+                                sceleton={sceleton}
             >
                 <div className="p-1">
 
@@ -79,18 +90,10 @@ export const EqAwaitBlock = () => {
                                 </div>
                             </CSSTransition>
                         ))}
-
                     </TransitionGroup>
-                    {awaitData?.is_loading
-                        &&
-                        <Skeleton width={'100%'}
-                                  height={'109px'}
-                                  className={'mt-1'}
-                                  rounded
-                                  scaled
-                                  pagination_size={3}
-                        />
-                    }
+
+                    {awaitData?.is_loading && sceleton}
+
                 </div>
             </PageWithPagination>
         </DynamicModuleLoader>
