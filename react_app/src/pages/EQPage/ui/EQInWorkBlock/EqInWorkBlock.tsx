@@ -46,12 +46,24 @@ export const EqInWorkBlock = () => {
         }
     }
 
+    const sceleton = (
+        <Skeleton width={'100%'}
+                  height={'109px'}
+                  className={'mt-1'}
+                  rounded
+                  scaled
+                  pagination_size={3}
+        />
+    )
+
     return (
         <DynamicModuleLoader reducers={reducers} removeAfterUnmount>
             <PageWithPagination hasMore={!!inWorkData?.next}
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
-                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
+                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
+                                sceleton={sceleton}
+            >
                 <div className="col p-1 m-0">
 
                     <StickyHeader loading={inWorkData?.is_loading}>
@@ -78,16 +90,9 @@ export const EqInWorkBlock = () => {
                         ))}
 
                     </TransitionGroup>
-                    {inWorkData?.is_loading
-                        &&
-                        <Skeleton width={'100%'}
-                                  height={'109px'}
-                                  className={'mt-1'}
-                                  rounded
-                                  scaled
-                                  pagination_size={3}
-                        />
-                    }
+
+                    {inWorkData?.is_loading && inWorkList.length === 0 && sceleton}
+
                 </div>
             </PageWithPagination>
         </DynamicModuleLoader>

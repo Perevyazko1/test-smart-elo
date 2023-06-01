@@ -92,7 +92,7 @@ export const EqAwaitBlock = () => {
                         ))}
                     </TransitionGroup>
 
-                    {awaitData?.is_loading && sceleton}
+                    {awaitData?.is_loading && awaitList.length === 0 && sceleton}
 
                 </div>
             </PageWithPagination>

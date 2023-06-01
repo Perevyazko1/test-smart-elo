@@ -48,13 +48,24 @@ export const EqReadyBlock = () => {
         }
     }
 
+    const sceleton = (
+        <Skeleton width={'100%'}
+                  height={'109px'}
+                  className={'mt-1'}
+                  rounded
+                  scaled
+                  pagination_size={3}
+        />
+    )
 
     return (
         <DynamicModuleLoader reducers={reducers} removeAfterUnmount>
             <PageWithPagination hasMore={!!readyData?.next}
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
-                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",}}>
+                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
+                                sceleton={sceleton}
+            >
                 <div className="p-1">
 
                     <StickyHeader loading={readyData?.is_loading}>
@@ -81,16 +92,9 @@ export const EqReadyBlock = () => {
                         ))}
 
                     </TransitionGroup>
-                    {readyData?.is_loading
-                        &&
-                        <Skeleton width={'100%'}
-                                  height={'109px'}
-                                  className={'mt-1'}
-                                  rounded
-                                  scaled
-                                  pagination_size={3}
-                        />
-                    }
+
+                    {readyData?.is_loading && readyList.length === 0 && sceleton}
+
                 </div>
             </PageWithPagination>
 
