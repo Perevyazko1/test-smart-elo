@@ -24,7 +24,6 @@ export const authByPinCodeSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(authByPinCode.pending, (state) => {
-                state.error = undefined;
                 state.isLoading = true;
             })
             .addCase(authByPinCode.fulfilled, (state) => {
@@ -32,7 +31,6 @@ export const authByPinCodeSlice = createSlice({
             })
             .addCase(authByPinCode.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.payload;
             })
     }
 })

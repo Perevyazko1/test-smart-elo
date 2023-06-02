@@ -25,7 +25,6 @@ export const OpSelectedTechProcess = (props: OpSelectedTechProcessProps) => {
     const [techProcess, setTechProcess] = useState(order_product.product.technological_process)
     
     useEffect(() => {
-        console.log('Сработало обновление техпроцесса')
         setTechProcess(order_product.product.technological_process)
     }, [order_product.product.technological_process])
 

@@ -40,7 +40,6 @@ export const EqAwaitBlock = () => {
     }, [awaitData?.not_relevant_id, dispatch])
 
     const fetchNextPage = () => {
-        console.log(window.screen.height)
         if (awaitData?.next) {
             dispatch(fetchNextAwaitList({url: awaitData.next}))
         }

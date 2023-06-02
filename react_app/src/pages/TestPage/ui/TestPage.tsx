@@ -1,27 +1,24 @@
 import React, {memo} from 'react';
-import {Container} from "react-bootstrap";
+import {Button, Container} from "react-bootstrap";
 
 import logo from "shared/assets/images/SZMK Logo White Horizontal 900х352.png";
 
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
-import {TechProcessWidget} from "widgets/TechProcessWidget";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {notificationsActions} from "widgets/Notification";
 
 
 const TestPage = memo(() => {
 
-    const schema = {
-        "ППУ": ["Обивка"],
-        "Крой": ["Пошив"],
-        "Пила": ["Лазер"],
-        "Лазер": ["Сборка"],
-        "Пошив": ["Обивка"],
-        "Старт": ["Пила", "Крой", "ППУ", "Подрядчики"],
-        "Обивка": ["Упаковка"],
-        "Сборка": ["Обивка"],
-        "Малярка": ["Обивка"],
-        "Столярка": ["Малярка"],
-        "Упаковка": ["Готово"],
-        "Подрядчики": ["Столярка"]
+    const dispatch = useAppDispatch()
+
+    const buttonOnclick = () => {
+        dispatch(notificationsActions.addNotification({
+            title: 'Уведомление',
+            body: "Проверка входящего уведомления",
+            type: "ошибка",
+            date: Date.now(),
+        }))
     }
 
     return (
@@ -37,15 +34,14 @@ const TestPage = memo(() => {
                     className={'ms-auto h-100 d-xl-flex justify-content-xl-center align-items-xl-center'}
                 />
             </section>
-            <Container className={'bg-light rounded'} style={{height: "93vh"}}>
+
+            <Container className={'bg-light rounded d-flex justify-content-center p-5'} style={{height: "93vh"}}>
                 <h3>Страница разработки</h3>
                 <hr/>
 
-                <TechProcessWidget
-                    // disabled={true}
-                    schema={schema}
-                    onSubmitData={(data) => console.log(data)}
-                />
+                <Button onClick={buttonOnclick}>
+                    Новое уведомление
+                </Button>
 
 
             </Container>

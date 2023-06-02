@@ -8,6 +8,7 @@ import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
 import {rtkAPI} from "shared/api/rtkAPI";
+import {NotificationList} from "widgets/Notification";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -22,6 +23,7 @@ export interface StateSchema {
     eqAwaitList?: ListControl,
     eqInWorkList?: ListControl,
     eqReadyList?: ListControl,
+    notifications?: NotificationList,
 }
 
 export type StateSchemaKey = keyof StateSchema;

@@ -1,9 +1,10 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, {AxiosError} from "axios";
 import {employee} from "entities/Employee";
 import {USER_LOCALSTORAGE_KEY} from 'shared/const/localstorage'
 import {employeeActions} from "entities/Employee/model/slice/employeeSlice";
 import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
+import {notificationsActions} from "../../../../../widgets/Notification";
 
 interface authByPinCodeProps {
     pin_code: number,
@@ -25,15 +26,24 @@ export const authByPinCode = createAsyncThunk<employee, authByPinCodeProps, { re
                 thunkAPI.dispatch(employeeActions.initAuthData())
                 return response.data;
             } else {
-                thunkAPI.dispatch(employeeActions.logout())
-                thunkAPI.dispatch(employeeActions.initAuthData())
                 throw new Error();
             }
-        } catch (e) {
-            // TODO написать обработку ошибок на различные статус коды ответа сервера
+        } catch (error) {
             thunkAPI.dispatch(employeeActions.logout())
             thunkAPI.dispatch(employeeActions.initAuthData())
-            return thunkAPI.rejectWithValue('Неверный ПИН-код')
+
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 401) {
+                    thunkAPI.dispatch(notificationsActions.addNotification({
+                        date: Date.now(),
+                        type: "ошибка",
+                        title: "Авторизация",
+                        body: "Неверный ПИН-код.",
+                    }))
+                }
+            }
+
+            return thunkAPI.rejectWithValue('Ошибка входа')
         }
 
     }

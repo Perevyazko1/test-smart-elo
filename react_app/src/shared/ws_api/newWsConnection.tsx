@@ -5,6 +5,7 @@ import {SERVER_WS_ADDRESS} from "../const/server_config";
 import {eqAwaitListActions} from "../../pages/EQPage/model/slice/awaitListSlice";
 import {eqInWorkListActions} from "../../pages/EQPage/model/slice/inWorkListSlice";
 import {eqReadyListActions} from "../../pages/EQPage/model/slice/readyListSlice";
+import {notificationsActions} from "../../widgets/Notification";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -36,13 +37,19 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
         socket.onclose = (event) => {
             if (event.wasClean) {
                 console.log('WS closed');
-
             } else {
                 console.log('Соединение потерянно, попытка восстановить...');
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
                     setTimeout(connect, RECONNECT_INTERVAL_MS);
                     reconnectAttempts++;
                 } else {
+                    dispatch(notificationsActions.addNotification({
+                        date: Date.now(),
+                        type: "ошибка запроса",
+                        title: "Потеря соединения",
+                        body: "Соединение с сервером потеряно, перезагрузите страницу.",
+                        notAutoHide: true,
+                    }))
                     console.error('Превышено количество попыток восстановления соединения: ', MAX_RECONNECT_ATTEMPTS);
                 }
             }
@@ -54,7 +61,12 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
                 data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {
                         case 'await':
-                            // TODO сделать обновления
+                            dispatch(notificationsActions.addNotification({
+                                date: Date.now(),
+                                type: "оповещение",
+                                title: "Обновление",
+                                body: "Данные обновлены.",
+                            }))
                             dispatch(eqAwaitListActions.hasUpdated())
                             return;
                         case 'in_work':

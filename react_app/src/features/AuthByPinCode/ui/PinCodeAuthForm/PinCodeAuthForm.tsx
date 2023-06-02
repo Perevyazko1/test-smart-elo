@@ -1,5 +1,5 @@
 import {useSelector} from "react-redux";
-import React, {memo, useCallback} from 'react';
+import React, {memo, useCallback, useEffect} from 'react';
 
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -13,6 +13,7 @@ import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
 import {authByPinCode} from "../../model/services/authByPinCode/authByPinCode";
 import {getAuthByPinCodeState} from "../../model/selectors/getAuthByPinCodeState/getAuthByPinCodeState";
 import {getRememberMe} from "../../model/selectors/getRememberMe/getRememberMe";
+import {notificationsActions} from "../../../../widgets/Notification";
 
 export interface PinCodeAuthFormProps {
     className?: string
@@ -57,7 +58,6 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
                 onSubmit={handleSubmit}
                 {...otherProps}
             >
-                <div className="mb-3">{authState?.error}</div>
 
                 <div className="mb-3">
                     <Input
