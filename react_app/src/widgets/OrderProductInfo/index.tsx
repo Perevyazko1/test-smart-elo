@@ -1,3 +1,3 @@
 export type {OrderProductInfoSchema} from "./model/type/OrderProductInfoSchema";
 
-export {OrderProductModal} from './ui/OrderProductModal/OrderProductModal'
+export {OrderProductInfo} from './ui/OrderProductInfo'

@@ -50,8 +50,8 @@ class OrderProductAdmin(admin.ModelAdmin):
 
     list_per_page = 20
 
-    search_fields = ['product']
-    list_filter = ['order__project']
+    search_fields = ['product__name', 'series_id']
+    list_filter = ['order__project', 'status']
 
 
 @admin.register(Order)
@@ -67,14 +67,37 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
-    list_display = ['number', 'status', 'department', 'executor', 'inspector']
+    list_display = ['number', 'status', 'department', 'executor', 'inspector', 'order_product']
+    list_display_links = ['number', 'status', 'department', 'executor', 'inspector']
+
+    list_filter = ['status', 'department', 'executor']
 
     list_per_page = 20
 
-    search_fields = ['assigment_id', 'status', 'date_completion']
+    search_fields = ['date_completion', 'number', 'order_product__series_id']
 
 
-admin.site.register(ProductionStep)
+@admin.register(ProductionStep)
+class ProductionStepAdmin(admin.ModelAdmin):
+    list_display = ['department', 'product', 'production_step_tariff']
+    list_display_links = ['department', 'product', 'production_step_tariff']
+
+    list_filter = ['department']
+
+    list_per_page = 20
+
+    search_fields = ['product__name', 'next_step__department__name', 'department__name']
+
+
+@admin.register(TechnologicalProcess)
+class ProductionStepAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    list_display_links = ['name']
+
+    list_per_page = 20
+
+    search_fields = ['name', 'schema']
+
+
 admin.site.register(ProductionStepTariff)
 admin.site.register(Fabric)
-admin.site.register(TechnologicalProcess)

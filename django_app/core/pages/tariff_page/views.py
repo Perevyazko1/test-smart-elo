@@ -1,4 +1,5 @@
 from django.http import JsonResponse
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
 from core.models import ProductionStep, Order
@@ -23,42 +24,45 @@ def get_tariff_page_filters(request):
     )
 
 
-@api_view(['GET'])
-def get_production_step_list(request):
-    view_mode = request.query_params.get('view_mode')
-    product_name = request.query_params.get('product_name')
-    department_number = request.query_params.get('department_number')
-    pin_code = request.query_params.get('pin_code')
-    user = Employee.objects.get(pin_code=pin_code)
-    serializer = ProductionStepSerializer
+class GetProductionSteps(viewsets.ModelViewSet):
+    queryset = ProductionStep.objects.all()
+    serializer_class = ProductionStepSerializer
 
-    qs = ProductionStep.objects.filter(
-        department__piecework_wages=True,
-        department__in=user.departments.all()
-    ).distinct()
+    def get_queryset(self):
+        qs = super().get_queryset()
+        view_mode = self.request.query_params.get('view_mode')
+        product_name = self.request.query_params.get('product_name')
+        department_number = self.request.query_params.get('department_number')
+        pin_code = self.request.query_params.get('pin_code')
 
-    if not product_name == '':
+        user = Employee.objects.get(pin_code=pin_code)
+
         qs = qs.filter(
-            product__name__icontains=product_name
+            department__piecework_wages=True,
+            department__in=user.departments.all()
         ).distinct()
 
-    if view_mode == 'Без тарификации':
-        qs = qs.filter(
-            production_step_tariff__isnull=True
-        ).distinct()
+        if not product_name == '':
+            qs = qs.filter(
+                product__name__icontains=product_name
+            ).distinct()
 
-    if view_mode == 'Тарифицированные':
-        qs = qs.filter(
-            production_step_tariff__isnull=False
-        ).distinct()
-    if not department_number == '0':
-        qs = qs.filter(
-            department__number=department_number
-        ).distinct()
+        if view_mode == 'Без тарификации':
+            qs = qs.filter(
+                production_step_tariff__isnull=True
+            ).distinct()
 
-    data = serializer(qs, many=True, context={'request': request}).data
+        if view_mode == 'Тарифицированные':
+            qs = qs.filter(
+                production_step_tariff__isnull=False
+            ).distinct()
 
-    return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
+        if not department_number == '0':
+            qs = qs.filter(
+                department__number=department_number
+            ).distinct()
+
+        return qs
 
 
 @api_view(['POST'])

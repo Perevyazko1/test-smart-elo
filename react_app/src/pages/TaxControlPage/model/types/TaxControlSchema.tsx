@@ -9,6 +9,13 @@ export interface TaxControlData {
     production_step_tariff: tariff | undefined;
 }
 
+export interface TaxControlList {
+    results: TaxControlData[];
+    count: number;
+    next: string | null;
+    previous: string | null;
+}
+
 export interface TaxControlSchema {
     is_loading: boolean;
     updated: boolean;
@@ -21,5 +28,5 @@ export interface TaxControlSchema {
     current_view_mode: string,
 
 
-    data?: TaxControlData[];
+    data?: TaxControlList;
 }

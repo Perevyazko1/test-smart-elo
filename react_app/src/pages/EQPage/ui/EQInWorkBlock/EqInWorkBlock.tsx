@@ -62,7 +62,7 @@ export const EqInWorkBlock = () => {
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
                                 style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
-                                sceleton={sceleton}
+                                skeleton={sceleton}
             >
                 <div className="col p-1 m-0">
 

@@ -1,8 +1,9 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {department} from "entities/Department";
 
-import {TaxControlData, TaxControlSchema} from "../types/TaxControlSchema";
+import {TaxControlData, TaxControlList, TaxControlSchema} from "../types/TaxControlSchema";
 import {fetchTaxControlList} from "../service/fetchTaxControlData/fetchTaxControlData";
+import {fetchNextTaxControlData} from "../service/fetchNextTaxControlData/fetchNextTaxControlData";
 
 
 export const initialState: TaxControlSchema = {
@@ -19,9 +20,6 @@ export const taxControlSlice = createSlice({
         name: 'taxControl',
         initialState,
         reducers: {
-            setTaxControlData: (state, action: PayloadAction<TaxControlData[]>) => {
-                state.data = action.payload
-            },
             setTaxControlUpdated: (state) => {
                 state.updated = !state.updated
             },
@@ -53,15 +51,30 @@ export const taxControlSlice = createSlice({
             builder
                 .addCase(fetchTaxControlList.pending, (state) => {
                     state.is_loading = true;
-                    // state.error = undefined;
                 })
-                .addCase(fetchTaxControlList.fulfilled, (state) => {
+                .addCase(fetchTaxControlList.fulfilled, (state, action: PayloadAction<TaxControlList>) => {
+                    state.is_loading = false;
+                    state.data = action.payload;
+                })
+                .addCase(fetchTaxControlList.rejected, (state) => {
                     state.is_loading = false;
                 })
-                .addCase(fetchTaxControlList.rejected, (state, action) => {
-                    state.is_loading = false;
-                    // state.error = action.payload;
+
+                .addCase(fetchNextTaxControlData.pending, (state) => {
+                    state.is_loading = true;
                 })
+                .addCase(fetchNextTaxControlData.fulfilled, (state, action: PayloadAction<TaxControlList>) => {
+                    state.is_loading = false;
+                    if (state.data?.results) {
+                        state.data.results = [...state.data.results, ...action.payload.results];
+                        state.data.next = action.payload.next;
+                        state.data.previous = action.payload.previous;
+                    }
+                })
+                .addCase(fetchNextTaxControlData.rejected, (state) => {
+                    state.is_loading = false;
+                })
+
 
         }
     }

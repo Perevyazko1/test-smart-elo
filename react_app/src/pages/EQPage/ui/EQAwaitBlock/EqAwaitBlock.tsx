@@ -64,7 +64,7 @@ export const EqAwaitBlock = () => {
                                     height: "93vh", overflow: "auto", overflowX: "hidden", overflowY: "auto",
                                     borderLeftWidth: "4px", borderLeftStyle: "solid"
                                 }}
-                                sceleton={sceleton}
+                                skeleton={sceleton}
             >
                 <div className="p-1">
 

@@ -17,6 +17,9 @@ import {getTCCurrentViewMode} from "../model/selectors/getTCCurrentViewMode/getT
 import {getTCDepartmentFilter} from "../model/selectors/getTCDepartmentFilter/getTCDepartmentFilter";
 import {getTCProductNameFilter} from "../model/selectors/getTCProductNameFilter/getTCProductNameFilter";
 import {getTCIsLoading} from "../model/selectors/getTCIsLoading/getTCIsLoading";
+import {PageWithPagination} from "../../../shared/ui/PageWithPagination/PageWithPagination";
+import {Skeleton} from "../../../shared/ui/Skeleton/Skeleton";
+import {fetchNextTaxControlData} from "../model/service/fetchNextTaxControlData/fetchNextTaxControlData";
 
 
 const initialReducers: ReducersList = {
@@ -28,37 +31,48 @@ const TaxControlPage = memo(() => {
     const tax_control_data = useSelector(getTaxControlData)
     const page_is_loading = useSelector(getTCIsLoading)
     const page_updated = useSelector(getTaxControlUpdated)
-    const current_view_mode = useSelector(getTCCurrentViewMode)
-    const current_department = useSelector(getTCDepartmentFilter)
-    const pin_code = useSelector(getEmployeePinCode)
-    const current_product_name_filter = useSelector(getTCProductNameFilter)
-
-    useEffect(() => {
-        if (current_view_mode && current_department && pin_code) {
-            dispatch(fetchTaxControlList({
-                department_number: current_department?.number,
-                view_mode: current_view_mode,
-                product_name: current_product_name_filter || '',
-                pin_code: pin_code,
-            }))
-        }
-    }, [
-        dispatch, page_updated, current_view_mode, current_department, current_product_name_filter,
-        pin_code
-    ])
 
     useEffect(() => {
         dispatch(fetchTCFilters({}))
     }, [dispatch])
+
+
+    useEffect(() => {
+        if (tax_control_data?.updated !== undefined)
+            dispatch(fetchTaxControlList({
+                limit: 10,
+                offset: 0,
+            }))
+        // eslint-disable-next-line
+    }, [dispatch, page_updated])
+
+    const fetchNextData = () => {
+        if (tax_control_data?.data?.next) {
+            dispatch(fetchNextTaxControlData({next: tax_control_data.data.next}))
+        }
+    }
+
+    const skeleton = (
+        <Skeleton width={"100%"}
+                  height={"100px"}
+                  pagination_size={3}
+                  className={'mb-1'}
+                  rounded={false}
+                  scaled={true}
+        />
+    )
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
             <TCNavBar/>
 
             <section style={{height: "93vh", background: "#929292"}} className={'p-2'}>
-                <Container
-                    className={'bg-light bg-gradient p-2 rounded h-100'}
+                <PageWithPagination
+                    className={'bg-light bg-gradient p-2 rounded h-100 mx-3'}
                     style={{overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
+                    hasMore={!!tax_control_data?.data?.next}
+                    scroll_callback={fetchNextData}
+                    skeleton={skeleton}
                 >
                     <div className={'fs-3 d-flex justify-content-start align-items-center'}>
                         Страница назначения тарификаций
@@ -77,31 +91,22 @@ const TaxControlPage = memo(() => {
 
                     <hr/>
 
-                    {page_is_loading
+                    {tax_control_data?.data?.results
                         ?
-                        <div className={'w-100 d-flex justify-content-center'}>
-                            <Spinner animation="grow"/>
-                        </div>
+                        <TaxControlTable tax_control_data={tax_control_data.data.results}/>
                         :
-                        <>
-                            {tax_control_data
-                                ?
-                                <TaxControlTable tax_control_data={tax_control_data}/>
-                                :
-                                <div className={"w-100 d-flex justify-content-center"}>
-                                    <div>
-                                        Нет данных
-                                    </div>
-                                </div>
-                            }
-                        </>
+                        <div className={"w-100 d-flex justify-content-center"}>
+                            <div>
+                                Нет данных
+                            </div>
+                        </div>
                     }
-
-
-                </Container>
+                    {tax_control_data?.is_loading && !tax_control_data.data?.results && skeleton}
+                </PageWithPagination>
             </section>
         </DynamicModuleLoader>
-    );
+    )
+        ;
 });
 
 export default TaxControlPage;

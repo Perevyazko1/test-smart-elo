@@ -5,7 +5,7 @@ import {useInfiniteScroll} from "../../lib/hooks/useInfiniteScroll/useInfiniteSc
 interface PageWithPaginationProps extends HTMLAttributes<HTMLDivElement> {
     hasMore: boolean,
     scroll_callback: () => void,
-    sceleton?: ReactNode,
+    skeleton?: ReactNode,
 }
 
 
@@ -13,7 +13,7 @@ export const PageWithPagination = (props: PageWithPaginationProps) => {
     const {
         hasMore,
         scroll_callback,
-        sceleton,
+        skeleton,
         ...otherProps
     } = props
     const wrapperRef = useRef() as MutableRefObject<HTMLDivElement>
@@ -40,7 +40,7 @@ export const PageWithPagination = (props: PageWithPaginationProps) => {
 
             {hasMore &&
                 <div>
-                    {sceleton}
+                    {skeleton}
                 </div>
             }
         </div>

@@ -1,28 +1,42 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import axios from "axios";
+import {ThunkConfig} from "app/providers/StoreProvider";
+import {getEmployeePinCode} from "entities/Employee";
 
-import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
-import {TaxControlData} from "../../types/TaxControlSchema";
-import {taxControlActions} from "../../slice/taxControlPageSlice";
+import {TaxControlList} from "../../types/TaxControlSchema";
+import {getTCCurrentViewMode} from "../../selectors/getTCCurrentViewMode/getTCCurrentViewMode";
+import {getTCDepartmentFilter} from "../../selectors/getTCDepartmentFilter/getTCDepartmentFilter";
+import {getTCProductNameFilter} from "../../selectors/getTCProductNameFilter/getTCProductNameFilter";
 
 
 interface fetchTaxControlProps {
-    pin_code: number,
-    department_number: number,
-    view_mode: string,
-    product_name: string,
+    limit: number,
+    offset: number,
 }
 
-export const fetchTaxControlList = createAsyncThunk<TaxControlData, fetchTaxControlProps, {rejectValue: string}>(
+export const fetchTaxControlList = createAsyncThunk<TaxControlList, fetchTaxControlProps, ThunkConfig<string>>(
     'eq/fetchTaxControlList',
-    async (filters: fetchTaxControlProps, thunkAPI) => {
+    async (params: fetchTaxControlProps, thunkAPI) => {
+
+        const {extra, getState} = thunkAPI;
+
+        const current_view_mode = getTCCurrentViewMode(getState())
+        const current_department = getTCDepartmentFilter(getState())
+        const pin_code = getEmployeePinCode(getState())
+        const current_product_name_filter = getTCProductNameFilter(getState())
+
         try {
-            const response = await axios.get(`${SERVER_HTTP_ADDRESS}/api/v1/core/get_production_step_list/`, {
-                params: {...filters}
+            const response = await extra.api.get<TaxControlList>('/core/get_production_steps/', {
+                params: {
+                    department_number: current_department?.number,
+                    view_mode: current_view_mode,
+                    product_name: current_product_name_filter || '',
+                    pin_code: pin_code,
+                    limit: params.limit,
+                    offset: params.offset,
+                }
             });
             if (response.data) {
-                thunkAPI.dispatch(taxControlActions.setTaxControlData(response.data.data))
-                return response.data.data;
+                return response.data;
             } else {
                 throw new Error();
             }

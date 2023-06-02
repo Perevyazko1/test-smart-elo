@@ -18,7 +18,7 @@ import {getButtonAction} from "../lib/getButtonAction";
 import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
 import {updateTargetData} from "../lib/updateTargetList";
-import {OrderProductModal} from "../../OrderProductInfo";
+import {OrderProductInfo} from "../../OrderProductInfo";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -134,7 +134,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             className={classNames('card bg-dark mt-1 p-1', mods, [className])}
             {...otherProps}
         >
-            {showCardInfo && <OrderProductModal onHide={hide_card_info} order_product={order_product}/>}
+            {showCardInfo && <OrderProductInfo onHide={hide_card_info} order_product={order_product}/>}
             
             <div
                 className="card-body d-flex m-0 p-0"

@@ -1,9 +1,11 @@
-import React, {memo, useCallback, useState} from 'react';
+import React, {memo, useCallback, useEffect, useState} from 'react';
 import {Container, Form, Table} from "react-bootstrap";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {tech_process_schema} from "entities/TechnologicalProcess";
 import {DepartmentConsts} from "entities/Department";
+
+import {checkSchemaValid} from "./model/lib/checkSchemaValid";
 
 
 interface TechProcessWidgetProps {
@@ -26,6 +28,7 @@ export const TechProcessWidget = memo((props: TechProcessWidgetProps) => {
     } = props
 
     const [actualSchema, setActualSchema] = useState<tech_process_schema>(schema || {})
+    const [schemaValid, setSchemaValid] = useState<boolean>(checkSchemaValid(actualSchema))
 
     const departments = Object.values(DepartmentConsts).filter(name => name !== DepartmentConsts.D1)
 
@@ -51,6 +54,10 @@ export const TechProcessWidget = memo((props: TechProcessWidgetProps) => {
             return newData;
         });
     }, []);
+
+    useEffect(() => {
+        setSchemaValid(checkSchemaValid(actualSchema))
+    }, [actualSchema])
 
     const mods: Mods = {};
 
@@ -137,6 +144,7 @@ export const TechProcessWidget = memo((props: TechProcessWidgetProps) => {
 
                 {!disabled && onSubmitData &&
                     <button
+                        disabled={!schemaValid}
                         type={'button'}
                         className={'btn btn-success'}
                         onClick={() => onSubmitData(actualSchema)}
