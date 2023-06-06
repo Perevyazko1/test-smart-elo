@@ -35,6 +35,15 @@ class AssignmentGenerator:
         production_steps = order_product.product.production_steps.filter(department__number=0)
         for production_step in production_steps:
             for next_step in production_step.next_step.all():
+                """Если в отделе конструкторов есть наряд с данным товаром, игнорируем генерацию нового наряда"""
+                if next_step.department.number == 1:
+                    assignment_exists = Assignment.objects.filter(
+                        order_product__product=order_product.product,
+                        department__number=1
+                    ).exists()
+                    if assignment_exists:
+                        continue
+
                 self.create_new_assignments(
                     order_product=order_product,
                     department=next_step.department,

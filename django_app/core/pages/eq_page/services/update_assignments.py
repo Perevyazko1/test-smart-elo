@@ -218,7 +218,7 @@ class UpdateAssignments:
             return 1
         return related_assignments_confirmed_minimum_count - next_step_assignments_count
 
-    def _create_related_assignments(self):
+    def _create_related_assignments(self, from_constructors: bool = False):
         """Получаем список последующих этапов"""
         self.department = Department.objects.get(number=self.department_number)
 
@@ -241,11 +241,26 @@ class UpdateAssignments:
                     'lists': ['await']
                 }
 
-                AssignmentGenerator.create_new_assignments(
-                    order_product=self.order_product,
-                    department=next_step.department,
-                    quantity=target_size
-                )
+                if from_constructors:
+                    """
+                    Если наряд поступил от конструкторов производим генерацию нарядов всех серий ожидающих разработки.
+                    """
+                    order_products = OrderProduct.objects.filter(
+                        product=self.order_product.product,
+                    )
+
+                    for order_product in order_products:
+                        AssignmentGenerator.create_new_assignments(
+                            order_product=order_product,
+                            department=next_step.department,
+                            quantity=target_size
+                        )
+                else:
+                    AssignmentGenerator.create_new_assignments(
+                        order_product=self.order_product,
+                        department=next_step.department,
+                        quantity=target_size
+                    )
 
     def _confirmation_instructions(self):
         """Действия при визировании бригадиром наряда"""
@@ -259,7 +274,7 @@ class UpdateAssignments:
 
             """Переопределяем контекст номера отдела т.к. дальнейшее создание нарядов пойдет со стартового отдела"""
             self.department_number = 0
-            self._create_related_assignments()
+            self._create_related_assignments(from_constructors=True)
 
         else:
             self._create_related_assignments()

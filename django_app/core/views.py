@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
-from .models import Order
+from .models import Order, OrderProduct
 
 
 def import_orders(request):

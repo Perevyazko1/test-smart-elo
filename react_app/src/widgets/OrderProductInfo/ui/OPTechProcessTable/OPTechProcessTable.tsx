@@ -41,14 +41,14 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
         dispatch(fetchSetCustomTechProcess({
             schema: schema,
             series_id: order_product.series_id
-        }))
+        })).then(() => {
+            dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
+            dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
+            dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
 
-        dispatch(eqAwaitListActions.addNotRelevantId(order_product.id))
-        dispatch(eqInWorkListActions.addNotRelevantId(order_product.id))
-        dispatch(eqReadyListActions.addNotRelevantId(order_product.id))
-
-        dispatch(orderProductInfoActions.setShowConstructor(false))
-        dispatch(orderProductInfoActions.setChangeTP(false))
+            dispatch(orderProductInfoActions.setShowConstructor(false))
+            dispatch(orderProductInfoActions.setChangeTP(false))
+        })
     }
 
     const on_cancellation_constructor = () => {

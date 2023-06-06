@@ -62,7 +62,7 @@ class OrderAdmin(admin.ModelAdmin):
 
     list_filter = ['project']
 
-    search_fields = ['project']
+    search_fields = ['project', 'number']
 
 
 @admin.register(Assignment)

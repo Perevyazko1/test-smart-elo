@@ -23,7 +23,7 @@ export const OpSelectedTechProcess = (props: OpSelectedTechProcessProps) => {
     const dispatch = useAppDispatch();
     const opInfoData = useSelector(getOPInfoData);
     const [techProcess, setTechProcess] = useState(order_product.product.technological_process)
-    
+
     useEffect(() => {
         setTechProcess(order_product.product.technological_process)
     }, [order_product.product.technological_process])

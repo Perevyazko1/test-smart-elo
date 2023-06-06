@@ -15,7 +15,7 @@ from core.pages.eq_page.services.ready_view_mode_filter import ready_view_mode_f
 from core.pages.eq_page.services.update_assignments import UpdateAssignments
 from core.serializers import TechProcessSerializer
 from core.services.get_week_info import GetWeekInfo
-from staff.models import Employee
+from staff.models import Employee, Audit
 
 
 @api_view(['POST'])
@@ -168,7 +168,7 @@ def get_view_modes(request):
 
 @api_view(['GET'])
 def get_tech_process_info(request):
-    qs = TechnologicalProcess.objects.exclude(image='').order_by('id')
+    qs = TechnologicalProcess.objects.exclude(image='').order_by('name')
     serializer = TechProcessSerializer
     data = serializer(qs, many=True, context={"request": request}).data
 
