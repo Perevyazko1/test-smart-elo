@@ -23,7 +23,8 @@ export const TCNavBar = memo((props: TCNavBarProps) => {
     const dispatch = useAppDispatch()
 
     const set_default_filters = () => {
-        dispatch(taxControlActions.setDefaultFilters())
+        dispatch(taxControlActions.setDefaultFilters());
+        dispatch(taxControlActions.hasUpdated());
     }
 
     const mods: Mods = {};

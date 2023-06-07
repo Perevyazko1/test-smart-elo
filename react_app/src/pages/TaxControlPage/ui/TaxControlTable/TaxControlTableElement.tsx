@@ -11,7 +11,7 @@ import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime"
 import {TaxControlData} from "../../model/types/TaxControlSchema";
 import {useAppDispatch} from "../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {fetchSetTax, SetTaxModes} from "../../model/service/fetchSetTax/fetchSetTax";
-import {taxControlActions} from "../../model/slice/taxControlPageSlice";
+import {getTaxControlData, taxControlActions} from "../../model/slice/taxControlPageSlice";
 
 interface TaxControlTableElementProps {
     tax_control_item: TaxControlData
@@ -28,6 +28,7 @@ export const TaxControlTableElement = memo((props: TaxControlTableElementProps) 
 
     const dispatch = useAppDispatch()
     const [currentTax, setCurrentTax] = useState(tax_control_item.production_step_tariff?.tariff)
+    const taxData = useSelector(getTaxControlData)
     const pin_code = useSelector(getEmployeePinCode)
 
     const setTax = async () => {
@@ -39,7 +40,7 @@ export const TaxControlTableElement = memo((props: TaxControlTableElementProps) 
                 tariff: currentTax,
                 product_id: tax_control_item.product.id
             }))
-            dispatch(taxControlActions.setTaxControlUpdated())
+            dispatch(taxControlActions.addNotRelevantId(tax_control_item.id))
         }
     }
 
@@ -102,6 +103,7 @@ export const TaxControlTableElement = memo((props: TaxControlTableElementProps) 
                     type={'button'}
                     className={'btn btn-success'}
                     onClick={setTax}
+                    disabled={taxData?.not_relevant_id.includes(tax_control_item.id)}
                 >
                     Утвердить
                 </button>

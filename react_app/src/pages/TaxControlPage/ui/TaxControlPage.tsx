@@ -1,25 +1,20 @@
 import React, {memo, useEffect} from 'react';
 import {useSelector} from "react-redux";
-import {Container, OverlayTrigger, Spinner, Tooltip} from "react-bootstrap";
+import {OverlayTrigger, Tooltip} from "react-bootstrap";
 
-import {getEmployeePinCode} from "entities/Employee";
+import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {getPaginationSize} from "shared/api/configs";
+import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
 import {fetchTaxControlList} from "../model/service/fetchTaxControlData/fetchTaxControlData";
-import {taxControlReducer} from "../model/slice/taxControlPageSlice";
-import {getTaxControlData} from "../model/selectors/getTaxControlData/getTaxControlData";
+import {getTaxControlData, getTaxControlList, taxControlReducer} from "../model/slice/taxControlPageSlice";
 import {TaxControlTable} from "./TaxControlTable/TaxControlTable";
-import {getTaxControlUpdated} from "../model/selectors/getTaxControlUpdated/getTaxControlUpdated";
 import {TCNavBar} from "./TCNavBar/TCNavBar";
 import {fetchTCFilters} from "../model/service/fetchTaxControlFilters/fetchTCFilters";
-import {getTCCurrentViewMode} from "../model/selectors/getTCCurrentViewMode/getTCCurrentViewMode";
-import {getTCDepartmentFilter} from "../model/selectors/getTCDepartmentFilter/getTCDepartmentFilter";
-import {getTCProductNameFilter} from "../model/selectors/getTCProductNameFilter/getTCProductNameFilter";
-import {getTCIsLoading} from "../model/selectors/getTCIsLoading/getTCIsLoading";
-import {PageWithPagination} from "../../../shared/ui/PageWithPagination/PageWithPagination";
-import {Skeleton} from "../../../shared/ui/Skeleton/Skeleton";
 import {fetchNextTaxControlData} from "../model/service/fetchNextTaxControlData/fetchNextTaxControlData";
+import {fetchTaxControlCard} from "../model/service/fetchTaxControlData/fetchTaxControlCard";
 
 
 const initialReducers: ReducersList = {
@@ -28,9 +23,8 @@ const initialReducers: ReducersList = {
 
 const TaxControlPage = memo(() => {
     const dispatch = useAppDispatch()
-    const tax_control_data = useSelector(getTaxControlData)
-    const page_is_loading = useSelector(getTCIsLoading)
-    const page_updated = useSelector(getTaxControlUpdated)
+    const taxList = useSelector(getTaxControlList.selectAll)
+    const taxData = useSelector(getTaxControlData)
 
     useEffect(() => {
         dispatch(fetchTCFilters({}))
@@ -38,17 +32,24 @@ const TaxControlPage = memo(() => {
 
 
     useEffect(() => {
-        if (tax_control_data?.updated !== undefined)
+        if (taxData?.updated !== undefined)
             dispatch(fetchTaxControlList({
-                limit: 10,
+                limit: getPaginationSize(
+                    window.screen.height
+                ),
                 offset: 0,
             }))
-        // eslint-disable-next-line
-    }, [dispatch, page_updated])
+    }, [dispatch, taxData?.updated])
+    
+    useEffect(() => {
+        if (taxData?.not_relevant_id && taxData?.not_relevant_id.length > 0) {
+            dispatch(fetchTaxControlCard({id: taxData.not_relevant_id[0]}))
+        }
+    }, [dispatch, taxData?.not_relevant_id])
 
     const fetchNextData = () => {
-        if (tax_control_data?.data?.next) {
-            dispatch(fetchNextTaxControlData({next: tax_control_data.data.next}))
+        if (taxData?.next) {
+            dispatch(fetchNextTaxControlData({next: taxData.next}))
         }
     }
 
@@ -70,7 +71,7 @@ const TaxControlPage = memo(() => {
                 <PageWithPagination
                     className={'bg-light bg-gradient p-2 rounded h-100 mx-3'}
                     style={{overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
-                    hasMore={!!tax_control_data?.data?.next}
+                    hasMore={!!taxData?.next}
                     scroll_callback={fetchNextData}
                     skeleton={skeleton}
                 >
@@ -91,9 +92,9 @@ const TaxControlPage = memo(() => {
 
                     <hr/>
 
-                    {tax_control_data?.data?.results
+                    {taxData
                         ?
-                        <TaxControlTable tax_control_data={tax_control_data.data.results}/>
+                        <TaxControlTable tax_control_data={taxList}/>
                         :
                         <div className={"w-100 d-flex justify-content-center"}>
                             <div>
@@ -101,12 +102,11 @@ const TaxControlPage = memo(() => {
                             </div>
                         </div>
                     }
-                    {tax_control_data?.is_loading && !tax_control_data.data?.results && skeleton}
+                    {taxData?.is_loading && !taxData && skeleton}
                 </PageWithPagination>
             </section>
         </DynamicModuleLoader>
-    )
-        ;
+    );
 });
 
 export default TaxControlPage;

@@ -1,21 +1,21 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
+
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {getEmployeePinCode} from "entities/Employee";
 
-import {TaxControlList} from "../../types/TaxControlSchema";
+import {TaxControlData} from "../../types/TaxControlSchema";
 import {getTCCurrentViewMode} from "../../selectors/getTCCurrentViewMode/getTCCurrentViewMode";
 import {getTCDepartmentFilter} from "../../selectors/getTCDepartmentFilter/getTCDepartmentFilter";
 import {getTCProductNameFilter} from "../../selectors/getTCProductNameFilter/getTCProductNameFilter";
 
 
-interface fetchTaxControlProps {
-    limit: number,
-    offset: number,
+interface fetchTaxControlCardProps {
+    id: number,
 }
 
-export const fetchTaxControlList = createAsyncThunk<TaxControlList, fetchTaxControlProps, ThunkConfig<string>>(
-    'taxControl/fetchTaxControlList',
-    async (params: fetchTaxControlProps, thunkAPI) => {
+export const fetchTaxControlCard = createAsyncThunk<TaxControlData, fetchTaxControlCardProps, ThunkConfig<string>>(
+    'taxControl/fetchTaxControlCard',
+    async (params: fetchTaxControlCardProps, thunkAPI) => {
 
         const {extra, getState} = thunkAPI;
 
@@ -25,14 +25,12 @@ export const fetchTaxControlList = createAsyncThunk<TaxControlList, fetchTaxCont
         const current_product_name_filter = getTCProductNameFilter(getState())
 
         try {
-            const response = await extra.api.get<TaxControlList>('/core/get_production_steps/', {
+            const response = await extra.api.get<TaxControlData>(`/core/get_production_steps/${params.id}`, {
                 params: {
                     department_number: current_department?.number,
                     view_mode: current_view_mode,
                     product_name: current_product_name_filter || '',
                     pin_code: pin_code,
-                    limit: params.limit,
-                    offset: params.offset,
                 }
             });
             if (response.data) {

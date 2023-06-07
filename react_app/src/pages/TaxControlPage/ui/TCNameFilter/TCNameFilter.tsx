@@ -34,6 +34,7 @@ export const TCNameFilter = memo((props: TCNameFilterProps) => {
 
     const set_product_name_filter = useCallback ((name: string) => {
         dispatch(taxControlActions.setProductNameFilter(name))
+        dispatch(taxControlActions.hasUpdated());
     }, [dispatch])
 
     const debouncedSetProductNameFilter = useDebounce(

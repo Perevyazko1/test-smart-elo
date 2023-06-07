@@ -178,6 +178,7 @@ def get_tech_process_info(request):
 @api_view(['POST'])
 def set_tech_process(request):
     series_id = request.data.get('series_id')
+    pin_code = request.data.get('pin_code')
     tech_process_id = request.data.get('tech_process_id')
     serializer = TechProcessSerializer
 
@@ -188,6 +189,13 @@ def set_tech_process(request):
     product.save()
 
     data = serializer(technological_process, context={'request': request}).data
+
+    Audit.objects.create(
+        employee=Employee.objects.get(pin_code=pin_code),
+        audit_type="edit",
+        details=f"Назначил технологический процесс: {technological_process.name}, "
+                f"для изделия: {product.name}"
+    )
 
     return JsonResponse({"data": data}, json_dumps_params={"ensure_ascii": False})
 
@@ -255,12 +263,20 @@ def get_order_product_info(request):
 @api_view(['POST'])
 def set_custom_tech_process(request):
     schema = request.data.get('schema')
+    pin_code = request.data.get('pin_code')
     series_id = request.data.get('series_id')
 
     if check_schema(schema):
         technological_process = create_custom_tech_process(schema=schema, series_id=series_id)
         serializer = TechProcessSerializer
         data = serializer(technological_process, context={'request': request}).data
+
+        Audit.objects.create(
+            employee=Employee.objects.get(pin_code=pin_code),
+            audit_type="edit",
+            details=f"Назначил специальный технологический процесс: {technological_process.name}, "
+                    f"для изделия: {technological_process.product_set.first().name}"
+        )
         return JsonResponse({
             "data": data
         }, json_dumps_params={"ensure_ascii": False})

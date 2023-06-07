@@ -3,6 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {tech_process_schema} from "entities/TechnologicalProcess";
 import {order_product_list} from "entities/OrderProduct";
 import {ThunkConfig} from "app/providers/StoreProvider";
+import {getEmployeePinCode} from "../../../../../entities/Employee";
 
 
 interface fetchSetCustomTechProcessProps {
@@ -15,10 +16,13 @@ export const fetchSetCustomTechProcess = createAsyncThunk<
 (
     'eq/fetchSetCustomTechProcess',
     async (filters: fetchSetCustomTechProcessProps, thunkAPI) => {
-        const {extra} = thunkAPI;
+        const {extra, getState} = thunkAPI;
+
+        const pin_code = getEmployeePinCode(getState())
 
         try {
             const response = await extra.api.post('/core/set_custom_tech_process/', {
+                pin_code: pin_code,
                 ...filters
             });
             if (response.data) {

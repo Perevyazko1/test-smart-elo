@@ -86,6 +86,7 @@ class ProductionStepTariffSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductionStepTariff
         fields = [
+            'id',
             'product',
             'department',
             'tariff',
@@ -102,6 +103,7 @@ class ProductionStepSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductionStep
         fields = [
+            'id',
             'product',
             'department',
             'production_step_tariff',

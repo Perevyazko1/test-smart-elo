@@ -27,6 +27,7 @@ export const TCViewModeFilter = memo((props: TCViewModeFilterProps) => {
 
     const set_current_view_mode = (view_mode_name: string) => {
         dispatch(taxControlActions.setCurrentViewFilter(view_mode_name))
+        dispatch(taxControlActions.hasUpdated());
     }
 
     const mods: Mods = {};

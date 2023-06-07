@@ -28,7 +28,8 @@ export const TСDepartmentFilter = memo((props: TСDepartmentFilterProps) => {
     const default_department = initialState.department_filter
 
     const set_department_filter = (department: department) => {
-        dispatch(taxControlActions.setDepartmentFilter(department))
+        dispatch(taxControlActions.setDepartmentFilter(department));
+        dispatch(taxControlActions.hasUpdated());
     }
 
     const mods: Mods = {};

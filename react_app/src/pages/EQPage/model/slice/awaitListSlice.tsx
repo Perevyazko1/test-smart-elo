@@ -9,14 +9,15 @@ import {eqListAdapter, ListControl} from "../types/eqSchema";
 
 
 const initialState: ListControl = {
+    next: null,
+    previous: null,
+    count: 0,
     results: eqListAdapter.getInitialState({
         ids: [],
         entities: {},
     }),
+
     is_loading: false,
-    next: null,
-    previous: null,
-    count: 0,
     has_updated: false,
     not_relevant_id: [],
 }
@@ -73,7 +74,7 @@ const eqAwaitListSlice = createSlice({
             .addCase(fetchAwaitCard.fulfilled, (state, action: PayloadAction<order_product>) => {
                 eqListAdapter.upsertOne(state.results, action.payload);
                 state.not_relevant_id = state.not_relevant_id.filter(
-                    (order_product_id) => order_product_id !== action.payload.id)
+                    (order_product_id) => order_product_id !== action.payload.id);
             })
 
             .addCase(fetchAwaitCard.rejected, (state, action) => {

@@ -1,7 +1,7 @@
 import datetime
 
 from core.models import ProductionStep, Assignment, ProductionStepTariff, Product
-from staff.models import Employee, Department
+from staff.models import Employee, Department, Audit
 
 
 def update_product_tax(product_id: int, pin_code: int, department_number: int, tariff: int):
@@ -27,3 +27,11 @@ def update_product_tax(product_id: int, pin_code: int, department_number: int, t
         department__number=department_number,
         tariff__isnull=True,
     ).update(tariff=production_step_tariff)
+
+    Audit.objects.create(
+        employee=Employee.objects.get(pin_code=pin_code),
+        audit_type="edit",
+        details=f"Утвердил тарификацию изделия {production_step.product.name} "
+                f"для отдела {production_step.department.name}"
+                f", в размере {production_step_tariff.tariff}"
+    )
