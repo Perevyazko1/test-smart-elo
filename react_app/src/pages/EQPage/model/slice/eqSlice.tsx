@@ -1,10 +1,10 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
-import {order_product} from "entities/OrderProduct";
 import {week_info} from "entities/WeekInfo";
 
 import {EqSchema, ViewMode} from "../types/eqSchema";
 import {fetchWeekInfo} from "../service/fetchWeekInfo/fetchWeekInfo";
+import {EQ_WEEK_YEAR_INFO} from "shared/const/localstorage";
 
 
 export const initialState: EqSchema = {
@@ -46,6 +46,10 @@ export const eqSlice = createSlice({
                 state.series_size = initialState.series_size;
             },
 
+            initWeekInfo: (state) => {
+                console.log('Init week info')
+            },
+
             weekInfoUpdated: (state) => {
                 state.week_info_updated = !state.week_info_updated
             },
@@ -59,6 +63,11 @@ export const eqSlice = createSlice({
                 .addCase(fetchWeekInfo.fulfilled, (state, action: PayloadAction<week_info>) => {
                     state.week_info_is_loading = false;
                     state.week_info = action.payload;
+                    localStorage.setItem(EQ_WEEK_YEAR_INFO, JSON.stringify({
+                        ...action.payload,
+                        date: Date.now()
+                    }))
+
                 })
                 .addCase(fetchWeekInfo.rejected, (state) => {
                     state.week_info_is_loading = false;

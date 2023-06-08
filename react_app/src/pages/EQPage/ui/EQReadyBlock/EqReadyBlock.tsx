@@ -1,10 +1,11 @@
-import React, {useEffect} from 'react';
+import React, {FC, useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
 import {CardType, OrderProductCard} from "widgets/OrderProductCard";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
+import {getPaginationSize} from "shared/api/configs";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
@@ -13,14 +14,17 @@ import {eqReadyListReducer, getEqReadyList, getEqReadyListData} from "../../mode
 import {fetchReadyList} from "../../model/service/fetchReadyList/fetchReadyList";
 import {fetchReadyCard} from "../../model/service/fetchReadyList/fetchReadyCard";
 import {fetchNextReadyList} from "../../model/service/fetchReadyList/fetchNextReadyList";
-import {getPaginationSize} from "../../../../shared/api/configs";
 
 
 const reducers: ReducersList = {
     'eqReadyList': eqReadyListReducer,
 }
 
-export const EqReadyBlock = () => {
+interface EqInWorkBlockProps {
+    verticalHeight: number;
+}
+
+export const EqReadyBlock: FC<EqInWorkBlockProps> = ({verticalHeight}) => {
     const dispatch = useAppDispatch();
     const readyData = useSelector(getEqReadyList)
     const readyList = useSelector(getEqReadyListData.selectAll);
@@ -63,7 +67,7 @@ export const EqReadyBlock = () => {
             <PageWithPagination hasMore={!!readyData?.next}
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
-                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
+                                style={{height: `${verticalHeight}vh`, overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
                                 skeleton={sceleton}
             >
                 <div className="p-1">

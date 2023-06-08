@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {FC, useEffect} from 'react';
 import {useSelector} from "react-redux";
 import {CSSTransition, TransitionGroup} from "react-transition-group";
 
@@ -15,12 +15,15 @@ import {eqInWorkListReducer, getEqInWorkList, getEqInWorkListData} from "../../m
 import {fetchInWorkCard} from "../../model/service/fetchInWorkList/fetchInWorkCard";
 import {getPaginationSize} from "../../../../shared/api/configs";
 
+interface EqInWorkBlockProps {
+  verticalHeight: number;
+}
 
 const reducers: ReducersList = {
     'eqInWorkList': eqInWorkListReducer,
 }
 
-export const EqInWorkBlock = () => {
+export const EqInWorkBlock: FC<EqInWorkBlockProps> = ({verticalHeight}) => {
     const dispatch = useAppDispatch();
     const inWorkData = useSelector(getEqInWorkList)
     const inWorkList = useSelector(getEqInWorkListData.selectAll);
@@ -61,7 +64,7 @@ export const EqInWorkBlock = () => {
             <PageWithPagination hasMore={!!inWorkData?.next}
                                 className="col m-0"
                                 scroll_callback={fetchNextPage}
-                                style={{height: "44vh", overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
+                                style={{height: `${verticalHeight}vh`, overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
                                 skeleton={sceleton}
             >
                 <div className="col p-1 m-0">

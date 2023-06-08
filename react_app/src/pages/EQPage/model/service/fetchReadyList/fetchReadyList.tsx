@@ -5,6 +5,7 @@ import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
 import {getCurrentProject} from "../../selectors/getCurrentProject/getCurrentProject";
 import {getCurrentViewMod} from "../../selectors/getCurrentViewMod/getCurrentViewMod";
 import {getWeekInfo} from "../../selectors/getWeekInfo/getWeekInfo";
+import {getInitialWeekInfo} from "../../lib/getInitialWeekInfo";
 
 interface fetchReadyListProps {
     limit: number,
@@ -21,7 +22,8 @@ export const fetchReadyList = createAsyncThunk<order_product_list, fetchReadyLis
         const pin_code = getEmployeePinCode(getState());
         const project = getCurrentProject(getState());
         const view_mode = getCurrentViewMod(getState());
-        const week_info = getWeekInfo(getState());
+        const week = getWeekInfo(getState())?.week || getInitialWeekInfo().week;
+        const year = getWeekInfo(getState())?.year || getInitialWeekInfo().year;
 
         try {
             const response = await extra.api.get<order_product_list>('/core/get_ready_list/', {
@@ -30,8 +32,8 @@ export const fetchReadyList = createAsyncThunk<order_product_list, fetchReadyLis
                     pin_code: pin_code,
                     project: project,
                     view_mode: view_mode.key,
-                    week: week_info?.week,
-                    year: week_info?.year,
+                    week: week,
+                    year: year,
                     ...params
                 }
             });

@@ -7,6 +7,8 @@ import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
 
 import {getCurrentProject} from "../../selectors/getCurrentProject/getCurrentProject";
 import {getCurrentViewMod} from "../../selectors/getCurrentViewMod/getCurrentViewMod";
+import {getInitialWeekInfo} from "../../lib/getInitialWeekInfo";
+import {EQ_WEEK_YEAR_INFO} from "../../../../../shared/const/localstorage";
 
 interface fetchWeekInfoProps {
     week: number | undefined,
@@ -22,15 +24,18 @@ export const fetchWeekInfo = createAsyncThunk<week_info, fetchWeekInfoProps, Thu
         const pin_code = getEmployeePinCode(getState());
         const project = getCurrentProject(getState());
         const view_mode = getCurrentViewMod(getState());
+        const week = params.week || getInitialWeekInfo().week;
+        const year = params.year || getInitialWeekInfo().year;
 
         try {
-            const response = await extra.api.get<week_info>(`${SERVER_HTTP_ADDRESS}/api/v1/core/get_week_info/`, {
+            const response = await extra.api.get<week_info>('/core/get_week_info/', {
                 params: {
                     department_number: current_department?.number,
                     pin_code: pin_code,
                     project: project,
                     view_mode: view_mode.key,
-                    ...params
+                    week: week,
+                    year: year,
                 }
             });
             if (response.data) {

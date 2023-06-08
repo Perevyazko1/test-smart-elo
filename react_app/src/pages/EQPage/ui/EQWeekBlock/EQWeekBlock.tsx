@@ -1,7 +1,9 @@
-import React, {useEffect, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
+import {useDrag} from 'react-dnd';
 
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import {EQ_WEEK_YEAR_INFO} from "shared/const/localstorage";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {fetchWeekInfo} from "../../model/service/fetchWeekInfo/fetchWeekInfo";
@@ -11,15 +13,18 @@ import {getWeekInfoIsLoading} from "../../model/selectors/getWeekInfoIsLoading/g
 import {eqReadyListActions} from "../../model/slice/readyListSlice";
 
 
-export const EqWeekBlock = () => {
+interface EqWeekInfoProps {
+    adjustHeight: (y: number) => void;
+}
+
+export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
     const dispatch = useAppDispatch()
     const week_info = useSelector(getWeekInfo)
     const is_loading = useSelector(getWeekInfoIsLoading)
     const hasUpdated = useSelector(getWeekInfoUpdated)
 
-
-    const [week, setWeek] = useState(week_info?.week)
-    const [year, setYear] = useState(week_info?.year)
+    const [week, setWeek] = useState<number | undefined>()
+    const [year, setYear] = useState<number | undefined>()
 
     const get_earned_sum = (Math.trunc(week_info?.earned || 0)).toLocaleString()
 
@@ -42,19 +47,36 @@ export const EqWeekBlock = () => {
         // eslint-disable-next-line
     }, [dispatch, hasUpdated])
 
+    const [{isDragging}, drag] = useDrag(() => ({
+        type: "week_info",
+        collect: (monitor) => {
+            if (monitor.isDragging()) {
+                const position = monitor.getClientOffset();
+                if (position) {
+                    adjustHeight(position.y);
+                }
+            }
+            return {
+                isDragging: !!monitor.isDragging(),
+            }
+        }
+    }))
+
     return (
         <div
-            className="row border border-3 border-dark rounded m-0 d-flex flex-column align-items-center justify-content-evenly px-2"
+            className="row border border-3 border-dark rounded m-0 d-flex align-items-center justify-content-between px-3"
             style={{
                 height: "5vh",
-                background: "rgba(255,224,115,0.93)"
+                background: "rgba(255,224,115,0.93)",
+                opacity: isDragging ? 0.5 : 1,
             }}>
 
-            {/*<div className={'bg-dark rounded d-flex align-items-center justify-content-center'}*/}
-            {/*     style={{width: "40px", height: "4vh"}}*/}
-            {/*>*/}
-            {/*    <i className="fas fa-sort text-light fs-3"/>*/}
-            {/*</div>*/}
+            <div className={'bg-dark rounded d-flex align-items-center justify-content-center me-2'}
+                 style={{width: "40px", height: "90%", touchAction: 'none', cursor: 'grab'}}
+                 ref={drag}
+            >
+                <i className="fas fa-sort text-light fs-3"/>
+            </div>
 
             <button className="btn btn-dark btn-sm fw-bold rounded me-2 p-0 d-flex align-items-center
                     justify-content-center"

@@ -1,4 +1,4 @@
-import React, {memo, useEffect} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 
 import {getCurrentDepartment} from "entities/Employee";
@@ -22,6 +22,9 @@ const EqPage = memo(() => {
     const dispatch = useAppDispatch()
     const current_department = useSelector(getCurrentDepartment)
 
+    const [upperHeight, setUpperHeight] = useState(44);
+    const [lowerHeight, setLowerHeight] = useState(44);
+
     useEffect(() => {
         if (current_department?.number) {
             dispatch(fetchViewModsList({
@@ -29,6 +32,21 @@ const EqPage = memo(() => {
             }))
         }
     }, [current_department, dispatch])
+
+    const adjustHeight = (y: number) => {
+        let vh = y * 100 / window.innerHeight;
+        if (vh - 7 > 0 && 95 - vh > 0) {
+            setUpperHeight(vh - 7)
+            setLowerHeight(95 - vh)
+        } else if (vh - 7 <= 0) {
+            setUpperHeight(0)
+            setLowerHeight(88)
+        } else if (95 - vh <= 0) {
+            setUpperHeight(88)
+            setLowerHeight(0)
+        }
+        console.log(vh - 7, 100 - vh)
+    }
 
 
     return (
@@ -44,13 +62,13 @@ const EqPage = memo(() => {
                         <div className="col-xl-6 p-0">
 
                             {/*<--------------- В работе блок --------------->*/}
-                            <EqInWorkBlock/>
+                            <EqInWorkBlock verticalHeight={upperHeight}/>
 
                             {/*<--------------- Недели блок --------------->*/}
-                            <EqWeekBlock/>
+                            <EqWeekBlock adjustHeight={adjustHeight}/>
 
                             {/*<--------------- Готовые изделия блок --------------->*/}
-                            <EqReadyBlock/>
+                            <EqReadyBlock verticalHeight={lowerHeight}/>
 
                         </div>
 

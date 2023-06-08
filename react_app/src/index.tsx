@@ -4,14 +4,21 @@ import App from './app/App';
 import {StoreProvider} from "./app/providers/StoreProvider";
 
 import {BrowserRouter} from 'react-router-dom';
+import {DndProvider} from "react-dnd";
+import {TouchBackend} from "react-dnd-touch-backend";
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
 );
+
 root.render(
     <StoreProvider>
-        <BrowserRouter>
-            <App/>
-        </BrowserRouter>
+        <DndProvider backend={TouchBackend}
+                     options={{enableMouseEvents: true}}
+        >
+            <BrowserRouter>
+                <App/>
+            </BrowserRouter>
+        </DndProvider>
     </StoreProvider>
 );
