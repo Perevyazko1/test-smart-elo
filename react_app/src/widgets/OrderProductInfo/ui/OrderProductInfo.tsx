@@ -11,6 +11,7 @@ import {OPTechProcessTable} from "./OPTechProcessTable/OPTechProcessTable";
 import {OpBaseInfo} from "./OPBaseInfo/OPBaseInfo";
 import {OpDepartmentInfoTable} from "./OPDepartmentInfoTable/OPDepartmentInfoTable";
 import {AppModal} from "../../../shared/ui/AppModal/AppModal";
+import {IndicatorWrapper} from "../../../shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 
 const initialReducers: ReducersList = {
@@ -62,9 +63,14 @@ export const OrderProductInfo = memo((props: OrderProductInfoProps) => {
                         <Accordion.Header>
                             {tech_process_confirmed
                                 ?
-                                <div className={'bg-warning mx-2 fw-bold'}>
-                                    Технологический процесс не выбран!
-                                </div>
+                                <IndicatorWrapper indicator={'tech-process'}
+                                                  className={'bg-danger'}
+                                                  right={'-10px'}
+                                >
+                                    <div className={'mx-2 fw-bold'}>
+                                        Технологический процесс не выбран!
+                                    </div>
+                                </IndicatorWrapper>
                                 :
                                 <div>
                                     Просмотреть информацию по технологическому процессу

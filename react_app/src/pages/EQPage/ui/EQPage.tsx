@@ -45,7 +45,6 @@ const EqPage = memo(() => {
             setUpperHeight(88)
             setLowerHeight(0)
         }
-        console.log(vh - 7, 100 - vh)
     }
 
 

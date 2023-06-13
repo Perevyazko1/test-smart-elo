@@ -19,6 +19,7 @@ import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
 import {updateTargetData} from "../lib/updateTargetList";
 import {OrderProductInfo} from "../../OrderProductInfo";
+import {IndicatorWrapper} from "../../../shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 export enum CardType {
     AWAIT_CARD = 'await',
@@ -53,28 +54,28 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     const showCardInfoWidget = useCallback(() => {
         setShowCardInfo(true)
     }, [])
-        
+
     const hide_card_info = useCallback(() => {
         setShowCardInfo(false)
     }, [])
 
     const buttonIcon = useCallback((first: boolean = true) => {
         return getButtonIcon(first, card_type)
-    },[card_type])
+    }, [card_type])
 
     const buttonBg = useCallback((first: boolean = true) => {
         return getButtonBg(first, card_type, order_product)
-    },[card_type, order_product])
+    }, [card_type, order_product])
 
     const buttonAction = useCallback((first: boolean) => {
         return getButtonAction(first, card_type)
-    },[card_type])
+    }, [card_type])
 
     const assignmentConfirmed = useCallback((assignment_number: number) => {
         return order_product.assignments.filter(
             assignment => assignment.number === assignment_number && assignment.inspector
         ).length > 0
-    },[order_product.assignments])
+    }, [order_product.assignments])
 
     const set_target_number = (assignment_number: number) => {
         if (assignmentConfirmed(assignment_number) || !assignment_number) {
@@ -122,7 +123,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
     useEffect(() => {
         setAssignmentsLists(createNumberLists(order_product, series_size))
     }, [order_product, series_size])
-    
+
 
     const mods: Mods = {
         [cls.card_active]: order_product.assignments.length > 0,
@@ -135,7 +136,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
             {...otherProps}
         >
             {showCardInfo && <OrderProductInfo onHide={hide_card_info} order_product={order_product}/>}
-            
+
             <div
                 className="card-body d-flex m-0 p-0"
                 style={{borderRadius: "6px"}}
@@ -158,28 +159,32 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                     <Slider price={order_product.tariff} images={sliderImages} width={'100%'} height={'100%'}/>
                 </CardContentWrapper>
 
-                <CardContentWrapper
-                    width={"90px"}
-                    className={'me-1'}
-                    onClick={showCardInfoWidget}
-                    warning={tech_process_not_changed}
+                <IndicatorWrapper indicator={'tech-process'}
+                                  show={tech_process_not_changed}
+                                  className={'bg-danger'}
                 >
-                    <h1 className="fw-bold m-0 p-0 pb-1" style={{fontSize: "12px"}}>
-                        Всего:{order_product.count_all}
-                    </h1>
-                    <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
-                    <h1 className="fw-bold m-0 p-0 py-1" style={{fontSize: "12px"}}>
-                        В раб:{order_product.count_in_work}
-                    </h1>
-                    <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
-                    <h1 className="fw-bold m-0 p-0 py-1" style={{fontSize: "12px"}}>
-                        Своб:{order_product.count_await}
-                    </h1>
-                    <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
-                    <h1 className="fw-bold m-0 p-0 pt-1" style={{fontSize: "12px"}}>
-                        Готово:{order_product.count_ready}
-                    </h1>
-                </CardContentWrapper>
+                    <CardContentWrapper
+                        width={"90px"}
+                        className={'me-1'}
+                        onClick={showCardInfoWidget}
+                    >
+                        <h1 className="fw-bold m-0 p-0 pb-1" style={{fontSize: "12px"}}>
+                            Всего:{order_product.count_all}
+                        </h1>
+                        <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
+                        <h1 className="fw-bold m-0 p-0 py-1" style={{fontSize: "12px"}}>
+                            В раб:{order_product.count_in_work}
+                        </h1>
+                        <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
+                        <h1 className="fw-bold m-0 p-0 py-1" style={{fontSize: "12px"}}>
+                            Своб:{order_product.count_await}
+                        </h1>
+                        <hr className="m-0 p-0" style={{color: "var(--bs-black)"}}/>
+                        <h1 className="fw-bold m-0 p-0 pt-1" style={{fontSize: "12px"}}>
+                            Готово:{order_product.count_ready}
+                        </h1>
+                    </CardContentWrapper>
+                </IndicatorWrapper>
 
                 <CardContentWrapper flexFill>
                     <div style={{height: "50%"}}>

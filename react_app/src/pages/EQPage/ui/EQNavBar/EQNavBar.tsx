@@ -1,31 +1,15 @@
 import React, {memo} from 'react';
-import {useSelector} from "react-redux";
 
 import logo from 'shared/assets/images/SZMK Logo White Horizontal 900х352.png';
-import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 
 import {EqSetSeriesSize} from "./EQSetSeriesSize";
 import {EqSetProject} from "./EQSetProject";
 import {EqSetViewMode} from "./EQSetViewMode";
 import {EQSetDepartment} from "./EQSetDepartment";
-import {getFiltersIsDefault} from "../../model/selectors/getFiltersIsDefault/getFiltersIsDefault";
-import {eqAwaitListActions} from "../../model/slice/awaitListSlice";
-import {eqInWorkListActions} from "../../model/slice/inWorkListSlice";
-import {eqReadyListActions} from "../../model/slice/readyListSlice";
-import {eqActions} from "../../model/slice/eqSlice";
 
 
 export const EqNavBar = memo(() => {
-    const dispatch = useAppDispatch()
-
-    const set_default_filters = () => {
-        dispatch(eqActions.setDefaultFilters())
-        dispatch(eqAwaitListActions.hasUpdated())
-        dispatch(eqInWorkListActions.hasUpdated())
-        dispatch(eqReadyListActions.hasUpdated())
-        dispatch(eqActions.weekInfoUpdated())
-    }
 
     return (
         <section
@@ -47,7 +31,7 @@ export const EqNavBar = memo(() => {
                 justify-content-xl-center align-items-xl-center my-auto ms-2"
                 type="button"
                 style={{height: "38px", width: "60px"}}
-                onClick={() => set_default_filters()}
+                onClick={() => window.location.reload()}
             >
                 <i className="fas fa-sync-alt fs-5 d-xl-flex align-items-xl-center py-xl-0 mx-xl-0 me-xl-0"/>
             </button>

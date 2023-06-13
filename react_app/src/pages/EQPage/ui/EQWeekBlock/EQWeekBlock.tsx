@@ -3,7 +3,6 @@ import {useSelector} from "react-redux";
 import {useDrag} from 'react-dnd';
 
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
-import {EQ_WEEK_YEAR_INFO} from "shared/const/localstorage";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {fetchWeekInfo} from "../../model/service/fetchWeekInfo/fetchWeekInfo";
@@ -81,7 +80,7 @@ export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
             <button className="btn btn-dark btn-sm fw-bold rounded me-2 p-0 d-flex align-items-center
                     justify-content-center"
                     type="button"
-                    style={{width: "80px", height: "90%"}}
+                    style={{width: "50px", height: "90%"}}
                     onClick={() => changeWeek(
                         week_info?.previous_week_data.week,
                         week_info?.previous_week_data.year
@@ -102,7 +101,7 @@ export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
                             "Неделя " + week_info?.week +
                             " с " + week_info?.str_dates[0] +
                             " по " + week_info?.str_dates[6] +
-                            " | Зараб.: " + get_earned_sum
+                            "|Зараб.: " + get_earned_sum
                         }
                     </>
                 }
@@ -111,12 +110,26 @@ export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
             <button className="btn btn-dark btn-sm fw-bold rounded ms-2 p-0 d-flex align-items-center
                     justify-content-center"
                     type="button"
-                    style={{width: "80px", height: "90%"}}
+                    style={{width: "50px", height: "90%"}}
                     onClick={() => changeWeek(week_info?.next_week_data.week, week_info?.next_week_data.year)}
                     disabled={is_loading}
             >
                 <i className="fas fa-angle-double-right fs-3"/>
             </button>
+
+            <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
+                 style={{
+                     width: "40px",
+                     height: "90%",
+                     touchAction: 'none',
+                     cursor: 'grab',
+                 }}
+            >
+                <i className="fas fa-sort text-light fs-3"
+                   style={{transform: "rotate(90deg)"}}
+                />
+            </div>
+
         </div>
     );
 };
