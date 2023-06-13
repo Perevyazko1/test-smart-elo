@@ -1,8 +1,9 @@
 import React, {memo} from 'react';
-import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Table} from "react-bootstrap";
 
 import {order_product} from "entities/OrderProduct";
+import {classNames, Mods} from "shared/lib/classNames/classNames";
+import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime";
 
 interface OpBaseInfoProps {
     order_product: order_product,
@@ -36,6 +37,16 @@ export const OpBaseInfo = memo((props: OpBaseInfoProps) => {
                     <td>№ Заказа</td>
                     <td>{order_product.series_id}</td>
                 </tr>
+                <tr>
+                    <td>Дата заказа</td>
+                    <td>{getHumansDatetime(order_product.order.moment).slice(0, 10)}</td>
+                </tr>
+
+                <tr>
+                    <td>План дата производства заказа</td>
+                    <td>{getHumansDatetime(order_product.order.planned_date).slice(0, 10)}</td>
+                </tr>
+
                 <tr>
                     <td>Проект</td>
                     <td>{order_product.order.project}</td>

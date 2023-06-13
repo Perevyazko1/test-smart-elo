@@ -98,10 +98,10 @@ export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
                     :
                     <>
                         {
-                            "Неделя " + week_info?.week +
+                            "Нед. " + week_info?.week +
                             " с " + week_info?.str_dates[0] +
                             " по " + week_info?.str_dates[6] +
-                            "|Зараб.: " + get_earned_sum
+                            " | Зараб.: " + get_earned_sum
                         }
                     </>
                 }

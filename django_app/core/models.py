@@ -103,6 +103,8 @@ class Order(models.Model):
     order_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     # Номер заказа берется из учетной системы
     number = models.CharField('Номер заказа', max_length=30, blank=True, unique=True)
+    moment = models.DateTimeField('Дата документа', blank=True, null=True)
+
     project = models.CharField('Проект', max_length=250, blank=True)
     planned_date = models.DateField('Произв. (пл. Дата):', blank=True, null=True)
 

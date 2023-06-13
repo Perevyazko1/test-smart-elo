@@ -1,17 +1,17 @@
 import React, {memo, useEffect} from 'react';
-import {Accordion, Button, Modal} from "react-bootstrap";
+import {Accordion} from "react-bootstrap";
 
 import {order_product} from "entities/OrderProduct";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
+import {AppModal} from "shared/ui/AppModal/AppModal";
+import {IndicatorWrapper} from "shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 import {orderProductInfoActions, orderProductInfoReducer} from "../model/slice/OrderProductInfoSlice";
 import {OPProductionInfoTable} from "./OPProductionInfoTable/OPProductionInfoTable";
 import {OPTechProcessTable} from "./OPTechProcessTable/OPTechProcessTable";
 import {OpBaseInfo} from "./OPBaseInfo/OPBaseInfo";
 import {OpDepartmentInfoTable} from "./OPDepartmentInfoTable/OPDepartmentInfoTable";
-import {AppModal} from "../../../shared/ui/AppModal/AppModal";
-import {IndicatorWrapper} from "../../../shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 
 const initialReducers: ReducersList = {

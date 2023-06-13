@@ -53,7 +53,9 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = [
-            'project'
+            'project',
+            'moment',
+            'planned_date',
         ]
 
 

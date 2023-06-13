@@ -20,6 +20,7 @@ class OrderEntity:
     """Тип данных описывающий сущность заказа"""
     order_id: str
     number: str
+    moment: str
     project: str
     planned_date: str
     urgency: int
@@ -90,6 +91,7 @@ class OrderAdapter:
         return OrderEntity(
             order_id=order['id'],
             number=order['name'],
+            moment=order['moment'],
             project=order.get('project', {}).get('name', ''),
             planned_date=self._get_planned_date("Произв. (пл. Дата):", order),
             urgency=self._get_urgency("Срочность", order),
