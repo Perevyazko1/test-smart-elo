@@ -28,7 +28,9 @@ services:
     volumes:
       - media:/app/media
     command: >
-      sh -c "python3 manage.py runserver 0.0.0.0:8000"
+      sh -c "python3 manage.py makemigrations &&
+             python3 manage.py migrate &&
+             python3 manage.py runserver 0.0.0.0:8000"
 
   pgadmin:
     build:
