@@ -58,7 +58,7 @@ class OrderProductAdmin(admin.ModelAdmin):
 class OrderAdmin(admin.ModelAdmin):
     change_list_template = 'admin/model_change_list.html'
 
-    list_display = ['number', 'moment', 'project', 'planned_date']
+    list_display = ['number', 'project', 'planned_date']
 
     list_filter = ['project']
 
