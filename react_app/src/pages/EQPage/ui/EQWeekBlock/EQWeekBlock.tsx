@@ -117,18 +117,18 @@ export const EqWeekBlock: FC<EqWeekInfoProps> = ({adjustHeight}) => {
                 <i className="fas fa-angle-double-right fs-3"/>
             </button>
 
-            <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
-                 style={{
-                     width: "40px",
-                     height: "90%",
-                     touchAction: 'none',
-                     cursor: 'grab',
-                 }}
-            >
-                <i className="fas fa-sort text-light fs-3"
-                   style={{transform: "rotate(90deg)"}}
-                />
-            </div>
+            {/*<div className={'bg-dark rounded d-flex align-items-center justify-content-center'}*/}
+            {/*     style={{*/}
+            {/*         width: "40px",*/}
+            {/*         height: "90%",*/}
+            {/*         touchAction: 'none',*/}
+            {/*         cursor: 'grab',*/}
+            {/*     }}*/}
+            {/*>*/}
+            {/*    <i className="fas fa-sort text-light fs-3"*/}
+            {/*       style={{transform: "rotate(90deg)"}}*/}
+            {/*    />*/}
+            {/*</div>*/}
 
         </div>
     );
