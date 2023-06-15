@@ -47,6 +47,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
 
     const [assignmentsLists, setAssignmentsLists] = useState(createNumberLists(order_product, series_size))
     const [showCardInfo, setShowCardInfo] = useState(false)
+    const [cardDisabled, setCardDisabled] = useState(false)
 
     const tech_process_not_changed = !order_product?.product?.technological_process
     const sliderImages = createImageUrls(order_product)
@@ -106,6 +107,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
 
     const updateAssignments = async (first: boolean = true) => {
         if (authData?.pin_code && authData?.current_department) {
+            setCardDisabled(true)
             await dispatch(fetchUpdateAssignments({
                 numbers: assignmentsLists.primary,
                 department_number: authData.current_department.number,
@@ -115,8 +117,8 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                 pin_code: authData.pin_code,
                 view_mode: view_mode.key,
             }))
-
             updateTargetData(first, card_type, dispatch, order_product)
+            setCardDisabled(false)
         }
     }
 
@@ -147,7 +149,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className={buttonBg() + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
                             onClick={() => updateAssignments()}
-                            disabled={disabled}
+                            disabled={disabled || cardDisabled}
                         >
                             {buttonIcon()}
                         </button>
@@ -256,7 +258,7 @@ export const OrderProductCard = memo((props: OrderProductCardProps) => {
                             className={buttonBg(false) + " btn link-dark border rounded border-2 border-dark d-flex justify-content-xl-center align-items-xl-center"}
                             type="button" style={{width: "39px", height: "90px"}}
                             onClick={() => updateAssignments(false)}
-                            disabled={disabled}
+                            disabled={disabled || cardDisabled}
                         >
                             {buttonIcon(false)}
                         </button>
