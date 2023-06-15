@@ -26,7 +26,7 @@ class UpdateAssignments:
         self.original_user: Employee | None = None
 
     def _check_pin_code_in_view_mode(self):
-        if not self.view_mode == 1 and not self.view_mode == 0:
+        if self.view_mode not in [0, 1, 2]:
             self.original_user = Employee.objects.get(pin_code=self.pin_code)
             self.pin_code = self.view_mode
 

@@ -1,77 +1,93 @@
-# import os
+from django.db.models import Count
+
 from core.models import Assignment
-# from core.models import TechnologicalProcess
-from staff.models import Department, Employee
-from django.contrib.auth.models import Group
-# from django.core.files import File
-# from .technological_processes import technological_processes
-from .employees import employees
 
-departments = {
-    'Старт': [0, False, False],
-    'Конструктора': [1, True, True],
-    'Обивка': [2, False, True],
-    'Пошив': [3, False, True],
-    'ППУ': [4, False, False],
-    'Крой': [5, False, True],
-    'Лазер': [6, False, False],
-    'Сборка': [7, False, True],
-    'Столярка': [8, False, False],
-    'Малярка': [9, False, False],
-    'Упаковка': [10, False, False],
-    'Подрядчики': [11, False, False],
-    'Пила': [12, False, False],
-    'Готово': [50, False, False],
-}
-
-groups = [
-    'Администраторы',
-
-    'Страница ЭЛО',
-    'Визирование нарядов',
-    'Режим просмотра бригадира',
-    'Действия от имени сотрудников отдела',
-
-    'Страница тарификаций',
-    'Первичная тарификация',
-    'Подтверждение тарификаций',
-]
+# departments = {
+#     'Старт': [0, False, False],
+#     'Конструктора': [1, True, True],
+#     'Обивка': [2, False, True],
+#     'Пошив': [3, False, True],
+#     'ППУ': [4, False, False],
+#     'Крой': [5, False, True],
+#     'Лазер': [6, False, False],
+#     'Сборка': [7, False, True],
+#     'Столярка': [8, False, False],
+#     'Малярка': [9, False, False],
+#     'Упаковка': [10, False, False],
+#     'Подрядчики': [11, False, False],
+#     'Пила': [12, False, False],
+#     'Готово': [50, False, False],
+# }
+#
+# groups = [
+#     'Администраторы',
+#
+#     'Страница ЭЛО',
+#     'Визирование нарядов',
+#     'Режим просмотра бригадира',
+#     'Действия от имени сотрудников отдела',
+#
+#     'Страница тарификаций',
+#     'Первичная тарификация',
+#     'Подтверждение тарификаций',
+# ]
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
-    assignment_await_list = Assignment.objects.filter(
-        department__number=1,
-        status="await"
-    )
-    assignment_in_work_list = Assignment.objects.filter(
-        department__number=1,
-        status="in_work"
-    )
-    assignment_ready_list = Assignment.objects.filter(
-        department__number=1,
-        status="ready"
-    )
+    # Получим все записи Assignment, которые имеют дубликаты, основанные на 'number', 'order_product', 'department'
+    duplicates = (Assignment.objects.values('number', 'order_product_id', 'department_id')
+                  .annotate(count=Count('id'))
+                  .filter(count__gt=1))
 
-    product_id_list = []
+    # Теперь получим все дублирующие объекты на основе этих значений
+    for duplicate in duplicates:
+        number = duplicate['number']
+        order_product_id = duplicate['order_product_id']
+        department_id = duplicate['department_id']
 
-    for assignment in assignment_ready_list:
-        if assignment.order_product.product.id in product_id_list:
-            continue
-        else:
-            product_id_list.append(assignment.order_product.product.id)
+        dup_objects = Assignment.objects.filter(
+            number=number,
+            order_product_id=order_product_id,
+            department_id=department_id,
+        ).order_by('status')  # Чтобы сначала удалялись 'await', потом 'in_work', затем 'ready'
 
-    for assignment in assignment_in_work_list:
-        if assignment.order_product.product.id in product_id_list:
-            assignment.delete()
-        else:
-            product_id_list.append(assignment.order_product.product.id)
-
-    for assignment in assignment_await_list:
-        if assignment.order_product.product.id in product_id_list:
-            assignment.delete()
-        else:
-            product_id_list.append(assignment.order_product.product.id)
+        # Используем [1:], чтобы оставить одну запись (наименьший по статусу) не удаленной
+        for obj in dup_objects[1:]:
+            obj.delete()
+    #
+    # assignment_await_list = Assignment.objects.filter(
+    #     department__number=1,
+    #     status="await"
+    # )
+    # assignment_in_work_list = Assignment.objects.filter(
+    #     department__number=1,
+    #     status="in_work"
+    # )
+    # assignment_ready_list = Assignment.objects.filter(
+    #     department__number=1,
+    #     status="ready"
+    # )
+    #
+    # product_id_list = []
+    #
+    # for assignment in assignment_ready_list:
+    #     if assignment.order_product.product.id in product_id_list:
+    #         continue
+    #     else:
+    #         product_id_list.append(assignment.order_product.product.id)
+    #
+    # for assignment in assignment_in_work_list:
+    #     if assignment.order_product.product.id in product_id_list:
+    #         assignment.delete()
+    #     else:
+    #         product_id_list.append(assignment.order_product.product.id)
+    #
+    # for assignment in assignment_await_list:
+    #     if assignment.order_product.product.id in product_id_list:
+    #         assignment.delete()
+    #     else:
+    #         product_id_list.append(assignment.order_product.product.id)
 
     # for department_name, department_params in departments.items():
     #     Department.objects.update_or_create(
