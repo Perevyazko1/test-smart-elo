@@ -1,5 +1,7 @@
 import datetime
 
+from django.db import transaction
+
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates, EqNotificationActions
@@ -294,6 +296,7 @@ class UpdateAssignments:
         result += f'Номер серии: {order_product.series_id}. Изделие: {order_product.product.name}'
         return result
 
+    @transaction.atomic
     def execute(self):
         """Произвести обновление переданных нарядов и создать последующие"""
 

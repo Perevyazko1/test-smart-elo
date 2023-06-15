@@ -17,6 +17,17 @@ def await_view_mode_filter(queryset, view_mode, department_number):
             queryset = queryset.filter(
                 product__technological_process__schema__icontains=department.name,
             ).distinct()
+        else:
+            queryset = queryset.filter(
+                product__technological_process_confirmed__isnull=True
+            ).distinct()
+
+            for order_product in queryset:
+                if not Assignment.objects.filter(
+                    department__number=department_number,
+                    order_product=order_product
+                ).exists():
+                    queryset = queryset.exclude(order_product)
 
         for order_product in queryset:
             assignments_count = Assignment.objects.filter(

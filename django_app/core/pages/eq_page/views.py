@@ -45,6 +45,8 @@ class GetAwaitList(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['status_list'] = ['await', 'in_work']
+        context['view_mode'] = self.request.query_params.get('view_mode')
+        context['pin_code'] = self.request.query_params.get('pin_code')
         context['department_number'] = self.request.query_params.get('department_number')
         return context
 
@@ -71,6 +73,8 @@ class GetInWorkList(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context['status_list'] = ['in_work']
         context['department_number'] = self.request.query_params.get('department_number')
+        context['pin_code'] = self.request.query_params.get('pin_code')
+        context['view_mode'] = self.request.query_params.get('view_mode')
         return context
 
     def get_queryset(self):
@@ -101,6 +105,7 @@ class GetReadyList(viewsets.ModelViewSet):
         context['week'] = self.request.query_params.get('week')
         context['year'] = self.request.query_params.get('year')
         context['view_mode'] = self.request.query_params.get('view_mode')
+        context['pin_code'] = self.request.query_params.get('pin_code')
         return context
 
     def get_queryset(self):

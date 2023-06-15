@@ -1,9 +1,13 @@
-from ..models import OrderProduct, Assignment, ProductionStep
+from django.db import transaction
+
 from staff.models import Department
+
+from ..models import OrderProduct, Assignment, ProductionStep
 
 
 class AssignmentGenerator:
     @staticmethod
+    @transaction.atomic
     def create_new_assignments(order_product: OrderProduct, department: Department, quantity: int = 1):
         assignment_tariff = ProductionStep.objects.get(
             product=order_product.product, department=department

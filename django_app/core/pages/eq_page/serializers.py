@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import OrderProduct, ProductionStep
+from core.models import OrderProduct, ProductionStep, Assignment
 from core.serializers import ProductSerializer, FabricSerializer, OrderSerializer, AssignmentsSerializer
 from core.services.get_week_info import GetWeekInfo
 
@@ -43,29 +43,57 @@ class EQCardSerializer(serializers.ModelSerializer):
         ]
 
     def get_assignments(self, obj):
+        pin_code = self.context.get('pin_code')
         status_list: list = self.context.get('status_list')
         view_mode: list = self.context.get('view_mode')
         department_number: list = self.context.get('department_number')
 
+        if len(view_mode) == 6:
+            pin_code = view_mode
+
         week = self.context.get('week')
         year = self.context.get('year')
 
-        qs = obj.assignments.all()
+        qs = obj.assignments.filter(
+            department__number=department_number
+        ).distinct()
 
-        if status_list:
-            qs = obj.assignments.filter(
-                status=status_list[0],
-                department__number=department_number,
-            )
-
-        if status_list == ['ready'] and not view_mode == '2':
-            week_info = GetWeekInfo(week=week, year=year).execute()
+        if status_list == ['await', 'in_work']:
             qs = qs.filter(
-                date_completion__gt=week_info.date_range[0],
-                date_completion__lte=week_info.date_range[1],
-            )
+                status="await",
+            ).distinct()
 
-        return AssignmentsSerializer(qs[:50], many=True).data
+        if status_list == ['in_work']:
+            qs = qs.filter(
+                status="in_work",
+            ).distinct()
+            if view_mode not in ["1", "2"]:
+                qs = qs.filter(
+                    executor__pin_code=pin_code,
+                )
+
+        if status_list == ['ready']:
+            qs = qs.filter(
+                status="ready",
+            ).distinct()
+
+            if view_mode not in ["1", "2"]:
+                qs = qs.filter(
+                    executor__pin_code=pin_code,
+                ).distinct()
+            if not view_mode == "2":
+                week_info = GetWeekInfo(week=week, year=year).execute()
+                qs = qs.filter(
+                    date_completion__gt=week_info.date_range[0],
+                    date_completion__lte=week_info.date_range[1],
+                ).distinct()
+
+            if view_mode == "2":
+                qs = qs.filter(
+                    inspector__isnull=True,
+                ).distinct()
+
+        return AssignmentsSerializer(qs.order_by('-inspector')[:50], many=True).data
 
     def get_count_data(self, obj: OrderProduct):
         department_number = self.context.get('department_number')

@@ -1,10 +1,11 @@
 import React, {memo, useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
 
+import {eqActions, getCurrentViewMod, getSeriesSize} from "pages/EQPage";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {eqActions, getCurrentViewMod, getSeriesSize} from "pages/EQPage";
+import {IndicatorWrapper} from "shared/ui/IndicatorWrapper/IndicatorWrapper";
 import {order_product} from "entities/OrderProduct";
 import {EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
 
@@ -19,7 +20,6 @@ import {createNumberLists} from "../lib/createNumberLists";
 import {setTargetNumber} from "../lib/setTargetNumber";
 import {updateTargetData} from "../lib/updateTargetList";
 import {OrderProductInfo} from "../../OrderProductInfo";
-import {IndicatorWrapper} from "../../../shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 export enum CardType {
     AWAIT_CARD = 'await',
