@@ -35,26 +35,27 @@ from core.models import Assignment
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
-    # Получим все записи Assignment, которые имеют дубликаты, основанные на 'number', 'order_product', 'department'
-    duplicates = (Assignment.objects.values('number', 'order_product_id', 'department_id')
-                  .annotate(count=Count('id'))
-                  .filter(count__gt=1))
-
-    # Теперь получим все дублирующие объекты на основе этих значений
-    for duplicate in duplicates:
-        number = duplicate['number']
-        order_product_id = duplicate['order_product_id']
-        department_id = duplicate['department_id']
-
-        dup_objects = Assignment.objects.filter(
-            number=number,
-            order_product_id=order_product_id,
-            department_id=department_id,
-        ).order_by('status')  # Чтобы сначала удалялись 'await', потом 'in_work', затем 'ready'
-
-        # Используем [1:], чтобы оставить одну запись (наименьший по статусу) не удаленной
-        for obj in dup_objects[1:]:
-            obj.delete()
+    pass
+    # # Получим все записи Assignment, которые имеют дубликаты, основанные на 'number', 'order_product', 'department'
+    # duplicates = (Assignment.objects.values('number', 'order_product_id', 'department_id')
+    #               .annotate(count=Count('id'))
+    #               .filter(count__gt=1))
+    #
+    # # Теперь получим все дублирующие объекты на основе этих значений
+    # for duplicate in duplicates:
+    #     number = duplicate['number']
+    #     order_product_id = duplicate['order_product_id']
+    #     department_id = duplicate['department_id']
+    #
+    #     dup_objects = Assignment.objects.filter(
+    #         number=number,
+    #         order_product_id=order_product_id,
+    #         department_id=department_id,
+    #     ).order_by('status')  # Чтобы сначала удалялись 'await', потом 'in_work', затем 'ready'
+    #
+    #     # Используем [1:], чтобы оставить одну запись (наименьший по статусу) не удаленной
+    #     for obj in dup_objects[1:]:
+    #         obj.delete()
     #
     # assignment_await_list = Assignment.objects.filter(
     #     department__number=1,

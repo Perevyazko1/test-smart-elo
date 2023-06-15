@@ -257,7 +257,7 @@ class Assignment(models.Model):
         verbose_name = 'Наряд'
         verbose_name_plural = 'Наряды'
         ordering = ['id']
-        # unique_together = ['number', 'order_product', 'department']
+        unique_together = ['number', 'order_product', 'department']
 
     STATUS_CHOICES = [
         ("await", "Ожидает назначения"),
