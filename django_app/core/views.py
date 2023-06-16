@@ -15,8 +15,19 @@ def import_orders(request):
 
 @api_view(['GET'])
 def get_project_filters(request):
+    mode = request.query_params.get('mode')
+
+    if mode == 'all':
+        projects = list(Order.objects.all().distinct('project').values_list('project', flat=True))
+    else:
+        projects = list(
+            Order.objects
+            .filter(order_products__status=0)
+            .distinct('project')
+            .values_list('project', flat=True)
+        )
+
     result = ['Все проекты']
-    projects = list(Order.objects.all().distinct('project').values_list('project', flat=True))
 
     result += projects
 

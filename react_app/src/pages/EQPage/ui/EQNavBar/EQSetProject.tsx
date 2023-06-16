@@ -1,5 +1,5 @@
-import React, {memo, useEffect} from 'react';
-import {Dropdown, DropdownButton} from "react-bootstrap";
+import React, {memo, useEffect, useState} from 'react';
+import {Button, Dropdown, DropdownButton} from "react-bootstrap";
 import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
@@ -24,12 +24,13 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
     const dispatch = useAppDispatch()
     const project_filters = useSelector(getProjectFilters)
     const current_project = useSelector(getCurrentProject)
+    const [currentMode, setCurrentMode] = useState<"active" | "all">('active')
 
     const mods: Mods = {};
 
     useEffect(() => {
-        dispatch(fetchProjectFilters({}))
-    }, [dispatch])
+        dispatch(fetchProjectFilters({mode: currentMode}))
+    }, [currentMode, dispatch])
 
     const updateCurrentProject = (name: string) => {
         dispatch(eqActions.setCurrentProject(name))
@@ -47,21 +48,43 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
             className={classNames('', mods, [className])}
             {...otherProps}
         >
-            <Dropdown.ItemText>
-                Выбор проекта
-            </Dropdown.ItemText>
+            <div style={{overflow: 'auto', overflowX: 'hidden', overflowY: 'auto', maxHeight: "85vh"}}>
 
-            <Dropdown.Divider/>
+                <Dropdown.ItemText>
+                    Выбор проекта
+                </Dropdown.ItemText>
 
-            {project_filters?.map((filter_name) => (
-                <Dropdown.Item
-                    key={filter_name}
-                    onClick={() => updateCurrentProject(filter_name)}
-                    active={filter_name === current_project}
-                >
-                    {filter_name}
-                </Dropdown.Item>
-            ))}
+                <Dropdown.Divider/>
+
+                {project_filters?.map((filter_name) => (
+                    <Dropdown.Item
+                        key={filter_name}
+                        onClick={() => updateCurrentProject(filter_name)}
+                        active={filter_name === current_project}
+                    >
+                        {filter_name}
+                    </Dropdown.Item>
+                ))}
+
+                {currentMode === 'active'
+                    ?
+                    <Button className={"w-100 p-0 mt-3"}
+                            style={{height: "25px"}}
+                            variant={'secondary'}
+                            onClick={() => setCurrentMode('all')}
+                    >
+                        Показать все
+                    </Button>
+                    :
+                    <Button className={"w-100 p-0 mt-3"}
+                            style={{height: "25px"}}
+                            variant={'secondary'}
+                            onClick={() => setCurrentMode('active')}
+                    >
+                        Показать активные
+                    </Button>
+                }
+            </div>
         </DropdownButton>
     );
 });

@@ -6,7 +6,7 @@ import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
 import {eqActions} from "../../slice/eqSlice";
 
 interface fetchProjectFiltersProps {
-    data?: string
+    mode: 'active' | 'all'
 }
 
 export const fetchProjectFilters = createAsyncThunk<string[], fetchProjectFiltersProps, {rejectValue: string}>(
@@ -14,7 +14,7 @@ export const fetchProjectFilters = createAsyncThunk<string[], fetchProjectFilter
     async (filters: fetchProjectFiltersProps, thunkAPI) => {
         try {
             const response = await axios.get(`${SERVER_HTTP_ADDRESS}/api/v1/core/get_project_filters/`, {
-                // params: {...filters}
+                params: {...filters}
             });
             if (response.data) {
                 thunkAPI.dispatch(eqActions.setProjectFilters(response.data.data))
