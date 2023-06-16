@@ -195,7 +195,7 @@ class UpdateAssignments:
                 order_product=self.order_product,
                 department=related_step.department,
                 status='ready',
-                executor__isnull=False
+                inspector__isnull=False
             ).count()
 
             if related_step.department.single and assignment_ready_size:
