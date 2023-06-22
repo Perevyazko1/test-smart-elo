@@ -1,6 +1,7 @@
 import React, {memo} from 'react';
-import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Placeholder} from "react-bootstrap";
+
+import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 interface SkeletonProps {
     className?: string;

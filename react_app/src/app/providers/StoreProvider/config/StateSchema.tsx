@@ -1,20 +1,30 @@
 import {AnyAction, CombinedState, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
 import {AxiosInstance} from "axios";
 
+import {rtkAPI} from "shared/api/rtkAPI";
 import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
-import {EqSchema, ListControl} from "pages/EQPage/model/types/eqSchema";
 import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
-import {AuditWidgetSchema} from "widgets/AuditWidget";
-import {TaxControlSchema} from "pages/TaxControlPage";
-import {rtkAPI} from "shared/api/rtkAPI";
 import {NotificationList} from "widgets/Notification";
+import {AuditWidgetSchema} from "widgets/AuditWidget";
+import {EqSchema, ListControl} from "pages/EQPage/model/types/eqSchema";
+import {TaxControlSchema} from "pages/TaxControlPage";
+import {normalizedEqData} from "pages/TestPage/model/types/eq_types";
+import {EqContentDesktop, EqContentMobile, EqFilters} from "pages/EqPageNew";
 
 export interface StateSchema {
     employee: EmployeeSchema,
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
+
     // Асинхронные редюсеры
+    eqDesktop?: EqContentDesktop,
+    eqMobile?: EqContentMobile,
+    eqFilters?: EqFilters,
+
+
+    eqPage?: normalizedEqData,
+
     authByPinCode?: AuthByPinCodeSchema,
     eq?: EqSchema,
     orderProductInfo?: OrderProductInfoSchema,

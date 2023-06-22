@@ -9,4 +9,5 @@ urlpatterns = [
 
     path('', include('core.pages.eq_page.urls')),
     path('', include('core.pages.tariff_page.urls')),
+    path('', include('core.pages.new_eq.urls')),
 ]

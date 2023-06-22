@@ -14,7 +14,7 @@ export const initialState: EqSchema = {
 
     week_info_updated: false,
     week_info_is_loading: true,
-}
+};
 
 
 export const eqSlice = createSlice({

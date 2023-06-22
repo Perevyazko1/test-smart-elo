@@ -24,9 +24,9 @@ import {
 
 import './styles/App.scss';
 import 'shared/assets/fonts/fontawesome-all.min.css';
-import {TestPage} from "pages/TestPage";
 import {ForbiddenPage} from "pages/ForbiddenPage";
 import {NotificationWidget} from "../widgets/Notification/ui/NotificationWidget";
+import {EqPageNew} from "pages/EqPageNew";
 
 
 function App() {
@@ -96,7 +96,7 @@ function App() {
                             {authData.username === "root" &&
                                 <Route path="/test" element={
                                     <Suspense fallback={<Loader/>}>
-                                        <TestPage/>
+                                        <EqPageNew/>
                                     </Suspense>
                                 }/>
                             }

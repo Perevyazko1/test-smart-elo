@@ -1,24 +1,19 @@
 import React, {memo, useCallback, useState} from 'react';
-import {NavLink} from "react-router-dom";
+import {NavLink, useLocation} from "react-router-dom";
 import {useSelector} from "react-redux";
-import {Dropdown, DropdownButton} from "react-bootstrap";
+import {Dropdown, NavDropdown} from "react-bootstrap";
+import {NavDropdownProps} from "react-bootstrap/NavDropdown";
 
 import {employeeActions, EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 import {AuditWidget} from "../../AuditWidget";
 
-interface UserInfoWithRoutsProps {
-    className?: string
-}
 
-
-export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
-    const {className, ...otherProps} = props
-
+export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | 'align' | 'children'>) => {
     const [showModal, setShowModal] = useState(false)
 
+    const location = useLocation()
     const dispatch = useAppDispatch()
 
     const eloPageAccess = useSelector(
@@ -39,47 +34,53 @@ export const UserInfoWithRouts = memo((props: UserInfoWithRoutsProps) => {
         dispatch(employeeActions.logout())
     }, [dispatch])
 
-    const mods: Mods = {};
 
     return (
-        <div className={classNames('mx-2', mods, [className])}>
-            <DropdownButton
-                variant={"dark"}
-                menuVariant={"dark"}
-                align={'end'}
-                title={employee?.first_name + " " + employee?.last_name}
-                {...otherProps}
-            >
-                {eloPageAccess &&
-                    <Dropdown.Item as={NavLink} to={'/'}>
-                        ЭЛО
-                    </Dropdown.Item>
-                }
-
-                {tariffPageAccess &&
-                    <Dropdown.Item as={NavLink} to={'/tax_control'}>
-                        Тарификации
-                    </Dropdown.Item>
-                }
-
-                {isAdmin &&
-                    <Dropdown.Item to={'/test'} as={NavLink}>
-                        Страница разработчика
-                    </Dropdown.Item>
-                }
-
-                <Dropdown.Item onClick={() => setShowModal(true)}>
-                    История действий
-                    {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
+        <NavDropdown
+            align={'end'}
+            title={employee?.first_name + " " + employee?.last_name}
+            {...props}
+        >
+            {eloPageAccess &&
+                <Dropdown.Item
+                    as={NavLink}
+                    to={'/'}
+                    active={location.pathname === '/'}
+                >
+                    ЭЛО
                 </Dropdown.Item>
+            }
 
-                <Dropdown.Divider/>
-
-                <Dropdown.Item onClick={logout}>
-                    Выйти
+            {tariffPageAccess &&
+                <Dropdown.Item
+                    as={NavLink}
+                    to={'/tax_control'}
+                    active={location.pathname === '/tax_control'}
+                >
+                    Тарификации
                 </Dropdown.Item>
-            </DropdownButton>
+            }
 
-        </div>
+            {isAdmin &&
+                <Dropdown.Item
+                    to={'/test'}
+                    as={NavLink}
+                    active={location.pathname === '/test'}
+                >
+                    Страница разработчика
+                </Dropdown.Item>
+            }
+
+            <Dropdown.Item onClick={() => setShowModal(true)}>
+                История действий
+                {showModal && <AuditWidget onHide={() => setShowModal(false)}/>}
+            </Dropdown.Item>
+
+            <Dropdown.Divider/>
+
+            <Dropdown.Item onClick={logout}>
+                Выйти
+            </Dropdown.Item>
+        </NavDropdown>
     );
 });
