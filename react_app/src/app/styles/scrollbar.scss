@@ -1,0 +1,22 @@
+
+/* Устанавливаем ширину скроллбара */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+/* Устанавливаем стиль для "трека" (полосы, по которой движется "бегунок") */
+::-webkit-scrollbar-track {
+    //background: #252525;
+}
+
+/* Устанавливаем стиль для "бегунка" */
+::-webkit-scrollbar-thumb {
+    background: var(--bs-gray-600);
+    border-radius: 5px;
+}
+
+/* Изменяем цвет "бегунка" при наведении */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-gray-800);
+}

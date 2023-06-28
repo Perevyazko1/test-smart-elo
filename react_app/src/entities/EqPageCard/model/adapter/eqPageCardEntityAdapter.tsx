@@ -10,6 +10,11 @@ export const eqPageCardEntityAdapter = createEntityAdapter<eq_card>({
             return urgencyDiff;
         }
 
-        return a.series_id.localeCompare(b.series_id);
+        const orderNumberDiff = a.order.number - b.order.number;
+        if (orderNumberDiff !== 0) {
+            return orderNumberDiff;
+        }
+
+        return a.id - b.id;
     },
 })

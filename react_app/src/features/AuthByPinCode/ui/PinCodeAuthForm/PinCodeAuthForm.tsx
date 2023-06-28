@@ -6,14 +6,13 @@ import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {Input} from "shared/ui/Input/Input";
 import {Checkbox} from "shared/ui/Checkbox/Checkbox";
-import {Button, ButtonTypes} from "shared/ui/Button/Button";
 
 import {authByPinCodeActions, authByPinCodeReducer} from "../../model/slice/authByPinCodeSlice";
 import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
 import {authByPinCode} from "../../model/services/authByPinCode/authByPinCode";
 import {getAuthByPinCodeState} from "../../model/selectors/getAuthByPinCodeState/getAuthByPinCodeState";
 import {getRememberMe} from "../../model/selectors/getRememberMe/getRememberMe";
-import {notificationsActions} from "../../../../widgets/Notification";
+import {Button} from "react-bootstrap";
 
 export interface PinCodeAuthFormProps {
     className?: string
@@ -87,7 +86,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
 
                 <div className="mb-3">
                     <Button
-                        type={ButtonTypes.SUBMIT}
+                        type={"submit"}
                         disabled={authState?.isLoading}
                         className={"btn-primary d-block w-100"}
                     >

@@ -162,7 +162,7 @@ def get_view_modes(request):
     result = []
 
     users = Employee.objects.filter(departments__number=department_number).exclude(
-        groups__name='Администраторы'
+        groups__name='Администраторы',
     )
 
     for user in users:

@@ -55,6 +55,7 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = [
             'project',
             'moment',
+            'number',
             'planned_date',
         ]
 

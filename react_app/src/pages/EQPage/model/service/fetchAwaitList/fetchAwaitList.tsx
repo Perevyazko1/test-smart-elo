@@ -22,7 +22,7 @@ export const fetchAwaitList = createAsyncThunk<order_product_list, fetchAwaitLis
         const view_mode = getCurrentViewMod(getState());
 
         try {
-            const response = await extra.api.get<order_product_list>('/core/get_await_list/', {
+            const response = await extra.api.get<order_product_list>('/core/get_eq_cards/', {
                 params: {
                     department_number: current_department?.number,
                     pin_code: pin_code,

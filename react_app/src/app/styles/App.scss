@@ -1,8 +1,10 @@
-//html {
-//  min-width: 360px;
-//  overflow: hidden;
-//}
+html {
+  //min-width: 360px;
+  //overflow: hidden;
+}
 
+@import "scrollbar";
+@import "input-range";
 
 @font-face {
   font-family: 'Verdana';
@@ -18,6 +20,11 @@
 
 $font-family-sans-serif: "Verdana", sans-serif;
 $font-family-monospace: "Motserrat-Light", monospace;
+
+* {
+  font-family: Motserrat-Light, serif;
+  font-weight: bold;
+}
 
 @import "~bootstrap/scss/bootstrap";
 
@@ -60,4 +67,9 @@ $font-family-monospace: "Motserrat-Light", monospace;
 
 a {
   text-decoration: none;
+}
+
+.fs-7 {
+  font-size: 14px;
+  font-weight: bold;
 }

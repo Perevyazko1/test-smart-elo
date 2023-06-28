@@ -9,7 +9,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {fetchCurrentDepartment} from "../../model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 import {eqActions} from "../../model/slice/eqSlice";
 import {getCurrentViewMod} from "../../model/selectors/getCurrentViewMod/getCurrentViewMod";
-import {eqAwaitListActions, eqAwaitListReducer} from "../../model/slice/awaitListSlice";
+import {eqAwaitListActions} from "../../model/slice/awaitListSlice";
 import {eqInWorkListActions} from "../../model/slice/inWorkListSlice";
 import {eqReadyListActions} from "../../model/slice/readyListSlice";
 

@@ -3,6 +3,7 @@ import {assignment} from "../../../Assignment";
 import {product} from "../../../Product";
 import {order} from "../../../Order";
 import {EntityState} from "@reduxjs/toolkit";
+import {employee} from "../../../Employee";
 
 
 type card_info = {
@@ -11,6 +12,11 @@ type card_info = {
     count_ready: number;
     count_await: number;
     tariff: number;
+}
+
+type department_info = {
+    full_name: string;
+    count_in_work: number;
 }
 
 
@@ -27,6 +33,7 @@ export type eq_card = {
     urgency: number;
     comment_base: string;
     comment_case: string;
+    department_info: department_info[];
 }
 
 export type eq_page_list = {

@@ -28,7 +28,8 @@ interface WeekData extends week_info {
 export interface EqFilters {
     weekData: WeekData,
     projectFilter: FilterData<string>,
-    viewModeFilter: FilterData<ViewMode>
+    viewModeFilter: FilterData<ViewMode>,
+    seriesSize: number,
 }
 
 export interface EqContentDesktop {

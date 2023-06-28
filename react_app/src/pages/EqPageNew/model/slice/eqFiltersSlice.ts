@@ -4,7 +4,7 @@ import {week_info} from "entities/WeekInfo/model/types/weekInfo";
 
 import {EqFilters, ViewMode} from "../types/eqPageSchema";
 
-const initialState: EqFilters = {
+export const initialState: EqFilters = {
     weekData: {
         week: undefined,
         year: undefined,
@@ -19,13 +19,12 @@ const initialState: EqFilters = {
         isLoading: false,
     },
     viewModeFilter: {
-        filters: [
-            {name: "Личные наряды", key: 0},
-        ],
+        filters: [],
         default: {name: "Личные наряды", key: 0},
         currentFilter: {name: "Личные наряды", key: 0},
         isLoading: false,
-    }
+    },
+    seriesSize: 1,
 };
 
 const eqFiltersSlice = createSlice({
@@ -51,6 +50,10 @@ const eqFiltersSlice = createSlice({
         },
         weekDataHasUpdated: (state) => {
             state.weekData.hasUpdated = !state.weekData.hasUpdated;
+        },
+
+        setSeriesSize: (state, action: PayloadAction<number>) => {
+            state.seriesSize = action.payload;
         },
 
     },

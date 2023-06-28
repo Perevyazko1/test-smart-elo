@@ -1,0 +1,35 @@
+from attr import dataclass
+
+
+@dataclass
+class RequestParams:
+    pin_code: str
+    view_mode_key: str
+    project_filter: str
+    department_number: str
+    week: str
+    year: str
+
+
+def get_eq_req_params(request) -> RequestParams | None:
+    if request.method == "POST":
+        return RequestParams(
+            pin_code=request.data.get("pin_code"),
+            view_mode_key=request.data.get("view_mode_key"),
+            project_filter=request.data.get("project_filter"),
+            department_number=request.data.get("department_number"),
+            week=request.data.get("week"),
+            year=request.data.get("year"),
+        )
+    elif request.method == "GET":
+        return RequestParams(
+            pin_code=request.query_params.get("pin_code"),
+            view_mode_key=request.query_params.get("view_mode_key"),
+            project_filter=request.query_params.get("project_filter"),
+            department_number=request.query_params.get("department_number"),
+            week=request.query_params.get("week"),
+            year=request.query_params.get("year"),
+        )
+    else:
+        # TODO добавить логи на этот случай
+        return None
