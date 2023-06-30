@@ -18,8 +18,8 @@ export const IndicatorWrapper = memo((props: IndicatorWrapperProps) => {
         className,
         children,
         indicator,
-        top="-4px",
-        right="0px",
+        top="0px",
+        right="-9px",
         show = true,
     } = props
 

@@ -22,9 +22,9 @@ def get_eq_card_count_data(order_product: OrderProduct, department_number: str):
         await_count = queryset.filter(status='await').count(),
     else:
         tariff = 0
-        in_work_count = 0
-        ready_count = 0
-        await_count = 0
+        in_work_count = [0]
+        ready_count = [0]
+        await_count = [0]
 
     count_all = order_product.quantity,
 

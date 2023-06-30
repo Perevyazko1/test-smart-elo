@@ -1,9 +1,9 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {tech_process_schema} from "entities/TechnologicalProcess";
+import {getEmployeePinCode} from "entities/Employee";
 import {order_product_list} from "entities/OrderProduct";
 import {ThunkConfig} from "app/providers/StoreProvider";
-import {getEmployeePinCode} from "../../../../../entities/Employee";
 
 
 interface fetchSetCustomTechProcessProps {

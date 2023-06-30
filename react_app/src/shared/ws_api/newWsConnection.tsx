@@ -1,11 +1,9 @@
 import {Dispatch} from "@reduxjs/toolkit";
-import {eqActions} from "pages/EQPage";
 
 import {SERVER_WS_ADDRESS} from "../const/server_config";
-import {eqAwaitListActions} from "../../pages/EQPage/model/slice/awaitListSlice";
-import {eqInWorkListActions} from "../../pages/EQPage/model/slice/inWorkListSlice";
-import {eqReadyListActions} from "../../pages/EQPage/model/slice/readyListSlice";
 import {notificationsActions} from "../../widgets/Notification";
+import {eqContentDesktopActions} from "../../pages/EqPageNew/model/slice/eqContentDesktopSlice";
+import {eqFiltersActions} from "../../pages/EqPageNew/model/slice/eqFiltersSlice";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -67,14 +65,14 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
                                 title: "Обновление",
                                 body: "Данные обновлены.",
                             }))
-                            dispatch(eqAwaitListActions.hasUpdated())
+                            dispatch(eqContentDesktopActions.awaitListHasUpdated())
                             return;
                         case 'in_work':
-                            dispatch(eqInWorkListActions.hasUpdated())
+                            dispatch(eqContentDesktopActions.inWorkListHasUpdated())
                             return;
                         case 'ready':
-                            dispatch(eqReadyListActions.hasUpdated())
-                            dispatch(eqActions.weekInfoUpdated())
+                            dispatch(eqContentDesktopActions.readyListHasUpdated())
+                            dispatch(eqFiltersActions.weekDataHasUpdated())
                             return;
                         default:
                             console.error('Неопознанная команда для обновления списков')
@@ -87,19 +85,20 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
                 data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {
                         case 'await':
-                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
                             return;
                         case 'in_work':
-                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
                             return;
                         case 'ready':
-                            dispatch(eqAwaitListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqInWorkListActions.addNotRelevantId(data.data.data))
-                            dispatch(eqReadyListActions.addNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
+                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
+                            dispatch(eqFiltersActions.weekDataHasUpdated(data.data.data))
                             return;
                         default:
                             console.error('Неопознанная команда для обновления списков')

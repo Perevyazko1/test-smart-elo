@@ -8,8 +8,9 @@ import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
 
 interface fetchListDataProps {
     target_list: 'await' | 'in_work' | 'ready',
-    limit: number,
-    offset: number,
+    limit?: number,
+    offset?: number,
+    url?: string,
 }
 
 
@@ -19,14 +20,21 @@ export const fetchListData = createAsyncThunk<eq_page_list, fetchListDataProps, 
         const {extra, getState} = thunkAPI;
 
         const filters = getEqProjectFilter(getState());
+        const {url, ...props} = params;
 
         try {
-            const response = await extra.api.get<eq_page_list>('/core/get_eq_cards/', {
-                params: {
-                    ...filters,
-                    ...params,
-                }
-            });
+            let response
+
+            if (url) {
+                response = await extra.api.get<eq_page_list>(url);
+            } else {
+                response = await extra.api.get<eq_page_list>('/core/get_eq_cards/', {
+                    params: {
+                        ...filters,
+                        ...props,
+                    }
+                });
+            }
             if (response.data) {
                 return response.data;
             } else {

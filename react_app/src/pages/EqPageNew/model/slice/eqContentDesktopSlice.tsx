@@ -4,6 +4,7 @@ import {eqPageCardEntityAdapter} from "entities/EqPageCard";
 
 import {EqContentDesktop} from "../types/eqPageSchema";
 import {fetchListData} from "../service/apiDesktop/fetchListData";
+import {fetchEqUpdateCard} from "../service/apiDesktop/fetchEqUpdateCard";
 
 const initialState: EqContentDesktop = {
     awaitList: {
@@ -12,7 +13,7 @@ const initialState: EqContentDesktop = {
             entities: {},
         },
         count: 0,
-        isLoading: false,
+        isLoading: true,
         hasUpdated: false,
         notRelevantId: [],
         next: null,
@@ -24,7 +25,7 @@ const initialState: EqContentDesktop = {
             entities: {},
         },
         count: 0,
-        isLoading: false,
+        isLoading: true,
         hasUpdated: false,
         notRelevantId: [],
         next: null,
@@ -36,7 +37,7 @@ const initialState: EqContentDesktop = {
             entities: {},
         },
         count: 0,
-        isLoading: false,
+        isLoading: true,
         hasUpdated: false,
         notRelevantId: [],
         next: null,
@@ -51,27 +52,33 @@ const eqContentDesktopSlice = createSlice({
     reducers: {
         // await reducers
         addAwaitNotRelevantId: (state, action: PayloadAction<number>) => {
-            state.awaitList.notRelevantId = [...state.awaitList.notRelevantId, action.payload]
+            state.awaitList.notRelevantId = [...state.awaitList.notRelevantId, action.payload];
         },
         awaitListHasUpdated: (state) => {
-            state.awaitList.hasUpdated = !state.awaitList.hasUpdated
+            state.awaitList.hasUpdated = !state.awaitList.hasUpdated;
         },
 
 
         // inWork reducers
         addInWorkNotRelevantId: (state, action: PayloadAction<number>) => {
-            state.inWorkList.notRelevantId = [...state.inWorkList.notRelevantId, action.payload]
+            state.inWorkList.notRelevantId = [...state.inWorkList.notRelevantId, action.payload];
         },
         inWorkListHasUpdated: (state) => {
-            state.inWorkList.hasUpdated = !state.inWorkList.hasUpdated
+            state.inWorkList.hasUpdated = !state.inWorkList.hasUpdated;
         },
 
         // ready reducers
         addReadyNotRelevantId: (state, action: PayloadAction<number>) => {
-            state.readyList.notRelevantId = [...state.readyList.notRelevantId, action.payload]
+            state.readyList.notRelevantId = [...state.readyList.notRelevantId, action.payload];
         },
         readyListHasUpdated: (state) => {
-            state.readyList.hasUpdated = !state.readyList.hasUpdated
+            state.readyList.hasUpdated = !state.readyList.hasUpdated;
+        },
+
+        allListUpdated: (state) => {
+            state.readyList.hasUpdated = !state.readyList.hasUpdated;
+            state.inWorkList.hasUpdated = !state.inWorkList.hasUpdated;
+            state.awaitList.hasUpdated = !state.awaitList.hasUpdated;
         },
 
 
@@ -95,18 +102,30 @@ const eqContentDesktopSlice = createSlice({
                 const {results, ...props} = action.payload;
                 switch (action.meta.arg.target_list) {
                     case "await":
-                        eqPageCardEntityAdapter.addMany(state.awaitList.results, results)
+                        if (action.meta.arg.url) {
+                            eqPageCardEntityAdapter.addMany(state.awaitList.results, results)
+                        } else {
+                            eqPageCardEntityAdapter.setAll(state.awaitList.results, results)
+                        }
                         state.awaitList = {...state.awaitList, ...props}
                         state.awaitList.isLoading = false;
                         return;
                     case "in_work":
-                        eqPageCardEntityAdapter.addMany(state.inWorkList.results, results)
-                        state.inWorkList = {...state.awaitList, ...props}
+                        if (action.meta.arg.url) {
+                            eqPageCardEntityAdapter.addMany(state.inWorkList.results, results)
+                        } else {
+                            eqPageCardEntityAdapter.setAll(state.inWorkList.results, results)
+                        }
+                        state.inWorkList = {...state.inWorkList, ...props}
                         state.inWorkList.isLoading = false;
                         return;
                     case "ready":
-                        eqPageCardEntityAdapter.addMany(state.readyList.results, results)
-                        state.readyList = {...state.awaitList, ...props}
+                        if (action.meta.arg.url) {
+                            eqPageCardEntityAdapter.addMany(state.readyList.results, results)
+                        } else {
+                            eqPageCardEntityAdapter.setAll(state.readyList.results, results)
+                        }
+                        state.readyList = {...state.readyList, ...props}
                         state.readyList.isLoading = false;
                         return;
                 }
@@ -122,6 +141,24 @@ const eqContentDesktopSlice = createSlice({
                     case "ready":
                         state.readyList.isLoading = false;
                         return;
+                }
+            })
+            .addCase(fetchEqUpdateCard.fulfilled, (state, action) => {
+                if (action.payload.await.assignments.length === 0 && action.payload.await.card_info.count_in_work === 0) {
+                    eqPageCardEntityAdapter.removeOne(state.awaitList.results, action.payload.await.series_id)
+                } else {
+                    eqPageCardEntityAdapter.upsertOne(state.awaitList.results, action.payload.await)
+                }
+
+                if (action.payload.in_work.assignments.length === 0) {
+                    eqPageCardEntityAdapter.removeOne(state.inWorkList.results, action.payload.in_work.series_id)
+                } else {
+                    eqPageCardEntityAdapter.upsertOne(state.inWorkList.results, action.payload.in_work)
+                }
+                if (action.payload.ready.assignments.length === 0) {
+                    eqPageCardEntityAdapter.removeOne(state.readyList.results, action.payload.ready.series_id)
+                } else {
+                    eqPageCardEntityAdapter.upsertOne(state.readyList.results, action.payload.ready)
                 }
             })
     }

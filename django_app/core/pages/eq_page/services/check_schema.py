@@ -50,7 +50,3 @@ invalid_data = {
     "Сборка": ["Обивка"],
     "Упаковка": ["Готово"]
 }
-
-if __name__ == '__main__':
-    print(check_schema(valid_data))
-    print(check_schema(invalid_data))

@@ -45,7 +45,7 @@ export const EqAwaitBlock = () => {
         }
     }
 
-    const sceleton = (
+    const sceleton =  (
         <Skeleton width={'100%'}
                   height={'109px'}
                   className={'mt-1'}

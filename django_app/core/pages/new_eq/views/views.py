@@ -1,10 +1,18 @@
+from django.db.models import Sum
 from rest_framework import viewsets
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
+from dataclasses import asdict
 
-from core.models import OrderProduct
+from core.models import OrderProduct, Assignment
 from core.pages.new_eq.serializers.serializers import EqCardSerializer
 from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_eq_card_queryset import get_eq_card_queryset
 from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
+from core.services.get_week_info import GetWeekInfo
+from .update_assignments import UpdateAssignments
+from .get_view_modes import get_view_modes
+from .get_project_filter import get_project_filters
 
 
 class GetEqCards(viewsets.ModelViewSet):
@@ -19,6 +27,74 @@ class GetEqCards(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        print(get_eq_req_params(self.request))
         qs = get_eq_card_queryset(queryset=qs, request=self.request)
         return qs
+
+
+@api_view(['POST'])
+def update_card(request):
+    eq_params = get_eq_req_params(request=request)
+    series_id: str = request.data.get('series_id')
+    numbers: list[int] = request.data.get('numbers')
+    action: str = request.data.get('action')
+
+    UpdateAssignments(series_id=series_id,
+                      department_number=eq_params.department_number,
+                      numbers=numbers,
+                      action=action,
+                      pin_code=eq_params.pin_code,
+                      view_mode=eq_params.view_mode_key
+                      ).execute()
+
+    queryset = OrderProduct.objects.get(series_id=series_id)
+
+    return JsonResponse({
+        "await": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'await',
+        }).data,
+        "in_work": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'in_work',
+        }).data,
+        "ready": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'ready',
+        }).data,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_eq_filters(request):
+    eq_params = get_eq_req_params(request=request)
+    mode = request.query_params.get('mode')
+
+    project_filters = get_project_filters(mode)
+    view_modes = get_view_modes(eq_params.department_number)
+
+    return JsonResponse({
+        "view_modes": view_modes,
+        "project_filters": project_filters,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_week_data(request):
+    eq_params = get_eq_req_params(request=request)
+
+    if len(eq_params.view_mode_key) == 6:
+        eq_params.pin_code = eq_params.view_mode_key
+
+    week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
+
+    earned = Assignment.objects.filter(
+        executor__pin_code=eq_params.pin_code,
+        department__number=eq_params.department_number,
+        inspector__isnull=False,
+        date_completion__gte=week_info.date_range[0],
+        date_completion__lt=week_info.date_range[1],
+    ).aggregate(Sum('tariff__tariff')).get('tariff__tariff__sum')
+
+    week_info.earned = earned
+
+    return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})

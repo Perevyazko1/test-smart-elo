@@ -3,7 +3,7 @@ import {normalized_page_list} from "entities/EqPageCard";
 
 export interface EqListData extends normalized_page_list {
     isLoading: boolean,
-    hasUpdated: boolean,
+    hasUpdated: boolean | undefined,
     notRelevantId: number[],
 }
 

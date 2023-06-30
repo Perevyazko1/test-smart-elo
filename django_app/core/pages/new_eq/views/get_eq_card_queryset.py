@@ -13,7 +13,7 @@ def get_eq_card_queryset(queryset, request):
 
     # Делаем общую фильтрацию по проекту
     if not eq_params.project_filter == 'Все проекты':
-        queryset.filter(order__project=eq_params.project_filter).distinct()
+        queryset = queryset.filter(order__project=eq_params.project_filter).distinct()
 
     # Индивидуально прогоняем каждый сценарий запроса
     match target_list:
@@ -38,7 +38,7 @@ def get_eq_card_queryset(queryset, request):
                     ).distinct()
                 # Для конструкторов фильтруем по отсутствию подтвержденного технологического процесса
                 else:
-                    queryset = queryset = queryset.filter(
+                    queryset = queryset.filter(
                         product__technological_process_confirmed__isnull=True
                     ).distinct()
 
@@ -78,12 +78,12 @@ def get_eq_card_queryset(queryset, request):
         case "in_work":
             # Делаем проверку на режим просмотра под пользователем
             # Если таков задан - переопределяем пин-код
-            if len(eq_params.view_mode_key) == "6":
+            if len(eq_params.view_mode_key) == 6:
                 eq_params.pin_code = eq_params.view_mode_key
 
             # Отфильтровываем персонально в случае режима просмотра в персональных режимах
             if len(eq_params.view_mode_key) == 6 or eq_params.view_mode_key == "0":
-                queryset.filter(
+                queryset = queryset.filter(
                     assignments__executor__pin_code=eq_params.pin_code,
                     assignments__department__number=eq_params.department_number,
                     assignments__status='in_work',
@@ -101,7 +101,8 @@ def get_eq_card_queryset(queryset, request):
         case "ready":
             # Делаем проверку на режим просмотра под пользователем
             # Если таков задан - переопределяем пин-код
-            if len(eq_params.view_mode_key) == "6":
+
+            if len(eq_params.view_mode_key) == 6:
                 eq_params.pin_code = eq_params.view_mode_key
 
             # Отфильтровываем персонально в случае режима просмотра в персональных режимах
@@ -128,7 +129,7 @@ def get_eq_card_queryset(queryset, request):
                 ).distinct().order_by('-assignments__inspector')
 
             # В режиме недоделок не фильтруем по пин-коду и по дате
-            if eq_params.view_mode_key == '1':
+            if eq_params.view_mode_key == '2':
                 queryset = queryset.filter(
                     assignments__department__number=eq_params.department_number,
                     assignments__status='ready',
@@ -138,4 +139,5 @@ def get_eq_card_queryset(queryset, request):
             return queryset.order_by('urgency', 'order__number', 'id')
         case _:
             # TODO добавить логи ошибок
+            print('НЕ КОРРЕКТНЫЙ TARGET LIST!!!')
             return None

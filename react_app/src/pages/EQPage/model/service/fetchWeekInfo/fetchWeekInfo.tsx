@@ -1,6 +1,4 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-
-import {SERVER_HTTP_ADDRESS} from "shared/const/server_config";
 import {week_info} from "entities/WeekInfo";
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
@@ -8,7 +6,6 @@ import {getCurrentDepartment, getEmployeePinCode} from "entities/Employee";
 import {getCurrentProject} from "../../selectors/getCurrentProject/getCurrentProject";
 import {getCurrentViewMod} from "../../selectors/getCurrentViewMod/getCurrentViewMod";
 import {getInitialWeekInfo} from "../../lib/getInitialWeekInfo";
-import {EQ_WEEK_YEAR_INFO} from "../../../../../shared/const/localstorage";
 
 interface fetchWeekInfoProps {
     week: number | undefined,

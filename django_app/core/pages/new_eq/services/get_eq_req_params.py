@@ -14,12 +14,12 @@ class RequestParams:
 def get_eq_req_params(request) -> RequestParams | None:
     if request.method == "POST":
         return RequestParams(
-            pin_code=request.data.get("pin_code"),
-            view_mode_key=request.data.get("view_mode_key"),
-            project_filter=request.data.get("project_filter"),
-            department_number=request.data.get("department_number"),
-            week=request.data.get("week"),
-            year=request.data.get("year"),
+            pin_code=str(request.data.get("pin_code")),
+            view_mode_key=str(request.data.get("view_mode_key")),
+            project_filter=str(request.data.get("project_filter")),
+            department_number=str(request.data.get("department_number")),
+            week=str(request.data.get("week")),
+            year=str(request.data.get("year")),
         )
     elif request.method == "GET":
         return RequestParams(

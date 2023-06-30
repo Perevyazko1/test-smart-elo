@@ -7,25 +7,30 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {getEqProjectFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqActions} from "../../../../../EQPage";
+import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
+import {eqContentDesktopActions, eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopSlice";
 
+interface EqSetProjectProps extends Omit<NavDropdownProps, 'title' | 'children' | 'active'> {
+    callback: () => void;
+    mode: 'all' | 'actual';
+}
 
-export const EqSetProject = memo((props: Omit<NavDropdownProps, 'title' | 'children' | 'active'>) => {
-    const dispatch = useAppDispatch()
-    const projectFilter = useSelector(getEqProjectFilter)
-    const [currentMode, setCurrentMode] = useState<"active" | "all">('active')
-
-    // TODO добавить запрос проектов
+export const EqSetProject = memo((props: EqSetProjectProps) => {
+    const {callback, mode, ...otherProps} = props;
+    const dispatch = useAppDispatch();
+    const projectFilter = useSelector(getEqProjectFilter);
 
     const updateCurrentProject = (name: string) => {
-        dispatch(eqActions.setCurrentProject(name))
-        // TODO обновление страниц
+        dispatch(eqFiltersActions.setCurrentProject(name));
+        dispatch(eqContentDesktopActions.allListUpdated());
+        dispatch(eqFiltersActions.weekDataHasUpdated());
     }
 
     return (
         <NavDropdown
             title={projectFilter?.currentFilter || ''}
             active={projectFilter?.currentFilter !== projectFilter?.default}
-            {...props}
+            {...otherProps}
         >
             <div style={{overflow: 'auto', overflowX: 'hidden', overflowY: 'auto', maxHeight: "85vh"}}>
 
@@ -45,24 +50,15 @@ export const EqSetProject = memo((props: Omit<NavDropdownProps, 'title' | 'child
                     </Dropdown.Item>
                 ))}
 
-                {currentMode === 'active'
-                    ?
-                    <Button className={"w-100 p-0 mt-3"}
-                            style={{height: "25px"}}
-                            variant={'secondary'}
-                            onClick={() => setCurrentMode('all')}
-                    >
-                        Показать все
-                    </Button>
-                    :
-                    <Button className={"w-100 p-0 mt-3"}
-                            style={{height: "25px"}}
-                            variant={'secondary'}
-                            onClick={() => setCurrentMode('active')}
-                    >
-                        Показать активные
-                    </Button>
-                }
+
+                <Button className={"w-100 p-0 mt-3"}
+                        style={{height: "25px"}}
+                        variant={'secondary'}
+                        onClick={callback}
+                >
+                    {mode === 'actual' ? "Показать все" : "Показать актуальные"}
+                </Button>
+
             </div>
         </NavDropdown>
     );

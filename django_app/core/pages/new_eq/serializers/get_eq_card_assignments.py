@@ -6,7 +6,7 @@ from core.services.get_week_info import GetWeekInfo
 
 def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
-    if len(eq_params.view_mode_key) == "6":
+    if len(eq_params.view_mode_key) == 6:
         eq_params.pin_code = eq_params.view_mode_key
 
     # Фильтруем наряды по отделу

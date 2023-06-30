@@ -7,7 +7,7 @@ import {AppNavbar} from "shared/newUI/AppNavbar/AppNavbar";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {Loader} from "shared/ui/Loader/Loader";
 
-import {EqDesktopContentAsync} from "../EqDesktopContent/EqDesktopContent.async";
+import {EqDesktopContentAsync} from "../EqDesktopContent/EqDesktopContent/EqDesktopContent.async";
 import {EqMobileContentAsync} from "../EqMobileContent/EqMobileContent.async";
 import {EqSetDepartment} from "../../widgets/NavBar/EqSetDepartment/EqSetDepartment";
 import {EqSetViewMode} from "../../widgets/NavBar/EqSetViewMode/EqSetViewMode";
