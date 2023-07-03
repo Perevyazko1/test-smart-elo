@@ -98,3 +98,26 @@ def get_week_data(request):
     week_info.earned = earned
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_card(request):
+    eq_params = get_eq_req_params(request=request)
+    series_id: str = request.query_params.get('series_id')
+
+    queryset = OrderProduct.objects.get(id=series_id)
+
+    return JsonResponse({
+        "await": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'await',
+        }).data,
+        "in_work": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'in_work',
+        }).data,
+        "ready": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'ready',
+        }).data,
+    }, json_dumps_params={"ensure_ascii": False})

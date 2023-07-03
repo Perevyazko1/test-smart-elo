@@ -2,7 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
-from .models import Order, OrderProduct
+from staff.models import Employee
+from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess
+from .serializers import TechProcessSerializer
 
 
 def import_orders(request):
@@ -32,3 +34,84 @@ def get_project_filters(request):
     result += projects
 
     return JsonResponse({"data": result}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_op_dep_info(request):
+    series_id = request.query_params.get('series_id')
+    department_number = request.query_params.get('department_number')
+
+    order_product = OrderProduct.objects.get(series_id=series_id)
+
+    employees = Employee.objects.filter(
+        departments__number=department_number
+    )
+
+    department_info = []
+
+    for employee in employees:
+        employee_assignments = Assignment.objects.filter(
+            order_product=order_product,
+            executor=employee,
+            department__number=department_number,
+        )
+        department_info.append(
+            {
+                "id": employee.id,
+                "full_name": f"{employee.first_name} {employee.last_name}",
+                "in_work": employee_assignments.filter(status="in_work").count(),
+                "ready": employee_assignments.filter(status="ready").count(),
+                "confirmed": employee_assignments.filter(
+                    inspector__isnull=False,
+                    status="ready"
+                ).count(),
+            }
+        )
+
+    return JsonResponse({
+        "department_info": department_info,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_op_prod_info(request):
+    series_id = request.query_params.get('series_id')
+
+    order_product = OrderProduct.objects.get(series_id=series_id)
+
+    production_steps = ProductionStep.objects.filter(
+        product=order_product.product,
+    ).exclude(department__number=0).exclude(department__number=50)
+
+    production_info = []
+
+    for production_step in production_steps:
+        department_assignments = Assignment.objects.filter(
+            order_product=order_product,
+            department=production_step.department,
+        )
+        production_info.append(
+            {
+                "department_name": production_step.department.name,
+                "in_work": department_assignments.filter(status="in_work").count(),
+                "ready": department_assignments.filter(status="ready").count(),
+                "confirmed": department_assignments.filter(
+                    inspector__isnull=False,
+                    status="ready",
+                ).count(),
+            }
+        )
+
+    return JsonResponse({
+        "production_info": production_info,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_tech_processes(request):
+    qs = TechnologicalProcess.objects.exclude(image='').order_by('name')
+    serializer = TechProcessSerializer
+    data = serializer(qs, many=True, context={"request": request}).data
+
+    return JsonResponse({"tech_processes": data}, json_dumps_params={"ensure_ascii": False})
+

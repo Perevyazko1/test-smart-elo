@@ -13,7 +13,7 @@ import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 import {orderProductInfoActions} from "../../model/slice/OrderProductInfoSlice";
 import {OpSelectedTechProcess} from "./OPSelectedTechProcess";
 import {OpTechProcessList} from "./OPTechProcessList";
-import {TechProcessWidget} from "../../../TechProcessWidget";
+import {TechProcessConstructor} from "../../../TechProcessConstructor";
 import {fetchSetCustomTechProcess} from "../../model/services/fetchSetCustomTechProcess/fetchSetCustomTechProcess";
 
 interface OPTechProcessTableProps {
@@ -68,7 +68,7 @@ export const OPTechProcessTable = memo((props: OPTechProcessTableProps) => {
             {...otherProps}
         >
             {opInfoData?.show_constructor &&
-                <TechProcessWidget
+                <TechProcessConstructor
                     className={'mb-3'}
                     schema={opInfoData.constructor_schema || {}}
                     onSubmitData={(data) => set_custom_tech_process(data)}

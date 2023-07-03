@@ -8,7 +8,7 @@ import {GET_STATIC_URL} from "shared/const/server_config";
 
 import {getOPInfoData} from "../../model/selectors/getOPInfoData/getOPInfoData";
 import {orderProductInfoActions} from "../../model/slice/OrderProductInfoSlice";
-import {TechProcessWidget} from "../../../TechProcessWidget";
+import {TechProcessConstructor} from "../../../TechProcessConstructor";
 
 interface OpSelectedTechProcessProps {
     order_product: order_product;
@@ -86,8 +86,8 @@ export const OpSelectedTechProcess = (props: OpSelectedTechProcessProps) => {
                                  style={{maxHeight: '400px', maxWidth: '500px'}}
                             />
                             :
-                            <TechProcessWidget schema={techProcess?.schema}
-                                               disabled={true}
+                            <TechProcessConstructor schema={techProcess?.schema}
+                                                    disabled={true}
                             />
                         }
                     </td>

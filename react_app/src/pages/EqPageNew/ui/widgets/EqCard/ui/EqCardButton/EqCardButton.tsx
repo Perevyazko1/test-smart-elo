@@ -8,7 +8,6 @@ import cls from "../EqDesktopCard/EqDesktopCard.module.scss";
 
 interface EqCardButtonProps extends ButtonProps {
     cardType: 'await' | 'in_work' | 'ready',
-    mods: Mods,
     first: boolean,
     urgency: number,
     isDisabled: boolean,
@@ -19,7 +18,6 @@ export const EqCardButton = memo((props: EqCardButtonProps) => {
     const {
         className,
         cardType,
-        mods,
         first,
         urgency,
         isDisabled,
@@ -58,13 +56,9 @@ export const EqCardButton = memo((props: EqCardButtonProps) => {
         return "success"
     }
 
-    const showBtn = () => {
-
-    }
-
     return (
         <Button
-            className={classNames(cls.cardBtn, mods, [className])}
+            className={classNames(cls.cardBtn, {}, [className])}
             type="button"
             variant={getButtonVariant()}
             disabled={isDisabled}

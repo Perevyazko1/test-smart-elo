@@ -1,5 +1,4 @@
 import React, {useEffect} from 'react';
-import {TransitionGroup, CSSTransition} from "react-transition-group";
 import {useSelector} from "react-redux";
 
 import {StateSchema} from "app/providers/StoreProvider";

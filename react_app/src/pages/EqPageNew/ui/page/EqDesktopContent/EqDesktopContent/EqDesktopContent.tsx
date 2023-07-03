@@ -1,3 +1,5 @@
+import {useSelector} from "react-redux";
+
 import useWindowDimensions from "shared/lib/hooks/useWindowDimensions/useWindowDimensions";
 import useResizableBlocks from "shared/lib/hooks/useResizableBlocks/useResizableBlocks";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
@@ -6,6 +8,10 @@ import {eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopS
 import {EqWeekBlock} from "../EqWeekBlock/EqWeekBlock";
 import cls from "./EqDesktopContent.module.scss";
 import {EqCardSection} from "../EqCardSection/EqCardSection";
+import {getNoRelevantId} from "../../../../model/selectors/desktopSelectors/desktopSelectors";
+import {useEffect} from "react";
+import {useAppDispatch} from "../../../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {fetchEqUpdateCard} from "../../../../model/service/apiDesktop/fetchEqUpdateCard";
 
 const initialReducers: ReducersList = {
     eqDesktop: eqContentDesktopReducer,
@@ -23,6 +29,17 @@ const EqDesktopContent = () => {
         drag
     } = useResizableBlocks(windowWidth, windowHeight);
 
+    const dispatch = useAppDispatch()
+    const noRelevantId = useSelector(getNoRelevantId);
+    
+    useEffect(() => {
+        if (noRelevantId.length > 0) {
+            dispatch(fetchEqUpdateCard({
+                mode: 'GET',
+                series_id: noRelevantId[0],
+            }))
+        }
+    }, [dispatch, noRelevantId])
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>

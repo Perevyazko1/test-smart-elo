@@ -1,0 +1,20 @@
+.numbers {
+  height: 50%;
+  display: flex;
+  overflow-y: hidden;
+  overflow-x: auto;
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  padding: 0.15rem;
+  gap: 0.15rem;
+}
+
+.number {
+  padding: 0;
+  min-width: 35px;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: center;
+  align-items: center;
+}

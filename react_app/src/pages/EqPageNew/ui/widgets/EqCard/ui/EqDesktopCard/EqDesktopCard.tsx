@@ -1,11 +1,10 @@
 import React, {memo, useCallback, useEffect, useState} from 'react';
 import {useSelector} from "react-redux";
-import {Button, Col} from "react-bootstrap";
+import {Col} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
 import {EmployeePermissions, getEmployeeHasPermissions} from "entities/Employee";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
-import {IndicatorWrapper} from "shared/ui/IndicatorWrapper/IndicatorWrapper";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {Slider} from "shared/ui/Slider/Slider";
 
@@ -17,7 +16,8 @@ import {EqCardButton} from "../EqCardButton/EqCardButton";
 import {getSeriesSize} from "../../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../../../model/slice/eqFiltersSlice";
 import {setTargetNumber} from "../../model/lib/setTargetNumber/setTargetNumber";
-import {OrderProductInfo} from "../../../OrderProductInfo";
+import {EqCardCounts} from "../EqCardCounts/EqCardCounts";
+import {EqCardNumbers} from "../EqCardNumbers/EqCardNumbers";
 
 
 interface EqCardProps {
@@ -40,13 +40,13 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
     const sliderImages = createEqImageUrls(eqCard);
     const seriesSize = useSelector(getSeriesSize);
     const [assignmentsLists, setAssignmentsLists] = useState(createEqNumberLists(eqCard, seriesSize));
-    const [showCardInfo, setShowCardInfo] = useState(false)
+
 
     const [cardDisabled, setCardDisabled] = useState(false)
     const confirmAssignment = useSelector(getEmployeeHasPermissions([
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
     ]))
-    const getAction = (first: boolean) => {
+    const getAction = useCallback((first: boolean) => {
         if (cardType === 'await') {
             return Actions.AWAIT_TO_IN_WORK
         } else if (cardType === 'in_work' && first) {
@@ -58,7 +58,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
         } else {
             return Actions.READY_TO_IN_WORK
         }
-    }
+    }, [cardType])
 
     const getButtonCallback = (first: boolean) => {
         setCardDisabled(true)
@@ -68,6 +68,9 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
             action: getAction(first),
         })).then(() => {
             setCardDisabled(false);
+            if (getAction(first) === Actions.CONFIRMED) {
+                dispatch(eqFiltersActions.weekDataHasUpdated())
+            }
         })
     };
 
@@ -88,13 +91,12 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
     const showFirstButton = useCallback(() => {
         if (blockWidth > 600) {
             if (assignmentsLists?.primary?.length > 0) {
-                if (cardType !== 'await') {
-                    if (!eqCard?.product?.technological_process) {
-                        return false;
-                    } else if (confirmAssignment) {
-                        return true;
-                    }
-                } else {
+                if (cardType === 'in_work' || cardType === 'await') {
+                    return true;
+                }
+                if (!eqCard?.product?.technological_process) {
+                    return false;
+                } else if (confirmAssignment) {
                     return true;
                 }
             }
@@ -114,9 +116,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
         return false;
     }, [assignmentsLists?.primary?.length, blockWidth, cardType])
 
-    const mods: Mods = {
-        'border border-secondary border-1 rounded h-100': true
-    };
+    const wrapper = 'border border-secondary border-1 rounded h-100'
 
     const cardActive: Mods = {
         'unscaled': eqCard.assignments.length > 0,
@@ -125,14 +125,12 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
 
     return (
         <Col sm={blockWidth > 2000 ? 6 : 12} className={classNames(cls.cardCol, cardActive, [className])}>
-            {showCardInfo && <OrderProductInfo onHide={() => setShowCardInfo(false)} order_product={eqCard}/>}
 
             <div className={classNames(cls.card, {}, ['bg-dark rounded'])}>
                 <div className={classNames(cls.overflowWrapper, {}, ['bg-dark rounded'])}>
 
                     {showFirstButton() &&
                         <EqCardButton
-                            mods={mods}
                             cardType={cardType}
                             first={true}
                             onClick={() => getButtonCallback(true)}
@@ -142,41 +140,16 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
                     }
 
                     <div
-                        className={classNames(cls.sliderBlock, mods, [])}
+                        className={classNames(cls.sliderBlock, {}, [wrapper])}
                     >
                         <Slider price={eqCard.card_info.tariff} images={sliderImages} width={'100%'} height={'100%'}/>
                     </div>
 
-                    <IndicatorWrapper indicator={'tech-process'}
-                                      show={!eqCard?.product?.technological_process}
-                                      className={'bg-danger'}
-                    >
-                        <div
-                            className={classNames(cls.countBlock, mods, ['fs-7'])}
-                            onClick={() => setShowCardInfo(true)}
-                        >
-                            <div className={eqCard.card_info.count_all === 0 ? 'text-muted' : ''}>
-                                Всего:{eqCard.card_info.count_all}
-                            </div>
-                            <hr className={cls.contentHr}/>
-                            <div className={eqCard.card_info.count_in_work === 0 ? 'text-muted' : ''}>
-                                В_раб:{eqCard.card_info.count_in_work}
-                            </div>
-                            <hr className={cls.contentHr}/>
+                    <EqCardCounts eqCard={eqCard} className={wrapper}/>
 
-                            <div className={eqCard.card_info.count_await === 0 ? 'text-muted' : ''}>
-                                Своб:{eqCard.card_info.count_await}
-                            </div>
-                            <hr className={cls.contentHr}/>
-
-                            <div className={eqCard.card_info.count_ready === 0 ? 'text-muted' : ''}>
-                                Готов:{eqCard.card_info.count_ready}
-                            </div>
-                        </div>
-                    </IndicatorWrapper>
 
                     <div
-                        className={classNames(cls.nameNumberBlock, mods, [])}
+                        className={classNames(cls.nameNumberBlock, {}, [wrapper])}
                     >
                         <div className={classNames(cls.productName, {}, [])}>
                             {eqCard.product.name}
@@ -184,41 +157,14 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
 
                         <hr className={cls.contentHr}/>
 
-                        <div className={cls.numbers}>
-                            {assignmentsLists.primary?.map((number) => (
-                                <Button
-                                    key={number}
-                                    className={classNames(cls.number, {}, ["fs-5 fw-bold"])}
-                                    variant={'primary'}
-                                >
-                                    {number}
-                                </Button>
-                            ))}
-                            {assignmentsLists.secondary?.map((number) => (
-                                <Button
-                                    key={number}
-                                    className={classNames(cls.number, {}, ["fs-5 fw-bold"])}
-                                    variant={'secondary'}
-                                    onClick={() => setNumber(number)}
-                                >
-                                    {number}
-                                </Button>
-                            ))}
-                            {assignmentsLists.confirmed?.map((number) => (
-                                <Button
-                                    key={number}
-                                    className={classNames(cls.number, {}, ["fs-5 fw-bold"])}
-                                    variant={'success'}
-                                >
-                                    {number}
-                                </Button>
-                            ))}
-                        </div>
+                        <EqCardNumbers
+                            callback={(number) => setNumber(number)}
+                            assignmentsLists={assignmentsLists}
+                        />
                     </div>
 
-
                     {blockWidth > 600 &&
-                        <div className={classNames(cls.orderProjectBlock, mods, ['fs-7'])}>
+                        <div className={classNames(cls.orderProjectBlock, {}, ['fs-7', wrapper])}>
                             <div>
                                 Заказ:
                                 <br/>
@@ -234,7 +180,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
                     }
 
                     {blockWidth > 900 &&
-                        <div className={classNames(cls.departmentInfoBlock, mods, ['fs-7'])}>
+                        <div className={classNames(cls.departmentInfoBlock, {}, ['fs-7', wrapper])}>
                             {eqCard.department_info.map((info) => (
                                 <div
                                     className={classNames(cls.countInfo, {}, [`${info.count_in_work === 0 ? 'text-muted' : ''}`])}
@@ -250,12 +196,12 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
 
                     {showSecondButton() &&
                         <EqCardButton
-                            mods={mods}
                             cardType={cardType}
                             first={false}
                             onClick={() => getButtonCallback(false)}
                             urgency={eqCard.urgency}
                             isDisabled={cardDisabled}
+                            className={wrapper}
                         />
                     }
                 </div>

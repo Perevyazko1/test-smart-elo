@@ -4,6 +4,7 @@ import {SERVER_WS_ADDRESS} from "../const/server_config";
 import {notificationsActions} from "../../widgets/Notification";
 import {eqContentDesktopActions} from "../../pages/EqPageNew/model/slice/eqContentDesktopSlice";
 import {eqFiltersActions} from "../../pages/EqPageNew/model/slice/eqFiltersSlice";
+import {fetchEqUpdateCard} from "../../pages/EqPageNew/model/service/apiDesktop/fetchEqUpdateCard";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -82,31 +83,8 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
             }
 
             if (data.data.action === 'update_target_item' && data.initiator !== pin_code) {
-                data.data.lists.forEach((list_name: string) => {
-                    switch (list_name) {
-                        case 'await':
-                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
-                            return;
-                        case 'in_work':
-                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
-                            return;
-                        case 'ready':
-                            dispatch(eqContentDesktopActions.addAwaitNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addInWorkNotRelevantId(data.data.data))
-                            dispatch(eqContentDesktopActions.addReadyNotRelevantId(data.data.data))
-                            dispatch(eqFiltersActions.weekDataHasUpdated(data.data.data))
-                            return;
-                        default:
-                            console.error('Неопознанная команда для обновления списков')
-                            return;
-                    }
-                });
+                dispatch(eqContentDesktopActions.addNotRelevantId(data.data.data));
             }
-
         }
     }
     connect();

@@ -10,7 +10,6 @@ export const getListInfo = (state: StateSchema, listType: 'await' | 'in_work' | 
         previous: targetState?.previous || null,
         count: targetState?.count || 0,
         isLoading: targetState?.isLoading !== undefined ? targetState.isLoading : true,
-        notRelevantId: targetState?.notRelevantId || [],
         hasUpdated: targetState?.hasUpdated,
     };
 };

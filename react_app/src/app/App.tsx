@@ -80,7 +80,7 @@ function App() {
                             {eloPagePermission &&
                                 <Route path="/" element={
                                     <Suspense fallback={<Loader/>}>
-                                        <EQPage/>
+                                        <EqPageNew/>
                                     </Suspense>
                                 }/>
                             }
@@ -96,7 +96,7 @@ function App() {
                             {authData.username === "root" &&
                                 <Route path="/test" element={
                                     <Suspense fallback={<Loader/>}>
-                                        <EqPageNew/>
+                                        <EQPage/>
                                     </Suspense>
                                 }/>
                             }

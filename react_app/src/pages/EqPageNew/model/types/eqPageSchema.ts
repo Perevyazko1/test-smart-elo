@@ -4,7 +4,6 @@ import {normalized_page_list} from "entities/EqPageCard";
 export interface EqListData extends normalized_page_list {
     isLoading: boolean,
     hasUpdated: boolean | undefined,
-    notRelevantId: number[],
 }
 
 export interface ViewMode {
@@ -36,6 +35,7 @@ export interface EqContentDesktop {
     awaitList: EqListData,
     inWorkList: EqListData,
     readyList: EqListData,
+    notRelevantId: string[],
 }
 
 export interface EqContentMobile {

@@ -1,7 +1,17 @@
 import {StateSchema} from "app/providers/StoreProvider";
 import {initialState} from "../../slice/eqFiltersSlice";
 
-export const getEqProjectFilter = (state: StateSchema) => {
+
+export interface EqFilters {
+    pin_code: number | undefined;
+    department_number: number | undefined;
+    view_mode_key: number;
+    project_filter: string;
+    week: number | undefined;
+    year: number | undefined;
+}
+
+export const getEqProjectFilter = (state: StateSchema): EqFilters => {
     return {
         pin_code: state.employee.authData?.pin_code,
         department_number: state.employee.authData?.current_department?.number,
