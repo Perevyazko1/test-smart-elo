@@ -1,11 +1,12 @@
-import React, {memo, useCallback, useState} from 'react';
+import React, {memo, useCallback, useEffect, useState} from 'react';
 import {Accordion} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
 import {OpCardDetails} from "widgets/OrderProduct/OpCardDetails";
 import {OpDepDetails} from "widgets/OrderProduct/OpDepDetails";
 import {OpProdDetails} from "widgets/OrderProduct/OpProdDetails";
-import {TechProcessInfo} from "../../../TechProcessInfo/ui/TechProcessInfo/TechProcessInfo";
+
+import {TechProcessInfo} from "../../../TechProcessInfo/ui/TechProcessInfo";
 
 
 interface OpInfoProps {
@@ -17,8 +18,13 @@ interface OpInfoProps {
 export const OpInfo = memo((props: OpInfoProps) => {
     const {
         className,
-        eqCard,
-    } = props
+    } = props;
+
+    const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
+
+    useEffect(() => {
+        setEqCard(props.eqCard);
+    }, [props.eqCard]);
 
 
     const techProcessSelected = useCallback(() => {

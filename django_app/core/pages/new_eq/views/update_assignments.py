@@ -48,8 +48,7 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.id,
-                            'lists': ['await', 'in_work']
+                            'data': assignment.order_product.series_id,
                         }
                     continue
 
@@ -62,8 +61,7 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.id,
-                            'lists': ['await', 'in_work', 'ready']
+                            'data': assignment.order_product.series_id,
                         }
                     continue
 
@@ -76,8 +74,7 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.id,
-                            'lists': ['await', 'in_work', 'ready']
+                            'data': assignment.order_product.series_id,
                         }
                     continue
 
@@ -90,8 +87,7 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.id,
-                            'lists': ['await', 'in_work']
+                            'data': assignment.order_product.series_id,
                         }
                     continue
 
@@ -103,8 +99,7 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.id,
-                            'lists': ['ready']
+                            'data': assignment.order_product.series_id,
                         }
                     continue
 
@@ -240,7 +235,6 @@ class UpdateAssignments:
                 self.notification_data[next_step.department.number] = {
                     'action': EqNotificationActions.UPDATE_TARGET_LIST.value,
                     'data': '',
-                    'lists': ['await']
                 }
 
                 if from_constructors:
@@ -269,7 +263,7 @@ class UpdateAssignments:
         self.order_product = OrderProduct.objects.get(series_id=self.series_id)
 
         """Проверяем условие, что происходит подтверждение в отделе конструкторов и тех-процесс выбран"""
-        if self.department_number == 1 and self.order_product.product.technological_process is not None:
+        if self.department_number in [1, '1'] and self.order_product.product.technological_process is not None:
             self._set_technological_process_confirmed()
             self._delete_constructor_relations()
             self._init_production_step_schema()

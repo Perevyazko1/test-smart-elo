@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 
 import {OpModal} from "features/OpInfo";
 import {eq_card} from "entities/EqPageCard";
@@ -15,9 +15,15 @@ interface EqCardCountsProps {
 
 export const EqCardCounts = memo((props: EqCardCountsProps) => {
     const {
-        eqCard,
         className,
-    } = props
+    } = props;
+
+    const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
+
+    useEffect(() => {
+        setEqCard(props.eqCard);
+    }, [props.eqCard]);
+
     const [showCardInfo, setShowCardInfo] = useState(false)
 
     return (

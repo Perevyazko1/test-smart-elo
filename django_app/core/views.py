@@ -2,8 +2,11 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
-from staff.models import Employee
+from staff.models import Employee, Audit
+from .consumers import ws_group_updates, EqNotificationActions
 from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess
+from .pages.eq_page.services.check_schema import check_schema
+from .pages.eq_page.services.create_custom_tech_process import create_custom_tech_process
 from .serializers import TechProcessSerializer
 
 
@@ -115,3 +118,38 @@ def get_tech_processes(request):
 
     return JsonResponse({"tech_processes": data}, json_dumps_params={"ensure_ascii": False})
 
+
+@api_view(['POST'])
+def set_tech_process(request):
+    schema = request.data.get('schema')
+    pin_code = request.data.get('pin_code')
+    series_id = request.data.get('series_id')
+
+    if check_schema(schema):
+        technological_process = create_custom_tech_process(schema=schema, series_id=series_id)
+        serializer = TechProcessSerializer
+        data = serializer(technological_process, context={'request': request}).data
+
+        Audit.objects.create(
+            employee=Employee.objects.get(pin_code=pin_code),
+            audit_type="edit",
+            details=f"Назначил специальный технологический процесс: {technological_process.name}, "
+                    f"для изделия: {technological_process.product_set.first().name}"
+        )
+        """Делаем рассылку на обновление данных в WS"""
+        ws_group_updates(
+            pin_code=pin_code,
+            notification_data={
+                '1': {
+                    'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                    'data': series_id,
+                }
+            }
+        )
+
+        return JsonResponse({
+            "data": data
+        }, json_dumps_params={"ensure_ascii": False})
+
+    else:
+        return JsonResponse({"error": 'Не корректная схема'}, json_dumps_params={"ensure_ascii": False})

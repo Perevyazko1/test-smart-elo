@@ -1,4 +1,5 @@
 from core.models import TechnologicalProcess, OrderProduct
+from staff.models import Employee
 
 
 def create_custom_tech_process(schema: dict, series_id: str) -> TechnologicalProcess:

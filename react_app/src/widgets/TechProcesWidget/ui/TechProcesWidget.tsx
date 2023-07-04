@@ -1,4 +1,4 @@
-import {memo, useCallback} from 'react';
+import {memo, useCallback, useEffect, useState} from 'react';
 import {Button, Table} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
@@ -16,12 +16,17 @@ interface TechProcesWithImageProps {
 
 export const TechProcesWidget = memo((props: TechProcesWithImageProps) => {
     const {
-        eqCard,
         hasChanged = false,
         editCallback,
         cancelCallback,
         className,
     } = props;
+
+    const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
+
+    useEffect(() => {
+        setEqCard(props.eqCard);
+    }, [props.eqCard]);
 
     const techProcessConfirmed = useCallback(() => {
         return !!eqCard?.product?.technological_process_confirmed

@@ -1,17 +1,18 @@
+import {useEffect} from "react";
 import {useSelector} from "react-redux";
 
 import useWindowDimensions from "shared/lib/hooks/useWindowDimensions/useWindowDimensions";
 import useResizableBlocks from "shared/lib/hooks/useResizableBlocks/useResizableBlocks";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
 import {eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopSlice";
 import {EqWeekBlock} from "../EqWeekBlock/EqWeekBlock";
-import cls from "./EqDesktopContent.module.scss";
 import {EqCardSection} from "../EqCardSection/EqCardSection";
 import {getNoRelevantId} from "../../../../model/selectors/desktopSelectors/desktopSelectors";
-import {useEffect} from "react";
-import {useAppDispatch} from "../../../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {fetchEqUpdateCard} from "../../../../model/service/apiDesktop/fetchEqUpdateCard";
+
+import cls from "./EqDesktopContent.module.scss";
 
 const initialReducers: ReducersList = {
     eqDesktop: eqContentDesktopReducer,

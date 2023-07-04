@@ -105,7 +105,7 @@ def get_card(request):
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.query_params.get('series_id')
 
-    queryset = OrderProduct.objects.get(id=series_id)
+    queryset = OrderProduct.objects.get(series_id=series_id)
 
     return JsonResponse({
         "await": EqCardSerializer(queryset, context={

@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import React, {memo, useEffect, useState} from "react";
 
 import {eq_card} from "entities/EqPageCard";
 import {AppModal} from "shared/ui/AppModal/AppModal";
@@ -11,7 +11,13 @@ export interface OpModalProps {
 }
 
 export const OpModal = memo((props: OpModalProps) => {
-    const {onHide, eqCard} = props;
+    const {onHide} = props;
+
+    const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
+
+    useEffect(() => {
+        setEqCard(props.eqCard);
+    }, [props.eqCard]);
 
     return (
         <AppModal onHide={onHide}

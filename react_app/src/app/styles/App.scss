@@ -28,6 +28,11 @@ $font-family-monospace: "Motserrat-Light", monospace;
 
 @import "~bootstrap/scss/bootstrap";
 
+[data-bs-theme=dark] {
+  --bs-tertiary-bg-rgb: 00, 00, 00;
+  --bs-body-bg: #000000;
+}
+
 .scaled {
   opacity: 0.8;
   transform: scale(0.95);
