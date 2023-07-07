@@ -1,4 +1,5 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useEffect} from 'react';
+import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 import {useSelector} from "react-redux";
 
@@ -7,11 +8,8 @@ import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import useDivWidth from "shared/lib/hooks/useComponentWidth/useComponentWidth";
 
 import {getWeekData} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
-import {fetchWeekInfo} from "../../../../../EQPage/model/service/fetchWeekInfo/fetchWeekInfo";
 import {fetchWeekData} from "../../../../model/service/filtersApi/fetchWeekData";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
-import {Button, Placeholder} from "react-bootstrap";
-import eqDesktopContent from "../EqDesktopContent/EqDesktopContent";
 import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 
 interface EqWeekBlockProps {

@@ -6,7 +6,7 @@ import {Container, Nav} from "react-bootstrap";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 import {getPaginationSize} from "shared/api/configs";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {AppNavbar} from "shared/newUI/AppNavbar/AppNavbar";
+import {AppNavbar} from "shared/ui/AppNavbar/AppNavbar";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
 import {eqPageReducer} from "../../model/slice/eqPageSlice";

@@ -7,9 +7,9 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {EmployeePermissions, getEmployeeHasPermissions, getEmployeePinCode} from "entities/Employee";
 
 import {getViewModeFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
-import {ViewMode} from "../../../../../EQPage/model/types/eqSchema";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
 import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
+import {ViewMode} from "../../../../model/types/eqPageSchema";
 
 
 export const EqSetViewMode = memo((props: Omit<NavDropdownProps, 'title' | 'children' | 'active'>) => {

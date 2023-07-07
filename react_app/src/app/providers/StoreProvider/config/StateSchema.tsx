@@ -4,10 +4,8 @@ import {AxiosInstance} from "axios";
 import {rtkAPI} from "shared/api/rtkAPI";
 import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee/model/types/employee";
-import {OrderProductInfoSchema} from "widgets/OrderProductInfo";
 import {NotificationList} from "widgets/Notification";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
-import {EqSchema, ListControl} from "pages/EQPage/model/types/eqSchema";
 import {TaxControlSchema} from "pages/TaxControlPage";
 import {normalizedEqData} from "pages/TestPage/model/types/eq_types";
 import {EqContentDesktop, EqContentMobile, EqFilters} from "pages/EqPageNew";
@@ -26,13 +24,8 @@ export interface StateSchema {
     eqPage?: normalizedEqData,
 
     authByPinCode?: AuthByPinCodeSchema,
-    eq?: EqSchema,
-    orderProductInfo?: OrderProductInfoSchema,
     auditWidget?: AuditWidgetSchema,
     taxControl?: TaxControlSchema,
-    eqAwaitList?: ListControl,
-    eqInWorkList?: ListControl,
-    eqReadyList?: ListControl,
     notifications?: NotificationList,
 }
 

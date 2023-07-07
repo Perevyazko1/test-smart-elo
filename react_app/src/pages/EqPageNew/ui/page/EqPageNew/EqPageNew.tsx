@@ -3,7 +3,7 @@ import {useMediaQuery} from "react-responsive";
 import {Container, Nav} from "react-bootstrap";
 
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
-import {AppNavbar} from "shared/newUI/AppNavbar/AppNavbar";
+import {AppNavbar} from "shared/ui/AppNavbar/AppNavbar";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {Loader} from "shared/ui/Loader/Loader";
 

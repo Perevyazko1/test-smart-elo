@@ -65,6 +65,7 @@ class ProductPicture(models.Model):
     class Meta:
         verbose_name = "Изображение изделия"
         verbose_name_plural = "Изображения изделий"
+        ordering = ['-id']
 
     product = models.ForeignKey(
         'Product',

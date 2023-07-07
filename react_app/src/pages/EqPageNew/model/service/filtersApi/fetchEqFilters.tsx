@@ -1,7 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 
-import {notificationsActions} from "widgets/Notification";
 import {ThunkConfig} from "app/providers/StoreProvider";
+import {handleErrors} from "shared/api/handleErrors";
 
 import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
 import {ViewMode} from "../../types/eqPageSchema";
@@ -36,34 +36,7 @@ export const fetchEqFilters = createAsyncThunk<EqFilters, fetchEqFiltersProps, T
                 throw new Error();
             }
         } catch (e: any) {
-            if (e.response) {
-                thunkAPI.dispatch(notificationsActions.addNotification({
-                    date: Date.now(),
-                    type: "ошибка",
-                    title: "Ошибка сервера",
-                    body: "Ошибка обработки запроса",
-                    notAutoHide: true
-                }))
-                return thunkAPI.rejectWithValue('Ошибка сервера');
-            } else if (e.request) {
-                thunkAPI.dispatch(notificationsActions.addNotification({
-                    date: Date.now(),
-                    type: "ошибка",
-                    title: "Ошибка связи",
-                    body: "Ошибка связи с сервером, проверьте подключение",
-                    notAutoHide: true
-                }))
-                return thunkAPI.rejectWithValue('Ошибка связи с сервером');
-            } else {
-                thunkAPI.dispatch(notificationsActions.addNotification({
-                    date: Date.now(),
-                    type: "ошибка",
-                    title: "Ошибка запроса",
-                    body: "Ошибка запроса данных. Попробуйте перезагрузить страницу.",
-                    notAutoHide: true
-                }))
-                return thunkAPI.rejectWithValue('Ошибка запроса');
-            }
+            return handleErrors(e, thunkAPI);
         }
     }
 )

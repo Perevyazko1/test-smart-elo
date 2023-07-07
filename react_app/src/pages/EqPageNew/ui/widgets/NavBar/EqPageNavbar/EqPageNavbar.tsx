@@ -5,7 +5,7 @@ import {Nav} from "react-bootstrap";
 import {getCurrentDepartment} from "entities/Employee";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {AppNavbar} from "shared/newUI/AppNavbar/AppNavbar";
+import {AppNavbar} from "shared/ui/AppNavbar/AppNavbar";
 
 import {EqSetDepartment} from "../EqSetDepartment/EqSetDepartment";
 import {EqSetViewMode} from "../EqSetViewMode/EqSetViewMode";

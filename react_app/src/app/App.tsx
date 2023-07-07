@@ -4,8 +4,10 @@ import {Route, Routes} from "react-router-dom";
 
 import {LoginPage} from "pages/LoginPage";
 import {TaxControlPage} from "pages/TaxControlPage";
-import {EQPage} from "pages/EQPage";
+import {ForbiddenPage} from "pages/ForbiddenPage";
+import {EqPageNew} from "pages/EqPageNew";
 import {authByPinCode} from "features/AuthByPinCode";
+import {NotificationWidget} from "widgets/Notification";
 
 import {Loader} from "shared/ui/Loader/Loader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
@@ -24,9 +26,7 @@ import {
 
 import './styles/App.scss';
 import 'shared/assets/fonts/fontawesome-all.min.css';
-import {ForbiddenPage} from "pages/ForbiddenPage";
-import {NotificationWidget} from "../widgets/Notification/ui/NotificationWidget";
-import {EqPageNew} from "pages/EqPageNew";
+
 
 
 function App() {
@@ -93,19 +93,11 @@ function App() {
                                 }/>
                             }
 
-                            {authData.username === "root" &&
-                                <Route path="/test" element={
-                                    <Suspense fallback={<Loader/>}>
-                                        <EQPage/>
-                                    </Suspense>
-                                }/>
-                            }
-
                             {eloPagePermission
                                 ?
                                 <Route path="/*" element={
                                     <Suspense fallback={<Loader/>}>
-                                        <EQPage/>
+                                        <EqPageNew/>
                                     </Suspense>
                                 }/>
                                 :

@@ -7,11 +7,9 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {getCurrentDepartment, getEmployeeAuthData, getEmployeeDepartments} from "entities/Employee";
 
 import {getViewModeFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
-import {
-    fetchCurrentDepartment
-} from "../../../../../EQPage/model/service/fetchCurrentDepartment/fetchCurrentDepartment";
 import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
+import {fetchCurrentDepartment} from "../../../../model/service/filtersApi/fetchCurrentDepartment";
 
 
 export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'children'>) => {
@@ -24,7 +22,6 @@ export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'ch
     const change_current_department = useCallback((department_number: number) => {
         if (authData?.pin_code && department_number !== currentDepartment?.number) {
             dispatch(fetchCurrentDepartment({
-                pin_code: authData?.pin_code,
                 department_number: department_number
             })).then(() => {
                 dispatch(eqContentDesktopActions.allListUpdated())

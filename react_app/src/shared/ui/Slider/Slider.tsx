@@ -1,8 +1,9 @@
 import {memo} from 'react';
 
-// Swiper
 import {Swiper, SwiperSlide} from "swiper/react";
-import {Navigation, Pagination} from "swiper";
+import {Pagination} from "swiper";
+import cls from './Slider.module.scss';
+
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -29,14 +30,17 @@ export const Slider = memo((props: SliderProps) => {
     return (
         <Swiper
             // install Swiper modules
-            modules={[Pagination, Navigation]}
+            grabCursor={true}
+            rewind={true}
+            modules={[Pagination]}
             spaceBetween={50}
             slidesPerView={1}
             pagination={{
-                type: "progressbar",
+                type: 'bullets',
+                horizontalClass: cls.swiperPagination,
             }}
             style={{width: width, height: height}}
-            className={"d-flex justify-content-center align-items-xl-center"}
+            className={"d-flex justify-content-center align-items-center"}
         >
             <>
                 <div

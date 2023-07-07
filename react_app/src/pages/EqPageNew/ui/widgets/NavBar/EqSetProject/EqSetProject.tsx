@@ -1,4 +1,4 @@
-import React, {memo, useState} from 'react';
+import React, {memo} from 'react';
 import {useSelector} from "react-redux";
 import {Button, Dropdown, NavDropdown} from "react-bootstrap";
 import {NavDropdownProps} from "react-bootstrap/NavDropdown";
@@ -6,9 +6,8 @@ import {NavDropdownProps} from "react-bootstrap/NavDropdown";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {getEqProjectFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
-import {eqActions} from "../../../../../EQPage";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
-import {eqContentDesktopActions, eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopSlice";
+import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 
 interface EqSetProjectProps extends Omit<NavDropdownProps, 'title' | 'children' | 'active'> {
     callback: () => void;
