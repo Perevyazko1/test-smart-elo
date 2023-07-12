@@ -11,8 +11,7 @@ urlpatterns = [
     path('get_op_prod_info/', get_op_prod_info),
     path('get_tech_processes/', get_tech_processes),
     path('set_tech_process/', set_tech_process),
-
-    path('', include('core.pages.eq_page.urls')),
+ 
     path('', include('core.pages.tariff_page.urls')),
     path('', include('core.pages.new_eq.urls')),
 ]

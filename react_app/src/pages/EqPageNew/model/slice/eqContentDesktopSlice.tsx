@@ -40,7 +40,6 @@ const initialState: EqContentDesktop = {
         next: null,
         previous: null,
     },
-    notRelevantId: [],
 }
 
 
@@ -48,10 +47,6 @@ const eqContentDesktopSlice = createSlice({
     name: 'eqContentDesktopSlice',
     initialState,
     reducers: {
-        addNotRelevantId: (state, action: PayloadAction<string>) => {
-            state.notRelevantId = [...state.notRelevantId, action.payload];
-        },
-
         awaitListHasUpdated: (state) => {
             state.awaitList.hasUpdated = !state.awaitList.hasUpdated;
         },
@@ -146,10 +141,6 @@ const eqContentDesktopSlice = createSlice({
                     eqPageCardEntityAdapter.removeOne(state.readyList.results, action.payload.ready.series_id)
                 } else {
                     eqPageCardEntityAdapter.upsertOne(state.readyList.results, action.payload.ready)
-                }
-                if (action.meta.arg.mode === "GET") {
-                    state.notRelevantId = state.notRelevantId.filter(
-                        (series_id) => series_id !== action.meta.arg.series_id)
                 }
             })
     }

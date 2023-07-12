@@ -7,7 +7,6 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {getEqProjectFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
-import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 
 interface EqSetProjectProps extends Omit<NavDropdownProps, 'title' | 'children' | 'active'> {
     callback: () => void;
@@ -21,7 +20,7 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
 
     const updateCurrentProject = (name: string) => {
         dispatch(eqFiltersActions.setCurrentProject(name));
-        dispatch(eqContentDesktopActions.allListUpdated());
+        dispatch(eqFiltersActions.listsHasUpdated());
         dispatch(eqFiltersActions.weekDataHasUpdated());
     }
 

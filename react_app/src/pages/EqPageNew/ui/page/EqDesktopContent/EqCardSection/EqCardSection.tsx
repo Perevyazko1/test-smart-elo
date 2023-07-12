@@ -4,11 +4,12 @@ import {useSelector} from "react-redux";
 import {StateSchema} from "app/providers/StoreProvider";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {classNames} from "shared/lib/classNames/classNames";
+import {getPaginationSize} from "shared/api/configs";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
-import {EqDesktopCard} from "../../../widgets/EqCard/ui/EqDesktopCard/EqDesktopCard";
+import {EqDesktopCard} from "../../../widgets/EqCard/ui/EqDesktopCard/EqDesktopCard/EqDesktopCard";
 import {
     getEqAwaitList,
     getEqInWorkList,
@@ -16,7 +17,7 @@ import {
 } from "../../../../model/selectors/desktopSelectors/desktopSelectors";
 import {fetchListData} from "../../../../model/service/apiDesktop/fetchListData";
 import {getListInfo} from "../../../../model/selectors/propsSelectors/propsSelectors";
-import {getPaginationSize} from "../../../../../../shared/api/configs";
+import {listsHasUpdated} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
 
 interface EqCardSectionProps {
     listType: 'await' | 'in_work' | 'ready';
@@ -42,7 +43,8 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             getEqReadyList.selectAll
     )
 
-    const listProps = useSelector((state: StateSchema) => (getListInfo(state, listType)))
+    const listProps = useSelector((state: StateSchema) => (getListInfo(state, listType)));
+    const hasUpdated = useSelector(listsHasUpdated);
 
     const headerName = listType === 'await' ? 'Список изделий в очереди' :
         listType === 'in_work' ? 'Список изделий в работе' : 'Список готовых изделий'
@@ -52,10 +54,11 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             dispatch(fetchListData({
                 target_list: listType,
                 offset: 0,
-                limit: getPaginationSize(heightPx, 102),
+                limit: getPaginationSize(heightPx, 102, 1.8),
             }))
         }
-    }, [dispatch, listProps.hasUpdated])
+        // eslint-disable-next-line
+    }, [dispatch, listProps.hasUpdated, hasUpdated])
 
     const fetchNextPage = () => {
         if (listProps.next) {
@@ -87,7 +90,7 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             }}
             scroll_callback={fetchNextPage}
         >
-            <div className="pt-1 p-0">
+            <div className="pt-1 px-1">
                 <StickyHeader loading={listProps.isLoading}>
                     {widthPx > 375 && headerName}
                 </StickyHeader>

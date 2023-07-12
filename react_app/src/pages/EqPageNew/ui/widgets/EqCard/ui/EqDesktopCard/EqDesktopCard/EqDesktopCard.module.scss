@@ -1,0 +1,95 @@
+.cardCol {
+  margin: .25rem 0 0 0;
+  padding: 0;
+  display: inline-block;
+  height: 102px;
+  min-width: 200px;
+}
+
+.card {
+  height: 100%;
+  padding: .25rem .25rem;
+}
+
+.overflowWrapper {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+
+.cardBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 40px;
+  color: var(--bs-dark);
+}
+
+.sliderBlock {
+  display: flex;
+  padding: .15rem;
+  justify-content: center;
+  align-items: center;
+  width: 100px;
+  min-width: 100px;
+  max-width: 100px;
+}
+
+.countBlock {
+  height: 100%;
+  padding: 0 0.25rem;
+}
+
+
+.nameNumberBlock {
+  min-width: 220px;
+  padding: 0 0.15rem;
+  flex: 1 1 auto;
+}
+
+.productName {
+  height: 50%;
+  overflow-y: auto;
+  font-size: 14px;
+}
+
+.orderProjectBlock {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  padding: 0 0.15rem;
+  height: 100%;
+  width: 90px;
+  min-width: 90px;
+  max-width: 90px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  font-weight: 800;
+}
+
+.departmentInfoBlock {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 0;
+  flex-shrink: 0;
+  justify-content: flex-start;
+  padding: 0 0.15rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.sliderBlock,
+.nameNumberBlock,
+.orderProjectBlock,
+.departmentInfoBlock, {
+  background: white;
+}
+
+.contentHr {
+  margin: 0;
+  padding: 0;
+}

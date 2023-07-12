@@ -35,6 +35,7 @@ class GetEqCards(viewsets.ModelViewSet):
 def update_card(request):
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.data.get('series_id')
+    variant: str = request.data.get('variant')
     numbers: list[int] = request.data.get('numbers')
     action: str = request.data.get('action')
 
@@ -48,20 +49,28 @@ def update_card(request):
 
     queryset = OrderProduct.objects.get(series_id=series_id)
 
-    return JsonResponse({
-        "await": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'await',
-        }).data,
-        "in_work": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'in_work',
-        }).data,
-        "ready": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'ready',
-        }).data,
-    }, json_dumps_params={"ensure_ascii": False})
+    if variant == 'desktop':
+        return JsonResponse({
+            "await": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'await',
+            }).data,
+            "in_work": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'in_work',
+            }).data,
+            "ready": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'ready',
+            }).data,
+        }, json_dumps_params={"ensure_ascii": False})
+    else:
+        return JsonResponse({
+            "mobile": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'mobile',
+            }).data,
+        }, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['GET'])
@@ -104,20 +113,29 @@ def get_week_data(request):
 def get_card(request):
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.query_params.get('series_id')
+    variant: str = request.query_params.get('variant')
 
     queryset = OrderProduct.objects.get(series_id=series_id)
 
-    return JsonResponse({
-        "await": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'await',
-        }).data,
-        "in_work": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'in_work',
-        }).data,
-        "ready": EqCardSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'ready',
-        }).data,
-    }, json_dumps_params={"ensure_ascii": False})
+    if variant == 'desktop':
+        return JsonResponse({
+            "await": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'await',
+            }).data,
+            "in_work": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'in_work',
+            }).data,
+            "ready": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'ready',
+            }).data,
+        }, json_dumps_params={"ensure_ascii": False})
+    else:
+        return JsonResponse({
+            "mobile": EqCardSerializer(queryset, context={
+                'eq_params': eq_params,
+                'target_list': 'mobile',
+            }).data,
+        }, json_dumps_params={"ensure_ascii": False})

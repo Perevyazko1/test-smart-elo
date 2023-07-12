@@ -7,7 +7,7 @@ import {ThunkConfig} from "app/providers/StoreProvider";
 import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
 
 interface fetchListDataProps {
-    target_list: 'await' | 'in_work' | 'ready',
+    target_list: 'await' | 'in_work' | 'ready' | 'mobile',
     limit?: number,
     offset?: number,
     url?: string,

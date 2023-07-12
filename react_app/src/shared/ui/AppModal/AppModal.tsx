@@ -1,5 +1,5 @@
 import React, {ReactNode, useState} from 'react';
-import {Button, Modal} from "react-bootstrap";
+import {Modal} from "react-bootstrap";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
@@ -37,18 +37,13 @@ export const AppModal = (props: AppModalProps) => {
                scrollable={true}
                className={classNames('', mods, [className])}
         >
-            <Modal.Header closeButton>
-                <Modal.Title>{title}</Modal.Title>
+            <Modal.Header closeButton className={'p-3'}>
+                <Modal.Title className={'fs-6'}>{title}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {children}
             </Modal.Body>
 
-            <Modal.Footer>
-                <Button variant="primary" onClick={hide_modal}>
-                    Закрыть
-                </Button>
-            </Modal.Footer>
         </Modal>
     );
 };

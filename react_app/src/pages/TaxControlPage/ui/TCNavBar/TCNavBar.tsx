@@ -33,8 +33,8 @@ export const TCNavBar = memo((props: TCNavBarProps) => {
         <section
             className={classNames('bg-dark d-flex mb-xl-0 pb-xl-0', mods, [className])}
             style={{height: "7vh"}}
+            data-bs-theme={'dark'}
             {...otherProps}
-
         >
             <img className="py-xl-1 pb-xl-1 px-xl-4 mx-xl-3 my-xl-0" src={logo} alt={"СЗМК"}/>
 
@@ -57,7 +57,7 @@ export const TCNavBar = memo((props: TCNavBarProps) => {
 
 
             <UserInfoWithRouts
-                className={'ms-auto h-100 d-xl-flex justify-content-xl-center align-items-xl-center'}
+                className={'text-white pe-2 ms-auto h-100 d-xl-flex justify-content-xl-center align-items-xl-center'}
             />
 
         </section>

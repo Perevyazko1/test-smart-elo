@@ -1,20 +1,12 @@
 import React, {Suspense} from "react";
 import {useMediaQuery} from "react-responsive";
-import {Container, Nav} from "react-bootstrap";
-
-import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
-import {AppNavbar} from "shared/ui/AppNavbar/AppNavbar";
+import {Container} from "react-bootstrap";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {Loader} from "shared/ui/Loader/Loader";
 
 import {EqDesktopContentAsync} from "../EqDesktopContent/EqDesktopContent/EqDesktopContent.async";
 import {EqMobileContentAsync} from "../EqMobileContent/EqMobileContent.async";
-import {EqSetDepartment} from "../../widgets/NavBar/EqSetDepartment/EqSetDepartment";
-import {EqSetViewMode} from "../../widgets/NavBar/EqSetViewMode/EqSetViewMode";
 import {eqFiltersReducer} from "../../../model/slice/eqFiltersSlice";
-import {EqSetProject} from "../../widgets/NavBar/EqSetProject/EqSetProject";
-import {EqSetSeriesSize} from "../../widgets/NavBar/EqSetSeriesSize/EqSetSeriesSize";
-import {EqUpdatePageBtn} from "../../widgets/NavBar/EqUpdatePageBtn/EqUpdatePageBtn";
 import {EqPageNavbar} from "../../widgets/NavBar/EqPageNavbar/EqPageNavbar";
 
 
@@ -34,7 +26,7 @@ const EqPageNew = () => {
                        data-bs-theme={'dark'}
             >
 
-                <EqPageNavbar/>
+                <EqPageNavbar isDesktop={isDesktopOrLaptop}/>
 
                 {isDesktopOrLaptop ?
                     <Suspense fallback={<Loader/>}>

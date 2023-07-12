@@ -10,9 +10,9 @@ import {TechProcessList} from "features/TechProcessList";
 import {getEmployeePinCode} from "entities/Employee";
 import {notificationsActions} from "widgets/Notification";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {eqContentDesktopActions} from "pages/EqPageNew";
 
 import {useTechProcessMutation} from "../api/api";
+import {eqFiltersActions} from "pages/EqPageNew";
 
 interface TechProcessInfoProps {
     eqCard: eq_card;
@@ -69,7 +69,7 @@ export const TechProcessInfo = memo((props: TechProcessInfoProps) => {
         if (pinCode) {
             try {
                 await postTechProcess({series_id: eqCard.series_id, schema: schema, pin_code: pinCode}).unwrap();
-                dispatch(eqContentDesktopActions.addNotRelevantId(eqCard.series_id));
+                dispatch(eqFiltersActions.addNotRelevantId(eqCard.series_id));
                 setShowSelectedTechProcess(true);
                 setShowTechProcessList(false);
                 setShowConstructor(false);

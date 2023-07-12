@@ -13,9 +13,15 @@ import {EqSetProject} from "../EqSetProject/EqSetProject";
 import {EqSetSeriesSize} from "../EqSetSeriesSize/EqSetSeriesSize";
 import {EqUpdatePageBtn} from "../EqUpdatePageBtn/EqUpdatePageBtn";
 import {fetchEqFilters} from "../../../../model/service/filtersApi/fetchEqFilters";
+import {EqWeekBlock} from "../../../page/EqDesktopContent/EqWeekBlock/EqWeekBlock";
 
 
-export const EqPageNavbar = memo(() => {
+interface EqPageNavbarProps {
+    isDesktop: boolean;
+}
+
+
+export const EqPageNavbar = memo((props: EqPageNavbarProps) => {
     const dispatch = useAppDispatch();
     const [projectMode, setProjectMode] = useState<'all' | 'actual'>('actual');
     const currentDepartment = useSelector(getCurrentDepartment);
@@ -28,38 +34,42 @@ export const EqPageNavbar = memo(() => {
         }
     }, [dispatch, projectMode, currentDepartment])
 
+    const positionStile = 'ms-xl-2 my-xl-0 my-xxl-0 my-1 border border-2 rounded px-1'
+
     return (
         <AppNavbar>
             <Nav className="me-auto">
                 <EqSetDepartment
-                    className={'ms-xl-2 my-xl-0 my-sm-1 border border-2 rounded px-1'}
+                    className={positionStile}
                     active
                 />
                 <EqSetViewMode
-                    className={'ms-xl-2 my-xl-0 my-sm-1 ms-xl-3 border border-2 rounded px-1'}
+                    className={positionStile}
                 />
                 <EqSetProject
                     mode={projectMode}
                     callback={() => setProjectMode(projectMode === 'all' ? 'actual' : 'all')}
-                    className={'ms-xl-2 my-xl-0 my-sm-1 ms-xl-3 border border-2 rounded px-1'}
+                    className={positionStile}
                 />
 
                 <EqSetSeriesSize
-                    className={'ms-xl-2 my-xl-0 my-sm-1 ms-xl-3 border border-2 rounded px-1'}
+                    className={positionStile}
                 />
 
                 <EqUpdatePageBtn
-                    className={'ms-xl-2 my-xl-0 my-sm-1 ms-xl-3 border border-2 bg-body-tertiary'}
+                    className={positionStile + ' bg-body-tertiary px-3'}
                 />
 
             </Nav>
 
             <Nav>
                 <UserInfoWithRouts
-                    className={'border border-2 rounded px-1 my-sm-1 my-xl-0'}
+                    className={positionStile}
                     active
                 />
             </Nav>
+
+            {!props.isDesktop && <EqWeekBlock/>}
         </AppNavbar>
     );
 });

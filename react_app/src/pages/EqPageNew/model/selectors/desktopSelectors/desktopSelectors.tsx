@@ -13,4 +13,3 @@ export const getEqReadyList = eqPageCardEntityAdapter.getSelectors<StateSchema>(
     state => state.eqDesktop?.readyList.results || eqPageCardEntityAdapter.getInitialState()
 );
 
-export const getNoRelevantId = (state: StateSchema) => state.eqDesktop?.notRelevantId || [];

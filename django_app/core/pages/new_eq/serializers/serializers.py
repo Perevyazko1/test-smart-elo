@@ -6,7 +6,6 @@ from core.pages.new_eq.serializers.get_eq_card_assignments import get_eq_card_as
 from core.pages.new_eq.serializers.get_eq_card_count_data import get_eq_card_count_data
 from core.pages.new_eq.services.get_eq_req_params import RequestParams
 from core.serializers import ProductSerializer, FabricSerializer, OrderSerializer
-from staff.serializers import EmployeeSerializer
 
 
 class EqOrderProductInfoSerializer(serializers.Serializer):

@@ -1,10 +1,9 @@
-import {eq_card} from "entities/EqPageCard";
+import {assignment} from "entities/Assignment";
 
-export const createEqNumberLists = (eqCard: eq_card, seriesSize: number) => {
+export const createEqNumberLists = (assignments: assignment[], seriesSize: number) => {
     const primary: number[] = [];
     const secondary: number[] = [];
     const confirmed: number[] = [];
-    const assignments = eqCard.assignments
 
     for (let i = 0; i < assignments.length; i++) {
         const assignment = assignments[i];

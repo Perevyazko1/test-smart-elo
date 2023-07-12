@@ -33,7 +33,7 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
         }
     };
 
-    const [{isDragging: isDragging}, drag] = useDrag(() => ({
+    const [{isDragging}, drag] = useDrag(() => ({
         type: 'mainDrag',
         collect: (monitor) => {
             if (monitor.isDragging()) {
@@ -44,7 +44,7 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
                 }
             }
             return {
-                isDragging: !!monitor.isDragging(),
+                isDragging: monitor.isDragging(),
             };
         },
     }));

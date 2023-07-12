@@ -16,18 +16,22 @@ export const useInfiniteScroll = ({callback, triggerRef, wrapperRef}: UseInfinit
     useEffect(() => {
         const options = {
             root: wrapperRef.current,
-            rootMargin: '0px',
+            rootMargin: '300px',
             threshold: 1.0
         }
 
-        const currentTriggerRef = triggerRef.current
+        const currentTriggerRef = triggerRef.current;
+
 
         if (currentTriggerRef && wrapperRef.current) {
+            options.rootMargin = `${wrapperRef.current.clientHeight / 3}px`;
+
             const observer = new IntersectionObserver(([entry]) => {
                 if (entry.isIntersecting) {
                     callbackRef.current();
                 }
             }, options);
+
 
             observer.observe(currentTriggerRef);
 

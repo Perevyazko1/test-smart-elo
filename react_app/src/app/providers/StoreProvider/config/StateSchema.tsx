@@ -7,8 +7,7 @@ import {EmployeeSchema} from "entities/Employee/model/types/employee";
 import {NotificationList} from "widgets/Notification";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
-import {normalizedEqData} from "pages/TestPage/model/types/eq_types";
-import {EqContentDesktop, EqContentMobile, EqFilters} from "pages/EqPageNew";
+import {EqContentDesktop, EqListData, EqFilters} from "pages/EqPageNew";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -17,11 +16,8 @@ export interface StateSchema {
 
     // Асинхронные редюсеры
     eqDesktop?: EqContentDesktop,
-    eqMobile?: EqContentMobile,
+    eqMobile?: EqListData,
     eqFilters?: EqFilters,
-
-
-    eqPage?: normalizedEqData,
 
     authByPinCode?: AuthByPinCodeSchema,
     auditWidget?: AuditWidgetSchema,

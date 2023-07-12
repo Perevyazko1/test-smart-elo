@@ -52,13 +52,13 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
     return (
         <DynamicModuleLoader reducers={initialReducers}>
             <form
-                className={classNames('', mods, [className])}
+                className={classNames('d-flex flex-column gap-3', mods, [className])}
                 method="post"
                 onSubmit={handleSubmit}
                 {...otherProps}
             >
 
-                <div className="mb-3">
+                <div className="">
                     <Input
                         onChange={setPinCode}
                         type="password"
@@ -74,7 +74,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
                 </div>
 
                 <div
-                    className="form-check d-xl-flex justify-content-xl-start my-xl-2 mb-xl-3 ms-xl-2"
+                    className="form-check d-xl-flex justify-content-xl-start"
                 >
                     <Checkbox
                         id={"check-box-login-page-1"}
@@ -84,15 +84,13 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
                     </Checkbox>
                 </div>
 
-                <div className="mb-3">
-                    <Button
-                        type={"submit"}
-                        disabled={authState?.isLoading}
-                        className={"btn-primary d-block w-100"}
-                    >
-                        Войти
-                    </Button>
-                </div>
+                <Button
+                    type={"submit"}
+                    disabled={authState?.isLoading}
+                    className={"btn-primary d-block w-100"}
+                >
+                    Войти
+                </Button>
 
                 <p className="text-muted">ПИН-код выдается администратором системы.</p>
 

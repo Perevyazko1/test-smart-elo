@@ -3,10 +3,11 @@ from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit
+
 from .consumers import ws_group_updates, EqNotificationActions
 from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess
-from .pages.eq_page.services.check_schema import check_schema
-from .pages.eq_page.services.create_custom_tech_process import create_custom_tech_process
+from .services.check_schema import check_schema
+from .services.create_custom_tech_process import create_custom_tech_process
 from .serializers import TechProcessSerializer
 
 

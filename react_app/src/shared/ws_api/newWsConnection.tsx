@@ -1,10 +1,10 @@
 import {Dispatch} from "@reduxjs/toolkit";
 
+import {eqContentDesktopActions} from "pages/EqPageNew";
+import {eqFiltersActions} from "pages/EqPageNew";
+import {notificationsActions} from "widgets/Notification";
+
 import {SERVER_WS_ADDRESS} from "../const/server_config";
-import {notificationsActions} from "../../widgets/Notification";
-import {eqContentDesktopActions} from "../../pages/EqPageNew/model/slice/eqContentDesktopSlice";
-import {eqFiltersActions} from "../../pages/EqPageNew/model/slice/eqFiltersSlice";
-import {fetchEqUpdateCard} from "../../pages/EqPageNew/model/service/apiDesktop/fetchEqUpdateCard";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
@@ -83,7 +83,7 @@ export const newWsConnection = (pin_code: number, department_number: number, dis
             }
 
             if (data.data.action === 'update_target_item' && data.initiator !== pin_code) {
-                dispatch(eqContentDesktopActions.addNotRelevantId(data.data.data));
+                dispatch(eqFiltersActions.addNotRelevantId(data.data.data));
             }
         }
     }

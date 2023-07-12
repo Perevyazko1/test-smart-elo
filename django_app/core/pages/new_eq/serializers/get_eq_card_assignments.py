@@ -4,6 +4,47 @@ from core.serializers import AssignmentsSerializer
 from core.services.get_week_info import GetWeekInfo
 
 
+def get_await_assignments(assignments):
+    return assignments.filter(
+        status="await",
+    ).distinct()
+
+
+def get_in_work_assignments(assignments, eq_params):
+    assignments = assignments.filter(
+        status="in_work",
+    ).distinct()
+
+    # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
+    if eq_params.view_mode_key not in ["1", "2"]:
+        assignments = assignments.filter(
+            executor__pin_code=eq_params.pin_code,
+        )
+    return assignments
+
+
+def get_ready_assignments(assignments, eq_params):
+    assignments = assignments.filter(
+        status="ready",
+    ).distinct()
+
+    # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
+    if eq_params.view_mode_key not in ["1", "2"]:
+        assignments = assignments.filter(
+            executor__pin_code=eq_params.pin_code,
+        ).distinct()
+
+    # Фильтруем все списки по дате кроме режима недоделок
+    if not eq_params.view_mode_key == "2":
+        week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
+        assignments = assignments.filter(
+            date_completion__gt=week_info.date_range[0],
+            date_completion__lte=week_info.date_range[1],
+        ).distinct()
+
+    return assignments
+
+
 def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
     if len(eq_params.view_mode_key) == 6:
@@ -16,37 +57,21 @@ def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_pr
 
     match target_list:
         case 'await':
-            assignments = assignments.filter(
-                status="await",
-            ).distinct()
+            assignments = get_await_assignments(assignments)[:50]
         case 'in_work':
-            assignments = assignments.filter(
-                status="in_work",
-            ).distinct()
-
-            # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
-            if eq_params.view_mode_key not in ["1", "2"]:
-                assignments = assignments.filter(
-                    executor__pin_code=eq_params.pin_code,
-                )
+            assignments = get_in_work_assignments(assignments, eq_params)[:50]
 
         case 'ready':
-            assignments = assignments.filter(
-                status="ready",
-            ).distinct()
+            assignments = get_ready_assignments(assignments, eq_params).order_by('-inspector')[:50]
 
-            # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
-            if eq_params.view_mode_key not in ["1", "2"]:
-                assignments = assignments.filter(
-                    executor__pin_code=eq_params.pin_code,
-                ).distinct()
+        case 'mobile':
+            await_assignments = get_await_assignments(assignments).order_by('number')[:50]
+            in_work_assignments = get_in_work_assignments(assignments, eq_params).order_by('number')[:50]
+            ready_assignments = get_ready_assignments(assignments, eq_params).order_by('-inspector')[:50]
 
-            # Фильтруем все списки по дате кроме режима недоделок
-            if not eq_params.view_mode_key == "2":
-                week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
-                assignments = assignments.filter(
-                    date_completion__gt=week_info.date_range[0],
-                    date_completion__lte=week_info.date_range[1],
-                ).distinct()
+            assignments = await_assignments.union(
+                in_work_assignments, ready_assignments
+            ).order_by('-inspector', 'number')
+
     # TODO добавить возможность возвращать больший размер списка
-    return AssignmentsSerializer(assignments.order_by('-inspector')[:50], many=True).data
+    return AssignmentsSerializer(assignments, many=True).data

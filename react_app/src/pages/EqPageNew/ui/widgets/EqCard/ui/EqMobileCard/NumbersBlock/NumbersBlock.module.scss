@@ -1,0 +1,37 @@
+.actionButton {
+  min-width: 50px;
+  width: 50px;
+  max-width: 50px;
+
+  min-height: 45px;
+  max-height: 45px;
+  height: 45px;
+}
+
+.numbersWrapper {
+  overflow-y: hidden;
+  overflow-x: auto;
+  width: 100%;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+}
+
+.numberButton {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 35px;
+  height: 45px;
+}
+
+
+.buttonsTitle {
+  height: 20px;
+}
+
+.numberBlockWrapper {
+  overflow: auto;
+  min-width: 1px;
+  max-width: 100%;
+  width: 100%;
+}

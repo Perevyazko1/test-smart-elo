@@ -7,7 +7,6 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {getCurrentDepartment, getEmployeeAuthData, getEmployeeDepartments} from "entities/Employee";
 
 import {getViewModeFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
-import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
 import {fetchCurrentDepartment} from "../../../../model/service/filtersApi/fetchCurrentDepartment";
 
@@ -24,7 +23,7 @@ export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'ch
             dispatch(fetchCurrentDepartment({
                 department_number: department_number
             })).then(() => {
-                dispatch(eqContentDesktopActions.allListUpdated())
+                dispatch(eqFiltersActions.listsHasUpdated())
                 dispatch(eqFiltersActions.weekDataHasUpdated())
             })
             if (![0, 1, 2].includes(currentViewMode?.key || 0)) {

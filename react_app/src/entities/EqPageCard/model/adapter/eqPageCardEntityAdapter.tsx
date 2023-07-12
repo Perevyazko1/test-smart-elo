@@ -10,7 +10,7 @@ export const eqPageCardEntityAdapter = createEntityAdapter<eq_card>({
             return urgencyDiff;
         }
 
-        const orderNumberDiff = a.order.number - b.order.number;
+        const orderNumberDiff = a.order.id - b.order.id;
         if (orderNumberDiff !== 0) {
             return orderNumberDiff;
         }

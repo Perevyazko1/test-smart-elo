@@ -19,7 +19,7 @@ const LoginPage = () => {
                 <div className="row d-flex justify-content-center">
                     <div className="col-md-6 col-xl-4">
                         <div className="card mb-5">
-                            <div className="card-body d-flex flex-column align-items-center">
+                            <div className="card-body d-flex flex-column align-items-center gap-2">
 
                                 <img
                                     className="px-xl-0 pe-xl-0 mx-xl-3 my-xl-1 mt-xl-0 py-xl-1"

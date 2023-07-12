@@ -21,8 +21,8 @@ export const OpModal = memo((props: OpModalProps) => {
 
     return (
         <AppModal onHide={onHide}
-                  className={'d-flex flex-column'}
-                  title={`Информация по изделию ${eqCard.product.name}`}
+                  className={'d-flex flex-column w-100'}
+                  title={`Информация по серии производства № ${eqCard.series_id}`}
         >
             <OpInfo eqCard={eqCard}/>
         </AppModal>

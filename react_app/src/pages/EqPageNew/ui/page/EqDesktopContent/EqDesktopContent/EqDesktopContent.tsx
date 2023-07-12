@@ -6,11 +6,11 @@ import useResizableBlocks from "shared/lib/hooks/useResizableBlocks/useResizable
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 
-import {eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopSlice";
 import {EqWeekBlock} from "../EqWeekBlock/EqWeekBlock";
 import {EqCardSection} from "../EqCardSection/EqCardSection";
-import {getNoRelevantId} from "../../../../model/selectors/desktopSelectors/desktopSelectors";
+import {eqContentDesktopReducer} from "../../../../model/slice/eqContentDesktopSlice";
 import {fetchEqUpdateCard} from "../../../../model/service/apiDesktop/fetchEqUpdateCard";
+import {getNoRelevantId} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
 
 import cls from "./EqDesktopContent.module.scss";
 
@@ -30,7 +30,7 @@ const EqDesktopContent = () => {
         drag
     } = useResizableBlocks(windowWidth, windowHeight);
 
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
     const noRelevantId = useSelector(getNoRelevantId);
     
     useEffect(() => {

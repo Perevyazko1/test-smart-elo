@@ -8,7 +8,6 @@ import {EmployeePermissions, getEmployeeHasPermissions, getEmployeePinCode} from
 
 import {getViewModeFilter} from "../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../../model/slice/eqFiltersSlice";
-import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopSlice";
 import {ViewMode} from "../../../../model/types/eqPageSchema";
 
 
@@ -31,9 +30,9 @@ export const EqSetViewMode = memo((props: Omit<NavDropdownProps, 'title' | 'chil
 
     const updateCurrentViewMod = (view_mode: ViewMode | undefined) => {
         if (view_mode) {
-            dispatch(eqFiltersActions.setCurrentViewMode(view_mode))
-            dispatch(eqContentDesktopActions.allListUpdated())
-            dispatch(eqFiltersActions.weekDataHasUpdated())
+            dispatch(eqFiltersActions.setCurrentViewMode(view_mode));
+            dispatch(eqFiltersActions.listsHasUpdated());
+            dispatch(eqFiltersActions.weekDataHasUpdated());
         }
     }
     return (

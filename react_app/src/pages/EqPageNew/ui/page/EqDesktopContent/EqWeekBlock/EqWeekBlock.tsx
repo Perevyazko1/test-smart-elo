@@ -14,7 +14,7 @@ import {eqContentDesktopActions} from "../../../../model/slice/eqContentDesktopS
 
 interface EqWeekBlockProps {
     isDragging?: boolean;
-    drag: ConnectDragSource;
+    drag?: ConnectDragSource;
 }
 
 
@@ -61,7 +61,12 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
             week: week,
             year: year,
         }))
-        dispatch(eqContentDesktopActions.readyListHasUpdated())
+        if (drag) {
+            dispatch(eqContentDesktopActions.readyListHasUpdated())
+        } else {
+            dispatch(eqFiltersActions.listsHasUpdated())
+        }
+
     }
 
     return (
@@ -72,6 +77,7 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
                 opacity: isDragging ? 0.5 : 1,
                 width: "100%",
                 height: "40px",
+                minHeight: "40px",
             }}
             ref={weekBlockRef}
         >
@@ -90,8 +96,8 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
             </Button>
 
 
-            <div className="fw-bold text-center"
-                 style={{fontSize: "14px", width: `${weekBlockWidth - 220}px`}}
+            <div className="fw-bold text-center text-dark"
+                 style={{fontSize: "14px", width: `${weekBlockWidth - 220 - (!!drag ? 50 : 0)}px`}}
             >
                 {weekData?.isLoading
                     ?
@@ -121,17 +127,19 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
                 <i className="fas fa-angle-double-right fs-3"/>
             </Button>
 
-            <div className={'bg-dark rounded d-flex align-items-center justify-content-center ms-2'}
-                 style={{
-                     width: "40px",
-                     height: "90%",
-                     touchAction: 'none',
-                     cursor: 'grab',
-                 }}
-                 ref={drag}
-            >
-                <i className="fas fa-compress-alt text-light fs-3"/>
-            </div>
+            {!!drag &&
+                <div className={'bg-dark rounded d-flex align-items-center justify-content-center ms-2'}
+                     style={{
+                         width: "40px",
+                         height: "90%",
+                         touchAction: 'none',
+                         cursor: 'grab',
+                     }}
+                     ref={drag}
+                >
+                    <i className="fas fa-compress-alt text-light fs-3"/>
+                </div>
+            }
         </div>
     );
 });
