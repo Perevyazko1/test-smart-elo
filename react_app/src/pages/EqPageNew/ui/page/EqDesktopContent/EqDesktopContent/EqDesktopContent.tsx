@@ -38,6 +38,7 @@ const EqDesktopContent = () => {
             dispatch(fetchEqUpdateCard({
                 mode: 'GET',
                 series_id: noRelevantId[0],
+                variant: 'desktop',
             }))
         }
     }, [dispatch, noRelevantId])

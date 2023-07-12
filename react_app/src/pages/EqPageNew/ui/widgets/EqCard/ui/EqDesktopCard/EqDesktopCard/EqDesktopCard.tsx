@@ -67,6 +67,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
             series_id: eqCard.series_id,
             numbers: assignmentsLists.primary,
             action: getAction(first),
+            variant: "desktop",
         })).then(() => {
             setCardDisabled(false);
             if (getAction(first) === Actions.CONFIRMED) {

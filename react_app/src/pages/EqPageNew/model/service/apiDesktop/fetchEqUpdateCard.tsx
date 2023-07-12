@@ -18,7 +18,7 @@ interface fetchEqUpdateCardProps {
     series_id: string,
     numbers?: number[],
     mode?: 'GET' | 'POST';
-    variant?: 'desktop' | 'mobile';
+    variant: 'desktop' | 'mobile';
 }
 
 type ListTypes = 'in_work' | 'await' | 'ready' | 'mobile';

@@ -86,6 +86,7 @@ export const NumbersBlock = memo((props: NumbersBlockProps) => {
                 series_id: eqCard.series_id,
                 numbers: assignmentsLists.primary,
                 action: getAction(first),
+                variant: 'mobile',
             })).then(() => {
                 setCardDisabled(false);
                 if (getAction(first) === Actions.CONFIRMED) {

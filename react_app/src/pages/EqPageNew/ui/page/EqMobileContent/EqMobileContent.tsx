@@ -7,6 +7,8 @@ import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPaginatio
 import {classNames} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
+import {getPaginationSize} from "shared/api/configs";
+import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 
 import {eqContentMobileReducer} from "../../../model/slice/eqContentMobileSlice";
 import {fetchListData} from "../../../model/service/apiDesktop/fetchListData";
@@ -17,9 +19,6 @@ import {getNoRelevantId, listsHasUpdated} from "../../../model/selectors/filters
 import {fetchEqUpdateCard} from "../../../model/service/apiDesktop/fetchEqUpdateCard";
 
 import cls from './EqMobileContent.module.scss';
-import {getPaginationSize} from "../../../../../shared/api/configs";
-import {EqWeekBlock} from "../EqDesktopContent/EqWeekBlock/EqWeekBlock";
-import {StickyHeader} from "../../../../../shared/ui/StickyHeader/StickyHeader";
 
 const initialReducers: ReducersList = {
     eqMobile: eqContentMobileReducer,
@@ -54,6 +53,7 @@ const EqMobileContent = () => {
             dispatch(fetchEqUpdateCard({
                 mode: 'GET',
                 series_id: noRelevantId[0],
+                variant: "mobile",
             }))
         }
     }, [dispatch, noRelevantId])
