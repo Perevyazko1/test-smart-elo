@@ -4,6 +4,7 @@ import {Nav} from "react-bootstrap";
 
 import {getCurrentDepartment} from "entities/Employee";
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
+import {UpdatePageBtn} from "widgets/UpdatePageBtn";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {AppNavbar} from "shared/ui/AppNavbar/AppNavbar";
 
@@ -11,7 +12,6 @@ import {EqSetDepartment} from "../EqSetDepartment/EqSetDepartment";
 import {EqSetViewMode} from "../EqSetViewMode/EqSetViewMode";
 import {EqSetProject} from "../EqSetProject/EqSetProject";
 import {EqSetSeriesSize} from "../EqSetSeriesSize/EqSetSeriesSize";
-import {EqUpdatePageBtn} from "../EqUpdatePageBtn/EqUpdatePageBtn";
 import {fetchEqFilters} from "../../../model/service/filtersApi/fetchEqFilters";
 import {EqWeekBlock} from "../../EqDesktopContent/EqWeekBlock/EqWeekBlock";
 
@@ -56,7 +56,7 @@ export const EqPageNavbar = memo((props: EqPageNavbarProps) => {
                     className={positionStile}
                 />
 
-                <EqUpdatePageBtn
+                <UpdatePageBtn
                     className={positionStile + ' bg-body-tertiary px-3'}
                 />
 

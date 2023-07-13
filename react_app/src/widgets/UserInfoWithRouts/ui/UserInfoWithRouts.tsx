@@ -61,6 +61,16 @@ export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | '
                 </Dropdown.Item>
             }
 
+            {tariffPageAccess &&
+                <Dropdown.Item
+                    as={NavLink}
+                    to={'/assignments'}
+                    active={location.pathname === '/assignments'}
+                >
+                    Наряды
+                </Dropdown.Item>
+            }
+
             {isAdmin &&
                 <Dropdown.Item
                     to={'/test'}

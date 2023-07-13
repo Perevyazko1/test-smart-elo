@@ -1,7 +1,5 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
-import {week_info} from "entities/WeekInfo/model/types/weekInfo";
-
 import {EqFilters, ViewMode} from "../types/eqPageSchema";
 import {fetchEqFilters} from "../service/filtersApi/fetchEqFilters";
 import {fetchWeekData} from "../service/filtersApi/fetchWeekData";

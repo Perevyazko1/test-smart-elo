@@ -268,7 +268,7 @@ class Assignment(models.Model):
     ]
 
     number = models.IntegerField('Порядковый номер наряда', default=1)
-    date_completion = models.DateTimeField('Дата завершения', null=True, blank=True)
+    date_completion = models.DateTimeField('Дата готовности', null=True, blank=True)
 
     notes = models.CharField('Заметки', max_length=250, blank=True)
     status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")

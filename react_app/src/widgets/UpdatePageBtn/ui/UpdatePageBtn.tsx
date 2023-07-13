@@ -2,7 +2,7 @@ import React, {memo} from 'react';
 import {Button} from "react-bootstrap";
 import {ButtonProps} from "react-bootstrap/Button";
 
-export const EqUpdatePageBtn = memo((props: ButtonProps) => {
+export const UpdatePageBtn = memo((props: ButtonProps) => {
     return (
         <Button
             onClick={() => window.location.reload()}

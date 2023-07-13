@@ -1,5 +1,4 @@
 import React, {Suspense, useEffect, useRef} from 'react';
-import {useSelector} from "react-redux";
 import {Route, Routes} from "react-router-dom";
 
 import {LoginPage} from "pages/LoginPage";
@@ -8,11 +7,14 @@ import {ForbiddenPage} from "pages/ForbiddenPage";
 import {EqPageNew} from "pages/EqPageNew";
 import {authByPinCode} from "features/AuthByPinCode";
 import {NotificationWidget} from "widgets/Notification";
+import {TestPage} from "pages/TestPage";
+import {AssignmentPage} from "pages/AssignmentPage";
 
 import {Loader} from "shared/ui/Loader/Loader";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {USER_LOCALSTORAGE_KEY} from "shared/const/localstorage";
 import {newWsConnection} from "shared/ws_api/newWsConnection";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 import {
     employee,
     employeeActions,
@@ -23,24 +25,26 @@ import {
     getEmployeeInited,
     getEmployeePinCode,
 } from "entities/Employee";
-
-import './styles/App.scss';
 import 'shared/assets/fonts/fontawesome-all.min.css';
 
-
+import './styles/App.scss';
 
 function App() {
     const dispatch = useAppDispatch()
-    const authData = useSelector(getEmployeeAuthData)
-    const employee_inited = useSelector(getEmployeeInited)
-    const pin_code = useSelector(getEmployeePinCode)
-    const current_department = useSelector(getCurrentDepartment)
+    const authData = useAppSelector(getEmployeeAuthData)
+    const employee_inited = useAppSelector(getEmployeeInited)
+    const pin_code = useAppSelector(getEmployeePinCode)
+    const current_department = useAppSelector(getCurrentDepartment)
 
-    const tariffPagePermission = useSelector(getEmployeeHasPermissions([
+    const tariffPagePermission = useAppSelector(getEmployeeHasPermissions([
         EmployeePermissions.TARIFICATION_PAGE
     ]))
-    const eloPagePermission = useSelector(getEmployeeHasPermissions([
+    const eloPagePermission = useAppSelector(getEmployeeHasPermissions([
         EmployeePermissions.ELO_PAGE
+    ]))
+
+    const adminPermission = useAppSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ADMIN
     ]))
 
     const socketRef = useRef<WebSocket | null>(null);
@@ -81,6 +85,22 @@ function App() {
                                 <Route path="/" element={
                                     <Suspense fallback={<Loader/>}>
                                         <EqPageNew/>
+                                    </Suspense>
+                                }/>
+                            }
+
+                            {adminPermission &&
+                                <Route path="/test" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <TestPage/>
+                                    </Suspense>
+                                }/>
+                            }
+
+                            {adminPermission &&
+                                <Route path="/assignments" element={
+                                    <Suspense fallback={<Loader/>}>
+                                        <AssignmentPage/>
                                     </Suspense>
                                 }/>
                             }
