@@ -3,8 +3,8 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {handleErrors} from "shared/api/handleErrors";
 
-import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
-import {ViewMode} from "../../types/eqPageSchema";
+import {getEqProjectFilter} from "../selectors/apiSelectors/apiSelectors";
+import {ViewMode} from "../types/eqPageSchema";
 
 type fetchEqFiltersProps = {
     mode: 'all' | 'actual';

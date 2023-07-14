@@ -9,7 +9,7 @@ import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModule
 import {EqWeekBlock} from "../EqWeekBlock/EqWeekBlock";
 import {EqCardSection} from "../EqCardSection/EqCardSection";
 import {eqContentDesktopReducer} from "../../../model/slice/eqContentDesktopSlice";
-import {fetchEqUpdateCard} from "../../../model/service/apiDesktop/fetchEqUpdateCard";
+import {fetchEqUpdateCard} from "../../../model/service/fetchEqUpdateCard";
 import {getNoRelevantId} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 
 import cls from "./EqDesktopContent.module.scss";

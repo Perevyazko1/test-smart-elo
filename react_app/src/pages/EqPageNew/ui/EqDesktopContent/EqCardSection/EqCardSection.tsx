@@ -15,7 +15,7 @@ import {
     getEqInWorkList,
     getEqReadyList,
 } from "../../../model/selectors/desktopSelectors/desktopSelectors";
-import {fetchListData} from "../../../model/service/apiDesktop/fetchListData";
+import {fetchListData} from "../../../model/service/fetchListData";
 import {getListInfo} from "../../../model/selectors/propsSelectors/propsSelectors";
 import {listsHasUpdated} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 

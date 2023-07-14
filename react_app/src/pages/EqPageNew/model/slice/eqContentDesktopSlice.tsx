@@ -3,8 +3,8 @@ import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {eqPageCardEntityAdapter} from "entities/EqPageCard";
 
 import {EqContentDesktop} from "../types/eqPageSchema";
-import {fetchListData} from "../service/apiDesktop/fetchListData";
-import {fetchEqUpdateCard} from "../service/apiDesktop/fetchEqUpdateCard";
+import {fetchListData} from "../service/fetchListData";
+import {fetchEqUpdateCard} from "../service/fetchEqUpdateCard";
 
 const initialState: EqContentDesktop = {
     awaitList: {

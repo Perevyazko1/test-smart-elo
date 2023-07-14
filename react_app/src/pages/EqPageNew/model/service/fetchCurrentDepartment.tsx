@@ -3,7 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {employee, employeeActions} from "entities/Employee";
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {handleErrors} from "shared/api/handleErrors";
-import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
+import {getEqProjectFilter} from "../selectors/apiSelectors/apiSelectors";
 
 interface fetchCurrentDepartmentProps {
     department_number: number,

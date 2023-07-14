@@ -8,7 +8,7 @@ import {getCurrentDepartment, getEmployeeAuthData, getEmployeeDepartments} from 
 
 import {getViewModeFilter} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
-import {fetchCurrentDepartment} from "../../../model/service/filtersApi/fetchCurrentDepartment";
+import {fetchCurrentDepartment} from "../../../model/service/fetchCurrentDepartment";
 
 
 export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'children'>) => {

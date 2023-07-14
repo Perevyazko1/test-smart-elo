@@ -1,0 +1,1 @@
+export {AppRoutes, getAppRouteConfig} from './const/routes';

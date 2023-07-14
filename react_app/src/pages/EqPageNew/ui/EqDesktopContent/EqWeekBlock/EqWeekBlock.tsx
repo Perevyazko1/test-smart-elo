@@ -8,7 +8,7 @@ import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import useDivWidth from "shared/lib/hooks/useComponentWidth/useComponentWidth";
 
 import {getWeekData} from "../../../model/selectors/filtersSelectors/filtersSelectors";
-import {fetchWeekData} from "../../../model/service/filtersApi/fetchWeekData";
+import {fetchWeekData} from "../../../model/service/fetchWeekData";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
 import {eqContentDesktopActions} from "../../../model/slice/eqContentDesktopSlice";
 

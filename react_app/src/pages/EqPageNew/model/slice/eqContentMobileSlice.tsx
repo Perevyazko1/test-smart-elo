@@ -1,8 +1,8 @@
 import {EqListData} from "../types/eqPageSchema";
 import {createSlice} from "@reduxjs/toolkit";
-import {fetchListData} from "../service/apiDesktop/fetchListData";
+import {fetchListData} from "../service/fetchListData";
 import {eqPageCardEntityAdapter} from "../../../../entities/EqPageCard";
-import {fetchEqUpdateCard} from "../service/apiDesktop/fetchEqUpdateCard";
+import {fetchEqUpdateCard} from "../service/fetchEqUpdateCard";
 
 const initialState: EqListData = {
     results: {

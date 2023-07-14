@@ -121,6 +121,7 @@ class AssignmentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Assignment
         fields = [
+            'id',
             'number',
             'notes',
             'status',

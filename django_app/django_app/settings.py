@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'rest_framework',
+    'django_filters',
     "corsheaders",
 ]
 
@@ -154,6 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 
 CORS_ORIGIN_ALLOW_ALL = True

@@ -1,8 +1,8 @@
 import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 import {EqFilters, ViewMode} from "../types/eqPageSchema";
-import {fetchEqFilters} from "../service/filtersApi/fetchEqFilters";
-import {fetchWeekData} from "../service/filtersApi/fetchWeekData";
+import {fetchEqFilters} from "../service/fetchEqFilters";
+import {fetchWeekData} from "../service/fetchWeekData";
 
 export const initialState: EqFilters = {
     weekData: {

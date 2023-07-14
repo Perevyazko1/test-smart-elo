@@ -12,7 +12,7 @@ import {EqSetDepartment} from "../EqSetDepartment/EqSetDepartment";
 import {EqSetViewMode} from "../EqSetViewMode/EqSetViewMode";
 import {EqSetProject} from "../EqSetProject/EqSetProject";
 import {EqSetSeriesSize} from "../EqSetSeriesSize/EqSetSeriesSize";
-import {fetchEqFilters} from "../../../model/service/filtersApi/fetchEqFilters";
+import {fetchEqFilters} from "../../../model/service/fetchEqFilters";
 import {EqWeekBlock} from "../../EqDesktopContent/EqWeekBlock/EqWeekBlock";
 
 

@@ -11,12 +11,12 @@ import {getPaginationSize} from "shared/api/configs";
 import {StickyHeader} from "shared/ui/StickyHeader/StickyHeader";
 
 import {eqContentMobileReducer} from "../../model/slice/eqContentMobileSlice";
-import {fetchListData} from "../../model/service/apiDesktop/fetchListData";
+import {fetchListData} from "../../model/service/fetchListData";
 import {EqMobileCard} from "../EqCard/ui/EqMobileCard/EqMobileCard";
 import {getEqMobileList, getEqMobileListInfo} from "../../model/selectors/mobileSelectors/mobileSelectors";
 
 import {getNoRelevantId, listsHasUpdated} from "../../model/selectors/filtersSelectors/filtersSelectors";
-import {fetchEqUpdateCard} from "../../model/service/apiDesktop/fetchEqUpdateCard";
+import {fetchEqUpdateCard} from "../../model/service/fetchEqUpdateCard";
 
 import cls from './EqMobileContent.module.scss';
 

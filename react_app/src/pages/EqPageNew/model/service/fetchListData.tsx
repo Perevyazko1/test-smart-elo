@@ -4,7 +4,7 @@ import {eq_page_list} from "entities/EqPageCard";
 import {handleErrors} from "shared/api/handleErrors";
 import {ThunkConfig} from "app/providers/StoreProvider";
 
-import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
+import {getEqProjectFilter} from "../selectors/apiSelectors/apiSelectors";
 
 interface fetchListDataProps {
     target_list: 'await' | 'in_work' | 'ready' | 'mobile',

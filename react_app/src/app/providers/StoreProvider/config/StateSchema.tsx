@@ -8,6 +8,7 @@ import {NotificationList} from "widgets/Notification";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
 import {EqContentDesktop, EqListData, EqFilters} from "pages/EqPageNew";
+import {AssignmentSchema} from "pages/AssignmentPage";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -18,6 +19,8 @@ export interface StateSchema {
     eqDesktop?: EqContentDesktop,
     eqMobile?: EqListData,
     eqFilters?: EqFilters,
+
+    assignments?: AssignmentSchema,
 
     authByPinCode?: AuthByPinCodeSchema,
     auditWidget?: AuditWidgetSchema,

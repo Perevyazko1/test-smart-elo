@@ -1,9 +1,9 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {eq_card} from "entities/EqPageCard";
-import {ThunkConfig} from "../../../../../app/providers/StoreProvider";
-import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
-import {handleErrors} from "../../../../../shared/api/handleErrors";
-import {eqFiltersActions} from "../../slice/eqFiltersSlice";
+import {ThunkConfig} from "../../../../app/providers/StoreProvider";
+import {getEqProjectFilter} from "../selectors/apiSelectors/apiSelectors";
+import {handleErrors} from "../../../../shared/api/handleErrors";
+import {eqFiltersActions} from "../slice/eqFiltersSlice";
 
 export enum Actions {
     AWAIT_TO_IN_WORK = 'await_to_in_work',

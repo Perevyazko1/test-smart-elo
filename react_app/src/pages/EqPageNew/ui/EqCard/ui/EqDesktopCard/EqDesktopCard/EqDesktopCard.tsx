@@ -9,7 +9,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {Slider} from "shared/ui/Slider/Slider";
 
 import cls from "./EqDesktopCard.module.scss";
-import {Actions, fetchEqUpdateCard} from "../../../../../model/service/apiDesktop/fetchEqUpdateCard";
+import {Actions, fetchEqUpdateCard} from "../../../../../model/service/fetchEqUpdateCard";
 import {createEqImageUrls} from "../../../model/lib/createEqImageUrls/createEqImageUrls";
 import {createEqNumberLists} from "../../../model/lib/createEqNumberLists/createEqNumberLists";
 import {EqCardButton} from "../EqCardButton/EqCardButton";

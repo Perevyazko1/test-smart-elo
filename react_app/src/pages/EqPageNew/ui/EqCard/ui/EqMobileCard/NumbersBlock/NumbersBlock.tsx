@@ -12,7 +12,7 @@ import {createEqNumberLists} from "../../../model/lib/createEqNumberLists/create
 import {getSeriesSize} from "../../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {setTargetNumber} from "../../../model/lib/setTargetNumber/setTargetNumber";
 import {eqFiltersActions} from "../../../../../model/slice/eqFiltersSlice";
-import {Actions, fetchEqUpdateCard} from "../../../../../model/service/apiDesktop/fetchEqUpdateCard";
+import {Actions, fetchEqUpdateCard} from "../../../../../model/service/fetchEqUpdateCard";
 import {EmployeePermissions, getEmployeeHasPermissions} from "../../../../../../../entities/Employee";
 
 interface NumbersBlockProps {

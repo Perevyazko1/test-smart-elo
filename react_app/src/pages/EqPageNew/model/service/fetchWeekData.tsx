@@ -3,9 +3,9 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {notificationsActions} from "widgets/Notification";
 import {ThunkConfig} from "app/providers/StoreProvider";
 
-import {getEqProjectFilter} from "../../selectors/apiSelectors/apiSelectors";
-import {ViewMode} from "../../types/eqPageSchema";
-import {week_info} from "../../../../../entities/WeekInfo";
+import {getEqProjectFilter} from "../selectors/apiSelectors/apiSelectors";
+import {ViewMode} from "../types/eqPageSchema";
+import {week_info} from "../../../../entities/WeekInfo";
 
 type fetchWeekDataProps = {
 }
