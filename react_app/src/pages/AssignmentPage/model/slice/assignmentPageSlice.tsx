@@ -35,9 +35,9 @@ const assignmentPageSlice = createSlice({
             .addCase(fetchAssignments.fulfilled, (state, action) => {
                 const {results, ...props} = action.payload;
                 if (action.meta.arg.isNext) {
-                    extendedAssignmentEntityAdapter.setAll(state.results, results)
-                } else {
                     extendedAssignmentEntityAdapter.addMany(state.results, results)
+                } else {
+                    extendedAssignmentEntityAdapter.setAll(state.results, results)
                 }
                 state.next = props.next;
                 state.count = props.count;

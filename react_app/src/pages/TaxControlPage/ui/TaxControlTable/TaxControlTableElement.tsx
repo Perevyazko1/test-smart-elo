@@ -3,7 +3,7 @@ import {useSelector} from "react-redux";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {Slider} from "shared/ui/Slider/Slider";
-import {Input} from "shared/ui/Input/Input";
+import {AppInput} from "shared/ui/AppInput/AppInput";
 import {getEmployeePinCode} from "entities/Employee";
 import {product} from "entities/Product"
 import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime";
@@ -69,7 +69,7 @@ export const TaxControlTableElement = memo((props: TaxControlTableElementProps) 
 
             <td>{tax_control_item.department.name}</td>
             <td>
-                <Input
+                <AppInput
                     type={'number'}
                     style={{width: "100px"}}
                     defaultValue={tax_control_item.production_step_tariff?.tariff}

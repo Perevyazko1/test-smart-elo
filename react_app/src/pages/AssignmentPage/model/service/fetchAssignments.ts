@@ -3,6 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {handleErrors} from "shared/api/handleErrors";
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {extended_api_assignment_list} from "entities/Assignment";
+import {AppRoutes} from "app/providers/Router";
 
 interface fetchAssignmentsProps {
     url?: string,
@@ -24,7 +25,7 @@ export const fetchAssignments = createAsyncThunk<extended_api_assignment_list, f
             if (url) {
                 response = await extra.api.get<extended_api_assignment_list>(url);
             } else {
-                response = await extra.api.get<extended_api_assignment_list>('/core/assignments/', {
+                response = await extra.api.get<extended_api_assignment_list>(AppRoutes.ASSIGNMENTS, {
                     params: {
                         ...props,
                     }

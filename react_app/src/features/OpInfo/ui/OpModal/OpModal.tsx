@@ -2,7 +2,6 @@ import React, {memo, useEffect, useState} from "react";
 
 import {eq_card} from "entities/EqPageCard";
 import {AppModal} from "shared/ui/AppModal/AppModal";
-import {OpCardDetails} from "../../../../widgets/OrderProduct/OpCardDetails/ui/OpCardDetails";
 import {OpInfo} from "../OpInfo/OpInfo";
 
 export interface OpModalProps {

@@ -37,7 +37,7 @@ export const TechProcessInfo = memo((props: TechProcessInfoProps) => {
 
     const [currentSchema, setCurrentSchema] = useState<tech_process_schema>({});
 
-    const [postTechProcess, {isLoading, isError, error}] = useTechProcessMutation();
+    const [postTechProcess] = useTechProcessMutation();
 
     const techProcessSelected = useCallback(() => {
         return !!eqCard?.product?.technological_process;

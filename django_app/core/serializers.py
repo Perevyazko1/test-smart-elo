@@ -86,7 +86,7 @@ class ProductionStepTariffSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
     approved_by = EmployeeSerializer(read_only=True)
-
+    
     class Meta:
         model = ProductionStepTariff
         fields = [
@@ -128,4 +128,30 @@ class AssignmentsSerializer(serializers.ModelSerializer):
             'department',
             'executor',
             'inspector',
+        ]
+
+
+class OrderProductSerializer(serializers.ModelSerializer):
+    product = ProductSerializer()
+    main_fabric = FabricSerializer()
+    second_fabric = FabricSerializer()
+    third_fabric = FabricSerializer()
+    order = OrderSerializer()
+
+    class Meta:
+        model = OrderProduct
+        fields = [
+            'id',
+            'series_id',
+            'status',
+            'product',
+            'order',
+            'main_fabric',
+            'second_fabric',
+            'third_fabric',
+            'quantity',
+            'price',
+            'urgency',
+            'comment_base',
+            'comment_case',
         ]

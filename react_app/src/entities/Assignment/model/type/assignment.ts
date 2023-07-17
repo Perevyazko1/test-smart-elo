@@ -3,6 +3,7 @@ import {EntityState} from "@reduxjs/toolkit";
 import {employee} from "../../../Employee";
 import {department} from "../../../Department";
 import {order_product} from "../../../OrderProduct";
+import {tariff} from "../../../Tariff";
 
 export interface assignment {
     id: number;
@@ -12,6 +13,7 @@ export interface assignment {
     department: number;
     executor: employee | null;
     inspector: employee | null;
+    tariff: tariff | null;
 }
 
 export interface extendedAssignment extends Omit<assignment, 'department'> {

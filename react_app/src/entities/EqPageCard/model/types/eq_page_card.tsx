@@ -1,9 +1,7 @@
-import {fabric} from "../../../Fabric";
-import {assignment} from "../../../Assignment";
-import {product} from "../../../Product";
-import {order} from "../../../Order";
 import {EntityState} from "@reduxjs/toolkit";
-import {employee} from "../../../Employee";
+
+import {assignment} from "../../../Assignment";
+import {order_product} from "../../../OrderProduct";
 
 
 type card_info = {
@@ -20,19 +18,9 @@ type department_info = {
 }
 
 
-export type eq_card = {
-    product: product;
-    main_fabric: fabric;
-    second_fabric: fabric;
-    third_fabric: fabric;
-    order: order;
+export interface eq_card extends order_product {
     assignments: assignment[];
     card_info: card_info;
-    id: number;
-    series_id: string;
-    urgency: number;
-    comment_base: string;
-    comment_case: string;
     department_info: department_info[];
 }
 

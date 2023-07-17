@@ -1,5 +1,4 @@
 import {product} from "entities/Product";
-import {assignment} from "entities/Assignment";
 import {fabric} from "entities/Fabric";
 import {order} from "entities/Order";
 
@@ -15,13 +14,7 @@ export interface order_product {
     urgency: number;
     comment_base: string;
     comment_case: string;
-    assignments: assignment[];
     tariff: number;
-    count_all: number;
-    count_in_work: number;
-    count_ready: number;
-    count_await: number;
-
 }
 
 export interface order_product_list {

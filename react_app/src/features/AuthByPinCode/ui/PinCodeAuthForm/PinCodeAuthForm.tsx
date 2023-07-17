@@ -1,10 +1,11 @@
+import React, {memo, useCallback} from 'react';
 import {useSelector} from "react-redux";
-import React, {memo, useCallback, useEffect} from 'react';
+import {Button} from "react-bootstrap";
 
 import {DynamicModuleLoader, ReducersList} from "shared/components/DynamicModuleLoader/DynamicModuleLoader";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {Input} from "shared/ui/Input/Input";
+import {AppInput} from "shared/ui/AppInput/AppInput";
 import {Checkbox} from "shared/ui/Checkbox/Checkbox";
 
 import {authByPinCodeActions, authByPinCodeReducer} from "../../model/slice/authByPinCodeSlice";
@@ -12,7 +13,6 @@ import {getPinCode} from "../../model/selectors/getPinCode/getPinCode";
 import {authByPinCode} from "../../model/services/authByPinCode/authByPinCode";
 import {getAuthByPinCodeState} from "../../model/selectors/getAuthByPinCodeState/getAuthByPinCodeState";
 import {getRememberMe} from "../../model/selectors/getRememberMe/getRememberMe";
-import {Button} from "react-bootstrap";
 
 export interface PinCodeAuthFormProps {
     className?: string
@@ -59,7 +59,7 @@ const PinCodeAuthForm = memo((props: PinCodeAuthFormProps) => {
             >
 
                 <div className="">
-                    <Input
+                    <AppInput
                         onChange={setPinCode}
                         type="password"
                         placeholder="ПИН-код"
