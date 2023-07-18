@@ -2,7 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {handleErrors} from "shared/api/handleErrors";
 import {ThunkConfig} from "app/providers/StoreProvider";
-import {extended_api_assignment_list} from "entities/Assignment";
+import {extended_api_assignment_list, extendedAssignment} from "entities/Assignment";
 
 interface updateAssignmentsProps {
     id_list: number[],
@@ -10,13 +10,13 @@ interface updateAssignmentsProps {
 }
 
 
-export const updateAssignments = createAsyncThunk<extended_api_assignment_list, updateAssignmentsProps, ThunkConfig<string>>(
+export const updateAssignments = createAsyncThunk<extendedAssignment[], updateAssignmentsProps, ThunkConfig<string>>(
     'assignments/updateAssignments',
     async (params: updateAssignmentsProps, thunkAPI) => {
         const {extra} = thunkAPI;
 
         try {
-            const response = await extra.api.post<extended_api_assignment_list>('core/update_assignments/', {
+            const response = await extra.api.post<extendedAssignment[]>('core/update_assignments/', {
                 ...params,
             });
             if (response.data) {

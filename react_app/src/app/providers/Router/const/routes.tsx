@@ -9,7 +9,7 @@ import {AssignmentPage} from "pages/AssignmentPage";
 export enum AppRoutes {
     EQ = 'eq',
     TEST = 'test_page',
-    ASSIGNMENTS = 'core/assignments',
+    ASSIGNMENTS = 'assignments',
     TAX = 'tax_control',
     FORBIDDEN = 'forbidden_page',
 }

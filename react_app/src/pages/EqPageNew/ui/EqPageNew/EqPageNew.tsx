@@ -7,7 +7,7 @@ import {Loader} from "shared/ui/Loader/Loader";
 
 import {EqDesktopContentAsync} from "../EqDesktopContent/EqDesktopContent/EqDesktopContent.async";
 import {EqMobileContentAsync} from "../EqMobileContent/EqMobileContent.async";
-import {EqPageNavbar} from "../EqNavBar/EqPageNavbar/EqPageNavbar";
+import {EqNavbar} from "../EqNavBar/EqNavbar/EqNavbar";
 import {eqFiltersReducer} from "../../model/slice/eqFiltersSlice";
 
 
@@ -27,7 +27,7 @@ const EqPageNew = () => {
                        data-bs-theme={'dark'}
             >
 
-                <EqPageNavbar isDesktop={isDesktopOrLaptop}/>
+                <EqNavbar isDesktop={isDesktopOrLaptop}/>
 
                 {isDesktopOrLaptop ?
                     <Suspense fallback={<Loader/>}>

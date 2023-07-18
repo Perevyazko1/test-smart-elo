@@ -25,7 +25,7 @@ export const fetchAssignments = createAsyncThunk<extended_api_assignment_list, f
             if (url) {
                 response = await extra.api.get<extended_api_assignment_list>(url);
             } else {
-                response = await extra.api.get<extended_api_assignment_list>(AppRoutes.ASSIGNMENTS, {
+                response = await extra.api.get<extended_api_assignment_list>(`core/${AppRoutes.ASSIGNMENTS}`, {
                     params: {
                         ...props,
                     }

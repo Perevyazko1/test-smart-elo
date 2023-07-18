@@ -1,8 +1,10 @@
 import React, {memo} from 'react';
-import {Table} from "react-bootstrap";
+import {Button, Table} from "react-bootstrap";
 
 import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime";
 import {eq_card} from "entities/EqPageCard";
+import {Link} from "react-router-dom";
+import {AppRoutes} from "../../../../app/providers/Router";
 
 interface OpCardDetailsProps {
     eqCard: eq_card;
@@ -17,6 +19,7 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
     } = props
 
     return (
+        <>
             <Table
                 className={className}
                 striped
@@ -44,7 +47,7 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
                     <td>№ Заказа / Серия</td>
                     <td>{eqCard.series_id}</td>
                 </tr>
-                
+
                 <tr>
                     <td>Дата заказа</td>
                     <td>{getHumansDatetime(eqCard.order.moment).slice(0, 10)}</td>
@@ -88,6 +91,16 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
                 }
 
                 </tbody>
+
             </Table>
+            <Link to={`/${AppRoutes.ASSIGNMENTS}?order_product__series_id=${eqCard.series_id}`}>
+                <Button
+                    className={'m-2'}
+                    size={'sm'}
+                >
+                    Просмотреть наряды по серии
+                </Button>
+            </Link>
+        </>
     );
 });

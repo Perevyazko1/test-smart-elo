@@ -113,7 +113,7 @@ const AssignmentPage = () => {
     const getStatusProps = useCallback((assignment: extendedAssignment): { bg: string, name: string } => {
         switch (assignment.status) {
             case 'await':
-                return {bg: 'bg-secondary', name: 'В ожидании'}
+                return {bg: 'bg-light', name: 'В ожидании'}
             case 'in_work':
                 return {bg: 'bg-primary', name: 'В работе'}
             case 'ready':
@@ -140,9 +140,10 @@ const AssignmentPage = () => {
                         />
 
                         <AppInput placeholder={'Номер серии'}
-                                  className={'my-auto mx-3'}
+                                  className={'my-auto mx-3 my-1'}
                                   onChange={(event) => setSeriesIdInput(event.target.value)}
                                   value={seriesIdInput}
+                                  inputSize={'sm'}
                         />
 
                     </Nav>
@@ -159,7 +160,7 @@ const AssignmentPage = () => {
 
                 <PageWithPagination
                     data-bs-theme={'light'}
-                    className={classNames(cls.pageContent, {}, ['container'])}
+                    className={classNames(cls.pageContent, {}, ['container mt-1'])}
                     hasMore={!!assignmentsProps.next}
                     scroll_callback={fetchNextPage}
                     skeleton={
@@ -171,28 +172,27 @@ const AssignmentPage = () => {
                             pagination_size={3}
                         />}
                 >
-                    <h3 className={"m-2"}>Страница работы с нарядами</h3>
-                    <hr className={'p-0 m-2'}/>
+                    <div className={classNames(cls.stickyWrapper, {}, ['bg-light'])}>
+                        <h3 className={""}>Страница работы с нарядами</h3>
+                        <hr className={'p-0 m-2 w-25'}/>
 
-                    <DropdownButton
-                        as={ButtonGroup}
-                        size="sm"
-                        drop={'end'}
-                        variant="secondary"
-                        title="Редактировать выбранные наряды"
-                        className={'mb-2'}
-                    >
-                        <Dropdown.Item
-                            eventKey="1"
-                            onClick={groupUpdateAssignments}
+                        <DropdownButton
+                            as={ButtonGroup}
+                            size="sm"
+                            drop={'end'}
+                            variant="secondary"
+                            title="Редактировать выбранные наряды"
+                            className={'mb-2'}
                         >
-                            Снять визирование
-                        </Dropdown.Item>
-                        <Dropdown.Item eventKey="2">Редактировать тарификацию</Dropdown.Item>
-                        <Dropdown.Item eventKey="3">Удалить</Dropdown.Item>
-                        <Dropdown.Divider/>
-                        <Dropdown.Item eventKey="4">Редактировать</Dropdown.Item>
-                    </DropdownButton>
+                            <Dropdown.Item
+                                eventKey="1"
+                                onClick={groupUpdateAssignments}
+                            >
+                                Снять визирование
+                            </Dropdown.Item>
+                        </DropdownButton>
+                        <hr className={'mt-0'}/>
+                    </div>
 
 
                     {assignmentsProps.isLoading && assignmentsList.length === 0 ?
@@ -242,9 +242,19 @@ const AssignmentPage = () => {
                                         {getStatusProps(assignment).name}
                                     </td>
                                     <td>{assignment.tariff?.tariff} </td>
-                                    <td>{`${assignment.executor?.last_name} ${assignment.executor?.first_name}`}</td>
+                                    <td>
+                                        {
+                                            `${assignment.executor?.last_name || ""} 
+                                            ${assignment.executor?.first_name || ""}`
+                                        }
+                                    </td>
                                     <td>13.07.2022</td>
-                                    <th>{`${assignment.inspector?.last_name} ${assignment.inspector?.first_name}`}</th>
+                                    <th>
+                                        {
+                                            `${assignment.inspector?.last_name || ""} 
+                                            ${assignment.inspector?.first_name || ""}`
+                                        }
+                                    </th>
                                 </tr>
                             ))}
 

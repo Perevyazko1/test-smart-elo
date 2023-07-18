@@ -21,7 +21,7 @@ interface EqPageNavbarProps {
 }
 
 
-export const EqPageNavbar = memo((props: EqPageNavbarProps) => {
+export const EqNavbar = memo((props: EqPageNavbarProps) => {
     const dispatch = useAppDispatch();
     const [projectMode, setProjectMode] = useState<'all' | 'actual'>('actual');
     const currentDepartment = useSelector(getCurrentDepartment);
