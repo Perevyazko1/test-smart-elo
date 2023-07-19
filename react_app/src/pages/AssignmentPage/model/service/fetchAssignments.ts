@@ -4,6 +4,7 @@ import {handleErrors} from "shared/api/handleErrors";
 import {ThunkConfig} from "app/providers/StoreProvider";
 import {extended_api_assignment_list} from "entities/Assignment";
 import {AppRoutes} from "app/providers/Router";
+import {getEmployeePinCode} from "../../../../entities/Employee";
 
 interface fetchAssignmentsProps {
     limit: number,
@@ -15,12 +16,14 @@ interface fetchAssignmentsProps {
 export const fetchAssignments = createAsyncThunk<extended_api_assignment_list, fetchAssignmentsProps, ThunkConfig<string>>(
     'assignments/fetchAssignments',
     async (params: fetchAssignmentsProps, thunkAPI) => {
-        const {extra} = thunkAPI;
+        const {extra, getState} = thunkAPI;
+        const pin_code = getEmployeePinCode(getState())
 
         try {
             const response = await extra.api.get<extended_api_assignment_list>(`core/${AppRoutes.ASSIGNMENTS}`, {
                 params: {
                     ...params,
+                    pin_code: pin_code,
                 }
             });
             if (response.data) {

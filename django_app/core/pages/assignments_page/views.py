@@ -14,6 +14,18 @@ class AssignmentViewSet(viewsets.ModelViewSet):
     filterset_class = AssignmentModelFilter
     serializer_class = AssignmentExtendedSerializer
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+        pin_code = self.request.query_params.get('pin_code')
+
+        user = Employee.objects.get(pin_code=pin_code)
+
+        qs = qs.filter(
+            department__in=user.departments.all()
+        )
+
+        return qs
+
 
 @api_view(['POST'])
 def update_assignments(request):
