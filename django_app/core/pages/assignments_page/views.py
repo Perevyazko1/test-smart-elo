@@ -3,6 +3,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
 from core.models import Assignment, ProductionStep
+from staff.models import Audit, Employee
+from staff.service import is_user_in_group
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
 
@@ -17,6 +19,14 @@ class AssignmentViewSet(viewsets.ModelViewSet):
 def update_assignments(request):
     assignments_id: list[int] = request.data.get('id_list')
     action: list[int] = request.data.get('action')
+    pin_code = request.data.get('pin_code')
+
+    employee = Employee.objects.get(pin_code=pin_code)
+
+    if not is_user_in_group(employee, 'Снятие визы'):
+        return JsonResponse({
+            f'error': f'Ошибка доступа. У пользователя нет прав на снятие визы с нарядов.'
+        }, status=401, json_dumps_params={"ensure_ascii": False})
 
     match action:
         case 'remove_confirmation':
@@ -80,12 +90,15 @@ def update_assignments(request):
 
                 assignment.inspector = None
                 assignment.save()
-                # TODO добавить аудит
+                Audit.objects.create(
+                    employee=employee,
+                    details=f"Снял визирование с наряда № {assignment.number} "
+                            f"серии {assignment.order_product.series_id} "
+                            f"отдела {assignment.department.name}"
+                )
                 continue
 
-            assignments = Assignment.objects.filter(id__in=assignments_id)
-            serializer = AssignmentExtendedSerializer(assignments, many=True)
-            return JsonResponse(serializer.data, safe=False, json_dumps_params={"ensure_ascii": False})
+            return JsonResponse({'result': 'ok'}, status=200, json_dumps_params={"ensure_ascii": False})
 
         case _:
             return JsonResponse({

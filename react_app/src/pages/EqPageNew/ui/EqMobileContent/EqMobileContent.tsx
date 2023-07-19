@@ -73,6 +73,7 @@ const EqMobileContent = () => {
     return (
         <DynamicModuleLoader reducers={initialReducers}>
             <PageWithPagination
+                hasUpdated={!!listProps.hasUpdated}
                 hasMore={!!listProps.next}
                 className={classNames(cls.contentBlock, {}, ['px-1'])}
                 skeleton={skeleton(false)}

@@ -15,6 +15,7 @@ import {TCNavBar} from "./TCNavBar/TCNavBar";
 import {fetchTCFilters} from "../model/service/fetchTaxControlFilters/fetchTCFilters";
 import {fetchNextTaxControlData} from "../model/service/fetchNextTaxControlData/fetchNextTaxControlData";
 import {fetchTaxControlCard} from "../model/service/fetchTaxControlData/fetchTaxControlCard";
+import {getAssignmentProps} from "../../AssignmentPage/model/selectors/assignmentSelector";
 
 
 const initialReducers: ReducersList = {
@@ -69,6 +70,7 @@ const TaxControlPage = memo(() => {
 
             <section style={{height: "93vh", background: "#929292"}} className={'p-2'}>
                 <PageWithPagination
+                    hasUpdated={!!taxData?.updated}
                     className={'bg-light bg-gradient p-2 rounded h-100 mx-3'}
                     style={{overflow: "auto", overflowX: "hidden", overflowY: "auto"}}
                     hasMore={!!taxData?.next}

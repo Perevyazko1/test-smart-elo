@@ -8,6 +8,7 @@ import {employeeActions, EmployeePermissions, getEmployeeAuthData, getEmployeeHa
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {AuditWidget} from "../../AuditWidget";
+import {useAppSelector} from "../../../shared/lib/hooks/useAppSelector/useAppSelector";
 
 
 export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | 'align' | 'children'>) => {
@@ -24,6 +25,9 @@ export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | '
         getEmployeeHasPermissions([
             EmployeePermissions.TARIFICATION_PAGE])
     )
+    const assignmentPagePermission = useAppSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ASSIGNMENT_PAGE
+    ]))
     const isAdmin = useSelector(
         getEmployeeHasPermissions([
             EmployeePermissions.ADMIN])
@@ -61,7 +65,7 @@ export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | '
                 </Dropdown.Item>
             }
 
-            {tariffPageAccess &&
+            {assignmentPagePermission &&
                 <Dropdown.Item
                     as={NavLink}
                     to={'/assignments'}

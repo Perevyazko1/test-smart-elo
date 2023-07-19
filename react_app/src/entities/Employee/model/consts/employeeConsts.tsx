@@ -10,5 +10,7 @@ export enum EmployeePermissions {
     TARIFICATION_PAGE = 'Страница тарификаций',
     TARIFICATION_BILLING = 'Первичная тарификация',
     TARIFICATION_CONFIRM = 'Подтверждение тарификаций',
-    
+
+    ASSIGNMENT_PAGE = 'Страница нарядов',
+    ASSIGNMENT_UNCONFIRMED = 'Снятие визы',
 }

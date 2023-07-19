@@ -43,6 +43,10 @@ function App() {
         EmployeePermissions.ELO_PAGE
     ]))
 
+    const assignmentPagePermission = useAppSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ASSIGNMENT_PAGE
+    ]))
+
     const adminPermission = useAppSelector(getEmployeeHasPermissions([
         EmployeePermissions.ADMIN
     ]))
@@ -97,7 +101,7 @@ function App() {
                                 }/>
                             }
 
-                            {adminPermission &&
+                            {assignmentPagePermission &&
                                 <Route path="/assignments" element={
                                     <Suspense fallback={<Loader/>}>
                                         <AssignmentPage/>

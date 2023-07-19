@@ -53,7 +53,6 @@ const assignmentPageSlice = createSlice({
                     state.isLoading = true;
                 })
             .addCase(updateAssignments.fulfilled, (state, action) => {
-                extendedAssignmentEntityAdapter.upsertMany(state.results, action.payload)
                 state.isLoading = false;
             })
             .addCase(updateAssignments.rejected, (state) => {

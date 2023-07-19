@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
+from rangefilter.filters import DateRangeFilter
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from .models import Employee, Department, Transaction, Audit
@@ -47,4 +48,21 @@ admin.site.register(Department)
 
 admin.site.register(Transaction)
 
-admin.site.register(Audit)
+
+@admin.register(Audit)
+class AuditAdmin(admin.ModelAdmin):
+    list_display = ['date', 'employee', 'short_detail']
+
+    list_filter = [
+        ('date', DateRangeFilter),
+        'employee',
+        'date'
+    ]
+
+    search_fields = ['details', 'employee__first_name', 'employee__last_name']
+
+    def short_detail(self, obj):
+        # обрезаем детали до 100 символов для отображения в списке
+        return obj.details[:100]
+
+    short_detail.short_description = 'Short Details'

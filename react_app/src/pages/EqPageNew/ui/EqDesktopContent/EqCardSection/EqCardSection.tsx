@@ -82,6 +82,7 @@ export const EqCardSection = (props: EqCardSectionProps) => {
     return (
         <PageWithPagination
             hasMore={!!listProps.next}
+            hasUpdated={!!listProps.hasUpdated}
             className={classNames(cls, {}, ['row'])}
             skeleton={skeleton(false)}
             style={{

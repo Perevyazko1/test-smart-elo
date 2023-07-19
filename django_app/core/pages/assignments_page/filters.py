@@ -9,4 +9,4 @@ class AssignmentModelFilter(django_filters.FilterSet):
 
     class Meta:
         model = Assignment
-        fields = ['number', 'status', 'order_product__series_id', 'department__name']
+        fields = ['order_product__series_id', 'department__name']

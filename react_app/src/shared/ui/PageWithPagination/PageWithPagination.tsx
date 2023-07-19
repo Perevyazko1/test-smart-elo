@@ -1,13 +1,13 @@
 import {HTMLAttributes, MutableRefObject, ReactNode, useEffect, useRef} from 'react';
+
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useInfiniteScroll} from "../../lib/hooks/useInfiniteScroll/useInfiniteScroll";
-import {useSelector} from "react-redux";
-import {listsHasUpdated} from "../../../pages/EqPageNew/model/selectors/filtersSelectors/filtersSelectors";
 
 interface PageWithPaginationProps extends HTMLAttributes<HTMLDivElement> {
     hasMore: boolean,
     scroll_callback: () => void,
     skeleton?: ReactNode,
+    hasUpdated: boolean,
 }
 
 
@@ -16,11 +16,11 @@ export const PageWithPagination = (props: PageWithPaginationProps) => {
         hasMore,
         scroll_callback,
         skeleton,
+        hasUpdated,
         ...otherProps
     } = props;
     const wrapperRef = useRef() as MutableRefObject<HTMLDivElement>
     const triggerRef = useRef() as MutableRefObject<HTMLDivElement>
-    const hasUpdated = useSelector(listsHasUpdated);
 
     useInfiniteScroll({
         callback: () => hasMore ? scroll_callback() : false,

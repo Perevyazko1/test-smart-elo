@@ -1,6 +1,6 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {useLocation, useNavigate} from "react-router-dom";
-import {ButtonGroup, Container, Dropdown, DropdownButton, Nav, Table} from "react-bootstrap";
+import {ButtonGroup, Container, Dropdown, DropdownButton, Nav, Spinner, Table} from "react-bootstrap";
 
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
 import {UpdatePageBtn} from "widgets/UpdatePageBtn";
@@ -15,8 +15,16 @@ import {useDebounce} from "shared/lib/hooks/useDebounce/useDebounce";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {AppInput} from "shared/ui/AppInput/AppInput";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import {DepartmentFilter} from "widgets/DepartmentFilter/ui/DepartmentFilter";
+import {
+    EmployeePermissions,
+    getEmployeeDepartments,
+    getEmployeeHasPermissions,
+    getEmployeePinCode
+} from "entities/Employee";
+import {department} from "entities/Department";
 
-import {assignmentPageReducer} from "../model/slice/assignmentPageSlice";
+import {assignmentPageActions, assignmentPageReducer} from "../model/slice/assignmentPageSlice";
 
 import {fetchAssignments} from "../model/service/fetchAssignments";
 import {getAssignmentList, getAssignmentProps} from "../model/selectors/assignmentSelector";
@@ -31,9 +39,20 @@ const initialReducers: ReducersList = {
 
 const AssignmentPage = () => {
     const dispatch = useAppDispatch();
+    const pinCode = useAppSelector(getEmployeePinCode)
+    const unconfirmedPermission = useAppSelector(getEmployeeHasPermissions([
+        EmployeePermissions.ASSIGNMENT_UNCONFIRMED,
+    ]))
 
     const location = useLocation();
     const navigate = useNavigate();
+
+    const paginationSize = useCallback(() => {
+        return getPaginationSize(window.innerHeight, 30, 1.6);
+    }, [])
+
+    const [limitOffset, setLimitOffset] = useState({limit: paginationSize(), offset: 0});
+
     const assignmentsList = useAppSelector(getAssignmentList.selectAll);
     const assignmentsProps = useAppSelector(getAssignmentProps);
 
@@ -41,6 +60,19 @@ const AssignmentPage = () => {
 
     const [seriesIdInput, setSeriesIdInput] = useState<string>(params.get('order_product__series_id') || '')
     const [checkedId, setCheckedId] = useState<number[]>([])
+
+
+    const allDepartment: department = {number: 100, name: 'Все отделы'}
+    const departments = useAppSelector(getEmployeeDepartments)
+    const getInitialDepartment = (): department => {
+        const queryDepartmentName = params.get('department__name')
+        if (queryDepartmentName) {
+            return departments?.find(department => department.name === queryDepartmentName) || allDepartment;
+        } else {
+            return allDepartment;
+        }
+    }
+    const [currentDepartment, setCurrentDepartment] = useState<department>(getInitialDepartment())
 
     const editTargetAssignmentId = (id: number, checked: boolean) => {
         if (checked) {
@@ -54,58 +86,63 @@ const AssignmentPage = () => {
         return {...acc, [key]: value};
     }, {});
 
-    const prevParamsRef = useRef<any>(null);
-
-    const getAssignments = () => {
+    const getAssignments = (
+        isNext: boolean = false,
+        limit: number = limitOffset.limit,
+        offset: number = limitOffset.offset
+    ) => {
         dispatch(fetchAssignments({
-            isNext: false,
-            limit: getPaginationSize(window.innerHeight, 30, 1.6),
-            offset: 0,
+            isNext: isNext,
+            limit: limit,
+            offset: offset,
             ...queryParameters,
         }))
     }
 
-    const fetchNextPage = () => {
-        console.log(assignmentsProps.next)
-        if (assignmentsProps.next) {
-            dispatch(fetchAssignments({
-                isNext: true,
-                url: assignmentsProps.next,
-            }))
-        }
+    useEffect(() => {
+        const isNext = limitOffset.offset >= paginationSize();
+        getAssignments(isNext);
+        //eslint-disable-next-line
+    }, [limitOffset])
+
+    const setNextPage = () => {
+        setLimitOffset({
+            limit: limitOffset.limit,
+            offset: limitOffset.offset + paginationSize()
+        })
     }
 
     const groupUpdateAssignments = () => {
-        dispatch(updateAssignments({
-            action: "remove_confirmation",
-            id_list: checkedId,
-        }))
+        if (pinCode) {
+            dispatch(updateAssignments({
+                action: "remove_confirmation",
+                id_list: checkedId,
+                pin_code: pinCode,
+            })).then(() => {
+                getAssignments(false, limitOffset.offset + limitOffset.limit, 0)
+            })
+        }
+
     }
 
-    useEffect(() => {
-        if (prevParamsRef.current === null || JSON.stringify(queryParameters) !== JSON.stringify(prevParamsRef.current)) {
-            getAssignments();
-            prevParamsRef.current = queryParameters;
-        }
-        // eslint-disable-next-line
-    }, [params, queryParameters]);
-
-    const setSeriesIdFilter = () => {
-        if (seriesIdInput) {
-            params.set('order_product__series_id', seriesIdInput);
+    const setQueryParam = (param: string, value: string) => {
+        if (value) {
+            params.set(param, value);
         } else {
-            params.delete('order_product__series_id');
+            params.delete(param);
         }
+        setLimitOffset({limit: paginationSize(), offset: 0})
         navigate({...location, search: params.toString()});
+        dispatch(assignmentPageActions.listHasUpdated())
     }
 
     const debouncedSetSeriesIdFilter = useDebounce(
-        setSeriesIdFilter,
+        setQueryParam,
         500
     )
 
     useEffect(() => {
-        debouncedSetSeriesIdFilter()
+        debouncedSetSeriesIdFilter('order_product__series_id', seriesIdInput)
         // eslint-disable-next-line
     }, [seriesIdInput])
 
@@ -135,15 +172,30 @@ const AssignmentPage = () => {
                 <AppNavbar>
                     <Nav className="me-auto">
 
-                        <UpdatePageBtn
-                            className={'ms-xl-2 my-xl-0 my-xxl-0 my-1 border border-2 rounded px-1 bg-body-tertiary px-3'}
-                        />
 
                         <AppInput placeholder={'Номер серии'}
-                                  className={'my-auto mx-3 my-1'}
+                                  className={'my-auto ms-3 my-1'}
                                   onChange={(event) => setSeriesIdInput(event.target.value)}
                                   value={seriesIdInput}
                                   inputSize={'sm'}
+                        />
+
+                        <DepartmentFilter
+                            currentDepartment={currentDepartment}
+                            departments={departments}
+                            additionalDepartments={[allDepartment]}
+                            setDepartmentCallback={(department) => {
+                                setCurrentDepartment(department);
+                                setQueryParam(
+                                    'department__name',
+                                    department.name === 'Все отделы' ? "" : department.name
+                                )
+                            }}
+                            className={'my-auto ms-2 my-1'}
+                        />
+
+                        <UpdatePageBtn
+                            className={'ms-xl-2 my-xl-0 my-xxl-0 my-1 border border-2 rounded px-1 bg-body-tertiary px-3'}
                         />
 
                     </Nav>
@@ -159,10 +211,11 @@ const AssignmentPage = () => {
 
 
                 <PageWithPagination
+                    hasUpdated={!!assignmentsProps.hasUpdated}
                     data-bs-theme={'light'}
                     className={classNames(cls.pageContent, {}, ['container mt-1'])}
                     hasMore={!!assignmentsProps.next}
-                    scroll_callback={fetchNextPage}
+                    scroll_callback={setNextPage}
                     skeleton={
                         <Skeleton
                             height={'25px'}
@@ -173,7 +226,13 @@ const AssignmentPage = () => {
                         />}
                 >
                     <div className={classNames(cls.stickyWrapper, {}, ['bg-light'])}>
-                        <h3 className={""}>Страница работы с нарядами</h3>
+                        <div className="d-flex align-items-center">
+                            <h3>
+                                Страница работы с нарядами
+
+                            </h3>
+                            {assignmentsProps.isLoading && <Spinner animation={'grow'} size={'sm'}/>}
+                        </div>
                         <hr className={'p-0 m-2 w-25'}/>
 
                         <DropdownButton
@@ -184,12 +243,14 @@ const AssignmentPage = () => {
                             title="Редактировать выбранные наряды"
                             className={'mb-2'}
                         >
-                            <Dropdown.Item
-                                eventKey="1"
-                                onClick={groupUpdateAssignments}
-                            >
-                                Снять визирование
-                            </Dropdown.Item>
+                            {unconfirmedPermission &&
+                                <Dropdown.Item
+                                    eventKey="1"
+                                    onClick={groupUpdateAssignments}
+                                >
+                                    Снять визирование
+                                </Dropdown.Item>
+                            }
                         </DropdownButton>
                         <hr className={'mt-0'}/>
                     </div>

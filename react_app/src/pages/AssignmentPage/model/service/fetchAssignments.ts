@@ -6,9 +6,8 @@ import {extended_api_assignment_list} from "entities/Assignment";
 import {AppRoutes} from "app/providers/Router";
 
 interface fetchAssignmentsProps {
-    url?: string,
-    limit?: number,
-    offset?: number,
+    limit: number,
+    offset: number,
     isNext: boolean,
 }
 
@@ -17,20 +16,13 @@ export const fetchAssignments = createAsyncThunk<extended_api_assignment_list, f
     'assignments/fetchAssignments',
     async (params: fetchAssignmentsProps, thunkAPI) => {
         const {extra} = thunkAPI;
-        const {url, ...props} = params;
 
         try {
-            let response
-
-            if (url) {
-                response = await extra.api.get<extended_api_assignment_list>(url);
-            } else {
-                response = await extra.api.get<extended_api_assignment_list>(`core/${AppRoutes.ASSIGNMENTS}`, {
-                    params: {
-                        ...props,
-                    }
-                });
-            }
+            const response = await extra.api.get<extended_api_assignment_list>(`core/${AppRoutes.ASSIGNMENTS}`, {
+                params: {
+                    ...params,
+                }
+            });
             if (response.data) {
                 return response.data;
             } else {

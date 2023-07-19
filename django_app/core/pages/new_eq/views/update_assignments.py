@@ -249,7 +249,7 @@ class UpdateAssignments:
                         AssignmentGenerator.create_new_assignments(
                             order_product=order_product,
                             department=next_step.department,
-                            quantity=target_size
+                            quantity=order_product.quantity
                         )
                 else:
                     AssignmentGenerator.create_new_assignments(
