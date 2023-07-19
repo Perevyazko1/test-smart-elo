@@ -5,6 +5,8 @@ import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime"
 import {eq_card} from "entities/EqPageCard";
 import {Link} from "react-router-dom";
 import {AppRoutes} from "../../../../app/providers/Router";
+import {useAppSelector} from "../../../../shared/lib/hooks/useAppSelector/useAppSelector";
+import {getCurrentDepartment} from "../../../../entities/Employee";
 
 interface OpCardDetailsProps {
     eqCard: eq_card;
@@ -16,7 +18,9 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
     const {
         className,
         eqCard
-    } = props
+    } = props;
+
+    const currentDepartment = useAppSelector(getCurrentDepartment)
 
     return (
         <>
@@ -93,7 +97,9 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
                 </tbody>
 
             </Table>
-            <Link to={`/${AppRoutes.ASSIGNMENTS}?order_product__series_id=${eqCard.series_id}`}>
+            <Link to={
+                `/${AppRoutes.ASSIGNMENTS}?order_product__series_id=${eqCard.series_id}&department__name=${currentDepartment?.name}`
+            }>
                 <Button
                     className={'m-2'}
                     size={'sm'}
