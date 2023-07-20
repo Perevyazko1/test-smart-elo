@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
-from core.models import ProductionStep, Order
+from core.models import ProductionStep
 from core.pages.tariff_page.services.update_product_tax import update_product_tax
 from core.serializers import ProductionStepSerializer
 from staff.models import Employee

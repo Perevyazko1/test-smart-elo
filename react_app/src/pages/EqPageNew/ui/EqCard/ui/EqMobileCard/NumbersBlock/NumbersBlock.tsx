@@ -1,19 +1,20 @@
 import React, {memo, useCallback, useEffect, useState} from 'react';
-import {useSelector} from "react-redux";
 import {Button} from "react-bootstrap";
 
 import {classNames} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {eq_card} from "entities/EqPageCard";
 import {assignment} from "entities/Assignment";
+import {EmployeePermissions, getEmployeeHasPermissions} from "entities/Employee";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 
-import cls from "./NumbersBlock.module.scss";
 import {createEqNumberLists} from "../../../model/lib/createEqNumberLists/createEqNumberLists";
 import {getSeriesSize} from "../../../../../model/selectors/filtersSelectors/filtersSelectors";
 import {setTargetNumber} from "../../../model/lib/setTargetNumber/setTargetNumber";
 import {eqFiltersActions} from "../../../../../model/slice/eqFiltersSlice";
 import {Actions, fetchEqUpdateCard} from "../../../../../model/service/fetchEqUpdateCard";
-import {EmployeePermissions, getEmployeeHasPermissions} from "../../../../../../../entities/Employee";
+
+import cls from "./NumbersBlock.module.scss";
 
 interface NumbersBlockProps {
     eqCard: eq_card,
@@ -36,7 +37,8 @@ export const NumbersBlock = memo((props: NumbersBlockProps) => {
     } = props;
 
     const dispatch = useAppDispatch();
-    const seriesSize = useSelector(getSeriesSize);
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
+    const seriesSize = useAppSelector(getSeriesSize);
     const [assignmentsLists, setAssignmentsLists] = useState(createEqNumberLists(assignments, seriesSize));
 
     useEffect(() => {
@@ -53,9 +55,9 @@ export const NumbersBlock = memo((props: NumbersBlockProps) => {
         dispatch(eqFiltersActions.setSeriesSize(1))
     }
 
-    const hasConfirmAssignmentPermissions = useSelector(getEmployeeHasPermissions([
+    const hasConfirmAssignmentPermissions = checkPermissions([
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
-    ]))
+    ])
 
     const getTitle = blockType === 'await'
         ? "Номера в ожидании"

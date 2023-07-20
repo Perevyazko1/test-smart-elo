@@ -5,6 +5,8 @@ import {TaxControlPage} from "pages/TaxControlPage";
 import {TestPage} from "pages/TestPage";
 import {ForbiddenPage} from "pages/ForbiddenPage";
 import {AssignmentPage} from "pages/AssignmentPage";
+import {ProductsPage} from "pages/ProductsPage";
+import {ProductDetailsPage} from "pages/ProductDetailsPage";
 
 export enum AppRoutes {
     EQ = 'eq',
@@ -12,10 +14,14 @@ export enum AppRoutes {
     ASSIGNMENTS = 'assignments',
     TAX = 'tax_control',
     FORBIDDEN = 'forbidden_page',
+    PRODUCTS = 'products',
+    PRODUCT_DETAILS = 'products/:id',
+
+    DEFAULT = 'default',
 }
 
 
-interface RouteConfig {
+export interface RouteConfig {
     routeName: string,
     element: ReactNode,
     permissions: EmployeePermissions[],
@@ -37,7 +43,7 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.TAX]: {
         routeName: 'Тарификации',
         element: <TaxControlPage/>,
-        permissions: [EmployeePermissions.ELO_PAGE],
+        permissions: [EmployeePermissions.TARIFICATION_PAGE],
         urlParams: [],
         queryParams: [],
         inNavigate: true,
@@ -45,7 +51,7 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.TEST]: {
         routeName: 'Тестовая страница',
         element: <TestPage/>,
-        permissions: [EmployeePermissions.ELO_PAGE],
+        permissions: [EmployeePermissions.ADMIN],
         urlParams: [],
         queryParams: [],
         inNavigate: true,
@@ -53,7 +59,7 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.FORBIDDEN]: {
         routeName: 'Нет доступа',
         element: <ForbiddenPage/>,
-        permissions: [EmployeePermissions.ELO_PAGE],
+        permissions: [],
         urlParams: [],
         queryParams: [],
         inNavigate: false,
@@ -61,10 +67,35 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.ASSIGNMENTS]: {
         routeName: 'Наряды',
         element: <AssignmentPage/>,
-        permissions: [EmployeePermissions.ADMIN],
-        urlParams: ['id'],
+        permissions: [EmployeePermissions.ASSIGNMENT_PAGE],
+        urlParams: [],
         queryParams: ['series_id', 'department', 'order_by'],
         inNavigate: true,
+    },
+    [AppRoutes.PRODUCTS]: {
+        routeName: 'Изделия',
+        element: <ProductsPage/>,
+        permissions: [EmployeePermissions.PRODUCT_PAGE],
+        urlParams: [],
+        queryParams: [],
+        inNavigate: true,
+    },
+    [AppRoutes.PRODUCT_DETAILS]: {
+        routeName: 'Детализация по изделию',
+        element: <ProductDetailsPage/>,
+        permissions: [EmployeePermissions.PRODUCT_PAGE],
+        urlParams: [],
+        queryParams: [],
+        inNavigate: false,
+    },
+
+    [AppRoutes.DEFAULT]: {
+        routeName: 'ЭЛО',
+        element: <EqPageNew/>,
+        permissions: [EmployeePermissions.ELO_PAGE],
+        urlParams: [],
+        queryParams: [],
+        inNavigate: false,
     },
 }
 

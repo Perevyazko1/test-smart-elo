@@ -1,1 +1,3 @@
-export {AppRoutes, getAppRouteConfig} from './const/routes';
+export {AppRoutes, getAppRouteConfig, appRoutesConfig} from './const/routes';
+
+export type {RouteConfig} from './const/routes';

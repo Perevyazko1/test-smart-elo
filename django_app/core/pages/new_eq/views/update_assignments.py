@@ -95,7 +95,12 @@ class UpdateAssignments:
                     if assignment.status == 'ready':
                         self.action_name = 'Подтвердил готовность'
 
-                        assignment.inspector = Employee.objects.get(pin_code=self.pin_code)
+                        if self.original_user:
+                            inspector_pin_code = self.original_user.pin_code
+                        else:
+                            inspector_pin_code = self.pin_code
+
+                        assignment.inspector = Employee.objects.get(pin_code=inspector_pin_code)
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,

@@ -1,8 +1,8 @@
 import React, {memo} from 'react';
-import {useSelector} from "react-redux";
 import {Dropdown, NavDropdown} from "react-bootstrap";
 import {NavDropdownProps} from "react-bootstrap/NavDropdown";
 
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {EmployeePermissions, getEmployeeHasPermissions, getEmployeePinCode} from "entities/Employee";
 
@@ -12,15 +12,16 @@ import {ViewMode} from "../../../model/types/eqPageSchema";
 
 
 export const EqSetViewMode = memo((props: Omit<NavDropdownProps, 'title' | 'children' | 'active'>) => {
-    const dispatch = useAppDispatch()
-    const viewMode = useSelector(getViewModeFilter)
-    const pin_code = useSelector(getEmployeePinCode)
-    const bossModePermission = useSelector(getEmployeeHasPermissions([
+    const dispatch = useAppDispatch();
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
+    const viewMode = useAppSelector(getViewModeFilter);
+    const pin_code = useAppSelector(getEmployeePinCode);
+    const bossModePermission = checkPermissions([
         EmployeePermissions.ELO_BOSS_VIEW_MODE
-    ]))
-    const behalfPermission = useSelector(getEmployeeHasPermissions([
+    ])
+    const behalfPermission = checkPermissions([
         EmployeePermissions.BEHALF_ACTIONS
-    ]))
+    ])
     if (!bossModePermission && !behalfPermission) {
         return <></>;
     }

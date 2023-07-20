@@ -39,10 +39,12 @@ const initialReducers: ReducersList = {
 
 const AssignmentPage = () => {
     const dispatch = useAppDispatch();
-    const pinCode = useAppSelector(getEmployeePinCode)
-    const unconfirmedPermission = useAppSelector(getEmployeeHasPermissions([
+    const pinCode = useAppSelector(getEmployeePinCode);
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
+
+    const unconfirmedPermission = checkPermissions([
         EmployeePermissions.ASSIGNMENT_UNCONFIRMED,
-    ]))
+    ])
 
     const location = useLocation();
     const navigate = useNavigate();

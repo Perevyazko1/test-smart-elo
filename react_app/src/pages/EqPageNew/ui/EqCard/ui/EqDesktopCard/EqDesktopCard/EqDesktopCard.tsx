@@ -1,11 +1,11 @@
 import React, {memo, useCallback, useEffect, useState} from 'react';
-import {useSelector} from "react-redux";
 import {Col} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
 import {EmployeePermissions, getEmployeeHasPermissions} from "entities/Employee";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 import {Slider} from "shared/ui/Slider/Slider";
 
 import cls from "./EqDesktopCard.module.scss";
@@ -38,14 +38,15 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
 
     const dispatch = useAppDispatch();
     const sliderImages = createEqImageUrls(eqCard);
-    const seriesSize = useSelector(getSeriesSize);
+    const seriesSize = useAppSelector(getSeriesSize);
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
     const [assignmentsLists, setAssignmentsLists] = useState(createEqNumberLists(eqCard.assignments, seriesSize));
 
     const [cardDisabled, setCardDisabled] = useState(false);
 
-    const confirmAssignment = useSelector(getEmployeeHasPermissions([
+    const confirmAssignment = checkPermissions([
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
-    ]))
+    ])
 
     const getAction = useCallback((first: boolean) => {
         if (cardType === 'await') {

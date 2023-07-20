@@ -4,34 +4,25 @@ import {useSelector} from "react-redux";
 import {Dropdown, NavDropdown} from "react-bootstrap";
 import {NavDropdownProps} from "react-bootstrap/NavDropdown";
 
-import {employeeActions, EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
+import {AppRoutes, getAppRouteConfig} from "app/providers/Router";
+import {employeeActions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {AuditWidget} from "../../AuditWidget";
-import {useAppSelector} from "../../../shared/lib/hooks/useAppSelector/useAppSelector";
-
 
 export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | 'align' | 'children'>) => {
-    const [showModal, setShowModal] = useState(false)
+    const [showModal, setShowModal] = useState(false);
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
 
-    const location = useLocation()
-    const dispatch = useAppDispatch()
+    const location = useLocation();
+    const dispatch = useAppDispatch();
 
-    const eloPageAccess = useSelector(
-        getEmployeeHasPermissions([
-            EmployeePermissions.TARIFICATION_PAGE])
-    )
-    const tariffPageAccess = useSelector(
-        getEmployeeHasPermissions([
-            EmployeePermissions.TARIFICATION_PAGE])
-    )
-    const assignmentPagePermission = useAppSelector(getEmployeeHasPermissions([
-        EmployeePermissions.ASSIGNMENT_PAGE
-    ]))
-    const isAdmin = useSelector(
-        getEmployeeHasPermissions([
-            EmployeePermissions.ADMIN])
-    )
+    const routesToRender = Object.values(AppRoutes).filter((routeName) => {
+        const config = getAppRouteConfig(routeName);
+        return config.inNavigate && checkPermissions(config.permissions);
+    });
+
     const employee = useSelector(getEmployeeAuthData)
 
     const logout = useCallback(() => {
@@ -45,45 +36,19 @@ export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | '
             title={employee?.first_name + " " + employee?.last_name}
             {...props}
         >
-            {eloPageAccess &&
-                <Dropdown.Item
-                    as={NavLink}
-                    to={'/'}
-                    active={location.pathname === '/'}
-                >
-                    ЭЛО
-                </Dropdown.Item>
-            }
-
-            {tariffPageAccess &&
-                <Dropdown.Item
-                    as={NavLink}
-                    to={'/tax_control'}
-                    active={location.pathname === '/tax_control'}
-                >
-                    Тарификации
-                </Dropdown.Item>
-            }
-
-            {assignmentPagePermission &&
-                <Dropdown.Item
-                    as={NavLink}
-                    to={'/assignments'}
-                    active={location.pathname === '/assignments'}
-                >
-                    Наряды
-                </Dropdown.Item>
-            }
-
-            {isAdmin &&
-                <Dropdown.Item
-                    to={'/test'}
-                    as={NavLink}
-                    active={location.pathname === '/test'}
-                >
-                    Страница разработчика
-                </Dropdown.Item>
-            }
+            {routesToRender.map((routeName) => {
+                const config = getAppRouteConfig(routeName);
+                return (
+                    <Dropdown.Item
+                        key={config.routeName}
+                        as={NavLink}
+                        to={`/${routeName}`}
+                        active={location.pathname === `/${routeName}`}
+                    >
+                        {config.routeName}
+                    </Dropdown.Item>
+                );
+            })}
 
             <Dropdown.Item onClick={() => setShowModal(true)}>
                 История действий

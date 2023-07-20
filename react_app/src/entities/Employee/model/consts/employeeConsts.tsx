@@ -13,4 +13,6 @@ export enum EmployeePermissions {
 
     ASSIGNMENT_PAGE = 'Страница нарядов',
     ASSIGNMENT_UNCONFIRMED = 'Снятие визы',
+
+    PRODUCT_PAGE = 'Страница товаров',
 }
