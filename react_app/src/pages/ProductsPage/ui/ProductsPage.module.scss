@@ -7,13 +7,8 @@
 }
 
 .pageContent {
-  height: calc(100vh - 60px);
+  height: calc(100vh - 65px);
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
-}
-
-.stickyWrapper {
-  position: sticky;
-  top: -2px;
 }

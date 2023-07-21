@@ -13,17 +13,29 @@ html {
 }
 
 @font-face {
-  font-family: 'Motserrat-Light';
+  font-family: 'Montserrat-Light';
   font-style: normal;
+  //font-weight: 400;
   src: url('Montserrat-Light.ttf') format('truetype');
 }
 
+@font-face {
+  font-family: 'Montserrat-Bold';
+  font-style: normal;
+  //font-weight: 700;
+  src: url('Montserrat-Bold.ttf') format('truetype');
+}
+
 $font-family-sans-serif: "Verdana", sans-serif;
-$font-family-monospace: "Motserrat-Light", monospace;
+$font-family-monospace: "Motserrat", monospace;
 
 * {
-  font-family: Motserrat-Light, sans-serif;
+  font-family: 'Montserrat-Light', sans-serif;
   font-weight: bold;
+}
+
+b, strong, .fw-bold {
+  font-family: 'Montserrat-Bold', sans-serif;
 }
 
 @import "~bootstrap/scss/bootstrap";

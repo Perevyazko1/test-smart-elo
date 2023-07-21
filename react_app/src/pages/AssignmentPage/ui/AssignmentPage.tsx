@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from "react";
-import {useLocation, useNavigate} from "react-router-dom";
 import {ButtonGroup, Container, Dropdown, DropdownButton, Nav, Spinner, Table} from "react-bootstrap";
 
 import {UserInfoWithRouts} from "widgets/UserInfoWithRouts";
@@ -14,6 +13,7 @@ import {getPaginationSize} from "shared/api/configs";
 import {useDebounce} from "shared/lib/hooks/useDebounce/useDebounce";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
 import {AppInput} from "shared/ui/AppInput/AppInput";
+import {useQueryParams} from "shared/lib/hooks/useQueryParams/useQueryParams";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {DepartmentFilter} from "widgets/DepartmentFilter/ui/DepartmentFilter";
 import {
@@ -25,12 +25,11 @@ import {
 import {department} from "entities/Department";
 
 import {assignmentPageActions, assignmentPageReducer} from "../model/slice/assignmentPageSlice";
-
+import {updateAssignments} from "../model/service/updateAssignments";
 import {fetchAssignments} from "../model/service/fetchAssignments";
 import {getAssignmentList, getAssignmentProps} from "../model/selectors/assignmentSelector";
 
 import cls from './AssignmentPage.module.scss';
-import {updateAssignments} from "../model/service/updateAssignments";
 
 const initialReducers: ReducersList = {
     assignments: assignmentPageReducer,
@@ -46,8 +45,7 @@ const AssignmentPage = () => {
         EmployeePermissions.ASSIGNMENT_UNCONFIRMED,
     ])
 
-    const location = useLocation();
-    const navigate = useNavigate();
+    const {setQueryParam, queryParameters, initialLoad} = useQueryParams();
 
     const paginationSize = useCallback(() => {
         return getPaginationSize(window.innerHeight, 30, 1.6);
@@ -58,16 +56,15 @@ const AssignmentPage = () => {
     const assignmentsList = useAppSelector(getAssignmentList.selectAll);
     const assignmentsProps = useAppSelector(getAssignmentProps);
 
-    const params = new URLSearchParams(location.search);
 
-    const [seriesIdInput, setSeriesIdInput] = useState<string>(params.get('order_product__series_id') || '')
+    const [seriesIdInput, setSeriesIdInput] = useState<string>(queryParameters.order_product__series_id || '')
     const [checkedId, setCheckedId] = useState<number[]>([])
 
 
     const allDepartment: department = {number: 100, name: 'Все отделы'}
     const departments = useAppSelector(getEmployeeDepartments)
     const getInitialDepartment = (): department => {
-        const queryDepartmentName = params.get('department__name')
+        const queryDepartmentName = queryParameters.department__name
         if (queryDepartmentName) {
             return departments?.find(department => department.name === queryDepartmentName) || allDepartment;
         } else {
@@ -84,10 +81,6 @@ const AssignmentPage = () => {
         }
     }
 
-    const queryParameters = Array.from(params.entries()).reduce((acc, [key, value]) => {
-        return {...acc, [key]: value};
-    }, {});
-
     const getAssignments = (
         isNext: boolean = false,
         limit: number = limitOffset.limit,
@@ -102,10 +95,20 @@ const AssignmentPage = () => {
     }
 
     useEffect(() => {
-        const isNext = limitOffset.offset >= paginationSize();
-        getAssignments(isNext);
+        if (limitOffset.offset >= paginationSize()) {
+            getAssignments(true);
+        }
         //eslint-disable-next-line
     }, [limitOffset])
+
+    useEffect(() => {
+        if (!initialLoad) {
+            setLimitOffset({limit: paginationSize(), offset: 0})
+            getAssignments(false, paginationSize(), 0);
+            dispatch(assignmentPageActions.listHasUpdated())
+        }
+        //eslint-disable-next-line
+    }, [initialLoad, queryParameters])
 
     const setNextPage = () => {
         setLimitOffset({
@@ -124,27 +127,15 @@ const AssignmentPage = () => {
                 getAssignments(false, limitOffset.offset + limitOffset.limit, 0)
             })
         }
-
     }
 
-    const setQueryParam = (param: string, value: string) => {
-        if (value) {
-            params.set(param, value);
-        } else {
-            params.delete(param);
-        }
-        setLimitOffset({limit: paginationSize(), offset: 0})
-        navigate({...location, search: params.toString()});
-        dispatch(assignmentPageActions.listHasUpdated())
-    }
-
-    const debouncedSetSeriesIdFilter = useDebounce(
-        setQueryParam,
+    const debouncedSetQueryParam = useDebounce(
+        (param: string, value: string) => setQueryParam(param, value),
         500
     )
 
     useEffect(() => {
-        debouncedSetSeriesIdFilter('order_product__series_id', seriesIdInput)
+        debouncedSetQueryParam('order_product__series_id', seriesIdInput)
         // eslint-disable-next-line
     }, [seriesIdInput])
 

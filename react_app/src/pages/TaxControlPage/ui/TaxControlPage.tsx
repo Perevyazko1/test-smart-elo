@@ -15,7 +15,6 @@ import {TCNavBar} from "./TCNavBar/TCNavBar";
 import {fetchTCFilters} from "../model/service/fetchTaxControlFilters/fetchTCFilters";
 import {fetchNextTaxControlData} from "../model/service/fetchNextTaxControlData/fetchNextTaxControlData";
 import {fetchTaxControlCard} from "../model/service/fetchTaxControlData/fetchTaxControlCard";
-import {getAssignmentProps} from "../../AssignmentPage/model/selectors/assignmentSelector";
 
 
 const initialReducers: ReducersList = {

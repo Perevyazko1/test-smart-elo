@@ -15,4 +15,5 @@ urlpatterns = [
     path('', include('core.pages.tariff_page.urls')),
     path('', include('core.pages.new_eq.urls')),
     path('', include('core.pages.assignments_page.urls')),
+    path('', include('core.pages.products_page.urls')),
 ]

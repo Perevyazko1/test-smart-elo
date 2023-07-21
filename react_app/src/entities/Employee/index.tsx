@@ -1,3 +1,5 @@
+export type {EmployeeSchema} from "./model/types/employee";
+
 export {getEmployeeInited} from "./model/selectors/getEmployeeInited/getEmployeeInited";
 
 export type {employee} from './model/types/employee';
@@ -12,4 +14,4 @@ export {getEmployeeFullName} from "./model/selectors/getEmployeeFullName/getEmpl
 export {EmployeePermissions} from './model/consts/employeeConsts';
 export {
     getEmployeeGroups, getEmployeeHasPermissions
-} from './model/selectors/getEmployeeAccess/getEmployeeAccess'
+} from './model/selectors/getEmployeeAccess/getEmployeeAccess';

@@ -3,12 +3,13 @@ import {AxiosInstance} from "axios";
 
 import {rtkAPI} from "shared/api/rtkAPI";
 import {AuthByPinCodeSchema} from "features/AuthByPinCode";
-import {EmployeeSchema} from "entities/Employee/model/types/employee";
+import {EmployeeSchema} from "entities/Employee";
 import {NotificationList} from "widgets/Notification";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
 import {TaxControlSchema} from "pages/TaxControlPage";
 import {EqContentDesktop, EqListData, EqFilters} from "pages/EqPageNew";
 import {AssignmentSchema} from "pages/AssignmentPage";
+import {ProductsSchema} from "pages/ProductsPage";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -21,6 +22,7 @@ export interface StateSchema {
     eqFilters?: EqFilters,
 
     assignments?: AssignmentSchema,
+    products?: ProductsSchema,
 
     authByPinCode?: AuthByPinCodeSchema,
     auditWidget?: AuditWidgetSchema,

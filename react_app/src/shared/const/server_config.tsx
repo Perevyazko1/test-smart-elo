@@ -6,7 +6,7 @@ export const SERVER_PORT = '8000';
 
 export const GET_STATIC_URL = () => {
     if (process.env.REACT_APP_DEV_MODE === "true") {
-        return `http://${process.env.REACT_APP_STATIC_URL || window.location.hostname}`
+        return `${SERVER_HOST}:${SERVER_PORT}`
     }
     return `http://${window.location.hostname}`
 }
