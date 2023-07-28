@@ -2,10 +2,15 @@ import {rtkAPI} from "shared/api/rtkAPI";
 
 import {ResponseDepInfo} from "../types/types";
 
+interface OpDepDetailsApiProps {
+    series_id: string,
+    department_number: number | undefined,
+}
+
 const OpDepDetailsApi = rtkAPI.injectEndpoints({
     endpoints: (build) => ({
-        getDepDetails: build.query<ResponseDepInfo, { series_id: string, department_number: number | undefined }>({
-            query: (props: {series_id: string, department_number: number | undefined }) => ({
+        getDepDetails: build.query<ResponseDepInfo, OpDepDetailsApiProps>({
+            query: (props: OpDepDetailsApiProps) => ({
                 url: '/core/get_op_dep_info',
                 params: {
                     series_id: props.series_id,

@@ -10,6 +10,7 @@ import {TaxControlSchema} from "pages/TaxControlPage";
 import {EqContentDesktop, EqListData, EqFilters} from "pages/EqPageNew";
 import {AssignmentSchema} from "pages/AssignmentPage";
 import {ProductsSchema} from "pages/ProductsPage";
+import {ProductDetailsSchema} from "pages/ProductDetailsPage";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -23,6 +24,7 @@ export interface StateSchema {
 
     assignments?: AssignmentSchema,
     products?: ProductsSchema,
+    productDetails?: ProductDetailsSchema,
 
     authByPinCode?: AuthByPinCodeSchema,
     auditWidget?: AuditWidgetSchema,

@@ -1,6 +1,6 @@
-from django.db.models import Count
+from core.models import OrderProduct, Assignment
+from core.services.assignment_generator import AssignmentGenerator
 
-from core.models import Assignment
 
 # departments = {
 #     'Старт': [0, False, False],
@@ -35,7 +35,43 @@ from core.models import Assignment
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
-    pass
+    active_order_products = OrderProduct.objects.filter(status="0")
+
+    for order_product in active_order_products:
+        product = order_product.product
+        for production_step in product.production_steps.all():
+            """Игнорируем этапы без связей"""
+            if not production_step.is_active:
+                continue
+            """Игнорируем этапы старт и готов"""
+            if production_step.department.number in [0, 50]:
+                continue
+            """Если есть наряд в разработке с таким изделием - переходим к следующей серии производства"""
+            if production_step.department.number == 1:
+                assignment_exists = Assignment.objects.filter(
+                    order_product__product=product,
+                    department__number=1
+                ).exclude(status='ready', inspector__isnull=False).exists()
+                if assignment_exists:
+                    break
+
+            """Для остальных отделов серии создаем наряды в статусе создан"""
+            """Получаем все наряды"""
+            assignments = Assignment.objects.filter(
+                department=production_step.department,
+                order_product=order_product,
+            )
+            """Получаем количество недостающих нарядов"""
+            target_size = order_product.quantity - assignments.count()
+
+            """Передаем в генератор с флагом статуса"""
+            AssignmentGenerator.create_new_assignments(
+                order_product=order_product,
+                department=production_step.department,
+                quantity=target_size,
+                status='created'
+            )
+
     # # Получим все записи Assignment, которые имеют дубликаты, основанные на 'number', 'order_product', 'department'
     # duplicates = (Assignment.objects.values('number', 'order_product_id', 'department_id')
     #               .annotate(count=Count('id'))

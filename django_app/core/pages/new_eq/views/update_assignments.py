@@ -7,6 +7,7 @@ from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates, EqNotificationActions
 from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
+from core.services.update_production_steps import update_production_steps
 from staff.models import Employee, Department, Audit
 
 
@@ -113,21 +114,7 @@ class UpdateAssignments:
 
     def _init_production_step_schema(self):
         """Итерируемся по JSON схеме технологического процесса и создаем этапы производства"""
-        schema = self.order_product.product.technological_process.schema
-
-        for target_department_name, related_department_names in schema.items():
-            production_step = ProductionStep.objects.get_or_create(
-                department=Department.objects.get(name=target_department_name),
-                product=self.order_product.product,
-            )[0]
-
-            for department_name in related_department_names:
-                production_step.next_step.add(
-                    ProductionStep.objects.get_or_create(
-                        department=Department.objects.get(name=department_name),
-                        product=self.order_product.product,
-                    )[0].id
-                )
+        update_production_steps(self.order_product.product)
 
     def _set_technological_process_confirmed(self):
         self.order_product.product.technological_process_confirmed = Employee.objects.get(pin_code=self.pin_code)
@@ -209,7 +196,7 @@ class UpdateAssignments:
         return Assignment.objects.filter(
             order_product=self.order_product,
             department=next_step.department
-        ).count()
+        ).exclude(status='created').count()
 
     def _get_target_size_for_create_assignments(self, next_step: ProductionStep) -> int:
         related_assignments_confirmed_minimum_count = self._get_related_assignments_confirmed_minimum_count(next_step)
@@ -220,8 +207,19 @@ class UpdateAssignments:
             return 1
         return related_assignments_confirmed_minimum_count - next_step_assignments_count
 
-    def _create_related_assignments(self, from_constructors: bool = False):
-        """Получаем список последующих этапов"""
+    def _create_assignments(self):
+        """ От конструкторов производим генерацию нарядов всех серий ожидающих разработки. """
+        order_products = OrderProduct.objects.filter(
+            product=self.order_product.product,
+        )
+
+        for order_product in order_products:
+            AssignmentGenerator().init_order_product_assignments(
+                order_product=order_product
+            )
+
+    def _activate_assignments(self):
+        """Делаем проверку готовности в других отделах и активируем нужное количество нарядов"""
         self.department = Department.objects.get(number=self.department_number)
 
         next_steps = ProductionStep.objects.get(
@@ -230,38 +228,41 @@ class UpdateAssignments:
         ).next_step.all()
 
         for next_step in next_steps:
+            """
+            Итерируемся по всем последующим отделам. 
+            Если отдел Готово - выполняем инструкцию по готовности и выходим.
+            """
             if next_step.department.name == "Готово":
                 self._ready_department_instruction()
                 break
 
+            """Вычисляем количество нарядов к обновлению"""
             target_size = self._get_target_size_for_create_assignments(next_step)
 
             if target_size:
+                """Если количество отлично от нуля переводим наряды в статус ожидает"""
                 self.notification_data[next_step.department.number] = {
                     'action': EqNotificationActions.UPDATE_TARGET_LIST.value,
                     'data': '',
                 }
-
-                if from_constructors:
-                    """
-                    Если наряд поступил от конструкторов производим генерацию нарядов всех серий ожидающих разработки.
-                    """
-                    order_products = OrderProduct.objects.filter(
-                        product=self.order_product.product,
-                    )
-
-                    for order_product in order_products:
-                        AssignmentGenerator.create_new_assignments(
-                            order_product=order_product,
-                            department=next_step.department,
-                            quantity=order_product.quantity
-                        )
+                if self.department.single:
+                    numbers = [1]
                 else:
-                    AssignmentGenerator.create_new_assignments(
+                    start_position = Assignment.objects.filter(
                         order_product=self.order_product,
-                        department=next_step.department,
-                        quantity=target_size
-                    )
+                        department=next_step.department
+                    ).exclude(status='created').count()
+
+                    last_position = start_position + target_size
+                    if last_position > self.order_product.quantity:
+                        last_position = self.order_product.quantity
+                    numbers = [i for i in range(start_position + 1, last_position + 1)]
+
+                Assignment.objects.filter(
+                    order_product=self.order_product,
+                    department=next_step.department,
+                    number__in=numbers
+                ).update(status='await')
 
     def _confirmation_instructions(self):
         """Действия при визировании бригадиром наряда"""
@@ -272,13 +273,10 @@ class UpdateAssignments:
             self._set_technological_process_confirmed()
             self._delete_constructor_relations()
             self._init_production_step_schema()
-
-            """Переопределяем контекст номера отдела т.к. дальнейшее создание нарядов пойдет со стартового отдела"""
-            self.department_number = 0
-            self._create_related_assignments(from_constructors=True)
+            self._create_assignments()
 
         else:
-            self._create_related_assignments()
+            self._activate_assignments()
 
     def _get_audit_details(self) -> str:
         order_product = OrderProduct.objects.get(series_id=self.series_id)

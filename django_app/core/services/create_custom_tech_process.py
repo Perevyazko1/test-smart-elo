@@ -1,8 +1,9 @@
-from core.models import TechnologicalProcess, OrderProduct
+from core.models import TechnologicalProcess, Product
+from core.services.update_production_steps import update_production_steps
 
 
-def create_custom_tech_process(schema: dict, series_id: str) -> TechnologicalProcess:
-    order_product = OrderProduct.objects.get(series_id=series_id)
+def create_custom_tech_process(schema: dict, product_id: str) -> TechnologicalProcess:
+    product = Product.objects.get(pk=product_id)
 
     check_usual_schema = TechnologicalProcess.objects.exclude(
         image=''
@@ -14,15 +15,17 @@ def create_custom_tech_process(schema: dict, series_id: str) -> TechnologicalPro
         tech_process = check_usual_schema[0]
     else:
         tech_process = TechnologicalProcess.objects.create(
-            name=f'Специальный тех-процесс {order_product.product.name}',
+            name=f'Специальный тех-процесс {product.name}',
             schema=schema,
         )
 
-    if order_product.product.technological_process:
-        if order_product.product.technological_process.image == '':
-            order_product.product.technological_process.delete()
+    if product.technological_process:
+        if product.technological_process.image == '':
+            product.technological_process.delete()
 
-    order_product.product.technological_process = tech_process
-    order_product.product.save()
+    product.technological_process = tech_process
+    product.save()
+
+    update_production_steps(product)
 
     return tech_process

@@ -21,7 +21,7 @@ export const OpDepDetails = memo((props: OpDepDetailsProps) => {
     const currentDepartment = useSelector(getCurrentDepartment)
     const {data, isLoading} = useDepDetails({
         series_id: seriesId,
-        department_number: currentDepartment?.number
+        department_number: currentDepartment?.number,
     });
 
     return (

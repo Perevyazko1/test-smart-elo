@@ -9,7 +9,7 @@ export interface assignment {
     id: number;
     number: number;
     notes: string;
-    status: 'in_work' | 'await' | 'ready';
+    status: 'in_work' | 'await' | 'ready' | 'created';
     department: number;
     executor: employee | null;
     inspector: employee | null;

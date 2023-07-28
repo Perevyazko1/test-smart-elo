@@ -8,7 +8,12 @@ from ..models import OrderProduct, Assignment, ProductionStep
 class AssignmentGenerator:
     @staticmethod
     @transaction.atomic
-    def create_new_assignments(order_product: OrderProduct, department: Department, quantity: int = 1):
+    def create_new_assignments(
+            order_product: OrderProduct,
+            department: Department,
+            quantity: int = 1,
+            status: str = 'await',
+    ):
         assignment_tariff = ProductionStep.objects.get(
             product=order_product.product, department=department
         ).production_step_tariff
@@ -21,35 +26,52 @@ class AssignmentGenerator:
             if last_position > order_product.quantity:
                 print("CREATE_NEW_ASSIGNMENTS: передано количество больше чем лимит серии.")
                 last_position = order_product.quantity
-            numbers = [i for i in range(start_position+1, last_position+1)]
+            numbers = [i for i in range(start_position + 1, last_position + 1)]
 
         for number in numbers:
-            Assignment.objects.update_or_create(
+            Assignment.objects.create(
                 number=number,
                 order_product=order_product,
                 department=department,
-                defaults={
-                    "tariff": assignment_tariff,
-                    "notes": 'Создан автоматически'
-                }
+                tariff=assignment_tariff,
+                notes='Создан автоматически',
+                status=status,
             )
 
     def init_order_product_assignments(self, order_product: OrderProduct):
-        # Инициализация первого уровня нарядов связанных со стартовым
-        production_steps = order_product.product.production_steps.filter(department__number=0)
+        """Инициализация первого уровня нарядов связанных со стартовым"""
+        production_steps = order_product.product.production_steps.all().exclude(is_active=False)
+        start_production_steps = order_product.product.production_steps.get(department__number=0)
         for production_step in production_steps:
-            for next_step in production_step.next_step.all():
-                """Если в отделе конструкторов есть наряд с данным товаром, игнорируем генерацию нового наряда"""
-                if next_step.department.number == 1:
-                    assignment_exists = Assignment.objects.filter(
-                        order_product__product=order_product.product,
-                        department__number=1
-                    ).exists()
-                    if assignment_exists:
-                        continue
+            """Пропускаем отделы старт и готово"""
+            if production_step.department.number in [0, 50]:
+                continue
 
+            """
+            Если в отделе конструкторов есть наряд в разработке с данным товаром -
+             игнорируем генерацию нового наряда
+             """
+            if production_step.department.number == 1:
+                assignment_exists = Assignment.objects.filter(
+                    order_product__product=order_product.product,
+                    department__number=1
+                ).exclude(status='ready', inspector__isnull=False).exists()
+                if assignment_exists:
+                    break
+
+            """Если отдел находится в списке стартовых - генерируем наряд в статусе ожидает"""
+            if production_step in start_production_steps.next_step.all():
                 self.create_new_assignments(
                     order_product=order_product,
-                    department=next_step.department,
+                    department=production_step.department,
                     quantity=int(order_product.quantity)
                 )
+            else:
+                """Если отдел не в списке стартовых и отдел не конструкторов - генерируем наряд в статусе создан"""
+                if not production_step.department.number == 1:
+                    self.create_new_assignments(
+                        order_product=order_product,
+                        department=production_step.department,
+                        quantity=int(order_product.quantity),
+                        status='created',
+                    )

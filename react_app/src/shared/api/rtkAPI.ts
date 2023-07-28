@@ -8,4 +8,5 @@ export const rtkAPI = createApi({
         baseUrl: SERVER_HTTP_ADDRESS + '/api/v1',
     }),
     endpoints: () => ({}),
+    keepUnusedDataFor: 0,
 })

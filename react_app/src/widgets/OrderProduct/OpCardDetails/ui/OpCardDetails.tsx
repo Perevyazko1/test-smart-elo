@@ -1,12 +1,12 @@
 import React, {memo} from 'react';
 import {Button, Table} from "react-bootstrap";
+import {Link} from "react-router-dom";
 
 import {getHumansDatetime} from "shared/lib/getHumansDatetime/getHumansDatetime";
+import {AppRoutes} from "app/providers/Router";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
+import {getCurrentDepartment} from "entities/Employee";
 import {eq_card} from "entities/EqPageCard";
-import {Link} from "react-router-dom";
-import {AppRoutes} from "../../../../app/providers/Router";
-import {useAppSelector} from "../../../../shared/lib/hooks/useAppSelector/useAppSelector";
-import {getCurrentDepartment} from "../../../../entities/Employee";
 
 interface OpCardDetailsProps {
     eqCard: eq_card;
@@ -39,7 +39,20 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
                 <tbody>
                 <tr>
                     <td>Изделие</td>
-                    <td>{eqCard.product.name}</td>
+                    <td>
+                        {eqCard.product.name}
+                        <Link to={
+                            `/${AppRoutes.PRODUCTS}/${eqCard.product.id}`
+                        }>
+                            <Button
+                                size={'sm'}
+                                className={'mx-2'}
+                                variant={'outline-secondary'}
+                            >
+                                Подробнее
+                            </Button>
+                        </Link>
+                    </td>
                 </tr>
 
                 <tr>

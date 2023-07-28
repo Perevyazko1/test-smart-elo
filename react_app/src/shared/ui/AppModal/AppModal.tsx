@@ -3,6 +3,8 @@ import {Modal} from "react-bootstrap";
 
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
+import cls from './AppModal.module.scss';
+
 interface AppModalProps {
     title: string,
     onHide: () => void,
@@ -33,9 +35,9 @@ export const AppModal = (props: AppModalProps) => {
     return (
         <Modal show={showModal}
                onHide={hide_modal}
-               size={'xl'}
                scrollable={true}
-               className={classNames('', mods, [className])}
+               dialogClassName={cls.modal90w}
+               className={classNames("", mods, [className])}
         >
             <Modal.Header closeButton className={'p-3'}>
                 <Modal.Title className={'fs-6'}>{title}</Modal.Title>

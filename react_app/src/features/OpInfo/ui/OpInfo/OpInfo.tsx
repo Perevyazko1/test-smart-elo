@@ -7,6 +7,8 @@ import {OpDepDetails} from "widgets/OrderProduct/OpDepDetails";
 import {OpProdDetails} from "widgets/OrderProduct/OpProdDetails";
 
 import {TechProcessInfo} from "../../../TechProcessInfo/ui/TechProcessInfo";
+import {useAppDispatch} from "../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {eqFiltersActions} from "../../../../pages/EqPageNew";
 
 
 interface OpInfoProps {
@@ -19,6 +21,8 @@ export const OpInfo = memo((props: OpInfoProps) => {
     const {
         className,
     } = props;
+
+    const dispatch = useAppDispatch();
 
     const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
 
@@ -64,7 +68,10 @@ export const OpInfo = memo((props: OpInfoProps) => {
                 </Accordion.Header>
 
                 <Accordion.Body>
-                    <TechProcessInfo eqCard={eqCard}/>
+                    <TechProcessInfo
+                        product={eqCard.product}
+                        updCallback={() => dispatch(eqFiltersActions.addNotRelevantId(eqCard.series_id))}
+                    />
                 </Accordion.Body>
 
             </Accordion.Item>

@@ -10,7 +10,7 @@ const LoginPage = () => {
             <div className="container">
                 <div className="row mb-5 my-xl-4">
                     <div className="col-md-8 col-xl-6 text-center mx-auto">
-                        <h1 className={'fw-bold font-monospace'}>
+                        <h1>
                             Вход в систему
                         </h1>
                     </div>

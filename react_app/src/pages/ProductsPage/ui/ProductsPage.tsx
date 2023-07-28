@@ -16,14 +16,14 @@ import {useDebounce} from "shared/lib/hooks/useDebounce/useDebounce";
 import {AppInput} from "shared/ui/AppInput/AppInput";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
+import {product} from "entities/Product";
+import {Slider} from "shared/ui/Slider/Slider";
 
 import {productsPageActions, productsPageReducer} from "../model/slice/productsPageSlice";
 import {getProductsList, getProductsProps} from "../model/selectors/productsSelector";
 import {fetchProducts} from "../model/service/fetchProducts";
 
 import cls from "./ProductsPage.module.scss";
-import {product} from "../../../entities/Product";
-import {Slider} from "../../../shared/ui/Slider/Slider";
 
 
 const initialReducers: ReducersList = {
@@ -164,22 +164,22 @@ const ProductsPage = () => {
                         <Table striped bordered hover size="sm">
                             <thead>
                             <tr>
-                                <th>
+                                <th className={'text-center'}>
                                     <strong>
                                     Изображение
                                 </strong>
                                 </th>
-                                <th>
+                                <th className={'text-center'}>
                                     <strong>
                                         Наименование
                                     </strong>
                                 </th>
-                                <th>
+                                <th className={'text-center'}>
                                     <strong>
                                         Тех-процесс
                                     </strong>
                                 </th>
-                                <th>
+                                <th className={'text-center'}>
                                     <strong>
                                         Схему подтвердил
                                     </strong>

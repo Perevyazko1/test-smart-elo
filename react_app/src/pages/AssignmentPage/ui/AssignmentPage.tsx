@@ -152,6 +152,8 @@ const AssignmentPage = () => {
                 } else {
                     return {bg: 'bg-danger', name: 'Готов'}
                 }
+            case 'created':
+                return {bg: 'bg-secondary', name: 'Создан'}
         }
 
     }, [])

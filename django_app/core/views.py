@@ -3,12 +3,12 @@ from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit
-
 from .consumers import ws_group_updates, EqNotificationActions
-from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess
+from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
+from .serializers import TechProcessSerializer
+from .services.assignment_generator import AssignmentGenerator
 from .services.check_schema import check_schema
 from .services.create_custom_tech_process import create_custom_tech_process
-from .serializers import TechProcessSerializer
 
 
 def import_orders(request):
@@ -124,29 +124,60 @@ def get_tech_processes(request):
 def set_tech_process(request):
     schema = request.data.get('schema')
     pin_code = request.data.get('pin_code')
-    series_id = request.data.get('series_id')
+    product_id = request.data.get('product_id')
+    mode = request.data.get('mode')
+
+    product = Product.objects.get(pk=product_id)
 
     if check_schema(schema):
-        technological_process = create_custom_tech_process(schema=schema, series_id=series_id)
+        technological_process = create_custom_tech_process(schema=schema, product_id=product.id)
         serializer = TechProcessSerializer
         data = serializer(technological_process, context={'request': request}).data
 
         Audit.objects.create(
             employee=Employee.objects.get(pin_code=pin_code),
             audit_type="edit",
-            details=f"Назначил специальный технологический процесс: {technological_process.name}, "
+            details=f"Назначил технологический процесс: {technological_process.name}, "
                     f"для изделия: {technological_process.product_set.first().name}"
         )
         """Делаем рассылку на обновление данных в WS"""
+        # TODO Переделать алгоритмы обновления
         ws_group_updates(
             pin_code=pin_code,
             notification_data={
                 '1': {
                     'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                    'data': series_id,
+                    'data': '',
                 }
             }
         )
+
+        if mode == 'with_current_assignments':
+            active_order_products = OrderProduct.objects.filter(
+                status="0",
+                product=product,
+            )
+
+            for order_product in active_order_products:
+                has_assignments_with_executor = Assignment.objects.filter(
+                    order_product=order_product,
+                    executor__isnull=False
+                ).exists()
+
+                if has_assignments_with_executor:
+                    return JsonResponse(
+                        {"error": f'Есть наряды с назначенными исполнителями в серии {order_product.series_id}.'
+                                  f'Тех процесс применен только к новым изделиям.'
+                         },
+                        status=400,
+                        json_dumps_params={"ensure_ascii": False}
+                    )
+
+            for order_product in active_order_products:
+                Assignment.objects.filter(
+                    order_product=order_product,
+                ).delete()
+                AssignmentGenerator().init_order_product_assignments(order_product=order_product)
 
         return JsonResponse({
             "data": data

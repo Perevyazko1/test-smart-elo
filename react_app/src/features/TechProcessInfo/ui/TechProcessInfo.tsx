@@ -1,112 +1,116 @@
-import React, {memo, useCallback, useEffect, useState} from 'react';
-import {useSelector} from "react-redux";
+import React, {memo, useEffect, useState} from 'react';
 
 import {classNames} from "shared/lib/classNames/classNames";
-import {eq_card} from "entities/EqPageCard";
-import {tech_process_schema} from "entities/TechnologicalProcess";
-import {TechProcessConstructor} from "widgets/TechProcessConstructor";
+import {product} from "entities/Product";
+import {tech_process_schema, technological_process} from "entities/TechnologicalProcess";
 import {TechProcesWidget} from "widgets/TechProcesWidget";
-import {TechProcessList} from "features/TechProcessList";
-import {getEmployeePinCode} from "entities/Employee";
-import {notificationsActions} from "widgets/Notification";
-import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
-import {useTechProcessMutation} from "../api/api";
-import {eqFiltersActions} from "pages/EqPageNew";
+import {TechProcessList} from "../../TechProcessList";
 
 interface TechProcessInfoProps {
-    eqCard: eq_card;
+    product: product;
     className?: string;
+    updCallback?: () => void;
 }
-
 
 export const TechProcessInfo = memo((props: TechProcessInfoProps) => {
     const {
+        updCallback,
         className,
     } = props;
 
-    const [eqCard, setEqCard] = useState<eq_card>(props.eqCard);
+    const [product, setProduct] = useState<product>(props.product);
+
+    const initialShowTechProcessList = () => {
+        return !product.technological_process;
+    }
+
+    const initialCurrentSchema = () => {
+        if (product.technological_process && !product.technological_process.image) {
+            return product.technological_process.schema
+        } else {
+            return {}
+        }
+    }
+
+    const initialCurrentTechProcess = () => {
+        if (product.technological_process && product.technological_process.image) {
+            return product.technological_process
+        } else {
+            return null
+        }
+    }
+
+    const [showTechProcessWidget, setShowTechProcessWidget] = useState<boolean>(false);
+    const [showTechProcessList, setShowTechProcessList] = useState<boolean>(initialShowTechProcessList());
+    const [currentSchema, setCurrentSchema] = useState<tech_process_schema>(initialCurrentSchema());
+    const [currentTechProcess, setCurrentTechProcess] = useState<technological_process | null>(initialCurrentTechProcess());
 
     useEffect(() => {
-        setEqCard(props.eqCard);
-    }, [props.eqCard]);
+        setProduct(props.product);
+    }, [props.product]);
 
+    const setConstructorClb = (schema: tech_process_schema) => {
+        setCurrentSchema(schema)
+        setShowTechProcessList(false)
+        setShowTechProcessWidget(true)
+    }
 
-    const dispatch = useAppDispatch();
-    const pinCode = useSelector(getEmployeePinCode);
+    const setTechProcessClb = (techProcess: technological_process) => {
+        setCurrentSchema(techProcess.schema)
+        setCurrentTechProcess(techProcess)
+        setShowTechProcessList(false)
+        setShowTechProcessWidget(true)
+    }
 
-    const [currentSchema, setCurrentSchema] = useState<tech_process_schema>({});
+    const editClb = () => {
+        const productWithTechProcess = !!product.technological_process;
+        const techProcessHasImage = !!product.technological_process?.image;
+        const showWidget = productWithTechProcess && !techProcessHasImage;
 
-    const [postTechProcess] = useTechProcessMutation();
+        setShowTechProcessList(true)
+        setShowTechProcessWidget(showWidget)
+        setCurrentSchema(showWidget ? product.technological_process?.schema || {} : {})
+        setCurrentTechProcess(null)
+    }
 
-    const techProcessSelected = useCallback(() => {
-        return !!eqCard?.product?.technological_process;
-    }, [eqCard?.product?.technological_process]);
-
-
-    const [showConstructor, setShowConstructor] = useState<boolean>(false);
-    const [showSelectedTechProcess, setShowSelectedTechProcess] = useState<boolean>(techProcessSelected());
-    const [showTechProcessList, setShowTechProcessList] = useState<boolean>(!techProcessSelected());
-
-    const techProcessListCallback = (schema: tech_process_schema) => {
-        setCurrentSchema(schema);
-        setShowConstructor(true);
-        setShowTechProcessList(false);
-    };
-
-    const constructorCancellationCallback = () => {
-        setShowConstructor(false);
-        if (!techProcessSelected()) {
-            setShowTechProcessList(true);
-            setShowSelectedTechProcess(false);
-        } else {
-            setShowTechProcessList(false);
-            setShowSelectedTechProcess(true);
-        }
-    };
-
-    const setTechProcess = async (schema: tech_process_schema) => {
-        if (pinCode) {
-            try {
-                await postTechProcess({series_id: eqCard.series_id, schema: schema, pin_code: pinCode}).unwrap();
-                dispatch(eqFiltersActions.addNotRelevantId(eqCard.series_id));
-                setShowSelectedTechProcess(true);
-                setShowTechProcessList(false);
-                setShowConstructor(false);
-            } catch (error) {
-                dispatch(notificationsActions.addNotification({
-                    date: Date.now(),
-                    type: "ошибка",
-                    title: "Ошибка сервера",
-                    body: "Ошибка обработки запроса",
-                    notAutoHide: true
-                }))
-            }
-        }
+    const hideAll = () => {
+        setShowTechProcessList(false)
+        setShowTechProcessWidget(false)
+        setCurrentSchema({})
+        setCurrentTechProcess(null)
     }
 
     return (
         <div className={classNames('', {}, [className])}>
-            {showConstructor &&
-                <TechProcessConstructor
-                    className={'mb-3'}
-                    schema={currentSchema}
-                    onSubmitData={setTechProcess}
-                    onCancellation={constructorCancellationCallback}
-                />
+            {
+                product.technological_process &&
+                <>
+                    <TechProcesWidget
+                        product={product}
+                        editClb={editClb}
+                        closeEditClb={hideAll}
+                        editState={showTechProcessList || showTechProcessWidget}
+                    />
+                    <hr/>
+                </>
+
             }
-            {showSelectedTechProcess &&
+
+            {showTechProcessWidget &&
                 <TechProcesWidget
-                    eqCard={eqCard}
-                    hasChanged={showTechProcessList}
-                    cancelCallback={() => setShowTechProcessList(false)}
-                    editCallback={() => setShowTechProcessList(true)}
+                    product={product}
+                    schema={currentSchema || currentTechProcess?.schema}
+                    imageUrl={currentTechProcess?.image}
+                    updCallback={updCallback}
+                    closeEditClb={hideAll}
                 />
             }
+
             {showTechProcessList &&
                 <TechProcessList
-                    constructorCallback={techProcessListCallback}
-                    submitCallback={setTechProcess}
+                    constructorCallback={(schema) => setConstructorClb(schema)}
+                    submitCallback={(schema) => setTechProcessClb(schema)}
                 />
             }
         </div>

@@ -13,7 +13,11 @@
   overflow-y: auto;
 }
 
-.stickyWrapper {
-  position: sticky;
-  top: -2px;
+.sliderBlock {
+  width: 320px;
+  height: 320px;
+}
+
+.textBlock {
+  min-width: 300px;
 }

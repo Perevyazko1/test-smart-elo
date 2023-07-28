@@ -219,6 +219,7 @@ class ProductionStep(models.Model):
     class Meta:
         verbose_name = 'Этап производства'
         verbose_name_plural = 'Этапы производства'
+        unique_together = ['department', 'product']
 
     # Ссылка на отдел производства и на этапы производства
     department = models.ForeignKey(Department, on_delete=models.CASCADE, verbose_name='production_steps')
@@ -248,6 +249,8 @@ class ProductionStep(models.Model):
         blank=True,
     )
 
+    is_active = models.BooleanField('Этап задействован в производстве', default=True)
+
     def __str__(self):
         return '{}'.format(f'{self.department} {self.product}')
 
@@ -261,6 +264,7 @@ class Assignment(models.Model):
         unique_together = ['number', 'order_product', 'department']
 
     STATUS_CHOICES = [
+        ("created", "Создан"),
         ("await", "Ожидает назначения"),
         ("in_work", "В работе"),
         ("ready", "Выполнен"),

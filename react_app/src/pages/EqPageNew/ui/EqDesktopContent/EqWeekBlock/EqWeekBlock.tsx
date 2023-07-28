@@ -31,19 +31,19 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
     const getEarnedSum = (Math.trunc(weekData?.earned || 0)).toLocaleString()
 
     const getWeekString = () => {
-        if (weekBlockWidth > 570) {
+        if (weekBlockWidth > 650) {
             return `Неделя ${weekData?.week} 
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
             | Заработано: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 470) {
+        } else if (weekBlockWidth > 550) {
             return `Нед. ${weekData?.week} 
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
             | Зараб.: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 380) {
+        } else if (weekBlockWidth > 450) {
             return `Нед. ${weekData?.week} | Зараб.: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 270) {
+        } else if (weekBlockWidth > 350) {
             return `Нед. ${weekData?.week}`;
         } else {
             return `${weekData?.week}`;

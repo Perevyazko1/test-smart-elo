@@ -1,6 +1,6 @@
 import { assignment } from "entities/Assignment";
 
-type Status = 'in_work' | 'await' | 'ready';
+type Status = 'in_work' | 'await' | 'ready' | 'created';
 type AssignmentList = Record<Status, assignment[]>;
 
 export const distributeAssignments = (assignments: assignment[]): AssignmentList =>
@@ -18,4 +18,5 @@ export const distributeAssignments = (assignments: assignment[]): AssignmentList
     in_work: [],
     await: [],
     ready: [],
+    created: [],
   } as AssignmentList);

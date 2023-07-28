@@ -30,7 +30,7 @@ export const Checkbox = memo((props: CheckboxProps) => {
                 {...otherProps}
             />
             <label
-                className="form-check-label fw-bold mx-xl-3 my-xl-0"
+                className="form-check-label mx-xl-3 my-xl-0"
                 htmlFor={id}
             >
                 {children}

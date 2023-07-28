@@ -1,7 +1,7 @@
 import {memo} from 'react';
 import {Button, Table} from "react-bootstrap";
 
-import {tech_process_schema} from "entities/TechnologicalProcess";
+import {tech_process_schema, technological_process} from "entities/TechnologicalProcess";
 import {GET_STATIC_URL} from "shared/const/server_config";
 
 import {useTechProcessList} from "../api/api";
@@ -9,7 +9,7 @@ import {useTechProcessList} from "../api/api";
 interface TechProcessListProps {
     className?: string;
     constructorCallback: (schema: tech_process_schema) => void;
-    submitCallback: (schema: tech_process_schema) => void;
+    submitCallback: (techProcess: technological_process) => void;
 }
 
 
@@ -61,7 +61,7 @@ export const TechProcessList = memo((props: TechProcessListProps) => {
                                 >
                                     <Button type={'button'}
                                             variant={'success'}
-                                            onClick={() => submitCallback(tech_process.schema)}
+                                            onClick={() => submitCallback(tech_process)}
                                     >
                                         Выбрать
                                     </Button>

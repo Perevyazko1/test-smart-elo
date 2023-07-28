@@ -12,8 +12,8 @@ interface TechProcessWidgetProps {
     disabled?: boolean,
     className?: string,
     schema?: tech_process_schema,
-    onSubmitData?: (data: tech_process_schema) => void,
-    onCancellation?: () => void,
+    callback?: (schema: tech_process_schema) => void,
+    isValidClb?: (valid: boolean) => void,
 }
 
 
@@ -22,10 +22,10 @@ export const TechProcessConstructor = memo((props: TechProcessWidgetProps) => {
         disabled = false,
         className,
         schema,
-        onSubmitData,
-        onCancellation,
+        callback,
+        isValidClb,
         ...otherProps
-    } = props
+    } = props;
 
     const [actualSchema, setActualSchema] = useState<tech_process_schema>(schema || {})
     const [schemaValid, setSchemaValid] = useState<boolean>(checkSchemaValid(actualSchema))
@@ -57,7 +57,18 @@ export const TechProcessConstructor = memo((props: TechProcessWidgetProps) => {
 
     useEffect(() => {
         setSchemaValid(checkSchemaValid(actualSchema))
+        // eslint-disable-next-line
     }, [actualSchema])
+
+    useEffect(() => {
+        if (callback && isValidClb) {
+            if (schemaValid) {
+                callback(actualSchema)
+            }
+            isValidClb(schemaValid)
+        }
+        // eslint-disable-next-line
+    }, [schemaValid])
 
     const mods: Mods = {};
 
@@ -139,30 +150,6 @@ export const TechProcessConstructor = memo((props: TechProcessWidgetProps) => {
                 ))}
                 </tbody>
             </Table>
-
-            <div>
-
-                {!disabled && onSubmitData &&
-                    <button
-                        disabled={!schemaValid}
-                        type={'button'}
-                        className={'btn btn-success'}
-                        onClick={() => onSubmitData(actualSchema)}
-                    >
-                        Подтвердить
-                    </button>
-                }
-
-                {!disabled && onCancellation &&
-                    <button
-                        type={'button'}
-                        className={'btn btn-warning mx-3'}
-                        onClick={() => onCancellation()}
-                    >
-                        Отмена
-                    </button>
-                }
-            </div>
 
         </Container>
     );
