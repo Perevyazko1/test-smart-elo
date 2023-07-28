@@ -44,16 +44,8 @@ def init_data():
             if not production_step.is_active:
                 continue
             """Игнорируем этапы старт и готов"""
-            if production_step.department.number in [0, 50]:
+            if production_step.department.number in [0, 1, 50]:
                 continue
-            """Если есть наряд в разработке с таким изделием - переходим к следующей серии производства"""
-            if production_step.department.number == 1:
-                assignment_exists = Assignment.objects.filter(
-                    order_product__product=product,
-                    department__number=1
-                ).exclude(status='ready', inspector__isnull=False).exists()
-                if assignment_exists:
-                    break
 
             """Для остальных отделов серии создаем наряды в статусе создан"""
             """Получаем все наряды"""
