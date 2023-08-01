@@ -39,6 +39,10 @@ class CreateOrderProductEntities:
             start_index += 1
 
     def execute(self, order_entity: OrderEntity) -> list[OrderProductEntity]:
+        # Если в заказе нет позиций - возвращаем пустой массив
+        if len(order_entity.products_info) == 0:
+            return []
+
         result = []
 
         order_product_entity = self._get_base_order_product(order_entity)
