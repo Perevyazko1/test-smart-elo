@@ -59,9 +59,10 @@ def update_assignments(request):
                     assignments = Assignment.objects.filter(
                         order_product=assignment.order_product
                     ).exclude(id=assignment_id)
+
                     count_all = assignments.count()
                     count_await = assignments.filter(
-                        status='await',
+                        status__in=['await', 'created'],
                     ).count()
 
                     if count_await < count_all:

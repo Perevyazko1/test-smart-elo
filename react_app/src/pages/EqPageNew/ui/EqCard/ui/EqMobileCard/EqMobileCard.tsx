@@ -4,6 +4,7 @@ import {Button, Card, Col} from "react-bootstrap";
 import {eq_card} from "entities/EqPageCard";
 import {OpModal} from "features/OpInfo";
 import {Slider} from "shared/ui/Slider/Slider";
+import {IndicatorWrapper} from "shared/ui/IndicatorWrapper/IndicatorWrapper";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 import {NumbersBlock} from "./NumbersBlock/NumbersBlock";
@@ -11,7 +12,6 @@ import {createEqImageUrls} from "../../model/lib/createEqImageUrls/createEqImage
 import {distributeAssignments} from "../../model/lib/distributeAssignments/distributeAssignments";
 
 import cls from "./EqMobileCard.module.scss";
-import {IndicatorWrapper} from "../../../../../../shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 
 interface EqMobileCardProps {
@@ -149,10 +149,12 @@ export const EqMobileCard = memo((props: EqMobileCardProps) => {
                                 <Col
                                     md={6}
                                     sm={12}
-                                    className={classNames(cls.countInfo, {}, [`${info.count_in_work === 0 ? 'text-muted' : ''}`])}
+                                    className={classNames(cls.countInfo, {}, [
+                                        `${info.count_in_work === 0 && info.count_all === 0  ? 'text-muted' : ''}`
+                                    ])}
                                     key={info.full_name}
                                 >
-                                    {info.full_name}: {info.count_in_work}
+                                    {info.full_name}: {info.count_in_work} ({info.count_all})
                                 </Col>
                             ))}
                         </div>

@@ -15,6 +15,7 @@ type card_info = {
 type department_info = {
     full_name: string;
     count_in_work: number;
+    count_all: number;
 }
 
 

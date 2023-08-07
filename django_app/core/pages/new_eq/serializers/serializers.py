@@ -19,6 +19,7 @@ class EqOrderProductInfoSerializer(serializers.Serializer):
 class EqDepartmentInfoSerializer(serializers.Serializer):
     full_name = serializers.CharField()
     count_in_work = serializers.IntegerField()
+    count_all = serializers.IntegerField()
 
 
 class EqCardSerializer(serializers.ModelSerializer):

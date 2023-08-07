@@ -186,10 +186,11 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
                         <div className={classNames(cls.departmentInfoBlock, {}, ['fs-7', wrapper])}>
                             {eqCard.department_info.map((info) => (
                                 <div
-                                    className={classNames(cls.countInfo, {}, [`${info.count_in_work === 0 ? 'text-muted' : ''}`])}
+                                    className={classNames(cls.countInfo, {}, [
+                                        `${info.count_in_work === 0 && info.count_all === 0 ? 'text-muted' : ''}`])}
                                     key={info.full_name}
                                 >
-                                    {info.full_name}: {info.count_in_work}
+                                    {info.full_name}: {info.count_in_work} ({info.count_all})
                                     <hr className={cls.contentHr}/>
                                 </div>
                             ))}
