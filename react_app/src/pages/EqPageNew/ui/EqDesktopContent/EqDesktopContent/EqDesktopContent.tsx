@@ -27,6 +27,7 @@ const EqDesktopContent = () => {
         inWorkHeight,
         readyHeight,
         isDragging,
+        resetSize,
         drag
     } = useResizableBlocks(windowWidth, windowHeight);
 
@@ -59,7 +60,7 @@ const EqDesktopContent = () => {
                         cls={cls.inWorkBlock}
                     />
 
-                    <EqWeekBlock drag={drag} isDragging={isDragging}/>
+                    <EqWeekBlock drag={drag} isDragging={isDragging} onDoubleClick={resetSize}/>
 
                     <EqCardSection
                         listType={'ready'}

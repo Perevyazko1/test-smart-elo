@@ -1,12 +1,13 @@
-import React, {memo, ReactNode} from 'react';
+import React, {memo, ReactNode, HTMLAttributes} from 'react';
 import {Spinner} from 'react-bootstrap'
 
 import {classNames} from "../../lib/classNames/classNames";
 import cls from './StickyHeader.module.scss';
 
-interface StickyHeaderProps {
-    children?: ReactNode
-    loading?: boolean
+interface StickyHeaderProps extends HTMLAttributes<HTMLDivElement> {
+    children?: ReactNode;
+    loading?: boolean;
+    className?: string;
 }
 
 
@@ -14,12 +15,17 @@ export const StickyHeader = memo((props: StickyHeaderProps) => {
     const {
         children,
         loading = false,
+        className,
         ...otherProps
-    } = props
+    } = props;
 
     return (
         <div
-            className={classNames(cls.stickyHeader, {}, ["bg-light bg-gradient border rounded border-2 border-dark"])}
+            className={classNames(
+                cls.stickyHeader,
+                {},
+                ["bg-light bg-gradient border rounded border-2 border-dark", className]
+            )}
             data-bs-smooth-scroll="true"
             {...otherProps}
         >

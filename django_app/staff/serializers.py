@@ -20,6 +20,7 @@ class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
             'id',
             'name',
             'number',
+            'color',
             'single',
             'piecework_wages',
         ]

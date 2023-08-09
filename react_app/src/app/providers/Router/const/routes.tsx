@@ -7,12 +7,14 @@ import {ForbiddenPage} from "pages/ForbiddenPage";
 import {AssignmentPage} from "pages/AssignmentPage";
 import {ProductsPage} from "pages/ProductsPage";
 import {ProductDetailsPage} from "pages/ProductDetailsPage";
+import {TaxControlPageNew} from "../../../../pages/TaxControlPageNew";
 
 export enum AppRoutes {
     EQ = 'eq',
     TEST = 'test_page',
     ASSIGNMENTS = 'assignments',
     TAX = 'tax_control',
+    TAX_NEW = 'tax_control_new',
     FORBIDDEN = 'forbidden_page',
     PRODUCTS = 'products',
     PRODUCT_DETAILS = 'products/:id',
@@ -87,6 +89,14 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
         urlParams: [],
         queryParams: [],
         inNavigate: false,
+    },
+    [AppRoutes.TAX_NEW]: {
+        routeName: 'Новая тарификация',
+        element: <TaxControlPageNew/>,
+        permissions: [EmployeePermissions.TARIFICATION_PAGE],
+        urlParams: [],
+        queryParams: [],
+        inNavigate: true,
     },
 
     [AppRoutes.DEFAULT]: {

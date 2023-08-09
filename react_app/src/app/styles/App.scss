@@ -38,7 +38,8 @@ b, strong, .fw-bold {
   font-family: 'Montserrat-Bold', sans-serif;
 }
 
-@import "~bootstrap/scss/bootstrap";
+@import "bootstrap/scss/bootstrap";
+
 
 [data-bs-theme=dark] {
   --bs-tertiary-bg-rgb: 00, 00, 00;
@@ -67,9 +68,9 @@ b, strong, .fw-bold {
 }
 
 .unscaled {
-  transform: scale(1);
-  opacity: 1;
-  animation: 200ms unscaled, opacity ease-out;
+  //transform: scale(1);
+  //opacity: 1;
+  //animation: 200ms unscaled, opacity ease-out;
 }
 
 @keyframes unscaled {

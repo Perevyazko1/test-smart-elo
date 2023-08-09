@@ -1,4 +1,4 @@
-import React, {memo, useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Col} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
@@ -28,7 +28,7 @@ interface EqCardProps {
 }
 
 
-export const EqDesktopCard = memo((props: EqCardProps) => {
+export const EqDesktopCard = (props: EqCardProps) => {
     const {
         blockWidth,
         eqCard,
@@ -48,7 +48,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
     ])
 
-    const getAction = useCallback((first: boolean) => {
+    const getAction = (first: boolean) => {
         if (cardType === 'await') {
             return Actions.AWAIT_TO_IN_WORK
         } else if (cardType === 'in_work' && first) {
@@ -60,7 +60,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
         } else {
             return Actions.READY_TO_IN_WORK
         }
-    }, [cardType])
+    }
 
     const getButtonCallback = (first: boolean) => {
         setCardDisabled(true)
@@ -91,7 +91,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
         setAssignmentsLists(createEqNumberLists(eqCard.assignments, seriesSize))
     }, [eqCard, seriesSize])
 
-    const showFirstButton = useCallback(() => {
+    const showFirstButton = () => {
         if (blockWidth > 600) {
             if (assignmentsLists?.primary?.length > 0) {
                 if (cardType === 'in_work' || cardType === 'await') {
@@ -105,9 +105,9 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
             }
         }
         return false;
-    }, [assignmentsLists?.primary?.length, blockWidth, cardType, confirmAssignment, eqCard?.product?.technological_process])
+    }
 
-    const showSecondButton = useCallback(() => {
+    const showSecondButton = () => {
         if (blockWidth > 600) {
             if (cardType === 'await') {
                 return false;
@@ -117,7 +117,7 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
             }
         }
         return false;
-    }, [assignmentsLists?.primary?.length, blockWidth, cardType])
+    }
 
     const wrapper = 'border border-secondary border-1 rounded h-100'
 
@@ -212,4 +212,4 @@ export const EqDesktopCard = memo((props: EqCardProps) => {
             </div>
         </Col>
     );
-});
+};

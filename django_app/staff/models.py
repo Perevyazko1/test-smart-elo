@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+from staff.service import validate_color
+
 
 class Department(models.Model):
     """Класс хранящий данные об отделах. У каждого отдела свой уникальный номер"""
@@ -13,6 +15,7 @@ class Department(models.Model):
 
     single = models.BooleanField('Отдел разово участвует в производстве', blank=True)
     piecework_wages = models.BooleanField('В отделе установлена сдельная оплата труда', default=False)
+    color = models.CharField(max_length=9, validators=[validate_color], default='#ffffff')
 
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.name}')

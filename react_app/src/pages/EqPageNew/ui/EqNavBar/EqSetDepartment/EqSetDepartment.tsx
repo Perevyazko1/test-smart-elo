@@ -36,6 +36,7 @@ export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'ch
         <NavDropdown
             title={currentDepartment?.name || ''}
             variant={"outline-light"}
+            // style={{backgroundColor: currentDepartment?.color}}
             {...props}
         >
             <Dropdown.ItemText>

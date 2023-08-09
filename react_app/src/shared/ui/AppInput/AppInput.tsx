@@ -26,7 +26,7 @@ export const AppInput = memo((props: InputProps) => {
     return (
         <input
             data-bs-theme={theme}
-            className={classNames("form-control", mods, [className])}
+            className={classNames("form-control fw-bold", mods, [className])}
             {...otherProps}
         >
             {children}

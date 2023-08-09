@@ -1,5 +1,6 @@
 import React, {useEffect} from 'react';
 import {useSelector} from "react-redux";
+import {Row} from "react-bootstrap";
 
 import {StateSchema} from "app/providers/StoreProvider";
 import {PageWithPagination} from "shared/ui/PageWithPagination/PageWithPagination";
@@ -18,6 +19,7 @@ import {
 import {fetchListData} from "../../../model/service/fetchListData";
 import {getListInfo} from "../../../model/selectors/propsSelectors/propsSelectors";
 import {listsHasUpdated} from "../../../model/selectors/filtersSelectors/filtersSelectors";
+
 
 interface EqCardSectionProps {
     listType: 'await' | 'in_work' | 'ready';
@@ -91,10 +93,16 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             }}
             scroll_callback={fetchNextPage}
         >
-            <div className="pt-1 px-1">
-                <StickyHeader loading={listProps.isLoading}>
-                    {widthPx > 375 && headerName}
-                </StickyHeader>
+            <Row className="pt-1 p-0 m-0">
+                <div className={'px-1'}>
+                    <StickyHeader
+                        loading={listProps.isLoading}
+                        // className={'mx-1'}
+                        // style={{backgroundColor: `${currentDepartment?.color}`}}
+                    >
+                        {widthPx > 375 && headerName}
+                    </StickyHeader>
+                </div>
 
 
                 {cardList.map((eq_card) => (
@@ -107,7 +115,7 @@ export const EqCardSection = (props: EqCardSectionProps) => {
                 ))}
 
                 {listProps?.isLoading && cardList.length === 0 && skeleton(true)}
-            </div>
+            </Row>
         </PageWithPagination>
     );
 };

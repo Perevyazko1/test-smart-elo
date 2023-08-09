@@ -1,5 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useDrag} from 'react-dnd';
+
 
 const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
     const [leftBlockWidth, setLeftBlockWidth] = useState(windowWidth / 2);
@@ -18,7 +19,7 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
             setInWorkHeight(offset_px - 60);
             setReadyHeight(windowHeight - offset_px + 20);
         }
-    };
+    }
 
     const adjustWidth = (offset_px: number) => {
         if (offset_px < 210) {
@@ -31,7 +32,14 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
             setLeftBlockWidth(offset_px);
             setRightBlockWidth(window.innerWidth - offset_px);
         }
-    };
+    }
+
+    const resetSize = () => {
+        setLeftBlockWidth(windowWidth / 2)
+        setRightBlockWidth(windowWidth / 2)
+        setInWorkHeight(windowHeight / 2 - 20)
+        setReadyHeight(windowHeight / 2 - 20)
+    }
 
     const [{isDragging}, drag] = useDrag(() => ({
         type: 'mainDrag',
@@ -68,6 +76,7 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
         inWorkHeight,
         readyHeight,
         isDragging,
+        resetSize,
         drag
     }
 }

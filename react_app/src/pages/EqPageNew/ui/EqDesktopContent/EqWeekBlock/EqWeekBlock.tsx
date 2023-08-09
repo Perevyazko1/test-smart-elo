@@ -11,8 +11,12 @@ import {getWeekData} from "../../../model/selectors/filtersSelectors/filtersSele
 import {fetchWeekData} from "../../../model/service/fetchWeekData";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
 import {eqContentDesktopActions} from "../../../model/slice/eqContentDesktopSlice";
+import useDoubleTap from "../../../../../shared/lib/hooks/useDoubleTap/useDoubleTap";
+import {getCurrentDepartment} from "../../../../../entities/Employee";
+import {useAppSelector} from "../../../../../shared/lib/hooks/useAppSelector/useAppSelector";
 
 interface EqWeekBlockProps {
+    onDoubleClick?: () => void;
     isDragging?: boolean;
     drag?: ConnectDragSource;
 }
@@ -20,13 +24,18 @@ interface EqWeekBlockProps {
 
 export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
     const {
+        onDoubleClick,
         isDragging,
-        drag
-    } = props
+        drag,
+    } = props;
 
     const dispatch = useAppDispatch();
-    const weekData = useSelector(getWeekData);
+    const weekData = useAppSelector(getWeekData);
+    const currentDepartment = useAppSelector(getCurrentDepartment);
     const {width: weekBlockWidth, ref: weekBlockRef} = useDivWidth();
+
+
+    const handleDoubleTap = useDoubleTap(onDoubleClick);
 
     const getEarnedSum = (Math.trunc(weekData?.earned || 0)).toLocaleString()
 
@@ -73,7 +82,7 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
         <div
             className="border border-3 border-dark rounded m-0 d-flex align-items-center justify-content-between px-3"
             style={{
-                background: "rgba(255,224,115,0.93)",
+                background: currentDepartment?.color || "rgba(255,224,115,0.93)",
                 opacity: isDragging ? 0.5 : 1,
                 width: "100%",
                 height: "40px",
@@ -136,6 +145,8 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
                          cursor: 'grab',
                      }}
                      ref={drag}
+                     onDoubleClick={onDoubleClick}
+                     onTouchEnd={(e) => handleDoubleTap(e)}
                 >
                     <i className="fas fa-compress-alt text-light fs-3"/>
                 </div>
