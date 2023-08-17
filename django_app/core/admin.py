@@ -20,7 +20,7 @@ class ProductAdmin(admin.ModelAdmin):
     def product_image(obj: Product):
         product_image = ProductPicture.objects.filter(product=obj).first()
         if product_image:
-            return mark_safe(f"<img src='/media/{product_image.image}' style='max-height: 25px;'>")
+            return mark_safe(f"<img src='/media/{product_image.thumbnail}' style='max-height: 25px;'>")
         return 'Без изобр.'
 
 
