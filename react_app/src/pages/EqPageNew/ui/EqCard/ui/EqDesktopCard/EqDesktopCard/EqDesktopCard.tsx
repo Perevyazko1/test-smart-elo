@@ -63,6 +63,14 @@ export const EqDesktopCard = (props: EqCardProps) => {
         }
     }
 
+    const getPlannedDate = () => {
+        if (eqCard.order.planned_date) {
+            let parts = eqCard.order.planned_date.split('-');
+            return `${parts[2]}.${parts[1]}`;
+        }
+        return '';
+    }
+
     const getButtonCallback = (first: boolean) => {
         setCardDisabled(true)
         dispatch(fetchEqUpdateCard({
@@ -148,6 +156,7 @@ export const EqDesktopCard = (props: EqCardProps) => {
                     >
                         <Slider
                             price={eqCard.card_info.tariff}
+                            date={getPlannedDate()}
                             images={sliderImages.images}
                             thumbnails={sliderImages.thumbnails}
                             width={'100%'}

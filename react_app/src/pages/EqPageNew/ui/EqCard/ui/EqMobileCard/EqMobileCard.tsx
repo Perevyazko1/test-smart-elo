@@ -33,6 +33,14 @@ export const EqMobileCard = memo((props: EqMobileCardProps) => {
         'bg-dark border rounded border-secondary': true,
     };
 
+    const getPlannedDate = () => {
+        if (eqCard.order.planned_date) {
+            let parts = eqCard.order.planned_date.split('-');
+            return `${parts[2]}.${parts[1]}`;
+        }
+        return '';
+    }
+
     const getCardIsActive = useCallback(() => {
         return eqCard.assignments.some(assignment => assignment.inspector === null);
     }, [eqCard.assignments])
@@ -73,6 +81,7 @@ export const EqMobileCard = memo((props: EqMobileCardProps) => {
                     >
                         <Slider
                             price={eqCard.card_info.tariff}
+                            date={getPlannedDate()}
                             images={sliderImages.images}
                             thumbnails={sliderImages.thumbnails}
                             width={'100%'}
@@ -156,7 +165,7 @@ export const EqMobileCard = memo((props: EqMobileCardProps) => {
                                     md={6}
                                     sm={12}
                                     className={classNames(cls.countInfo, {}, [
-                                        `${info.count_in_work === 0 && info.count_all === 0  ? 'text-muted' : ''}`
+                                        `${info.count_in_work === 0 && info.count_all === 0 ? 'text-muted' : ''}`
                                     ])}
                                     key={info.full_name}
                                 >

@@ -16,6 +16,7 @@ import {GET_STATIC_URL} from "../../const/server_config";
 
 interface SliderProps {
     price?: number,
+    date?: string,
     images?: string[],
     thumbnails?: string[],
     width?: string,
@@ -27,6 +28,7 @@ interface SliderProps {
 export const Slider = memo((props: SliderProps) => {
     const {
         price,
+        date,
         images,
         thumbnails,
         width = '100px',
@@ -36,7 +38,7 @@ export const Slider = memo((props: SliderProps) => {
 
     const [showModal, setShowModal] = useState(false);
 
-    const getTargetImages =  thumbnails || images;
+    const getTargetImages = thumbnails || images;
 
     return (
         <Swiper
@@ -68,6 +70,23 @@ export const Slider = memo((props: SliderProps) => {
                         {price}
                     </h5>
                 </div>
+
+                {date &&
+                    <div
+                        style={{
+                            position: "absolute",
+                            top: "0px",
+                            margin: "auto",
+                            zIndex: "999",
+                            opacity: "0.75",
+                            pointerEvents: "none",
+                        }}
+                    >
+                        <h5 className={"fw-bolder bg-light border rounded fs-6"}>
+                            {date}
+                        </h5>
+                    </div>
+                }
             </>
 
 
