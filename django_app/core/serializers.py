@@ -19,19 +19,26 @@ class TechProcessSerializer(serializers.ModelSerializer):
 
 class ProductPicturesSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = ProductPicture
-        fields = ['id', 'image']
+        fields = ['id', 'image', 'thumbnail']
 
     def get_image(self, obj):
         if obj.image:
             return obj.image.url
         return None
 
+    def get_thumbnail(self, obj):
+        if obj.thumbnail:
+            return obj.thumbnail.url
+        return None
+
 
 class FabricSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
+    thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         model = Fabric
@@ -41,11 +48,17 @@ class FabricSerializer(serializers.ModelSerializer):
             'name',
             'image_filename',
             'image',
+            'thumbnail',
         ]
 
     def get_image(self, obj):
         if obj.image:
             return obj.image.url
+        return None
+
+    def get_thumbnail(self, obj):
+        if obj.thumbnail:
+            return obj.thumbnail.url
         return None
 
 

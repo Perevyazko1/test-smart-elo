@@ -21,10 +21,11 @@ const EqPageNew = () => {
 
     return (
         <DynamicModuleLoader reducers={initialReducers}>
-            <Container style={{width: "100vw", height: "100vh", background: "var(--bs-gray-300)"}}
-                       className={'m-0 p-0'}
-                       fluid
-                       data-bs-theme={'dark'}
+            <Container
+                style={{width: "100vw", height: "100vh", background: "var(--bs-gray-300)"}}
+                className={'m-0 p-0'}
+                fluid
+                data-bs-theme={'dark'}
             >
 
                 <EqNavbar isDesktop={isDesktopOrLaptop}/>

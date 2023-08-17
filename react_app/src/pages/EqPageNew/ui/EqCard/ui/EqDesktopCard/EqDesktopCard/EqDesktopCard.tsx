@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Col} from "react-bootstrap";
 
 import {eq_card} from "entities/EqPageCard";
-import {EmployeePermissions, getEmployeeHasPermissions} from "entities/Employee";
+import {EmployeePermissions, getCurrentDepartment, getEmployeeHasPermissions} from "entities/Employee";
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
@@ -34,11 +34,12 @@ export const EqDesktopCard = (props: EqCardProps) => {
         eqCard,
         cardType,
         className,
-    } = props
+    } = props;
 
     const dispatch = useAppDispatch();
     const sliderImages = createEqImageUrls(eqCard);
     const seriesSize = useAppSelector(getSeriesSize);
+    const currentDepartment = useAppSelector(getCurrentDepartment);
     const checkPermissions = useAppSelector(getEmployeeHasPermissions);
     const [assignmentsLists, setAssignmentsLists] = useState(createEqNumberLists(eqCard.assignments, seriesSize));
 
@@ -46,7 +47,7 @@ export const EqDesktopCard = (props: EqCardProps) => {
 
     const confirmAssignment = checkPermissions([
         EmployeePermissions.ELO_CONFIRM_ASSIGNMENT
-    ])
+    ]);
 
     const getAction = (first: boolean) => {
         if (cardType === 'await') {
@@ -145,7 +146,13 @@ export const EqDesktopCard = (props: EqCardProps) => {
                     <div
                         className={classNames(cls.sliderBlock, {}, [wrapper])}
                     >
-                        <Slider price={eqCard.card_info.tariff} images={sliderImages} width={'100%'} height={'100%'}/>
+                        <Slider
+                            price={eqCard.card_info.tariff}
+                            images={sliderImages.images}
+                            thumbnails={sliderImages.thumbnails}
+                            width={'100%'}
+                            height={'100%'}
+                        />
                     </div>
 
                     <EqCardCounts eqCard={eqCard} className={wrapper}/>
@@ -167,7 +174,10 @@ export const EqDesktopCard = (props: EqCardProps) => {
                     </div>
 
                     {blockWidth > 600 &&
-                        <div className={classNames(cls.orderProjectBlock, {}, ['fs-7', wrapper])}>
+                        <div
+                            className={classNames(cls.orderProjectBlock, {}, ['fs-7', wrapper])}
+                            style={{backgroundColor: currentDepartment?.color}}
+                        >
                             <div>
                                 Заказ:
                                 <br/>

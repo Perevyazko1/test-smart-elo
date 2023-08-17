@@ -1,21 +1,26 @@
-import {memo} from 'react';
+import React, {memo, useState} from 'react';
 
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination} from "swiper";
+
+import {ModalSlider} from "widgets/ModalSlider/ui/ModalSlider";
+
 import cls from './Slider.module.scss';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-
 import {GET_STATIC_URL} from "../../const/server_config";
+
 
 interface SliderProps {
     price?: number,
     images?: string[],
+    thumbnails?: string[],
     width?: string,
     height?: string,
+    clickable?: boolean,
 }
 
 
@@ -23,9 +28,15 @@ export const Slider = memo((props: SliderProps) => {
     const {
         price,
         images,
+        thumbnails,
         width = '100px',
         height = '100px',
-    } = props
+        clickable = true,
+    } = props;
+
+    const [showModal, setShowModal] = useState(false);
+
+    const getTargetImages =  thumbnails || images;
 
     return (
         <Swiper
@@ -46,7 +57,7 @@ export const Slider = memo((props: SliderProps) => {
                 <div
                     style={{
                         position: "absolute",
-                        bottom: "5px",
+                        bottom: "-8px",
                         margin: "auto",
                         zIndex: "999",
                         opacity: "0.75",
@@ -60,7 +71,7 @@ export const Slider = memo((props: SliderProps) => {
             </>
 
 
-            {images?.length && images.map((image_url) => (
+            {getTargetImages?.length && getTargetImages.map((image_url) => (
                 <SwiperSlide
                     style={{width: width, height: height}}
                     className={"d-flex justify-content-center align-items-center py-1"}
@@ -72,9 +83,12 @@ export const Slider = memo((props: SliderProps) => {
                         className="rounded m-0 p-0"
                         alt={"Slide"}
                         loading={"lazy"}
+                        onClick={() => setShowModal(true)}
                     />
                 </SwiperSlide>
             ))}
+
+            {showModal && clickable && <ModalSlider onHide={() => setShowModal(false)} urls={images || []}/>}
         </Swiper>
     );
 });

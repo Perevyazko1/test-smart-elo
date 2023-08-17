@@ -1,7 +1,6 @@
 import React, {memo, useEffect} from 'react';
 import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
-import {useSelector} from "react-redux";
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
