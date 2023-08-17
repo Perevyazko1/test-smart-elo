@@ -2,7 +2,4 @@
 /venv/
 /.idea/
 /static/
-staff/__pycache__/
-staff/migrations/__pycache__/
-core/__pycache__/
-core/migrations/__pycache__/
+*.pyc
