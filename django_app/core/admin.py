@@ -36,7 +36,7 @@ class ProductPictureAdmin(admin.ModelAdmin):
 
     @staticmethod
     def get_product_image(obj: ProductPicture):
-        return mark_safe(f"<img src='/media/{obj.image}' style='max-height: 50px;'>")
+        return mark_safe(f"<img src='/media/{obj.thumbnail}' style='max-height: 50px;'>")
 
     @staticmethod
     def get_preview(obj: ProductPicture):

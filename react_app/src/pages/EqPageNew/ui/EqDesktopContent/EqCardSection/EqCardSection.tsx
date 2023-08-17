@@ -94,15 +94,11 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             scroll_callback={fetchNextPage}
         >
             <Row className="pt-1 p-0 m-0">
-                <div className={'px-1'}>
-                    <StickyHeader
-                        loading={listProps.isLoading}
-                        // className={'mx-1'}
-                        // style={{backgroundColor: `${currentDepartment?.color}`}}
-                    >
-                        {widthPx > 375 && headerName}
-                    </StickyHeader>
-                </div>
+                <StickyHeader
+                    loading={listProps.isLoading}
+                >
+                    {widthPx > 375 && headerName}
+                </StickyHeader>
 
 
                 {cardList.map((eq_card) => (

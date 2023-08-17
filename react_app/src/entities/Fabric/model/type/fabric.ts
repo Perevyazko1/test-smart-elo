@@ -4,4 +4,5 @@ export interface fabric {
     name: string;
     image_filename: string;
     image: string;
+    thumbnail: string;
 }

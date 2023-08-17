@@ -71,7 +71,13 @@ export const EqMobileCard = memo((props: EqMobileCardProps) => {
                             ["d-flex align-items-end me-xl-1"]
                         )}
                     >
-                        <Slider price={eqCard.card_info.tariff} images={sliderImages} width={'100%'} height={'100%'}/>
+                        <Slider
+                            price={eqCard.card_info.tariff}
+                            images={sliderImages.images}
+                            thumbnails={sliderImages.thumbnails}
+                            width={'100%'}
+                            height={'100%'}
+                        />
                     </div>
 
                     <div

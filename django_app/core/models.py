@@ -3,6 +3,9 @@ import uuid
 from django.db import models
 
 from staff.models import Department, Employee
+from PIL import Image
+from django.core.files.base import ContentFile
+from io import BytesIO
 
 
 class Product(models.Model):
@@ -73,8 +76,30 @@ class ProductPicture(models.Model):
         on_delete=models.CASCADE,
     )
 
-    image_filename = models.CharField('Имя файла', max_length=120, blank=True, null=True)
+    image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/products/", blank=True, null=True)
+
+    thumbnail = models.ImageField('Миниатюра', upload_to=f"images/products/thumbnails/", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Если у экземпляра есть атрибут _creating_thumbnail и он True, мы пропускаем создание миниатюры
+        if hasattr(self, '_creating_thumbnail') and self._creating_thumbnail:
+            super().save(*args, **kwargs)
+            return
+
+        super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image.path)
+            img.thumbnail((100, 100))
+
+            image_io = BytesIO()
+            img.save(image_io, format=img.format)
+            image_content = ContentFile(image_io.getvalue(), self.image_filename)
+
+            self._creating_thumbnail = True
+            self.thumbnail.save(self.image_filename, image_content)
+            del self._creating_thumbnail
 
     def __str__(self):
         return '{}'.format(f'{self.image}')
@@ -89,8 +114,41 @@ class Fabric(models.Model):
     fabric_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Название ткани', max_length=255)
 
-    image_filename = models.CharField('Имя файла', max_length=120, blank=True, null=True)
-    image = models.ImageField('Ссылка на изображение', upload_to=f"images/products/", blank=True, null=True)
+    image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
+    image = models.ImageField(
+        'Ссылка на изображение',
+        upload_to=f"images/products/",
+        blank=True,
+        null=True,
+        max_length=256,
+    )
+    thumbnail = models.ImageField(
+        'Миниатюра',
+        upload_to=f"images/products/thumbnails/",
+        blank=True,
+        null=True,
+        max_length=256,
+    )
+
+    def save(self, *args, **kwargs):
+        # Если у экземпляра есть атрибут _creating_thumbnail и он True, мы пропускаем создание миниатюры
+        if hasattr(self, '_creating_thumbnail') and self._creating_thumbnail:
+            super().save(*args, **kwargs)
+            return
+
+        super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image.path)
+            img.thumbnail((100, 100))
+
+            image_io = BytesIO()
+            img.save(image_io, format=img.format)
+            image_content = ContentFile(image_io.getvalue(), self.image_filename)
+
+            self._creating_thumbnail = True
+            self.thumbnail.save(self.image_filename, image_content)
+            del self._creating_thumbnail
 
     def __str__(self):
         return '{}'.format(f'{self.name}')
