@@ -59,16 +59,18 @@ export const Slider = memo((props: SliderProps) => {
                 <div
                     style={{
                         position: "absolute",
-                        bottom: "-8px",
+                        bottom: "0px",
                         margin: "auto",
                         zIndex: "999",
-                        opacity: "0.75",
-                        pointerEvents: "none"
+                        opacity: "0.55",
+                        pointerEvents: "none",
                     }}
                 >
-                    <h5 className={"fw-bolder bg-light border rounded "}>
-                        {price}
-                    </h5>
+                    <div className={'d-flex justify-content-center'}>
+                        <div className={"fw-bolder bg-light border rounded me-1 fs-7"}>
+                            {price}
+                        </div>
+                    </div>
                 </div>
 
                 {date &&
@@ -82,9 +84,9 @@ export const Slider = memo((props: SliderProps) => {
                             pointerEvents: "none",
                         }}
                     >
-                        <h5 className={"fw-bolder bg-light border rounded fs-6"}>
+                        <div className={"fw-bolder bg-light border rounded fs-7"}>
                             {date}
-                        </h5>
+                        </div>
                     </div>
                 }
             </>
@@ -107,7 +109,12 @@ export const Slider = memo((props: SliderProps) => {
                 </SwiperSlide>
             ))}
 
-            {showModal && clickable && <ModalSlider onHide={() => setShowModal(false)} urls={images || []}/>}
+            {showModal && clickable &&
+                <ModalSlider
+                    onHide={() => setShowModal(false)}
+                    urls={images || []}
+                />
+            }
         </Swiper>
     );
 });
