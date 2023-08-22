@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 
-from staff.models import Employee
+from staff.models import Employee, Audit
 
 from core.models import ProductionStep, ProductionStepTariff
 from core.pages.new_tariff_page.serializers import TariffPageSerializer, TariffSerializer
@@ -31,5 +31,5 @@ class TariffViewSet(viewsets.ModelViewSet):
     serializer_class = TariffSerializer
 
     def create(self, request, *args, **kwargs):
-        print(request.data)
+        pin_code = self.request.query_params.get('pin_code')
         return super().create(request, *args, **kwargs)
