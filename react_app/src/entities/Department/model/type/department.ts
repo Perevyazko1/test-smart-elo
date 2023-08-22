@@ -1,4 +1,5 @@
 export interface department {
+    id?: number,
     name: string,
     number: number,
     color?: string,

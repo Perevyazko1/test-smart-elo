@@ -86,7 +86,7 @@ const ProductDetailsPage = () => {
                                             {},
                                             ['border border-2 rounded'])
                                     }>
-                                        <Slider images={productPictures} width={'300px'} height={'300px'}/>
+                                        <Slider images={productPictures.images} width={'300px'} height={'300px'}/>
                                     </div>
 
                                     <div className={cls.textBlock}>

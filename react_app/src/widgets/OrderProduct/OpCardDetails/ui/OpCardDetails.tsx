@@ -120,6 +120,17 @@ export const OpCardDetails = memo((props: OpCardDetailsProps) => {
                     Просмотреть наряды по серии
                 </Button>
             </Link>
+
+            <Link to={
+                `/${AppRoutes.TARIFFS}?product__name=${eqCard.product.name}`
+            }>
+                <Button
+                    className={'m-2'}
+                    size={'sm'}
+                >
+                    Просмотреть тарификации
+                </Button>
+            </Link>
         </>
     );
 });

@@ -62,14 +62,13 @@ export const Slider = memo((props: SliderProps) => {
                         bottom: "0px",
                         margin: "auto",
                         zIndex: "999",
-                        opacity: "0.55",
+                        opacity: "0.75",
                         pointerEvents: "none",
                     }}
                 >
-                    <div className={'d-flex justify-content-center'}>
-                        <div className={"fw-bolder bg-light border rounded me-1 fs-7"}>
-                            {price}
-                        </div>
+                    <div className={"fw-bold text-black bg-light border rounded me-1 fs-7"}
+                         style={{padding: "0 0.15rem"}}>
+                        {price}
                     </div>
                 </div>
 
@@ -84,7 +83,7 @@ export const Slider = memo((props: SliderProps) => {
                             pointerEvents: "none",
                         }}
                     >
-                        <div className={"fw-bolder bg-light border rounded fs-7"}>
+                        <div className={"fw-bolder bg-light border rounded fs-7"} style={{padding: "0 0.15rem"}}>
                             {date}
                         </div>
                     </div>

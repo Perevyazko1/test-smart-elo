@@ -28,7 +28,6 @@ export const DepartmentFilter = memo((props: DepartmentFilterProps) => {
     return (
         <DropdownButton
             variant={"outline-light"}
-            menuVariant="dark"
             title={currentDepartment?.name || ''}
             className={classNames('', mods, [className])}
             {...otherProps}
@@ -42,6 +41,7 @@ export const DepartmentFilter = memo((props: DepartmentFilterProps) => {
             {[...additionalDepartments, ...departments]?.map((department) => (
                 <div key={department.number}>
                     <Dropdown.Item
+                        active={currentDepartment.name === department.name}
                         onClick={() => setDepartmentCallback(department)}
                     >
                         {department.name}

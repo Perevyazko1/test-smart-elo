@@ -6,11 +6,11 @@ import {AuthByPinCodeSchema} from "features/AuthByPinCode";
 import {EmployeeSchema} from "entities/Employee";
 import {NotificationList} from "widgets/Notification";
 import {AuditWidgetSchema} from "widgets/AuditWidget";
-import {TaxControlSchema} from "pages/TaxControlPage";
 import {EqContentDesktop, EqListData, EqFilters} from "pages/EqPageNew";
 import {AssignmentSchema} from "pages/AssignmentPage";
 import {ProductsSchema} from "pages/ProductsPage";
 import {ProductDetailsSchema} from "pages/ProductDetailsPage";
+import {TariffPageSchema} from "pages/TariffPage";
 
 export interface StateSchema {
     employee: EmployeeSchema,
@@ -24,11 +24,11 @@ export interface StateSchema {
 
     assignments?: AssignmentSchema,
     products?: ProductsSchema,
+    tariff?: TariffPageSchema,
     productDetails?: ProductDetailsSchema,
 
     authByPinCode?: AuthByPinCodeSchema,
     auditWidget?: AuditWidgetSchema,
-    taxControl?: TaxControlSchema,
     notifications?: NotificationList,
 }
 

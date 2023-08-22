@@ -1,20 +1,18 @@
 import {EmployeePermissions} from "entities/Employee";
 import React, {ReactNode} from "react";
 import {EqPageNew} from "pages/EqPageNew";
-import {TaxControlPage} from "pages/TaxControlPage";
 import {TestPage} from "pages/TestPage";
 import {ForbiddenPage} from "pages/ForbiddenPage";
 import {AssignmentPage} from "pages/AssignmentPage";
 import {ProductsPage} from "pages/ProductsPage";
 import {ProductDetailsPage} from "pages/ProductDetailsPage";
-import {TaxControlPageNew} from "../../../../pages/TaxControlPageNew";
+import {TariffPage} from "pages/TariffPage";
 
 export enum AppRoutes {
     EQ = 'eq',
     TEST = 'test_page',
     ASSIGNMENTS = 'assignments',
-    TAX = 'tax_control',
-    TAX_NEW = 'tax_control_new',
+    TARIFFS = 'tariff_cards',
     FORBIDDEN = 'forbidden_page',
     PRODUCTS = 'products',
     PRODUCT_DETAILS = 'products/:id',
@@ -40,14 +38,6 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
         permissions: [EmployeePermissions.ELO_PAGE],
         urlParams: [],
         queryParams: ['week', 'year', 'view_mode', 'series_size', 'project'],
-        inNavigate: true,
-    },
-    [AppRoutes.TAX]: {
-        routeName: 'Тарификации',
-        element: <TaxControlPage/>,
-        permissions: [EmployeePermissions.TARIFICATION_PAGE],
-        urlParams: [],
-        queryParams: [],
         inNavigate: true,
     },
     [AppRoutes.TEST]: {
@@ -90,9 +80,9 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
         queryParams: [],
         inNavigate: false,
     },
-    [AppRoutes.TAX_NEW]: {
-        routeName: 'Новая тарификация',
-        element: <TaxControlPageNew/>,
+    [AppRoutes.TARIFFS]: {
+        routeName: 'Тарификации',
+        element: <TariffPage/>,
         permissions: [EmployeePermissions.TARIFICATION_PAGE],
         urlParams: [],
         queryParams: [],

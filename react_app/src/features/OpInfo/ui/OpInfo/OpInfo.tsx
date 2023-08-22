@@ -5,10 +5,10 @@ import {eq_card} from "entities/EqPageCard";
 import {OpCardDetails} from "widgets/OrderProduct/OpCardDetails";
 import {OpDepDetails} from "widgets/OrderProduct/OpDepDetails";
 import {OpProdDetails} from "widgets/OrderProduct/OpProdDetails";
+import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
+import {eqFiltersActions} from "pages/EqPageNew";
 
 import {TechProcessInfo} from "../../../TechProcessInfo/ui/TechProcessInfo";
-import {useAppDispatch} from "../../../../shared/lib/hooks/useAppDispatch/useAppDispatch";
-import {eqFiltersActions} from "../../../../pages/EqPageNew";
 
 
 interface OpInfoProps {

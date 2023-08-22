@@ -1,11 +1,13 @@
+import datetime
 import uuid
+from io import BytesIO
 
-from django.db import models
-
-from staff.models import Department, Employee
 from PIL import Image
 from django.core.files.base import ContentFile
-from io import BytesIO
+from django.db import models
+from django.utils import timezone
+
+from staff.models import Department, Employee
 
 
 class Product(models.Model):
@@ -107,6 +109,7 @@ class ProductPicture(models.Model):
 
 class Fabric(models.Model):
     """Ткани"""
+
     class Meta:
         verbose_name = "Ткань"
         verbose_name_plural = "Ткани"
@@ -213,9 +216,9 @@ class OrderProduct(models.Model):
     # До трех видов ткани на изделие
     main_fabric = models.ForeignKey(Fabric, related_name='order_products_main', verbose_name='Ткань основа',
                                     on_delete=models.CASCADE, null=True, blank=True)
-    second_fabric = models.ForeignKey(Fabric, related_name='order_products_second',  verbose_name='Ткань компаньон',
+    second_fabric = models.ForeignKey(Fabric, related_name='order_products_second', verbose_name='Ткань компаньон',
                                       on_delete=models.CASCADE, null=True, blank=True)
-    third_fabric = models.ForeignKey(Fabric, related_name='order_products_third',  verbose_name='Ткань дополнительная',
+    third_fabric = models.ForeignKey(Fabric, related_name='order_products_third', verbose_name='Ткань дополнительная',
                                      on_delete=models.CASCADE, null=True, blank=True)
 
     quantity = models.IntegerField('Количество', default=1)
@@ -254,9 +257,19 @@ class ProductionStepTariff(models.Model):
         on_delete=models.CASCADE
     )
 
-    tariff = models.IntegerField("Производственный тариф", default=0)
+    tariff = models.IntegerField("Утвержденный тариф", default=0)
+    proposed_tariff = models.IntegerField("Предложенный тариф", default=0)
 
-    confirmation_date = models.DateTimeField('Дата/Время подтверждения', auto_now_add=True)
+    confirmation_date = models.DateTimeField(
+        'Дата/Время утверждения',
+        blank=True,
+        null=True,
+    )
+    proposed_date = models.DateTimeField(
+        'Дата/Время предложения',
+        blank=True,
+        null=True,
+    )
 
     approved_by = models.ForeignKey(
         Employee,
@@ -267,6 +280,37 @@ class ProductionStepTariff(models.Model):
         null=True,
     )
 
+    proposed_by = models.ForeignKey(
+        Employee,
+        verbose_name='Тарификацию утвердил',
+        related_name='production_step_proposed_tariffs',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+
+    def save(self, *args, **kwargs):
+        # Если объект уже существует, то проверяем изменения
+        if self.pk:
+            orig = ProductionStepTariff.objects.get(pk=self.pk)
+
+            # Если значение tariff было изменено, устанавливаем текущую дату для confirmation_date
+            if orig.tariff != self.tariff:
+                self.confirmation_date = datetime.datetime.now()
+
+            # Если значение proposed_tariff было изменено, устанавливаем текущую дату для proposed_date
+            if orig.proposed_tariff != self.proposed_tariff:
+                self.proposed_date = datetime.datetime.now()
+
+        else:  # Объект создается
+            if self.tariff:  # Если tariff установлен
+                self.confirmation_date = datetime.datetime.now()
+
+            if self.proposed_tariff:  # Если proposed_tariff установлен
+                self.proposed_date = datetime.datetime.now()
+
+        super(ProductionStepTariff, self).save(*args, **kwargs)
+
     def __str__(self):
         return '{}'.format(f'{self.tariff} {self.department.name} '
                            f'{self.confirmation_date.date()} {self.product} {self.approved_by}')
@@ -274,6 +318,7 @@ class ProductionStepTariff(models.Model):
 
 class ProductionStep(models.Model):
     """Класс хранящий данные об этапе"""
+
     class Meta:
         verbose_name = 'Этап производства'
         verbose_name_plural = 'Этапы производства'
@@ -315,6 +360,7 @@ class ProductionStep(models.Model):
 
 class Assignment(models.Model):
     """Класс хранящий данные о состоянии выполнения нарядов"""
+
     class Meta:
         verbose_name = 'Наряд'
         verbose_name_plural = 'Наряды'
@@ -382,6 +428,7 @@ class Assignment(models.Model):
 
 class TechnologicalProcess(models.Model):
     """Класс сохраняющий схемы технологических процессов"""
+
     class Meta:
         verbose_name = 'Технологический процесс'
         verbose_name_plural = 'Технологические процессы'
