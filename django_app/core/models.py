@@ -354,6 +354,19 @@ class ProductionStep(models.Model):
 
     is_active = models.BooleanField('Этап задействован в производстве', default=True)
 
+    def save(self, *args, **kwargs):
+        # Если объект уже существует, то проверяем изменения
+        if self.pk:
+            orig = ProductionStep.objects.get(pk=self.pk)
+            if orig.production_step_tariff != self.production_step_tariff:
+                Assignment.objects.filter(
+                    department=self.department,
+                    order_product__product=self.product,
+                    inspector=None,
+                ).update(tariff=self.production_step_tariff)
+
+        super(ProductionStep, self).save(*args, **kwargs)
+
     def __str__(self):
         return '{}'.format(f'{self.department} {self.product}')
 

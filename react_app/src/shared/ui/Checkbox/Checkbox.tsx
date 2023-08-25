@@ -22,9 +22,9 @@ export const Checkbox = memo((props: CheckboxProps) => {
     };
 
     return (
-        <div>
+        <div className={className}>
             <input
-                className={classNames('form-check-input', mods, [className])}
+                className={classNames('form-check-input', mods, [])}
                 type="checkbox"
                 id={id}
                 {...otherProps}

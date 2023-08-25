@@ -7,6 +7,7 @@ import {AssignmentPage} from "pages/AssignmentPage";
 import {ProductsPage} from "pages/ProductsPage";
 import {ProductDetailsPage} from "pages/ProductDetailsPage";
 import {TariffPage} from "pages/TariffPage";
+import {WagesPage} from "pages/WagesPage";
 
 export enum AppRoutes {
     EQ = 'eq',
@@ -15,6 +16,7 @@ export enum AppRoutes {
     TARIFFS = 'tariff_cards',
     FORBIDDEN = 'forbidden_page',
     PRODUCTS = 'products',
+    WAGES = 'wages_page',
     PRODUCT_DETAILS = 'products/:id',
 
     DEFAULT = 'default',
@@ -43,6 +45,14 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.TEST]: {
         routeName: 'Тестовая страница',
         element: <TestPage/>,
+        permissions: [EmployeePermissions.ADMIN],
+        urlParams: [],
+        queryParams: [],
+        inNavigate: true,
+    },
+    [AppRoutes.WAGES]: {
+        routeName: 'Заработная плата',
+        element: <WagesPage/>,
         permissions: [EmployeePermissions.ADMIN],
         urlParams: [],
         queryParams: [],

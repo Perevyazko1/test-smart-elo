@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Button} from "react-bootstrap";
+import {Button, ButtonGroup} from "react-bootstrap";
 
 import {EmployeePermissions, getEmployeeAuthData, getEmployeeHasPermissions} from "entities/Employee";
 import {Slider} from "shared/ui/Slider/Slider";
@@ -12,6 +12,8 @@ import {IndicatorWrapper} from "shared/ui/IndicatorWrapper/IndicatorWrapper";
 
 import {TariffPageCard} from "../../model/types/types";
 import {updateTariff} from "../../model/service/updateTariff";
+import {AppModal} from "../../../../shared/ui/AppModal/AppModal";
+import {RetarifficationWidget} from "../RetarifficationWidget/RetarifficationWidget";
 
 
 interface TaxElementProps {
@@ -39,6 +41,8 @@ export const TariffElement = (props: TaxElementProps) => {
     const [proposedInput, setProposedInput] = useState<number | "">(card.production_step_tariff?.proposed_tariff || "");
 
     const [showStory, setShowStory] = useState(false);
+    const [showAssignments, setShowAssignments] = useState(false);
+
     const productPictures = useProductPictures(card.product);
 
     const proposedTariff = () => {
@@ -98,6 +102,11 @@ export const TariffElement = (props: TaxElementProps) => {
 
     return (
         <>
+            {showAssignments &&
+                <AppModal title={'Перетарификация нарядов'} onHide={() => setShowAssignments(false)}>
+                    <RetarifficationWidget card={card}/>
+                </AppModal>
+            }
             <tr>
                 <td rowSpan={2}>
                     <IndicatorWrapper
@@ -118,19 +127,29 @@ export const TariffElement = (props: TaxElementProps) => {
                     {card.product.name}
                 </td>
 
-                <td style={{background: card.department.color || ''}} rowSpan={2}>
+                <td style={{background: card.department.color || ''}} rowSpan={2} className={'fs-7'}>
                     <div className={'d-flex flex-column justify-content-between h-100 w-100'}>
                         {card.department.name}
 
                         <hr className={'m-1'}/>
-
-                        <Button
-                            size={'sm'}
-                            variant={showStory ? 'warning' : 'secondary'}
-                            onClick={() => setShowStory(!showStory)}
-                        >
-                            История
-                        </Button>
+                        <ButtonGroup vertical>
+                            <Button
+                                size={'sm'}
+                                variant={showStory ? 'primary' : 'outline-dark'}
+                                onClick={() => setShowStory(!showStory)}
+                            >
+                                История
+                            </Button>
+                            {!!card.production_step_tariff?.tariff && hasApprovedPermission &&
+                                <Button
+                                    size={'sm'}
+                                    variant={'outline-dark'}
+                                    onClick={() => setShowAssignments(true)}
+                                >
+                                    Хвосты
+                                </Button>
+                            }
+                        </ButtonGroup>
                     </div>
                 </td>
                 <td className={'text-nowrap'}>
@@ -138,12 +157,11 @@ export const TariffElement = (props: TaxElementProps) => {
                 </td>
                 <td>
                     <AppInput
-                        // className={card.production_step_tariff?.tariff ? cls.bgSelected : ''}
                         inputSize={'sm'}
                         disabled
                         type={'number'}
                         style={{width: "100px"}}
-                        defaultValue={card.production_step_tariff?.tariff || ""}
+                        value={card.production_step_tariff?.tariff || ""}
                     />
                 </td>
                 <td className={'fs-7'}>
@@ -154,7 +172,6 @@ export const TariffElement = (props: TaxElementProps) => {
                 <td className={'text-nowrap fs-7'}>
                     {`${card.production_step_tariff?.approved_by?.first_name || ""} 
                     ${card.production_step_tariff?.approved_by?.last_name || ""}`}
-
                 </td>
                 <td>
                     <Button
@@ -215,21 +232,24 @@ export const TariffElement = (props: TaxElementProps) => {
             </tr>
 
             {showStory &&
-                <tr>
-                    <td colSpan={3}>
-                        <h5 className={'my-3 ms-2'}>История тарификаций в разработке</h5>
-                        {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
-                        {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
-                        {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
-                        {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
-                    </td>
-                    <td colSpan={5}>
-                        {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
-                        {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
-                        {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
-                        {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
-                    </td>
-                </tr>
+                <>
+                    <tr>
+                        <td colSpan={3}>
+                            <h5 className={'my-3 ms-2'}>История тарификаций в разработке</h5>
+                            {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
+                            {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
+                            {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
+                            {/*<p>08.08.2023 - Назначение тарифа №1 </p>*/}
+                        </td>
+                        <td colSpan={5}>
+                            {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
+                            {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
+                            {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
+                            {/*<p>Харченко Д. Тариф: 500. Предложил Великий Д.</p>*/}
+                        </td>
+                    </tr>
+
+                </>
             }
         </>
     );

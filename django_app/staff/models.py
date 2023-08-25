@@ -1,5 +1,8 @@
+import datetime
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 
 from staff.service import validate_color
 
@@ -38,6 +41,7 @@ class Employee(AbstractUser):
         blank=True, null=True,
         on_delete=models.SET_NULL
     )
+    current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def __str__(self):
         if self.first_name:
@@ -46,6 +50,7 @@ class Employee(AbstractUser):
 
 
 class Transaction(models.Model):
+
     """Класс сохраняющий финансовые транзакции касаемо сотрудников"""
     class Meta:
         verbose_name = 'Финансовые транзакция'
@@ -67,12 +72,20 @@ class Transaction(models.Model):
         ("prize", "Премия"),
         ("fine", "Штраф"),
         ("loan", "Займ"),
+        ("other", "Другое"),
     ]
 
-    commit_date = models.DateTimeField('Дата проведения', auto_now_add=True)
+    add_date = models.DateTimeField(
+        'Дата / Время создания',
+        auto_now_add=True,
+    )
+
     transaction_type = models.CharField('Тип', max_length=50, choices=TYPE_CHOICES, default="cash")
     details = models.CharField('Детализация', max_length=50, choices=DETAILS_CHOICES, default="wages")
-    amount = models.DecimalField('Сумма', max_digits=9, decimal_places=2, default=0.00)
+
+    amount = models.DecimalField('Сумма', max_digits=10, decimal_places=2, default=0.00)
+    starting_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    ending_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     employee = models.ForeignKey(
         Employee,
@@ -90,6 +103,7 @@ class Transaction(models.Model):
         default=None,
         null=True,
     )
+
     inspector = models.ForeignKey(
         Employee,
         verbose_name='Проверяющий',
@@ -98,15 +112,31 @@ class Transaction(models.Model):
         default=None,
         null=True,
     )
+    inspect_date = models.DateTimeField(
+        'Дата / Время визирования',
+        blank=True,
+        null=True,
+    )
+
+    description = models.CharField('Описание', max_length=250, blank=True, null=True)
+
+    is_locked = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        if self.is_locked:
+            raise ValidationError("This transaction is locked and cannot be edited.")
+
+        if self.amount and self.inspector:
+            self.starting_balance = self.executor.current_balance
+            self.ending_balance = self.executor.current_balance + self.amount
+            self.executor.current_balance += self.amount
+            self.executor.save()
+            self.inspect_date = datetime.datetime.now()
+            self.is_locked = True  # блокировка модели для редактирования
+        super(Transaction, self).save(*args, **kwargs)
 
     def __str__(self):
-        return '{}'.format(
-            f'{self.amount} ₽ '
-            f'Неделя {self.commit_date.strftime("%U")} '
-            f'({self.commit_date.strftime("%d.%m")}) '
-            f'{self.get_transaction_type_display()} '
-            f'{self.get_details_display()} '
-            f'в пользу {self.employee}')
+        return '{}'.format(f'{self.amount} || {self.add_date.strftime("%m.%d.%Y - %H:%M")} в пользу {self.executor}')
 
 
 class Audit(models.Model):

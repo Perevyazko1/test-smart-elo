@@ -9,7 +9,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement>{
 }
 
 
-export const AppInput = memo((props: InputProps) => {
+export const AppInput = (props: InputProps) => {
     const {
         className,
         children,
@@ -32,4 +32,4 @@ export const AppInput = memo((props: InputProps) => {
             {children}
         </input>
     );
-});
+};

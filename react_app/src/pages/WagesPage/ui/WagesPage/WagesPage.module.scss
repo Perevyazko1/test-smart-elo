@@ -1,0 +1,24 @@
+.pageContainer {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--bs-light);
+}
+
+.pageContent {
+  height: calc(100vh - 60px);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.stickyWrapper {
+  position: sticky;
+  top: -2px;
+}
+
+.borderBottom {
+  border-bottom: 2px solid !important;
+}
+

@@ -8,7 +8,7 @@ from core.consumers import ws_group_updates, EqNotificationActions
 from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
 from core.services.update_production_steps import update_production_steps
-from staff.models import Employee, Department, Audit
+from staff.models import Employee, Department, Audit, Transaction
 
 
 class UpdateAssignments:
@@ -293,6 +293,29 @@ class UpdateAssignments:
         result += f'Номер серии: {order_product.series_id}. Изделие: {order_product.product.name}'
         return result
 
+    def _tariffication_instruction(self):
+        for assignment_number in self.numbers:
+            print('3')
+            target_assignment = Assignment.objects.get(
+                number=assignment_number,
+                department=self.department,
+                order_product=self.order_product
+            )
+            if target_assignment.tariff:
+                print('4')
+                if target_assignment.tariff.tariff:
+                    print('5')
+                    description = f'Производство полуфабриката {target_assignment} {target_assignment.department.name}'
+                    Transaction.objects.create(
+                        transaction_type='accrual',
+                        details='other',
+                        amount=target_assignment.tariff.tariff,
+                        employee=target_assignment.executor,
+                        executor=target_assignment.inspector,
+                        inspector=target_assignment.inspector,
+                        description=description,
+                    )
+
     @transaction.atomic
     def execute(self):
         """Произвести обновление переданных нарядов и создать последующие"""
@@ -306,6 +329,10 @@ class UpdateAssignments:
         """В случае если происходит подтверждение наряда создаем связанные наряды"""
         if self.action == "confirmed":
             self._confirmation_instructions()
+            print('1')
+            if self.department.piecework_wages:
+                print('2')
+                self._tariffication_instruction()
 
         Audit.objects.create(
             employee=self.original_user or Employee.objects.get(pin_code=self.pin_code),
