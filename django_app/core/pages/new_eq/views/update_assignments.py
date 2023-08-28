@@ -295,16 +295,14 @@ class UpdateAssignments:
 
     def _tariffication_instruction(self):
         for assignment_number in self.numbers:
-            print('3')
+            department = Department.objects.get(number=self.department_number)
             target_assignment = Assignment.objects.get(
                 number=assignment_number,
-                department=self.department,
+                department=department,
                 order_product=self.order_product
             )
             if target_assignment.tariff:
-                print('4')
                 if target_assignment.tariff.tariff:
-                    print('5')
                     description = f'Производство полуфабриката {target_assignment} {target_assignment.department.name}'
                     Transaction.objects.create(
                         transaction_type='accrual',
@@ -329,9 +327,8 @@ class UpdateAssignments:
         """В случае если происходит подтверждение наряда создаем связанные наряды"""
         if self.action == "confirmed":
             self._confirmation_instructions()
-            print('1')
-            if self.department.piecework_wages:
-                print('2')
+            department = Department.objects.get(number=self.department_number)
+            if department.piecework_wages:
                 self._tariffication_instruction()
 
         Audit.objects.create(

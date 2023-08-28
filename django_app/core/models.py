@@ -5,7 +5,6 @@ from io import BytesIO
 from PIL import Image
 from django.core.files.base import ContentFile
 from django.db import models
-from django.utils import timezone
 
 from staff.models import Department, Employee
 
@@ -434,6 +433,18 @@ class Assignment(models.Model):
         null=True, blank=True,
         default=None
     )
+    inspect_date = models.DateTimeField('Дата визирования', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # Если inspector был изменен и теперь не равен None, установить inspect_date
+        if self.pk is not None:
+            orig = Assignment.objects.get(pk=self.pk)
+            if orig.inspector != self.inspector:
+                if self.inspector is not None:
+                    self.inspect_date = datetime.datetime.now()
+                else:
+                    self.inspect_date = None
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.order_product.series_id} {self.status}')

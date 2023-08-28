@@ -39,6 +39,14 @@ export interface TariffPageCardList {
     previous: string | null;
 }
 
+export interface RetarifficationCard {
+    id: number;
+    executor: employee;
+    string_representation: string;
+    inspect_date: string;
+    date_completion: string;
+}
+
 export interface NormalizedTariffPageCardList extends Omit<TariffPageCardList, 'results'> {
     results: EntityState<TariffPageCard>
 }

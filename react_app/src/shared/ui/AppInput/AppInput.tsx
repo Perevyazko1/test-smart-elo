@@ -1,4 +1,4 @@
-import {memo, ReactNode, InputHTMLAttributes} from 'react';
+import {InputHTMLAttributes, ReactNode} from 'react';
 import {classNames, Mods} from "shared/lib/classNames/classNames";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement>{

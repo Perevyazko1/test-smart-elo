@@ -1,9 +1,13 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.decorators import api_view
 
-from core.models import ProductionStep, ProductionStepTariff
+from core.models import ProductionStep, ProductionStepTariff, Assignment
 from core.pages.new_tariff_page.filters import ProductionStepModelFilter
-from core.pages.new_tariff_page.serializers import TariffPageSerializer, TariffSerializer
-from staff.models import Employee
+from core.pages.new_tariff_page.serializers import TariffPageSerializer, TariffSerializer, RetarifficationSerializer
+from staff.models import Employee, Transaction
 
 
 class TariffPageViewSet(viewsets.ModelViewSet):
@@ -34,20 +38,63 @@ class TariffViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
 
 
-# class RetarifficationViewSet(viewsets.ModelViewSet):
-#     queryset = Assignment.objects.all()
-#     serializer_class = TariffPageSerializer
-#     filterset_class = ProductionStepModelFilter
-#
-#     def get_queryset(self):
-#         qs = super().get_queryset()
-#         pin_code = self.request.query_params.get('pin_code')
-#
-#         user = Employee.objects.get(pin_code=pin_code)
-#
-#         qs = qs.filter(
-#             department__in=user.departments.all(),
-#             department__piecework_wages=True,
-#         )
-#
-#         return qs.order_by('product')
+class RetarifficationViewSet(viewsets.ModelViewSet):
+    queryset = Assignment.objects.all()
+    serializer_class = RetarifficationSerializer
+    ordering_fields = ['executor', 'inspector', 'inspect_date', 'date_completion']
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        try:
+            product__id = int(self.request.query_params.get('product__id'))
+            department__number = int(self.request.query_params.get('department__number'))
+        except TypeError:
+            return Response({'error': 'Incorrect params'}, status=status.HTTP_404_NOT_FOUND)
+
+        qs = qs.filter(
+            order_product__product__id=int(product__id),
+            department__number=int(department__number),
+            tariff__isnull=True,
+            inspector__isnull=False,
+        )
+
+        return qs
+
+
+@api_view(['POST'])
+def post_retariffication(request):
+    ids = request.data.get('ids')
+    if not ids:
+        return Response({'error': 'ids field is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    queryset = Assignment.objects.filter(id__in=ids)
+
+    pin_code = request.query_params.get('pin_code')
+    try:
+        inspector = Employee.objects.get(pin_code=pin_code)
+    except Employee.DoesNotExist:
+        return Response({'error': 'Inspector not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    for assignment in queryset:
+        product = assignment.order_product.product
+        department = assignment.department
+        production_step = ProductionStep.objects.get(
+            department=department,
+            product=product,
+        )
+        assignment.tariff = production_step.production_step_tariff
+        assignment.save()
+
+        description = f'Производство полуфабриката {assignment} {assignment.department.name}'
+
+        Transaction.objects.create(
+            transaction_type='accrual',
+            details='other',
+            amount=assignment.tariff.tariff,
+            employee=assignment.executor,
+            executor=inspector,
+            inspector=inspector,
+            description=description,
+        )
+
+    return Response({'status': 'success'}, status=status.HTTP_200_OK)

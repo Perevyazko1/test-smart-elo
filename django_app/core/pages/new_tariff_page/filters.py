@@ -1,6 +1,6 @@
 import django_filters
 from django.db import models
-from core.models import ProductionStep, Product
+from core.models import ProductionStep, Product, Assignment
 
 
 class ProductionStepModelFilter(django_filters.FilterSet):

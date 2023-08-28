@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import ProductionStep, ProductionStepTariff
+from core.models import ProductionStep, ProductionStepTariff, Assignment
 from core.serializers import ProductSerializer
 from staff.serializers import DepartmentSerializer, EmployeeSerializer
 
@@ -52,3 +52,21 @@ class TariffPageSerializer(serializers.ModelSerializer):
             'production_step_tariff',
             'production_step_tariff_id',
         ]
+
+
+class RetarifficationSerializer(serializers.ModelSerializer):
+    executor = EmployeeSerializer(read_only=True)
+    string_representation = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Assignment
+        fields = [
+            'id',
+            'executor',
+            'string_representation',
+            'inspect_date',
+            'date_completion',
+        ]
+
+    def get_string_representation(self, obj):
+        return str(obj)
