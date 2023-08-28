@@ -1,13 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit
 from .consumers import ws_group_updates, EqNotificationActions
-from .filters import ProductionStepModelFilter
-from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product, ProductionStepTariff
-from .serializers import TechProcessSerializer, ProductionStepSerializer, ProductionStepTariffSerializer
+from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
+from .serializers import TechProcessSerializer
 from .services.assignment_generator import AssignmentGenerator
 from .services.check_schema import check_schema
 from .services.create_custom_tech_process import create_custom_tech_process
