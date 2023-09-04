@@ -1,5 +1,6 @@
 from rest_framework import viewsets
-from rest_framework.decorators import action
+from rest_framework.filters import OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -41,7 +42,8 @@ class TariffViewSet(viewsets.ModelViewSet):
 class RetarifficationViewSet(viewsets.ModelViewSet):
     queryset = Assignment.objects.all()
     serializer_class = RetarifficationSerializer
-    ordering_fields = ['executor', 'inspector', 'inspect_date', 'date_completion']
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['executor', 'inspect_date', 'date_completion']
 
     def get_queryset(self):
         qs = super().get_queryset()

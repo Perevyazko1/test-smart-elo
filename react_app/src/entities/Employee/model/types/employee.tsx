@@ -8,13 +8,14 @@ export interface group {
 
 export interface employee {
     id?: number,
-    username?: string,
-    first_name?: string,
+    username: string,
+    first_name: string,
     last_name?: string,
-    pin_code?: number,
-    current_department?: department,
-    departments?: department[],
-    groups?: group[],
+    pin_code: number,
+    current_department: department | null,
+    departments: department[],
+    groups: group[],
+    current_balance: string,
 }
 
 

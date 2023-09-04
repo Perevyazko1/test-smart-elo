@@ -59,3 +59,6 @@ export interface TariffPageSchema extends NormalizedTariffPageCardList {
     isLoading: boolean;
     hasUpdated: boolean | undefined;
 }
+
+export type Ordering =
+    null | 'executor' | '-executor' | 'inspect_date' | '-inspect_date' | 'date_completion' | '-date_completion';

@@ -447,7 +447,7 @@ class Assignment(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return '{}'.format(f'№{self.number} - {self.order_product.series_id} {self.status}')
+        return '{}'.format(f'№{self.number} - {self.order_product.series_id}')
 
 
 class TechnologicalProcess(models.Model):

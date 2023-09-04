@@ -51,19 +51,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
         ]
 
 
-class TransactionSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Transaction
-        fields = [
-            'commit_date',
-            'transaction_type',
-            'details',
-            'amount',
-            'employee',
-            'inspector',
-        ]
-
-
 class AuditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Audit

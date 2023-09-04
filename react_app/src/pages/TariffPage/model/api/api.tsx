@@ -1,5 +1,5 @@
 import {rtkAPI} from "shared/api/rtkAPI";
-import {RetarifficationCard} from "../types/types";
+import {Ordering, RetarifficationCard} from "../types/types";
 
 interface ProjectsList {
     data: string[];
@@ -8,6 +8,7 @@ interface ProjectsList {
 interface RetarifficationProps {
     product__id: number;
     department__number: number;
+    ordering: Ordering;
 }
 
 interface PostRetarifficationProps {
@@ -35,6 +36,7 @@ const ProjectsListApi = rtkAPI.injectEndpoints({
                         params: {
                             product__id: props.product__id,
                             department__number: props.department__number,
+                            ...(props.ordering !== null && {ordering: props.ordering}),
                         },
                     }),
                     providesTags: (result) => [{ type: 'RetarifficationCard', id: 'ALL' }],

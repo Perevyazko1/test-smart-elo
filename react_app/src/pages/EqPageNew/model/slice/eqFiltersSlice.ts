@@ -6,6 +6,11 @@ import {fetchWeekData} from "../service/fetchWeekData";
 
 export const initialState: EqFilters = {
     weekData: {
+        str_dates: [],
+        dt_dates: [],
+        date_range: [],
+        previous_week_data: null,
+        next_week_data: null,
         week: undefined,
         year: undefined,
         hasUpdated: false,

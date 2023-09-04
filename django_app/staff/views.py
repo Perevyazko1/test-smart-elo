@@ -3,8 +3,8 @@ from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from .models import Employee, Department, Transaction, Audit
-from .serializers import EmployeeSerializer, DepartmentSerializer, TransactionSerializer, AuditSerializer
+from .models import Employee, Department, Audit
+from .serializers import EmployeeSerializer, DepartmentSerializer, AuditSerializer
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
@@ -15,11 +15,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     serializer_class = DepartmentSerializer
-
-
-class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
 
 
 @api_view(['POST'])

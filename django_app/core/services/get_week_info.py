@@ -7,6 +7,7 @@ class WeekInfo:
     week: str
     year: str
     str_dates: [str]
+    dt_dates: list[datetime]
     date_range: list[datetime]
     previous_week_data: dict
     next_week_data: dict
@@ -53,6 +54,7 @@ class GetWeekInfo:
             week=self.week,
             year=self.year,
             str_dates=str_dates,
+            dt_dates=dt_dates,
             date_range=date_range,
             previous_week_data=previous_week_data,
             next_week_data=next_week_data

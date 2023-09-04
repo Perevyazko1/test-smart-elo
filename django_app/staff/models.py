@@ -39,9 +39,10 @@ class Employee(AbstractUser):
         Department,
         related_name='employees_current',
         blank=True, null=True,
-        on_delete=models.SET_NULL
+        on_delete=models.SET_NULL,
     )
     current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    description = models.CharField('Описание', max_length=250, blank=True, null=True)
 
     def __str__(self):
         if self.first_name:

@@ -4,15 +4,15 @@ import {ConnectDragSource} from "react-dnd";
 
 import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import useDoubleTap from "shared/lib/hooks/useDoubleTap/useDoubleTap";
+import {getCurrentDepartment} from "entities/Employee";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
 import useDivWidth from "shared/lib/hooks/useComponentWidth/useComponentWidth";
 
 import {getWeekData} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 import {fetchWeekData} from "../../../model/service/fetchWeekData";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
 import {eqContentDesktopActions} from "../../../model/slice/eqContentDesktopSlice";
-import useDoubleTap from "../../../../../shared/lib/hooks/useDoubleTap/useDoubleTap";
-import {getCurrentDepartment} from "../../../../../entities/Employee";
-import {useAppSelector} from "../../../../../shared/lib/hooks/useAppSelector/useAppSelector";
 
 interface EqWeekBlockProps {
     onDoubleClick?: () => void;
