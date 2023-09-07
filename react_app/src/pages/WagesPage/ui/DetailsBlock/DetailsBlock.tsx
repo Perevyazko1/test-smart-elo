@@ -103,11 +103,17 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     </div>
                 </div>
 
-                <div style={{minWidth: "250px"}} className={'gap-1 d-flex flex-column flex-wrap'}>
+                <div style={{
+                    minWidth: "250px",
+                    maxWidth: "250px",
+                    // overflowX: "hidden",
+                    // overflowY: "auto",
+                }}
+                     className={'gap-1 d-flex flex-wrap'}
+                >
                     {addPermission &&
                         <Button variant={'warning'}
-                                style={{height: "62px"}}
-                                className={'w-50'}
+                                style={{height: "62px", width: "120px"}}
                                 onClick={() => setShowWagesModal(
                                     {transaction_type: 'cash', details: 'wages'})
                                 }
@@ -117,8 +123,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     }
                     {addPermission &&
                         <Button variant={'danger'}
-                                style={{height: "62px"}}
-                                className={'w-50'}
+                                style={{height: "62px", width: "120px"}}
                                 onClick={() => setShowWagesModal(
                                     {transaction_type: 'debiting', details: 'fine'})
                                 }
@@ -128,8 +133,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     }
 
                     <Button variant={'secondary'}
-                            style={{height: "62px"}}
-                            className={'w-50'}
+                            style={{height: "62px", width: "120px"}}
                             onClick={() => alert('Функция печати данных за неделю находится в разработке.')}
                     >
                         🖨️ Печать
@@ -139,8 +143,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     {addPermission &&
                         <Button
                             variant={'success'}
-                            style={{height: "62px"}}
-                            className={'w-50'}
+                            style={{height: "62px", width: "120px"}}
                             onClick={() => setShowWagesModal(
                                 {transaction_type: 'accrual', details: 'wages'})
                             }
