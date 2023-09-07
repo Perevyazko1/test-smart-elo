@@ -53,7 +53,7 @@ export const appRoutesConfig: Record<AppRoutes, RouteConfig> = {
     [AppRoutes.WAGES]: {
         routeName: 'Заработная плата',
         element: <WagesPage/>,
-        permissions: [EmployeePermissions.ADMIN],
+        permissions: [EmployeePermissions.WAGES_PAGE],
         urlParams: [],
         queryParams: [],
         inNavigate: true,

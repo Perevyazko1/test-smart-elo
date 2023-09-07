@@ -28,14 +28,16 @@ class WagesSerializer(serializers.ModelSerializer):
         for week in week_info:
             transactions = Transaction.objects.filter(
                 employee=obj,
-                details='wages',
                 add_date__gt=week.date_range[0],
                 add_date__lte=week.date_range[1],
             )
-            total_amount = transactions.aggregate(Sum('amount'))['amount__sum']
+            total_wages = transactions.exclude(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum']
+            total_accrual = transactions.filter(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum']
             has_uninspected = transactions.filter(inspector__isnull=True).exists()
+
             result[f'Нед. {week.week}'] = {
-                'total': total_amount,
+                'total_accrual': total_accrual,
+                'total_wages': total_wages,
                 'confirmed': not has_uninspected,
             }
 

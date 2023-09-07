@@ -43,14 +43,14 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
             return `Неделя ${weekData?.week} 
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
-            | Заработано: ${getEarnedSum}`;
+            | ЗП: ${getEarnedSum}`;
         } else if (weekBlockWidth > 550) {
             return `Нед. ${weekData?.week} 
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
-            | Зараб.: ${getEarnedSum}`;
+            | ЗП: ${getEarnedSum}`;
         } else if (weekBlockWidth > 450) {
-            return `Нед. ${weekData?.week} | Зараб.: ${getEarnedSum}`;
+            return `Нед. ${weekData?.week} | ЗП: ${getEarnedSum}`;
         } else if (weekBlockWidth > 350) {
             return `Нед. ${weekData?.week}`;
         } else {

@@ -1,10 +1,11 @@
 import {Button} from "react-bootstrap";
 import React, {useState} from "react";
+
 import {week_info} from "entities/WeekInfo";
+import {Transaction} from "entities/Transaction";
 
 import {WagesEarnedPerDay} from "../../model/types/types";
 import {DayDetail} from "./DayDetail";
-import {Transaction} from "../../../../entities/Transaction";
 
 interface WeekDetailElementProps {
     data: WagesEarnedPerDay;
@@ -32,6 +33,7 @@ export const WeekDetailElement = (props: WeekDetailElementProps) => {
                         <Button
                             variant={'outline-dark'}
                             onClick={() => setShowDetails(!showDetails)}
+                            className={data.confirmed ? '' : 'bg-warning'}
                         >
                             Подробнее
                         </Button>

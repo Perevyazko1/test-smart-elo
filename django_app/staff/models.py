@@ -73,6 +73,7 @@ class Transaction(models.Model):
         ("prize", "Премия"),
         ("fine", "Штраф"),
         ("loan", "Займ"),
+        ("adjustment", "Корректировка"),
         ("other", "Другое"),
     ]
 
@@ -128,10 +129,14 @@ class Transaction(models.Model):
             raise ValidationError("This transaction is locked and cannot be edited.")
 
         if self.amount and self.inspector:
-            self.starting_balance = self.executor.current_balance
-            self.ending_balance = self.executor.current_balance + self.amount
-            self.executor.current_balance += self.amount
-            self.executor.save()
+            self.starting_balance = self.employee.current_balance
+            if self.transaction_type == 'accrual':
+                self.ending_balance = self.employee.current_balance + self.amount
+                self.employee.current_balance += self.amount
+            else:
+                self.ending_balance = self.employee.current_balance - self.amount
+                self.employee.current_balance -= self.amount
+            self.employee.save()
             self.inspect_date = datetime.datetime.now()
             self.is_locked = True  # блокировка модели для редактирования
         super(Transaction, self).save(*args, **kwargs)

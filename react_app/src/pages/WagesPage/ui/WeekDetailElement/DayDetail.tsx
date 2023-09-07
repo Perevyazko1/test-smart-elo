@@ -1,8 +1,8 @@
 import React from "react";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import {Transaction} from "entities/Transaction";
 
 import {GetTransactionList} from "../../model/api/api";
-import {Transaction} from "../../../../entities/Transaction";
 
 interface DayDetailProps {
     daySrt: string;
@@ -27,9 +27,18 @@ export const DayDetail = (props: DayDetailProps) => {
         <>
             {data && data.map((transaction) => (
                 <tr key={transaction.id}>
-                    <td colSpan={3} onClick={() => onClick(transaction)}>
+                    <td
+                        colSpan={3}
+                        onClick={() => onClick(transaction)}
+                        style={{
+                            cursor: 'pointer',
+                            backgroundColor: transaction.inspect_date ? '#cee0c7' : '#ffc5c5',
+                    }}>
                         <b>
-                            {`${Number(transaction.amount) > 0 ? "➕" : Number(transaction.amount) < 0 ? "➖" : ""}
+                            {`${transaction.transaction_type === "accrual" 
+                                ? "➕"
+                                : "➖"
+                            }
                         ${Number(transaction.amount).toLocaleString('ru-RU')}`}
                         </b>
                         {` - ${transaction.description}`}

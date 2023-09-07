@@ -91,7 +91,7 @@ def post_retariffication(request):
 
         Transaction.objects.create(
             transaction_type='accrual',
-            details='other',
+            details='wages',
             amount=assignment.tariff.tariff,
             employee=assignment.executor,
             executor=inspector,

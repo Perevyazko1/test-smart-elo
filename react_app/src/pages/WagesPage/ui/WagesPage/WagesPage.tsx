@@ -9,15 +9,15 @@ import {AppInput} from "shared/ui/AppInput/AppInput";
 import {Skeleton} from "shared/ui/Skeleton/Skeleton";
 import {useQueryParams} from "shared/lib/hooks/useQueryParams/useQueryParams";
 import {useDebounce} from "shared/lib/hooks/useDebounce/useDebounce";
+import {DepartmentFilter} from "widgets/DepartmentFilter/ui/DepartmentFilter";
+import {department} from "entities/Department";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
+import {getEmployeeDepartments} from "entities/Employee";
 
 import cls from './WagesPage.module.scss';
 import {GetWagesList} from "../../model/api/api";
 import {DetailsBlock} from "../DetailsBlock/DetailsBlock";
 import {WagesItem} from "../../model/types/types";
-import {DepartmentFilter} from "../../../../widgets/DepartmentFilter/ui/DepartmentFilter";
-import {department} from "../../../../entities/Department";
-import {useAppSelector} from "../../../../shared/lib/hooks/useAppSelector/useAppSelector";
-import {getEmployeeDepartments} from "../../../../entities/Employee";
 
 const WagesPage = () => {
     const {setQueryParam, queryParameters} = useQueryParams();
@@ -37,9 +37,6 @@ const WagesPage = () => {
     }
     const [currentDepartment, setCurrentDepartment] = useState<department>(getInitialDepartment())
 
-
-    const [selectedEmployee, setSelectedEmployee] = useState<WagesItem | null>(null);
-
     const [nameInputValue, setNameInputValue] = useState<string>('');
     useEffect(() => {
         debouncedSetQueryParam('input_name', nameInputValue)
@@ -49,6 +46,13 @@ const WagesPage = () => {
     const {data} = GetWagesList({
         ...queryParameters
     });
+
+    const [selectedEmployee, setSelectedEmployee] = useState<WagesItem | null>(null);
+    useEffect(() => {
+        if (data && selectedEmployee) {
+            setSelectedEmployee(data.detailed_data.find(obj => obj.id === selectedEmployee.id) || null)
+        }
+    }, [data])
 
     useEffect(() => {
         if (data && data.detailed_data.length === 1) {
@@ -137,7 +141,10 @@ const WagesPage = () => {
                                         {data ?
                                             Object.entries(data.total_data).map(([key, value]) => (
                                                 <th className={'fw-bold'} key={key}>
-                                                    {key}{value.confirmed && "✅"}
+                                                    {key}{
+                                                        key !== 'Баланс' ?
+                                                        value.confirmed ? "✅" : "❗" : ""
+                                                    }
                                                 </th>
                                             ))
                                             :
@@ -166,7 +173,7 @@ const WagesPage = () => {
                                                 <th className={'fw-bold'}
                                                     key={key}
                                                 >
-                                                    {value.total?.toLocaleString("ru-RU")}
+                                                    {value.total_wages?.toLocaleString("ru-RU")}
                                                 </th>
                                             ))
                                             :
@@ -193,7 +200,12 @@ const WagesPage = () => {
                                             null :
                                             employee
                                     )}
-                                        style={{height: '66px', width: '300px'}}>
+                                        style={{
+                                            height: '66px',
+                                            width: '300px',
+                                            backgroundColor: selectedEmployee?.id === employee.id ? "#becdd2" : "",
+                                        }}
+                                    >
                                         {employee.first_name} {employee.last_name}
                                     </td>
                                     {!selectedEmployee &&
@@ -229,12 +241,12 @@ const WagesPage = () => {
                                             </td>
                                             {Object.entries(employee.weeks_info).map(([key, value]) => (
                                                 <td key={key}>
-                                                    {
-                                                        Number(value.total).toLocaleString(
-                                                            'ru-RU'
-                                                        )
-                                                    }
-                                                    {value.confirmed && value.total && "✅"}
+                                                    <div className={'text-muted'}>
+                                                        {Number(value.total_accrual).toLocaleString('ru-RU')}
+                                                        {!value.confirmed && "❗️"}
+                                                    </div>
+                                                    <hr className={'m-1'}/>
+                                                    {Number(value.total_wages).toLocaleString('ru-RU')}
                                                 </td>
                                             ))}
                                         </>

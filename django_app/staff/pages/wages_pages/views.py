@@ -2,10 +2,13 @@ from dataclasses import asdict
 
 from django.db.models import Sum
 from django.http import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
+from core.models import Assignment
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee, Transaction
 from staff.pages.wages_pages.filters import EmployeeModelFilter, TransactionModelFilter
@@ -17,6 +20,8 @@ class WagesViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = WagesSerializer
     filterset_class = EmployeeModelFilter
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['first_name']
 
     def list(self, request, *args, **kwargs):
         week_info = get_weeks_list_info()
@@ -24,21 +29,23 @@ class WagesViewSet(viewsets.ModelViewSet):
 
         total_balance = Employee.objects.all().aggregate(Sum('current_balance'))['current_balance__sum']
         total_data['Баланс'] = {
-            'total': total_balance,
+            'total_accrual': total_balance,
+            'total_wages': total_balance,
             'confirmed': False,
         }
 
         for week in week_info:
             transactions = Transaction.objects.filter(
-                details='wages',
                 add_date__gt=week.date_range[0],
                 add_date__lte=week.date_range[1],
             )
-            total_amount = transactions.aggregate(Sum('amount'))['amount__sum']
+            total_wages = transactions.exclude(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum']
+            total_accrual = transactions.filter(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum']
             has_uninspected = transactions.filter(inspector__isnull=True).exists()
 
-            total_data[f'Нед. {week.week}'] = {
-                'total': total_amount,
+            total_data[f'Нед.{week.week}'] = {
+                'total_accrual': total_accrual,
+                'total_wages': total_wages,
                 'confirmed': not has_uninspected,
             }
 
@@ -51,6 +58,17 @@ class TransactionViewSet(viewsets.ModelViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
     filterset_class = TransactionModelFilter
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['inspector']
+
+    def update(self, request, *args, **kwargs):
+        # Переопределяем обновление объекта, что бы он возвращал полный объект
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return self.retrieve(request, *args, **kwargs)
 
 
 @api_view(['GET'])
@@ -76,15 +94,55 @@ def get_wages_week_info(request):
             employee__id=employee__id,
             add_date__date=target_week_info.dt_dates[i],
         )
-        accruals = transaction.filter(amount__gte=0).aggregate(Sum('amount'))['amount__sum'] or 0
-        debit = transaction.filter(amount__lt=0).aggregate(Sum('amount'))['amount__sum'] or 0
+        accruals = transaction.filter(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum'] or 0
+        debit = transaction.exclude(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum'] or 0
+        confirmed = transaction.filter(inspector__isnull=True).exists()
 
         earned_per_week[week_day] = {
             'accruals': accruals,
             'debit': debit,
+            'confirmed': not confirmed,
         }
 
     return JsonResponse({
         'target_week_info': asdict(target_week_info),
         'earned_per_week': earned_per_week,
     }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_assignment_counts(request):
+    employee__id = request.query_params.get('employee__id')
+    date_from = request.query_params.get('date_from')
+    date_by = request.query_params.get('date_by')
+
+    try:
+        employee = Employee.objects.get(id=employee__id)
+    except Employee.DoesNotExist:
+        return JsonResponse({'error': 'Employee not found'}, status=404)
+
+    assignments = Assignment.objects.filter(
+        executor=employee,
+        date_completion__gt=date_from,
+        date_completion__lte=date_by
+    )
+
+    data = []
+    while assignments.exists():
+        assignment = assignments.first()
+        data.append(
+            {
+                'product_name': assignment.order_product.product.name,
+                'department_name': assignment.department.name,
+                'count': assignments.filter(
+                    order_product=assignment.order_product,
+                    department=assignment.department,
+                ).count()
+            }
+        )
+        assignments = assignments.exclude(
+            order_product=assignment.order_product,
+            department=assignment.department,
+        )
+
+    return JsonResponse({'results': data}, json_dumps_params={"ensure_ascii": False})

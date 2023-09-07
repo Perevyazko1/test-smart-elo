@@ -3,7 +3,8 @@ import {week_info} from "entities/WeekInfo";
 
 
 interface WeekInfo {
-    total: number | null;
+    total_wages: number | null;
+    total_accrual: number | null;
     confirmed: boolean;
 }
 
@@ -33,6 +34,7 @@ export type WagesList = {
 export interface WagesEarnedPerDay {
     accruals: number;
     debit: number;
+    confirmed: boolean;
 }
 
 export interface EarnedPerWeek {
@@ -42,4 +44,10 @@ export interface EarnedPerWeek {
 export interface WagesWeekInfo {
     target_week_info: week_info;
     earned_per_week: EarnedPerWeek;
+}
+
+export interface AssignmentsCounter {
+    product_name: string;
+    department_name: string;
+    count: number;
 }

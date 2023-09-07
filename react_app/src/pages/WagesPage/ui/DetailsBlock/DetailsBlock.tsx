@@ -2,17 +2,21 @@ import {Button, Table} from "react-bootstrap";
 import React, {useState} from "react";
 
 import {classNames} from "shared/lib/classNames/classNames";
+import {Skeleton} from "shared/ui/Skeleton/Skeleton";
+import {useQueryParams} from "shared/lib/hooks/useQueryParams/useQueryParams";
+import {AppModal} from "shared/ui/AppModal/AppModal";
+import {Transaction, TRANSACTION_DETAILS, TRANSACTION_TYPES} from "entities/Transaction";
+import {useAppSelector} from "shared/lib/hooks/useAppSelector/useAppSelector";
+import {EmployeePermissions, getEmployeeHasPermissions} from "entities/Employee";
 
-import cls from './DetailsBlock.module.scss';
-import Photo from "./912316.png";
 import {WagesItem} from "../../model/types/types";
 import {GetWagesWeekInfo} from "../../model/api/api";
 import {WeekDetailElement} from "../WeekDetailElement/WeekDetailElement";
-import {Skeleton} from "../../../../shared/ui/Skeleton/Skeleton";
-import {useQueryParams} from "../../../../shared/lib/hooks/useQueryParams/useQueryParams";
-import {AppModal} from "../../../../shared/ui/AppModal/AppModal";
 import {AddTransactionForm} from "../AddTransactionForm/AddTransactionForm";
-import {Transaction} from "../../../../entities/Transaction";
+import {ProductCounter} from "../ProductCounter/ProductCounter";
+
+import cls from './DetailsBlock.module.scss';
+import Photo from "./912316.png";
 
 interface DetailsBlockProps {
     employee: WagesItem;
@@ -23,8 +27,16 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
         employee,
     } = props;
 
+
+    const checkPermissions = useAppSelector(getEmployeeHasPermissions);
+    const addPermission = checkPermissions([EmployeePermissions.WAGES_ADD_TRANSACTION]);
+
     const {setQueryParam, queryParameters} = useQueryParams();
-    const [showWagesModal, setShowWagesModal] = useState<boolean>(false);
+    const [showWagesModal, setShowWagesModal] = useState<
+        false | {
+        transaction_type: keyof typeof TRANSACTION_TYPES,
+        details: keyof typeof TRANSACTION_DETAILS,
+    }>(false);
     const [transactionDetail, setTransactionDetail] = useState<Transaction | null>(null);
 
     const {data} = GetWagesWeekInfo({
@@ -52,24 +64,29 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                 <AppModal title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
                           onHide={() => setShowWagesModal(false)}
                 >
-                    <AddTransactionForm employee={employee}/>
+                    <AddTransactionForm
+                        employee={employee}
+                        transaction_type={showWagesModal.transaction_type}
+                        details={showWagesModal.details}
+                    />
                 </AppModal>
             }
             {transactionDetail &&
                 <AppModal title={`Начисление сотруднику ${employee.first_name} ${employee.last_name}`}
                           onHide={() => setTransactionDetail(null)}
                 >
-                    <AddTransactionForm employee={employee} transaction={transactionDetail}/>
+                    <AddTransactionForm employee={employee} transaction={transactionDetail}
+                                        deleteClb={() => setTransactionDetail(null)}/>
                 </AppModal>
             }
-            <div className={classNames(cls.detailHeader, {}, ['d-flex p-3'])}>
+            <div className={classNames(cls.detailHeader, {}, ['d-flex p-2 px-3 gap-2'])}>
                 <img
                     src={Photo}
                     alt="Фото сотрудника"
                     style={{maxWidth: "140px", maxHeight: "140px"}}
                     className={'me-3'}
                 />
-                <div>
+                <div className={'flex-fill'}>
                     <h4 className={'fw-bold'}>{employee.first_name} {employee.last_name}</h4>
                     <p>{employee.description || 'У сотрудника нет описания'}</p>
                     <div className={'gap-2 d-flex flex-wrap'}>
@@ -86,12 +103,63 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     </div>
                 </div>
 
+                <div style={{minWidth: "250px"}} className={'gap-1 d-flex flex-column flex-wrap'}>
+                    {addPermission &&
+                        <Button variant={'warning'}
+                                style={{height: "62px"}}
+                                className={'w-50'}
+                                onClick={() => setShowWagesModal(
+                                    {transaction_type: 'cash', details: 'wages'})
+                                }
+                        >
+                            ➕ Зарплата
+                        </Button>
+                    }
+                    {addPermission &&
+                        <Button variant={'danger'}
+                                style={{height: "62px"}}
+                                className={'w-50'}
+                                onClick={() => setShowWagesModal(
+                                    {transaction_type: 'debiting', details: 'fine'})
+                                }
+                        >
+                            ➖ Штраф
+                        </Button>
+                    }
+
+                    <Button variant={'secondary'}
+                            style={{height: "62px"}}
+                            className={'w-50'}
+                            onClick={() => alert('Функция печати данных за неделю находится в разработке.')}
+                    >
+                        🖨️ Печать
+                    </Button>
+
+
+                    {addPermission &&
+                        <Button
+                            variant={'success'}
+                            style={{height: "62px"}}
+                            className={'w-50'}
+                            onClick={() => setShowWagesModal(
+                                {transaction_type: 'accrual', details: 'wages'})
+                            }
+                        >
+                            ➕ Начислить
+                        </Button>
+
+
+                    }
+
+                </div>
+
             </div>
+
             <hr className={'m-1 mx-3 border border-2 border-black'}/>
 
             <div className={'d-flex p-2'} style={{height: '67vh'}}>
                 <div style={{
-                    width: '40%',
+                    minWidth: '40%',
                     height: '66vh',
                     overflowX: 'hidden',
                     overflowY: 'auto',
@@ -161,7 +229,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                     }
                         {Number(employee.current_balance).toLocaleString("ru-RU")}</h4>
 
-                    <Table>
+                    <Table striped bordered>
                         <thead>
                         <tr>
                             <th className={'fw-bold'}>#</th>
@@ -170,7 +238,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                                     className={'fw-bold'}
                                     key={key}
                                 >
-                                    {key} {value.confirmed && value.total && "✅"}
+                                    {key}{!value.confirmed && "❗"}
                                 </th>
                             ))}
                         </tr>
@@ -178,59 +246,47 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
 
                         <tbody>
                         <tr>
-                            <td>Заработано</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                            <td>0</td>
-                        </tr>
-                        <tr>
-                            <td>Выдано</td>
+                            <td>Зар.</td>
                             {Object.entries(employee.weeks_info).map(([key, value]) => (
                                 <td key={key}>
                                     {
-                                        Number(value.total).toLocaleString(
+                                        Number(value.total_accrual).toLocaleString(
                                             'ru-RU'
                                         )
                                     }
-                                    {value.confirmed && value.total && "✅"}
+                                </td>
+                            ))}
+                        </tr>
+                        <tr>
+                            <td>Выд.</td>
+                            {Object.entries(employee.weeks_info).map(([key, value]) => (
+                                <td key={key}>
+                                    {
+                                        Number(value.total_wages).toLocaleString(
+                                            'ru-RU'
+                                        )
+                                    }
                                 </td>
                             ))}
                         </tr>
                         </tbody>
                     </Table>
 
-
-                    <div>
-                        <div className={'d-flex gap-3 p-2 mt-5'}>
-                            <Button variant={'danger'}>
-                                ➖ Добавить штраф
-                            </Button>
-
-                            <Button variant={'secondary'}>
-                                🖨️ Печать
-                            </Button>
-
+                    {data ?
+                        <div style={{maxWidth: '100%'}}>
+                            <ProductCounter employee__id={employee.id}
+                                            date_by={data.target_week_info.date_range[1]}
+                                            date_from={data.target_week_info.date_range[0]}
+                            />
                         </div>
+                        :
+                        <Skeleton width={'100%'} height={'320px'}/>
+                    }
 
-                        <div className={'d-flex gap-3 p-2'}>
-                            <Button
-                                variant={'success'}
-                                onClick={() => setShowWagesModal(true)}
-                            >
-                                ➕ Добавить начисление
-                            </Button>
 
-                            <Button variant={'warning'}>
-                                ➕ Выдать ЗП
-                            </Button>
-
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
-    );
+    )
+        ;
 };

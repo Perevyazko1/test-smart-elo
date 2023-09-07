@@ -11,6 +11,11 @@ export enum EmployeePermissions {
     TARIFICATION_BILLING = 'Первичная тарификация',
     TARIFICATION_CONFIRM = 'Подтверждение тарификаций',
 
+    WAGES_PAGE = 'ЗП - Страница',
+    WAGES_ADD_TRANSACTION = 'ЗП - Создание начислений',
+    WAGES_CONFIRM_TRANSACTION = 'ЗП - Визирование',
+    WAGES_DELETE_TRANSACTION = 'ЗП - Удаление',
+
     ASSIGNMENT_PAGE = 'Страница нарядов',
     ASSIGNMENT_UNCONFIRMED = 'Снятие визы',
 

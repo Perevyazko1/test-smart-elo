@@ -5,7 +5,7 @@ def get_view_modes(department_number):
     result = []
 
     users = Employee.objects.filter(departments__number=department_number).exclude(
-        groups__name='Администраторы',
+        is_staff=True,
     )
 
     for user in users:

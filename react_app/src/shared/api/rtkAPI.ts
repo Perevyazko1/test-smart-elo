@@ -7,7 +7,7 @@ export const rtkAPI = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl: SERVER_HTTP_ADDRESS + '/api/v1',
     }),
-    tagTypes: ['RetarifficationCard'],
+    tagTypes: ['RetarifficationCard', 'WagesList', 'WagesWeekInfo', 'Transaction'],
     endpoints: () => ({}),
     keepUnusedDataFor: 0,
 })

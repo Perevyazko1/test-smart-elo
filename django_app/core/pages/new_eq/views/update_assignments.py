@@ -306,7 +306,7 @@ class UpdateAssignments:
                     description = f'Производство полуфабриката {target_assignment} {target_assignment.department.name}'
                     Transaction.objects.create(
                         transaction_type='accrual',
-                        details='other',
+                        details='wages',
                         amount=target_assignment.tariff.tariff,
                         employee=target_assignment.executor,
                         executor=target_assignment.inspector,

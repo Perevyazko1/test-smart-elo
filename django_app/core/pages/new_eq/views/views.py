@@ -1,8 +1,9 @@
+from dataclasses import asdict
+
 from django.db.models import Sum
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from django.http import JsonResponse
-from dataclasses import asdict
 
 from core.models import OrderProduct, Assignment
 from core.pages.new_eq.serializers.serializers import EqCardSerializer
@@ -10,9 +11,9 @@ from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_eq_card_queryset import get_eq_card_queryset
 from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
 from core.services.get_week_info import GetWeekInfo
-from .update_assignments import UpdateAssignments
-from .get_view_modes import get_view_modes
 from .get_project_filter import get_project_filters
+from .get_view_modes import get_view_modes
+from .update_assignments import UpdateAssignments
 
 
 class GetEqCards(viewsets.ModelViewSet):
