@@ -36,7 +36,7 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
 
     const handleDoubleTap = useDoubleTap(onDoubleClick);
 
-    const getEarnedSum = (Math.trunc(weekData?.earned || 0)).toLocaleString()
+    const getEarnedSum = weekData?.earned || "0"
 
     const getWeekString = () => {
         if (weekBlockWidth > 650) {
@@ -44,14 +44,14 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
             | ЗП: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 550) {
+        } else if (weekBlockWidth > 600) {
             return `Нед. ${weekData?.week} 
             с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
             по ${weekData?.str_dates ? weekData.str_dates[6] : ''}  
             | ЗП: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 450) {
+        } else if (weekBlockWidth > 500) {
             return `Нед. ${weekData?.week} | ЗП: ${getEarnedSum}`;
-        } else if (weekBlockWidth > 350) {
+        } else if (weekBlockWidth > 400) {
             return `Нед. ${weekData?.week}`;
         } else {
             return `${weekData?.week}`;

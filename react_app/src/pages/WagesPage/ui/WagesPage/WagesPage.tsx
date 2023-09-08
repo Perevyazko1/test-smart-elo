@@ -142,9 +142,9 @@ const WagesPage = () => {
                                             Object.entries(data.total_data).map(([key, value]) => (
                                                 <th className={'fw-bold'} key={key}>
                                                     {key}{
-                                                        key !== 'Баланс' ?
+                                                    key !== 'Баланс' ?
                                                         value.confirmed ? "✅" : "❗" : ""
-                                                    }
+                                                }
                                                 </th>
                                             ))
                                             :
@@ -194,17 +194,19 @@ const WagesPage = () => {
 
                             <tbody>
                             {data?.detailed_data.map((employee) => (
-                                <tr key={employee.id}>
-                                    <td onClick={() => setSelectedEmployee(
+                                <tr
+                                    key={employee.id}
+                                    onClick={() => setSelectedEmployee(
                                         selectedEmployee?.id === employee.id ?
                                             null :
                                             employee
                                     )}
-                                        style={{
-                                            height: '66px',
-                                            width: '300px',
-                                            backgroundColor: selectedEmployee?.id === employee.id ? "#becdd2" : "",
-                                        }}
+                                >
+                                    <td style={{
+                                        height: '66px',
+                                        width: '300px',
+                                        backgroundColor: selectedEmployee?.id === employee.id ? "#becdd2" : "",
+                                    }}
                                     >
                                         {employee.first_name} {employee.last_name}
                                     </td>

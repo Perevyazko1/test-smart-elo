@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from core.models import Assignment
+from core.models import Assignment, ProductPicture
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee, Transaction
 from staff.pages.wages_pages.filters import EmployeeModelFilter, TransactionModelFilter
@@ -32,6 +32,8 @@ class WagesViewSet(viewsets.ModelViewSet):
             'total_accrual': total_balance,
             'total_wages': total_balance,
             'confirmed': False,
+            'week': '',
+            'year': '',
         }
 
         for week in week_info:
@@ -47,6 +49,8 @@ class WagesViewSet(viewsets.ModelViewSet):
                 'total_accrual': total_accrual,
                 'total_wages': total_wages,
                 'confirmed': not has_uninspected,
+                'week': week.week,
+                'year': week.year,
             }
 
         serializer = self.get_serializer(self.filter_queryset(self.get_queryset()), many=True)
@@ -130,18 +134,30 @@ def get_assignment_counts(request):
     data = []
     while assignments.exists():
         assignment = assignments.first()
+        pictures = ProductPicture.objects.filter(
+            product=assignment.order_product.product
+        )
+        thumbnail_urls = []
+        picture_urls = []
+
+        for picture in pictures:
+            thumbnail_urls.append(picture.thumbnail.url)
+            picture_urls.append(picture.image.url)
+
         data.append(
             {
                 'product_name': assignment.order_product.product.name,
                 'department_name': assignment.department.name,
                 'count': assignments.filter(
-                    order_product=assignment.order_product,
+                    order_product__product=assignment.order_product.product,
                     department=assignment.department,
-                ).count()
+                ).count(),
+                'thumbnail_urls': [thumbnail_urls],
+                'picture_urls': [picture_urls],
             }
         )
         assignments = assignments.exclude(
-            order_product=assignment.order_product,
+            order_product__product=assignment.order_product.product,
             department=assignment.department,
         )
 

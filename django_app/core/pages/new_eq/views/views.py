@@ -11,6 +11,7 @@ from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_eq_card_queryset import get_eq_card_queryset
 from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
 from core.services.get_week_info import GetWeekInfo
+from staff.models import Transaction
 from .get_project_filter import get_project_filters
 from .get_view_modes import get_view_modes
 from .update_assignments import UpdateAssignments
@@ -105,7 +106,17 @@ def get_week_data(request):
         date_completion__lt=week_info.date_range[1],
     ).aggregate(Sum('tariff__tariff')).get('tariff__tariff__sum')
 
-    week_info.earned = earned
+    transactions_sum = Transaction.objects.filter(
+        employee__pin_code=eq_params.pin_code,
+        inspect_date__gte=week_info.date_range[0],
+        inspect_date__lt=week_info.date_range[1],
+        transaction_type="accrual",
+        details__in=['prize', 'fine']
+    ).aggregate(Sum('amount')).get('amount__sum')
+
+    week_info.earned = f'{earned or "0"}'
+    if transactions_sum:
+        week_info.earned += f' + {int(transactions_sum)}(доп)'
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 

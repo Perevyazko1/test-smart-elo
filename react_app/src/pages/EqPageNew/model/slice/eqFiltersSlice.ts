@@ -15,7 +15,7 @@ export const initialState: EqFilters = {
         year: undefined,
         hasUpdated: false,
         isLoading: true,
-        earned: 0,
+        earned: "0",
     },
     projectFilter: {
         filters: ["Все проекты",],

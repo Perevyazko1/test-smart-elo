@@ -39,6 +39,8 @@ class WagesSerializer(serializers.ModelSerializer):
                 'total_accrual': total_accrual,
                 'total_wages': total_wages,
                 'confirmed': not has_uninspected,
+                'week': week.week,
+                'year': week.year,
             }
 
         return result

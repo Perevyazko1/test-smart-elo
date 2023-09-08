@@ -9,5 +9,5 @@ export interface week_info extends week_data {
     date_range: string[];
     previous_week_data: week_data | null;
     next_week_data: week_data | null;
-    earned: number;
+    earned: string;
 }

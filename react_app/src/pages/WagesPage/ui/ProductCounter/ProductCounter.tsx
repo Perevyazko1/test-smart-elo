@@ -1,8 +1,9 @@
 import {Col, Form, Row, Table} from "react-bootstrap";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 
 import {UseGetAssignmentCounts} from "../../model/api/api";
 import {Skeleton} from "../../../../shared/ui/Skeleton/Skeleton";
+import {Slider} from "../../../../shared/ui/Slider/Slider";
 
 interface ProductCounterProps {
     employee__id: number;
@@ -14,6 +15,14 @@ interface ProductCounterProps {
 export const ProductCounter = (props: ProductCounterProps) => {
     const [dateBy, setDateBy] = useState<string>(props.date_by.slice(0, 10));
     const [dateFrom, setDateFrom] = useState<string>(props.date_from.slice(0, 10));
+
+    useEffect(() => {
+        setDateBy(props.date_by.slice(0, 10))
+    }, [props.date_by])
+
+    useEffect(() => {
+        setDateFrom(props.date_from.slice(0, 10))
+    }, [props.date_from])
 
     const {data, isLoading, isFetching} = UseGetAssignmentCounts({
         employee__id: props.employee__id,
@@ -32,14 +41,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
     };
 
     return (
-        <div className={'border rounded border-2 p-2'}
-             style={{
-                 maxHeight: '320px',
-                 maxWidth: '100%',
-                 overflowY: 'auto',
-                 overflowX: 'hidden',
-             }}
-        >
+        <div>
             <Form>
                 <Row>
                     <Form.Group controlId="date_from" as={Col} md="6">
@@ -64,6 +66,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
             <Table size={'sm'} bordered>
                 <thead>
                 <tr>
+                    <th>#</th>
                     <th>Наименование изделия</th>
                     <th>Отдел</th>
                     <th>Колич.</th>
@@ -87,6 +90,16 @@ export const ProductCounter = (props: ProductCounterProps) => {
                     <>
                         {data?.results.map((assignmentInfo) => (
                             <tr className={'fs-7'} key={assignmentInfo.product_name + assignmentInfo.department_name}>
+                                <td>
+                                    {assignmentInfo.thumbnail_urls.length > 0 ?
+                                        <Slider width={'40px'} height={'40px'}
+                                                images={assignmentInfo.picture_urls}
+                                                thumbnails={assignmentInfo.thumbnail_urls}
+                                        />
+                                        :
+                                        <>БИ</>
+                                    }
+                                </td>
                                 <td>{assignmentInfo.product_name}</td>
                                 <td>{assignmentInfo.department_name}</td>
                                 <td>{assignmentInfo.count} шт</td>

@@ -6,6 +6,8 @@ interface WeekInfo {
     total_wages: number | null;
     total_accrual: number | null;
     confirmed: boolean;
+    week: string;
+    year: string;
 }
 
 interface WeekData {
@@ -50,4 +52,6 @@ export interface AssignmentsCounter {
     product_name: string;
     department_name: string;
     count: number;
+    thumbnail_urls: string[];
+    picture_urls: string[];
 }
