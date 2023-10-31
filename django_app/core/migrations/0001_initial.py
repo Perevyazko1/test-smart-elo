@@ -29,7 +29,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Fabric',
+            name='OrderProduct',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('fabric_id', models.UUIDField(default=uuid.uuid4, unique=True, verbose_name='API ID')),
@@ -43,7 +43,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Order',
+            name='OrderProduct',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('order_id', models.UUIDField(default=uuid.uuid4, unique=True, verbose_name='API ID')),
@@ -132,7 +132,7 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='ProductPicture',
+            name='TechProcess',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('image_filename', models.CharField(blank=True, max_length=120, null=True, verbose_name='Имя файла')),

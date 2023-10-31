@@ -45,7 +45,7 @@ const EqDesktopContent = () => {
     }, [dispatch, noRelevantId])
 
     return (
-        <DynamicModuleLoader reducers={initialReducers}>
+        <DynamicModuleLoader reducers={initialReducers} removeAfterUnmount={false}>
             <div className={'d-flex'}>
                 <div
                     style={{

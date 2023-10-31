@@ -1,23 +1,23 @@
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 import {useDrag} from 'react-dnd';
 
 
 const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
     const [leftBlockWidth, setLeftBlockWidth] = useState(windowWidth / 2);
     const [rightBlockWidth, setRightBlockWidth] = useState(windowWidth / 2);
-    const [inWorkHeight, setInWorkHeight] = useState(windowHeight / 2 - 20);
-    const [readyHeight, setReadyHeight] = useState(windowHeight / 2 - 20);
+    const [inWorkHeight, setInWorkHeight] = useState(windowHeight / 2 - 18);
+    const [readyHeight, setReadyHeight] = useState(windowHeight / 2 - 18);
 
     const adjustHeight = (offset_px: number) => {
-        if (offset_px - 60 < 30) {
+        if (offset_px < 30) {
             setInWorkHeight(0);
-            setReadyHeight(windowHeight - 40);
-        } else if (offset_px > windowHeight) {
-            setInWorkHeight(windowHeight - 40);
+            setReadyHeight(windowHeight - 38);
+        } else if (offset_px > windowHeight - 60) {
+            setInWorkHeight(windowHeight - 38);
             setReadyHeight(0);
         } else {
-            setInWorkHeight(offset_px - 60);
-            setReadyHeight(windowHeight - offset_px + 20);
+            setInWorkHeight(offset_px);
+            setReadyHeight(windowHeight - offset_px - 36);
         }
     }
 
@@ -37,8 +37,8 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
     const resetSize = () => {
         setLeftBlockWidth(windowWidth / 2)
         setRightBlockWidth(windowWidth / 2)
-        setInWorkHeight(windowHeight / 2 - 20)
-        setReadyHeight(windowHeight / 2 - 20)
+        setInWorkHeight(windowHeight / 2 - 18)
+        setReadyHeight(windowHeight / 2 - 18)
     }
 
     const [{isDragging}, drag] = useDrag(() => ({
@@ -47,8 +47,8 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
             if (monitor.isDragging()) {
                 const position = monitor.getClientOffset();
                 if (position) {
-                    adjustWidth(position.x + 33);
-                    adjustHeight(position.y - 21);
+                    adjustWidth(position.x + 25);
+                    adjustHeight(position.y - 15);
                 }
             }
             return {
@@ -56,19 +56,6 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number) => {
             };
         },
     }));
-
-    useEffect(() => {
-        const handleResize = () => {
-            setLeftBlockWidth(windowWidth / 2);
-            setRightBlockWidth(windowWidth / 2);
-            setInWorkHeight(windowHeight / 2 - 20);
-            setReadyHeight(windowHeight / 2 - 20);
-        };
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, [windowHeight, windowWidth]);
 
     return {
         leftBlockWidth,

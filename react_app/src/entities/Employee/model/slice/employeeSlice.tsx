@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {employee, EmployeeSchema} from "../types/employee";
-import {USER_LOCALSTORAGE_KEY} from "../../../../shared/const/localstorage";
+import {USER_LOCALSTORAGE_KEY, USER_LOCALSTORAGE_TOKEN} from "shared/const/localstorage";
 import {department} from "../../../Department";
 
 
@@ -16,6 +16,7 @@ export const employeeSlice = createSlice({
     reducers: {
         setEmployee: (state, action: PayloadAction<employee>) => {
             state.authData = action.payload
+            localStorage.setItem(USER_LOCALSTORAGE_TOKEN, action.payload.token)
         },
         setCurrentDepartment: (state, action: PayloadAction<department>) => {
             if (state.authData) {

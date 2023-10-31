@@ -1,0 +1,1 @@
+export {EqPageAsync as EqPage} from './ui/EqPage/EqPage.async';

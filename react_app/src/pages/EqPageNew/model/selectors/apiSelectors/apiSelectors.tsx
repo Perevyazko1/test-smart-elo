@@ -5,7 +5,7 @@ import {initialState} from "../../slice/eqFiltersSlice";
 export interface EqFilters {
     pin_code: number | undefined;
     department_number: number | undefined;
-    view_mode_key: number;
+    view_mode_key: number | string;
     project_filter: string;
     week: number | undefined;
     year: number | undefined;

@@ -20,13 +20,17 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     const mods: Mods = {};
 
     return (
-        <Navbar expand="xl"
+        <Navbar expand="md"
                 className={classNames('bg-body-tertiary p-0', mods, [className])}
-                style={{height: "55px"}}
+                style={{
+                    height: "55px",
+                    maxWidth: '100vw',
+                    overflowX: 'hidden',
+        }}
                 data-bs-theme={'dark'}
         >
             <Container fluid className={"mx-xxl-4"}>
-                <img style={{maxWidth: "100%"}} height={"45px"} src={logo} alt={"СЗМК"} className={'me-2 me-xxl-4 my-auto'}/>
+                <img height={"45px"} src={logo} alt={"СЗМК"} className={'me-2 me-xxl-4 my-auto'}/>
 
                 <Navbar.Toggle aria-controls="app-navbar-nav"/>
 

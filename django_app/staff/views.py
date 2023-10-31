@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .models import Employee, Department, Audit
@@ -18,6 +19,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def pin_code_authentication(request):
     pin_code = request.data.get('pin_code')
 

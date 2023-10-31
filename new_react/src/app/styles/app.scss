@@ -1,0 +1,119 @@
+* {
+  font-family: 'Montserrat', Arial, sans-serif;
+}
+
+$app-navbar-height: 45px;
+$app-body-height: calc(100vh - $app-navbar-height);
+
+.appNavbar {
+  height: $app-navbar-height;
+  width: 100vw;
+}
+
+.xOverflow {
+  overflow: auto hidden;
+  max-width: 100%;
+}
+
+.yOverflow {
+  overflow: hidden auto;
+  max-height: 100%;
+}
+
+.appBody {
+  width: 100vw;
+  height: $app-body-height;
+
+  @media (max-width: 1200px) {
+    height: 100vh;
+  }
+}
+
+.p-05 {
+  padding: 0.21rem 0.24rem;
+}
+
+.pb-05 {
+  padding: 0 .15rem .15rem 0;
+}
+
+.appBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ffffff;
+  border: 1.5px solid #000000;
+  color: #1e1e1e;
+
+  &:active {
+    background-color: #c0c0c0;
+    border: 1.5px solid #1e1e1e;
+    color: #111;
+  }
+
+
+  &:disabled {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+
+
+  &.greyBtn {
+    background-color: #a9a9a9;
+    border: 1.5px solid #525252;
+    color: #262626;
+
+    &:active {
+      background-color: #2d2d2d;
+      border-color: #eeeeee;
+      color: #c9c9c9;
+    }
+  }
+
+  &.greenBtn {
+    background-color: #347051;
+    border: 1.5px solid #419b6b;
+    color: #ccffd9;
+
+    &:active {
+      background-color: #1f553a;
+      border-color: #276e49;
+      color: #1b231c;
+    }
+  }
+
+  &.yellowBtn {
+    background-color: #ffcc00;
+    border: 1.5px solid #ffd633;
+    color: #333;
+
+    &:active {
+      background-color: #e6b800;
+      border-color: #ffb300;
+      color: #111;
+    }
+  }
+
+  &.blueBtn {
+    background-color: #1955b2;
+    border: 1.5px solid #164da2;
+    color: #e4dfdc;
+
+    &:active {
+      background-color: #1f6be1;;
+      border-color: #0d2e5e;
+      color: #383535;
+    }
+  }
+
+}
+
+.fs-7 {
+  font-size: 12px;
+}
+
+[data-bs-theme=dark] {
+  --bs-tertiary-bg-rgb: 00, 00, 00;
+  --bs-body-bg: #000000;
+  --bs-offcanvas-bg: #000000;
+}

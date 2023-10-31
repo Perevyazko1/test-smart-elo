@@ -1,0 +1,23 @@
+.dropIcon {
+  transition: transform 0.3s ease;
+  transform: rotate(0deg);
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+
+.menu {
+  position: absolute;
+  z-index: 1000;
+  background-color: black;
+  top: 36px;
+  left: 0;
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.1s;
+}
+
+.expand {
+  transform: scaleY(1);
+}

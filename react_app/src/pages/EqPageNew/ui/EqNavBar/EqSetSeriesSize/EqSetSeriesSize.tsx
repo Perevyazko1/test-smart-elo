@@ -8,14 +8,16 @@ import {getCurrentDepartment} from "entities/Employee";
 
 import {getSeriesSize} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
+import {useQueryParams} from "../../../../../shared/lib/hooks/useQueryParams/useQueryParams";
 
 
 export const EqSetSeriesSize = memo((props: Omit<NavDropdownProps, 'title' | 'children' | 'active'>) => {
     const dispatch = useAppDispatch();
 
     const seriesSize = useSelector(getSeriesSize);
+    const {setQueryParam, queryParameters} = useQueryParams();
 
-    const [currentSeriesSize, setCurrentSeriesSize] = useState(seriesSize);
+    const [currentSeriesSize, setCurrentSeriesSize] = useState<string>(queryParameters.series_size || "1");
 
     const series_size_input = useRef<HTMLInputElement>(null);
 
@@ -25,12 +27,13 @@ export const EqSetSeriesSize = memo((props: Omit<NavDropdownProps, 'title' | 'ch
     }
 
     const confirmSeriesSize = () => {
-        dispatch(eqFiltersActions.setSeriesSize(currentSeriesSize))
+        setQueryParam('series_size', currentSeriesSize === "1" ? "" : currentSeriesSize)
+        // dispatch(eqFiltersActions.setSeriesSize(currentSeriesSize))
     }
 
     const changeCurrentSeriesSize = (value: number) => {
-        if ((value < 0 && currentSeriesSize > 1) || (value > 0 && currentSeriesSize < 50)) {
-            setCurrentSeriesSize(currentSeriesSize + value)
+        if ((value < 0 && Number(currentSeriesSize) > 1) || (value > 0 && Number(currentSeriesSize) < 50)) {
+            setCurrentSeriesSize(String(Number(currentSeriesSize) + value))
             if (series_size_input.current) {
                 series_size_input.current.value = String(currentSeriesSize)
             }
@@ -39,7 +42,7 @@ export const EqSetSeriesSize = memo((props: Omit<NavDropdownProps, 'title' | 'ch
 
     return (
         <NavDropdown
-            title={`Размер серии X${seriesSize}`}
+            title={`Размер серии X${queryParameters.series_size || '1'}`}
             active={seriesSize !== 1}
             {...props}
         >
@@ -78,12 +81,12 @@ export const EqSetSeriesSize = memo((props: Omit<NavDropdownProps, 'title' | 'ch
                     <input
                         className="form-range"
                         type="range"
-                        defaultValue={1}
+                        defaultValue={currentSeriesSize}
                         min={1}
                         max={50}
                         step={1}
                         ref={series_size_input}
-                        onChange={() => setCurrentSeriesSize(Number(series_size_input.current?.value))}
+                        onChange={() => setCurrentSeriesSize(series_size_input.current?.value || '1')}
                     />
                 </div>
             </div>

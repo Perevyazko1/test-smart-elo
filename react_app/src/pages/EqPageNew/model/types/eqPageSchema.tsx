@@ -8,7 +8,7 @@ export interface EqListData extends normalized_page_list {
 
 export interface ViewMode {
     name: string,
-    key: number
+    key: number | string,
 }
 
 interface FilterData<T> {

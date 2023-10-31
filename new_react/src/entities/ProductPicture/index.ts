@@ -1,0 +1,1 @@
+export type {ProductPicture} from './types/productPicture';

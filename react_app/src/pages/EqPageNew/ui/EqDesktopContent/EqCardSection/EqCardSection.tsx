@@ -56,7 +56,7 @@ export const EqCardSection = (props: EqCardSectionProps) => {
             dispatch(fetchListData({
                 target_list: listType,
                 offset: 0,
-                limit: getPaginationSize(heightPx, 102, 1.8),
+                limit: getPaginationSize(heightPx, 102,  widthPx > 2000 ? 3.6: 1.8),
             }))
         }
         // eslint-disable-next-line

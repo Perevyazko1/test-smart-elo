@@ -3,7 +3,8 @@ from dataclasses import asdict
 from django.db.models import Sum
 from django.http import JsonResponse
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.permissions import AllowAny
 
 from core.models import OrderProduct, Assignment
 from core.pages.new_eq.serializers.serializers import EqCardSerializer
@@ -35,6 +36,7 @@ class GetEqCards(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def update_card(request):
+    print(request)
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.data.get('series_id')
     variant: str = request.data.get('variant')
@@ -77,8 +79,9 @@ def update_card(request):
 
 @api_view(['GET'])
 def get_eq_filters(request):
+    print(request)
     eq_params = get_eq_req_params(request=request)
-    mode = request.query_params.get('mode')
+    mode = request.query_params.get('project_mode')
 
     project_filters = get_project_filters(mode)
     view_modes = get_view_modes(eq_params.department_number)

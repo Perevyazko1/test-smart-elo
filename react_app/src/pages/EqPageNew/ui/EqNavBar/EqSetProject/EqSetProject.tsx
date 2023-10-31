@@ -7,6 +7,7 @@ import {useAppDispatch} from "shared/lib/hooks/useAppDispatch/useAppDispatch";
 
 import {getEqProjectFilter} from "../../../model/selectors/filtersSelectors/filtersSelectors";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
+import {useQueryParams} from "../../../../../shared/lib/hooks/useQueryParams/useQueryParams";
 
 interface EqSetProjectProps extends Omit<NavDropdownProps, 'title' | 'children' | 'active'> {
     callback: () => void;
@@ -15,6 +16,9 @@ interface EqSetProjectProps extends Omit<NavDropdownProps, 'title' | 'children' 
 
 export const EqSetProject = memo((props: EqSetProjectProps) => {
     const {callback, mode, ...otherProps} = props;
+
+    const {setQueryParam, queryParameters} = useQueryParams();
+
     const dispatch = useAppDispatch();
     const projectFilter = useSelector(getEqProjectFilter);
 
@@ -26,8 +30,8 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
 
     return (
         <NavDropdown
-            title={projectFilter?.currentFilter || ''}
-            active={projectFilter?.currentFilter !== projectFilter?.default}
+            title={queryParameters.project || projectFilter?.default}
+            active={!!queryParameters.project && queryParameters.project !== projectFilter?.default}
             {...otherProps}
         >
             <div style={{overflow: 'auto', overflowX: 'hidden', overflowY: 'auto', maxHeight: "85vh"}}>
@@ -41,8 +45,12 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
                 {projectFilter?.filters.map((filter_name) => (
                     <Dropdown.Item
                         key={filter_name}
-                        onClick={() => updateCurrentProject(filter_name)}
-                        active={filter_name === projectFilter?.currentFilter}
+                        onClick={() => setQueryParam(
+                            'project',
+                            filter_name !== projectFilter?.default ?
+                                filter_name : ''
+                        )}
+                        active={filter_name === queryParameters.project}
                     >
                         {filter_name}
                     </Dropdown.Item>
@@ -52,9 +60,12 @@ export const EqSetProject = memo((props: EqSetProjectProps) => {
                 <Button className={"w-100 p-0 mt-3"}
                         style={{height: "25px"}}
                         variant={'secondary'}
-                        onClick={callback}
+                        onClick={() => setQueryParam(
+                            'project_mode',
+                            queryParameters.project_mode ? '' : 'all'
+                        )}
                 >
-                    {mode === 'actual' ? "Показать все" : "Показать актуальные"}
+                    {queryParameters.project_mode ? "Показать актуальные" : "Показать все"}
                 </Button>
 
             </div>

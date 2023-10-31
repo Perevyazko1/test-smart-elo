@@ -1,0 +1,1 @@
+export type {OrderProduct} from './types/orderProduct';

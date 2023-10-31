@@ -16,6 +16,7 @@ export interface employee {
     departments: department[],
     groups: group[],
     current_balance: string,
+    token: string,
 }
 
 

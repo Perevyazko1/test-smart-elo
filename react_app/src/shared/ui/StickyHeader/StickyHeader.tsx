@@ -29,7 +29,7 @@ export const StickyHeader = memo((props: StickyHeaderProps) => {
                 className={classNames(
                     cls.mainBody,
                     {},
-                    ['bg-light bg-gradient border rounded border-2 border-dark']
+                    ['fs-7 bg-light bg-gradient border rounded border-2 border-dark']
                 )}>
 
                 {loading

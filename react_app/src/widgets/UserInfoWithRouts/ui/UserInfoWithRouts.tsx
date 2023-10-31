@@ -32,7 +32,7 @@ export const UserInfoWithRouts = memo((props: Omit<NavDropdownProps, 'title' | '
 
     return (
         <NavDropdown
-            align={'end'}
+            align={'start'}
             title={employee?.first_name + " " + employee?.last_name}
             {...props}
         >

@@ -1,7 +1,7 @@
-import React, {memo} from 'react';
-import {Placeholder} from "react-bootstrap";
-
-import {classNames, Mods} from "shared/lib/classNames/classNames";
+import React from 'react';
+import {Container} from "react-bootstrap";
+import {Mods} from "shared/lib/classNames/classNames";
+import {FixedSizeList as List} from 'react-window';
 
 interface SkeletonProps {
     className?: string;
@@ -15,7 +15,7 @@ interface SkeletonProps {
 }
 
 
-export const Skeleton = memo((props: SkeletonProps) => {
+export const Skeleton = (props: SkeletonProps) => {
     const {
         className,
         all_size = 0,
@@ -26,7 +26,7 @@ export const Skeleton = memo((props: SkeletonProps) => {
         height = '100px',
         scaled = false,
         ...otherProps
-    } = props
+    } = props;
 
     const getSkeletonCount = () => {
         if (all_size && current_size) {
@@ -47,27 +47,34 @@ export const Skeleton = memo((props: SkeletonProps) => {
         'scaled': scaled,
     };
 
-    const skeleton = (
-        <Placeholder as="div" animation="wave">
-            <Placeholder style={{height: height, width: width}}
-                         className={classNames('', mods, [className])}
-                         {...otherProps}
-            />
-        </Placeholder>
+    const skeleton = () => (
+        // <Placeholder
+        //     as="div"
+        //     // animation="glow"
+        //     className={'p-0 w-100'}
+        // >
+        //     <Placeholder style={{height: height, width: width}}
+        //                  className={classNames('', mods, [className])}
+        //                  {...otherProps}
+        //     />
+        // </Placeholder>
+        <Container fluid className={'w-100 bg-secondary rounded'} style={{height: '120px'}}>
+
+        </Container>
     )
-    
+
     if (getSkeletonCount() === 1) {
-        return skeleton
+        return skeleton()
     } else {
         const repeatedElementsArray = Array(getSkeletonCount()).fill(skeleton)
         return (
             <>
                 {repeatedElementsArray.map((element, index) => (
-                    <div key={index}>
+                    <div key={index} className={'p-0 mb-1'}>
                         {element}
                     </div>
                 ))}
             </>
         )
     }
-});
+};

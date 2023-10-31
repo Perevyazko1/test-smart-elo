@@ -13,6 +13,7 @@ import {getWeekData} from "../../../model/selectors/filtersSelectors/filtersSele
 import {fetchWeekData} from "../../../model/service/fetchWeekData";
 import {eqFiltersActions} from "../../../model/slice/eqFiltersSlice";
 import {eqContentDesktopActions} from "../../../model/slice/eqContentDesktopSlice";
+import {useQueryParams} from "../../../../../shared/lib/hooks/useQueryParams/useQueryParams";
 
 interface EqWeekBlockProps {
     onDoubleClick?: () => void;
@@ -27,6 +28,8 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
         isDragging,
         drag,
     } = props;
+
+    const {setQueryParam, queryParameters} = useQueryParams();
 
     const dispatch = useAppDispatch();
     const weekData = useAppSelector(getWeekData);
@@ -65,6 +68,8 @@ export const EqWeekBlock = memo((props: EqWeekBlockProps) => {
     }, [dispatch, weekData?.hasUpdated])
 
     const changeWeek = (week: number | undefined, year: number | undefined) => {
+        setQueryParam('week', String(week));
+        setQueryParam('year', String(year));
         dispatch(eqFiltersActions.setWeekData({
             week: week,
             year: year,

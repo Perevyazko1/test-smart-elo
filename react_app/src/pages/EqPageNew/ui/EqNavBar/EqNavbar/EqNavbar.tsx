@@ -14,6 +14,7 @@ import {EqSetProject} from "../EqSetProject/EqSetProject";
 import {EqSetSeriesSize} from "../EqSetSeriesSize/EqSetSeriesSize";
 import {fetchEqFilters} from "../../../model/service/fetchEqFilters";
 import {EqWeekBlock} from "../../EqDesktopContent/EqWeekBlock/EqWeekBlock";
+import {useQueryParams} from "../../../../../shared/lib/hooks/useQueryParams/useQueryParams";
 
 
 interface EqPageNavbarProps {
@@ -21,7 +22,7 @@ interface EqPageNavbarProps {
 }
 
 
-export const EqNavbar = memo((props: EqPageNavbarProps) => {
+export const EqNavbar = (props: EqPageNavbarProps) => {
     const dispatch = useAppDispatch();
     const [projectMode, setProjectMode] = useState<'all' | 'actual'>('actual');
     const currentDepartment = useSelector(getCurrentDepartment);
@@ -72,4 +73,4 @@ export const EqNavbar = memo((props: EqPageNavbarProps) => {
             {!props.isDesktop && <EqWeekBlock/>}
         </AppNavbar>
     );
-});
+};

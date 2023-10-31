@@ -26,9 +26,10 @@ export const EqSetDepartment = memo((props: Omit<NavDropdownProps, 'title' | 'ch
                 dispatch(eqFiltersActions.listsHasUpdated())
                 dispatch(eqFiltersActions.weekDataHasUpdated())
             })
-            if (![0, 1, 2].includes(currentViewMode?.key || 0)) {
-                dispatch(eqFiltersActions.setDefaultViewMode())
-            }
+            // TODO пофиксить строку
+            // if (![0, 1, 2].includes(currentViewMode?.key || 0)) {
+            //     dispatch(eqFiltersActions.setDefaultViewMode())
+            // }
         }
     }, [currentDepartment?.number, currentViewMode, authData?.pin_code, dispatch])
 

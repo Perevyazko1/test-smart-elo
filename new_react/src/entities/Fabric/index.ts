@@ -1,0 +1,1 @@
+export type {Fabric} from './types/fabric';

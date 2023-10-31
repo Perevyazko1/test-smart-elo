@@ -1,0 +1,1 @@
+export type {TechProcess} from './types/techProcess';
