@@ -23,7 +23,7 @@ export const getUserRouteConfig = (user: Employee | undefined, navOnly: boolean 
                     route: {
                         path: '/',
                         element: firstRoute.route.element,
-                        errorElement: AppRoutesConfig.error.route.element,
+                        errorElement: firstRoute.route.errorElement,
                     },
                     name: firstRoute.name,
                     navigate: firstRoute.navigate,

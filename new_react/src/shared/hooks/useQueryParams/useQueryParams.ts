@@ -1,7 +1,13 @@
 import {useMemo, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 
-export const useQueryParams = () => {
+export interface UseQueryParamsResult {
+    setQueryParam: (param: string, value: string) => void;
+    queryParameters: Record<string, string>;
+    initialLoad: boolean;
+}
+
+export const useQueryParams = (): UseQueryParamsResult => {
     const location = useLocation();
     const navigate = useNavigate();
     const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
@@ -34,5 +40,5 @@ export const useQueryParams = () => {
         }
     };
 
-    return { setQueryParam, queryParameters, initialLoad };
+    return {setQueryParam, queryParameters, initialLoad};
 };

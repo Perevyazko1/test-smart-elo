@@ -79,7 +79,6 @@ def update_card(request):
 
 @api_view(['GET'])
 def get_eq_filters(request):
-    print(request)
     eq_params = get_eq_req_params(request=request)
     mode = request.query_params.get('project_mode')
 
@@ -96,9 +95,9 @@ def get_eq_filters(request):
 def get_week_data(request):
     eq_params = get_eq_req_params(request=request)
 
-    if len(eq_params.view_mode_key) == 6:
-        eq_params.pin_code = eq_params.view_mode_key
-
+    # if len(eq_params.view_mode_key) == 6:
+    #     eq_params.pin_code = eq_params.view_mode_key
+    # TODO Добавить расчет от лица сотрудника отдела
     week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
 
     earned = Assignment.objects.filter(

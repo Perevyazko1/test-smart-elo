@@ -1,4 +1,5 @@
 export enum APP_PERMISSIONS {
+    ANON = 'Анонимный пользователь',
     ADMIN = 'Администраторы',
 
     ELO_PAGE = 'Страница ЭЛО',

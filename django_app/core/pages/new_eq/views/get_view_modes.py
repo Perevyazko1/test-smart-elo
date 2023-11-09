@@ -3,6 +3,7 @@ from staff.models import Employee
 
 def get_view_modes(department_number):
     result = [
+        {'name': 'Личные наряды', 'key': 'self'},
         {'name': 'Режим бригадира', 'key': 'boss'},
         {'name': 'Режим недоделки', 'key': 'unfinished'},
     ]
@@ -12,6 +13,6 @@ def get_view_modes(department_number):
     )
 
     for user in users:
-        result.append({'name': f'{user.first_name} {user.last_name}', 'key': user.id})
+        result.append({'name': f'{user.first_name} {user.last_name}', 'key': str(user.id)})
 
     return result

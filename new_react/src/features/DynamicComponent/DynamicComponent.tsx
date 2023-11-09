@@ -1,21 +1,19 @@
-import {FC, ReactNode, useEffect} from 'react';
-import { useDispatch, useStore } from 'react-redux';
-import { Reducer } from '@reduxjs/toolkit';
+import {ReactNode, useEffect} from 'react';
+import {useDispatch, useStore} from 'react-redux';
+import {Reducer} from '@reduxjs/toolkit';
 import {ReduxStoreWithManager, StateSchemaKey} from "@app";
 
 export type ReducersList = {
     [name in StateSchemaKey]?: Reducer;
 }
 
-interface DMLProps {
+interface DynamicComponentProps {
     children: ReactNode;
     reducers: ReducersList;
     removeAfterUnmount?: boolean;
 }
 
-
-// DinamicComponent -  Dynamic module loader
-export const DinamicComponent: FC<DMLProps> = (props) => {
+export const DynamicComponent = (props: DynamicComponentProps) => {
     const {
         children,
         reducers,

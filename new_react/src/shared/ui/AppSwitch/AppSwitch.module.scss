@@ -49,9 +49,14 @@
     background-color: white;
     border-radius: 4px;
     transition: transform 0.3s ease;
+    border: 1px solid var(--bs-gray-800);
   }
 }
 
 .switchInput:checked + .switchLabel::before {
-  transform: translateX(4px); // Добавьте этот стиль
+  transform: translateX(2px);
+}
+
+.switchInput + .switchLabel::before {
+  transform: translateX(-2px);
 }

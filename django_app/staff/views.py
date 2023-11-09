@@ -33,11 +33,10 @@ def pin_code_authentication(request):
 
 @api_view(['POST'])
 def change_current_department(request):
-    pin_code = request.data.get('pin_code')
     department_number = request.data.get('department_number')
 
     try:
-        user = Employee.objects.get(pin_code=pin_code)
+        user = request.user
         user.current_department = Department.objects.get(number=department_number)
         user.save()
         serialized_user = EmployeeSerializer(user, context={'request': request})

@@ -1,7 +1,7 @@
 import React, {StrictMode} from 'react';
 import ReactDOM from 'react-dom/client';
 
-import {App, StoreProvider} from "@app";
+import {App, ContextProvider, StoreProvider} from "@app";
 import '@app/styles/index.scss';
 import {DndProvider} from "react-dnd";
 import {TouchBackend} from "react-dnd-touch-backend";
@@ -15,7 +15,9 @@ root.render(
     <StrictMode>
         <StoreProvider>
             <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
-                <App/>
+                <ContextProvider>
+                    <App/>
+                </ContextProvider>
             </DndProvider>
         </StoreProvider>
     </StrictMode>

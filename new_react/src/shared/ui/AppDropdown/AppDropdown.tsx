@@ -9,10 +9,11 @@ interface AppDropdownProps {
     onSelect?: (item: string) => void;
     active?: boolean;
     children?: ReactNode;
+    childrenPos?: 'top' | 'bottom';
 }
 
 export const AppDropdown = (props: AppDropdownProps) => {
-    const {items, selected, onSelect, active, children} = props;
+    const {items, selected, onSelect, active, children, childrenPos = 'top'} = props;
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -50,8 +51,17 @@ export const AppDropdown = (props: AppDropdownProps) => {
             </div>
 
             <div className={`${cls.menu} ${isOpen && cls.expand} rounded p-1 border border-secondary`}>
-                {children}
-                {renderOptions}
+                {childrenPos === 'top' ?
+                    <>
+                        {children}
+                        {renderOptions}
+                    </> :
+                    <>
+                        {renderOptions}
+                        {children}
+                    </>
+                }
+
             </div>
         </div>
     )

@@ -36,6 +36,5 @@ export const Checkbox = memo((props: CheckboxProps) => {
                 {children}
             </label>
         </div>
-
     );
 });

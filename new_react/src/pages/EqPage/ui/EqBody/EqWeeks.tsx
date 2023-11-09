@@ -1,8 +1,11 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useMemo} from "react";
 import {IsDesktopContext} from "@app";
 import {ConnectDragSource} from "react-dnd";
-import {useDoubleTap} from "@shared/hooks";
+import {useAppDispatch, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
 import {Button} from "react-bootstrap";
+
+import {getWeekData} from "../../model/selectors/filterSelectors";
+import {fetchWeekData} from "@pages/EqPage/model/api/fetchWeekData";
 
 interface EqWeeksProps {
     blockWidthPx: number;
@@ -13,21 +16,37 @@ interface EqWeeksProps {
 }
 
 export const EqWeeks = (props: EqWeeksProps) => {
+    const dispatch = useAppDispatch();
+    const {queryParameters, setQueryParam} = useAppQuery();
+
     const {blockWidthPx, isDragging, showClb, drag, resetSize} = props;
     const isDesktop = useContext(IsDesktopContext);
     const handleDoubleTap = useDoubleTap(resetSize);
+    const weekData = useAppSelector(getWeekData);
 
+    useEffect(() => {
+        if (weekData?.hasUpdated !== undefined) {
+            dispatch(fetchWeekData({
+                ...queryParameters
+            }))
+        }
+    }, [dispatch, queryParameters, weekData?.hasUpdated])
+
+    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]) 
+    
     const getWeekString = () => {
         if (blockWidthPx > 650) {
-            return 'Неделя 42 с 23.10 по 30.10 | ЗП: 20 000';
+            return `Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
+            по ${weekData?.str_dates ? weekData.str_dates[6] : ''}   | ЗП: ${getEarnedSum}`;
         } else if (blockWidthPx > 550) {
-            return 'Нед. 42 с 23.10 по 30.10 | ЗП: 20 000';
+            return `Нед. ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
+            по ${weekData?.str_dates ? weekData.str_dates[6] : ''}   | ЗП: ${getEarnedSum}`;
         } else if (blockWidthPx > 400) {
-            return 'Нед. 42 | ЗП: 20 000';
+            return `Нед. ${weekData?.week} | ЗП: ${getEarnedSum}`;
         } else if (blockWidthPx > 300) {
-            return 'Нед. 42';
+            return `Нед. ${weekData?.week}`;
         } else if (blockWidthPx > 250) {
-            return '42';
+            return `${weekData?.week}`;
         } else {
             return '';
         }
@@ -60,6 +79,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         variant={'dark'}
                         size={'sm'}
                         style={{width: "50px", height: "29px"}}
+                        onClick={() => setQueryParam('week', `${weekData?.previous_week_data?.week}`)}
                 >
                     <i className="fas fa-angle-double-left fs-3"/>
                 </Button>
@@ -74,29 +94,30 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         variant={'dark'}
                         size={'sm'}
                         style={{width: "50px", height: "29px"}}
+                        onClick={() => setQueryParam('week', `${weekData?.next_week_data?.week}`)}
                 >
                     <i className="fas fa-angle-double-right fs-3"/>
                 </Button>
             </div>
 
-                {!!drag &&
-                    <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center ms-2'}
-                         style={{
-                             width: "40px",
-                             height: "29px",
-                             touchAction: 'none',
-                             cursor: 'grab',
-                         }}
-                         ref={drag}
-                         onDoubleClick={resetSize}
-                         onTouchEnd={handleDoubleTap}
-                    >
-                        {isDragging ? <i className="far fa-hand-rock fs-5 text-light"/>
-                            : <i className="far fa-hand-paper fs-5 text-light"/>
-                        }
+            {!!drag &&
+                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center ms-2'}
+                     style={{
+                         width: "40px",
+                         height: "29px",
+                         touchAction: 'none',
+                         cursor: 'grab',
+                     }}
+                     ref={drag}
+                     onDoubleClick={resetSize}
+                     onTouchEnd={handleDoubleTap}
+                >
+                    {isDragging ? <i className="far fa-hand-rock fs-5 text-light"/>
+                        : <i className="far fa-hand-paper fs-5 text-light"/>
+                    }
 
-                    </div>
-                }
+                </div>
+            }
         </div>
     )
 }

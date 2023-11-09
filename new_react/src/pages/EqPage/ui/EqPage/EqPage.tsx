@@ -1,6 +1,6 @@
 import {useCallback, useState} from "react";
 
-import {DinamicComponent, ReducersList} from "@shared/components";
+import {DynamicComponent, QueryContext, ReducersList} from "@features";
 
 import {EqNav} from "../EqNav/EqNav";
 import {EqBody} from "../EqBody/EqBody";
@@ -19,9 +19,11 @@ export const EqPage = () => {
     }, [])
 
     return (
-        <DinamicComponent removeAfterUnmount={false} reducers={initialReducers}>
-            <EqNav closeClb={closeClb} showCanvas={showCanvas}/>
-            <EqBody showClb={() => setShowCanvas(true)}/>
-        </DinamicComponent>
+        <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
+            <QueryContext>
+                <EqNav closeClb={closeClb} showCanvas={showCanvas}/>
+                <EqBody showClb={() => setShowCanvas(true)}/>
+            </QueryContext>
+        </DynamicComponent>
     );
 };
