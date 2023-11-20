@@ -1,0 +1,61 @@
+.modalBackdrop {
+  height: 100vh;
+  width: 100vw;
+  background-color: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1111;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.3s;
+}
+
+.modalActive {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modalContent {
+  padding: 20px;
+  border-radius: 0.25rem;
+  background-color: var(--bs-gray-300);
+  transform: scale(0.8);
+  transition: 0.3s;
+  position: relative;
+  min-width: 25vw;
+  min-height: 25vh;
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+.modalContentActive {
+  transform: scale(1);
+}
+
+.modalBtn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: .2;
+  background-color: rgba(0, 0, 0, .1);
+
+  &:hover {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0);
+  }
+
+  &:active {
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0);
+  }
+}

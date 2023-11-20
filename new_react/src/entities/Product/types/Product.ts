@@ -14,6 +14,6 @@ type ExtendedFields = 'product_pictures' | 'technological_process' | 'technologi
 
 export interface Product extends Omit<BaseProduct, ExtendedFields> {
     technological_process_confirmed: Employee;
-    product_pictures: ProductPicture;
+    product_pictures: ProductPicture[];
     technological_process: TechProcess;
 }

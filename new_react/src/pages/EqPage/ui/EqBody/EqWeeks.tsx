@@ -1,11 +1,12 @@
 import React, {useContext, useEffect, useMemo} from "react";
-import {IsDesktopContext} from "@app";
-import {ConnectDragSource} from "react-dnd";
-import {useAppDispatch, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
 import {Button} from "react-bootstrap";
+import {ConnectDragSource} from "react-dnd";
+
+import {IsDesktopContext} from "@app";
+import {useAppDispatch, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
 
 import {getWeekData} from "../../model/selectors/filterSelectors";
-import {fetchWeekData} from "@pages/EqPage/model/api/fetchWeekData";
+import {fetchWeekData} from "../../model/api/fetchWeekData";
 
 interface EqWeeksProps {
     blockWidthPx: number;
@@ -115,7 +116,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     {isDragging ? <i className="far fa-hand-rock fs-5 text-light"/>
                         : <i className="far fa-hand-paper fs-5 text-light"/>
                     }
-
                 </div>
             }
         </div>

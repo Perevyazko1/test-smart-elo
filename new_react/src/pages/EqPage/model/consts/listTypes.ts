@@ -1,0 +1,1 @@
+export type ListTypes = 'await' | 'in_work' | 'ready';

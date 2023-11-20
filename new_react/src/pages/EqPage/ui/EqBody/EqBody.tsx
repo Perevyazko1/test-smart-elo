@@ -1,4 +1,4 @@
-import {EqSectionCard} from "@pages/EqPage/ui/EqBody/EqSectionCard";
+import {EqSection} from "@pages/EqPage/ui/EqBody/EqSection";
 import useResizableBlocks from "@pages/EqPage/model/lib/useResizableBlocks";
 import React, {useContext} from "react";
 import useWindowDimensions from "@pages/EqPage/model/lib/useWindowDimensions";
@@ -47,7 +47,11 @@ export const EqBody = (props: EqBodyProps) => {
                         padding: '0 0 0 0.15rem',
                     }}
                     >
-                        <EqSectionCard height={inWorkHeight}   width={leftBlockWidth}/>
+                        <EqSection
+                            height={inWorkHeight}
+                            width={leftBlockWidth}
+                            listType={'in_work'}
+                        />
                     </div>
 
 
@@ -63,7 +67,11 @@ export const EqBody = (props: EqBodyProps) => {
                         padding: '0 0 0 0.15rem',
                     }}
                     >
-                        <EqSectionCard height={readyHeight}  width={leftBlockWidth}/>
+                        <EqSection
+                            height={readyHeight}
+                            width={leftBlockWidth}
+                            listType={'ready'}
+                        />
                     </div>
 
 
@@ -79,7 +87,11 @@ export const EqBody = (props: EqBodyProps) => {
                         padding: '0 0 0 0.15rem',
                     }}
                 >
-                    <EqSectionCard height={windowHeight} width={rightBlockWidth}/>
+                    <EqSection
+                        height={windowHeight}
+                        width={rightBlockWidth}
+                        listType={'await'}
+                    />
                 </div>
             </div>
         </div>

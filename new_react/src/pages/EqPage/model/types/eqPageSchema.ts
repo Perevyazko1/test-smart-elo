@@ -8,8 +8,8 @@ import {WeekData} from "../types/weekInfo";
 
 export interface EqListData extends Omit<ApiList<EqCard>, 'results'> {
     results: EntityState<EqCard>;
-    isLoading: boolean;
-    hasUpdated: boolean;
+    isLoading: boolean | undefined;
+    hasUpdated: boolean | undefined;
 }
 
 interface EqFilters<T> {
@@ -19,7 +19,7 @@ interface EqFilters<T> {
     isLoading: boolean,
 }
 
-export interface EqBodySchema {
+export interface EqPageSchema {
     // Фильтра ЭЛО
     projects: EqFilters<string>,
     viewModes: EqFilters<ViewMode>,
@@ -34,7 +34,7 @@ export interface EqBodySchema {
 
 }
 
-export const InitialEqBodySchema: EqBodySchema = {
+export const InitialEqBodySchema: EqPageSchema = {
     projects: {
         filters: ['Все проекты'],
         currentFilter: 'Все проекты',
@@ -75,8 +75,8 @@ export const InitialEqBodySchema: EqBodySchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: null,
-        previous: null,
+        next: undefined,
+        previous: undefined,
     },
     inWorkList: {
         results: {
@@ -86,8 +86,8 @@ export const InitialEqBodySchema: EqBodySchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: null,
-        previous: null,
+        next: undefined,
+        previous: undefined,
     },
     readyList: {
         results: {
@@ -97,7 +97,7 @@ export const InitialEqBodySchema: EqBodySchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: null,
-        previous: null,
+        next: undefined,
+        previous: undefined,
     },
 }

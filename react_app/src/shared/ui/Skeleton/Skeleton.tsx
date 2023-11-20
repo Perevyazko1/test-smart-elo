@@ -1,7 +1,6 @@
 import React from 'react';
 import {Container} from "react-bootstrap";
 import {Mods} from "shared/lib/classNames/classNames";
-import {FixedSizeList as List} from 'react-window';
 
 interface SkeletonProps {
     className?: string;
@@ -48,16 +47,6 @@ export const Skeleton = (props: SkeletonProps) => {
     };
 
     const skeleton = () => (
-        // <Placeholder
-        //     as="div"
-        //     // animation="glow"
-        //     className={'p-0 w-100'}
-        // >
-        //     <Placeholder style={{height: height, width: width}}
-        //                  className={classNames('', mods, [className])}
-        //                  {...otherProps}
-        //     />
-        // </Placeholder>
         <Container fluid className={'w-100 bg-secondary rounded'} style={{height: '120px'}}>
 
         </Container>

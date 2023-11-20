@@ -1,3 +1,5 @@
+from requests import Request
+
 from core.models import Assignment
 from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
@@ -7,14 +9,14 @@ from staff.models import Department
 
 def get_filtered_await_queryset(queryset, eq_params):
     # Фильтр на случай режима просмотра личных нарядов или нарядов конкретного сотрудника
-    if eq_params.view_mode_key == "0" or len(eq_params.view_mode_key) == 6:
+    if eq_params.view_mode_key is None or eq_params.view_mode_key not in ['boss', 'unfinished']:
         queryset = queryset.filter(
             assignments__status__in=['await', 'in_work'],
             assignments__department__number=eq_params.department_number
         ).distinct()
 
     # Фильтр при включенном режима бригадира
-    if eq_params.view_mode_key == '1':
+    if eq_params.view_mode_key == 'boss':
         # Извлекаем все не закрытые серии производства
         queryset = queryset.filter(status="0").distinct()
         department = Department.objects.get(number=eq_params.department_number)
@@ -42,7 +44,7 @@ def get_filtered_await_queryset(queryset, eq_params):
                 queryset = queryset.exclude(series_id=order_product.series_id)
 
     # Фильтр при включенном режима недоделки
-    if eq_params.view_mode_key == '2':
+    if eq_params.view_mode_key == 'unfinished':
         queryset = queryset.filter(status="0").distinct()
         department = Department.objects.get(number=eq_params.department_number)
 
@@ -67,11 +69,11 @@ def get_filtered_await_queryset(queryset, eq_params):
 def get_filtered_in_work_queryset(queryset, eq_params):
     # Делаем проверку на режим просмотра под пользователем
     # Если таков задан - переопределяем пин-код
-    if len(eq_params.view_mode_key) == 6:
-        eq_params.pin_code = eq_params.view_mode_key
-
+    # if len(eq_params.view_mode_key) == 6:
+    #     eq_params.pin_code = eq_params.view_mode_key
+    # TODO вернуть функционал проверки от лица пользователя
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
-    if len(eq_params.view_mode_key) == 6 or eq_params.view_mode_key == "0":
+    if eq_params.view_mode_key is not None or eq_params.view_mode_key not in ['boss', 'unfinished']:
         queryset = queryset.filter(
             assignments__executor__pin_code=eq_params.pin_code,
             assignments__department__number=eq_params.department_number,
@@ -79,7 +81,7 @@ def get_filtered_in_work_queryset(queryset, eq_params):
         ).distinct()
 
     # В режиме бригадира и недоделок получаем все изделия отдела в статусе в работе
-    if eq_params.view_mode_key in ["1", "2"]:
+    if eq_params.view_mode_key in ["boss", "unfinished"]:
         queryset = queryset.filter(
             assignments__department__number=eq_params.department_number,
             assignments__status='in_work',
@@ -92,11 +94,12 @@ def get_filtered_ready_queryset(queryset, eq_params):
     # Делаем проверку на режим просмотра под пользователем
     # Если таков задан - переопределяем пин-код
 
-    if len(eq_params.view_mode_key) == 6:
-        eq_params.pin_code = eq_params.view_mode_key
+    # if len(eq_params.view_mode_key) == 6:
+    #     eq_params.pin_code = eq_params.view_mode_key
+    # TODO вернуть функционал
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
-    if len(eq_params.view_mode_key) == 6 or eq_params.view_mode_key == "0":
+    if eq_params.view_mode_key is None or eq_params.view_mode_key not in ['boss', 'unfinished']:
         week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
 
         queryset = queryset.filter(
@@ -108,7 +111,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
         ).distinct().order_by('-assignments__inspector')
 
     # В режиме бригадира фильтрацию по пин-коду не делаем
-    if eq_params.view_mode_key == '1':
+    if eq_params.view_mode_key == 'boss':
         week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
 
         queryset = queryset.filter(
@@ -119,7 +122,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
         ).distinct().order_by('-assignments__inspector')
 
     # В режиме недоделок не фильтруем по пин-коду и по дате
-    if eq_params.view_mode_key == '2':
+    if eq_params.view_mode_key == 'unfinished':
         queryset = queryset.filter(
             assignments__department__number=eq_params.department_number,
             assignments__status='ready',
@@ -129,14 +132,14 @@ def get_filtered_ready_queryset(queryset, eq_params):
     return queryset.order_by('urgency', 'order', 'id')
 
 
-def get_eq_card_queryset(queryset, request):
+def get_eq_card_queryset(queryset, request: Request):
     """Фильтр кверисета для запроса карточек"""
     # Извлекаем базовые параметры из запроса
     eq_params = get_eq_req_params(request)
     target_list = get_target_list_name_from_req(request)
 
     # Делаем общую фильтрацию по проекту
-    if not eq_params.project_filter == 'Все проекты':
+    if eq_params.project_filter is not None:
         queryset = queryset.filter(order__project=eq_params.project_filter).distinct()
 
     # Индивидуально прогоняем каждый сценарий запроса

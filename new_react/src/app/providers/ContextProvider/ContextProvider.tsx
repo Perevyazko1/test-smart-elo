@@ -1,6 +1,5 @@
 import {createContext, ReactNode, useState} from "react";
 import {Employee, testEmployee} from "@entities/Employee";
-import {useQueryParams, UseQueryParamsResult} from "@shared/hooks";
 import {useMediaQuery} from "react-responsive";
 import {APP_COMPACT_MODE, CURRENT_USER} from "@shared/consts";
 

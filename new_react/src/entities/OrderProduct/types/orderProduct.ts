@@ -21,9 +21,9 @@ type ExtendedFields = 'product' | 'main_fabric' | 'second_fabric' | 'third_fabri
 
 export interface OrderProduct extends Omit<BaseOrderProduct, ExtendedFields> {
     product: Product;
-    tariff: Tariff;
-    main_fabric: Fabric;
-    second_fabric: Fabric;
-    third_fabric: Fabric;
+    tariff: Tariff | null;
+    main_fabric: Fabric | null;
+    second_fabric: Fabric | null;
+    third_fabric: Fabric | null;
     order: Order;
 }

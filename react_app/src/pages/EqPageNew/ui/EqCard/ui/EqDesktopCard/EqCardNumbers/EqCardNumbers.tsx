@@ -15,7 +15,7 @@ export const EqCardNumbers = memo((props: EqCardNumbersProps) => {
     const {
         assignmentsLists,
         callback,
-    } = props
+    } = props;
 
     return (
         <div className={cls.numbers}>

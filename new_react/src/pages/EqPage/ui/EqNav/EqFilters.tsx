@@ -25,6 +25,7 @@ export const EqFilters = () => {
                 ...queryParameters,
             }))
         }
+        //eslint-disable-next-line
     }, [dispatch, currentUser.current_department, queryParameters.project_mode])
 
     const viewModeClb = (item: string) => {

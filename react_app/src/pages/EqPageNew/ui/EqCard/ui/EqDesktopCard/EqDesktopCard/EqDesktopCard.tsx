@@ -153,6 +153,7 @@ export const EqDesktopCard = (props: EqCardProps) => {
 
                     <div
                         className={classNames(cls.sliderBlock, {}, [wrapper])}
+
                     >
                         <Slider
                             price={eqCard.card_info.tariff}

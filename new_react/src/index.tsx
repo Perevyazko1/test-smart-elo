@@ -1,4 +1,4 @@
-import React, {StrictMode} from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 import {App, ContextProvider, StoreProvider} from "@app";
@@ -12,13 +12,11 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-    <StrictMode>
-        <StoreProvider>
-            <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
-                <ContextProvider>
-                    <App/>
-                </ContextProvider>
-            </DndProvider>
-        </StoreProvider>
-    </StrictMode>
+    <StoreProvider>
+        <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
+            <ContextProvider>
+                <App/>
+            </ContextProvider>
+        </DndProvider>
+    </StoreProvider>
 );

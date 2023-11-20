@@ -4,9 +4,7 @@ import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {useCurrentUser} from "@shared/hooks";
 import {getUserRoutes} from "@shared/lib";
 import '@shared/assets/fonts/fontawesome-all.min.css';
-
-import {ContextProvider} from "../providers/ContextProvider/ContextProvider";
-
+import {ModalProvider} from "@app/providers/ModalProvider/ModalProvider";
 
 export const App = () => {
     const {currentUser} = useCurrentUser();
@@ -19,7 +17,9 @@ export const App = () => {
 
     return (
         <div data-bs-theme={'dark'}>
-            <RouterProvider router={router}/>
+            <ModalProvider>
+                <RouterProvider router={router}/>
+            </ModalProvider>
         </div>
     )
 }

@@ -1,3 +1,5 @@
+export {ModalContext} from "@app/providers/ModalProvider/ModalProvider";
+
 export {StoreProvider} from "./providers/StoreProvider/StoreProvider";
 export {App} from './ui/App';
 export {
