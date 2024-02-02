@@ -59,7 +59,7 @@ services:
     depends_on:
       - django_app
     volumes:
-      - ./react_app/build/:/usr/share/nginx/html
+      - ./new_react/build/:/usr/share/nginx/html
       - media:/usr/share/nginx/html/media
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
