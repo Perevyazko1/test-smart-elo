@@ -1,1 +1,1 @@
-export type {TechProcess} from './types/techProcess';
+export type {TechProcess, TechProcessSchema} from './types/techProcess';

@@ -40,7 +40,7 @@ export interface BaseTransaction {
 type ExtendedFields = 'employee' | 'executor' | 'inspector';
 
 export interface Transaction extends Omit<BaseTransaction, ExtendedFields> {
-    employee: Employee;
-    executor: Employee;
-    inspector: Employee;
+    employee?: Employee;
+    executor?: Employee;
+    inspector?: Employee;
 }

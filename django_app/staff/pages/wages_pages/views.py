@@ -152,8 +152,8 @@ def get_assignment_counts(request):
                     order_product__product=assignment.order_product.product,
                     department=assignment.department,
                 ).count(),
-                'thumbnail_urls': [thumbnail_urls],
-                'picture_urls': [picture_urls],
+                'thumbnail_urls': thumbnail_urls,
+                'picture_urls': picture_urls,
             }
         )
         assignments = assignments.exclude(

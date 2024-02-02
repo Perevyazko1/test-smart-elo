@@ -1,2 +1,2 @@
-export {rtkAPI} from "@shared/api/rtkAPI/rtkAPI";
+export {rtkAPI} from "./rtkAPI/rtkAPI";
 export {$axiosAPI} from "./axiosAPI/axiosAPI";

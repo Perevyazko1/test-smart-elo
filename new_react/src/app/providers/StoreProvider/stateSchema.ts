@@ -1,13 +1,23 @@
 import {AnyAction, CombinedState, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
 import {AxiosInstance} from "axios";
-import {rtkAPI} from "@shared/api";
+
 import {EqPageSchema} from "@pages/EqPage";
+import {AssignmentSchema} from "@pages/AssignmentPage";
+import {ProductsSchema} from "@pages/ProductPage";
+import {TariffPageSchema} from "@pages/TariffPage";
+
+import {rtkAPI} from "@shared/api";
+import {AuditWidgetSchema} from "@widgets/UserActions";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
     eqPage?: EqPageSchema;
+    assignments?: AssignmentSchema;
+    products?: ProductsSchema;
+    tariffs?: TariffPageSchema;
+    auditWidget?: AuditWidgetSchema;
 }
 
 export type StateSchemaKey = keyof StateSchema;

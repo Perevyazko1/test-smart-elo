@@ -1,5 +1,5 @@
-import {APP_PERMISSIONS} from "@shared/consts";
+import {APP_PERM} from "@shared/consts";
 
 export interface Group {
-    name: APP_PERMISSIONS,
+    name: APP_PERM,
 }

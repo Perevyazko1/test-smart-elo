@@ -18,7 +18,7 @@ class UpdateAssignments:
         self.department_number: int = department_number
         self.action: str = action
         self.pin_code: str = pin_code
-        self.view_mode: int = view_mode
+        self.view_mode: int | None = view_mode
 
         self.notification_data: dict = {}
         self.order_product: OrderProduct | None = None
@@ -27,9 +27,9 @@ class UpdateAssignments:
         self.original_user: Employee | None = None
 
     def _check_pin_code_in_view_mode(self):
-        if self.view_mode not in [0, 1, 2, '0', '1', '2']:
+        if self.view_mode not in ['self', 'boss', 'unfinished', 'None']:
             self.original_user = Employee.objects.get(pin_code=self.pin_code)
-            self.pin_code = self.view_mode
+            self.pin_code = Employee.objects.get(id=self.view_mode).pin_code
 
     def _update_target_numbers(self):
         """Изменение нарядов/поручений с переданным списком номеров"""
@@ -117,7 +117,7 @@ class UpdateAssignments:
         update_production_steps(self.order_product.product)
 
     def _set_technological_process_confirmed(self):
-        self.order_product.product.technological_process_confirmed = Employee.objects.get(pin_code=self.pin_code)
+        self.order_product.product.technological_process_confirmed = self.original_user
         self.order_product.product.save()
 
     def _delete_constructor_relations(self):

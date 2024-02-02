@@ -1,8 +1,9 @@
-import {eqCardEntityAdapter} from "../types/eqCard";
+import {eqCardEntityAdapter} from "../types/eqCardType";
 import {StateSchema} from "@app";
 import {EqListData} from "@pages/EqPage/model/types/eqPageSchema";
 import {createSelector} from "@reduxjs/toolkit";
 
+export const getNoRelevantId = (state: StateSchema) => state.eqPage?.notRelevantId;
 
 export const getEqAwaitList = eqCardEntityAdapter.getSelectors<StateSchema>(
     state => state.eqPage?.awaitList.results || eqCardEntityAdapter.getInitialState()

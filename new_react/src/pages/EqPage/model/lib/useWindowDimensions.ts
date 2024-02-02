@@ -1,23 +1,27 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect} from 'react';
 
 const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
-  const [windowWidth, setWindowWidth] = useState(window.innerWidth + widthEdit);
-  const [windowHeight, setWindowHeight] = useState(window.innerHeight + heightEdit);
+    // Поднимаем два стейта где будем хранить высоту и ширину блока. Инициализируем с учетом переданных параметров
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth + widthEdit);
+    const [windowHeight, setWindowHeight] = useState(window.innerHeight + heightEdit);
 
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth + widthEdit);
-      setWindowHeight(window.innerHeight + heightEdit);
-    };
+    useEffect(() => {
+        console.log('rerender')
+        const handleResize = () => {
+            setWindowWidth(window.innerWidth + widthEdit);
+            setWindowHeight(window.innerHeight + heightEdit);
+        };
+        // Добавляем слушатель событий который при изменении размеров окна будет изменять стейт
+        window.addEventListener('resize', handleResize);
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [heightEdit, widthEdit]);
+        // удаляем слушатель после демонтирования компонента
+        return () => window.removeEventListener('resize', handleResize);
+    }, [heightEdit, widthEdit]);
 
-  return {
-    windowWidth,
-    windowHeight
-  }
+    return {
+        windowWidth,
+        windowHeight
+    }
 };
 
 export default useWindowDimensions;

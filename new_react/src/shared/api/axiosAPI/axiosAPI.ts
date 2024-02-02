@@ -1,5 +1,6 @@
 import axios from "axios";
-import {SERVER_HTTP_ADDRESS, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
+
+import {SERVER_HTTP_ADDRESS, USER_LOCALSTORAGE_TOKEN} from "../../consts";
 
 
 export const $axiosAPI = axios.create({

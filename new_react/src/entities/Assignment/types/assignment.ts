@@ -1,6 +1,9 @@
 import {Employee} from "@entities/Employee";
 import {Department} from "@entities/Department";
 import {Tariff} from "@entities/Tariff";
+import {EntityState} from "@reduxjs/toolkit";
+import {ApiList} from "@shared/types";
+import {OrderProduct} from "@entities/OrderProduct";
 
 export interface BaseAssignment {
     id: number;
@@ -11,13 +14,22 @@ export interface BaseAssignment {
     executor: number;
     inspector: number;
     tariff: number;
+    order_product: number;
 }
 
-type ExtendedFields = 'department' | 'executor' | 'inspector' | 'tariff';
+type ExtendedFields = 'department' | 'executor' | 'inspector' | 'tariff' | 'order_product';
 
 export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {
-    executor: Employee;
-    inspector: Employee;
+    executor: Employee | null;
+    order_product: OrderProduct;
+    inspector: Employee | null;
     department: Department;
-    tariff: Tariff;
+    tariff: Tariff | null;
+}
+
+export interface AssignmentApiList extends ApiList<Assignment> {
+}
+
+export interface NorAssignmentList extends Omit<AssignmentApiList, 'results'> {
+    results: EntityState<Assignment>
 }

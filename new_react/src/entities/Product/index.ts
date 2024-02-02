@@ -1,1 +1,2 @@
-export type {Product} from './types/Product';
+export { ProductAdapter } from './adapter/adapter';
+export type {Product} from './types/product';

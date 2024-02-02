@@ -1,81 +1,65 @@
-import {useEffect, useMemo} from "react";
-import {Button} from "react-bootstrap";
+import React, { useEffect, useMemo } from 'react';
+import { Button } from 'react-bootstrap';
 
-import {AppDropdown} from "@shared/ui";
-import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
+import { APP_PERM } from '@shared/consts';
+import { AppDropdown } from '@shared/ui';
+import { useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission } from '@shared/hooks';
 
-import {fetchEqFilters} from "../../model/api/fetchEqFilters";
-import {getEqProjects, getEqViewMode} from "../../model/selectors/filterSelectors";
+import { fetchEqFilters } from '../../model/api/fetchEqFilters';
+import { getEqProjects, getEqViewMode } from '../../model/selectors/filterSelectors';
 
 export const EqFilters = () => {
-    const {queryParameters, setQueryParam} = useAppQuery();
-    const {currentUser} = useCurrentUser();
+    const { queryParameters, setQueryParam, initialLoad } = useAppQuery();
+    const { currentUser } = useCurrentUser();
     const dispatch = useAppDispatch();
     const viewModes = useAppSelector(getEqViewMode);
     const projects = useAppSelector(getEqProjects);
 
+    const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+    const behalfPerm = usePermission(APP_PERM.BEHALF_ACTIONS);
+
     const viewModesList = useMemo(() => {
-        return viewModes?.filters.map((viewMode) => viewMode.name) || []
-    }, [viewModes?.filters])
+        let result = viewModes?.filters;
+        if (!bossPerm) {
+            result = result?.filter(mode => mode.name !== 'Режим бригадира');
+        }
+        if (!behalfPerm) {
+            result = result?.filter(mode => ['self', 'boss', 'unfinished'].includes(String(mode.key)));
+        }
+        return result?.map(viewMode => viewMode.name) || [];
+    }, [behalfPerm, bossPerm, viewModes?.filters]);
 
     useEffect(() => {
-        if (currentUser.current_department) {
+        if (currentUser.current_department && !initialLoad) {
             dispatch(fetchEqFilters({
                 department_number: currentUser.current_department.number,
                 ...queryParameters,
-            }))
+            }));
         }
-        //eslint-disable-next-line
-    }, [dispatch, currentUser.current_department, queryParameters.project_mode])
+    }, [dispatch, currentUser.current_department, queryParameters, initialLoad]);
 
     const viewModeClb = (item: string) => {
-        const targetKey = viewModes?.filters.find(viewMode => viewMode.name === item)?.key
+        const targetKey = viewModes?.filters.find(viewMode => viewMode.name === item)?.key;
         if (targetKey) {
-            targetKey === viewModes?.default.key ?
-                setQueryParam('view_mode', '')
-                :
-                setQueryParam('view_mode', String(targetKey))
+            setQueryParam('view_mode', targetKey === viewModes.default.key ? '' : String(targetKey));
         }
-    }
+    };
 
     const getSelectedViewMode = () => {
         if (queryParameters.view_mode && viewModes) {
-            const viewMode = viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode)?.name;
-            if (viewMode) {
-                return viewMode;
-            } else {
-                setQueryParam('view_mode', '');
-                return viewModes.default.name;
-            }
-        } else if (viewModes) {
-            return viewModes.default.name;
+            return viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode)?.name || viewModes.default.name;
         } else {
-            return 'Загрузка';
+            return viewModes ? viewModes.default.name : 'Загрузка';
         }
-    }
-
-    const getSelectedProject = () => {
-        if (queryParameters.project && projects) {
-            const project = projects.filters.find(project => project === queryParameters.project);
-            if (project) {
-                return project;
-            } else {
-                setQueryParam('project', '');
-                return projects.default;
-            }
-        } else if (projects) {
-            return projects.default;
-        } else {
-            return 'Загрузка';
-        }
-    }
+    };
 
     const projectClb = (item: string) => {
-        item === projects?.default ?
-            setQueryParam('project', '')
-            :
-            setQueryParam('project', item)
-    }
+        setQueryParam('project', item === projects?.default ? '' : item);
+    };
+
+    const getSelectedProject = () => {
+        return queryParameters.project && projects ? projects.filters.find(project => project === queryParameters.project) || projects.default : projects ? projects.default : 'Загрузка';
+    };
 
     return (
         <>
@@ -93,15 +77,12 @@ export const EqFilters = () => {
                 onSelect={projectClb}
                 childrenPos={'bottom'}
             >
-                <Button className={"w-100 p-0 mt-3"}
-                        style={{height: "25px"}}
+                <Button className={'w-100 p-0 mt-3'}
+                        style={{ height: '25px' }}
                         variant={'secondary'}
-                        onClick={() => setQueryParam(
-                            'project_mode',
-                            queryParameters.project_mode ? '' : 'all'
-                        )}
+                        onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
                 >
-                    {queryParameters.project_mode ? "Актуальные" : "Показать все"}
+                    {queryParameters.project_mode ? 'Актуальные' : 'Показать все'}
                 </Button>
             </AppDropdown>
         </>

@@ -36,7 +36,6 @@ class GetEqCards(viewsets.ModelViewSet):
 
 @api_view(['POST'])
 def update_card(request):
-    print(request)
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.data.get('series_id')
     variant: str = request.data.get('variant')

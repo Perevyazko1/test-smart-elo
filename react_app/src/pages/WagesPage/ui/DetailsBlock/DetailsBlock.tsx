@@ -37,6 +37,7 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
         transaction_type: keyof typeof TRANSACTION_TYPES,
         details: keyof typeof TRANSACTION_DETAILS,
     }>(false);
+
     const [transactionDetail, setTransactionDetail] = useState<Transaction | null>(null);
 
     const {data} = GetWagesWeekInfo({
@@ -75,8 +76,10 @@ export const DetailsBlock = (props: DetailsBlockProps) => {
                 <AppModal title={`Начисление сотруднику ${employee.first_name} ${employee.last_name}`}
                           onHide={() => setTransactionDetail(null)}
                 >
-                    <AddTransactionForm employee={employee} transaction={transactionDetail}
-                                        deleteClb={() => setTransactionDetail(null)}/>
+                    <AddTransactionForm
+                        employee={employee} transaction={transactionDetail}
+                        deleteClb={() => setTransactionDetail(null)}
+                    />
                 </AppModal>
             }
             <Container fluid className={'w-100 h-100'}>

@@ -1,4 +1,4 @@
-import React, {memo} from 'react';
+import React, {memo, useMemo} from 'react';
 
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination} from 'swiper/modules';
@@ -30,6 +30,23 @@ export const AppSlider = memo((props: AppSliderProps) => {
         height = '100px',
     } = props;
 
+    const Sliders = useMemo(() => (
+        images?.map(image => (
+            <SwiperSlide
+                style={{width: width, height: height}}
+                className={"d-flex justify-content-center align-items-center py-1"}
+                key={image}
+            >
+                <img
+                    src={GET_STATIC_URL() + image}
+                    style={{maxWidth: width, maxHeight: height}}
+                    className="rounded m-0 p-0"
+                    alt={"Slide"}
+                    loading={"lazy"}
+                />
+            </SwiperSlide>))
+    ), [height, images, width])
+
     return (
         <Swiper
             // install Swiper modules
@@ -46,7 +63,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
             className={"d-flex justify-content-center align-items-center"}
         >
             <>
-                {price &&
+                {price !== undefined &&
                     <div
                         style={{
                             position: "absolute",
@@ -58,7 +75,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             pointerEvents: "none",
                         }}
                     >
-                        <div className={"fw-bold text-black bg-light border rounded me-1 fs-7"}
+                        <div className={"fw-bold text-black border rounded me-1 fs-7" + (price === 0 ? ' bg-warning' : ' bg-light')}
                              style={{padding: "0 0.1rem"}}>
                             {price}
                         </div>
@@ -85,22 +102,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
             </>
 
 
-            {images?.length && images.map((image_url) => (
-                <SwiperSlide
-                    style={{width: width, height: height}}
-                    className={"d-flex justify-content-center align-items-center py-1"}
-                    key={image_url}
-                >
-                    <img
-                        src={GET_STATIC_URL() + image_url}
-                        style={{maxWidth: width, maxHeight: height}}
-                        className="rounded m-0 p-0"
-                        alt={"Slide"}
-                        loading={"lazy"}
-                        // onClick={() => setShowModal(true)}
-                    />
-                </SwiperSlide>
-            ))}
+            {Sliders}
 
         </Swiper>
     );

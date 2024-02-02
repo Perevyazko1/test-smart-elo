@@ -1,10 +1,10 @@
 import {Employee} from "../types/employee";
-import {APP_PERMISSIONS} from "@shared/consts";
+import {APP_PERM} from "@shared/consts";
 
 export const testEmployee: Employee = {
     id: 0,
     groups: [
-        {name: APP_PERMISSIONS.ANON},
+        {name: APP_PERM.ANON},
     ],
     username: 'anon_user',
     first_name: 'Anon',

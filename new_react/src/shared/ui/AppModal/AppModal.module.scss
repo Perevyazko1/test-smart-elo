@@ -20,16 +20,16 @@
 }
 
 .modalContent {
-  padding: 20px;
+  position: relative;
   border-radius: 0.25rem;
   background-color: var(--bs-gray-300);
   transform: scale(0.8);
   transition: 0.3s;
-  position: relative;
   min-width: 25vw;
   min-height: 25vh;
   max-width: 100vw;
   max-height: 100vh;
+  overflow: hidden;
 }
 
 .modalContentActive {
@@ -38,16 +38,17 @@
 
 .modalBtn {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 4px;
+  right: 6px;
   border-radius: 50%;
   width: 40px;
   height: 40px;
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: .2;
+  opacity: .5;
   background-color: rgba(0, 0, 0, .1);
+  z-index: 1000;
 
   &:hover {
     opacity: 1;

@@ -1,4 +1,4 @@
-export enum APP_PERMISSIONS {
+export enum APP_PERM {
     ANON = 'Анонимный пользователь',
     ADMIN = 'Администраторы',
 

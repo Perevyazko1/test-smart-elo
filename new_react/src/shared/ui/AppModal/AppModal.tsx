@@ -38,7 +38,9 @@ export const AppModal = (props: AppModalProps) => {
                     <i className="fas fa-times mx-xl-3 fs-3 text-black"/>
                 </button>
 
-                {children}
+                <div className={'p-3'} style={{overflowY: 'auto', overflowX: 'hidden', maxHeight: '100dvh'}}>
+                    {children}
+                </div>
             </div>
         </div>
     );

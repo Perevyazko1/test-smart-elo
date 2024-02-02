@@ -4,7 +4,7 @@ from core.models import Assignment
 from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
 from core.services.get_week_info import GetWeekInfo
-from staff.models import Department
+from staff.models import Department, Employee
 
 
 def get_filtered_await_queryset(queryset, eq_params):
@@ -67,13 +67,12 @@ def get_filtered_await_queryset(queryset, eq_params):
 
 
 def get_filtered_in_work_queryset(queryset, eq_params):
-    # Делаем проверку на режим просмотра под пользователем
-    # Если таков задан - переопределяем пин-код
-    # if len(eq_params.view_mode_key) == 6:
-    #     eq_params.pin_code = eq_params.view_mode_key
-    # TODO вернуть функционал проверки от лица пользователя
+    # Если получаем ключ - делаем подмену пин-кода для дальнейшей фильтрации
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None']:
+        eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
+
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
-    if eq_params.view_mode_key is not None or eq_params.view_mode_key not in ['boss', 'unfinished']:
+    if eq_params.view_mode_key not in ['boss', 'unfinished']:
         queryset = queryset.filter(
             assignments__executor__pin_code=eq_params.pin_code,
             assignments__department__number=eq_params.department_number,
@@ -93,10 +92,8 @@ def get_filtered_in_work_queryset(queryset, eq_params):
 def get_filtered_ready_queryset(queryset, eq_params):
     # Делаем проверку на режим просмотра под пользователем
     # Если таков задан - переопределяем пин-код
-
-    # if len(eq_params.view_mode_key) == 6:
-    #     eq_params.pin_code = eq_params.view_mode_key
-    # TODO вернуть функционал
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None']:
+        eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
     if eq_params.view_mode_key is None or eq_params.view_mode_key not in ['boss', 'unfinished']:

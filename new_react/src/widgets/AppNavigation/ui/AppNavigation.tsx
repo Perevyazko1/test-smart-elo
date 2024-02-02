@@ -7,9 +7,12 @@ import {testEmployee} from "@entities/Employee";
 import {getUserRouteConfig} from "@shared/lib";
 import {AppDropdown, AppSwitch} from "@shared/ui";
 import {APP_COMPACT_MODE, CURRENT_USER} from "@shared/consts";
+import {useAppModal} from "@shared/hooks";
+import {UserActions} from "@widgets/UserActions";
 
-export const AppNavigation = () => {
+export const AppNavigation = (props: {isDesktop: boolean}) => {
     const currentUser = useContext(CurrentUserContext);
+    const {openModal} = useAppModal();
 
     if (!currentUser) {
         throw new Error("SomeComponent must be used within a AppInCompactMode.Provider");
@@ -31,8 +34,8 @@ export const AppNavigation = () => {
     const location = useLocation();
 
     const getRoutesConfig = useCallback(() => {
-        return getUserRouteConfig(currentUser.currentUser, true);
-    }, [currentUser]);
+        return getUserRouteConfig(currentUser.currentUser, true, props.isDesktop);
+    }, [currentUser.currentUser, props.isDesktop]);
 
     const renderOptions = getRoutesConfig().map((routeConfig) => {
         return (
@@ -65,11 +68,22 @@ export const AppNavigation = () => {
         localStorage.removeItem(CURRENT_USER);
     }
 
+    const showUserActionsClb = () => {
+        openModal(
+            <UserActions/>
+        )
+    }
+
     return (
         <AppDropdown selected={getSelectedName()}>
             {renderOptions}
             <div className={'py-2'}>
                 <AppSwitch checked={isCompactMode} label={'Сжатый вид'} onSwitch={switchCompactMode}/>
+            </div>
+            <div className={'py-2'}>
+                <Button onClick={showUserActionsClb} className={'w-100 bg-black'} variant={'dark'}>
+                    История
+                </Button>
             </div>
 
             <div>

@@ -3,7 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 import {ApiList} from "@shared/types";
 
-import {EqCard} from "../types/eqCard";
+import {EqCardType} from "../types/eqCardType";
 import {ListTypes} from "../consts/listTypes";
 
 
@@ -15,7 +15,7 @@ interface fetchListDataProps {
 }
 
 
-export const fetchListData = createAsyncThunk<ApiList<EqCard>, fetchListDataProps, ThunkConfig<string>>(
+export const fetchListData = createAsyncThunk<ApiList<EqCardType>, fetchListDataProps, ThunkConfig<string>>(
     'eq/fetchListData',
     async (params: fetchListDataProps, thunkAPI) => {
         const {extra} = thunkAPI;
@@ -26,9 +26,9 @@ export const fetchListData = createAsyncThunk<ApiList<EqCard>, fetchListDataProp
             let response
 
             if (url) {
-                response = await extra.api.get<ApiList<EqCard>>(url);
+                response = await extra.api.get<ApiList<EqCardType>>(url);
             } else {
-                response = await extra.api.get<ApiList<EqCard>>('/core/get_eq_cards/', {
+                response = await extra.api.get<ApiList<EqCardType>>('/core/get_eq_cards/', {
                     params: {
                         ...props,
                     }

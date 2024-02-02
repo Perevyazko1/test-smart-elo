@@ -1,9 +1,16 @@
 import React, {useContext, useEffect, useMemo} from "react";
-import {Button} from "react-bootstrap";
+import {Button, Spinner} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
 import {IsDesktopContext} from "@app";
-import {useAppDispatch, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
+import {
+    useAppDispatch,
+    useAppIsLoading,
+    useAppQuery,
+    useAppSelector,
+    useCurrentUser,
+    useDoubleTap
+} from "@shared/hooks";
 
 import {getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
@@ -18,7 +25,9 @@ interface EqWeeksProps {
 
 export const EqWeeks = (props: EqWeeksProps) => {
     const dispatch = useAppDispatch();
+    const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
+    const {isLoading} = useAppIsLoading();
 
     const {blockWidthPx, isDragging, showClb, drag, resetSize} = props;
     const isDesktop = useContext(IsDesktopContext);
@@ -31,10 +40,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
                 ...queryParameters
             }))
         }
-    }, [dispatch, queryParameters, weekData?.hasUpdated])
+    }, [dispatch, queryParameters, weekData?.hasUpdated, currentUser.current_department]);
 
-    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]) 
-    
+    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned])
+
     const getWeekString = () => {
         if (blockWidthPx > 650) {
             return `Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
@@ -58,7 +67,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
             className={'d-flex justify-content-between align-items-center px-2 rounded border border-1'}
             style={{
                 height: '36px',
-                background: '#00969b',
+                backgroundColor: currentUser.current_department.color || '#ffffff',
                 opacity: isDragging ? 0.5 : 1,
             }}
         >
@@ -71,7 +80,16 @@ export const EqWeeks = (props: EqWeeksProps) => {
                      }}
                      onClick={showClb}
                 >
-                    <i className="fas fa-filter text-light fs-6"/>
+                    {isLoading ?
+                        <Spinner
+                            animation={'grow'}
+                            className={'text-light'}
+                            size={'sm'}
+                            style={{left: '30px'}}
+                        />
+                        :
+                        <i className="fas fa-filter text-light fs-6"/>
+                    }
                 </div>
             }
 

@@ -34,6 +34,7 @@ class Employee(AbstractUser):
     pin_code = models.CharField('Пин код для входа', max_length=6, unique=True)
     # Принадлежность к отделу. По этому параметру определяется выгрузка нарядов в приложение.
     departments = models.ManyToManyField(Department, related_name='employees', verbose_name='Отделы', blank=True)
+    patronymic = models.CharField('Отчество', max_length=256, blank=True, null=True)
 
     current_department = models.ForeignKey(
         Department,

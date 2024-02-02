@@ -6,7 +6,7 @@ export interface BaseEmployee {
     username: string,
     first_name: string | null,
     last_name: string | null,
-    pin_code: number | null,
+    pin_code: number,
     current_department: number | null,
     departments: number[],
     groups: number[],

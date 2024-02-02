@@ -1,11 +1,12 @@
 import {EqPageSchema} from "@pages/EqPage";
-import {createSlice} from "@reduxjs/toolkit";
+import {createSlice, PayloadAction} from "@reduxjs/toolkit";
 
 import {InitialEqBodySchema} from "../types/eqPageSchema";
 import {fetchEqFilters} from "../api/fetchEqFilters";
 import {fetchWeekData} from "../api/fetchWeekData";
 import {fetchListData} from "../api/fetchListData";
-import {eqCardEntityAdapter} from "../types/eqCard";
+import {eqCardEntityAdapter} from "../types/eqCardType";
+import {fetchEqUpdCard} from "@pages/EqPage/model/api/fetchEqUpdCard";
 
 const initialState: EqPageSchema = InitialEqBodySchema;
 
@@ -27,6 +28,17 @@ const eqPageSlice = createSlice({
             state.readyList.hasUpdated = !state.readyList.hasUpdated;
             state.inWorkList.hasUpdated = !state.inWorkList.hasUpdated;
             state.awaitList.hasUpdated = !state.awaitList.hasUpdated;
+        },
+
+        addNotRelevantId: (state, action: PayloadAction<string>) => {
+            state.notRelevantId = [...state.notRelevantId, action.payload];
+        },
+        excludeNotRelevantId: (state, action: PayloadAction<string>) => {
+            state.notRelevantId = state.notRelevantId.filter(
+                        (series_id) => series_id !== action.payload)
+        },
+        weekDataHasUpdated: (state) => {
+            state.weekData.hasUpdated = !state.weekData.hasUpdated;
         },
 
     },
@@ -122,6 +134,26 @@ const eqPageSlice = createSlice({
                     case "ready":
                         state.readyList.isLoading = false;
                         return;
+                }
+            })
+
+        .addCase(fetchEqUpdCard.fulfilled, (state, action) => {
+                if (action.payload.await.assignments.length === 0 && action.payload.await.card_info.count_in_work === 0) {
+                    eqCardEntityAdapter.removeOne(state.awaitList.results, action.payload.await.series_id)
+                } else {
+                    eqCardEntityAdapter.upsertOne(state.awaitList.results, action.payload.await)
+                }
+
+                if (action.payload.in_work.assignments.length === 0) {
+                    eqCardEntityAdapter.removeOne(state.inWorkList.results, action.payload.in_work.series_id)
+                } else {
+                    eqCardEntityAdapter.upsertOne(state.inWorkList.results, action.payload.in_work)
+                }
+
+                if (action.payload.ready.assignments.length === 0) {
+                    eqCardEntityAdapter.removeOne(state.readyList.results, action.payload.ready.series_id)
+                } else {
+                    eqCardEntityAdapter.upsertOne(state.readyList.results, action.payload.ready)
                 }
             })
     }

@@ -1,0 +1,32 @@
+.detailsBlock {
+  width: calc(100vw - 320px);
+}
+
+.headerBlock {
+  display: flex;
+  height: 20%;
+  border-bottom: solid 2px black;
+  overflow: hidden auto;
+}
+
+.bodyBlock {
+  height: 80%;
+}
+
+.weekInfoBlock {
+  max-height: 100%;
+  min-width: 380px;
+  overflow: hidden auto;
+  border-right: solid 2px black;
+}
+
+.sumBlock {
+  height: 35%;
+  overflow: hidden auto;
+}
+
+.countProductBlock {
+  max-height: 65%;
+  overflow: hidden auto;
+  border-top: solid 2px black;
+}

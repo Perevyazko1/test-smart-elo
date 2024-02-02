@@ -15,6 +15,9 @@
 
 `docker compose -f docker-compose-dev.yml up --build -d`
 
+Препрод версия:
+`docker-compose -f docker-compose-preprod.yml up -d --build`
+
 Создание виртуального окружения: 
 
 `python -m venv venv`

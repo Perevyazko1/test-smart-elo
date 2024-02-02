@@ -1,5 +1,6 @@
 import {createApi, fetchBaseQuery} from "@reduxjs/toolkit/query/react";
-import {SERVER_HTTP_ADDRESS} from "@shared/consts";
+
+import {SERVER_HTTP_ADDRESS} from "../../consts";
 
 
 export const rtkAPI = createApi({

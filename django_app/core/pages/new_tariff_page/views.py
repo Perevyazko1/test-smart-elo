@@ -1,14 +1,14 @@
-from rest_framework import viewsets
-from rest_framework.filters import OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
+from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 
 from core.models import ProductionStep, ProductionStepTariff, Assignment
 from core.pages.new_tariff_page.filters import ProductionStepModelFilter
 from core.pages.new_tariff_page.serializers import TariffPageSerializer, TariffSerializer, RetarifficationSerializer
-from staff.models import Employee, Transaction
+from staff.models import Transaction
 
 
 class TariffPageViewSet(viewsets.ModelViewSet):
@@ -18,12 +18,8 @@ class TariffPageViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         qs = super().get_queryset()
-        pin_code = self.request.query_params.get('pin_code')
-
-        user = Employee.objects.get(pin_code=pin_code)
-
         qs = qs.filter(
-            department__in=user.departments.all(),
+            department__in=self.request.user.departments.all(),
             department__piecework_wages=True,
         )
 
@@ -33,10 +29,6 @@ class TariffPageViewSet(viewsets.ModelViewSet):
 class TariffViewSet(viewsets.ModelViewSet):
     queryset = ProductionStepTariff.objects.all()
     serializer_class = TariffSerializer
-
-    def create(self, request, *args, **kwargs):
-        pin_code = self.request.query_params.get('pin_code')
-        return super().create(request, *args, **kwargs)
 
 
 class RetarifficationViewSet(viewsets.ModelViewSet):
@@ -71,11 +63,7 @@ def post_retariffication(request):
 
     queryset = Assignment.objects.filter(id__in=ids)
 
-    pin_code = request.query_params.get('pin_code')
-    try:
-        inspector = Employee.objects.get(pin_code=pin_code)
-    except Employee.DoesNotExist:
-        return Response({'error': 'Inspector not found'}, status=status.HTTP_404_NOT_FOUND)
+    inspector = request.user
 
     for assignment in queryset:
         product = assignment.order_product.product

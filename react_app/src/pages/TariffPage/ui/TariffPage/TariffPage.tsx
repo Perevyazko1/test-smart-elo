@@ -81,7 +81,6 @@ const TariffPage = () => {
         //eslint-disable-next-line
     }, [limitOffset])
 
-
     const [productNameInput, setProductNameInput] = useState<string>(
         queryParameters.product__name || ''
     )
@@ -289,8 +288,6 @@ const TariffPage = () => {
                                     card={card}
                                 />
                             ))}
-
-
                             </tbody>
                         </Table>
                     }

@@ -1,0 +1,64 @@
+import {createSlice} from "@reduxjs/toolkit";
+import {AssignmentAdapter} from "@entities/Assignment";
+
+import {AssignmentSchema} from "../types/types";
+import {fetchAssignments} from "../service/fetchAssignments";
+import {updateAssignments} from "../service/updateAssignments";
+
+
+export const initialState: AssignmentSchema = {
+    results: {
+        ids: [],
+        entities: {},
+    },
+    count: 0,
+    isLoading: true,
+    hasUpdated: false,
+    next: null,
+    previous: null,
+};
+
+const assignmentPageSlice = createSlice({
+    name: 'assignmentPageSlice',
+    initialState,
+    reducers: {
+        listHasUpdated: (state) => {
+            state.hasUpdated = !state.hasUpdated;
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchAssignments.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchAssignments.fulfilled, (state, action) => {
+                const {results, ...props} = action.payload;
+                if (action.meta.arg.isNext) {
+                    AssignmentAdapter.addMany(state.results, results)
+                } else {
+                    AssignmentAdapter.setAll(state.results, results)
+                }
+                state.next = props.next;
+                state.count = props.count;
+                state.previous = props.previous;
+                state.isLoading = false;
+            })
+            .addCase(fetchAssignments.rejected, (state) => {
+                state.isLoading = false;
+            })
+
+            .addCase(updateAssignments.pending, (state) => {
+                    state.isLoading = true;
+                })
+            .addCase(updateAssignments.fulfilled, (state, action) => {
+                state.isLoading = false;
+            })
+            .addCase(updateAssignments.rejected, (state) => {
+                state.isLoading = false;
+            })
+    },
+});
+
+
+export const {actions: assignmentPageActions} = assignmentPageSlice;
+export const {reducer: assignmentPageReducer} = assignmentPageSlice;

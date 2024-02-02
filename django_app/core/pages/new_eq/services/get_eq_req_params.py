@@ -24,7 +24,7 @@ def get_eq_req_params(request) -> RequestParams | None:
     elif request.method == "GET":
         return RequestParams(
             pin_code=str(request.user.pin_code),
-            view_mode_key=request.query_params.get("view_mode"),
+            view_mode_key=str(request.query_params.get("view_mode")),
             project_filter=request.query_params.get("project"),
             department_number=str(request.user.current_department.number),
             week=request.query_params.get("week"),

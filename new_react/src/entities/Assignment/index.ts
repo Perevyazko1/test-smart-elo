@@ -1,1 +1,2 @@
-export type {Assignment} from './types/assignment';
+export {AssignmentAdapter} from './adapter/adapter';
+export type {Assignment, AssignmentApiList, NorAssignmentList} from './types/assignment';

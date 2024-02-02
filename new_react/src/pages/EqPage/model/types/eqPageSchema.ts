@@ -2,12 +2,12 @@ import {EntityState} from "@reduxjs/toolkit";
 
 import {ApiList} from "@shared/types";
 
-import {EqCard} from "./eqCard";
+import {EqCardType} from "./eqCardType";
 import {ViewMode} from "../types/viewMode";
 import {WeekData} from "../types/weekInfo";
 
-export interface EqListData extends Omit<ApiList<EqCard>, 'results'> {
-    results: EntityState<EqCard>;
+export interface EqListData extends Omit<ApiList<EqCardType>, 'results'> {
+    results: EntityState<EqCardType>;
     isLoading: boolean | undefined;
     hasUpdated: boolean | undefined;
 }
@@ -32,6 +32,7 @@ export interface EqPageSchema {
     inWorkList: EqListData,
     readyList: EqListData,
 
+    notRelevantId: string[],
 }
 
 export const InitialEqBodySchema: EqPageSchema = {
@@ -75,8 +76,8 @@ export const InitialEqBodySchema: EqPageSchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: undefined,
-        previous: undefined,
+        next: null,
+        previous: null,
     },
     inWorkList: {
         results: {
@@ -86,8 +87,8 @@ export const InitialEqBodySchema: EqPageSchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: undefined,
-        previous: undefined,
+        next: null,
+        previous: null,
     },
     readyList: {
         results: {
@@ -97,7 +98,9 @@ export const InitialEqBodySchema: EqPageSchema = {
         count: 0,
         isLoading: true,
         hasUpdated: false,
-        next: undefined,
-        previous: undefined,
+        next: null,
+        previous: null,
     },
+
+    notRelevantId: [],
 }

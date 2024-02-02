@@ -125,6 +125,7 @@ const eqContentDesktopSlice = createSlice({
                         return;
                 }
             })
+
             .addCase(fetchEqUpdateCard.fulfilled, (state, action) => {
                 if (action.payload.await.assignments.length === 0 && action.payload.await.card_info.count_in_work === 0) {
                     eqPageCardEntityAdapter.removeOne(state.awaitList.results, action.payload.await.series_id)

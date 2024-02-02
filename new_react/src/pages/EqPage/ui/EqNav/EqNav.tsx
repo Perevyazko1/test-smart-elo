@@ -1,5 +1,5 @@
 import {AppNavbar} from "@widgets/AppNavbar";
-import {useQueryParams} from "@shared/hooks";
+import {useCurrentUser, useQueryParams} from "@shared/hooks";
 
 import {EqSeriesSize} from "./EqSeriesSize";
 import {EqDepWidget} from "./EqDepWidget";
@@ -18,6 +18,7 @@ export const EqNav = (props: EqNavProps) => {
     } = props;
 
     const {queryParameters, setQueryParam} = useQueryParams();
+    const {currentUser} = useCurrentUser();
 
 
     const seriesSizeClb = (item: string) => {
@@ -31,7 +32,9 @@ export const EqNav = (props: EqNavProps) => {
 
             <EqFilters/>
 
-            <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
+            {!currentUser.current_department.single &&
+                <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
+            }
 
         </AppNavbar>
     );

@@ -35,6 +35,7 @@ const initialState = (windowWidth: number, windowHeight: number): ResizableBlock
 });
 
 const reducer = (state: ResizableBlocksState, action: ResizableBlocksActions): ResizableBlocksState => {
+    // Свитч кейс для обработки экшенов и изменения стейта
     switch (action.type) {
         case 'SET_WIDTH':
             return {
@@ -55,9 +56,10 @@ const reducer = (state: ResizableBlocksState, action: ResizableBlocksActions): R
     }
 };
 
+// Незамысловатый тротлер для функций с аргументами
 function throttle(func: (arg: any) => void, limit: number) {
     let inThrottle: boolean;
-    return function(this: any, arg: number) {
+    return function (this: any, arg: number) {
         const context = this;
         if (!inThrottle) {
             func.apply(context, [arg]);
@@ -68,30 +70,39 @@ function throttle(func: (arg: any) => void, limit: number) {
 }
 
 const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: Offset) => {
+    // поднимаем стейт с диспатчем для работы с параметрами размеров блоков
     const [state, dispatch] = useReducer(reducer, initialState(windowWidth, windowHeight));
 
+    // Обработка изменения положения по вертикали управляемого элемента
     const adjustHeight = useCallback((offset_px: number) => {
         let newInWorkHeight: number;
         let newReadyHeight: number;
 
+        // Механизм примагничивания блоков
         if (offset_px < 30) {
+            // Схлопывание блока в работе
             newInWorkHeight = 0;
             newReadyHeight = windowHeight - 38;
         } else if (offset_px > windowHeight - 60) {
+            // Схлопывание блока готовых изделий
             newInWorkHeight = windowHeight - 38;
             newReadyHeight = 0;
         } else {
+            // Иначе обычное изменение размеров с учетом высоты блока недель между блоками
             newInWorkHeight = offset_px;
             newReadyHeight = windowHeight - offset_px - 36;
         }
+        // Через диспатч меняем состояние размеров блоков
         dispatch({type: 'SET_HEIGHT', inWork: newInWorkHeight, ready: newReadyHeight});
     }, [windowHeight]);
 
 
+    // Обработка изменения положения по горизонтали управляемого элемента
     const adjustWidth = useCallback((offset_px: number) => {
         let newLeftWidth: number;
         let newRightWidth: number;
 
+        // Изменения размеров блока происходит до установки минимального значения размеров этих блоков
         if (offset_px < MIN_WIDTH) {
             newLeftWidth = MIN_WIDTH;
             newRightWidth = windowWidth - MIN_WIDTH;
@@ -102,34 +113,43 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: O
             newLeftWidth = offset_px;
             newRightWidth = windowWidth - offset_px;
         }
-
+        // Через диспатч меняем значения
         dispatch({type: 'SET_WIDTH', left: newLeftWidth, right: newRightWidth});
     }, [windowWidth]);
 
-
+    // Коллбек сброса размеров блоков до значений по умолчанию
     const resetSize = useCallback(() => {
         dispatch({type: 'RESET', windowWidth, windowHeight});
     }, [windowWidth, windowHeight]);
 
-    const throttledAdjustWidth = throttle(adjustWidth, 2);
-    const throttledAdjustHeight = throttle(adjustHeight, 2);
+    // Оборачиваем коллбеки изменения размеров в троттлер для оптимизации
+    const throttledAdjustWidth = throttle(adjustWidth, 3);
+    const throttledAdjustHeight = throttle(adjustHeight, 3);
 
+    // Используем внешнюю библиотеку для работы с механизмом dnd
     const [{isDragging}, drag] = useDrag(() => ({
         type: 'mainDrag',
         collect: (monitor) => {
             if (monitor.isDragging()) {
+                // Считываем положение элемента
                 const position = monitor.getClientOffset();
                 if (position) {
+
+                    console.log('rerender')
+                    // По отдельности вызываем коллбеки для изменения размеров
                     throttledAdjustWidth(position.x + offset.x);
                     throttledAdjustHeight(position.y + offset.y);
                 }
             }
             return {
+                // Возвращаем состояние элемента перемещается ли он
                 isDragging: monitor.isDragging(),
             };
         },
     }));
 
+    // Возвращаем размеры блоков из стейта, состояние отслеживаемого элемента, коллбек для сброса размеров и drag ref
+    // элемента который будем отслеживать
     return {
         ...state,
         isDragging,

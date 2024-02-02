@@ -47,7 +47,6 @@ def change_current_department(request):
 
 @api_view(['GET'])
 def get_audit_list(request):
-    pin_code = request.query_params.get('pin_code')
-    audit_list = Audit.objects.filter(employee__pin_code=pin_code).order_by('-date')[:100]
+    audit_list = Audit.objects.filter(employee=request.user).order_by('-date')[:100]
     data = AuditSerializer(audit_list, many=True).data
     return JsonResponse({'data': data}, json_dumps_params={"ensure_ascii": False})

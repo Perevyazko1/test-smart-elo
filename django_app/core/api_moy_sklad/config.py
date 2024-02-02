@@ -7,10 +7,13 @@ import os
 TOKEN = 'b6cbd1444a9cf14ee0c03efa27933a6c9cbbed14'
 
 # Базовый путь к запросам сущностей
-BASE_URL = 'https://online.moysklad.ru/api/remap/1.2/entity/'
+BASE_URL = 'https://api.moysklad.ru/api/remap/1.2/entity/'
 
 # Header для GET запросов
-GET_AUTH = {'Authorization': f'Bearer {TOKEN}'}
+GET_AUTH = {
+    'Authorization': f'Bearer {TOKEN}',
+    'Accept-Encoding': 'gzip',
+}
 
 # Header для POST запросов
 CONT_TYPE = {'Content-Type': 'application/json'}
