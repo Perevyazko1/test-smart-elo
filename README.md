@@ -65,3 +65,9 @@
 
 3. Еще в отдельном терминале:
 `celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler`
+
+## Выпуск обновления
+1. Делаем новый билд проекта
+`npm run build`
+
+2. Пушим обновленный проект на GIT 

@@ -134,7 +134,7 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
                         width={'100%'}
                         height={'100%'}
                         price={currentUser.current_department.piecework_wages ? card.card_info.tariff : undefined}
-                        date={card.order.planned_date.slice(-5)}
+                        date={card.order.planned_date?.slice(-5)}
                     />
                 </div>
 

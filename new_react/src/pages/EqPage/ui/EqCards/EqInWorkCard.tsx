@@ -1,4 +1,4 @@
-import React, {HTMLAttributes, memo, useCallback, useEffect, useState} from "react";
+import React, {HTMLAttributes, memo, useCallback, useEffect, useMemo, useState} from "react";
 
 import cls from "./EqCard.module.scss";
 
@@ -37,7 +37,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
     // Получаем высоту карточки
     const cardHeight = useCardHeight();
 
-    const getSliderWidth = useCallback(() => {
+    const sliderWidth = useMemo(() => {
         if (isCompactMode) {
             return '72px';
         } else {
@@ -109,9 +109,9 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
 
                 {/*slider*/}
                 <div className={cls.sliderBlock + ' bg-light rounded'} style={{
-                    width: getSliderWidth(),
-                    minWidth: getSliderWidth(),
-                    maxWidth: getSliderWidth(),
+                    width: sliderWidth,
+                    minWidth: sliderWidth,
+                    maxWidth: sliderWidth,
                 }}
                      onClick={() => openModal(
                          <AppSlider
@@ -126,7 +126,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
                         width={'100%'}
                         height={'100%'}
                         price={currentUser.current_department.piecework_wages ? card.card_info.tariff : undefined}
-                        date={card.order.planned_date.slice(-5)}
+                        date={card.order.planned_date?.slice(-5)}
                     />
                 </div>
 

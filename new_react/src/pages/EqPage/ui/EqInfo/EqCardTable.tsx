@@ -63,7 +63,12 @@ export const EqCardTable = (props: EqCardTableProps) => {
 
                 <tr>
                     <td>План дата производства заказа</td>
-                    <td>{getHumansDatetime(card.order.planned_date).slice(0, 10)}</td>
+                    <td>{
+                        card.order.planned_date
+                            ?
+                            getHumansDatetime(card.order.planned_date).slice(0, 10)
+                            : 'БД'
+                    }</td>
                 </tr>
 
                 <tr>
