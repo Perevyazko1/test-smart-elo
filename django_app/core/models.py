@@ -311,8 +311,9 @@ class ProductionStepTariff(models.Model):
         super(ProductionStepTariff, self).save(*args, **kwargs)
 
     def __str__(self):
+        confirmation_date = self.confirmation_date.date() if self.confirmation_date else 'Без даты'
         return '{}'.format(f'{self.tariff} {self.department.name} '
-                           f'{self.confirmation_date.date()} {self.product} {self.approved_by}')
+                           f'{confirmation_date} {self.product} {self.approved_by}')
 
 
 class ProductionStep(models.Model):
@@ -447,8 +448,7 @@ class Assignment(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        order_product_series_id = self.order_product.series_id if self.order_product else 'Без продукта'
-        return f'№{self.number} - {order_product_series_id}'
+        return '{}'.format(f'№{self.number} - {self.order_product.series_id}')
 
 
 class TechnologicalProcess(models.Model):
