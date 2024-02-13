@@ -1,45 +1,29 @@
-from core.models import ProductPicture, Fabric
+import os
 
+from django.conf import settings
 
-# departments = {
-#     'Старт': [0, False, False],
-#     'Конструктора': [1, True, True],
-#     'Обивка': [2, False, True],
-#     'Пошив': [3, False, True],
-#     'ППУ': [4, False, False],
-#     'Крой': [5, False, True],
-#     'Лазер': [6, False, False],
-#     'Сборка': [7, False, True],
-#     'Столярка': [8, False, False],
-#     'Малярка': [9, False, False],
-#     'Упаковка': [10, False, False],
-#     'Подрядчики': [11, False, False],
-#     'Пила': [12, False, False],
-#     'Готово': [50, False, False],
-# }
-#
-# groups = [
-#     'Администраторы',
-#
-#     'Страница ЭЛО',
-#     'Визирование нарядов',
-#     'Режим просмотра бригадира',
-#     'Действия от имени сотрудников отдела',
-#
-#     'Страница тарификаций',
-#     'Первичная тарификация',
-#     'Подтверждение тарификаций',
-# ]
+from core.models import Fabric, ProductPicture
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
-    pictures = ProductPicture.objects.filter(image__isnull=False)
+    print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
+    thumbnails_dir = os.path.join(settings.MEDIA_ROOT, 'images/products/thumbnails/')
+    print(thumbnails_dir)
+    thumbnails_files = set(os.listdir(thumbnails_dir))
+    print(thumbnails_files)
 
-    for pic in pictures:
-        pic.save()
+    # Получаем список имен файлов из объектов модели
+    used_filenames = set()
+    for model in [Fabric, ProductPicture]:
+        for obj in model.objects.all():
+            if obj.thumbnail:
+                used_filenames.add(os.path.basename(obj.thumbnail.name))
 
-    fabrics = Fabric.objects.filter(image__isnull=False)
+    # Определяем файлы, которые не используются и можно удалить
+    unused_files = thumbnails_files - used_filenames
 
-    for fabric in fabrics:
-        fabric.save()
+    for filename in unused_files:
+        file_path = os.path.join(thumbnails_dir, filename)
+        os.remove(file_path)
+        print(f"Deleted unused thumbnail: {filename}")

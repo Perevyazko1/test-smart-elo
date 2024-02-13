@@ -16,6 +16,11 @@
   transform: scaleY(0);
   transform-origin: top;
   transition: transform 0.1s;
+
+  // Ограничиваем высоту контейнера с меню
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: 85vh;
 }
 
 .expand {

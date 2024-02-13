@@ -1,9 +1,11 @@
 import datetime
 import uuid
 from io import BytesIO
+import os
 
 from PIL import Image
 from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 from django.db import models
 
 from staff.models import Department, Employee
@@ -133,24 +135,24 @@ class Fabric(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Если у экземпляра есть атрибут _creating_thumbnail и он True, мы пропускаем создание миниатюры
-        if hasattr(self, '_creating_thumbnail') and self._creating_thumbnail:
-            super().save(*args, **kwargs)
-            return
-
+        # Сохраняем объект, чтобы убедиться, что у нас есть ID для генерации имени файла миниатюры
         super().save(*args, **kwargs)
 
         if self.image:
-            img = Image.open(self.image.path)
-            img.thumbnail((100, 100))
+            # Проверяем, существует ли уже миниатюра
+            if not default_storage.exists(self.image.name):
+                img = Image.open(self.image.path)
+                img.thumbnail((100, 100))
 
-            image_io = BytesIO()
-            img.save(image_io, format=img.format)
-            image_content = ContentFile(image_io.getvalue(), self.image_filename)
+                image_io = BytesIO()
+                img.save(image_io, format=img.format, quality=90)
+                image_content = ContentFile(image_io.getvalue())
 
-            self._creating_thumbnail = True
-            self.thumbnail.save(self.image_filename, image_content)
-            del self._creating_thumbnail
+                # Сохраняем миниатюру
+                self.thumbnail.save(self.image.name, image_content, save=False)
+
+            # Обновляем только поле thumbnail, чтобы избежать рекурсии
+            super(Fabric, self).save(update_fields=['thumbnail'])
 
     def __str__(self):
         return '{}'.format(f'{self.name}')

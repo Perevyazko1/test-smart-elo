@@ -45,5 +45,6 @@ class ImportImages:
                     image_data = self._get_image_data(image_info)
                     fabric = Fabric.objects.get(fabric_id=product_entity.id)
                     fabric.image_filename = image_filename
+                    fabric.save()
                     fabric.image.save(image_filename, ContentFile(image_data))
                 break

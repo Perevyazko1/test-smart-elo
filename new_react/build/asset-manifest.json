@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.82b181f9.css",
+    "main.css": "/static/css/main.3dfc841f.css",
     "main.js": "/static/js/main.e0e9f2ce.js",
     "static/media/fa-solid-900.svg": "/static/media/fa-solid-900.76857d47348d8e00ee05.svg",
     "static/media/fa-brands-400.svg": "/static/media/fa-brands-400.4a43897c83af77d2ffec.svg",
@@ -22,11 +22,11 @@
     "static/media/SZMK Logo White Horizontal 900х352.png": "/static/media/SZMK Logo White Horizontal 900х352.aa147cc679b4e0c88d70.png",
     "static/media/fa-regular-400.woff2": "/static/media/fa-regular-400.a28b95d3e799579ba1dd.woff2",
     "index.html": "/index.html",
-    "main.82b181f9.css.map": "/static/css/main.82b181f9.css.map",
+    "main.3dfc841f.css.map": "/static/css/main.3dfc841f.css.map",
     "main.e0e9f2ce.js.map": "/static/js/main.e0e9f2ce.js.map"
   },
   "entrypoints": [
-    "static/css/main.82b181f9.css",
+    "static/css/main.3dfc841f.css",
     "static/js/main.e0e9f2ce.js"
   ]
 }
