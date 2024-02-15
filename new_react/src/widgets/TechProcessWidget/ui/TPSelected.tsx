@@ -20,6 +20,7 @@ interface TPSelectedProps {
     edited?: boolean;
     newProduct?: boolean;
     setNewTP?: (techProcess: TechProcess) => void;
+    inspector?: string;
 }
 
 
@@ -38,6 +39,7 @@ export const TpSelected = (props: TPSelectedProps) => {
         productId,
         updateClb,
         setNewTP,
+        inspector,
     } = props;
 
     const getImageUrl = useCallback(() => {
@@ -109,6 +111,13 @@ export const TpSelected = (props: TPSelectedProps) => {
                 </tr>
                 </thead>
                 <tbody>
+                {inspector &&
+                    <tr>
+                        <td>
+                            Технологический процесс назначил {inspector}
+                        </td>
+                    </tr>
+                }
                 <tr>
                     <td>
                         {getImageWidget()}

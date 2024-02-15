@@ -2,9 +2,9 @@ import {useCurrentUser} from "@shared/hooks";
 import {useEffect, useMemo, useState} from "react";
 import {$axiosAPI} from "@shared/api";
 import {Employee} from "@entities/Employee";
-import {CURRENT_USER} from "@shared/consts";
 import {AxiosError} from "axios";
 import {AppDropdown} from "@shared/ui";
+import {Spinner} from "react-bootstrap";
 
 export const EqDepWidget = () => {
     const {currentUser, setCurrentUser} = useCurrentUser();
@@ -36,10 +36,6 @@ export const EqDepWidget = () => {
                     });
 
                     if (isMounted) {
-                        const localUser = localStorage.getItem(CURRENT_USER);
-                        if (localUser) {
-                            localStorage.setItem(CURRENT_USER, JSON.stringify(response.data));
-                        }
                         setCurrentUser(response.data);
                     }
                 } catch (error) {
@@ -62,7 +58,7 @@ export const EqDepWidget = () => {
     }, [currentUser.current_department.name, currentUser.departments, department, setCurrentUser]);
 
     if (isLoading) {
-        return (<div>Загрузка...</div>)
+        return (<Spinner/>)
     }
     if (error) {
         return (<div>{error}</div>)

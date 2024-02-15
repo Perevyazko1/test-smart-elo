@@ -1,5 +1,5 @@
 import {Employee} from "@entities/Employee";
-import {RouteObject} from "react-router-dom";
+import {Navigate, RouteObject} from "react-router-dom";
 import {AppRoute, AppRoutesConfig} from "@shared/routes";
 
 
@@ -61,7 +61,15 @@ export const getUserRoutes = (user: Employee | undefined, isDesktop: boolean): R
 
     const appRoutes = Object.values(permittedRouteConfig);
 
-    return appRoutes.map(route => {
-        return route.route
-    })
+    const routes = appRoutes.map(route => {
+        return route.route;
+    });
+
+    // Добавьте редирект для всех неопределенных путей
+    routes.push({
+        path: '*',
+        element: <Navigate to={user ? '/' : '/login'} replace />,
+    });
+
+    return routes;
 }

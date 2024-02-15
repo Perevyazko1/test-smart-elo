@@ -6,7 +6,6 @@ const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
     const [windowHeight, setWindowHeight] = useState(window.innerHeight + heightEdit);
 
     useEffect(() => {
-        console.log('rerender')
         const handleResize = () => {
             setWindowWidth(window.innerWidth + widthEdit);
             setWindowHeight(window.innerHeight + heightEdit);

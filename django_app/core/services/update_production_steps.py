@@ -11,9 +11,6 @@ def update_production_steps(product):
         product=product,
     )
 
-    # Создаем множество для быстрого поиска существующих отделов
-    existing_departments = list(step.department.name for step in existing_steps)
-
     # Создаем или обновляем этапы в соответствии с новой схемой
     for target_department_name, related_department_names in schema.items():
         production_step = ProductionStep.objects.update_or_create(

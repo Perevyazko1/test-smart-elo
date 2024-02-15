@@ -19,7 +19,7 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
     const [edited, setEdited] = useState<boolean>(false);
 
     const [showTPList, setShowTPList] = useState<boolean>(!card.product.technological_process);
-    
+
     const [submitTP, setSubmitTP] = useState<TechProcess | null>(card.product.technological_process);
 
     const initialCurrentSchema = () => {
@@ -98,6 +98,7 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
                     editClb={editClb}
                     closeEditClb={hideAll}
                     edited={edited}
+                    inspector={`${card.product.technological_process_confirmed?.first_name || ''} ${card.product.technological_process_confirmed?.last_name || ''}`}
                 />
             }
 

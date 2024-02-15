@@ -32,6 +32,16 @@ def pin_code_authentication(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
+def base_authentication(request):
+    try:
+        serialized_user = EmployeeSerializer(request.user, context={'request': request})
+        return JsonResponse(serialized_user.data)
+    except:
+        return Response('Пользователь не найден', status=401)
+
+
+@api_view(['POST'])
 def change_current_department(request):
     department_number = request.data.get('department_number')
 

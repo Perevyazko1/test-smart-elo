@@ -1,7 +1,7 @@
 import {Employee} from "../types/employee";
 import {APP_PERM} from "@shared/consts";
 
-export const testEmployee: Employee = {
+export const anonEmployee: Employee = {
     id: 0,
     groups: [
         {name: APP_PERM.ANON},

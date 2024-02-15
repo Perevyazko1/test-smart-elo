@@ -14,6 +14,7 @@ urlpatterns = [
     path('', include(router.urls)),
     path('', include('staff.pages.wages_pages.urls')),
     path('pin_code_authentication/', pin_code_authentication),
+    path('base_authentication/', base_authentication),
     path('change_current_department/', change_current_department),
     path('get_audit_list/', get_audit_list),
 ]

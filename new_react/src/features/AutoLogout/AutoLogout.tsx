@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {useCurrentUser} from "@shared/hooks";
-import {testEmployee} from "@entities/Employee";
+import {anonEmployee} from "@entities/Employee";
 import { throttle } from 'lodash';
 
 export const AutoLogout = () => {
@@ -22,7 +22,7 @@ export const AutoLogout = () => {
                 setCountdown(countdown - 1);
             }, 1000);
         } else {
-            setCurrentUser(testEmployee);
+            setCurrentUser(anonEmployee);
         }
 
         return () => clearInterval(interval);

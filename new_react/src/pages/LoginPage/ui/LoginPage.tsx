@@ -4,7 +4,7 @@ import {AxiosError} from "axios";
 
 import logo from '@shared/assets/images/SZMK Logo Dark Horizontal 900x350.png';
 import {AppSwitch} from "@shared/ui";
-import {CURRENT_USER, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
+import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {Employee} from "@entities/Employee";
 import {$axiosAPI} from "@shared/api";
 import {useCurrentUser} from "@shared/hooks";
@@ -31,7 +31,6 @@ export const LoginPage = () => {
                     const token = response.data.token;
                     $axiosAPI.defaults.headers.common['Authorization'] = `Token ${token}`;
                     if (rememberMe) {
-                        localStorage.setItem(CURRENT_USER, JSON.stringify(response.data));
                         localStorage.setItem(USER_LOCALSTORAGE_TOKEN, response.data.token);
                     }
                 }

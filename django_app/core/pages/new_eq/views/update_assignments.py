@@ -67,7 +67,7 @@ class UpdateAssignments:
                     continue
 
                 case 'ready_to_in_work':
-                    if assignment.status == 'ready':
+                    if assignment.status == 'ready' and assignment.inspector is None:
                         self.action_name = 'Вернул в работу'
 
                         assignment.status = 'in_work'
@@ -93,7 +93,7 @@ class UpdateAssignments:
                     continue
 
                 case 'confirmed':
-                    if assignment.status == 'ready':
+                    if assignment.status == 'ready' and assignment.inspector is None:
                         self.action_name = 'Подтвердил готовность'
 
                         if self.original_user:

@@ -1,7 +1,7 @@
 import {createContext, ReactNode, useState} from "react";
-import {Employee, testEmployee} from "@entities/Employee";
+import {anonEmployee, Employee} from "@entities/Employee";
 import {useMediaQuery} from "react-responsive";
-import {APP_COMPACT_MODE, CURRENT_USER} from "@shared/consts";
+import {APP_COMPACT_MODE} from "@shared/consts";
 
 interface ContextProviderProps {
     children: ReactNode;
@@ -32,11 +32,8 @@ export const IsLoadingContext = createContext<IsLoadingContextType | undefined>(
 
 export const ContextProvider = (props: ContextProviderProps) => {
     const isDesktop = useMediaQuery({minDeviceWidth: 1201});
-    const initialUser = localStorage.getItem(CURRENT_USER);
 
-    const [currentUser, setCurrentUser] = useState<Employee>(
-        initialUser ? JSON.parse(initialUser) : testEmployee
-    );
+    const [currentUser, setCurrentUser] = useState<Employee>(anonEmployee);
     const [isCompactMode, setIsCompactMode] = useState<boolean>(
         !!localStorage.getItem(APP_COMPACT_MODE)
     );

@@ -3,10 +3,10 @@ import {Link, useLocation} from "react-router-dom";
 import {useCallback, useContext} from "react";
 
 import {AppInCompactMode, CurrentUserContext} from "@app";
-import {testEmployee} from "@entities/Employee";
+import {anonEmployee} from "@entities/Employee";
 import {getUserRouteConfig} from "@shared/lib";
 import {AppDropdown, AppSwitch} from "@shared/ui";
-import {APP_COMPACT_MODE, CURRENT_USER} from "@shared/consts";
+import {APP_COMPACT_MODE, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {useAppModal} from "@shared/hooks";
 import {UserActions} from "@widgets/UserActions";
 
@@ -64,8 +64,8 @@ export const AppNavigation = (props: {isDesktop: boolean}) => {
     }
 
     const exitHandle = () => {
-        currentUser.setCurrentUser(testEmployee);
-        localStorage.removeItem(CURRENT_USER);
+        localStorage.removeItem(USER_LOCALSTORAGE_TOKEN);
+        currentUser.setCurrentUser(anonEmployee);
     }
 
     const showUserActionsClb = () => {

@@ -32,7 +32,6 @@ export const useFetchListData = (props: useFetchListDataProps) => {
         setIsLoading(true);
         try {
             // Первый запрос на сервер
-            console.log('Пошел первый запрос карточек ', listType)
             const initialResponse = await dispatch(fetchListData({
                 target_list: listType,
                 offset: 0,
@@ -42,7 +41,6 @@ export const useFetchListData = (props: useFetchListDataProps) => {
 
             if (initialResponse.count && limit && initialResponse.count > limit) {
                 // Если количество элементов больше limit, делаем второй запрос
-                console.log('Пошел второй запрос карточек ', listType)
                 await dispatch(fetchListData({
                     target_list: listType,
                     limit: initialResponse.count - limit, // Запрашиваем оставшиеся элементы
