@@ -32,7 +32,6 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
         return (
             <div className={'bg-black text-white d-flex align-items-center justify-content-center p-3 appNavbar'}>
                 {isLoading && <Spinner
-                    animation={'grow'}
                     className={'me-2 position-absolute'}
                     size={'sm'}
                     style={{left: '30px'}}
