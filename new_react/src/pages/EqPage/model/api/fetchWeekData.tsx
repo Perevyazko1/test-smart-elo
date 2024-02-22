@@ -3,6 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 
 import {WeekInfo} from "../types/weekInfo";
+import {errorApiHandler} from "@shared/api";
 
 
 type fetchWeekDataProps = {}
@@ -25,6 +26,7 @@ export const fetchWeekData = createAsyncThunk<WeekInfo, fetchWeekDataProps, Thun
                 throw new Error();
             }
         } catch (e: any) {
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка сервера');
         }
     }

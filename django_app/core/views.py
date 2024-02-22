@@ -8,7 +8,8 @@ from .models import Order, OrderProduct, ProductionStep, Assignment, Technologic
 from .serializers import TechProcessSerializer
 from .services.assignment_generator import AssignmentGenerator
 from .services.check_schema import check_schema
-from .services.create_custom_tech_process import create_custom_tech_process
+from .services.create_custom_tech_process import create_and_set_tech_process
+from .services.update_production_steps import update_production_steps
 
 
 def import_orders(request):
@@ -125,12 +126,34 @@ def set_tech_process(request):
     schema = request.data.get('schema')
     pin_code = request.data.get('pin_code')
     product_id = request.data.get('product_id')
-    mode = request.data.get('mode')
 
-    product = Product.objects.get(pk=product_id)
+    active_order_products = OrderProduct.objects.filter(
+        status="0",
+        product_id=product_id,
+    )
+
+    for order_product in active_order_products:
+        has_assignments_with_executor = Assignment.objects.filter(
+            order_product=order_product,
+            executor__isnull=False
+        ).exclude(department__number="1").exists()
+
+        if has_assignments_with_executor:
+            return JsonResponse(
+                {
+                    "error": f'Есть наряды с назначенными исполнителями в серии {order_product.series_id}. '
+                             f'Для изменения технологического процесса все наряды по изделию должны быть в статусе '
+                             f'ожидает назначения.'
+                },
+                status=400,
+                json_dumps_params={"ensure_ascii": False}
+            )
 
     if check_schema(schema):
-        technological_process = create_custom_tech_process(schema=schema, product_id=product.id)
+        technological_process = create_and_set_tech_process(schema=schema, product_id=product_id)
+        product = Product.objects.get(pk=product_id)
+        update_production_steps(product)
+
         serializer = TechProcessSerializer
         data = serializer(technological_process, context={'request': request}).data
 
@@ -152,32 +175,11 @@ def set_tech_process(request):
             }
         )
 
-        if mode == 'with_current_assignments':
-            active_order_products = OrderProduct.objects.filter(
-                status="0",
-                product=product,
-            )
-
-            for order_product in active_order_products:
-                has_assignments_with_executor = Assignment.objects.filter(
-                    order_product=order_product,
-                    executor__isnull=False
-                ).exists()
-
-                if has_assignments_with_executor:
-                    return JsonResponse(
-                        {"error": f'Есть наряды с назначенными исполнителями в серии {order_product.series_id}.'
-                                  f'Тех процесс применен только к новым изделиям.'
-                         },
-                        status=400,
-                        json_dumps_params={"ensure_ascii": False}
-                    )
-
-            for order_product in active_order_products:
-                Assignment.objects.filter(
-                    order_product=order_product,
-                ).delete()
-                AssignmentGenerator().init_order_product_assignments(order_product=order_product)
+        for order_product in active_order_products:
+            Assignment.objects.filter(
+                order_product=order_product,
+            ).delete()
+            AssignmentGenerator().init_order_product_assignments(order_product=order_product)
 
         return JsonResponse({
             "data": data

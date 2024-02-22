@@ -1,6 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 import {AssignmentApiList} from "@entities/Assignment";
+import {errorApiHandler} from "@shared/api";
 
 interface fetchAssignmentsProps {
     limit: number,
@@ -26,7 +27,7 @@ export const fetchAssignments = createAsyncThunk<AssignmentApiList, fetchAssignm
                 throw new Error();
             }
         } catch (e: any) {
-            console.error('Ошибка запроса к серверу: ', e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

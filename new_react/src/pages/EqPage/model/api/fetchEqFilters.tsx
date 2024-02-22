@@ -1,5 +1,8 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
+
 import {ThunkConfig} from "@app";
+import {errorApiHandler} from "@shared/api";
+
 import {ViewMode} from "../types/viewMode";
 
 type fetchEqFiltersProps = {
@@ -29,7 +32,7 @@ export const fetchEqFilters = createAsyncThunk<EqFilters, fetchEqFiltersProps, T
                 throw new Error();
             }
         } catch (e: any) {
-            console.log(e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

@@ -18,7 +18,6 @@ interface TPSelectedProps {
     closeEditClb?: () => void;
     updateClb?: () => void;
     edited?: boolean;
-    newProduct?: boolean;
     setNewTP?: (techProcess: TechProcess) => void;
     inspector?: string;
 }
@@ -35,7 +34,6 @@ export const TpSelected = (props: TPSelectedProps) => {
         edited,
         closeEditClb,
         title,
-        newProduct,
         productId,
         updateClb,
         setNewTP,
@@ -52,14 +50,13 @@ export const TpSelected = (props: TPSelectedProps) => {
     const [isValid, setIsValid] = useState<boolean>(true);
 
     const [postTechProcess, {isLoading}] = useTechProcessMutation();
-    const setTechProcess = async (mode: 'with_current_assignments' | 'tech_process_only') => {
+    const setTechProcess = async () => {
         if (pinCode && schema && productId) {
             try {
                 const data = await postTechProcess({
                     product_id: productId,
                     schema: schema,
                     pin_code: pinCode,
-                    mode: mode,
                 }).unwrap();
                 if (setNewTP) {
                     setNewTP(data.data);
@@ -73,6 +70,11 @@ export const TpSelected = (props: TPSelectedProps) => {
             } catch (error: any) {
                 const serverError = error as { data?: { error?: string } }
                 console.error(serverError)
+                alert(
+                    serverError.data?.error
+                    ||
+                    'Непредвиденная ошибка обновления техпроцесса, обратитесь к администратору'
+                )
             }
         }
     }
@@ -155,21 +157,10 @@ export const TpSelected = (props: TPSelectedProps) => {
                         variant={'success'}
                         className={'mx-2 mb-2'}
                         disabled={!isValid || isLoading}
-                        onClick={() => setTechProcess('tech_process_only')}
+                        onClick={setTechProcess}
                     >
-                        Применить для новых заказов
+                        Применить
                     </Button>
-                    {!newProduct &&
-                        <Button
-                            type={'button'}
-                            variant={'primary'}
-                            className={'mx-2 mb-2'}
-                            disabled={!isValid || isLoading}
-                            onClick={() => setTechProcess('with_current_assignments')}
-                        >
-                            Применить для новых и текущих заказов
-                        </Button>
-                    }
                 </>
             }
         </>

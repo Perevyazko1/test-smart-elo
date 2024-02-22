@@ -1,16 +1,17 @@
 from core.models import TechnologicalProcess, Product
-from core.services.update_production_steps import update_production_steps
 
 
-def create_custom_tech_process(schema: dict, product_id: str) -> TechnologicalProcess:
+def create_and_set_tech_process(schema: dict, product_id: str) -> TechnologicalProcess:
     product = Product.objects.get(pk=product_id)
 
+    # Проверка наличия технологического процесса с изображением, то есть заготовленного шаблона
     check_usual_schema = TechnologicalProcess.objects.exclude(
         image=''
     ).filter(
         schema=schema
     )
 
+    # Если шаблон есть - выбираем его. Если нет - создаем индивидуальный техпроцесс
     if check_usual_schema.exists():
         tech_process = check_usual_schema[0]
     else:
@@ -19,13 +20,13 @@ def create_custom_tech_process(schema: dict, product_id: str) -> TechnologicalPr
             schema=schema,
         )
 
+    # Если ранее был установлен индивидуальный техпроцесс, то он будет удален из БД
     if product.technological_process:
         if product.technological_process.image == '':
             product.technological_process.delete()
 
+    # Привязываем выбранный техпроцесс к соответствующему изделию
     product.technological_process = tech_process
     product.save()
-
-    update_production_steps(product)
 
     return tech_process

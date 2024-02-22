@@ -3,6 +3,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 
 import {TariffPageCardList} from "../types/types";
+import {errorApiHandler} from "@shared/api";
 
 interface fetchTariffsProps {
     limit: number,
@@ -28,7 +29,7 @@ export const fetchTariffs = createAsyncThunk<TariffPageCardList, fetchTariffsPro
                 throw new Error();
             }
         } catch (e: any) {
-            console.error('Ошибка запроса к серверу: ', e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

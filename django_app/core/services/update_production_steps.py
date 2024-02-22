@@ -20,6 +20,7 @@ def update_production_steps(product):
                 "is_active": True
             }
         )[0]
+        # Чистим все связи этапа
         production_step.next_step.clear()
 
         for department_name in related_department_names:

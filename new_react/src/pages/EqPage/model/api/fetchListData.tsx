@@ -2,6 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {ThunkConfig} from "@app";
 import {ApiList} from "@shared/types";
+import {errorApiHandler} from "@shared/api";
 
 import {EqCardType} from "../types/eqCardType";
 import {ListTypes} from "../consts/listTypes";
@@ -40,7 +41,7 @@ export const fetchListData = createAsyncThunk<ApiList<EqCardType>, fetchListData
                 throw new Error();
             }
         } catch (e: any) {
-            console.log(e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

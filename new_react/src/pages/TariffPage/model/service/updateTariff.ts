@@ -2,6 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {Tariff, TariffPageCard} from "../types/types";
 import {ThunkConfig} from "@app";
+import {errorApiHandler} from "@shared/api";
 
 interface updateTariffProps {
     tariffData: Tariff,
@@ -43,7 +44,7 @@ export const updateTariff = createAsyncThunk<TariffPageCard, updateTariffProps, 
             }
         } catch
             (e: any) {
-            console.error('Ошибка запроса к серверу: ', e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

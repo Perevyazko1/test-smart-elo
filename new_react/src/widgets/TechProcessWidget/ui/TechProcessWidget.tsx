@@ -114,7 +114,6 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
                     setSchema={setSelectedSchema}
                     schema={selectedSchema || selectedTechProcess?.schema}
                     title={`Предложенный технологический процесс: ${selectedTechProcess?.name || 'Новый'}`}
-                    newProduct={!card.product.technological_process_confirmed}
                     updateClb={updCallback}
                 />
             }

@@ -92,9 +92,11 @@ def update_assignments(request):
                                 target_assignment.delete()
                             else:
                                 return JsonResponse({
-                                    f'error': f'Ошибка. Наряд №{target_assignment.number} '
-                                              f'серии {target_assignment.order_product.series_id} взят в работу. '
-                                              f'Обратитесь к администратору'
+                                    f'error': f'Ошибка. В отделе {target_assignment.department.name} '
+                                              f'наряд №{target_assignment.number} '
+                                              f'серии {target_assignment.order_product.series_id} уже назначен. '
+                                              f'Для снятия визы наряды последующего отдела должны быть в статусе '
+                                              f'Ожидает.'
                                 }, status=400, json_dumps_params={"ensure_ascii": False})
 
                 assignment.inspector = None

@@ -2,7 +2,6 @@ import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import {rtkAPI} from "@shared/api";
 
 interface TechProcessInfoApiProps {
-    mode: 'with_current_assignments' | 'tech_process_only',
     product_id: number,
     pin_code: number,
     schema: TechProcessSchema,

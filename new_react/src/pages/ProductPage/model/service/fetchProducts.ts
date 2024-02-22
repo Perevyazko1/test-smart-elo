@@ -1,6 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ProductApiList} from "@entities/Product/types/product";
 import {ThunkConfig} from "@app";
+import {errorApiHandler} from "@shared/api";
 
 interface fetchProductsProps {
     limit: number,
@@ -26,7 +27,7 @@ export const fetchProducts = createAsyncThunk<ProductApiList, fetchProductsProps
                 throw new Error();
             }
         } catch (e: any) {
-            console.error('Ошибка запроса к серверу: ', e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }

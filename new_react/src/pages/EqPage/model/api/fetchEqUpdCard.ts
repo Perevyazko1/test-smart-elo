@@ -1,7 +1,9 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
-import {EqCardType} from "@pages/EqPage/model/types/eqCardType";
 import {ThunkConfig} from "@app";
 import {eqPageActions} from "@pages/EqPage";
+import {errorApiHandler} from "@shared/api";
+
+import {EqCardType} from "../types/eqCardType";
 
 export enum Actions {
     AWAIT_TO_IN_WORK = 'await_to_in_work',
@@ -55,7 +57,7 @@ export const fetchEqUpdCard = createAsyncThunk<UpdatedCards, fetchEqUpdateCardPr
                 throw new Error();
             }
         } catch (e: any) {
-            console.log(e);
+            errorApiHandler(e);
             return thunkAPI.rejectWithValue('Ошибка связи с сервером');
         }
     }
