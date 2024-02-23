@@ -27,9 +27,10 @@ class UpdateAssignments:
         self.original_user: Employee | None = None
 
     def _check_pin_code_in_view_mode(self):
+        self.original_user = Employee.objects.get(pin_code=self.pin_code)
         if self.view_mode not in ['self', 'boss', 'unfinished', 'None']:
-            self.original_user = Employee.objects.get(pin_code=self.pin_code)
             self.pin_code = Employee.objects.get(id=self.view_mode).pin_code
+
 
     def _update_target_numbers(self):
         """Изменение нарядов/поручений с переданным списком номеров"""
@@ -169,7 +170,8 @@ class UpdateAssignments:
         """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""
         related_steps = ProductionStep.objects.filter(
             product=self.order_product.product,
-            next_step=next_step
+            next_step=next_step,
+            is_active=True,
         )
 
         result = self.order_product.quantity
@@ -232,9 +234,14 @@ class UpdateAssignments:
             Итерируемся по всем последующим отделам. 
             Если отдел Готово - выполняем инструкцию по готовности и выходим.
             """
+
             if next_step.department.name == "Готово":
                 self._ready_department_instruction()
                 break
+
+            """Игнорируем не активные этапы"""
+            if not next_step.is_active:
+                continue
 
             """Вычисляем количество нарядов к обновлению"""
             target_size = self._get_target_size_for_create_assignments(next_step)

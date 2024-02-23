@@ -6,8 +6,10 @@ import os
 # Основной токен
 TOKEN = 'b6cbd1444a9cf14ee0c03efa27933a6c9cbbed14'
 
+SKLAD_URL = 'https://api.moysklad.ru'
+
 # Базовый путь к запросам сущностей
-BASE_URL = 'https://api.moysklad.ru/api/remap/1.2/entity/'
+BASE_URL = f'{SKLAD_URL}/api/remap/1.2/entity/'
 
 # Header для GET запросов
 GET_AUTH = {

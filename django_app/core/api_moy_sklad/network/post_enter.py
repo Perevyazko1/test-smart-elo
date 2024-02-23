@@ -2,7 +2,7 @@ import json
 import requests
 
 from ..metadata import META_UL_SZMK, STORE_K_TRAKT_FABRIKA, get_product_meta, get_variant_meta
-from ..config import POST_AUTH
+from ..config import POST_AUTH, BASE_URL
 from ...models import Product
 
 
@@ -15,9 +15,8 @@ class CreateEnterDocument:
         else:
             product_meta = get_variant_meta(product.product_id)
 
-        # TODO сделать обработку неудачного пост запроса
-        return requests.post(
-            "https://online.moysklad.ru/api/remap/1.2/entity/enter",
+        result = requests.post(
+            f"{BASE_URL}enter",
             headers=POST_AUTH,
             data=json.dumps(
                 {
@@ -39,3 +38,5 @@ class CreateEnterDocument:
                 }
             )
         )
+        # TODO сделать обработку неудачного пост запроса
+        return result

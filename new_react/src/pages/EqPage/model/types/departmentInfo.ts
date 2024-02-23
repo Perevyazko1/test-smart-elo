@@ -18,6 +18,7 @@ export interface ResponseDepInfo {
 
 export interface ProductionInfo {
     department_name: string,
+    await: number,
     in_work: number,
     ready: number,
     confirmed: number,

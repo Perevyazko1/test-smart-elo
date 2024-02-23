@@ -86,6 +86,7 @@ def get_op_prod_info(request):
 
     production_steps = ProductionStep.objects.filter(
         product=order_product.product,
+        is_active=True,
     ).exclude(department__number=0).exclude(department__number=50)
 
     production_info = []
@@ -99,6 +100,7 @@ def get_op_prod_info(request):
             {
                 "department_name": production_step.department.name,
                 "in_work": department_assignments.filter(status="in_work").count(),
+                "await": department_assignments.filter(status="await").count(),
                 "ready": department_assignments.filter(status="ready").count(),
                 "confirmed": department_assignments.filter(
                     inspector__isnull=False,
@@ -136,7 +138,7 @@ def set_tech_process(request):
         has_assignments_with_executor = Assignment.objects.filter(
             order_product=order_product,
             executor__isnull=False
-        ).exclude(department__number="1").exists()
+        ).exclude(department__number=1).exists()
 
         if has_assignments_with_executor:
             return JsonResponse(
@@ -178,7 +180,7 @@ def set_tech_process(request):
         for order_product in active_order_products:
             Assignment.objects.filter(
                 order_product=order_product,
-            ).delete()
+            ).exclude(department__number=1).delete()
             AssignmentGenerator().init_order_product_assignments(order_product=order_product)
 
         return JsonResponse({
