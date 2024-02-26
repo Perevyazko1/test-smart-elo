@@ -50,34 +50,49 @@ export const EqFilters = () => {
         }
     };
 
-    const getSelectedViewMode = () => {
+    const getSelectedViewMode = useMemo(() => {
         if (queryParameters.view_mode && viewModes) {
-            return viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode)?.name || viewModes.default.name;
+            const selectedViewMode = viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode);
+            if (!selectedViewMode) {
+                setQueryParam('view_mode', '')
+                return viewModes.default.name;
+            }
+            return selectedViewMode.name;
         } else {
             return viewModes ? viewModes.default.name : 'Загрузка';
         }
-    };
+    }, [queryParameters.view_mode, setQueryParam, viewModes])
 
     const projectClb = (item: string) => {
         setQueryParam('project', item === projects?.default ? '' : item);
     };
 
-    const getSelectedProject = () => {
-        return queryParameters.project && projects ? projects.filters.find(project => project === queryParameters.project) || projects.default : projects ? projects.default : 'Загрузка';
-    };
+    const getSelectedProject = useMemo(() => {
+        if (queryParameters.project && projects) {
+            const selectedProject = projects.filters.find(project => project === queryParameters.project);
+            
+            if (!selectedProject) {
+                setQueryParam('project', '');
+                return projects.default; 
+            }
+            return selectedProject;
+        } else {
+            return projects ? projects.default : 'Загрузка';
+        }
+    }, [projects, queryParameters.project, setQueryParam])
 
     return (
         <>
             {bossPerm &&
                 <AppDropdown
-                    selected={getSelectedViewMode()}
+                    selected={getSelectedViewMode}
                     active={!!queryParameters.view_mode}
                     items={viewModesList}
                     onSelect={viewModeClb}
                 />
             }
             <AppDropdown
-                selected={getSelectedProject()}
+                selected={getSelectedProject}
                 active={!!queryParameters.project}
                 items={projects?.filters}
                 onSelect={projectClb}
