@@ -56,7 +56,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 <Button variant={'outline-dark'}
                                         onClick={() => window.location.reload()}
                                 >
-                                    <i className="text-muted fas fa-sync-alt fs-6"/>
+                                    <i className="text-white fas fa-sync-alt fs-6"/>
                                 </Button>
                             </div>
                         </div>

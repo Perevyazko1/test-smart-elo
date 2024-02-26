@@ -12,6 +12,7 @@ import {productsPageActions} from "../model/slice/productsPageSlice";
 import {Container, Spinner, Table} from "react-bootstrap";
 import {AppSkeleton, AppSlider} from "@shared/ui";
 import {PaginationContainer} from "@features";
+import {Link} from "react-router-dom";
 
 export const ProductPageContent = () => {
     const dispatch = useAppDispatch();
@@ -139,15 +140,17 @@ export const ProductPageContent = () => {
                         :
                         <>
                             {productList.map((product) => (
-                                <tr key={product.id}
-                                    // onClick={() => navigate(
-                                    //     `/${AppRoutes.PRODUCT_DETAILS.replace(':id', String(product.id))}`
-                                    // )}
-                                >
+                                <tr key={product.id}>
                                     <th>
                                         <AppSlider images={createImageUlsList(product)}/>
                                     </th>
-                                    <th>{product.name}</th>
+                                    <th>
+                                        <Link to={`/product/${product.id}`}
+
+                                        >
+                                            {product.name}
+                                        </Link>
+                                    </th>
                                     <th>{product.technological_process?.name || ''}</th>
                                     <th>
                                         {

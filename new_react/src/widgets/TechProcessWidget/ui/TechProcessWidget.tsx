@@ -1,26 +1,26 @@
 import {useState} from "react";
 
 import {TechProcessList} from "@widgets/TechProcessWidget/ui/TechProcessList";
-import {EqCardType} from "@pages/EqPage/model/types/eqCardType";
 import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import {TpSelected} from "@widgets/TechProcessWidget/ui/TPSelected";
+import {Product} from "@entities/Product";
 
 
 interface TechProcessWidgetProps {
-    card: EqCardType;
+    product: Product;
     updCallback?: () => void;
 }
 
 
 export const TechProcessWidget = (props: TechProcessWidgetProps) => {
-    const {card, updCallback} = props;
+    const {product, updCallback} = props;
 
     const [showNewTP, setShowNewTP] = useState<boolean>(false);
     const [edited, setEdited] = useState<boolean>(false);
 
-    const [showTPList, setShowTPList] = useState<boolean>(!card.product.technological_process);
+    const [showTPList, setShowTPList] = useState<boolean>(!product.technological_process);
 
-    const [submitTP, setSubmitTP] = useState<TechProcess | null>(card.product.technological_process);
+    const [submitTP, setSubmitTP] = useState<TechProcess | null>(product.technological_process);
 
     const initialCurrentSchema = () => {
         if (submitTP && submitTP.image) {
@@ -85,10 +85,11 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
         setShowTPList(!!submitTP);
         setEdited(false);
         setShowNewTP(false);
+        setShowTPList(false);
     }
 
     return (
-        <div>
+        <div data-bs-theme={'light'}>
             {submitTP &&
                 <TpSelected
                     variant={'current'}
@@ -98,14 +99,14 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
                     editClb={editClb}
                     closeEditClb={hideAll}
                     edited={edited}
-                    inspector={`${card.product.technological_process_confirmed?.first_name || ''} ${card.product.technological_process_confirmed?.last_name || ''}`}
+                    inspector={`${product.technological_process_confirmed?.first_name || ''} ${product.technological_process_confirmed?.last_name || ''}`}
                 />
             }
 
             {showNewTP &&
                 <TpSelected
                     setNewTP={setSubmitTP}
-                    productId={card.product.id}
+                    productId={product.id}
                     variant={'selected'}
                     imageUrl={selectedTechProcess?.image || ""}
                     techProcess={selectedTechProcess}

@@ -3,7 +3,8 @@ import {EqCardType} from "@pages/EqPage/model/types/eqCardType";
 import {getHumansDatetime} from "@shared/lib";
 import {IndicatorWrapper} from "@shared/ui";
 import {Link} from "react-router-dom";
-import {useCurrentUser} from "@shared/hooks";
+import {useCurrentUser, usePermission} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
 
 
 interface EqCardTableProps {
@@ -13,6 +14,7 @@ interface EqCardTableProps {
 export const EqCardTable = (props: EqCardTableProps) => {
     const {card} = props;
     const {currentUser} = useCurrentUser();
+    const productPerm = usePermission(APP_PERM.PRODUCT_PAGE);
 
     return (
         <>
@@ -32,17 +34,19 @@ export const EqCardTable = (props: EqCardTableProps) => {
                     <td>Изделие</td>
                     <td>
                         {card.product.name}
-                        <Link to={
-                            `/product/${card.product.id}`
-                        }>
-                            <Button
-                                size={'sm'}
-                                className={'mx-2'}
-                                variant={'outline-secondary'}
-                            >
-                                Подробнее
-                            </Button>
-                        </Link>
+                        {productPerm &&
+                            <Link to={
+                                `/product/${card.product.id}`
+                            }>
+                                <Button
+                                    size={'sm'}
+                                    className={'mx-2'}
+                                    variant={'outline-secondary'}
+                                >
+                                    Подробнее
+                                </Button>
+                            </Link>
+                        }
                     </td>
                 </tr>
 

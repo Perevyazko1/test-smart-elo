@@ -9,6 +9,7 @@ import {AssignmentPage} from "@pages/AssignmentPage";
 import {ProductPage} from "@pages/ProductPage";
 import {TariffPage} from "@pages/TariffPage";
 import {WagesPage} from "@pages/WagesPage";
+import { ProductDetailsPage } from "@pages/ProductDetailsPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -25,6 +26,7 @@ enum AppRoutes {
     ERROR = 'error',
     ASSIGNMENT = 'assignment',
     PRODUCT = 'product',
+    PRODUCT_DETAILS = 'product_detail',
     TARIFFS = 'tariff',
     WAGES = 'wages',
 }
@@ -70,6 +72,13 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         name: 'Изделия',
         mobile: false,
         navigate: true,
+        permissions: [APP_PERM.PRODUCT_PAGE]
+    },
+    [AppRoutes.PRODUCT_DETAILS]: {
+        route: {path: '/product/:productId', element: <ProductDetailsPage/>, errorElement: <ErrorPage/>},
+        name: 'Информация по изделию',
+        mobile: false,
+        navigate: false,
         permissions: [APP_PERM.PRODUCT_PAGE]
     },
     [AppRoutes.TEST]: {

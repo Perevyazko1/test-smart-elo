@@ -8,6 +8,7 @@ import {TariffPageSchema} from "@pages/TariffPage";
 
 import {rtkAPI} from "@shared/api";
 import {AuditWidgetSchema} from "@widgets/UserActions";
+import {ProductDetailsSchema} from "@pages/ProductDetailsPage";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
@@ -18,6 +19,7 @@ export interface StateSchema {
     products?: ProductsSchema;
     tariffs?: TariffPageSchema;
     auditWidget?: AuditWidgetSchema;
+    productDetails?: ProductDetailsSchema;
 }
 
 export type StateSchemaKey = keyof StateSchema;

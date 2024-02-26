@@ -49,7 +49,7 @@ export const EqInfo = (props: EqInfoProps) => {
                         </IndicatorWrapper>
                     </Accordion.Header>
                     <Accordion.Body>
-                        <TechProcessWidget card={card} updCallback={updCallback}/>
+                        <TechProcessWidget product={card.product} updCallback={updCallback}/>
                     </Accordion.Body>
                 </Accordion.Item>
 

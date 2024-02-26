@@ -2,6 +2,11 @@
   font-family: 'Montserrat', Arial, sans-serif;
 }
 
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
 $app-navbar-height: 45px;
 $app-body-height: calc(100vh - $app-navbar-height);
 

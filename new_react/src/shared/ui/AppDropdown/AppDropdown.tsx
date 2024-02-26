@@ -43,26 +43,43 @@ export const AppDropdown = (props: AppDropdownProps) => {
                  position: 'relative',
              }}
         >
-            <div>
-                <Button variant={'black'} onClick={() => setIsOpen(!isOpen)} className={'text-nowrap'}>
-                    {selected}
-                    <i className={`fas fa-chevron-down ms-2 ${cls.dropIcon} ${isOpen && cls.rotate} ${active && ' text-danger'}`}/>
-                </Button>
-            </div>
+            {renderOptions && renderOptions?.length < 2 && !children
+                ?
+                <div>
+                    <Button
+                        variant={'outline-dark'}
+                        className={'text-nowrap text-light'}
+                        disabled
+                        onClick={() => setIsOpen(!isOpen)}
+                    >
+                        {selected}
+                        <i className={`fas fa-chevron-down ms-2 ${cls.dropIcon} ${isOpen && cls.rotate} ${active && ' text-danger'}`}/>
+                    </Button>
+                </div>
+                :
+                <>
+                    <div>
+                        <Button variant={'black'} onClick={() => setIsOpen(!isOpen)} className={'text-nowrap'}>
+                            {selected}
+                            <i className={`fas fa-chevron-down ms-2 ${cls.dropIcon} ${isOpen && cls.rotate} ${active && ' text-danger'}`}/>
+                        </Button>
+                    </div>
 
-            <div className={`${cls.menu} ${isOpen && cls.expand} rounded p-1 border border-secondary`}>
-                {childrenPos === 'top' ?
-                    <>
-                        {children}
-                        {renderOptions}
-                    </> :
-                    <>
-                        {renderOptions}
-                        {children}
-                    </>
-                }
+                    <div className={`${cls.menu} ${isOpen && cls.expand} rounded p-1 border border-secondary`}>
+                        {childrenPos === 'top' ?
+                            <>
+                                {children}
+                                {renderOptions}
+                            </> :
+                            <>
+                                {renderOptions}
+                                {children}
+                            </>
+                        }
 
-            </div>
+                    </div>
+                </>
+            }
         </div>
     )
 }

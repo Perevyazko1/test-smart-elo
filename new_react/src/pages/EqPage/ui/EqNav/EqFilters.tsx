@@ -1,16 +1,16 @@
-import React, { useEffect, useMemo } from 'react';
-import { Button } from 'react-bootstrap';
+import React, {useEffect, useMemo} from 'react';
+import {Button} from 'react-bootstrap';
 
-import { APP_PERM } from '@shared/consts';
-import { AppDropdown } from '@shared/ui';
-import { useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission } from '@shared/hooks';
+import {APP_PERM} from '@shared/consts';
+import {AppDropdown} from '@shared/ui';
+import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission} from '@shared/hooks';
 
-import { fetchEqFilters } from '../../model/api/fetchEqFilters';
-import { getEqProjects, getEqViewMode } from '../../model/selectors/filterSelectors';
+import {fetchEqFilters} from '../../model/api/fetchEqFilters';
+import {getEqProjects, getEqViewMode} from '../../model/selectors/filterSelectors';
 
 export const EqFilters = () => {
-    const { queryParameters, setQueryParam, initialLoad } = useAppQuery();
-    const { currentUser } = useCurrentUser();
+    const {queryParameters, setQueryParam, initialLoad} = useAppQuery();
+    const {currentUser} = useCurrentUser();
     const dispatch = useAppDispatch();
     const viewModes = useAppSelector(getEqViewMode);
     const projects = useAppSelector(getEqProjects);
@@ -31,11 +31,16 @@ export const EqFilters = () => {
 
     useEffect(() => {
         if (currentUser.current_department && !initialLoad) {
+            if (!bossPerm) {
+                setQueryParam('view_mode', '');
+            }
+            console.log('Пошел запрос фильтров')
             dispatch(fetchEqFilters({
                 department_number: currentUser.current_department.number,
                 ...queryParameters,
             }));
         }
+        // eslint-disable-next-line
     }, [dispatch, currentUser.current_department, queryParameters, initialLoad]);
 
     const viewModeClb = (item: string) => {
@@ -63,13 +68,14 @@ export const EqFilters = () => {
 
     return (
         <>
-            <AppDropdown
-                selected={getSelectedViewMode()}
-                active={!!queryParameters.view_mode}
-                items={viewModesList}
-                onSelect={viewModeClb}
-            />
-
+            {bossPerm &&
+                <AppDropdown
+                    selected={getSelectedViewMode()}
+                    active={!!queryParameters.view_mode}
+                    items={viewModesList}
+                    onSelect={viewModeClb}
+                />
+            }
             <AppDropdown
                 selected={getSelectedProject()}
                 active={!!queryParameters.project}
@@ -78,7 +84,7 @@ export const EqFilters = () => {
                 childrenPos={'bottom'}
             >
                 <Button className={'w-100 p-0 mt-3'}
-                        style={{ height: '25px' }}
+                        style={{height: '25px'}}
                         variant={'secondary'}
                         onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
                 >

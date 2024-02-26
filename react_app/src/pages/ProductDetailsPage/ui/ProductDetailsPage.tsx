@@ -18,7 +18,7 @@ import {
     getCurrentProduct,
     getPageHasUpdated,
     getPageIsLoading
-} from "../model/selectors/productSelectors/productSelectors";
+} from "../model/selectors/productSelectors";
 
 import cls from "./ProductDetailsPage.module.scss";
 import {TechProcessInfo} from "../../../features/TechProcessInfo/ui/TechProcessInfo";
