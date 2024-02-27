@@ -1,7 +1,6 @@
 from core.models import OrderProduct
 from core.pages.assignments_page.serializers import AssignmentExtendedSerializer
 from core.pages.new_eq.services.get_eq_req_params import RequestParams
-from core.serializers import AssignmentsSerializer
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
 
@@ -17,8 +16,10 @@ def get_in_work_assignments(assignments, eq_params):
         status="in_work",
     ).distinct()
 
+    print(eq_params)
+
     # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
-    if eq_params.view_mode_key not in ["None", "boss", "unfinished"]:
+    if eq_params.view_mode_key not in ['boss', 'unfinished']:
         assignments = assignments.filter(
             executor__pin_code=eq_params.pin_code,
         )
