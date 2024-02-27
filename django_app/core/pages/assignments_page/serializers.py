@@ -24,4 +24,8 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'executor',
             'inspector',
             'tariff',
+            'appointment_date',
+            'date_completion',
+            'inspect_date',
+            'appointed_by_boss',
         ]

@@ -17,6 +17,7 @@ import {EqNumbers} from "./EqNumbers";
 import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
 import {eqPageActions} from "@pages/EqPage";
 import {APP_PERM} from "@shared/consts";
+import {AssignmentInfo} from "@widgets/AssignmentInfo";
 
 interface EqReadyCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -207,7 +208,12 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
                     </div>
                 </div>
 
-                <div className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}>
+                <div
+                    className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
+                     onClick={() => openModal(
+                         <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+                     )}
+                >
                     {card.department_info.map((info, index) => (
                         <div key={index}>
                             {info.full_name} {info.count_in_work} ({info.count_all})

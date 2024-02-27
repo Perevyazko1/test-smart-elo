@@ -427,6 +427,8 @@ class Assignment(models.Model):
         null=True,
         blank=True,
     )
+    appointment_date = models.DateTimeField('Дата взятия в работу', null=True, blank=True)
+
     inspector = models.ForeignKey(
         Employee,
         related_name='assignments_inspector',
@@ -436,6 +438,7 @@ class Assignment(models.Model):
         default=None
     )
     inspect_date = models.DateTimeField('Дата визирования', null=True, blank=True)
+    appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
 
     def save(self, *args, **kwargs):
         # Если inspector был изменен и теперь не равен None, установить inspect_date

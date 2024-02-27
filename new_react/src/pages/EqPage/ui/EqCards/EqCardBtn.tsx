@@ -7,22 +7,25 @@ interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     cardType: ListTypes,
     first: boolean,
     urgency: number,
+    locked?: boolean,
 }
 
 export const EqCardBtn = memo((props: EqCardBtnProps) => {
-    const {cardType, urgency, first, ...otherProps} = props;
+    const {cardType, urgency, first, locked, ...otherProps} = props;
 
     const getButtonIcon = () => {
         if (cardType === 'await') {
-            return <i className="fas fa-angle-double-left fs-2"/>
+            return <i className="fas fa-angle-double-left fs-2"/>;
+        } else if (locked) {
+            return <i className="fas fa-lock fs-5"/>;
         } else if (cardType === 'in_work' && first) {
-            return <i className="fas fa-check fs-3"/>
+            return <i className="fas fa-check fs-3"/>;
         } else if (cardType === 'in_work' && !first) {
-            return <i className="fas fa-angle-double-right fs-2"/>
+            return <i className="fas fa-angle-double-right fs-2"/>;
         } else if (cardType === 'ready' && first) {
-            return <i className="fas fa-check-double fs-3"/>
+            return <i className="fas fa-check-double fs-3"/>;
         } else if (cardType === 'ready' && !first) {
-            return <i className="fas fa-angle-double-up fs-2"/>
+            return <i className="fas fa-angle-double-up fs-2"/>;
         }
     }
 

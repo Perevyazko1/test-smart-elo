@@ -3,8 +3,7 @@ from dataclasses import asdict
 from django.db.models import Sum
 from django.http import JsonResponse
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view
 
 from core.models import OrderProduct, Assignment
 from core.pages.new_eq.serializers.serializers import EqCardSerializer

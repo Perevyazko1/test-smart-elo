@@ -2,7 +2,7 @@ import React, {HTMLAttributes, memo, useCallback, useEffect, useMemo, useState} 
 
 import cls from "./EqCard.module.scss";
 
-import {useAppDispatch, useAppModal, useAppQuery, useCompactMode, useCurrentUser} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useAppQuery, useCompactMode, useCurrentUser, usePermission} from "@shared/hooks";
 import {AppSlider, IndicatorWrapper} from "@shared/ui";
 
 import {createEqNumberLists} from "../../model/lib/createEqNumberLists";
@@ -16,6 +16,8 @@ import {EqCardBtn} from "./EqCardBtn";
 import {EqNumbers} from "./EqNumbers";
 import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
 import {eqPageActions} from "@pages/EqPage";
+import {AssignmentInfo} from "@widgets/AssignmentInfo";
+import {APP_PERM} from "@shared/consts";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -65,22 +67,42 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
         )
         setQueryParam('series_size', '')
     }
+    const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE)
+
+    const returnLocked = useMemo(() => {
+        if (bossPerm) {
+            return false;
+        }
+        const bossAssignments = card.assignments.filter(assignment => assignment.appointed_by_boss)
+        return bossAssignments.some(assignment => {
+            return assignmentsLists.primary.includes(assignment.number)
+        })
+    }, [assignmentsLists.primary, bossPerm, card.assignments])
 
     useEffect(() => {
         setAssignmentsLists(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1))
     }, [card.assignments, queryParameters.series_size])
 
     const getBtnClb = (first: boolean) => {
-        setCardDisabled(true)
-        dispatch(fetchEqUpdCard({
-            series_id: card.series_id,
-            numbers: assignmentsLists.primary,
-            action: getAction(first),
-            variant: "desktop",
-            ...queryParameters,
-        })).then(() => {
-            setCardDisabled(false);
-        })
+        if (returnLocked && !first) {
+            openModal(
+                <h4 className={'mx-4'}>
+                    Один или несколько выбранных нарядов назначены бригадиром. <br/>
+                    Вернуть в ожидание такие наряды может только бригадир.
+                </h4>
+            )
+        } else {
+            setCardDisabled(true)
+            dispatch(fetchEqUpdCard({
+                series_id: card.series_id,
+                numbers: assignmentsLists.primary,
+                action: getAction(first),
+                variant: "desktop",
+                ...queryParameters,
+            })).then(() => {
+                setCardDisabled(false);
+            })
+        }
     };
 
     const getScaled = useCallback(() => {
@@ -202,7 +224,12 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
                     </div>
                 </div>
 
-                <div className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}>
+                <div
+                    className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
+                    onClick={() => openModal(
+                        <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+                    )}
+                >
                     {card.department_info.map((info, index) => (
                         <div key={index}>
                             {info.full_name} {info.count_in_work} ({info.count_all})
@@ -218,6 +245,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
                     urgency={card.urgency}
                     onClick={() => getBtnClb(false)}
                     disabled={cardDisabled}
+                    locked={returnLocked}
                 />
             </div>
         </div>

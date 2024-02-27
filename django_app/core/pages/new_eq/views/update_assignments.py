@@ -45,8 +45,12 @@ class UpdateAssignments:
                     if assignment.status == 'await':
                         self.action_name = 'Взял в работу'
 
+                        if self.view_mode not in ['self', 'boss', 'unfinished', 'None']:
+                            assignment.appointed_by_boss = True
+
                         assignment.status = 'in_work'
                         assignment.executor = Employee.objects.get(pin_code=self.pin_code)
+                        assignment.appointment_date = datetime.datetime.now()
                         assignment.save()
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -84,9 +88,12 @@ class UpdateAssignments:
                     if assignment.status == 'in_work':
                         self.action_name = 'Вернул в ожидание'
 
+                        assignment.appointed_by_boss = False
                         assignment.status = 'await'
                         assignment.executor = None
+                        assignment.appointment_date = None
                         assignment.save()
+
                         self.notification_data[self.department_number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
@@ -344,4 +351,4 @@ class UpdateAssignments:
         )
 
         """Делаем рассылку на обновление данных в WS"""
-        ws_group_updates(pin_code=self.pin_code, notification_data=self.notification_data)
+        ws_group_updates(pin_code=self.original_user.pin_code, notification_data=self.notification_data)

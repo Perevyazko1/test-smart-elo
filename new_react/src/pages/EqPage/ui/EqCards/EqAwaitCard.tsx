@@ -2,6 +2,7 @@ import React, {HTMLAttributes, memo, useCallback, useEffect, useMemo, useState} 
 
 import cls from "./EqCard.module.scss";
 
+import {AssignmentInfo} from "@widgets/AssignmentInfo";
 import {useAppDispatch, useAppModal, useAppQuery, useCompactMode, useCurrentUser} from "@shared/hooks";
 import {AppSlider, IndicatorWrapper} from "@shared/ui";
 
@@ -11,11 +12,11 @@ import {EqCardType} from "../../model/types/eqCardType";
 import {useCardHeight} from "../../model/lib/useCardHeight";
 import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
 import {Actions, fetchEqUpdCard} from "../../model/api/fetchEqUpdCard";
+import {eqPageActions} from "../../model/slice/eqPageSlice";
 
 import {EqCardBtn} from "./EqCardBtn";
 import {EqNumbers} from "./EqNumbers";
-import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
-import {eqPageActions} from "@pages/EqPage";
+import {EqInfo} from "../EqInfo/EqInfo";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -213,7 +214,12 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
                     </div>
                 </div>
 
-                <div className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}>
+                <div
+                    className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
+                     onClick={() => openModal(
+                         <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+                     )}
+                >
                     {card.department_info.map((info, index) => (
                         <div key={index}>
                             {info.full_name} {info.count_in_work} ({info.count_all})

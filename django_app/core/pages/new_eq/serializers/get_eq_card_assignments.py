@@ -1,4 +1,5 @@
 from core.models import OrderProduct
+from core.pages.assignments_page.serializers import AssignmentExtendedSerializer
 from core.pages.new_eq.services.get_eq_req_params import RequestParams
 from core.serializers import AssignmentsSerializer
 from core.services.get_week_info import GetWeekInfo
@@ -75,4 +76,4 @@ def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_pr
             ).order_by('-inspector', 'number')
 
     # TODO добавить возможность возвращать больший размер списка
-    return AssignmentsSerializer(assignments, many=True).data
+    return AssignmentExtendedSerializer(assignments, many=True).data
