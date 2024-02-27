@@ -16,8 +16,6 @@ def get_in_work_assignments(assignments, eq_params):
         status="in_work",
     ).distinct()
 
-    print(eq_params)
-
     # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
     if eq_params.view_mode_key not in ['boss', 'unfinished']:
         assignments = assignments.filter(
@@ -32,7 +30,7 @@ def get_ready_assignments(assignments, eq_params):
     ).distinct()
 
     # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
-    if eq_params.view_mode_key not in ["None", "boss", "unfinished"]:
+    if eq_params.view_mode_key not in ["boss", "unfinished"]:
         assignments = assignments.filter(
             executor__pin_code=eq_params.pin_code,
         ).distinct()
