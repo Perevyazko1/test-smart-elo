@@ -83,7 +83,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'dark'}
                         size={'sm'}
                         className={'mx-2'}
-                        disabled={!isLoading || !isEdited}
+                        disabled={isLoading || isEdited}
                         onClick={() => updateClb('all')}
                     >
                         Все наряды
@@ -92,7 +92,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'secondary'}
                         size={'sm'}
                         className={'mx-2'}
-                        disabled={!isLoading || !isEdited}
+                        disabled={isLoading || isEdited}
                         onClick={() => updateClb('in_work')}
                     >
                         В работе
@@ -102,7 +102,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'outline-dark'}
                         size={'sm'}
                         className={'mx-2'}
-                        disabled={!isLoading || !isEdited}
+                        disabled={isLoading || isEdited}
                         onClick={() => updateClb('await')}
                     >
                         В ожидании
@@ -111,7 +111,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'primary'}
                         size={'sm'}
                         className={'mx-2'}
-                        disabled={!isLoading || !isEdited}
+                        disabled={isLoading || isEdited}
                         onClick={() => updateClb('selected')}
                     >
                         Выбранные
