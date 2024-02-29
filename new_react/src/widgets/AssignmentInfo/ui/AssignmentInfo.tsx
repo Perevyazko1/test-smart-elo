@@ -1,4 +1,4 @@
-import {Button, Table} from "react-bootstrap";
+import {Button, Spinner, Table} from "react-bootstrap";
 import {useEditAssignmentInfo, useGetAssignmentInfo} from "../model/api/api";
 import {useCurrentUser} from "@shared/hooks";
 import {AssignmentInfoRow} from "@widgets/AssignmentInfo/ui/AssignmentInfoRow";
@@ -62,6 +62,8 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     return (
         <div data-bs-theme={'light'}>
             <h5 className={'m-0 p-2'}>
+                {isEdited || isLoading && <Spinner size={'sm'}/>}
+
                 <b>Карточка: {seriesId} || Информация по нарядам: {title}</b>
             </h5>
 
@@ -81,6 +83,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'dark'}
                         size={'sm'}
                         className={'mx-2'}
+                        disabled={!isLoading || !isEdited}
                         onClick={() => updateClb('all')}
                     >
                         Все наряды
@@ -89,6 +92,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'secondary'}
                         size={'sm'}
                         className={'mx-2'}
+                        disabled={!isLoading || !isEdited}
                         onClick={() => updateClb('in_work')}
                     >
                         В работе
@@ -98,6 +102,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'outline-dark'}
                         size={'sm'}
                         className={'mx-2'}
+                        disabled={!isLoading || !isEdited}
                         onClick={() => updateClb('await')}
                     >
                         В ожидании
@@ -106,6 +111,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         variant={'primary'}
                         size={'sm'}
                         className={'mx-2'}
+                        disabled={!isLoading || !isEdited}
                         onClick={() => updateClb('selected')}
                     >
                         Выбранные
