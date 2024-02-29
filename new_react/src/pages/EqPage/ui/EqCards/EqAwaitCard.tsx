@@ -107,6 +107,7 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
             <div className={cls.overflowWrapper + ` bg-black rounded rounded-2 ${getScaled()}`}>
                 {assignmentsLists.primary.length > 0 &&
                     <EqCardBtn
+                        plane_date={card.plane_date}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                         cardType={"await"}
                         first={true}

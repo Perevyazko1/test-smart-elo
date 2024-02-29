@@ -10,7 +10,7 @@ export const getHumansDatetime = (utc_datetime: string) => {
     );
     const time = dateTime.toLocaleTimeString(
         'ru-RU',
-        {hour: '2-digit', minute: '2-digit', second: '2-digit'}
+        {hour: '2-digit', minute: '2-digit'}
     );
 
     return `${date} - ${time}`

@@ -31,6 +31,7 @@ class EqCardSerializer(serializers.ModelSerializer):
     assignments = serializers.SerializerMethodField(read_only=True)
     card_info = serializers.SerializerMethodField()
     department_info = serializers.SerializerMethodField()
+    plane_date = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderProduct
@@ -48,9 +49,11 @@ class EqCardSerializer(serializers.ModelSerializer):
             'assignments',
             'card_info',
             'department_info',
+            'plane_date',
         ]
         read_only_fields = [
-            'series_id'
+            'series_id',
+            'plane_date',
         ]
 
     def get_assignments(self, obj: OrderProduct):
@@ -86,3 +89,25 @@ class EqCardSerializer(serializers.ModelSerializer):
             return serializer.data
         else:
             raise serializers.ValidationError(serializer.errors)
+
+    def get_plane_date(self, obj: OrderProduct):
+        assignment_data = self.get_assignments(obj)
+
+        min_plane_date = None
+
+        # Пройдитесь по каждому объекту в данных
+        for assignment in assignment_data:
+            # Получите plane_date из текущего объекта
+            plane_date = assignment.get('plane_date')
+            # Если plane_date не равна None и это первая не None дата или она меньше текущей минимальной даты
+            if plane_date is not None and (min_plane_date is None or plane_date < min_plane_date):
+                min_plane_date = plane_date
+
+        # Верните результат
+        if min_plane_date is not None:
+            # Если найдена ненулевая дата, верните ее
+            result = min_plane_date
+        else:
+            # Если все даты plane_date равны None, верните None
+            result = None
+        return result

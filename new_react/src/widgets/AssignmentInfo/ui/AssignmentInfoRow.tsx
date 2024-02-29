@@ -1,9 +1,15 @@
 import {Assignment} from "@entities/Assignment";
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
-import {useMemo} from "react";
+import React, {useMemo} from "react";
 
-export const AssignmentInfoRow = (props: { assignment: Assignment }) => {
-    const {assignment} = props;
+interface AssignmentInfoRowProps {
+    assignment: Assignment;
+    onSelect: (id: number) => void;
+    selected: boolean;
+}
+
+export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
+    const {assignment, selected, onSelect} = props;
 
     const getStatusProps = useMemo((): { bg: string, name: string } => {
         switch (assignment.status) {
@@ -25,12 +31,17 @@ export const AssignmentInfoRow = (props: { assignment: Assignment }) => {
     return (
         <tr>
             <td>
-                {assignment.number}
+                <input
+                    className="form-check-input"
+                    type="checkbox"
+                    checked={selected}
+                    onChange={() => onSelect(assignment.id)}
+                />
             </td>
+            <td>{assignment.appointed_by_boss && <i className="far fa-check-circle text-success"/>}</td>
+            <td>{assignment.number}</td>
+            <td>{getHumansDatetime(assignment.plane_date || '')}</td>
 
-            <td>
-                {assignment.appointed_by_boss && <i className="far fa-check-circle text-success"/>}
-            </td>
 
             <td>
                 {getEmployeeName(assignment.executor)}

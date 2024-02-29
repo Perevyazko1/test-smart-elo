@@ -1,4 +1,4 @@
-import React, {ButtonHTMLAttributes, memo} from "react";
+import React, {ButtonHTMLAttributes, memo, useMemo} from "react";
 import {ListTypes} from "@pages/EqPage/model/consts/listTypes";
 import {Spinner} from "react-bootstrap";
 
@@ -8,10 +8,29 @@ interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     first: boolean,
     urgency: number,
     locked?: boolean,
+    plane_date?: string | null;
 }
 
 export const EqCardBtn = memo((props: EqCardBtnProps) => {
-    const {cardType, urgency, first, locked, ...otherProps} = props;
+    const {cardType, urgency, first, locked, plane_date, ...otherProps} = props;
+
+    const planeDateTime: { date: string, time: string } = useMemo(() => {
+        if (!plane_date) {
+            return {date: '', time: ''};
+        }
+
+        const dateTime = new Date(plane_date);
+        const date = dateTime.toLocaleDateString(
+            'ru-RU',
+            {day: '2-digit', month: '2-digit'}
+        );
+        const time = dateTime.toLocaleTimeString(
+            'ru-RU',
+            {hour: '2-digit', minute: '2-digit'}
+        );
+
+        return {date: date, time: time};
+    }, [plane_date])
 
     const getButtonIcon = () => {
         if (cardType === 'await') {
@@ -53,6 +72,12 @@ export const EqCardBtn = memo((props: EqCardBtnProps) => {
 
     return (
         <button className={'appBtn p-1 rounded rounded-2 h-100 ' + getButtonVariant()} {...otherProps}>
+            <div className={'fs-7'}>
+                <b>{planeDateTime.date}</b>
+                <br/>
+                {planeDateTime.time}
+            </div>
+            <br/>
             {otherProps.disabled ? <Spinner animation={'grow'} size={'sm'}/> : getButtonIcon()}
         </button>
     );

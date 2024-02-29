@@ -10,6 +10,7 @@ export interface EqCardType extends OrderProduct {
     assignments: Assignment[];
     card_info: CardInfo;
     department_info: DepartmentInfo[];
+    plane_date: string | null;
 }
 
 export const eqCardEntityAdapter = createEntityAdapter<EqCardType>({

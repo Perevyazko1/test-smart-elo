@@ -34,7 +34,7 @@ const customFetchBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
 export const rtkAPI = createApi({
     reducerPath: 'rtkAPI',
     baseQuery: customFetchBaseQuery,
-    tagTypes: ['RetarifficationCard', 'WagesList', 'WagesWeekInfo', 'Transaction'],
+    tagTypes: ['RetarifficationCard', 'WagesList', 'WagesWeekInfo', 'Transaction', 'AssignmentInfo'],
     endpoints: () => ({}),
     keepUnusedDataFor: 0,
 })

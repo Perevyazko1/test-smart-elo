@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
+from core.consumers import ws_group_updates, EqNotificationActions
 from core.models import OrderProduct, Assignment
 from core.pages.new_eq.serializers.serializers import EqCardSerializer
 from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
@@ -151,3 +152,58 @@ def get_card(request):
                 'target_list': 'mobile',
             }).data,
         }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_assignments(request):
+    ids = request.data.get('ids')
+    mode = request.data.get('mode')
+    date = request.data.get('date')
+    if date == '':
+        date = None
+
+    series_id = request.data.get('series_id')
+    department = request.user.current_department
+
+    qs = Assignment.objects.filter(
+        department=department,
+        order_product__series_id=series_id,
+        status__in=['in_work', 'await']
+    )
+
+    if qs.exists():
+        match mode:
+            case 'in_work':
+                qs.filter(
+                    status='in_work'
+                ).update(
+                    plane_date=date
+                )
+            case 'all':
+                qs.update(
+                    plane_date=date
+                )
+            case 'selected':
+                qs.filter(
+                    id__in=ids
+                ).update(
+                    plane_date=date
+                )
+            case 'await':
+                qs.filter(
+                    status='await'
+                ).update(
+                    plane_date=date
+                )
+        notification_data = {str(department.number): {
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': series_id,
+        }}
+
+        ws_group_updates(
+            pin_code='',
+            notification_data=notification_data
+        )
+
+    return JsonResponse({
+        "result": 'ok'}, json_dumps_params={"ensure_ascii": False})

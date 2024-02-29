@@ -18,6 +18,7 @@ import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
 import {eqPageActions} from "@pages/EqPage";
 import {AssignmentInfo} from "@widgets/AssignmentInfo";
 import {APP_PERM} from "@shared/consts";
+import {getHumansDatetime} from "@shared/lib";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -121,6 +122,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
         <div className={'mt-1 pb-05'} {...otherProps} style={{height: `${cardHeight}px`}}>
             <div className={cls.overflowWrapper + ` bg-black rounded rounded-2 ${getScaled()}`}>
                 <EqCardBtn
+                    plane_date={card.plane_date}
                     style={{minWidth: '39px', maxWidth: '39px'}}
                     cardType={"in_work"}
                     first={true}

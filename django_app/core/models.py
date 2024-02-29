@@ -437,6 +437,7 @@ class Assignment(models.Model):
         null=True, blank=True,
         default=None
     )
+    plane_date = models.DateTimeField('План дата готовности', null=True, blank=True)
     inspect_date = models.DateTimeField('Дата визирования', null=True, blank=True)
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
 

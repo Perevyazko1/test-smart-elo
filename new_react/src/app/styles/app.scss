@@ -46,6 +46,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-wrap: wrap;
   background-color: #ffffff;
   border: 1.5px solid #000000;
   color: #1e1e1e;
@@ -166,4 +167,39 @@ $app-body-height: calc(100vh - $app-navbar-height);
     transform: scale(1);
     opacity: 1;
   }
+}
+
+/* Стили для datetime-local input */
+input[type="datetime-local"] {
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+/* Стили для активного datetime-local input */
+input[type="datetime-local"]:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 .2rem rgba(0, 123, 255, .25);
+}
+
+/* Стили для datetime-local input в состоянии hover */
+input[type="datetime-local"]:hover {
+  color: #495057;
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Стили для отключенного datetime-local input */
+input[type="datetime-local"]:disabled {
+  background-color: #e9ecef;
+  opacity: 1;
 }
