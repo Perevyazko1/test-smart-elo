@@ -23,17 +23,18 @@ export const EqAwaitSection = (props: EqAwaitSectionProps) => {
     const cardHeight = useCardHeight();
 
     // Запрашиваем карточки с сервера. Карточки запрашиваются в 2 запроса.
-    const {isLoading} = useFetchListData({
+    useFetchListData({
         listType: 'await',
         height,
+        deps: [awaitProps.hasUpdated]
     });
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла
     const scrollElementRef = useRef<HTMLDivElement>(null);
-    
+
     const getItemsCount = useMemo(() => {
-        return isLoading ? awaitProps.count || awaitList.length || 3 : awaitList.length
-    }, [awaitList, awaitProps.count, isLoading]);
+        return awaitProps.isLoading ? awaitProps.count || awaitList.length || 3 : awaitList.length
+    }, [awaitList, awaitProps.count, awaitProps.isLoading]);
 
     // С помощью данного хука получаем виртуализированный список элементов
     const {virtualItems, totalHeight} = useFixedSizeList({
@@ -58,10 +59,6 @@ export const EqAwaitSection = (props: EqAwaitSectionProps) => {
                     const item = awaitList[virtualItem.index];
 
                     if (!item) {
-                        if (awaitProps.count === awaitList.length) {
-                            return <div key={virtualItem.index}></div>
-                        }
-
                         return (
                             <AppSkeleton className={'rounded pt-1'} style={{
                                 height: `${cardHeight}px`,

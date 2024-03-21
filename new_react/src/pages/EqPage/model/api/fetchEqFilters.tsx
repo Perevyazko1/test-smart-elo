@@ -7,6 +7,7 @@ import {ViewMode} from "../types/viewMode";
 
 type fetchEqFiltersProps = {
     department_number: number,
+    mode: string | undefined;
 }
 
 interface EqFilters {

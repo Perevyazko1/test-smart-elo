@@ -18,7 +18,6 @@ import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
 import {eqPageActions} from "@pages/EqPage";
 import {AssignmentInfo} from "@widgets/AssignmentInfo";
 import {APP_PERM} from "@shared/consts";
-import {getHumansDatetime} from "@shared/lib";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -96,6 +95,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
             setCardDisabled(true)
             dispatch(fetchEqUpdCard({
                 series_id: card.series_id,
+                department_number: currentUser.current_department.number,
                 numbers: assignmentsLists.primary,
                 action: getAction(first),
                 variant: "desktop",

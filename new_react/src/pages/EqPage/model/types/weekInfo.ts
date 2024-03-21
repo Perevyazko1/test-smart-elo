@@ -12,4 +12,5 @@ export interface WeekData extends WeekInfo {
     earned: string;
     hasUpdated: boolean;
     isLoading: boolean;
+    inited: boolean;
 }

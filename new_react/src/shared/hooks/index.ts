@@ -4,7 +4,6 @@ export { useProductPictures } from "./useProductPictures/useProductPictures";
 export {useInfiniteScroll} from "./useInfiniteScroll/useInfiniteScroll";
 export {useDraggable} from "./useDraggable/useDraggable";
 export {useFixedSizeList} from "./useFixedSizeList/useFixedSizeList";
-export {useAppIsLoading} from "./useAppIsLoading/useAppIsLoading";
 export {useCompactMode} from "./useCompactMode/useCompactMode";
 export {useAppModal} from "./useAppModal/useAppModal";
 export {useAppSelector} from "./useAppSelector/useAppSelector";

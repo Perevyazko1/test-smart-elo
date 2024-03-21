@@ -16,11 +16,13 @@ interface FilterData<T> {
     filters: T[],
     default: T,
     isLoading: boolean,
+    inited?: boolean,
 }
 
 interface WeekData extends week_info {
     isLoading: boolean;
     hasUpdated: boolean;
+    inited?: boolean,
 }
 
 

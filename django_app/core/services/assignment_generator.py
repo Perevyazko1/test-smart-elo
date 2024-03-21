@@ -40,24 +40,24 @@ class AssignmentGenerator:
 
     def init_order_product_assignments(self, order_product: OrderProduct):
         """Инициализация первого уровня нарядов связанных со стартовым"""
+
+        """
+        Если в отделе конструкторов есть наряд в разработке с данным товаром -
+         игнорируем генерацию новых нарядов
+        """
+        if Assignment.objects.filter(
+            order_product__product=order_product.product,
+            department__number=1
+        ).exclude(status='ready', inspector__isnull=False):
+            return
+
         production_steps = order_product.product.production_steps.all().exclude(is_active=False)
         start_production_steps = order_product.product.production_steps.get(department__number=0)
+
         for production_step in production_steps:
             """Пропускаем отделы старт и готово"""
             if production_step.department.number in [0, 50]:
                 continue
-
-            """
-            Если в отделе конструкторов есть наряд в разработке с данным товаром -
-             игнорируем генерацию нового наряда
-             """
-            if production_step.department.number == 1:
-                assignment_exists = Assignment.objects.filter(
-                    order_product__product=order_product.product,
-                    department__number=1
-                ).exclude(status='ready', inspector__isnull=False).exists()
-                if assignment_exists:
-                    break
 
             """Если отдел находится в списке стартовых - генерируем наряд в статусе ожидает"""
             if production_step in start_production_steps.next_step.all():

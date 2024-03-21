@@ -68,7 +68,7 @@ def get_filtered_await_queryset(queryset, eq_params):
 
 def get_filtered_in_work_queryset(queryset, eq_params):
     # Если получаем ключ - делаем подмену пин-кода для дальнейшей фильтрации
-    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None']:
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None', 'self']:
         eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
@@ -92,7 +92,7 @@ def get_filtered_in_work_queryset(queryset, eq_params):
 def get_filtered_ready_queryset(queryset, eq_params):
     # Делаем проверку на режим просмотра под пользователем
     # Если таков задан - переопределяем пин-код
-    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None']:
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None', 'self']:
         eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах

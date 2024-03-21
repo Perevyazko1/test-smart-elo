@@ -48,7 +48,7 @@ def get_ready_assignments(assignments, eq_params):
 
 def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
-    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None']:
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None', 'self']:
         eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
 
     # Фильтруем наряды по отделу

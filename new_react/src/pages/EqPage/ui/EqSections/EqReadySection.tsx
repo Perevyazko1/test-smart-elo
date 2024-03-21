@@ -44,11 +44,12 @@ export const EqReadySection = (props: EqReadySectionProps) => {
     const cardHeight = useCardHeight();
 
     // Запрашиваем карточки с сервера. Карточки запрашиваются в 2 запроса.
-    const {isLoading} = useFetchListData({
+    useFetchListData({
         listType: 'ready',
         height,
         deps: [
             queryParameters.week,
+            readyProps.hasUpdated,
         ],
     });
 
@@ -56,8 +57,8 @@ export const EqReadySection = (props: EqReadySectionProps) => {
     const scrollElementRef = useRef<HTMLDivElement>(null);
 
     const getItemsCount = useMemo(() => {
-        return isLoading ? readyProps.count || readyList.length || 3 : readyList.length
-    }, [isLoading, readyList.length, readyProps.count])
+        return readyProps.isLoading ? readyProps.count || readyList.length || 3 : readyList.length
+    }, [readyProps.isLoading, readyList.length, readyProps.count])
 
     // С помощью данного хука получаем виртуализированный список элементов
     const {virtualItems, totalHeight} = useFixedSizeList({
@@ -82,21 +83,18 @@ export const EqReadySection = (props: EqReadySectionProps) => {
                     const item = sortedReadyList[virtualItem.index];
 
                     if (!item) {
-                        if (readyProps.count === readyList.length) {
-                            return <div key={virtualItem.index}></div>
-                        }
-
                         return (
                             <AppSkeleton className={'rounded pt-1'} style={{
                                 height: `${cardHeight}px`,
                                 width: '100%',
                                 position: 'absolute',
+                                paddingLeft: '0.05rem',
+                                paddingRight: '0.15rem',
                                 top: '0',
                                 transform: `translateY(${virtualItem.offsetTop}px)`,
                             }} key={virtualItem.index}/>
                         )
                     }
-
 
                     return (
                         <div style={{

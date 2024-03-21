@@ -1,16 +1,9 @@
 import React, {useContext, useEffect, useMemo} from "react";
-import {Button, Spinner} from "react-bootstrap";
+import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
 import {IsDesktopContext} from "@app";
-import {
-    useAppDispatch,
-    useAppIsLoading,
-    useAppQuery,
-    useAppSelector,
-    useCurrentUser,
-    useDoubleTap
-} from "@shared/hooks";
+import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 
 import {getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
@@ -27,7 +20,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
-    const {isLoading} = useAppIsLoading();
 
     const {blockWidthPx, isDragging, showClb, drag, resetSize} = props;
     const isDesktop = useContext(IsDesktopContext);
@@ -37,6 +29,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     useEffect(() => {
         if (weekData?.hasUpdated !== undefined) {
             dispatch(fetchWeekData({
+                department_number: currentUser.current_department.number,
                 ...queryParameters
             }))
         }
@@ -80,16 +73,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                      }}
                      onClick={showClb}
                 >
-                    {isLoading ?
-                        <Spinner
-                            animation={'grow'}
-                            className={'text-light'}
-                            size={'sm'}
-                            style={{left: '30px'}}
-                        />
-                        :
-                        <i className="fas fa-filter text-light fs-6"/>
-                    }
+                    <i className="fas fa-filter text-light fs-6"/>
                 </div>
             }
 

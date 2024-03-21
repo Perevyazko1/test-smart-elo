@@ -23,17 +23,18 @@ export const EqInWorkSection = (props: EqInWorkSectionProps) => {
     const cardHeight = useCardHeight();
 
     // Запрашиваем карточки с сервера. Карточки запрашиваются в 2 запроса.
-    const {isLoading} = useFetchListData({
+    useFetchListData({
         listType: 'in_work',
         height,
+        deps: [inWorkProps.hasUpdated],
     });
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла
     const scrollElementRef = useRef<HTMLDivElement>(null);
 
     const getItemsCount = useMemo(() => {
-        return isLoading ? inWorkProps.count || inWorkList.length || 3 : inWorkList.length
-    }, [inWorkList.length, inWorkProps.count, isLoading])
+        return inWorkProps.isLoading ? inWorkProps.count || inWorkList.length || 3 : inWorkList.length
+    }, [inWorkList.length, inWorkProps.count, inWorkProps.isLoading])
 
     // С помощью данного хука получаем виртуализированный список элементов
     const {virtualItems, totalHeight} = useFixedSizeList({
@@ -58,15 +59,13 @@ export const EqInWorkSection = (props: EqInWorkSectionProps) => {
                     const item = inWorkList[virtualItem.index];
 
                     if (!item) {
-                        if (inWorkProps.count === inWorkList.length) {
-                            return <div key={virtualItem.index}></div>
-                        }
-
                         return (
                             <AppSkeleton className={'rounded pt-1'} style={{
                                 height: `${cardHeight}px`,
                                 width: '100%',
                                 position: 'absolute',
+                                paddingLeft: '0.05rem',
+                                paddingRight: '0.15rem',
                                 top: '0',
                                 transform: `translateY(${virtualItem.offsetTop}px)`,
                             }} key={virtualItem.index}/>

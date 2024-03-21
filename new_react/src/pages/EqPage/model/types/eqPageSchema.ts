@@ -10,6 +10,7 @@ export interface EqListData extends Omit<ApiList<EqCardType>, 'results'> {
     results: EntityState<EqCardType>;
     isLoading: boolean | undefined;
     hasUpdated: boolean | undefined;
+    reqId: number;
 }
 
 interface EqFilters<T> {
@@ -21,18 +22,20 @@ interface EqFilters<T> {
 
 export interface EqPageSchema {
     // Фильтра ЭЛО
-    projects: EqFilters<string>,
-    viewModes: EqFilters<ViewMode>,
+    projects: EqFilters<string>;
+    viewModes: EqFilters<ViewMode>;
 
     // Блок недель
-    weekData: WeekData,
+    weekData: WeekData;
 
     // Списки карточек
-    awaitList: EqListData,
-    inWorkList: EqListData,
-    readyList: EqListData,
+    awaitList: EqListData;
+    inWorkList: EqListData;
+    readyList: EqListData;
 
-    notRelevantId: string[],
+    notRelevantId: string[];
+    filtersReady: boolean;
+    filtersInited: boolean;
 }
 
 export const InitialEqBodySchema: EqPageSchema = {
@@ -66,6 +69,7 @@ export const InitialEqBodySchema: EqPageSchema = {
         hasUpdated: false,
         isLoading: true,
         earned: "0",
+        inited: false,
     },
 
     awaitList: {
@@ -78,6 +82,7 @@ export const InitialEqBodySchema: EqPageSchema = {
         hasUpdated: false,
         next: null,
         previous: null,
+        reqId: 0,
     },
     inWorkList: {
         results: {
@@ -89,6 +94,7 @@ export const InitialEqBodySchema: EqPageSchema = {
         hasUpdated: false,
         next: null,
         previous: null,
+        reqId: 0,
     },
     readyList: {
         results: {
@@ -100,7 +106,10 @@ export const InitialEqBodySchema: EqPageSchema = {
         hasUpdated: false,
         next: null,
         previous: null,
+        reqId: 0,
     },
 
     notRelevantId: [],
+    filtersReady: false,
+    filtersInited: false,
 }

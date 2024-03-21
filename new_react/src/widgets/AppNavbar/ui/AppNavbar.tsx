@@ -1,10 +1,9 @@
-import {Button, Offcanvas, Spinner} from "react-bootstrap";
+import {Button, Offcanvas} from "react-bootstrap";
 import {memo, ReactNode, useContext, useMemo} from "react";
 
 import {IsDesktopContext} from "@app";
 import Logo from '@shared/assets/images/SZMK Logo White Horizontal 900х352.png';
 import {AppNavigation} from "@widgets/AppNavigation";
-import {useAppIsLoading} from "@shared/hooks";
 import {useNavigate} from "react-router-dom";
 
 interface AppNavbarProps {
@@ -15,7 +14,6 @@ interface AppNavbarProps {
 
 export const AppNavbar = memo((props: AppNavbarProps) => {
     const {showNav, closeClb, children} = props;
-    const {isLoading} = useAppIsLoading();
     const isDesktop = useContext(IsDesktopContext);
 
     let navigate = useNavigate();
@@ -31,12 +29,6 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     if (isDesktop) {
         return (
             <div className={'bg-black text-white d-flex align-items-center justify-content-center p-3 appNavbar'}>
-                {isLoading && <Spinner
-                    className={'me-2 position-absolute'}
-                    size={'sm'}
-                    style={{left: '30px'}}
-                />}
-
                 <div className={'d-flex'}
                      style={{minWidth: '1150px', maxWidth: '100%'}}
                 >

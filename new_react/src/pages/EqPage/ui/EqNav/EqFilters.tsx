@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {Button} from 'react-bootstrap';
 
 import {APP_PERM} from '@shared/consts';
@@ -6,7 +6,8 @@ import {AppDropdown} from '@shared/ui';
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission} from '@shared/hooks';
 
 import {fetchEqFilters} from '../../model/api/fetchEqFilters';
-import {getEqProjects, getEqViewMode} from '../../model/selectors/filterSelectors';
+import {eqFiltersInited, getEqProjects, getEqViewMode} from '../../model/selectors/filterSelectors';
+import {eqPageActions} from "@pages/EqPage";
 
 export const EqFilters = () => {
     const {queryParameters, setQueryParam, initialLoad} = useAppQuery();
@@ -14,6 +15,7 @@ export const EqFilters = () => {
     const dispatch = useAppDispatch();
     const viewModes = useAppSelector(getEqViewMode);
     const projects = useAppSelector(getEqProjects);
+    const inited = useAppSelector(eqFiltersInited);
 
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
     const behalfPerm = usePermission(APP_PERM.BEHALF_ACTIONS);
@@ -30,56 +32,93 @@ export const EqFilters = () => {
     }, [behalfPerm, bossPerm, viewModes?.filters]);
 
     useEffect(() => {
-        if (currentUser.current_department && !initialLoad) {
+        if (currentUser.current_department.number && !initialLoad) {
             if (!bossPerm) {
                 setQueryParam('view_mode', '');
             }
-            console.log('Пошел запрос фильтров')
             dispatch(fetchEqFilters({
                 department_number: currentUser.current_department.number,
-                ...queryParameters,
+                mode: queryParameters.mode,
             }));
         }
         // eslint-disable-next-line
-    }, [dispatch, currentUser.current_department, queryParameters, initialLoad]);
+    }, [bossPerm, currentUser.current_department.number, dispatch, initialLoad, queryParameters.mode]);
+
+    useEffect(() => {
+        let edited = false;
+        if (inited && !initialLoad) {
+            // Проверяем закончилась ли инициализация квери параметров
+            // Затем проверяем есть ли у нас установленный режим просмотра
+            if (queryParameters.view_mode) {
+                // Проверяем прошла ли первоначальная загрузка фильтров
+                // Проверяем, есть ли режим просмотра в текущих загруженных фильтрах
+                const checkViewMode = viewModes?.filters.find(
+                    viewMode => viewMode.key === queryParameters.view_mode
+                );
+                // Если его нет - обнуляем установленный режим просмотра
+                if (!checkViewMode?.name) {
+                    setQueryParam('view_mode', '');
+                    edited = true;
+                }
+            }
+            if (queryParameters.project) {
+                const checkProject = projects?.filters.find(
+                    project => project === queryParameters.project
+                );
+                if (!checkProject) {
+                    setQueryParam('project', '');
+                    edited = true;
+                }
+            }
+
+            if (!edited) {
+                dispatch(eqPageActions.filtersReady(true));
+            }
+        }
+    }, [
+        dispatch,
+        inited,
+        initialLoad,
+        projects?.filters,
+        queryParameters.project,
+        queryParameters.view_mode,
+        setQueryParam,
+        viewModes?.filters
+    ]);
+
+    const updTargetItemsBeforeSetViewMode = (prevViewMode: string, newViewMode: string) => {
+        if (['unfinished', 'boss'].includes(prevViewMode) || ['unfinished', 'boss'].includes(newViewMode)) {
+            dispatch(eqPageActions.awaitUpdated());
+        }
+        dispatch(eqPageActions.inWorkUpdated());
+        dispatch(eqPageActions.readyUpdated());
+    }
 
     const viewModeClb = (item: string) => {
-        const targetKey = viewModes?.filters.find(viewMode => viewMode.name === item)?.key;
-        if (targetKey) {
-            setQueryParam('view_mode', targetKey === viewModes.default.key ? '' : String(targetKey));
+        const newState = viewModes?.filters.find(viewMode => viewMode.name === item)?.key;
+        const prevState = queryParameters.view_mode;
+        if (newState) {
+            setQueryParam('view_mode', newState === viewModes.default.key ? '' : String(newState));
         }
+        updTargetItemsBeforeSetViewMode(prevState, String(newState))
     };
 
-    const getSelectedViewMode = useMemo(() => {
-        if (queryParameters.view_mode && viewModes) {
-            const selectedViewMode = viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode);
-            if (!selectedViewMode) {
-                setQueryParam('view_mode', '')
-                return viewModes.default.name;
-            }
-            return selectedViewMode.name;
-        } else {
-            return viewModes ? viewModes.default.name : 'Загрузка';
-        }
-    }, [queryParameters.view_mode, setQueryParam, viewModes])
+    const getSelectedViewMode = viewModes ?
+        (queryParameters.view_mode
+            && viewModes.filters.find(viewMode => viewMode.key === queryParameters.view_mode)?.name
+        ) || viewModes.default.name : 'Загрузка';
+
+    const getSelectedProject = projects ?
+        (queryParameters.project && projects.filters.find(project => project === queryParameters.project)
+        ) || projects.default : 'Загрузка';
 
     const projectClb = (item: string) => {
         setQueryParam('project', item === projects?.default ? '' : item);
+        dispatch(eqPageActions.awaitUpdated());
+        dispatch(eqPageActions.inWorkUpdated());
+        dispatch(eqPageActions.readyUpdated());
     };
 
-    const getSelectedProject = useMemo(() => {
-        if (queryParameters.project && projects) {
-            const selectedProject = projects.filters.find(project => project === queryParameters.project);
-            
-            if (!selectedProject) {
-                setQueryParam('project', '');
-                return projects.default; 
-            }
-            return selectedProject;
-        } else {
-            return projects ? projects.default : 'Загрузка';
-        }
-    }, [projects, queryParameters.project, setQueryParam])
 
     return (
         <>

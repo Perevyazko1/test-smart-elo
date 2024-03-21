@@ -44,13 +44,13 @@ export const newWsConnection = (props: newWsConnectionProps) => {
         );
 
         socket.onopen = () => {
-            console.log('WS connected');
+            // console.log('WS connected');
             reconnectAttempts = 0;
         };
 
         socket.onclose = (event) => {
             if (event.wasClean) {
-                console.log('WS closed');
+                // console.log('WS closed');
             } else {
                 console.log('Соединение потерянно, попытка восстановить...');
                 if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
@@ -76,7 +76,7 @@ export const newWsConnection = (props: newWsConnectionProps) => {
                             dispatch(eqPageActions.inWorkUpdated())
                             return;
                         case 'ready':
-                            dispatch(eqPageActions.readyListHasUpdated())
+                            dispatch(eqPageActions.readyUpdated())
                             dispatch(eqPageActions.weekDataHasUpdated())
                             return;
                         default:

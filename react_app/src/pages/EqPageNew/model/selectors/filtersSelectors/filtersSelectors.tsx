@@ -6,3 +6,9 @@ export const getWeekData = (state: StateSchema) => state.eqFilters?.weekData;
 export const getSeriesSize = (state: StateSchema) => state.eqFilters?.seriesSize || 1;
 export const getNoRelevantId = (state: StateSchema) => state.eqFilters?.notRelevantId || [];
 export const listsHasUpdated = (state: StateSchema) => state.eqFilters?.listsHasUpdated || false;
+
+export const filtersIsInited = (state: StateSchema) => {
+    return state.eqFilters?.weekData.inited &&
+        state.eqFilters.viewModeFilter.inited &&
+        state.eqFilters.projectFilter.inited
+}

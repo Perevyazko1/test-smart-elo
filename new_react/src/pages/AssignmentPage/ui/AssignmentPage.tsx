@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
-import {ButtonGroup, Container, Dropdown, DropdownButton, Spinner, Table} from "react-bootstrap";
+import {Container, Spinner, Table} from "react-bootstrap";
 
 import cls from './AssignmentPage.module.scss';
 
@@ -7,21 +7,12 @@ import {DynamicComponent, PaginationContainer, QueryContext, ReducersList} from 
 import {AppNavbar} from "@widgets/AppNavbar";
 import {Assignment} from "@entities/Assignment";
 import {AppDropdown, AppInput, AppSkeleton} from "@shared/ui";
-import {
-    useAppDispatch,
-    useAppSelector,
-    useCurrentUser,
-    useDebounce,
-    usePermission,
-    useQueryParams
-} from "@shared/hooks";
-import {getPaginationSize} from "@shared/lib";
+import {useAppDispatch, useAppSelector, useCurrentUser, useDebounce, useQueryParams} from "@shared/hooks";
+import {getHumansDatetime, getPaginationSize} from "@shared/lib";
 
 import {getAssignmentList, getAssignmentProps} from "../model/selectors/assignmentSelector";
 import {fetchAssignments} from "../model/service/fetchAssignments";
 import {assignmentPageActions, assignmentPageReducer} from "../model/slice/assignmentPageSlice";
-import {updateAssignments} from "../model/service/updateAssignments";
-import {APP_PERM} from "@shared/consts";
 import {ModalProvider} from "@app";
 
 
@@ -34,7 +25,6 @@ export const AssignmentPage = () => {
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam, initialLoad} = useQueryParams();
-    const unconfirmedPerm = usePermission(APP_PERM.ASSIGNMENT_UNCONFIRMED);
 
     // Считаем размер страницы для одного запроса
     const paginationSize = useMemo(() => {
@@ -92,7 +82,6 @@ export const AssignmentPage = () => {
     // При изменении интервала страницы запрашиваем данные
     useEffect(() => {
         if (limitOffset.offset >= paginationSize) {
-            console.log('Пошел запрос')
             getAssignments(true);
         }
         //eslint-disable-next-line
@@ -115,20 +104,6 @@ export const AssignmentPage = () => {
             limit: limitOffset.limit,
             offset: limitOffset.offset + paginationSize,
         })
-    }
-
-    // Метод для группового обновления выделенных нарядов - снятие визы
-    // После запроса делаем повторный запрос всего списка
-    const groupUpdateAssignments = () => {
-        if (currentUser.pin_code) {
-            dispatch(updateAssignments({
-                action: "remove_confirmation",
-                id_list: checkedId,
-                pin_code: currentUser.pin_code,
-            })).then(() => {
-                getAssignments(false, limitOffset.offset + limitOffset.limit, 0)
-            })
-        }
     }
 
     // Дебаунсим изменение поисковой строки
@@ -224,26 +199,6 @@ export const AssignmentPage = () => {
                                     </h4>
                                 </div>
                                 <hr className={'p-0 me-2 mx-2 mt-0 w-25'}/>
-
-                                <DropdownButton
-                                    as={ButtonGroup}
-                                    size="sm"
-                                    drop={'end'}
-                                    variant="secondary"
-                                    title="Редактировать выбранные наряды"
-                                    className={'mb-2'}
-                                    disabled={checkedId.length === 0}
-                                >
-                                    {unconfirmedPerm &&
-                                        <Dropdown.Item
-                                            eventKey="1"
-                                            onClick={groupUpdateAssignments}
-                                        >
-                                            Снять визирование
-                                        </Dropdown.Item>
-                                    }
-                                </DropdownButton>
-                                <hr className={'mt-0'}/>
                             </div>
 
                             <Container>
@@ -296,7 +251,7 @@ export const AssignmentPage = () => {
                                             ${assignment.executor?.first_name || ""}`
                                                             }
                                                         </td>
-                                                        <td>13.07.2022</td>
+                                                        <td>{getHumansDatetime(assignment.date_completion || '')}</td>
                                                         <th>
                                                             {
                                                                 `${assignment.inspector?.last_name || ""} 

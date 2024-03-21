@@ -1,17 +1,53 @@
-import {useCurrentUser} from "@shared/hooks";
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
+import {AxiosError} from "axios";
+import {Spinner} from "react-bootstrap";
+
+import {useAppDispatch, useCurrentUser} from "@shared/hooks";
 import {$axiosAPI} from "@shared/api";
 import {Employee} from "@entities/Employee";
-import {AxiosError} from "axios";
 import {AppDropdown} from "@shared/ui";
-import {Spinner} from "react-bootstrap";
+import {eqPageActions} from "@pages/EqPage";
 
 export const EqDepWidget = () => {
     const {currentUser, setCurrentUser} = useCurrentUser();
+    const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const [department, setDepartment] = useState(() => currentUser?.current_department?.name ?? '');
+    const fetchData = async (depName: string) => {
+
+        try {
+            const targetDepartment = currentUser.departments.find(dep => dep.name === depName)
+            if (!targetDepartment) {
+                setError("Не корректный отдел пользователя");
+                return;
+            }
+
+            const response = await $axiosAPI.post<Employee>('/staff/change_current_department/', {
+                department_number: targetDepartment?.number,
+            });
+            dispatch(eqPageActions.filtersInited(false));
+            dispatch(eqPageActions.filtersReady(false));
+
+            setCurrentUser(response.data);
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response?.data) {
+                    setError(error.response.data)
+                }
+            } else setError('Неопознанная ошибка')
+        }
+    };
+
+    const setDepClb = (depName: string) => {
+        if (depName !== currentUser.current_department.name) {
+            setIsLoading(true);
+            fetchData(depName).then(() => {
+                dispatch(eqPageActions.allListClear())
+            });
+            setIsLoading(false);
+        }
+    }
 
     const departments = useMemo(
         () => currentUser.departments.map(department => department.name),
@@ -19,46 +55,12 @@ export const EqDepWidget = () => {
     );
 
 
-    useEffect(() => {
-        if (department !== currentUser.current_department.name) {
-            let isMounted = true;
-            setIsLoading(true);
-            const fetchData = async () => {
-                try {
-                    const targetDepartment = currentUser.departments.find(dep => dep.name === department)
-                    if (!targetDepartment) {
-                        setError("Не корректный отдел пользователя");
-                        return;
-                    }
-
-                    const response = await $axiosAPI.post<Employee>('/staff/change_current_department/', {
-                        department_number: targetDepartment?.number,
-                    });
-
-                    if (isMounted) {
-                        setCurrentUser(response.data);
-                    }
-                } catch (error) {
-                    if (isMounted) {
-                        if (error instanceof AxiosError) {
-                            if (error.response?.data) {
-                                setError(error.response.data)
-                            }
-                        } else setError('Неопознанная ошибка')
-                    }
-                }
-            };
-
-            fetchData().then(() => setIsLoading(false));
-
-            return () => {
-                isMounted = false;
-            };
-        }
-    }, [currentUser.current_department.name, currentUser.departments, department, setCurrentUser]);
-
     if (isLoading) {
-        return (<Spinner/>)
+        return (
+            <div className={'d-flex justify-content-center align-items-center'} style={{minWidth: '80px'}}>
+                <Spinner size={'sm'}/>
+            </div>
+        )
     }
     if (error) {
         return (<div>{error}</div>)
@@ -66,9 +68,9 @@ export const EqDepWidget = () => {
 
     return (
         <AppDropdown
-            selected={department}
+            selected={currentUser.current_department.name}
             items={departments}
-            onSelect={setDepartment}
+            onSelect={setDepClb}
         />
     );
 };

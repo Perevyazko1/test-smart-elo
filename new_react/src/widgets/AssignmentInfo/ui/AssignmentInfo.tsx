@@ -1,9 +1,10 @@
 import {Button, Spinner, Table} from "react-bootstrap";
 import {useEditAssignmentInfo, useGetAssignmentInfo} from "../model/api/api";
-import {useCurrentUser} from "@shared/hooks";
+import {useCurrentUser, usePermission} from "@shared/hooks";
 import {AssignmentInfoRow} from "@widgets/AssignmentInfo/ui/AssignmentInfoRow";
-import React, {useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {AppSkeleton} from "@shared/ui";
+import {APP_PERM} from "@shared/consts";
 
 interface AssignmentInfoProps {
     seriesId: string;
@@ -12,6 +13,7 @@ interface AssignmentInfoProps {
 
 export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const {seriesId, title} = props;
+    const unconfirmedPerm = usePermission(APP_PERM.ASSIGNMENT_UNCONFIRMED);
 
     const {currentUser} = useCurrentUser();
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -22,8 +24,20 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
         order_product__series_id: seriesId,
     });
 
-    const [editAssignments, {isLoading: isEdited, isError}] = useEditAssignmentInfo();
+    const [editAssignments, {isLoading: isEdited, error}] = useEditAssignmentInfo();
 
+    interface ServerError {
+        data?: {
+            error?: string
+        }
+    }
+
+    useEffect(() => {
+        if (error) {
+            const serverError = error as ServerError;
+            alert(serverError?.data?.error || 'Ошибка сервера. Обратитесь к администратору.')
+        }
+    }, [error])
     const onSelectClb = (selectedId: number) => {
         if (selectedIds.includes(selectedId)) {
             setSelectedIds(selectedIds.filter(id => id !== selectedId))
@@ -50,7 +64,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
         </tr>
     ), []);
 
-    const updateClb = (mode: 'in_work' | 'all' | 'selected' | 'await') => {
+    const updateClb = (mode: 'in_work' | 'all' | 'selected' | 'await' | 'remove_visa') => {
         editAssignments({
             series_id: seriesId,
             date: inputDate,
@@ -62,7 +76,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     return (
         <div data-bs-theme={'light'}>
             <h5 className={'m-0 p-2'}>
-                {isEdited || isLoading && <Spinner size={'sm'}/>}
+                {(isEdited || isLoading) && <Spinner size={'sm'}/>}
 
                 <b>Карточка: {seriesId} || Информация по нарядам: {title}</b>
             </h5>
@@ -115,6 +129,15 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         onClick={() => updateClb('selected')}
                     >
                         Выбранные
+                    </Button>
+                    <Button
+                        variant={'outline-danger'}
+                        size={'sm'}
+                        className={'mx-2'}
+                        disabled={isLoading || isEdited || !unconfirmedPerm}
+                        onClick={() => updateClb('remove_visa')}
+                    >
+                        Снять визу
                     </Button>
                 </div>
             </div>

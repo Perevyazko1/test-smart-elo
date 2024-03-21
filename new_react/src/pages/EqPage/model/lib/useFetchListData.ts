@@ -1,8 +1,11 @@
+import {useCallback, useEffect, useMemo, useRef} from "react";
+
+import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
+
 import {ListTypes} from "@pages/EqPage/model/consts/listTypes";
-import {useAppDispatch, useAppQuery, useCurrentUser} from "@shared/hooks";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {fetchListData} from "@pages/EqPage/model/api/fetchListData";
 import {useCardHeight} from "@pages/EqPage/model/lib/useCardHeight";
+import {eqFiltersReady} from "@pages/EqPage/model/selectors/filterSelectors";
 
 interface useFetchListDataProps {
     listType: ListTypes;
@@ -14,10 +17,10 @@ export const useFetchListData = (props: useFetchListDataProps) => {
     const {listType, height, deps = []} = props;
 
     const {currentUser} = useCurrentUser();
+    const filtersReady = useAppSelector(eqFiltersReady);
     const {queryParameters} = useAppQuery();
     const cardHeight = useCardHeight();
     const dispatch = useAppDispatch();
-    const [isLoading, setIsLoading] = useState(false);
 
     const initialHeight = useRef(height);
 
@@ -28,45 +31,45 @@ export const useFetchListData = (props: useFetchListDataProps) => {
         }
     }, [cardHeight])
 
-    const fetchData = useCallback(async () => {
-        setIsLoading(true);
-        try {
-            // Первый запрос на сервер
-            const initialResponse = await dispatch(fetchListData({
-                target_list: listType,
-                offset: 0,
-                limit: limit,
-                ...queryParameters,
-            })).unwrap();
-
-            if (initialResponse.count && limit && initialResponse.count > limit) {
-                // Если количество элементов больше limit, делаем второй запрос
-                await dispatch(fetchListData({
-                    target_list: listType,
-                    limit: initialResponse.count - limit, // Запрашиваем оставшиеся элементы
-                    offset: limit,
-                    ...queryParameters, // Запрашиваем все элементы
-                })).unwrap();
-            }
-        } catch (error) {
-            console.error('Ошибка при получении данных:', error);
-            throw error;
-        } finally {
-            setIsLoading(false); // Загрузка завершена
-        }
-        // eslint-disable-next-line
-    }, [
-        dispatch,
-        listType,
-        currentUser,
-        queryParameters.view_mode,
-        queryParameters.project,
-        // eslint-disable-next-line
-        ...deps]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        if (filtersReady) {
+            console.log(queryParameters)
+            const fetchData = async () => {
+                const reqId = Date.now()
+                try {
+                    // Первый запрос на сервер
+                    const initialResponse = await dispatch(fetchListData({
+                        target_list: listType,
+                        offset: 0,
+                        limit: limit,
+                        department_number: currentUser.current_department.number,
+                        reqId,
+                        ...queryParameters,
+                    })).unwrap();
 
-    return {isLoading}
+                    if (initialResponse.count && limit && initialResponse.count > limit) {
+                        // Если количество элементов больше limit, делаем второй запрос
+                        await dispatch(fetchListData({
+                            target_list: listType,
+                            limit: initialResponse.count - limit, // Запрашиваем оставшиеся элементы
+                            offset: limit,
+                            department_number: currentUser.current_department.number,
+                            reqId,
+                            ...queryParameters, // Запрашиваем все элементы
+                        })).unwrap();
+                    }
+                } catch (error) {
+                    console.error('Ошибка при получении данных:', error);
+                    throw error;
+                }
+            }
+            fetchData().then()
+        }
+        //eslint-disable-next-line
+    }, [...deps,
+        filtersReady,
+    ]);
+
+    return;
 }

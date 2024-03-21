@@ -78,6 +78,7 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
         setCardDisabled(true)
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
+            department_number: currentUser.current_department.number,
             numbers: assignmentsLists.primary,
             action: getAction(first),
             variant: "desktop",

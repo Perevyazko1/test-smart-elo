@@ -3,7 +3,6 @@ import {AssignmentAdapter} from "@entities/Assignment";
 
 import {AssignmentSchema} from "../types/types";
 import {fetchAssignments} from "../service/fetchAssignments";
-import {updateAssignments} from "../service/updateAssignments";
 
 
 export const initialState: AssignmentSchema = {
@@ -44,16 +43,6 @@ const assignmentPageSlice = createSlice({
                 state.isLoading = false;
             })
             .addCase(fetchAssignments.rejected, (state) => {
-                state.isLoading = false;
-            })
-
-            .addCase(updateAssignments.pending, (state) => {
-                    state.isLoading = true;
-                })
-            .addCase(updateAssignments.fulfilled, (state, action) => {
-                state.isLoading = false;
-            })
-            .addCase(updateAssignments.rejected, (state) => {
                 state.isLoading = false;
             })
     },

@@ -22,12 +22,14 @@ export const initialState: EqFilters = {
         default: "Все проекты",
         currentFilter: "Все проекты",
         isLoading: true,
+        inited: false,
     },
     viewModeFilter: {
         filters: [],
         default: {name: "Личные наряды", key: 0},
         currentFilter: {name: "Личные наряды", key: 0},
         isLoading: true,
+        inited: false,
     },
     seriesSize: 1,
     notRelevantId: [],
@@ -48,7 +50,7 @@ const eqFiltersSlice = createSlice({
 
         excludeNotRelevantId: (state, action: PayloadAction<string>) => {
             state.notRelevantId = state.notRelevantId.filter(
-                        (series_id) => series_id !== action.payload)
+                (series_id) => series_id !== action.payload)
         },
 
         setCurrentViewMode: (state, action: PayloadAction<ViewMode>) => {
@@ -77,21 +79,24 @@ const eqFiltersSlice = createSlice({
         builder
             .addCase(fetchEqFilters.pending, (state) => {
                 state.projectFilter.isLoading = true;
-
                 state.viewModeFilter.isLoading = true;
             })
 
             .addCase(fetchEqFilters.fulfilled, (state, action) => {
                 state.projectFilter.filters = action.payload.project_filters;
                 state.projectFilter.isLoading = false;
+                state.projectFilter.inited = true;
 
                 state.viewModeFilter.filters = action.payload.view_modes;
                 state.viewModeFilter.isLoading = false;
+                state.viewModeFilter.inited = true;
             })
 
             .addCase(fetchEqFilters.rejected, (state) => {
                 state.projectFilter.isLoading = false;
+                state.projectFilter.inited = true;
                 state.viewModeFilter.isLoading = false;
+                state.viewModeFilter.inited = true;
             })
 
             .addCase(fetchWeekData.pending, (state) => {
@@ -101,10 +106,12 @@ const eqFiltersSlice = createSlice({
             .addCase(fetchWeekData.fulfilled, (state, action) => {
                 state.weekData = {...state.weekData, ...action.payload};
                 state.weekData.isLoading = false;
+                state.weekData.inited = true;
             })
 
             .addCase(fetchWeekData.rejected, (state) => {
                 state.weekData.isLoading = false;
+                state.weekData.inited = true;
             })
     },
 });

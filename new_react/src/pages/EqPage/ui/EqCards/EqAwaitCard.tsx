@@ -82,6 +82,7 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
             numbers: assignmentsLists.primary,
+            department_number: currentUser.current_department.number,
             action: getAction(),
             variant: "desktop",
             ...queryParameters,

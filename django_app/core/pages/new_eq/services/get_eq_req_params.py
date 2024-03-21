@@ -17,7 +17,7 @@ def get_eq_req_params(request) -> RequestParams | None:
             pin_code=str(request.user.pin_code),
             view_mode_key=str(request.data.get("view_mode")),
             project_filter=str(request.data.get("project")),
-            department_number=str(request.user.current_department.number),
+            department_number=str(request.data.get("department_number")),
             week=str(request.data.get("week")),
             year=str(request.data.get("year")),
         )
@@ -26,7 +26,7 @@ def get_eq_req_params(request) -> RequestParams | None:
             pin_code=str(request.user.pin_code),
             view_mode_key=str(request.query_params.get("view_mode")),
             project_filter=request.query_params.get("project"),
-            department_number=str(request.user.current_department.number),
+            department_number=str(request.query_params.get("department_number")),
             week=request.query_params.get("week"),
             year=request.query_params.get("year"),
         )

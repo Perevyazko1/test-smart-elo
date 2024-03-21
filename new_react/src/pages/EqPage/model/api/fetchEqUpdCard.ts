@@ -14,8 +14,9 @@ export enum Actions {
 }
 
 interface fetchEqUpdateCardProps {
-    action?: Actions,
     series_id: string,
+    department_number: number,
+    action?: Actions,
     numbers?: number[],
     mode?: 'GET' | 'POST';
     variant: 'desktop' | 'mobile';

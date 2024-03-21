@@ -3,7 +3,7 @@ import React, {useContext, useEffect} from "react";
 import useWindowDimensions from "@pages/EqPage/model/lib/useWindowDimensions";
 import {IsDesktopContext} from "@app";
 import {EqWeeks} from "@pages/EqPage/ui/EqBody/EqWeeks";
-import {useAppDispatch, useAppQuery, useAppSelector} from "@shared/hooks";
+import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
 import {getNoRelevantId} from "@pages/EqPage/model/selectors/cardSelectors";
 import {fetchEqUpdCard} from "@pages/EqPage/model/api/fetchEqUpdCard";
 import {EqAwaitSection} from "@pages/EqPage/ui/EqSections/EqAwaitSection";
@@ -17,6 +17,7 @@ interface EqBodyProps {
 export const EqBody = (props: EqBodyProps) => {
     // Достаем из пропсов коллбек который далее передадим в блок недель на кнопку открытия канваса меню
     const {showClb} = props;
+    const {currentUser} = useCurrentUser();
 
     // Вызываем хук query параметров
     const {queryParameters} = useAppQuery();
@@ -53,6 +54,7 @@ export const EqBody = (props: EqBodyProps) => {
         if (noRelevantId && noRelevantId.length > 0) {
             dispatch(fetchEqUpdCard({
                 mode: 'GET',
+                department_number: currentUser.current_department.number,
                 series_id: noRelevantId[0],
                 variant: 'desktop',
                 ...queryParameters,

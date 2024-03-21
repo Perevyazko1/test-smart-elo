@@ -6,7 +6,9 @@ import {WeekInfo} from "../types/weekInfo";
 import {errorApiHandler} from "@shared/api";
 
 
-type fetchWeekDataProps = {}
+type fetchWeekDataProps = {
+    department_number: number;
+}
 
 
 export const fetchWeekData = createAsyncThunk<WeekInfo, fetchWeekDataProps, ThunkConfig<string>>(
