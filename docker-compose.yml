@@ -45,6 +45,12 @@ services:
     volumes:
       - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
 
+  db-admin:
+    image: adminer:4.8.1
+    ports:
+      - "8080:8080"
+    restart: always
+
   redis:
     container_name: redis_eq
     build: ./redis
