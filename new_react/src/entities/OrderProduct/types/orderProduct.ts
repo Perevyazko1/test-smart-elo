@@ -15,6 +15,7 @@ export interface BaseOrderProduct {
     comment_base: string;
     comment_case: string;
     tariff: number;
+    further_packaging: boolean;
 }
 
 type ExtendedFields = 'product' | 'main_fabric' | 'second_fabric' | 'third_fabric' | 'order' | 'tariff';

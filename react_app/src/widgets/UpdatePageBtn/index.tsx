@@ -1,1 +1,0 @@
-export {UpdatePageBtn} from './ui/UpdatePageBtn';

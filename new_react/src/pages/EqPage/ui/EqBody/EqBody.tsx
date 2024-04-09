@@ -46,7 +46,7 @@ export const EqBody = (props: EqBodyProps) => {
         y: isDesktop ? -62 : -20,
     });
 
-    // Читаем ID карточек которые нужно обновит
+    // Читаем ID карточек которые нужно обновить
     const noRelevantId = useAppSelector(getNoRelevantId);
 
     // Поочередно запрашиваем обновленные данные по ID пока список не будет пуст. Список чистится внутри редьюсера.
@@ -54,9 +54,8 @@ export const EqBody = (props: EqBodyProps) => {
         if (noRelevantId && noRelevantId.length > 0) {
             dispatch(fetchEqUpdCard({
                 mode: 'GET',
-                department_number: currentUser.current_department.number,
+                department_id: currentUser.current_department.id,
                 series_id: noRelevantId[0],
-                variant: 'desktop',
                 ...queryParameters,
             }))
         }

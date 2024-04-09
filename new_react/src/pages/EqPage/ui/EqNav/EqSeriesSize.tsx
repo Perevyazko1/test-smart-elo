@@ -14,7 +14,7 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
     const baseSeriesSize = '1';
     const seriesSizeConfig = {
         minValue: 1,
-        maxValue: 50,
+        maxValue: 30,
     }
 
     const [seriesSize, setSeriesSize] = useState(queryParameters.series_size || baseSeriesSize);
@@ -60,7 +60,7 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
                         type="range"
                         defaultValue={queryParameters.series_size || baseSeriesSize}
                         min={1}
-                        max={50}
+                        max={30}
                         step={1}
                         ref={seriesSizeRef}
                         onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}

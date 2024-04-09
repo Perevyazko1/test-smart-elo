@@ -3,7 +3,7 @@ import {ResponseDepInfo} from "../types/departmentInfo";
 
 interface OpDepDetailsApiProps {
     series_id: string,
-    department_number: number | undefined,
+    department_id: number,
 }
 
 const OpDepDetailsApi = rtkAPI.injectEndpoints({
@@ -13,7 +13,7 @@ const OpDepDetailsApi = rtkAPI.injectEndpoints({
                 url: '/core/get_op_dep_info',
                 params: {
                     series_id: props.series_id,
-                    department_number: props.department_number,
+                    department_id: props.department_id,
                 }
             }),
         }),

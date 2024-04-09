@@ -1,1 +1,0 @@
-export {technological_process, tech_process_schema} from './model/type/technological_process'

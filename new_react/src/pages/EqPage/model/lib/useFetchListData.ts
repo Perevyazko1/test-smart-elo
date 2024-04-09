@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef} from "react";
+import {useEffect, useMemo, useRef} from "react";
 
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
 
@@ -34,7 +34,6 @@ export const useFetchListData = (props: useFetchListDataProps) => {
 
     useEffect(() => {
         if (filtersReady) {
-            console.log(queryParameters)
             const fetchData = async () => {
                 const reqId = Date.now()
                 try {
@@ -43,7 +42,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                         target_list: listType,
                         offset: 0,
                         limit: limit,
-                        department_number: currentUser.current_department.number,
+                        department_id: currentUser.current_department.id,
                         reqId,
                         ...queryParameters,
                     })).unwrap();
@@ -54,7 +53,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                             target_list: listType,
                             limit: initialResponse.count - limit, // Запрашиваем оставшиеся элементы
                             offset: limit,
-                            department_number: currentUser.current_department.number,
+                            department_id: currentUser.current_department.id,
                             reqId,
                             ...queryParameters, // Запрашиваем все элементы
                         })).unwrap();

@@ -1,8 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import {App, ContextProvider, StoreProvider} from "@app";
 import '@app/styles/index.scss';
+
+import {App, ContextProvider, StoreProvider} from "@app";
 import {DndProvider} from "react-dnd";
 import {TouchBackend} from "react-dnd-touch-backend";
 

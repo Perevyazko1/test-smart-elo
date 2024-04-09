@@ -1,1 +1,0 @@
-export {product_picture} from './model/type/product_picture'

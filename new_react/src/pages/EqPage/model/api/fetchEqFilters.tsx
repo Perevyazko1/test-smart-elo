@@ -6,7 +6,7 @@ import {errorApiHandler} from "@shared/api";
 import {ViewMode} from "../types/viewMode";
 
 type fetchEqFiltersProps = {
-    department_number: number,
+    department_id: number,
     mode: string | undefined;
 }
 
@@ -25,7 +25,7 @@ export const fetchEqFilters = createAsyncThunk<EqFilters, fetchEqFiltersProps, T
             const response = await extra.api.get<EqFilters>('/core/get_eq_filters/', {
                 params: {
                     ...params,
-                }
+                },
             });
             if (response.data) {
                 return response.data;

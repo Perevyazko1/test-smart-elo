@@ -3,9 +3,10 @@ import {Container, Spinner, Table} from "react-bootstrap";
 
 import cls from './AssignmentPage.module.scss';
 
+import {ModalProvider} from "@app";
+import {Assignment} from "@entities/Assignment";
 import {DynamicComponent, PaginationContainer, QueryContext, ReducersList} from "@features";
 import {AppNavbar} from "@widgets/AppNavbar";
-import {Assignment} from "@entities/Assignment";
 import {AppDropdown, AppInput, AppSkeleton} from "@shared/ui";
 import {useAppDispatch, useAppSelector, useCurrentUser, useDebounce, useQueryParams} from "@shared/hooks";
 import {getHumansDatetime, getPaginationSize} from "@shared/lib";
@@ -13,7 +14,7 @@ import {getHumansDatetime, getPaginationSize} from "@shared/lib";
 import {getAssignmentList, getAssignmentProps} from "../model/selectors/assignmentSelector";
 import {fetchAssignments} from "../model/service/fetchAssignments";
 import {assignmentPageActions, assignmentPageReducer} from "../model/slice/assignmentPageSlice";
-import {ModalProvider} from "@app";
+import {Department} from "@entities/Department";
 
 
 const initialReducers: ReducersList = {
@@ -41,19 +42,28 @@ export const AssignmentPage = () => {
 
 
     // Делаем затычку для выбора всех отделов
-    const allDepartment = 'Все отделы';
+    const allDepartment: Department = useMemo(() => {
+        return {
+            id: 0,
+            name: 'Все отделы',
+            piecework_wages: false,
+            color: 'FFFFFF',
+            number: 0,
+            single: false
+        }
+    }, []);
 
     // Инициализируем отдел если таков был в query параметрах
-    const getInitialDepartment = useCallback((): string => {
-        const queryDepartmentName = queryParameters.department__name;
+    const getInitialDepartment = useCallback((): Department => {
+        const queryDepartmentName = queryParameters.department__id;
         if (queryDepartmentName) {
-            return currentUser.departments?.find(department => department.name === queryDepartmentName)?.name || allDepartment;
+            return currentUser.departments?.find(department => String(department.id) === queryDepartmentName) || allDepartment;
         } else {
             return allDepartment;
         }
-    }, [allDepartment, currentUser.departments, queryParameters.department__name]);
+    }, [allDepartment, currentUser.departments, queryParameters.department__id]);
 
-    const [currentDepartment, setCurrentDepartment] = useState<string>(getInitialDepartment());
+    const [currentDepartment, setCurrentDepartment] = useState<Department>(getInitialDepartment());
     const [seriesIdInput, setSeriesIdInput] = useState<string>(queryParameters.order_product__series_id || '');
 
     // Выделение нарядов
@@ -99,7 +109,6 @@ export const AssignmentPage = () => {
 
     // Коллбек установки следующей страницы
     const setNextPage = () => {
-        console.log('Изменение номера страницы')
         setLimitOffset({
             limit: limitOffset.limit,
             offset: limitOffset.offset + paginationSize,
@@ -115,12 +124,6 @@ export const AssignmentPage = () => {
         debouncedSetQueryParam('order_product__series_id', seriesIdInput)
         // eslint-disable-next-line
     }, [seriesIdInput]);
-
-
-    const departments = useMemo(
-        () => currentUser.departments.map(department => department.name),
-        [currentUser.departments]
-    );
 
     const PageSkeletons = useMemo(() => (
         <>
@@ -154,15 +157,19 @@ export const AssignmentPage = () => {
         }
     }, []);
 
-    const setDepartmentClb = (department: string) => {
-        setCurrentDepartment(department);
-        if (department !== allDepartment) {
-            setQueryParam('department__name', department)
+    const setDepartmentClb = (departmentName: string) => {
+        const selectedDepartment = currentUser.departments.find(department => department.name === departmentName)
+        setCurrentDepartment(selectedDepartment || allDepartment);
+        if (selectedDepartment) {
+            setQueryParam('department__id', String(selectedDepartment.id))
         } else {
-            setQueryParam('department__name', '')
+            setQueryParam('department__id', '')
         }
     };
 
+    const departmentItems = useMemo(() => {
+        return currentUser.departments.map(department => department.name)
+    }, [currentUser.departments])
 
     return (
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
@@ -177,9 +184,9 @@ export const AssignmentPage = () => {
                             />
 
                             <AppDropdown
-                                selected={currentDepartment}
+                                selected={currentDepartment.name}
                                 active={currentDepartment !== allDepartment}
-                                items={[allDepartment, ...departments]}
+                                items={[allDepartment.name, ...departmentItems]}
                                 onSelect={setDepartmentClb}
                             />
                         </AppNavbar>

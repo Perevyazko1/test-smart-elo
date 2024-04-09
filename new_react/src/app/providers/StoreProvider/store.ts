@@ -1,11 +1,10 @@
 import {CombinedState, Reducer} from 'redux';
 import {configureStore, ReducersMapObject} from "@reduxjs/toolkit";
 
+import {rtkAPI, $axiosAPI} from "@shared/api";
 
 import {createReducerManager} from "./reducerManager";
 import {StateSchema} from "./stateSchema";
-import {rtkAPI} from "@shared/api";
-import {$axiosAPI} from "@shared/api/axiosAPI/axiosAPI";
 
 
 export function createReduxStore(initialState?: StateSchema) {

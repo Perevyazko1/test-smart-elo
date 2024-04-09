@@ -20,7 +20,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const [inputDate, setInputDate] = useState<string>('');
 
     const {data, isLoading} = useGetAssignmentInfo({
-        department__name: currentUser.current_department.name,
+        department__id: currentUser.current_department.id,
         order_product__series_id: seriesId,
     });
 
@@ -60,13 +60,14 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
     const PageSkeleton = useMemo(() => (
         <tr>
-            <td colSpan={8}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
+            <td colSpan={10}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
         </tr>
     ), []);
 
     const updateClb = (mode: 'in_work' | 'all' | 'selected' | 'await' | 'remove_visa') => {
         editAssignments({
             series_id: seriesId,
+            department__id: currentUser.current_department.id,
             date: inputDate,
             ids: selectedIds,
             mode: mode,

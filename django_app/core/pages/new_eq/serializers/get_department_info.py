@@ -2,9 +2,9 @@ from core.models import Assignment
 from staff.models import Employee
 
 
-def get_eq_card_department_info(order_product, department_number):
+def get_eq_card_department_info(order_product, department):
     employees = Employee.objects.filter(
-        departments__number=department_number,
+        departments=department,
     ).exclude(
         username='root',
     )
@@ -13,7 +13,7 @@ def get_eq_card_department_info(order_product, department_number):
         assignments = Assignment.objects.filter(
                 executor=employee,
                 order_product=order_product,
-                department__number=department_number,
+                department=department,
             )
         count_all = assignments.count()
         if count_all == 0:

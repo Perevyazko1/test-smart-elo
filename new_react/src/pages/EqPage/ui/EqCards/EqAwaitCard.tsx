@@ -82,9 +82,8 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
             numbers: assignmentsLists.primary,
-            department_number: currentUser.current_department.number,
+            department_id: currentUser.current_department.id,
             action: getAction(),
-            variant: "desktop",
             ...queryParameters,
         })).then(() => {
             setCardDisabled(false);
@@ -184,8 +183,8 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
                 }
                 <div className={cls.nameNumberBlock + ' bg-light rounded'}>
                     <div className={cls.productName}>
+                        {card.further_packaging && "📦"}
                         {card.product.name}
-                        {/*{Math.ceil(Math.random() * 100)}*/}
                     </div>
 
                     <hr className={'m-0 p-0'}/>

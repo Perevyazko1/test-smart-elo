@@ -1,5 +1,7 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo} from 'react';
 import {Button} from 'react-bootstrap';
+
+import {eqPageActions} from "@pages/EqPage";
 
 import {APP_PERM} from '@shared/consts';
 import {AppDropdown} from '@shared/ui';
@@ -7,7 +9,6 @@ import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermissi
 
 import {fetchEqFilters} from '../../model/api/fetchEqFilters';
 import {eqFiltersInited, getEqProjects, getEqViewMode} from '../../model/selectors/filterSelectors';
-import {eqPageActions} from "@pages/EqPage";
 
 export const EqFilters = () => {
     const {queryParameters, setQueryParam, initialLoad} = useAppQuery();
@@ -37,7 +38,7 @@ export const EqFilters = () => {
                 setQueryParam('view_mode', '');
             }
             dispatch(fetchEqFilters({
-                department_number: currentUser.current_department.number,
+                department_id: currentUser.current_department.id,
                 mode: queryParameters.mode,
             }));
         }

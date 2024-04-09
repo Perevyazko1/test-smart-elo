@@ -1,11 +1,12 @@
 from rest_framework import serializers
 
-from core.models import OrderProduct
+from core.models import OrderProduct, ProductionStep
 from core.pages.new_eq.serializers.get_department_info import get_eq_card_department_info
 from core.pages.new_eq.serializers.get_eq_card_assignments import get_eq_card_assignments
 from core.pages.new_eq.serializers.get_eq_card_count_data import get_eq_card_count_data
 from core.pages.new_eq.services.get_eq_req_params import RequestParams
 from core.serializers import ProductSerializer, FabricSerializer, OrderSerializer
+from staff.models import Department
 
 
 class EqOrderProductInfoSerializer(serializers.Serializer):
@@ -32,6 +33,7 @@ class EqCardSerializer(serializers.ModelSerializer):
     card_info = serializers.SerializerMethodField()
     department_info = serializers.SerializerMethodField()
     plane_date = serializers.SerializerMethodField()
+    further_packaging = serializers.SerializerMethodField()
 
     class Meta:
         model = OrderProduct
@@ -50,10 +52,12 @@ class EqCardSerializer(serializers.ModelSerializer):
             'card_info',
             'department_info',
             'plane_date',
+            'further_packaging',
         ]
         read_only_fields = [
             'series_id',
             'plane_date',
+            'further_packaging',
         ]
 
     def get_assignments(self, obj: OrderProduct):
@@ -66,11 +70,20 @@ class EqCardSerializer(serializers.ModelSerializer):
             order_product=obj,
         )
 
+    def get_further_packaging(self, obj: OrderProduct):
+        eq_params: RequestParams = self.context.get('eq_params')
+        return ProductionStep.objects.get(
+            product=obj.product,
+            department=eq_params.department
+        ).next_step.all().filter(
+            department__name="Упаковка"
+        ).exists()
+
     def get_department_info(self, obj: OrderProduct):
         eq_params: RequestParams = self.context.get('eq_params')
         data = get_eq_card_department_info(
             order_product=obj,
-            department_number=eq_params.department_number
+            department=eq_params.department
         )
         serializer = EqDepartmentInfoSerializer(data=data, many=True)
         if serializer.is_valid():
@@ -82,7 +95,7 @@ class EqCardSerializer(serializers.ModelSerializer):
         eq_params: RequestParams = self.context.get('eq_params')
         data = get_eq_card_count_data(
             order_product=obj,
-            department_number=eq_params.department_number
+            department=eq_params.department
         )
         serializer = EqOrderProductInfoSerializer(data=data)
         if serializer.is_valid():

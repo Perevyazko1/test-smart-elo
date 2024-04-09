@@ -29,7 +29,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     useEffect(() => {
         if (weekData?.hasUpdated !== undefined) {
             dispatch(fetchWeekData({
-                department_number: currentUser.current_department.number,
+                department_id: currentUser.current_department.id,
                 ...queryParameters
             }))
         }

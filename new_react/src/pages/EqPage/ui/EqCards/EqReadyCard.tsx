@@ -78,10 +78,9 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
         setCardDisabled(true)
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
-            department_number: currentUser.current_department.number,
+            department_id: currentUser.current_department.id,
             numbers: assignmentsLists.primary,
             action: getAction(first),
-            variant: "desktop",
             ...queryParameters,
         })).then(() => {
             setCardDisabled(false);
@@ -178,8 +177,8 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
                 {/*Имя и номера бегунков*/}
                 <div className={cls.nameNumberBlock + ' bg-light rounded'}>
                     <div className={cls.productName}>
+                        {card.further_packaging && "📦"}
                         {card.product.name}
-                        {/*{Math.ceil(Math.random() * 100)}*/}
                     </div>
 
                     <hr className={'m-0 p-0'}/>

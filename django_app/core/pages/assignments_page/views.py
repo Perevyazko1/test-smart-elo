@@ -1,10 +1,6 @@
-from django.http import JsonResponse
 from rest_framework import viewsets
-from rest_framework.decorators import api_view
 
-from core.models import Assignment, ProductionStep
-from staff.models import Audit, Employee
-from staff.service import is_user_in_group
+from core.models import Assignment
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
 

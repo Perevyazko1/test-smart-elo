@@ -1,1 +1,0 @@
-export {WagesPageAsync as WagesPage} from './ui/WagesPage/WagesPage.async';

@@ -1,1 +1,0 @@
-export {tariff} from './model/type/tariff'

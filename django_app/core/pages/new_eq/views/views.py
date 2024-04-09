@@ -10,9 +10,8 @@ from core.models import OrderProduct, Assignment, ProductionStep
 from core.pages.new_eq.serializers.serializers import EqCardSerializer
 from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
 from core.pages.new_eq.views.get_eq_card_queryset import get_eq_card_queryset
-from core.pages.new_eq.views.get_target_list_name_from_req import get_target_list_name_from_req
 from core.services.get_week_info import GetWeekInfo
-from staff.models import Transaction
+from staff.models import Transaction, Department, Employee
 from staff.service import is_user_in_group
 from .get_project_filter import get_project_filters
 from .get_view_modes import get_view_modes
@@ -26,7 +25,7 @@ class GetEqCards(viewsets.ModelViewSet):
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['eq_params'] = get_eq_req_params(request=self.request)
-        context['target_list'] = get_target_list_name_from_req(request=self.request)
+        context['target_list'] = self.request.query_params.get("target_list")
         return context
 
     def get_queryset(self):
@@ -39,51 +38,42 @@ class GetEqCards(viewsets.ModelViewSet):
 def update_card(request):
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.data.get('series_id')
-    variant: str = request.data.get('variant')
     numbers: list[int] = request.data.get('numbers')
     action: str = request.data.get('action')
 
     UpdateAssignments(series_id=series_id,
-                      department_number=eq_params.department_number,
+                      department=eq_params.department,
                       numbers=numbers,
                       action=action,
-                      pin_code=eq_params.pin_code,
+                      employee=eq_params.user,
                       view_mode=eq_params.view_mode_key
                       ).execute()
 
     queryset = OrderProduct.objects.get(series_id=series_id)
 
-    if variant == 'desktop':
-        return JsonResponse({
-            "await": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'await',
-            }).data,
-            "in_work": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'in_work',
-            }).data,
-            "ready": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'ready',
-            }).data,
-        }, json_dumps_params={"ensure_ascii": False})
-    else:
-        return JsonResponse({
-            "mobile": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'mobile',
-            }).data,
-        }, json_dumps_params={"ensure_ascii": False})
+    return JsonResponse({
+        "await": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'await',
+        }).data,
+        "in_work": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'in_work',
+        }).data,
+        "ready": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'ready',
+        }).data,
+    }, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['GET'])
 def get_eq_filters(request):
-    eq_params = get_eq_req_params(request=request)
+    eq_params = get_eq_req_params(request)
     mode = request.query_params.get('project_mode')
 
     project_filters = get_project_filters(mode)
-    view_modes = get_view_modes(eq_params.department_number)
+    view_modes = get_view_modes(eq_params.department)
 
     return JsonResponse({
         "view_modes": view_modes,
@@ -95,21 +85,21 @@ def get_eq_filters(request):
 def get_week_data(request):
     eq_params = get_eq_req_params(request=request)
 
-    # if len(eq_params.view_mode_key) == 6:
-    #     eq_params.pin_code = eq_params.view_mode_key
-    # TODO Добавить расчет от лица сотрудника отдела
+    if eq_params.view_mode_key not in ['self', 'boss', 'unfinished'] and eq_params.view_mode_key is not None:
+        eq_params.user = Employee.objects.get(id=eq_params.view_mode_key)
+
     week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
 
     earned = Assignment.objects.filter(
-        executor__pin_code=eq_params.pin_code,
-        department__number=eq_params.department_number,
+        executor=eq_params.user,
+        department=eq_params.department,
         inspector__isnull=False,
         date_completion__gte=week_info.date_range[0],
         date_completion__lt=week_info.date_range[1],
     ).aggregate(Sum('tariff__tariff')).get('tariff__tariff__sum')
 
     transactions_sum = Transaction.objects.filter(
-        employee__pin_code=eq_params.pin_code,
+        employee=eq_params.user,
         inspect_date__gte=week_info.date_range[0],
         inspect_date__lt=week_info.date_range[1],
         transaction_type="accrual",
@@ -127,32 +117,23 @@ def get_week_data(request):
 def get_card(request):
     eq_params = get_eq_req_params(request=request)
     series_id: str = request.query_params.get('series_id')
-    variant: str = request.query_params.get('variant')
 
     queryset = OrderProduct.objects.get(series_id=series_id)
 
-    if variant == 'desktop':
-        return JsonResponse({
-            "await": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'await',
-            }).data,
-            "in_work": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'in_work',
-            }).data,
-            "ready": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'ready',
-            }).data,
-        }, json_dumps_params={"ensure_ascii": False})
-    else:
-        return JsonResponse({
-            "mobile": EqCardSerializer(queryset, context={
-                'eq_params': eq_params,
-                'target_list': 'mobile',
-            }).data,
-        }, json_dumps_params={"ensure_ascii": False})
+    return JsonResponse({
+        "await": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'await',
+        }).data,
+        "in_work": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'in_work',
+        }).data,
+        "ready": EqCardSerializer(queryset, context={
+            'eq_params': eq_params,
+            'target_list': 'ready',
+        }).data,
+    }, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['POST'])
@@ -162,7 +143,7 @@ def update_assignments(request):
     date = request.data.get('date')
     series_id = request.data.get('series_id')
     user = request.user
-    department = user.current_department
+    department = Department.objects.get(id=request.data.get('department__id'))
 
     if mode == 'remove_visa':
         if not is_user_in_group(user, 'Снятие визы'):
@@ -242,14 +223,6 @@ def update_assignments(request):
                             ).count()
                             if min_assign_with_visa_in_dependents_departments > assignments_with_visa:
                                 min_assign_with_visa_in_dependents_departments = assignments_with_visa
-                            print(
-                                'Последующий этап зависит от: ', dependent_ps.department.name,
-                                ' в нем ', assignments_with_visa, ' нарядов с визой'
-                            )
-                        print(
-                            'Итого минимальное количество нарядов с визой в зависимых отделах: ',
-                            min_assign_with_visa_in_dependents_departments
-                        )
 
                         """
                         Если количество нарядов с визой в отделах от которых зависит исходный отдел меньше

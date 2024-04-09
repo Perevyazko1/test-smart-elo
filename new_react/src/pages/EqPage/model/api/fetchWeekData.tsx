@@ -7,7 +7,7 @@ import {errorApiHandler} from "@shared/api";
 
 
 type fetchWeekDataProps = {
-    department_number: number;
+    department_id: number;
 }
 
 

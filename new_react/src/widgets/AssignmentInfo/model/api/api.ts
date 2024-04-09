@@ -2,13 +2,14 @@ import {rtkAPI} from "@shared/api";
 import {Assignment} from "@entities/Assignment";
 
 interface AssignmentInfoApiProps {
-    department__name: string,
-    order_product__series_id: string,
+    department__id: number;
+    order_product__series_id: string;
 }
 
 interface EditAssignmentsInfoProps {
     ids: number[];
     mode: 'in_work' | 'all' | 'selected' | 'await' | 'remove_visa';
+    department__id: number;
     date: string;
     series_id: string;
 }

@@ -1,11 +1,13 @@
 import {useCallback, useState} from "react";
 
+import {ModalProvider} from "@app";
+
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
+
+import {eqPageReducer} from "../../model/slice/eqPageSlice";
 
 import {EqNav} from "../EqNav/EqNav";
 import {EqBody} from "../EqBody/EqBody";
-import {eqPageReducer} from "../../model/slice/eqPageSlice";
-import {ModalProvider} from "@app";
 
 // Список редьюсеров для инициализации
 const initialReducers: ReducersList = {

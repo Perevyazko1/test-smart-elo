@@ -12,6 +12,12 @@ services:
     env_file:
       - .env
 
+  db-admin:
+    image: adminer:4.8.1
+    ports:
+      - "8080:8080"
+    restart: always
+
   pgadmin:
     build:
       context: ./pgadmin

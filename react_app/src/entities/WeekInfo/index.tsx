@@ -1,1 +1,0 @@
-export {week_info} from "./model/types/weekInfo";

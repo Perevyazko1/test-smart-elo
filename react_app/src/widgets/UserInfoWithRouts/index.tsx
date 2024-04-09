@@ -1,1 +1,0 @@
-export {UserInfoWithRouts} from './ui/UserInfoWithRouts'

@@ -15,14 +15,13 @@ export enum Actions {
 
 interface fetchEqUpdateCardProps {
     series_id: string,
-    department_number: number,
+    department_id: number,
     action?: Actions,
     numbers?: number[],
     mode?: 'GET' | 'POST';
-    variant: 'desktop' | 'mobile';
 }
 
-type ListTypes = 'in_work' | 'await' | 'ready' | 'mobile';
+type ListTypes = 'in_work' | 'await' | 'ready';
 
 type UpdatedCards = Record<ListTypes, EqCardType>;
 
@@ -44,9 +43,19 @@ export const fetchEqUpdCard = createAsyncThunk<UpdatedCards, fetchEqUpdateCardPr
                     }
                 });
             } else {
-                response = await extra.api.post<UpdatedCards>('/core/update_card/', {
-                    ...params,
-                });
+                const {series_id, action, numbers, ...otherParams} = params;
+                response = await extra.api.post<UpdatedCards>('/core/update_card/',
+                    {
+                        series_id,
+                        action,
+                        numbers,
+                    },
+                    {
+                        params: {
+                            ...otherParams,
+                        }
+                    }
+                );
             }
 
             if (response.data) {

@@ -1,10 +1,11 @@
 from core.models import ProductionStep, OrderProduct
+from staff.models import Department
 
 
-def get_eq_card_count_data(order_product: OrderProduct, department_number: str):
+def get_eq_card_count_data(order_product: OrderProduct, department: Department):
     target_production_step = ProductionStep.objects.filter(
         product=order_product.product,
-        department__number=department_number
+        department=department
     )
 
     if target_production_step.exists():
@@ -15,7 +16,7 @@ def get_eq_card_count_data(order_product: OrderProduct, department_number: str):
         else:
             tariff = 0
 
-        queryset = order_product.assignments.filter(department__number=department_number)
+        queryset = order_product.assignments.filter(department=department)
         in_work_count = queryset.filter(status='in_work').count(),
 
         ready_count = queryset.filter(status='ready').count(),

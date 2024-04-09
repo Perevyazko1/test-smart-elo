@@ -1,1 +1,0 @@
-export {order_product, order_product_list} from './model/types/order_product';

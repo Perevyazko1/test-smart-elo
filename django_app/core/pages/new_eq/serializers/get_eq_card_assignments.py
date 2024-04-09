@@ -2,13 +2,7 @@ from core.models import OrderProduct
 from core.pages.assignments_page.serializers import AssignmentExtendedSerializer
 from core.pages.new_eq.services.get_eq_req_params import RequestParams
 from core.services.get_week_info import GetWeekInfo
-from staff.models import Employee
-
-
-def get_await_assignments(assignments):
-    return assignments.filter(
-        status="await",
-    ).distinct()
+from staff.models import Employee, Department
 
 
 def get_in_work_assignments(assignments, eq_params):
@@ -18,61 +12,72 @@ def get_in_work_assignments(assignments, eq_params):
 
     # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
     if eq_params.view_mode_key not in ['boss', 'unfinished']:
+        executor = eq_params.user
         assignments = assignments.filter(
-            executor__pin_code=eq_params.pin_code,
-        )
-    return assignments
-
-
-def get_ready_assignments(assignments, eq_params):
-    assignments = assignments.filter(
-        status="ready",
-    ).distinct()
-
-    # Если режим просмотра от конкретного пользователя, фильтруем список по пин-коду
-    if eq_params.view_mode_key not in ["boss", "unfinished"]:
-        assignments = assignments.filter(
-            executor__pin_code=eq_params.pin_code,
-        ).distinct()
-
-    # Фильтруем все списки по дате кроме режима недоделок
-    if not eq_params.view_mode_key == "unfinished":
-        week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
-        assignments = assignments.filter(
-            date_completion__gt=week_info.date_range[0],
-            date_completion__lte=week_info.date_range[1],
-        ).distinct()
-
-    return assignments
+            executor=executor,
+        )[:30]
+    return assignments[:30]
 
 
 def get_eq_card_assignments(eq_params: RequestParams, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
-    if eq_params.view_mode_key not in ['boss', 'unfinished', 'None', 'self']:
-        eq_params.pin_code = Employee.objects.get(id=eq_params.view_mode_key).pin_code
-
-    # Фильтруем наряды по отделу
-    assignments = order_product.assignments.filter(
-        department__number=eq_params.department_number
-    ).distinct()
+    if eq_params.view_mode_key not in ['boss', 'unfinished', 'self'] and eq_params.view_mode_key is not None:
+        eq_params.user = Employee.objects.get(id=eq_params.view_mode_key)
 
     match target_list:
         case 'await':
-            assignments = get_await_assignments(assignments)[:50]
+            if eq_params.view_mode_key == 'boss':
+                assignments = order_product.assignments.filter(
+                    department=eq_params.department,
+                    status='await'
+                )[:30]
+            elif eq_params.view_mode_key == 'unfinished':
+                assignments = order_product.assignments.filter(
+                    department=eq_params.department,
+                    status='await'
+                )[:30]
+            else:
+                assignments = order_product.assignments.filter(
+                    department=eq_params.department,
+                    status='await'
+                )[:30]
+            return AssignmentExtendedSerializer(assignments, many=True).data
         case 'in_work':
-            assignments = get_in_work_assignments(assignments, eq_params)[:50]
+            assignments = order_product.assignments.filter(
+                department=eq_params.department
+            ).distinct()
+            assignments = get_in_work_assignments(assignments, eq_params)
+            return AssignmentExtendedSerializer(assignments, many=True).data
 
         case 'ready':
-            assignments = get_ready_assignments(assignments, eq_params).order_by('-inspector')[:50]
+            # Режим просмотра личных нарядов или нарядов сотрудника
+            if eq_params.view_mode_key not in ["boss", "unfinished"]:
+                week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
+                assignments = order_product.assignments.filter(
+                    executor=eq_params.user,
+                    department=eq_params.department,
+                    status="ready",
+                    date_completion__gt=week_info.date_range[0],
+                    date_completion__lte=week_info.date_range[1],
+                ).distinct().order_by('-inspector')[:30]
+                return AssignmentExtendedSerializer(assignments, many=True).data
 
-        case 'mobile':
-            await_assignments = get_await_assignments(assignments).order_by('number')[:50]
-            in_work_assignments = get_in_work_assignments(assignments, eq_params).order_by('number')[:50]
-            ready_assignments = get_ready_assignments(assignments, eq_params).order_by('-inspector')[:50]
+            # Режим просмотра в режиме бригадира
+            elif eq_params.view_mode_key == "boss":
+                week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
+                assignments = order_product.assignments.filter(
+                    department=eq_params.department,
+                    status="ready",
+                    date_completion__gt=week_info.date_range[0],
+                    date_completion__lte=week_info.date_range[1],
+                ).distinct().order_by('-inspector')[:30]
+                return AssignmentExtendedSerializer(assignments, many=True).data
 
-            assignments = await_assignments.union(
-                in_work_assignments, ready_assignments
-            ).order_by('-inspector', 'number')
-
-    # TODO добавить возможность возвращать больший размер списка
-    return AssignmentExtendedSerializer(assignments, many=True).data
+            # Режим просмотра в режиме недоделок
+            else:
+                assignments = order_product.assignments.filter(
+                    department=eq_params.department,
+                    status="ready",
+                    inspector__isnull=True,
+                ).distinct().order_by('-inspector')[:30]
+                return AssignmentExtendedSerializer(assignments, many=True).data

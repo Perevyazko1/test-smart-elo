@@ -14,7 +14,7 @@ export const TestPage = memo(() => {
     const [showCanvas, setShowCanvas] = useState<boolean>(false);
 
     const btnClb = async () => {
-        const perm =  await Notification.requestPermission();
+        const perm = await Notification.requestPermission();
         console.log(perm)
         if (perm === 'granted') {
             new Notification('Приветики пистолетики');
@@ -26,9 +26,19 @@ export const TestPage = memo(() => {
         <QueryContext>
             <ModalProvider>
                 <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
-                    <div>
+                    <div data-bs-theme={'light'}>
                         <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}/>
-                        {/*<TestBody/>*/}
+                        <form method='POST' action='https://demo.paykeeper.ru/create/'
+                              className={'p-3 border border-2 rounded gap-2'}
+                        >
+                            Введите сумму оплаты:
+                            <input type='text' name='sum' value='100'/> <br/>
+                            Введите номер заказа:
+                            <input type='text' name='orderid' value='123456'/> <br/>
+                            Введите название услуги:
+                            <input type='text' name='service_name' value='Тестовая оплата'/> <br/>
+                            <input type='submit' value='Перейти к оплате'/>
+                        </form>
 
                         <Button
                             onClick={btnClb}

@@ -1,1 +1,0 @@
-export {order} from './model/type/order'

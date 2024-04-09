@@ -32,6 +32,7 @@ export const getAwaitListInfo = createSelector(
 );
 
 const selectInWorkList = (state: StateSchema) => state.eqPage?.inWorkList;
+
 export const getInWorkListInfo = createSelector(
     [selectInWorkList],
     (inWorkList: EqListData | undefined) => {
@@ -46,6 +47,7 @@ export const getInWorkListInfo = createSelector(
 );
 
 const selectReadyList = (state: StateSchema) => state.eqPage?.readyList;
+
 export const getReadyListInfo = createSelector(
     [selectReadyList],
     (readyList: EqListData | undefined) => {

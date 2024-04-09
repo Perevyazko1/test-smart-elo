@@ -12,25 +12,23 @@ from staff.models import Employee, Department, Audit, Transaction
 
 
 class UpdateAssignments:
-    def __init__(self, series_id, numbers, department_number, action, pin_code, view_mode):
+    def __init__(self, series_id, numbers, department, action, employee, view_mode):
         self.series_id: str = series_id
         self.numbers: list[int] = numbers
-        self.department_number: int = department_number
+        self.department: Department = department
         self.action: str = action
-        self.pin_code: str = pin_code
-        self.view_mode: int | None = view_mode
+        self.employee: Employee = employee
+        self.view_mode: str | None = view_mode
 
         self.notification_data: dict = {}
         self.order_product: OrderProduct | None = None
-        self.department: Department | None = None
         self.action_name: str = ''
         self.original_user: Employee | None = None
 
     def _check_pin_code_in_view_mode(self):
-        self.original_user = Employee.objects.get(pin_code=self.pin_code)
-        if self.view_mode not in ['self', 'boss', 'unfinished', 'None']:
-            self.pin_code = Employee.objects.get(id=self.view_mode).pin_code
-
+        self.original_user = self.employee
+        if self.view_mode not in ['self', 'boss', 'unfinished'] and self.view_mode is not None:
+            self.employee = Employee.objects.get(id=self.view_mode)
 
     def _update_target_numbers(self):
         """Изменение нарядов/поручений с переданным списком номеров"""
@@ -38,7 +36,7 @@ class UpdateAssignments:
             assignment = Assignment.objects.get(
                 number=number,
                 order_product__series_id=self.series_id,
-                department__number=self.department_number,
+                department=self.department,
             )
             match self.action:
                 case 'await_to_in_work':
@@ -49,10 +47,10 @@ class UpdateAssignments:
                             assignment.appointed_by_boss = True
 
                         assignment.status = 'in_work'
-                        assignment.executor = Employee.objects.get(pin_code=self.pin_code)
+                        assignment.executor = self.employee
                         assignment.appointment_date = datetime.datetime.now()
                         assignment.save()
-                        self.notification_data[self.department_number] = {
+                        self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
                         }
@@ -65,7 +63,7 @@ class UpdateAssignments:
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
-                        self.notification_data[self.department_number] = {
+                        self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
                         }
@@ -78,7 +76,7 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
-                        self.notification_data[self.department_number] = {
+                        self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
                         }
@@ -94,7 +92,7 @@ class UpdateAssignments:
                         assignment.appointment_date = None
                         assignment.save()
 
-                        self.notification_data[self.department_number] = {
+                        self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
                         }
@@ -105,13 +103,13 @@ class UpdateAssignments:
                         self.action_name = 'Подтвердил готовность'
 
                         if self.original_user:
-                            inspector_pin_code = self.original_user.pin_code
+                            inspector = self.original_user
                         else:
-                            inspector_pin_code = self.pin_code
+                            inspector = self.employee
 
-                        assignment.inspector = Employee.objects.get(pin_code=inspector_pin_code)
+                        assignment.inspector = inspector
                         assignment.save()
-                        self.notification_data[self.department_number] = {
+                        self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
                         }
@@ -229,8 +227,6 @@ class UpdateAssignments:
 
     def _activate_assignments(self):
         """Делаем проверку готовности в других отделах и активируем нужное количество нарядов"""
-        self.department = Department.objects.get(number=self.department_number)
-
         next_steps = ProductionStep.objects.get(
             product=self.order_product.product,
             department=self.department
@@ -283,7 +279,7 @@ class UpdateAssignments:
         self.order_product = OrderProduct.objects.get(series_id=self.series_id)
 
         """Проверяем условие, что происходит подтверждение в отделе конструкторов и тех-процесс выбран"""
-        if self.department_number in [1, '1'] and self.order_product.product.technological_process is not None:
+        if self.department.number == 1 and self.order_product.product.technological_process is not None:
             self._set_technological_process_confirmed()
             self._delete_constructor_relations()
             self._init_production_step_schema()
@@ -297,22 +293,20 @@ class UpdateAssignments:
 
         result = ''
 
-        if self.view_mode == 1:
+        if self.view_mode == 'boss':
             result += 'В режиме бригадира'
-        if len(str(self.view_mode)) == 6:
-            view_mode_user = Employee.objects.get(pin_code=self.pin_code)
-            result += f'В режиме, от имени пользователя ' \
-                      f'{view_mode_user.first_name} {view_mode_user.last_name}'
+        if not self.original_user == self.employee:
+            result += f'В режиме "От имени сотрудника" ' \
+                      f'{self.employee.first_name} {self.employee.last_name}'
         result += f' {self.action_name} изделия под номерами: {self.numbers}.'
         result += f'Номер серии: {order_product.series_id}. Изделие: {order_product.product.name}'
         return result
 
     def _tariffication_instruction(self):
         for assignment_number in self.numbers:
-            department = Department.objects.get(number=self.department_number)
             target_assignment = Assignment.objects.get(
                 number=assignment_number,
-                department=department,
+                department=self.department,
                 order_product=self.order_product
             )
             if target_assignment.tariff:
@@ -341,12 +335,11 @@ class UpdateAssignments:
         """В случае если происходит подтверждение наряда создаем связанные наряды"""
         if self.action == "confirmed":
             self._confirmation_instructions()
-            department = Department.objects.get(number=self.department_number)
-            if department.piecework_wages:
+            if self.department.piecework_wages:
                 self._tariffication_instruction()
 
         Audit.objects.create(
-            employee=self.original_user or Employee.objects.get(pin_code=self.pin_code),
+            employee=self.original_user or self.employee,
             details=self._get_audit_details()
         )
 
