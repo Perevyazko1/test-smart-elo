@@ -75,8 +75,8 @@ class EqCardSerializer(serializers.ModelSerializer):
         production_step = ProductionStep.objects.filter(
             product=obj.product,
             department=eq_params.department
-        ).exists()
-        if production_step:
+        )
+        if production_step.exists():
             return production_step.next_step.all().filter(
                 department__name="Упаковка"
             ).exists()
