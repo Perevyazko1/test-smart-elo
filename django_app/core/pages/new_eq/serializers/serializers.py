@@ -77,7 +77,7 @@ class EqCardSerializer(serializers.ModelSerializer):
             department=eq_params.department
         )
         if production_step.exists():
-            return production_step.next_step.all().filter(
+            return production_step.first().next_step.all().filter(
                 department__name="Упаковка"
             ).exists()
         else:
