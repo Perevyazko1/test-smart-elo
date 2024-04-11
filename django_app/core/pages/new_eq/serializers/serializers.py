@@ -72,10 +72,10 @@ class EqCardSerializer(serializers.ModelSerializer):
 
     def get_further_packaging(self, obj: OrderProduct):
         eq_params: RequestParams = self.context.get('eq_params')
-        return ProductionStep.objects.get(
+        return ProductionStep.objects.filter(
             product=obj.product,
             department=eq_params.department
-        ).next_step.all().filter(
+        ).first().next_step.all().filter(
             department__name="Упаковка"
         ).exists()
 
