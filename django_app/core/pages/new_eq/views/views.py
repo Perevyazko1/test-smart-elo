@@ -89,7 +89,6 @@ def get_week_data(request):
         eq_params.user = Employee.objects.get(id=eq_params.view_mode_key)
 
     week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
-
     earned = Assignment.objects.filter(
         executor=eq_params.user,
         department=eq_params.department,
@@ -110,6 +109,7 @@ def get_week_data(request):
     if transactions_sum:
         week_info.earned += f' + {int(transactions_sum)}(доп)'
 
+    print(week_info)
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
 

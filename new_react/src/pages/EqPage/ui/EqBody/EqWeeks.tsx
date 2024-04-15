@@ -5,7 +5,7 @@ import {ConnectDragSource} from "react-dnd";
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 
-import {getWeekData} from "../../model/selectors/filterSelectors";
+import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
 
 interface EqWeeksProps {
@@ -20,6 +20,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
+    const filtersReady = useAppSelector(eqFiltersReady);
 
     const {blockWidthPx, isDragging, showClb, drag, resetSize} = props;
     const isDesktop = useContext(IsDesktopContext);
@@ -27,13 +28,24 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const weekData = useAppSelector(getWeekData);
 
     useEffect(() => {
-        if (weekData?.hasUpdated !== undefined) {
+        console.log('Сработал useEffect')
+        if (weekData?.hasUpdated !== undefined && filtersReady) {
+            console.log('Пошел запрос недель')
             dispatch(fetchWeekData({
                 department_id: currentUser.current_department.id,
                 ...queryParameters
             }))
         }
-    }, [dispatch, queryParameters, weekData?.hasUpdated, currentUser.current_department]);
+        // eslint-disable-next-line
+    }, [
+        dispatch,
+        filtersReady,
+        queryParameters.week,
+        queryParameters.project,
+        queryParameters.view_mode,
+        weekData?.hasUpdated,
+        currentUser.current_department
+    ]);
 
     const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned])
 

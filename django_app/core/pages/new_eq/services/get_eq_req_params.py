@@ -24,6 +24,6 @@ def get_eq_req_params(request) -> RequestParams | None:
         view_mode_key=request.query_params.get("view_mode"),
         project_filter=request.query_params.get("project"),
         department=department,
-        week=request.data.get("week"),
-        year=request.data.get("year"),
+        week=request.query_params.get("week"),
+        year=request.query_params.get("year"),
     )
