@@ -7,34 +7,18 @@ from staff.models import Employee
 def get_filtered_await_queryset(queryset, eq_params):
     # Фильтр при включенном режима бригадира
     if eq_params.view_mode_key == 'boss':
-        # Извлекаем все не закрытые серии производства
-        queryset = queryset.filter(
-            status="0",
-            assignments__status__in=['await', 'in_work'],
-            assignments__department=eq_params.department
-        ).distinct()
-
-        # Если запрос не от конструкторов - фильтруем по наличию отдела в схеме производства
-        if not eq_params.department.number == 1:
+        if eq_params.department.number == 1:
             queryset = queryset.filter(
-                product__technological_process__schema__icontains=eq_params.department.name,
-            ).distinct()
-        # Для конструкторов фильтруем по отсутствию подтвержденного технологического процесса
-        else:
-            queryset = queryset.filter(
+                status="0",
                 product__technological_process_confirmed__isnull=True
             ).distinct()
-
-        # Отфильтровываем изделия которые уже отработаны отделом
-        for order_product in queryset:
-            assignments_count = Assignment.objects.filter(
-                order_product=order_product,
-                department=eq_params.department,
-                status='ready'
-            ).count()
-
-            if (eq_params.department.single and assignments_count) or (order_product.quantity == assignments_count):
-                queryset = queryset.exclude(series_id=order_product.series_id)
+        else:
+            # Извлекаем все не закрытые серии производства
+            queryset = queryset.filter(
+                status="0",
+                assignments__status__in=['await', 'in_work', 'created'],
+                assignments__department=eq_params.department
+            ).distinct()
 
     # Фильтр при включенном режима недоделки
     elif eq_params.view_mode_key == 'unfinished':
@@ -61,6 +45,7 @@ def get_filtered_await_queryset(queryset, eq_params):
                 queryset = queryset.exclude(series_id=order_product.series_id)
     else:
         queryset = queryset.filter(
+            status="0",
             assignments__status__in=['await', 'in_work'],
             assignments__department=eq_params.department
         ).distinct()
@@ -75,6 +60,7 @@ def get_filtered_in_work_queryset(queryset, eq_params):
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
     if eq_params.view_mode_key not in ['boss', 'unfinished']:
         queryset = queryset.filter(
+            status="0",
             assignments__executor=eq_params.user,
             assignments__department=eq_params.department,
             assignments__status='in_work',
@@ -83,6 +69,7 @@ def get_filtered_in_work_queryset(queryset, eq_params):
     # В режиме бригадира и недоделок получаем все изделия отдела в статусе в работе
     if eq_params.view_mode_key in ["boss", "unfinished"]:
         queryset = queryset.filter(
+            status="0",
             assignments__department=eq_params.department,
             assignments__status='in_work',
         ).distinct()
