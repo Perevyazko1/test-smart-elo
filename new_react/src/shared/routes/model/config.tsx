@@ -10,6 +10,8 @@ import {ProductPage} from "@pages/ProductPage";
 import {TariffPage} from "@pages/TariffPage";
 import {WagesPage} from "@pages/WagesPage";
 import { ProductDetailsPage } from "@pages/ProductDetailsPage";
+import {OrdersPage} from "@pages/OrdersPage";
+import {OrderDetailPage} from "@pages/OrderDetailPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -29,6 +31,8 @@ enum AppRoutes {
     PRODUCT_DETAILS = 'product_detail',
     TARIFFS = 'tariff',
     WAGES = 'wages',
+    SPECIFICATIONS = 'specifications',
+    ORDER_DETAILS = 'order_details',
 }
 
 export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
@@ -66,6 +70,20 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         mobile: false,
         navigate: true,
         permissions: [APP_PERM.WAGES_PAGE]
+    },
+    [AppRoutes.SPECIFICATIONS]: {
+        route: {path: '/orders', element: <OrdersPage/>, errorElement: <ErrorPage/>},
+        name: 'Заказы',
+        mobile: false,
+        navigate: true,
+        permissions: [APP_PERM.SPECIFICATIONS_PAGE]
+    },
+    [AppRoutes.ORDER_DETAILS]: {
+        route: {path: '/orders/:order_id', element: <OrderDetailPage/>, errorElement: <ErrorPage/>},
+        name: 'Информация по заказу',
+        mobile: false,
+        navigate: false,
+        permissions: [APP_PERM.SPECIFICATIONS_PAGE]
     },
     [AppRoutes.PRODUCT]: {
         route: {path: '/product', element: <ProductPage/>, errorElement: <ErrorPage/>},

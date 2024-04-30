@@ -1,8 +1,9 @@
+"""Core admin panel. """
 from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from core.models import Product, ProductPicture, Fabric, Order, OrderProduct, Assignment, ProductionStep, \
-    TechnologicalProcess, ProductionStepTariff
+    TechnologicalProcess, ProductionStepTariff, OrderProductComment
 
 
 @admin.register(Product)
@@ -101,3 +102,4 @@ class ProductionStepAdmin(admin.ModelAdmin):
 
 admin.site.register(ProductionStepTariff)
 admin.site.register(Fabric)
+admin.site.register(OrderProductComment)

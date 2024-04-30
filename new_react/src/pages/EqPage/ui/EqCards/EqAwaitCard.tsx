@@ -17,6 +17,7 @@ import {eqPageActions} from "../../model/slice/eqPageSlice";
 import {EqCardBtn} from "./EqCardBtn";
 import {EqNumbers} from "./EqNumbers";
 import {EqInfo} from "../EqInfo/EqInfo";
+import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -202,7 +203,11 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
                          backgroundColor: currentUser.current_department.color || "#ffffff"
                      }}
                 >
-                    <div className={'fs-7 fw-bold text-center'}>
+                    <div className={'fs-7 fw-bold text-center'}
+                         onClick={() => openModal(
+                             <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
+                         )}
+                    >
                         Заказ:
                         <br/>
                         {card.series_id}

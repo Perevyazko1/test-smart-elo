@@ -27,6 +27,7 @@ class OrderEntity:
     comment_base: str
     comment_case: str
     products_info: list[ProductInfo]
+    link: str
 
 
 @dataclass
@@ -97,7 +98,8 @@ class OrderAdapter:
             urgency=self._get_urgency("Срочность", order),
             comment_base=self._get_target_attribute_value("Коммент. (каркас):", order),
             comment_case=self._get_target_attribute_value("Коммент. (чехол):", order),
-            products_info=self._get_products_info(order)
+            products_info=self._get_products_info(order),
+            link=self._get_target_attribute_value("Ссылка на спец-ю:", order),
         )
 
     def execute(self, order_data: dict) -> Iterable[OrderEntity]:

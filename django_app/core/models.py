@@ -177,6 +177,8 @@ class Order(models.Model):
     comment_base = models.TextField('Коммент. (каркас):', blank=True)
     comment_case = models.TextField('Коммент. (чехол):', blank=True)
 
+    # TODO Сделать статус заказа
+
     def __str__(self):
         return '{}'.format(f'{self.number} {self.project}')
 
@@ -228,12 +230,26 @@ class OrderProduct(models.Model):
     # Индивидуальное назначение срочности производства
     urgency = models.SmallIntegerField('Срочность', default=3)
 
-    # Индивидуальные комментарии каркас/чехол
-    comment_base = models.TextField('Коммент. (каркас):', blank=True)
-    comment_case = models.TextField('Коммент. (чехол):', blank=True)
-
     def __str__(self):
         return '{}'.format(f'{self.series_id}: {self.product.name_internal} - {self.status}')
+
+
+class OrderProductComment(models.Model):
+    """Комментарий к позиции производства. """
+    class Meta:
+        verbose_name = 'Комментарий к ПЗ'
+        verbose_name_plural = 'Комментарии к ПЗ'
+        ordering = ['id']
+
+    author = models.ForeignKey(Employee, verbose_name='Автор', on_delete=models.CASCADE)
+    order_product = models.ForeignKey(OrderProduct, verbose_name='Позиция заказа', on_delete=models.CASCADE)
+    important = models.BooleanField('Важное', default=False)
+    add_date = models.DateTimeField('Дата добавления', auto_now_add=True, blank=True)
+    deleted = models.BooleanField('Удалено', default=False)
+    text = models.CharField('Комментарий', max_length=255)
+
+    def __str__(self):
+        return '{}'.format(f'{self.author}: {self.order_product.series_id} - {self.text[:50]}')
 
 
 class ProductionStepTariff(models.Model):

@@ -13,6 +13,15 @@ from ..network.get_product_data import GetProductData
 from ..network.get_variant_data import GetVariantData
 
 
+import json
+
+from ..network.set_eq_link_in_order import set_eq_link_in_order
+
+
+def nice_json(data):
+    print(json.dumps(data, indent=4, ensure_ascii=False))
+
+
 class ImportOrders:
     @staticmethod
     def get_product_entity_from_product_info(product_info: ProductInfo) -> ProductEntity:
@@ -30,8 +39,11 @@ class ImportOrders:
         """Импорт данных с моего склада и формирование данных"""
         order_data: dict = GetOrdersData().execute()
         order_entities: Iterable[OrderEntity] = OrderAdapter().execute(order_data)
+
         for order_entity in order_entities:
-            order_entities_to_db(order_entity)
+            order = order_entities_to_db(order_entity)
+            if not order_entity.link:
+                set_eq_link_in_order(order_entity.order_id, str(order.id))
 
             """Формирование и сохранение товаров и тканей"""
             for product_info in order_entity.products_info:

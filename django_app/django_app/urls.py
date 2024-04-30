@@ -1,3 +1,4 @@
+"""Project urls. """
 from django.conf import settings
 from django.contrib import admin
 from django.http import JsonResponse
@@ -7,7 +8,8 @@ from django.views.static import serve
 from django_app.init_data.init_data import init_data
 
 
-def init_app_data(request):
+def init_app_data():
+    """Init app data func. """
     init_data()
 
     return JsonResponse({"result": 'inited'})

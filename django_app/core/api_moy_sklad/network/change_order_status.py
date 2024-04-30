@@ -10,7 +10,7 @@ def change_order_status(order_id: str):
     data = {
         "state": {
             "meta": READY_ORDER_METADATA
-        }
+        },
     }
     req = requests.put(url, headers=POST_AUTH, data=json.dumps(data))
 

@@ -25,7 +25,7 @@ POST_AUTH = {**GET_AUTH, **CONT_TYPE}
 
 # Список целевых статусов для импорта заказов
 ORDER_FILTER_LIST = [
-    os.getenv('TARGET_API_STATUS', "state.name=В производстве | ЭЛО"),
+    os.getenv('TARGET_API_STATUS', "Тест"),
     # 'state.name=В пр-ве | Ожидает',
     # 'state.name=В пр-ве | Пила / Пошив',
     # 'state.name=В пр-ве | Пила / Сшит',

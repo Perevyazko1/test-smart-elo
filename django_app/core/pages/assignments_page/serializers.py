@@ -1,3 +1,4 @@
+"""Assignments serializers. """
 from rest_framework import serializers
 
 from core.models import Assignment
@@ -13,6 +14,7 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
     tariff = ProductionStepTariffSerializer()
 
     class Meta:
+        """Meta. """
         model = Assignment
         fields = [
             'id',

@@ -17,8 +17,6 @@ class OrderProductEntityToDB:
                 'quantity': order_product_entity.quantity,
                 'price': order_product_entity.price,
                 'urgency': order_product_entity.urgency,
-                'comment_base': order_product_entity.comment_base,
-                'comment_case': order_product_entity.comment_case,
             }
         )
 

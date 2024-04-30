@@ -18,6 +18,7 @@ import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
 import {eqPageActions} from "@pages/EqPage";
 import {APP_PERM} from "@shared/consts";
 import {AssignmentInfo} from "@widgets/AssignmentInfo";
+import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
 
 interface EqReadyCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -201,7 +202,11 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
                         {card.series_id}
                         <hr className={'m-0 p-0'}/>
                     </div>
-                    <div className={'fs-7 text-center'}>
+                    <div className={'fs-7 text-center'}
+                         onClick={() => openModal(
+                             <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
+                         )}
+                    >
                         Проект:
                         <br/>
                         {card.order.project}

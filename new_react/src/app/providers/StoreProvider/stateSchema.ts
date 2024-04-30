@@ -5,16 +5,20 @@ import {EqPageSchema} from "@pages/EqPage";
 import {AssignmentSchema} from "@pages/AssignmentPage";
 import {ProductsSchema} from "@pages/ProductPage";
 import {TariffPageSchema} from "@pages/TariffPage";
-
-import {rtkAPI} from "@shared/api";
-import {AuditWidgetSchema} from "@widgets/UserActions";
 import {ProductDetailsSchema} from "@pages/ProductDetailsPage";
+import {OrdersPageSchema} from "@pages/OrdersPage";
+
+import {AuditWidgetSchema} from "@widgets/UserActions";
+import {OrderDetailsSchema} from "@widgets/OrderDetailWidget";
+import {rtkAPI} from "@shared/api";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
     eqPage?: EqPageSchema;
+    orderDetail?: OrderDetailsSchema;
+    orders?: OrdersPageSchema;
     assignments?: AssignmentSchema;
     products?: ProductsSchema;
     tariffs?: TariffPageSchema;

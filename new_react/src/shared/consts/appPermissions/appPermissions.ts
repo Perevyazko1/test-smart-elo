@@ -22,5 +22,7 @@ export enum APP_PERM {
 
     PRODUCT_PAGE = 'Страница товаров',
 
+    SPECIFICATIONS_PAGE = 'Страница спецификаций',
+
     CHANGE_TECH_PROCESS = 'Изменение техпроцессов',
 }

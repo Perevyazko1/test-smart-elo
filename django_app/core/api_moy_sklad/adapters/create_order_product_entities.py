@@ -17,8 +17,6 @@ class OrderProductEntity:
     quantity: int = 1
     price: Decimal = Decimal(0.00)
     urgency: int = DEFAULT_URGENCY_LEVEL
-    comment_base: str = ''
-    comment_case: str = ''
 
 
 class CreateOrderProductEntities:
@@ -28,8 +26,6 @@ class CreateOrderProductEntities:
         return OrderProductEntity(
             order_id=order_entity.order_id,
             urgency=order_entity.urgency,
-            comment_base=order_entity.comment_base,
-            comment_case=order_entity.comment_case,
         )
 
     @staticmethod

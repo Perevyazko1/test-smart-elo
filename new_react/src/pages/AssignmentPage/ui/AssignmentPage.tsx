@@ -100,7 +100,7 @@ export const AssignmentPage = () => {
     // Инициализируем параметры при загрузке страницы и запрашиваем данные
     useEffect(() => {
         if (!initialLoad) {
-            setLimitOffset({limit: paginationSize, offset: 0})
+            setLimitOffset({limit: paginationSize, offset: 0});
             getAssignments(false, paginationSize, 0);
             dispatch(assignmentPageActions.listHasUpdated());
         }

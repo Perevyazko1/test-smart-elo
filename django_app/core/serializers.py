@@ -175,6 +175,4 @@ class OrderProductSerializer(serializers.ModelSerializer):
             'quantity',
             'price',
             'urgency',
-            'comment_base',
-            'comment_case',
         ]
