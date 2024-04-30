@@ -146,6 +146,9 @@ class OrderPageDetailsSerializer(serializers.ModelSerializer):
 
         total_departments = Department.objects.all().exclude(single=True).exclude(number__in=[0, 50]).count()
 
+        if not total_product_count:
+            total_product_count = 0
+
         assignments_qs = Assignment.objects.filter(
             order_product__order=obj
         ).exclude(department__single=True)
