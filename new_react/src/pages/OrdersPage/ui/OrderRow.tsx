@@ -21,10 +21,17 @@ export const OrderRow = (props: { order: OrderItem }) => {
                     {props.order.number}
                 </Link>
             </td>
-            <td>#</td>
+            <td>{props.order.inner_number}</td>
             <td>{props.order.urgency}</td>
             <td>{props.order.project}</td>
-            <td>#</td>
+            <td>
+                {
+                    props.order.status === "0" ?
+                        "В работе"
+                        :
+                        "Завершен"
+                }
+            </td>
             <td>{props.order.planned_date}</td>
         </tr>
     );

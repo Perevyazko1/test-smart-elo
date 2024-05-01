@@ -3,6 +3,7 @@ import {createSlice} from "@reduxjs/toolkit";
 import {OrderDetailsSchema} from "../types";
 import {fetchOrderDetail} from "../api/fetchOrderDetail";
 import {fetchAddComment} from "../api/fetchAddComment";
+import {fetchEditComment} from "@widgets/OrderDetailWidget/model/api/fetchEditComment";
 
 
 export const initialState: OrderDetailsSchema = {
@@ -54,6 +55,28 @@ const orderDetailSlice = createSlice({
                 state.isLoading = false;
             })
             .addCase(fetchAddComment.rejected, (state) => {
+                state.isLoading = false;
+            })
+
+            .addCase(fetchEditComment.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchEditComment.fulfilled, (state, action) => {
+                const orderProducts = state.data?.order_products;
+                const data = orderProducts?.filter(op => op.id !== action.meta.arg.op_id);
+                const newOrderProducts = [];
+                data && newOrderProducts.push(...data);
+                newOrderProducts.push(action.payload);
+                newOrderProducts.sort(
+                    (a, b) => a.id - b.id
+                );
+
+                if (state.data) {
+                    state.data.order_products = newOrderProducts;
+                }
+                state.isLoading = false;
+            })
+            .addCase(fetchEditComment.rejected, (state) => {
                 state.isLoading = false;
             })
     },

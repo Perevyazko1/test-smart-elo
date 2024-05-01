@@ -16,6 +16,8 @@ def order_entities_to_db(order_entity: OrderEntity):
                 "planned_date": order_entity.planned_date,
                 "comment_case": order_entity.comment_case,
                 "comment_base": order_entity.comment_base,
+                "status": order_entity.status,
+                "inner_number": order_entity.inner_number,
             }
         )[0]
     except Exception as e:

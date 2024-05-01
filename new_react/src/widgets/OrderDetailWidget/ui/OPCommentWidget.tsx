@@ -34,7 +34,7 @@ export const OpCommentWidget = (props: OpCommentWidgetProps) => {
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
             />
-            <Button size={"sm"} disabled={!comment} onClick={addComment}>
+            <Button size={"sm"} className={'mb-2'} disabled={!comment} variant={'dark'} onClick={addComment}>
                 Оставить комментарий
             </Button>
         </div>

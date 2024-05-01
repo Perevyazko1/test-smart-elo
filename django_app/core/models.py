@@ -162,6 +162,11 @@ class Order(models.Model):
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
 
+    STATUS_CHOICES = [
+        ("0", "В работе"),
+        ("1", "Изготовлен"),
+    ]
+
     order_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     # Номер заказа берется из учетной системы
     number = models.CharField('Номер заказа', max_length=30, blank=True, unique=True)
@@ -173,11 +178,13 @@ class Order(models.Model):
     # Градация срочности от 1 до 4, где 1 очень срочный/горящий
     urgency = models.SmallIntegerField('Срочность', default=3)
 
+    inner_number = models.CharField('Вх. заказ (№):', max_length=250, blank=True)
+
     # Общие комментарии по базе (каркасу) и чехлу
     comment_base = models.TextField('Коммент. (каркас):', blank=True)
     comment_case = models.TextField('Коммент. (чехол):', blank=True)
 
-    # TODO Сделать статус заказа
+    status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="0")
 
     def __str__(self):
         return '{}'.format(f'{self.number} {self.project}')
@@ -239,7 +246,7 @@ class OrderProductComment(models.Model):
     class Meta:
         verbose_name = 'Комментарий к ПЗ'
         verbose_name_plural = 'Комментарии к ПЗ'
-        ordering = ['id']
+        ordering = ['-important', '-add_date']
 
     author = models.ForeignKey(Employee, verbose_name='Автор', on_delete=models.CASCADE)
     order_product = models.ForeignKey(OrderProduct, verbose_name='Позиция заказа', on_delete=models.CASCADE)

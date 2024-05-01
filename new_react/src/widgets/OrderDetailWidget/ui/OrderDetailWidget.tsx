@@ -10,6 +10,7 @@ import {fetchOrderDetail} from "../model/api/fetchOrderDetail";
 
 import {OrderDetailPosition} from "./OrderDetailPosition";
 import {AppSkeleton} from "@shared/ui";
+import {getHumansDatetime} from "@shared/lib";
 
 
 const initialReducers: ReducersList = {
@@ -85,7 +86,12 @@ export const OrderDetailWidget = (props: OrderDetailWidgetProps) => {
                             </tr>
                             <tr>
                                 <td>Вх. заказ (№)</td>
-                                <td>#</td>
+                                <td>{orderData.inner_number}</td>
+                            </tr>
+
+                            <tr>
+                                <td>План дата отгрузки</td>
+                                <td>{getHumansDatetime(orderData.planned_date)}</td>
                             </tr>
                             <tr>
                                 <td>Проект</td>
@@ -125,6 +131,9 @@ export const OrderDetailWidget = (props: OrderDetailWidgetProps) => {
                             </tbody>
                             :
                             <tbody>
+                            <tr>
+                                <td colSpan={2}><AppSkeleton/></td>
+                            </tr>
                             <tr>
                                 <td colSpan={2}><AppSkeleton/></td>
                             </tr>

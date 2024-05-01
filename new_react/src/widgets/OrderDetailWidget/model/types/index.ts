@@ -14,6 +14,8 @@ export interface OrderItem {
     project: string;
     planned_date: string;
     urgency: number;
+    inner_number: string;
+    status: string;
 }
 
 

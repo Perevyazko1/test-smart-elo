@@ -9,6 +9,7 @@ import {GET_STATIC_URL} from "@shared/consts";
 
 import {OpComment, OrderProduct} from "../model/types";
 import {ProgressItem} from "./ProgressItem";
+import {OpCommentRow} from "@widgets/OrderDetailWidget/ui/OPComment";
 
 
 export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
@@ -24,10 +25,7 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
         }
     }, [openDepInfo, orderProduct.departments_info]);
 
-    const getCommentFormatedText = (comment: OpComment) => {
-        return `${comment.author.last_name} ${comment.author.first_name?.slice(0, 1)}. 
-        ${getHumansDatetime(comment.add_date)}: ${comment.text}`
-    }
+
 
     return (
         <Table striped bordered hover size="sm" id={`order-product-id-${orderProduct.id}`}>
@@ -117,12 +115,7 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
                 <td>Комментарии к изделию:</td>
                 <td colSpan={3}>
                     {orderProduct.op_comments.map(comment => (
-                        <div key={comment.id}>
-                            <p className={'m-1 p-0'}>
-                                {getCommentFormatedText(comment)}
-                            </p>
-                            <hr className={'m-1 p-0'}/>
-                        </div>
+                        <OpCommentRow comment={comment} key={comment.id}/>
                     ))}
 
                     <OpCommentWidget series_id={orderProduct.series_id}/>

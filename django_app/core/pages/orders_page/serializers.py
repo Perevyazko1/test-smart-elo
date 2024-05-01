@@ -25,6 +25,8 @@ class OrderPageListSerializer(serializers.ModelSerializer):
             'project',
             'planned_date',
             'urgency',
+            'inner_number',
+            'status',
         ]
 
 
@@ -70,7 +72,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
         """Get order product comments. """
         qs = OrderProductComment.objects.filter(
             order_product=obj,
-        ).order_by('important', 'add_date')
+        )
         return OrderProductCommentSerializer(qs, many=True).data
 
     def get_product_name(self, obj: OrderProduct):
@@ -121,6 +123,8 @@ class OrderPageDetailsSerializer(serializers.ModelSerializer):
             'urgency',
             'comment_base',
             'comment_case',
+            'inner_number',
+            'status',
             'order_products',
             'order_ready_info',
         ]
@@ -158,4 +162,3 @@ class OrderPageDetailsSerializer(serializers.ModelSerializer):
             "all": assignments_qs.count() + (total_product_count * total_departments),
             "ready": assignments_qs.filter(inspector__isnull=False).count(),
         }
-
