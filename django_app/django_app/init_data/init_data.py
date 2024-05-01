@@ -8,7 +8,8 @@ def init_data():
 
     for order in orders_sq:
         order_products_active_exists = OrderProduct.objects.filter(
-            status="0"
+            order=order,
+            status="0",
         ).exists()
         if not order_products_active_exists:
             order.status = "1"
