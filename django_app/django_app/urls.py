@@ -4,11 +4,13 @@ from django.contrib import admin
 from django.http import JsonResponse
 from django.urls import path, include, re_path
 from django.views.static import serve
+from rest_framework.decorators import api_view
 
 from django_app.init_data.init_data import init_data
 
 
-def init_app_data():
+@api_view(['GET'])
+def init_app_data(request):
     """Init app data func. """
     init_data()
 
