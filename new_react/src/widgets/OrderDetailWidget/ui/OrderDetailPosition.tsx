@@ -3,13 +3,13 @@ import {Table} from "react-bootstrap";
 
 import altLogo from "./products.png";
 
-import {OpCommentWidget} from "@widgets/OrderDetailWidget/ui/OPCommentWidget";
-import {getHumansDatetime} from "@shared/lib";
 import {GET_STATIC_URL} from "@shared/consts";
 
-import {OpComment, OrderProduct} from "../model/types";
+import {OrderProduct} from "../model/types";
+
+import {OpCommentWidget} from "./OPCommentWidget";
 import {ProgressItem} from "./ProgressItem";
-import {OpCommentRow} from "@widgets/OrderDetailWidget/ui/OPComment";
+import {OpCommentRow} from "./OPComment";
 
 
 export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
