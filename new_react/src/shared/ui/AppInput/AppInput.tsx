@@ -16,7 +16,6 @@ export const AppInput = (props: InputProps) => {
 
     return (
         <input
-            // style={{maxHeight: '35px', height: '30px'}}
             className={"form-control fw-bold form-control-sm my-auto"}
             {...otherProps}
         >

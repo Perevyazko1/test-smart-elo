@@ -1,10 +1,14 @@
-import {Button, Offcanvas} from "react-bootstrap";
 import {memo, ReactNode, useContext, useMemo} from "react";
+import {Button, Offcanvas} from "react-bootstrap";
+import {useNavigate} from "react-router-dom";
 
 import {IsDesktopContext} from "@app";
-import Logo from '@shared/assets/images/SZMK Logo White Horizontal 900х352.png';
 import {AppNavigation} from "@widgets/AppNavigation";
-import {useNavigate} from "react-router-dom";
+import {NotificationWidget} from "@widgets/NotificationWidget";
+
+import Logo from '@shared/assets/images/SZMK Logo White Horizontal 900х352.png';
+import {IndicatorWrapper} from "@shared/ui";
+import {useAppModal} from "@shared/hooks";
 
 interface AppNavbarProps {
     showNav: boolean;
@@ -15,8 +19,15 @@ interface AppNavbarProps {
 export const AppNavbar = memo((props: AppNavbarProps) => {
     const {showNav, closeClb, children} = props;
     const isDesktop = useContext(IsDesktopContext);
+    const {openModal} = useAppModal();
 
     let navigate = useNavigate();
+
+    const notificationHandler = () => {
+        openModal(
+            <NotificationWidget/>
+        )
+    }
 
     const backHandler = () => {
         navigate(-1);
@@ -53,7 +64,15 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                             </div>
                         </div>
 
-                        <div>
+                        <div className={'d-flex align-items-center'}>
+                            <Button variant={'black'}
+                                    onClick={notificationHandler}
+                            >
+                                <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
+                                    <i className="far fa-bell"/>
+                                </IndicatorWrapper>
+                            </Button>
+
                             <AppNavigation isDesktop={isDesktop}/>
                         </div>
                     </div>

@@ -92,7 +92,8 @@ class OrderProductSerializer(serializers.ModelSerializer):
         """Get departments info. """
         result = {}
         production_steps = ProductionStep.objects.filter(
-            product=obj.product
+            product=obj.product,
+            is_active=True,
         ).exclude(
             department__name__in=["Старт", "Готово"]
         )

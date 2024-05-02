@@ -18,6 +18,8 @@ import {EqCardBtn} from "./EqCardBtn";
 import {EqNumbers} from "./EqNumbers";
 import {EqInfo} from "../EqInfo/EqInfo";
 import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
+import {Button} from "react-bootstrap";
+import {TarifficationWidget} from "@widgets/TarifficationWidget";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -185,6 +187,14 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
                 <div className={cls.nameNumberBlock + ' bg-light rounded'}>
                     <div className={cls.productName}>
                         {card.further_packaging && "📦"}
+                        <Button size={"sm"}
+                                className={'p-0 px-1 me-1 fs-7'}
+                                variant={'outline-danger'}
+                                style={{marginTop: '0.15rem'}}
+                                onClick={() => openModal(<TarifficationWidget/>)}
+                        >
+                            Тарифицировать
+                        </Button>
                         {card.product.name}
                     </div>
 

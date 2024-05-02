@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
-from staff.models import Employee, Audit
+from staff.models import Employee, Audit, Department
 from .consumers import ws_group_updates, EqNotificationActions
 from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
 from .serializers import TechProcessSerializer
@@ -44,12 +44,13 @@ def get_project_filters(request):
 @api_view(['GET'])
 def get_op_dep_info(request):
     series_id = request.query_params.get('series_id')
-    department_number = request.query_params.get('department_number')
+    department_id = request.query_params.get('department_id')
 
+    department = Department.objects.get(id=department_id)
     order_product = OrderProduct.objects.get(series_id=series_id)
 
     employees = Employee.objects.filter(
-        departments__number=department_number
+        departments=department
     )
 
     department_info = []
@@ -58,7 +59,7 @@ def get_op_dep_info(request):
         employee_assignments = Assignment.objects.filter(
             order_product=order_product,
             executor=employee,
-            department__number=department_number,
+            department=department,
         )
         department_info.append(
             {
