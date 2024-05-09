@@ -6,6 +6,7 @@ import {useAppSelector, useFixedSizeList} from "@shared/hooks";
 import {getEqInWorkList, getInWorkListInfo} from "../../model/selectors/cardSelectors";
 import {useCardHeight} from "../../model/lib/useCardHeight";
 import {useFetchListData} from "../../model/lib/useFetchListData";
+
 import {EqInWorkCard} from "../EqCards/EqInWorkCard";
 
 interface EqInWorkSectionProps extends HTMLAttributes<HTMLDivElement> {

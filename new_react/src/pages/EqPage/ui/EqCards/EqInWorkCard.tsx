@@ -1,24 +1,19 @@
-import React, {HTMLAttributes, memo, useCallback, useEffect, useMemo, useState} from "react";
+import React, {HTMLAttributes, memo, useEffect, useMemo, useState} from "react";
 
-import cls from "./EqCard.module.scss";
-
-import {useAppDispatch, useAppModal, useAppQuery, useCompactMode, useCurrentUser, usePermission} from "@shared/hooks";
-import {AppSlider, IndicatorWrapper} from "@shared/ui";
+import {useAppDispatch, useAppModal, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
 
 import {createEqNumberLists} from "../../model/lib/createEqNumberLists";
-import {setTargetNumber} from "../../model/lib/setTargetNumber";
 import {EqCardType} from "../../model/types/eqCardType";
-import {useCardHeight} from "../../model/lib/useCardHeight";
-import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
 import {Actions, fetchEqUpdCard} from "../../model/api/fetchEqUpdCard";
 
-import {EqCardBtn} from "./EqCardBtn";
-import {EqNumbers} from "./EqNumbers";
-import {EqInfo} from "@pages/EqPage/ui/EqInfo/EqInfo";
-import {eqPageActions} from "@pages/EqPage";
-import {AssignmentInfo} from "@widgets/AssignmentInfo";
-import {APP_PERM} from "@shared/consts";
-import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
+import {EqCardBtn} from "./ui/EqCardBtn";
+import {EqCardBody} from "./ui/EqCardBody";
+import {CardSlider} from "./ui/CardSlider";
+import {CardCounter} from "./ui/CardCounter";
+import {CardNameNumbers} from "./ui/CardNameNumbers";
+import {CardOrderProject} from "./ui/CardOrderProject";
+import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -32,23 +27,9 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
     // Поднимаем хук для вызова модалки с контентом
     const {openModal} = useAppModal();
     const {currentUser} = useCurrentUser();
-    const {queryParameters, setQueryParam} = useAppQuery();
+    const {queryParameters} = useAppQuery();
 
     const [cardDisabled, setCardDisabled] = useState(false);
-
-    const {isCompactMode} = useCompactMode();
-    // Получаем высоту карточки
-    const cardHeight = useCardHeight();
-
-    const sliderWidth = useMemo(() => {
-        if (isCompactMode) {
-            return '72px';
-        } else {
-            return '100px';
-        }
-    }, [isCompactMode]);
-
-    const sliderImages = createEqImageUrls(card);
 
     const getAction = (first: boolean) => {
         return first ? Actions.IN_WORK_TO_READY : Actions.IN_WORK_TO_AWAIT
@@ -59,15 +40,6 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
         setAssignmentsLists
     ] = useState(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
 
-    const setNumber = (assignment_number: number) => {
-        setAssignmentsLists(setTargetNumber(
-            assignmentsLists.primary,
-            assignmentsLists.secondary,
-            assignmentsLists.confirmed,
-            assignment_number)
-        )
-        setQueryParam('series_size', '')
-    }
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE)
 
     const returnLocked = useMemo(() => {
@@ -106,154 +78,46 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
         }
     };
 
-    const getScaled = useCallback(() => {
-        return card.assignments.length !== 0 ? 'unscaled' : "scaled"
-    }, [card.assignments.length]);
-
-    const openModalWithInfo = useCallback(() => {
-        openModal(
-            <EqInfo card={card} updCallback={
-                () => dispatch(eqPageActions.addNotRelevantId(card.series_id))
-            }/>
-        )
-    }, [card, dispatch, openModal]);
-
     return (
-        <div className={'mt-1 pb-05'} {...otherProps} style={{height: `${cardHeight}px`}}>
-            <div className={cls.overflowWrapper + ` bg-black rounded rounded-2 ${getScaled()}`}>
-                <EqCardBtn
-                    plane_date={card.plane_date}
-                    style={{minWidth: '39px', maxWidth: '39px'}}
-                    cardType={"in_work"}
-                    first={true}
-                    urgency={card.urgency}
-                    onClick={() => getBtnClb(true)}
-                    disabled={cardDisabled}
-                />
+        <EqCardBody card={card} {...otherProps}>
+            <EqCardBtn
+                plane_date={card.plane_date}
+                style={{minWidth: '39px', maxWidth: '39px'}}
+                cardType={"in_work"}
+                first={true}
+                urgency={card.urgency}
+                onClick={() => getBtnClb(true)}
+                disabled={cardDisabled}
+            />
 
-                {/*slider*/}
-                <div className={cls.sliderBlock + ' bg-light rounded'} style={{
-                    width: sliderWidth,
-                    minWidth: sliderWidth,
-                    maxWidth: sliderWidth,
-                }}
-                     onClick={() => openModal(
-                         <AppSlider
-                             images={sliderImages.images}
-                             width={'90vw'}
-                             height={'90vh'}
-                         />
-                     )}
-                >
-                    <AppSlider
-                        images={sliderImages.thumbnails}
-                        width={'100%'}
-                        height={'100%'}
-                        price={currentUser.current_department.piecework_wages ? card.card_info.tariff : undefined}
-                        date={card.order.planned_date?.slice(-5)}
-                    />
-                </div>
+            {/*slider*/}
+            <CardSlider card={card}/>
 
-                {/*counts*/}
-                <div
-                    className={cls.cardCounts + ' fs-7 fw-bold rounded'}
-                    onClick={openModalWithInfo}
-                >
-                    <IndicatorWrapper
-                        indicator={'comment'}
-                        show={!!card.comment_base || !!card.comment_case}
-                        color={' bg-warning'}
-                        top={`${cardHeight - 17}px`}
-                    >
-                        <IndicatorWrapper
-                            indicator={'tech-process'}
-                            show={!card.product.technological_process}
-                            color={' bg-danger'}
-                            top={`${!!card.comment_base || !!card.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
-                        >
-                            <div>
-                                Всего:{card.card_info.count_all}
-                            </div>
-                            <hr className={cls.contentHr}/>
-                            <div>
-                                В_раб:{card.card_info.count_in_work}
-                            </div>
-                            <hr className={cls.contentHr}/>
+            {/*counts*/}
+            <CardCounter card={card}/>
 
-                            <div>
-                                Своб:{card.card_info.count_await}
-                            </div>
-                            <hr className={cls.contentHr}/>
+            {/*Имя и номера бегунков*/}
+            <CardNameNumbers
+                card={card}
+                assignmentsLists={assignmentsLists}
+                setAssignmentsLists={setAssignmentsLists}
+            />
 
-                            <div className={'text-muted'}>
-                                Готов:{card.card_info.count_ready}
-                            </div>
-                        </IndicatorWrapper>
-                    </IndicatorWrapper>
-                </div>
+            {/*Заказ-Проект блок*/}
+            <CardOrderProject card={card}/>
 
-                {/*Имя и номера бегунков*/}
-                <div className={cls.nameNumberBlock + ' bg-light rounded'}>
-                    <div className={cls.productName}>
-                        {card.further_packaging && "📦"}
-                        {card.product.name}
-                    </div>
+            {/*Отделы инфо блок*/}
+            <CardDepartmentInfo card={card}/>
 
-                    <hr className={'m-0 p-0'}/>
-
-                    <div className={cls.numbersBlock}>
-                        <EqNumbers assignmentsLists={assignmentsLists} setNumber={setNumber}/>
-                    </div>
-                </div>
-
-                {/*Заказ-Проект блок*/}
-                <div className={cls.orderProjectBlock + ' rounded'}
-                     style={{
-                         fontSize: '14px',
-                         backgroundColor: currentUser.current_department.color || "#ffffff"
-                     }}
-                >
-                    <div className={'fs-7 fw-bold text-center'}>
-                        Заказ:
-                        <br/>
-                        {card.series_id}
-                        <hr className={'m-0 p-0'}/>
-                    </div>
-                    <div className={'fs-7 text-center'}
-                         onClick={() => openModal(
-                             <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
-                         )}
-                    >
-                        Проект:
-                        <br/>
-                        {card.order.project}
-                    </div>
-                </div>
-
-                <div
-                    className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
-                    onClick={() => openModal(
-                        <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
-                    )}
-                >
-                    {card.department_info.map((info, index) => (
-                        <div key={index}>
-                            {info.full_name} {info.count_in_work} ({info.count_all})
-                            <hr className={'m-0 p-0'}/>
-                        </div>
-                    ))}
-                </div>
-
-                <EqCardBtn
-                    style={{minWidth: '39px', maxWidth: '39px'}}
-                    cardType={"in_work"}
-                    first={false}
-                    urgency={card.urgency}
-                    onClick={() => getBtnClb(false)}
-                    disabled={cardDisabled}
-                    locked={returnLocked}
-                />
-            </div>
-        </div>
+            <EqCardBtn
+                style={{minWidth: '39px', maxWidth: '39px'}}
+                cardType={"in_work"}
+                first={false}
+                urgency={card.urgency}
+                onClick={() => getBtnClb(false)}
+                disabled={cardDisabled}
+                locked={returnLocked}
+            />
+        </EqCardBody>
     );
 });

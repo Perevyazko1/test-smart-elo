@@ -6,6 +6,7 @@ import {useAppSelector, useFixedSizeList} from "@shared/hooks";
 import {getAwaitListInfo, getEqAwaitList} from "../../model/selectors/cardSelectors";
 import {useCardHeight} from "../../model/lib/useCardHeight";
 import {useFetchListData} from "../../model/lib/useFetchListData";
+
 import {EqAwaitCard} from "../EqCards/EqAwaitCard";
 
 interface EqAwaitSectionProps extends HTMLAttributes<HTMLDivElement> {

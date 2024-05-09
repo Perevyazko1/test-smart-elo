@@ -14,6 +14,7 @@ class EqOrderProductInfoSerializer(serializers.Serializer):
     count_ready = serializers.IntegerField()
     count_await = serializers.IntegerField()
     tariff = serializers.IntegerField()
+    proposed_tariff = serializers.BooleanField()
 
 
 class EqDepartmentInfoSerializer(serializers.Serializer):
@@ -96,7 +97,7 @@ class EqCardSerializer(serializers.ModelSerializer):
         eq_params: RequestParams = self.context.get('eq_params')
         data = get_eq_card_count_data(
             order_product=obj,
-            department=eq_params.department
+            department=eq_params.department,
         )
         serializer = EqOrderProductInfoSerializer(data=data)
         if serializer.is_valid():

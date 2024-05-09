@@ -4,13 +4,14 @@ import {eqPageActions} from "@pages/EqPage";
 
 import {SERVER_WS_ADDRESS} from "../../consts";
 import {ExtNotificationOptions} from "@shared/hooks";
+import {appNavbarActions} from "@widgets/AppNavbar";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_INTERVAL_MS = 5000;
 
 type WsMessageData = {
-    action: 'update_eq_lists' | 'update_target_item';
+    action: 'update_eq_lists' | 'update_target_item' | 'update_notification';
     data: any;
     lists: ['await' | 'in_work' | 'ready' | ''];
 }
@@ -88,6 +89,10 @@ export const newWsConnection = (props: newWsConnectionProps) => {
 
             if (data.data.action === 'update_target_item' && data.initiator !== pin_code) {
                 dispatch(eqPageActions.addNotRelevantId(data.data.data))
+            }
+
+            if (data.data.action === 'update_notification') {
+                dispatch(appNavbarActions.listHasUpdated())
             }
         }
     }

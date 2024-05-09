@@ -4,7 +4,7 @@ from django.db import transaction
 
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
-from core.consumers import ws_group_updates, EqNotificationActions
+from core.consumers import ws_group_updates, EqNotificationActions, ws_update_notification
 from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
 from core.services.update_production_steps import update_production_steps
@@ -63,6 +63,9 @@ class UpdateAssignments:
                         assignment.status = 'ready'
                         assignment.date_completion = datetime.datetime.now()
                         assignment.save()
+
+                        ws_update_notification(self.department.number)
+
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
@@ -76,6 +79,9 @@ class UpdateAssignments:
                         assignment.status = 'in_work'
                         assignment.date_completion = None
                         assignment.save()
+
+                        ws_update_notification(self.department.number)
+
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
@@ -109,6 +115,9 @@ class UpdateAssignments:
 
                         assignment.inspector = inspector
                         assignment.save()
+
+                        ws_update_notification(self.department.number)
+
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.series_id,
@@ -251,6 +260,7 @@ class UpdateAssignments:
 
             if target_size:
                 """Если количество отлично от нуля переводим наряды в статус ожидает"""
+                ws_update_notification(next_step.department.number)
                 self.notification_data[next_step.department.number] = {
                     'action': EqNotificationActions.UPDATE_TARGET_LIST.value,
                     'data': '',

@@ -168,15 +168,15 @@ def set_tech_process(request):
         )
         """Делаем рассылку на обновление данных в WS"""
         # TODO Переделать алгоритмы обновления
-        ws_group_updates(
-            pin_code=pin_code,
-            notification_data={
-                '1': {
-                    'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                    'data': '',
-                }
-            }
-        )
+        # ws_group_updates(
+        #     pin_code=pin_code,
+        #     notification_data={
+        #         '1': {
+        #             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+        #             'data': '',
+        #         }
+        #     }
+        # )
 
         for order_product in active_order_products:
             Assignment.objects.filter(

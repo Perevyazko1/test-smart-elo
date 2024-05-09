@@ -1,6 +1,7 @@
 from django.db import transaction
 
 from staff.models import Department
+from ..consumers import ws_update_notification
 
 from ..models import OrderProduct, Assignment, ProductionStep
 
@@ -66,6 +67,7 @@ class AssignmentGenerator:
                     department=production_step.department,
                     quantity=int(order_product.quantity)
                 )
+                ws_update_notification(production_step.department.number)
             else:
                 """Если отдел не в списке стартовых и отдел не конструкторов - генерируем наряд в статусе создан"""
                 if not production_step.department.number == 1:

@@ -305,7 +305,7 @@ class ProductionStepTariff(models.Model):
 
     proposed_by = models.ForeignKey(
         Employee,
-        verbose_name='Тарификацию утвердил',
+        verbose_name='Тарификацию предложил',
         related_name='production_step_proposed_tariffs',
         on_delete=models.CASCADE,
         blank=True,

@@ -10,6 +10,7 @@ from asgiref.sync import async_to_sync
 class EqNotificationActions(Enum):
     UPDATE_TARGET_LIST = 'update_eq_lists'
     UPDATE_TARGET_ITEM = 'update_target_item'
+    UPDATE_NOTIFICATION = 'update_notification'
 
 
 @dataclass
@@ -61,3 +62,20 @@ def ws_group_updates(pin_code: str, notification_data: dict):
             str(department_number),
             {"type": "client_message", "message": asdict(result)}
         )
+
+
+def ws_update_notification(department_number):
+    """Send command to update notification. """
+    channel_layer = get_channel_layer()
+
+    message = EqNotification(
+        initiator="",
+        data={
+            "action": EqNotificationActions.UPDATE_NOTIFICATION.value,
+        },
+    )
+
+    async_to_sync(channel_layer.group_send)(
+        str(department_number),
+        {"type": "client_message", "message": asdict(message)}
+    )

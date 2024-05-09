@@ -5,6 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
+from core.consumers import ws_update_notification
 from core.models import ProductionStep, ProductionStepTariff, Assignment
 from core.pages.new_tariff_page.filters import ProductionStepModelFilter
 from core.pages.new_tariff_page.serializers import TariffPageSerializer, TariffSerializer, RetarifficationSerializer
@@ -29,6 +30,13 @@ class TariffPageViewSet(viewsets.ModelViewSet):
 class TariffViewSet(viewsets.ModelViewSet):
     queryset = ProductionStepTariff.objects.all()
     serializer_class = TariffSerializer
+
+    def create(self, request, *args, **kwargs):
+        """WS update command after save. """
+        response = super().create(request, *args, **kwargs)
+        if request.method in ['POST', 'PUT']:
+            ws_update_notification(request.user.current_department.number)
+        return response
 
 
 class RetarifficationViewSet(viewsets.ModelViewSet):

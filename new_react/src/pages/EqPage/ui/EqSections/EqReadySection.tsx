@@ -6,6 +6,7 @@ import {useAppQuery, useAppSelector, useFixedSizeList} from "@shared/hooks";
 import {getEqReadyList, getReadyListInfo} from "../../model/selectors/cardSelectors";
 import {useCardHeight} from "../../model/lib/useCardHeight";
 import {useFetchListData} from "../../model/lib/useFetchListData";
+
 import {EqReadyCard} from "../EqCards/EqReadyCard";
 
 interface EqReadySectionProps extends HTMLAttributes<HTMLDivElement> {

@@ -1,25 +1,17 @@
-import React, {HTMLAttributes, memo, useCallback, useEffect, useMemo, useState} from "react";
-
-import cls from "./EqCard.module.scss";
-
-import {AssignmentInfo} from "@widgets/AssignmentInfo";
-import {useAppDispatch, useAppModal, useAppQuery, useCompactMode, useCurrentUser} from "@shared/hooks";
-import {AppSlider, IndicatorWrapper} from "@shared/ui";
+import {HTMLAttributes, memo, useState} from "react";
+import {useAppDispatch, useAppQuery, useCurrentUser} from "@shared/hooks";
 
 import {createEqNumberLists} from "../../model/lib/createEqNumberLists";
-import {setTargetNumber} from "../../model/lib/setTargetNumber";
 import {EqCardType} from "../../model/types/eqCardType";
-import {useCardHeight} from "../../model/lib/useCardHeight";
-import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
 import {Actions, fetchEqUpdCard} from "../../model/api/fetchEqUpdCard";
-import {eqPageActions} from "../../model/slice/eqPageSlice";
 
-import {EqCardBtn} from "./EqCardBtn";
-import {EqNumbers} from "./EqNumbers";
-import {EqInfo} from "../EqInfo/EqInfo";
-import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
-import {Button} from "react-bootstrap";
-import {TarifficationWidget} from "@widgets/TarifficationWidget";
+import {EqCardBtn} from "./ui/EqCardBtn";
+import {EqCardBody} from "./ui/EqCardBody";
+import {CardSlider} from "./ui/CardSlider";
+import {CardCounter} from "./ui/CardCounter";
+import {CardNameNumbers} from "./ui/CardNameNumbers";
+import {CardOrderProject} from "./ui/CardOrderProject";
+import {CardDepartmentInfo} from "@pages/EqPage/ui/EqCards/ui/CardDepartmentInfo";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -27,35 +19,14 @@ interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
 
 // Карточка блока ожидания
 export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
-    const {...otherProps} = props;
+    const {card, ...otherProps} = props;
     const dispatch = useAppDispatch();
 
-    const [card, setCard] = useState(props.card);
-
-    useEffect(() => {
-        setCard(props.card);
-    }, [props.card]);
-
-    // Поднимаем хук для вызова модалки с контентом
-    const {openModal} = useAppModal();
     const {currentUser} = useCurrentUser();
-    const {queryParameters, setQueryParam} = useAppQuery();
+    const {queryParameters} = useAppQuery();
 
     const [cardDisabled, setCardDisabled] = useState(false);
 
-    const {isCompactMode} = useCompactMode();
-    // Получаем высоту карточки
-    const cardHeight = useCardHeight();
-
-    const sliderWidth = useMemo(() => {
-        if (isCompactMode) {
-            return '72px';
-        } else {
-            return '100px';
-        }
-    }, [isCompactMode]);
-
-    const sliderImages = createEqImageUrls(card);
 
     const getAction = () => {
         return Actions.AWAIT_TO_IN_WORK;
@@ -65,20 +36,6 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         assignmentsLists,
         setAssignmentsLists
     ] = useState(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
-
-    const setNumber = (assignment_number: number) => {
-        setAssignmentsLists(setTargetNumber(
-            assignmentsLists.primary,
-            assignmentsLists.secondary,
-            assignmentsLists.confirmed,
-            assignment_number),
-        )
-        setQueryParam('series_size', '')
-    }
-
-    useEffect(() => {
-        setAssignmentsLists(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1))
-    }, [card.assignments, queryParameters.series_size])
 
     const getBtnClb = () => {
         setCardDisabled(true)
@@ -93,158 +50,40 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         })
     };
 
-    const getScaled = useCallback(() => {
-        return card.assignments.length !== 0 ? 'unscaled' : "scaled"
-    }, [card.assignments.length])
-
-    const openModalWithInfo = useCallback(() => {
-        openModal(
-            <EqInfo card={card} updCallback={
-                () => dispatch(eqPageActions.addNotRelevantId(card.series_id))
-            }/>
-        )
-    }, [card, dispatch, openModal]);
 
     return (
-        <div className={'mt-1 pb-05'} {...otherProps} style={{height: `${cardHeight}px`}}>
-            <div className={cls.overflowWrapper + ` bg-black rounded rounded-2 ${getScaled()}`}>
-                {assignmentsLists.primary.length > 0 &&
-                    <EqCardBtn
-                        plane_date={card.plane_date}
-                        style={{minWidth: '39px', maxWidth: '39px'}}
-                        cardType={"await"}
-                        first={true}
-                        urgency={card.urgency}
-                        onClick={() => getBtnClb()}
-                        disabled={cardDisabled}
-                    />
-                }
+        <EqCardBody card={card} {...otherProps}>
+            {assignmentsLists.primary.length > 0 &&
+                <EqCardBtn
+                    plane_date={card.plane_date}
+                    style={{minWidth: '39px', maxWidth: '39px'}}
+                    cardType={"await"}
+                    first={true}
+                    urgency={card.urgency}
+                    onClick={() => getBtnClb()}
+                    disabled={cardDisabled}
+                />
+            }
 
-                {/*slider*/}
-                <div className={cls.sliderBlock + ' bg-light rounded'} style={{
-                    width: sliderWidth,
-                    minWidth: sliderWidth,
-                    maxWidth: sliderWidth,
-                }}
-                     onClick={() => openModal(
-                         <AppSlider
-                             images={sliderImages.images}
-                             width={'90vw'}
-                             height={'90vh'}
-                         />
-                     )}
-                >
-                    <AppSlider
-                        images={sliderImages.thumbnails}
-                        width={'100%'}
-                        height={'100%'}
-                        price={currentUser.current_department.piecework_wages ? card.card_info.tariff : undefined}
-                        date={card.order.planned_date?.slice(-5)}
-                    />
-                </div>
+            {/*slider*/}
+            <CardSlider card={card}/>
 
-                {/*counts*/}
+            {/*counts*/}
+            <CardCounter card={card}/>
 
-                <div
-                    className={cls.cardCounts + ' fs-7 fw-bold rounded'}
-                    onClick={openModalWithInfo}
-                >
-                    <IndicatorWrapper
-                        indicator={'comment'}
-                        show={!!card.comment_base || !!card.comment_case}
-                        color={' bg-warning'}
-                        top={`${cardHeight - 17}px`}
-                    >
-                        <IndicatorWrapper
-                            indicator={'tech-process'}
-                            show={!card.product.technological_process}
-                            color={' bg-danger'}
-                            top={`${!!card.comment_base || !!card.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
-                        >
-                            <div>
-                                Всего:{card.card_info.count_all}
-                            </div>
-                            <hr className={cls.contentHr}/>
-                            <div>
-                                В_раб:{card.card_info.count_in_work}
-                            </div>
-                            <hr className={cls.contentHr}/>
+            {/*Имя и номера бегунков*/}
+            <CardNameNumbers
+                card={card}
+                assignmentsLists={assignmentsLists}
+                setAssignmentsLists={setAssignmentsLists}
+            />
 
-                            <div>
-                                Своб:{card.card_info.count_await}
-                            </div>
-                            <hr className={cls.contentHr}/>
+            {/*Отделы инфо блок*/}
+            <CardDepartmentInfo card={card}/>
 
-                            <div className={'text-muted'}>
-                                Готов:{card.card_info.count_ready}
-                            </div>
-                        </IndicatorWrapper>
-                    </IndicatorWrapper>
-                </div>
+            {/*Заказ-Проект блок*/}
+            <CardOrderProject card={card}/>
 
-                {/*Имя и номера бегунков*/
-                }
-                <div className={cls.nameNumberBlock + ' bg-light rounded'}>
-                    <div className={cls.productName}>
-                        {card.further_packaging && "📦"}
-                        <Button size={"sm"}
-                                className={'p-0 px-1 me-1 fs-7'}
-                                variant={'outline-danger'}
-                                style={{marginTop: '0.15rem'}}
-                                onClick={() => openModal(<TarifficationWidget/>)}
-                        >
-                            Тарифицировать
-                        </Button>
-                        {card.product.name}
-                    </div>
-
-                    <hr className={'m-0 p-0'}/>
-
-                    <div className={cls.numbersBlock}>
-                        <EqNumbers assignmentsLists={assignmentsLists} setNumber={setNumber}/>
-                    </div>
-                </div>
-
-                {/*Заказ-Проект блок*/
-                }
-                <div className={cls.orderProjectBlock + ' rounded'}
-                     style={{
-                         fontSize: '14px',
-                         backgroundColor: currentUser.current_department.color || "#ffffff"
-                     }}
-                >
-                    <div className={'fs-7 fw-bold text-center'}
-                         onClick={() => openModal(
-                             <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
-                         )}
-                    >
-                        Заказ:
-                        <br/>
-                        {card.series_id}
-                        <hr className={'m-0 p-0'}/>
-                    </div>
-                    <div className={'fs-7 text-center'}>
-                        Проект:
-                        <br/>
-                        {card.order.project}
-                    </div>
-                </div>
-
-                <div
-                    className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
-                     onClick={() => openModal(
-                         <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
-                     )}
-                >
-                    {card.department_info.map((info, index) => (
-                        <div key={index}>
-                            {info.full_name} {info.count_in_work} ({info.count_all})
-                            <hr className={'m-0 p-0'}/>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    )
-        ;
+        </EqCardBody>
+    );
 });

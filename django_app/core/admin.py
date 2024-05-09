@@ -91,7 +91,7 @@ class ProductionStepAdmin(admin.ModelAdmin):
 
 
 @admin.register(TechnologicalProcess)
-class ProductionStepAdmin(admin.ModelAdmin):
+class TechnologicalProcessAdmin(admin.ModelAdmin):
     list_display = ['name']
     list_display_links = ['name']
 

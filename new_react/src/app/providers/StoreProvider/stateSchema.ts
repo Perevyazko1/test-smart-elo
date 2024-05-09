@@ -11,12 +11,14 @@ import {OrdersPageSchema} from "@pages/OrdersPage";
 import {AuditWidgetSchema} from "@widgets/UserActions";
 import {OrderDetailsSchema} from "@widgets/OrderDetailWidget";
 import {rtkAPI} from "@shared/api";
+import {AppNavbarSchema} from "@widgets/AppNavbar";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
     eqPage?: EqPageSchema;
+    appNavbar?: AppNavbarSchema;
     orderDetail?: OrderDetailsSchema;
     orders?: OrdersPageSchema;
     assignments?: AssignmentSchema;

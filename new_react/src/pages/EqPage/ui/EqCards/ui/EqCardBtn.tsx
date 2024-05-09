@@ -1,6 +1,7 @@
-import React, {ButtonHTMLAttributes, memo, useMemo} from "react";
-import {ListTypes} from "@pages/EqPage/model/consts/listTypes";
+import {ButtonHTMLAttributes, memo, useMemo} from "react";
 import {Spinner} from "react-bootstrap";
+
+import {ListTypes} from "../../../model/consts/listTypes";
 
 
 interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {

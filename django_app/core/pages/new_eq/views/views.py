@@ -109,7 +109,6 @@ def get_week_data(request):
     if transactions_sum:
         week_info.earned += f' + {int(transactions_sum)}(доп)'
 
-    print(week_info)
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
 
