@@ -18,6 +18,7 @@ interface AppSliderProps {
     images?: string[],
     width?: string,
     height?: string,
+    bgColor?: ' bg-warning' | ' bg-danger' | ' bg-light';
 }
 
 
@@ -26,6 +27,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
         price,
         date,
         images,
+        bgColor = ' bg-light',
         width = '100px',
         height = '100px',
     } = props;
@@ -71,11 +73,11 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             left: "2px",
                             margin: "auto",
                             zIndex: "999",
-                            opacity: "0.4",
+                            opacity: "0.7",
                             pointerEvents: "none",
                         }}
                     >
-                        <div className={"fw-bold text-black border rounded me-1 fs-7" + (price === 0 ? ' bg-warning' : ' bg-light')}
+                        <div className={"fw-bold text-black border rounded me-1 fs-7" + bgColor}
                              style={{padding: "0 0.1rem"}}>
                             {price}
                         </div>
@@ -90,7 +92,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             right: "2px",
                             margin: "auto",
                             zIndex: "999",
-                            opacity: "0.4",
+                            opacity: "0.7",
                             pointerEvents: "none",
                         }}
                     >

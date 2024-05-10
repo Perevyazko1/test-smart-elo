@@ -14,7 +14,7 @@ class EqOrderProductInfoSerializer(serializers.Serializer):
     count_ready = serializers.IntegerField()
     count_await = serializers.IntegerField()
     tariff = serializers.IntegerField()
-    proposed_tariff = serializers.BooleanField()
+    proposed_tariff = serializers.IntegerField()
 
 
 class EqDepartmentInfoSerializer(serializers.Serializer):

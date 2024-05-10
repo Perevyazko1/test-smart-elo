@@ -49,7 +49,20 @@ export const CardSlider = (props: CardSliderProps) => {
                 images={sliderImages.thumbnails}
                 width={'100%'}
                 height={'100%'}
-                price={currentUser.current_department.piecework_wages ? card.card_info.tariff : undefined}
+                bgColor={card.card_info.tariff
+                    ? " bg-light"
+                    : card.card_info.proposed_tariff
+                        ? " bg-warning"
+                        : " bg-danger"
+                }
+                price={currentUser.current_department.piecework_wages
+                    ?
+                    card.card_info.tariff
+                        ? card.card_info.tariff
+                        : card.card_info.proposed_tariff
+                            ? card.card_info.proposed_tariff
+                            : 0
+                    : undefined}
                 date={card.order.planned_date?.slice(-5)}
             />
         </div>

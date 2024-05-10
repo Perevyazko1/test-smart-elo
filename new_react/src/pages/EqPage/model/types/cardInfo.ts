@@ -4,5 +4,5 @@ export interface CardInfo {
     count_ready: number;
     count_await: number;
     tariff: number;
-    proposed_tariff: boolean;
+    proposed_tariff: number;
 }

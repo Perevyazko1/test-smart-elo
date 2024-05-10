@@ -62,14 +62,19 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
         <div className={cls.nameNumberBlock + ' bg-light rounded'}>
             <div className={cls.productName}>
                 {card.further_packaging && "📦"}
-                {!card.card_info.tariff &&
-                    currentUser.current_department.piecework_wages &&
-                    !card.card_info.proposed_tariff &&
-                    <Button size={"sm"}
-                            className={'p-0 px-1 me-1 fs-7'}
-                            variant={'outline-danger'}
-                            style={{marginTop: '0.15rem'}}
-                            onClick={openTarifficationWidget}
+                {currentUser.current_department.piecework_wages &&
+                    <Button
+                        size={"sm"}
+                        className={'p-0 px-1 me-1 fs-7'}
+                        variant={
+                            card.card_info.tariff
+                                ? 'outline-dark'
+                                : card.card_info.proposed_tariff
+                                    ? 'outline-warning'
+                                    : 'outline-danger'
+                        }
+                        style={{marginTop: '0.15rem'}}
+                        onClick={openTarifficationWidget}
                     >
                         Сделка
                     </Button>

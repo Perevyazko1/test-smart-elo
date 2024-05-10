@@ -13,10 +13,10 @@ def get_eq_card_count_data(order_product: OrderProduct, department: Department):
 
         if production_step.production_step_tariff:
             tariff = production_step.production_step_tariff.tariff
-            proposed_tariff = True
+            proposed_tariff = production_step.production_step_tariff.proposed_tariff
         else:
             tariff = 0
-            proposed_tariff = False
+            proposed_tariff = 0
 
         queryset = order_product.assignments.filter(department=department)
         in_work_count = queryset.filter(status='in_work').count(),
@@ -25,7 +25,7 @@ def get_eq_card_count_data(order_product: OrderProduct, department: Department):
         await_count = queryset.filter(status='await').count(),
     else:
         tariff = 0
-        proposed_tariff = False
+        proposed_tariff = 0
         in_work_count = [0]
         ready_count = [0]
         await_count = [0]
