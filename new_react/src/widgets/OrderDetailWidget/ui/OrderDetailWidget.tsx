@@ -67,7 +67,7 @@ export const OrderDetailWidget = (props: OrderDetailWidgetProps) => {
 
     return (
         <DynamicComponent reducers={initialReducers}>
-            <div style={{minWidth: '90vw'}}>
+            <div style={{width: '100%'}}>
                 <div className="d-flex align-items-center p-2">
                     <h4 className={'m-0'}>
                         Cпецификация
