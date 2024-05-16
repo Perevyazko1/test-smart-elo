@@ -14,6 +14,7 @@ interface AssignmentInfoProps {
 export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const {seriesId, title} = props;
     const unconfirmedPerm = usePermission(APP_PERM.ASSIGNMENT_UNCONFIRMED);
+    const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const {currentUser} = useCurrentUser();
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -84,64 +85,66 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
             <hr className={'m-0 p-0'}/>
 
-            <div className={'p-2'}>
-                Назначить плановую дату на наряды в статусе:
-                <br/>
-                <div className={'gap-2'}>
-                    <input
-                        type="datetime-local"
-                        className={'mx-2'}
-                        value={inputDate}
-                        onChange={(e) => setInputDate(e.target.value)}
-                    />
-                    <Button
-                        variant={'dark'}
-                        size={'sm'}
-                        className={'mx-2'}
-                        disabled={isLoading || isEdited}
-                        onClick={() => updateClb('all')}
-                    >
-                        Все наряды
-                    </Button>
-                    <Button
-                        variant={'secondary'}
-                        size={'sm'}
-                        className={'mx-2'}
-                        disabled={isLoading || isEdited}
-                        onClick={() => updateClb('in_work')}
-                    >
-                        В работе
-                    </Button>
+            {!isViewer &&
+                <div className={'p-2'}>
+                    Назначить плановую дату на наряды в статусе:
+                    <br/>
+                    <div className={'gap-2'}>
+                        <input
+                            type="datetime-local"
+                            className={'mx-2'}
+                            value={inputDate}
+                            onChange={(e) => setInputDate(e.target.value)}
+                        />
+                        <Button
+                            variant={'dark'}
+                            size={'sm'}
+                            className={'mx-2'}
+                            disabled={isLoading || isEdited}
+                            onClick={() => updateClb('all')}
+                        >
+                            Все наряды
+                        </Button>
+                        <Button
+                            variant={'secondary'}
+                            size={'sm'}
+                            className={'mx-2'}
+                            disabled={isLoading || isEdited}
+                            onClick={() => updateClb('in_work')}
+                        >
+                            В работе
+                        </Button>
 
-                    <Button
-                        variant={'outline-dark'}
-                        size={'sm'}
-                        className={'mx-2'}
-                        disabled={isLoading || isEdited}
-                        onClick={() => updateClb('await')}
-                    >
-                        В ожидании
-                    </Button>
-                    <Button
-                        variant={'primary'}
-                        size={'sm'}
-                        className={'mx-2'}
-                        disabled={isLoading || isEdited}
-                        onClick={() => updateClb('selected')}
-                    >
-                        Выбранные
-                    </Button>
-                    <Button
-                        variant={'outline-danger'}
-                        size={'sm'}
-                        className={'mx-2'}
-                        disabled={isLoading || isEdited || !unconfirmedPerm}
-                        onClick={() => updateClb('remove_visa')}
-                    >
-                        Снять визу
-                    </Button>
+                        <Button
+                            variant={'outline-dark'}
+                            size={'sm'}
+                            className={'mx-2'}
+                            disabled={isLoading || isEdited}
+                            onClick={() => updateClb('await')}
+                        >
+                            В ожидании
+                        </Button>
+                        <Button
+                            variant={'primary'}
+                            size={'sm'}
+                            className={'mx-2'}
+                            disabled={isLoading || isEdited}
+                            onClick={() => updateClb('selected')}
+                        >
+                            Выбранные
+                        </Button>
+                        <Button
+                            variant={'outline-danger'}
+                            size={'sm'}
+                            className={'mx-2'}
+                            disabled={isLoading || isEdited || !unconfirmedPerm}
+                            onClick={() => updateClb('remove_visa')}
+                        >
+                            Снять визу
+                        </Button>
+                    </div>
                 </div>
-            </div>
+            }
 
             <Table size={'sm'} bordered striped hover>
                 <thead>

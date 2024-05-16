@@ -1,4 +1,4 @@
-import React, {HTMLAttributes, memo, useEffect, useState} from "react";
+import React, {HTMLAttributes, memo, useEffect, useMemo, useState} from "react";
 
 import {useAppDispatch, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
@@ -30,6 +30,7 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
     const {queryParameters} = useAppQuery();
 
     const visaPerm = usePermission(APP_PERM.ELO_CONFIRM_ASSIGNMENT);
+    const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const [cardDisabled, setCardDisabled] = useState(false);
 
@@ -66,10 +67,22 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
     const getBtnClb = (first: boolean) => {
         confirmClb(first);
     };
+    
+    const showFirstBtn = useMemo(() => {
+        return assignmentsLists.primary.length > 0 
+            && !!card.product.technological_process 
+            && visaPerm 
+            && !isViewer;
+    }, [assignmentsLists.primary.length, card.product.technological_process, isViewer, visaPerm]);
+    
+    const showSecondBtn = useMemo(() => {
+        return assignmentsLists.primary.length > 0 
+            && !isViewer
+    }, [assignmentsLists.primary.length, isViewer])
 
     return (
         <EqCardBody card={card}>
-            {assignmentsLists.primary.length > 0 && !!card.product.technological_process && visaPerm &&
+            {showFirstBtn &&
                 <EqCardBtn
                     style={{minWidth: '39px', maxWidth: '39px'}}
                     cardType={"ready"}
@@ -99,7 +112,7 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
             {/*Отделы инфо блок*/}
             <CardDepartmentInfo card={card}/>
 
-            {assignmentsLists.primary.length > 0 &&
+            {showSecondBtn &&
                 <EqCardBtn
                     style={{minWidth: '39px', maxWidth: '39px'}}
                     cardType={"ready"}

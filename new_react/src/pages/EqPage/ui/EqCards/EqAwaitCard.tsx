@@ -1,5 +1,7 @@
-import {HTMLAttributes, memo, useState} from "react";
-import {useAppDispatch, useAppQuery, useCurrentUser} from "@shared/hooks";
+import {HTMLAttributes, memo, useMemo, useState} from "react";
+
+import {APP_PERM} from "@shared/consts";
+import {useAppDispatch, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
 
 import {createEqNumberLists} from "../../model/lib/createEqNumberLists";
 import {EqCardType} from "../../model/types/eqCardType";
@@ -11,7 +13,7 @@ import {CardSlider} from "./ui/CardSlider";
 import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
-import {CardDepartmentInfo} from "@pages/EqPage/ui/EqCards/ui/CardDepartmentInfo";
+import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
     card: EqCardType;
@@ -24,9 +26,10 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
 
     const {currentUser} = useCurrentUser();
     const {queryParameters} = useAppQuery();
+    
+    const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const [cardDisabled, setCardDisabled] = useState(false);
-
 
     const getAction = () => {
         return Actions.AWAIT_TO_IN_WORK;
@@ -50,10 +53,13 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         })
     };
 
+    const showFirstBtn = useMemo(() => {
+        return !isViewer && assignmentsLists.primary.length > 0
+    }, [assignmentsLists.primary.length, isViewer])
 
     return (
         <EqCardBody card={card} {...otherProps}>
-            {assignmentsLists.primary.length > 0 &&
+            {showFirstBtn &&
                 <EqCardBtn
                     plane_date={card.plane_date}
                     style={{minWidth: '39px', maxWidth: '39px'}}

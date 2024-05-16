@@ -20,6 +20,7 @@ export const EqFilters = () => {
 
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
     const behalfPerm = usePermission(APP_PERM.BEHALF_ACTIONS);
+    const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const viewModesList = useMemo(() => {
         let result = viewModes?.filters;
@@ -29,8 +30,11 @@ export const EqFilters = () => {
         if (!behalfPerm) {
             result = result?.filter(mode => ['self', 'boss', 'unfinished'].includes(String(mode.key)));
         }
+        if (isViewer) {
+            result = result?.filter(mode => mode.name !== 'Личные наряды');
+        }
         return result?.map(viewMode => viewMode.name) || [];
-    }, [behalfPerm, bossPerm, viewModes?.filters]);
+    }, [behalfPerm, bossPerm, isViewer, viewModes?.filters]);
 
     useEffect(() => {
         if (currentUser.current_department.number && !initialLoad) {
@@ -48,9 +52,21 @@ export const EqFilters = () => {
     useEffect(() => {
         let edited = false;
         if (inited && !initialLoad) {
-            // Проверяем закончилась ли инициализация квери параметров
-            // Затем проверяем есть ли у нас установленный режим просмотра
-            if (queryParameters.view_mode) {
+            // Проверяем закончилась ли инициализация квери параметров.
+            // Проверяем, находится ли пользователь в режиме просмотра.
+            // Если включен режим просмотра - то устанавливаем режим бригадира.
+            if (isViewer) {
+                const checkViewMode = viewModes?.filters.find(
+                    viewMode => viewMode.key === queryParameters.view_mode
+                );
+                // Если его нет - обнуляем установленный режим просмотра
+                if (!checkViewMode?.name) {
+                    setQueryParam('view_mode', 'boss');
+                    edited = true;
+                }
+            }
+            // Если пользователь не в режиме просмотра проверяем есть ли у нас установленный режим просмотра
+            else if (queryParameters.view_mode) {
                 // Проверяем прошла ли первоначальная загрузка фильтров
                 // Проверяем, есть ли режим просмотра в текущих загруженных фильтрах
                 const checkViewMode = viewModes?.filters.find(
@@ -77,6 +93,7 @@ export const EqFilters = () => {
             }
         }
     }, [
+        isViewer,
         dispatch,
         inited,
         initialLoad,

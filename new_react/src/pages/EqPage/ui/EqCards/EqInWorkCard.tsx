@@ -28,6 +28,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
     const {openModal} = useAppModal();
     const {currentUser} = useCurrentUser();
     const {queryParameters} = useAppQuery();
+    const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const [cardDisabled, setCardDisabled] = useState(false);
 
@@ -80,15 +81,17 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
 
     return (
         <EqCardBody card={card} {...otherProps}>
-            <EqCardBtn
-                plane_date={card.plane_date}
-                style={{minWidth: '39px', maxWidth: '39px'}}
-                cardType={"in_work"}
-                first={true}
-                urgency={card.urgency}
-                onClick={() => getBtnClb(true)}
-                disabled={cardDisabled}
-            />
+            {!isViewer &&
+                <EqCardBtn
+                    plane_date={card.plane_date}
+                    style={{minWidth: '39px', maxWidth: '39px'}}
+                    cardType={"in_work"}
+                    first={true}
+                    urgency={card.urgency}
+                    onClick={() => getBtnClb(true)}
+                    disabled={cardDisabled}
+                />
+            }
 
             {/*slider*/}
             <CardSlider card={card}/>
@@ -109,15 +112,17 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
             {/*Отделы инфо блок*/}
             <CardDepartmentInfo card={card}/>
 
-            <EqCardBtn
-                style={{minWidth: '39px', maxWidth: '39px'}}
-                cardType={"in_work"}
-                first={false}
-                urgency={card.urgency}
-                onClick={() => getBtnClb(false)}
-                disabled={cardDisabled}
-                locked={returnLocked}
-            />
+            {!isViewer &&
+                <EqCardBtn
+                    style={{minWidth: '39px', maxWidth: '39px'}}
+                    cardType={"in_work"}
+                    first={false}
+                    urgency={card.urgency}
+                    onClick={() => getBtnClb(false)}
+                    disabled={cardDisabled}
+                    locked={returnLocked}
+                />
+            }
         </EqCardBody>
     );
 });
