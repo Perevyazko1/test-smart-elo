@@ -4,7 +4,6 @@ import {AxiosInstance} from "axios";
 import {EqPageSchema} from "@pages/EqPage";
 import {AssignmentSchema} from "@pages/AssignmentPage";
 import {ProductsSchema} from "@pages/ProductPage";
-import {TariffPageSchema} from "@pages/TariffPage";
 import {ProductDetailsSchema} from "@pages/ProductDetailsPage";
 import {OrdersPageSchema} from "@pages/OrdersPage";
 
@@ -12,20 +11,23 @@ import {AuditWidgetSchema} from "@widgets/UserActions";
 import {OrderDetailsSchema} from "@widgets/OrderDetailWidget";
 import {rtkAPI} from "@shared/api";
 import {AppNavbarSchema} from "@widgets/AppNavbar";
+import {TarifficationPageSchema} from "@pages/TarifficationPage";
+import {PostTarifficationSchema} from "@widgets/PostTarifficationWidget";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
+    tarifficationPage?: TarifficationPageSchema;
     eqPage?: EqPageSchema;
     appNavbar?: AppNavbarSchema;
     orderDetail?: OrderDetailsSchema;
     orders?: OrdersPageSchema;
     assignments?: AssignmentSchema;
     products?: ProductsSchema;
-    tariffs?: TariffPageSchema;
     auditWidget?: AuditWidgetSchema;
     productDetails?: ProductDetailsSchema;
+    postTariffication?: PostTarifficationSchema;
 }
 
 export type StateSchemaKey = keyof StateSchema;

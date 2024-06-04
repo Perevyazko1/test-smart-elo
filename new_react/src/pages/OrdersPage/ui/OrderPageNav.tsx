@@ -2,7 +2,8 @@ import {AppNavbar} from "@widgets/AppNavbar";
 import React, {useEffect, useMemo, useState} from "react";
 import {useAppQuery, useDebounce} from "@shared/hooks";
 import {AppDropdown, AppInput} from "@shared/ui";
-import {useProjectsList} from "@pages/TariffPage/model/api/api";
+
+import { useProjectsList } from "../model/api/rtk";
 
 export const OrderPageNav = () => {
     const [showCanvas, setShowCanvas] = useState<boolean>(false);

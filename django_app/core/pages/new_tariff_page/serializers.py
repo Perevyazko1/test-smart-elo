@@ -42,6 +42,7 @@ class TariffPageSerializer(serializers.ModelSerializer):
     department = DepartmentSerializer(read_only=True)
     production_step_tariff = TariffSerializer(read_only=True)
     production_step_tariff_id = serializers.IntegerField(write_only=True)
+    has_assignments = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ProductionStep
@@ -51,7 +52,16 @@ class TariffPageSerializer(serializers.ModelSerializer):
             'department',
             'production_step_tariff',
             'production_step_tariff_id',
+            'has_assignments',
         ]
+
+    def get_has_assignments(self, obj: ProductionStep) -> bool:
+        """Get has assignments without tariffication flag. """
+        return Assignment.objects.filter(
+            order_product__product=obj.product,
+            department=obj.department,
+            tariff__isnull=True,
+        ).exists()
 
 
 class RetarifficationSerializer(serializers.ModelSerializer):

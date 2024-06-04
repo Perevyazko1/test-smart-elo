@@ -3,7 +3,6 @@ from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit, Department
-from .consumers import ws_group_updates, EqNotificationActions
 from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
 from .serializers import TechProcessSerializer
 from .services.assignment_generator import AssignmentGenerator

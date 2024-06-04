@@ -8,7 +8,6 @@ export enum APP_PERM {
     ELO_CONFIRM_ASSIGNMENT = 'Визирование нарядов',
     BEHALF_ACTIONS = 'Действия от имени сотрудников отдела',
 
-
     TARIFFICATION_PAGE = 'Страница тарификаций',
     TARIFFICATION_BILLING = 'Первичная тарификация',
     TARIFFICATION_CONFIRM = 'Подтверждение тарификаций',

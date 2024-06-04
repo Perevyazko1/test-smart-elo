@@ -15,6 +15,7 @@ class EqOrderProductInfoSerializer(serializers.Serializer):
     count_await = serializers.IntegerField()
     tariff = serializers.IntegerField()
     proposed_tariff = serializers.IntegerField()
+    production_step__id = serializers.IntegerField()
 
 
 class EqDepartmentInfoSerializer(serializers.Serializer):
@@ -49,11 +50,6 @@ class EqCardSerializer(serializers.ModelSerializer):
             'assignments',
             'card_info',
             'department_info',
-            'plane_date',
-            'further_packaging',
-        ]
-        read_only_fields = [
-            'series_id',
             'plane_date',
             'further_packaging',
         ]

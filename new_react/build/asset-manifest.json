@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.d0f856ba.css",
-    "main.js": "/static/js/main.f14ecf02.js",
+    "main.css": "/static/css/main.481419ea.css",
+    "main.js": "/static/js/main.3b57ec90.js",
     "static/media/fa-solid-900.svg": "/static/media/fa-solid-900.76857d47348d8e00ee05.svg",
     "static/media/fa-brands-400.svg": "/static/media/fa-brands-400.4a43897c83af77d2ffec.svg",
     "static/media/Montserrat-Regular.ttf": "/static/media/Montserrat-Regular.3cd786652b8a2e9d41f2.ttf",
@@ -22,11 +22,11 @@
     "static/media/SZMK Logo White Horizontal 900х352.png": "/static/media/SZMK Logo White Horizontal 900х352.aa147cc679b4e0c88d70.png",
     "static/media/fa-regular-400.woff2": "/static/media/fa-regular-400.a28b95d3e799579ba1dd.woff2",
     "index.html": "/index.html",
-    "main.d0f856ba.css.map": "/static/css/main.d0f856ba.css.map",
-    "main.f14ecf02.js.map": "/static/js/main.f14ecf02.js.map"
+    "main.481419ea.css.map": "/static/css/main.481419ea.css.map",
+    "main.3b57ec90.js.map": "/static/js/main.3b57ec90.js.map"
   },
   "entrypoints": [
-    "static/css/main.d0f856ba.css",
-    "static/js/main.f14ecf02.js"
+    "static/css/main.481419ea.css",
+    "static/js/main.3b57ec90.js"
   ]
 }

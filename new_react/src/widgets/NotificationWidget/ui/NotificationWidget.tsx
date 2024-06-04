@@ -53,7 +53,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
     }
 
     const awaitTariffVisaClb = () => {
-        navigate("/tariff/?tariff_status=proposed");
+        navigate("/tariffication/?tariff_status=proposed");
         props.closeClb();
     }
 
@@ -151,7 +151,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
                             {data.await_tariff_visa &&
                                 <tr>
                                     <td>
-                                        Предложенных сделок без визы
+                                        Утвердить предложенную сделку
                                     </td>
                                     <td>
                                         <b>{data.await_tariff_visa}</b>

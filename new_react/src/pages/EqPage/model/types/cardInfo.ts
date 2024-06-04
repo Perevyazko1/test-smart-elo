@@ -5,4 +5,5 @@ export interface CardInfo {
     count_await: number;
     tariff: number;
     proposed_tariff: number;
+    production_step__id: number;
 }

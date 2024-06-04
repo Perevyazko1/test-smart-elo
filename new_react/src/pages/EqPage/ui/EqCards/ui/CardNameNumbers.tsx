@@ -1,7 +1,6 @@
 import {useEffect} from "react";
 import {Button} from "react-bootstrap";
 
-import {TarifficationWidget} from "@widgets/TarifficationWidget";
 import {useAppModal, useAppQuery, useCurrentUser} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
@@ -11,6 +10,7 @@ import {setTargetNumber} from "../../../model/lib/setTargetNumber";
 import {createEqNumberLists} from "../../../model/lib/createEqNumberLists";
 
 import {EqNumbers} from "./EqNumbers";
+import {TarifficationWidget} from "@widgets/TarifficationWidget";
 
 interface CardNameNumbersProps {
     card: EqCardType;
@@ -51,10 +51,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
 
     const openTarifficationWidget = () => {
         openModal(
-            <TarifficationWidget
-                productId={card.product.id}
-                departmentId={currentUser.current_department.id}
-            />
+            <TarifficationWidget production_step__id={card.card_info.production_step__id}/>
         )
     }
 

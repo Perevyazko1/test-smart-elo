@@ -319,13 +319,13 @@ class UpdateAssignments:
                 department=self.department,
                 order_product=self.order_product
             )
-            if target_assignment.tariff:
-                if target_assignment.tariff.tariff:
+            if target_assignment.new_tariff:
+                if target_assignment.new_tariff.amount:
                     description = f'Производство полуфабриката {target_assignment} {target_assignment.department.name}'
                     Transaction.objects.create(
                         transaction_type='accrual',
                         details='wages',
-                        amount=target_assignment.tariff.tariff,
+                        amount=target_assignment.new_tariff.amount,
                         employee=target_assignment.executor,
                         executor=target_assignment.inspector,
                         inspector=target_assignment.inspector,

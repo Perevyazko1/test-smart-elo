@@ -5,16 +5,14 @@ import {useGetTariffCard} from "../model/api";
 
 
 interface TarifficationWidgetProps {
-    productId: number;
-    departmentId: number;
+    production_step__id: number;
 }
 
 export const TarifficationWidget = (props: TarifficationWidgetProps) => {
-    const {productId, departmentId} = props;
+    const {production_step__id} = props;
 
     const {data} = useGetTariffCard({
-        product__id: productId,
-        department__id: departmentId,
+        production_step__id: production_step__id,
     });
 
     return (

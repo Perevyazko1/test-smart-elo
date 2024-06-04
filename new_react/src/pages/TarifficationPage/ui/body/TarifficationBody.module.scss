@@ -1,0 +1,13 @@
+.stickyWrapper {
+  position: sticky;
+  padding: 0 0.25rem;
+  top: 0;
+  z-index: 500;
+}
+
+.pageContent {
+  height: calc(100dvh - 50px);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}

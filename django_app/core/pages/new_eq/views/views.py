@@ -95,7 +95,7 @@ def get_week_data(request):
         inspector__isnull=False,
         date_completion__gte=week_info.date_range[0],
         date_completion__lt=week_info.date_range[1],
-    ).aggregate(Sum('tariff__tariff')).get('tariff__tariff__sum')
+    ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
     transactions_sum = Transaction.objects.filter(
         employee=eq_params.user,

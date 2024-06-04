@@ -38,9 +38,9 @@ def check_tasks_exists(request):
             )
             for order_product in active_order_products:
                 if ProductionStep.objects.filter(
-                    product=order_product.product,
-                    department=user.current_department,
-                    production_step_tariff__isnull=True
+                        product=order_product.product,
+                        department=user.current_department,
+                        proposed_tariff__isnull=True
                 ).exists():
                     return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
 
@@ -51,8 +51,9 @@ def check_tasks_exists(request):
             for order_product in active_order_products:
                 if ProductionStep.objects.filter(
                         product=order_product.product,
-                        department=user.current_department,
-                        production_step_tariff__tariff__lt=models.F('production_step_tariff__proposed_tariff')
+                        proposed_tariff__isnull=False,
+                ).exclude(
+                    confirmed_tariff__amount=models.F('proposed_tariff__amount')
                 ).exists():
                     return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
 
@@ -68,16 +69,16 @@ def get_tasks_count(request):
 
     if user.groups.filter(name="Визирование нарядов").exists():
         assignments = Assignment.objects.filter(
-                department=user.current_department,
-                inspector__isnull=True,
-                status="ready"
+            department=user.current_department,
+            inspector__isnull=True,
+            status="ready"
         )
         if assignments.exists():
             result['await_visa'] = assignments.count()
 
     if user.groups.filter(name="Изменение техпроцессов"):
         products = Product.objects.filter(
-                technological_process__isnull=True
+            technological_process__isnull=True
         )
         if products.exists():
             result['await_tech_process'] = products.count()
@@ -106,9 +107,9 @@ def get_tasks_count(request):
                     continue
 
                 production_step = ProductionStep.objects.filter(
-                        product=order_product.product,
-                        department=user.current_department,
-                        production_step_tariff__isnull=True
+                    product=order_product.product,
+                    department=user.current_department,
+                    proposed_tariff__isnull=True
                 )
                 if production_step.exists():
                     total_tariff_count += 1
@@ -132,8 +133,9 @@ def get_tasks_count(request):
 
                 production_step = ProductionStep.objects.filter(
                     product=order_product.product,
-                    department=user.current_department,
-                    production_step_tariff__tariff__lt=models.F('production_step_tariff__proposed_tariff'),
+                    proposed_tariff__isnull=False,
+                ).exclude(
+                    confirmed_tariff__amount=models.F('proposed_tariff__amount')
                 )
                 if production_step.exists():
                     total_tariff_count += 1
