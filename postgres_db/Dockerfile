@@ -2,6 +2,12 @@ FROM postgres:15.2-alpine
 
 EXPOSE 5432
 
-RUN chmod 0700 /var/lib/postgresql/data
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+USER postgres
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 CMD ["postgres"]
