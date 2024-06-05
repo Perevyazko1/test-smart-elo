@@ -4,11 +4,10 @@ services:
   postgres:
     build: ./postgres_db
     container_name: postgres_db_eq
-    restart: always
     expose:
       - "5432"
     volumes:
-      - db:/var/lib/postgresql/data
+      - ./postgres_db/PGDATA/:/var/lib/postgresql/data
     env_file:
       - .env.docker.prod
 
@@ -106,7 +105,3 @@ services:
     command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file:
       - .env.docker.prod
-
-volumes:
-  db:
-    driver: local
