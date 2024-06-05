@@ -7,9 +7,11 @@ services:
     expose:
       - "5432"
     volumes:
-      - ./postgres_db/PGDATA/:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     env_file:
       - .env.docker.prod
+
+#docker volume create --opt type=none --opt device=C:\PROJECTS\EQ-PRODUCTION\postgres_db\PGDATA --opt o=bind db_data
 
   django_app:
     build:
@@ -105,3 +107,8 @@ services:
 #    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
 #    env_file:
 #      - .env.docker.prod
+
+
+volumes:
+  db_data:
+    external: true
