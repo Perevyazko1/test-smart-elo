@@ -72,39 +72,39 @@ services:
     env_file:
       - .env.docker.prod
 
-#  celery_worker:
-#    build:
-#      context: ./django_app
-#      dockerfile: Dockerfile
-#    container_name: celery_worker_eq
-#    restart: always
-#    volumes:
-#      - ./django_app/media/:/app/media
-#    depends_on:
-#      - django_app
-#      - postgres
-#    ports:
-#      - "58231"
-#    command: celery -A django_app worker -l info
-#    env_file:
-#      - .env.docker.prod
+  celery_worker:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_worker_eq
+    restart: always
+    volumes:
+      - ./django_app/media/:/app/media
+    depends_on:
+      - django_app
+      - postgres
+    ports:
+      - "58231"
+    command: celery -A django_app worker -l info
+    env_file:
+      - .env.docker.prod
 
-#  celery_beat:
-#    build:
-#      context: ./django_app
-#      dockerfile: Dockerfile
-#    container_name: celery_beat_eq
-#    restart: always
-#    depends_on:
-#      - django_app
-#      - postgres
-#    volumes:
-#      - ./django_app/media/:/app/media
-#    ports:
-#      - "58232"
-#    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-#    env_file:
-#      - .env.docker.prod
+  celery_beat:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_beat_eq
+    restart: always
+    depends_on:
+      - django_app
+      - postgres
+    volumes:
+      - ./django_app/media/:/app/media
+    ports:
+      - "58232"
+    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env.docker.prod
 
 
 volumes:
