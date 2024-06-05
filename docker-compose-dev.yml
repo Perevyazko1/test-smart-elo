@@ -3,7 +3,7 @@ version: "3.8"
 services:
   postgres_db:
     build: ./postgres_db
-    container_name: postgres_db_eq
+    container_name: dev_postgres_db_eq
     restart: always
     volumes:
       - ./postgres_db/PGDATA:/var/lib/postgresql/data
@@ -22,7 +22,7 @@ services:
     build:
       context: ./pgadmin
       dockerfile: Dockerfile
-    container_name: pgadmin_eq
+    container_name: dev_pgadmin_eq
     restart: always
     depends_on:
       - postgres_db
@@ -34,7 +34,7 @@ services:
       - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   redis:
-    container_name: redis_eq
+    container_name: dev_redis_eq
     build: ./redis
     restart: always
     ports:
