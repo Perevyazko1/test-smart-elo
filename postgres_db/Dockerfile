@@ -1,12 +1,16 @@
 FROM postgres:15.7-alpine
 
-# Изменяем права доступа и владельца
-RUN mkdir -p /var/lib/postgresql/data && \
-    chown -R postgres:postgres /var/lib/postgresql/data && \
-    chmod 0700 /var/lib/postgresql/data
+# Копируем скрипт для исправления прав
+COPY fix-permissions.sh /usr/local/bin/fix-permissions.sh
 
-EXPOSE 5432
+# Даем скрипту права на выполнение
+RUN chmod +x /usr/local/bin/fix-permissions.sh
 
+# Переходим на пользователя postgres
 USER postgres
 
+# Используем наш скрипт как entrypoint
+ENTRYPOINT ["/usr/local/bin/fix-permissions.sh"]
+
+# Запускаем PostgreSQL
 CMD ["postgres"]
