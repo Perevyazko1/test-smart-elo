@@ -1,4 +1,4 @@
-FROM postgres:15.7-alpine
+FROM postgres:14
 
 # Копируем скрипт для исправления прав
 COPY fix-permissions.sh /usr/local/bin/fix-permissions.sh
