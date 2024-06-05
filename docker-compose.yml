@@ -7,7 +7,7 @@ services:
     expose:
       - "5432"
     volumes:
-      - ./postgres_db/PGDATA/:/var/lib/postgresql/data
+      - ./postgres_db/PGDATA/:/var/lib/postgresql/data 777
     env_file:
       - .env.docker.prod
 
