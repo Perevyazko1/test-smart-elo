@@ -5,8 +5,8 @@ import {InitialEqBodySchema} from "../types/eqPageSchema";
 import {fetchEqFilters} from "../api/fetchEqFilters";
 import {fetchWeekData} from "../api/fetchWeekData";
 import {fetchListData} from "../api/fetchListData";
-import {eqCardEntityAdapter} from "../types/eqCardType";
 import {fetchEqUpdCard} from "@pages/EqPage/model/api/fetchEqUpdCard";
+import {eqCardEntityAdapter} from "@pages/EqPage/model/types";
 
 const initialState: EqPageSchema = InitialEqBodySchema;
 

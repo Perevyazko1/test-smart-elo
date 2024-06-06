@@ -1,4 +1,3 @@
-import {EqCardType} from "@pages/EqPage/model/types/eqCardType";
 import {EqCardTable} from "@pages/EqPage/ui/EqInfo/EqCardTable";
 import {EqDepDetails} from "@pages/EqPage/ui/EqInfo/EqDepDetails";
 import {EqProdDetails} from "@pages/EqPage/ui/EqInfo/EqProdDetails";
@@ -6,9 +5,10 @@ import {TechProcessWidget} from "@widgets/TechProcessWidget/ui/TechProcessWidget
 import {Accordion} from "react-bootstrap";
 import {useMemo} from "react";
 import {IndicatorWrapper} from "@shared/ui";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 interface EqInfoProps {
-    card: EqCardType;
+    card: EqOrderProduct;
     updCallback?: () => void;
 }
 
@@ -58,7 +58,7 @@ export const EqInfo = (props: EqInfoProps) => {
                     <Accordion.Header>
                         <IndicatorWrapper
                             indicator={'comment'}
-                            show={!!card.comment_base || !!card.comment_case}
+                            show={!!card.order.comment_base || !!card.order.comment_case}
                             color={' bg-warning'}
                             right={"-22px"}
                         >

@@ -4,8 +4,8 @@ import {ThunkConfig} from "@app";
 import {ApiList} from "@shared/types";
 import {errorApiHandler} from "@shared/api";
 
-import {EqCardType} from "../types/eqCardType";
 import {ListTypes} from "../consts/listTypes";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 
 interface fetchListDataProps {
@@ -17,13 +17,13 @@ interface fetchListDataProps {
 }
 
 
-export const fetchListData = createAsyncThunk<ApiList<EqCardType>, fetchListDataProps, ThunkConfig<string>>(
+export const fetchListData = createAsyncThunk<ApiList<EqOrderProduct>, fetchListDataProps, ThunkConfig<string>>(
     'eq/fetchListData',
     async (params: fetchListDataProps, thunkAPI) => {
         const {extra} = thunkAPI;
 
         try {
-            const response = await extra.api.get<ApiList<EqCardType>>('/core/get_eq_cards/', {
+            const response = await extra.api.get<ApiList<EqOrderProduct>>('/core/get_eq_cards/', {
                 params: {
                     ...params,
                 }

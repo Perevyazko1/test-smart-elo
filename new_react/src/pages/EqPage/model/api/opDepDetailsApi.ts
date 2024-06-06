@@ -1,5 +1,5 @@
 import {rtkAPI} from "@shared/api";
-import {ResponseDepInfo} from "../types/departmentInfo";
+import {ResponseDepInfo} from "@pages/EqPage/model/types";
 
 interface OpDepDetailsApiProps {
     series_id: string,

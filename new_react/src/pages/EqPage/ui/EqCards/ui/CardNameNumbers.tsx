@@ -5,15 +5,15 @@ import {useAppModal, useAppQuery, useCurrentUser} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
 
-import {EqCardType} from "../../../model/types/eqCardType";
 import {setTargetNumber} from "../../../model/lib/setTargetNumber";
 import {createEqNumberLists} from "../../../model/lib/createEqNumberLists";
 
 import {EqNumbers} from "./EqNumbers";
 import {TarifficationWidget} from "@widgets/TarifficationWidget";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 interface CardNameNumbersProps {
-    card: EqCardType;
+    card: EqOrderProduct;
     assignmentsLists: {
         primary: number[];
         secondary: number[];

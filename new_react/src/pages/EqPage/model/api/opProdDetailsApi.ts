@@ -1,5 +1,5 @@
 import {rtkAPI} from "@shared/api";
-import {ResponseProdInfo} from "../types/departmentInfo";
+import {ResponseProdInfo} from "@pages/EqPage/model/types";
 
 
 const OpProdDetailsApi = rtkAPI.injectEndpoints({

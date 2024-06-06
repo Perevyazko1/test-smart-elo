@@ -5,15 +5,15 @@ import {useAppDispatch, useAppModal} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
 
-import {EqCardType} from "../../../model/types/eqCardType";
 import {eqPageActions} from "../../../model/slice/eqPageSlice";
 import {useCardHeight} from "../../../model/lib/useCardHeight";
 
 import {EqInfo} from "../../EqInfo/EqInfo";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 
 interface CardCounterProps {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const CardCounter = (props: CardCounterProps) => {
@@ -41,7 +41,7 @@ export const CardCounter = (props: CardCounterProps) => {
         >
             <IndicatorWrapper
                 indicator={'comment'}
-                show={!!card.comment_base || !!card.comment_case}
+                show={!!card.order.comment_base || !!card.order.comment_case}
                 color={' bg-warning'}
                 top={`${cardHeight - 17}px`}
             >
@@ -49,7 +49,7 @@ export const CardCounter = (props: CardCounterProps) => {
                     indicator={'tech-process'}
                     show={!card.product.technological_process}
                     color={' bg-danger'}
-                    top={`${!!card.comment_base || !!card.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
+                    top={`${!!card.order.comment_base || !!card.order.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
                 >
                     <div>
                         Всего:{card.card_info.count_all}

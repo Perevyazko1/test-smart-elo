@@ -2,8 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 import {eqPageActions} from "@pages/EqPage";
 import {errorApiHandler} from "@shared/api";
-
-import {EqCardType} from "../types/eqCardType";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 export enum Actions {
     AWAIT_TO_IN_WORK = 'await_to_in_work',
@@ -23,7 +22,7 @@ interface fetchEqUpdateCardProps {
 
 type ListTypes = 'in_work' | 'await' | 'ready';
 
-type UpdatedCards = Record<ListTypes, EqCardType>;
+type UpdatedCards = Record<ListTypes, EqOrderProduct>;
 
 
 export const fetchEqUpdCard = createAsyncThunk<UpdatedCards, fetchEqUpdateCardProps, ThunkConfig<string>>(

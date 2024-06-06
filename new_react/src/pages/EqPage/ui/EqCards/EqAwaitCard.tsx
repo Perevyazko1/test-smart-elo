@@ -4,7 +4,6 @@ import {APP_PERM} from "@shared/consts";
 import {useAppDispatch, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
 
 import {createEqNumberLists} from "../../model/lib/createEqNumberLists";
-import {EqCardType} from "../../model/types/eqCardType";
 import {Actions, fetchEqUpdCard} from "../../model/api/fetchEqUpdCard";
 
 import {EqCardBtn} from "./ui/EqCardBtn";
@@ -14,9 +13,10 @@ import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 interface EqAwaitCardProps extends HTMLAttributes<HTMLDivElement> {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 // Карточка блока ожидания

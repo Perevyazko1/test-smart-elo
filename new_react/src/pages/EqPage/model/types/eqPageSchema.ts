@@ -2,12 +2,12 @@ import {EntityState} from "@reduxjs/toolkit";
 
 import {ApiList} from "@shared/types";
 
-import {EqCardType} from "./eqCardType";
 import {ViewMode} from "../types/viewMode";
 import {WeekData} from "../types/weekInfo";
+import {EqOrderProduct} from "./index";
 
-export interface EqListData extends Omit<ApiList<EqCardType>, 'results'> {
-    results: EntityState<EqCardType>;
+export interface EqListData extends Omit<ApiList<EqOrderProduct>, 'results'> {
+    results: EntityState<EqOrderProduct>;
     isLoading: boolean | undefined;
     hasUpdated: boolean | undefined;
     reqId: number;

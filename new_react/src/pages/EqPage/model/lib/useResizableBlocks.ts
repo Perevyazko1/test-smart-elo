@@ -149,7 +149,7 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: O
     }));
 
     // Возвращаем размеры блоков из стейта, состояние отслеживаемого элемента, коллбек для сброса размеров и drag ref
-    // элемента который будем отслеживать
+    // элемента, который будем отслеживать
     return {
         ...state,
         isDragging,

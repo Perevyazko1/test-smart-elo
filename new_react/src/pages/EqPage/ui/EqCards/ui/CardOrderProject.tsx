@@ -2,11 +2,11 @@ import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
 import {useAppModal, useCurrentUser} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
-import {EqCardType} from "../../../model/types/eqCardType";
 
 interface CardOrderProjectProps {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const CardOrderProject = (props: CardOrderProjectProps) => {

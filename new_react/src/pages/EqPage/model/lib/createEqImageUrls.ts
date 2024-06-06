@@ -1,6 +1,7 @@
-import {EqCardType} from "../types/eqCardType";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
-export const createEqImageUrls = (card: EqCardType): {images: string[], thumbnails: string[]} => {
+
+export const createEqImageUrls = (card: EqOrderProduct): {images: string[], thumbnails: string[]} => {
     const imagesSet = new Set<string>();
     const thumbnailsSet = new Set<string>();
 

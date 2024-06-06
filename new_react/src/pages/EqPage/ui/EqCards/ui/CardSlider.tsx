@@ -7,11 +7,11 @@ import {useAppModal, useCompactMode, useCurrentUser} from "@shared/hooks";
 import cls from "./EqCard.module.scss";
 
 import {createEqImageUrls} from "../../../model/lib/createEqImageUrls";
-import {EqCardType} from "../../../model/types/eqCardType";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 
 interface CardSliderProps {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const CardSlider = (props: CardSliderProps) => {

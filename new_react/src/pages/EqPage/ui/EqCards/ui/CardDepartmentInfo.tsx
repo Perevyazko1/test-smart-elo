@@ -2,11 +2,11 @@ import {AssignmentInfo} from "@widgets/AssignmentInfo";
 import {useAppModal} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
-import {EqCardType} from "../../../model/types/eqCardType";
 
 interface CardDepartmentInfoProps {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {

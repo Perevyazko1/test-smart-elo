@@ -2,11 +2,11 @@ import {HTMLAttributes, useMemo} from "react";
 
 import cls from "./EqCard.module.scss";
 
-import {EqCardType} from "../../../model/types/eqCardType";
 import {useCardHeight} from "../../../model/lib/useCardHeight";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 interface EqCardBodyProps extends HTMLAttributes<HTMLDivElement> {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const EqCardBody = (props: EqCardBodyProps) => {

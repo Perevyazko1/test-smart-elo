@@ -1,14 +1,14 @@
 import {Button, Table} from "react-bootstrap";
-import {EqCardType} from "@pages/EqPage/model/types/eqCardType";
 import {getHumansDatetime} from "@shared/lib";
 import {IndicatorWrapper} from "@shared/ui";
 import {Link} from "react-router-dom";
 import {useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
+import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 
 interface EqCardTableProps {
-    card: EqCardType;
+    card: EqOrderProduct;
 }
 
 export const EqCardTable = (props: EqCardTableProps) => {
@@ -84,25 +84,25 @@ export const EqCardTable = (props: EqCardTableProps) => {
                     <td>
                         <IndicatorWrapper
                             indicator={'comment'}
-                            show={!!card.comment_case}
+                            show={!!card.order.comment_case}
                             color={' bg-warning'}
                         >
                             Комментарий чехол
                         </IndicatorWrapper>
                     </td>
-                    <td>{card.comment_case}</td>
+                    <td>{card.order.comment_case}</td>
                 </tr>
                 <tr>
                     <td>
                         <IndicatorWrapper
                             indicator={'comment'}
-                            show={!!card.comment_base}
+                            show={!!card.order.comment_base}
                             color={' bg-warning'}
                         >
                             Комментарий каркас
                         </IndicatorWrapper>
                     </td>
-                    <td>{card.comment_base}</td>
+                    <td>{card.order.comment_base}</td>
                 </tr>
                 {card.main_fabric &&
                     <tr>
