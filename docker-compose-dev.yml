@@ -2,11 +2,11 @@ version: "3.8"
 
 services:
   postgres_db:
-    build: ./postgres_db
+    build: services/postgres_db
     container_name: dev_postgres_db_eq
     restart: always
     volumes:
-      - ./postgres_db/PGDATA:/var/lib/postgresql/data
+      - ./services/postgres_db/PGDATA:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     env_file:
@@ -20,7 +20,7 @@ services:
 
   pgadmin:
     build:
-      context: ./pgadmin
+      context: ./services/pgadmin
       dockerfile: Dockerfile
     container_name: dev_pgadmin_eq
     restart: always
@@ -31,56 +31,11 @@ services:
     env_file:
       - .env.docker.prod
     volumes:
-      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
+      - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   redis:
     container_name: dev_redis_eq
-    build: ./redis
+    build: services/redis
     restart: always
     ports:
       - "6379:6379"
-#
-#  django_app:
-#    build:
-#      context: ./django_app
-#      dockerfile: Dockerfile
-#    container_name: django_app_eq
-#    restart: always
-#    depends_on:
-#      - redis
-#      - postgres_db
-#    ports:
-#      - "8000:8000"
-#    env_file:
-#      - .env
-#    volumes:
-#      - product_images:/app/media/images/products
-#    command: >
-#      sh -c "python3 manage.py makemigrations &&
-#             python3 manage.py migrate &&
-#             python3 manage.py runserver 0.0.0.0:8000"
-#
-#  celery_worker:
-#    build:
-#      context: ./django_app
-#      dockerfile: Dockerfile
-#    container_name: celery_worker_eq
-#    restart: always
-#    depends_on:
-#      - django_app
-#    ports:
-#      - "58231:58231"
-#    command: celery -A django_app worker -l info
-#
-#  celery_beat:
-#    build:
-#      context: ./django_app
-#      dockerfile: Dockerfile
-#    container_name: celery_beat_eq
-#    restart: always
-#    depends_on:
-#      - django_app
-#    ports:
-#      - "58232:58232"
-#    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-#

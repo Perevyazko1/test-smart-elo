@@ -1,4 +1,5 @@
-from core.models import ProductionStep, OrderProduct
+"""Get EQ card count data. """
+from core.models import OrderProduct, ProductionStep
 from staff.models import Department
 
 

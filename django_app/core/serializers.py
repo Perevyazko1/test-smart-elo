@@ -95,37 +95,9 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
 
-class ProductionStepTariffSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)
-    department = DepartmentSerializer(read_only=True)
-
-    approved_by = EmployeeSerializer(read_only=True)
-    approved_by_id = serializers.IntegerField(write_only=True)
-
-    proposed_by = EmployeeSerializer(read_only=True)
-    proposed_by_id = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = ProductionStepTariff
-        fields = [
-            'id',
-            'product',
-            'department',
-            'tariff',
-            'proposed_tariff',
-            'confirmation_date',
-            'proposed_date',
-            'approved_by',
-            'proposed_by_id',
-            'approved_by_id',
-            'proposed_by',
-        ]
-
-
 class ProductionStepSerializer(serializers.ModelSerializer):
     product = ProductSerializer(read_only=True)
     department = DepartmentSerializer(read_only=True)
-    production_step_tariff = ProductionStepTariffSerializer(read_only=True)
 
     class Meta:
         model = ProductionStep

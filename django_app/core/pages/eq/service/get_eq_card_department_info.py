@@ -1,3 +1,4 @@
+"""Get EQ card department info. """
 from core.models import Assignment
 from staff.models import Employee
 

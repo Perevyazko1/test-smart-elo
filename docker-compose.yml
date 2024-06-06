@@ -2,12 +2,13 @@ version: "3.8"
 
 services:
   postgres:
-    build: ./postgres_db
+    build: ./services/postgres_db
     container_name: postgres_db_eq
     expose:
       - "5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    restart: always
     env_file:
       - .env.docker.prod
 
@@ -27,11 +28,11 @@ services:
     volumes:
       - ./django_app/media/:/app/media
     command: >
-      sh -c "python3 manage.py runserver 0.0.0.0:8000"
+      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
 
   pgadmin:
     build:
-      context: ./pgadmin
+      context: ./services/pgadmin
       dockerfile: Dockerfile
     container_name: pgadmin_eq
     restart: always
@@ -42,7 +43,7 @@ services:
     env_file:
       - .env.docker.prod
     volumes:
-      - ./pgadmin/PGADMINDATA:/var/lib/pgadmin
+      - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   db-admin:
     image: adminer:4.8.1
@@ -52,21 +53,21 @@ services:
 
   redis:
     container_name: redis_eq
-    build: ./redis
+    build: ./services/redis
     ports:
       - "6379:6379"
     restart: always
 
   nginx:
     container_name: nginx_eq
-    build: ./nginx
+    build: ./services/nginx
     restart: always
     depends_on:
       - django_app
     volumes:
       - ./new_react/build/:/usr/share/nginx/html
       - ./django_app/media/:/usr/share/nginx/html/media
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
       - "80:80"
     env_file:

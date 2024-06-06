@@ -1,26 +1,33 @@
+"""Views for EQ Page. """
 from dataclasses import asdict
 
-from django.db.models import Sum
 from django.http import JsonResponse
+from django.db.models import Sum
+
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
-from core.consumers import ws_group_updates, EqNotificationActions
-from core.models import OrderProduct, Assignment, ProductionStep
-from core.pages.new_eq.serializers.serializers import EqCardSerializer
-from core.pages.new_eq.services.get_eq_req_params import get_eq_req_params
-from core.pages.new_eq.views.get_eq_card_queryset import get_eq_card_queryset
-from core.services.get_week_info import GetWeekInfo
-from staff.models import Transaction, Department, Employee
+from core.models import (
+    OrderProduct, Assignment, ProductionStep,
+)
+from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
-from .get_project_filter import get_project_filters
-from .get_view_modes import get_view_modes
-from .update_assignments import UpdateAssignments
+
+from ...consumers import EqNotificationActions, ws_group_updates
+from ...services.get_week_info import GetWeekInfo
+
+from .serializers import EqOrderProductSerializer
+
+from .service.get_eq_card_queryset import get_eq_card_queryset
+from .service.get_eq_req_params import get_eq_req_params
+from .service.get_project_filter import get_project_filters
+from .service.get_view_modes import get_view_modes
+from .service.update_assignments import UpdateAssignments
 
 
-class GetEqCards(viewsets.ModelViewSet):
+class EqCardsViewSet(viewsets.ModelViewSet):
     queryset = OrderProduct.objects.all()
-    serializer_class = EqCardSerializer
+    serializer_class = EqOrderProductSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -42,25 +49,25 @@ def update_card(request):
     action: str = request.data.get('action')
 
     UpdateAssignments(series_id=series_id,
-                      department=eq_params.department,
+                      department=eq_params['department'],
                       numbers=numbers,
                       action=action,
-                      employee=eq_params.user,
-                      view_mode=eq_params.view_mode_key
+                      employee=eq_params['user'],
+                      view_mode=eq_params['view_mode_key']
                       ).execute()
 
     queryset = OrderProduct.objects.get(series_id=series_id)
 
     return JsonResponse({
-        "await": EqCardSerializer(queryset, context={
+        "await": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'await',
         }).data,
-        "in_work": EqCardSerializer(queryset, context={
+        "in_work": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'in_work',
         }).data,
-        "ready": EqCardSerializer(queryset, context={
+        "ready": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'ready',
         }).data,
@@ -73,7 +80,7 @@ def get_eq_filters(request):
     mode = request.query_params.get('project_mode')
 
     project_filters = get_project_filters(mode)
-    view_modes = get_view_modes(eq_params.department)
+    view_modes = get_view_modes(eq_params['department'])
 
     return JsonResponse({
         "view_modes": view_modes,
@@ -85,20 +92,20 @@ def get_eq_filters(request):
 def get_week_data(request):
     eq_params = get_eq_req_params(request=request)
 
-    if eq_params.view_mode_key not in ['self', 'boss', 'unfinished'] and eq_params.view_mode_key is not None:
-        eq_params.user = Employee.objects.get(id=eq_params.view_mode_key)
+    if eq_params['view_mode_key'] not in ['self', 'boss', 'unfinished'] and eq_params['view_mode_key'] is not None:
+        eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
-    week_info = GetWeekInfo(week=eq_params.week, year=eq_params.year).execute()
+    week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
     earned = Assignment.objects.filter(
-        executor=eq_params.user,
-        department=eq_params.department,
+        executor=eq_params['user'],
+        department=eq_params['department'],
         inspector__isnull=False,
         date_completion__gte=week_info.date_range[0],
         date_completion__lt=week_info.date_range[1],
     ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
     transactions_sum = Transaction.objects.filter(
-        employee=eq_params.user,
+        employee=eq_params['user'],
         inspect_date__gte=week_info.date_range[0],
         inspect_date__lt=week_info.date_range[1],
         transaction_type="accrual",
@@ -120,15 +127,15 @@ def get_card(request):
     queryset = OrderProduct.objects.get(series_id=series_id)
 
     return JsonResponse({
-        "await": EqCardSerializer(queryset, context={
+        "await": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'await',
         }).data,
-        "in_work": EqCardSerializer(queryset, context={
+        "in_work": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'in_work',
         }).data,
-        "ready": EqCardSerializer(queryset, context={
+        "ready": EqOrderProductSerializer(queryset, context={
             'eq_params': eq_params,
             'target_list': 'ready',
         }).data,

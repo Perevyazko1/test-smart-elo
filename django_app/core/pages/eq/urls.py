@@ -1,11 +1,11 @@
 from django.urls import path, include
 from rest_framework import routers
 
-from .views.views import (
-    GetEqCards, update_card, get_eq_filters, get_week_data, get_card, update_assignments)
+from .views import (
+    EqCardsViewSet, update_card, get_eq_filters, get_week_data, get_card, update_assignments)
 
 router = routers.DefaultRouter()
-router.register(r'get_eq_cards', GetEqCards)
+router.register(r'get_eq_cards', EqCardsViewSet)
 
 
 urlpatterns = [

@@ -2,8 +2,21 @@
 from rest_framework import serializers
 
 from core.models import Assignment
-from core.serializers import OrderProductSerializer, ProductionStepTariffSerializer
+from core.serializers import OrderProductSerializer
 from staff.serializers import EmployeeSerializer, DepartmentSerializer
+
+
+class SimpleAssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        """Meta. """
+        model = Assignment
+        fields = [
+            'id',
+            'number',
+            'status',
+            'inspector',
+            'appointed_by_boss',
+        ]
 
 
 class AssignmentExtendedSerializer(serializers.ModelSerializer):
@@ -11,7 +24,6 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
     inspector = EmployeeSerializer()
     department = DepartmentSerializer()
     order_product = OrderProductSerializer()
-    tariff = ProductionStepTariffSerializer()
 
     class Meta:
         """Meta. """
@@ -25,7 +37,6 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'department',
             'executor',
             'inspector',
-            'tariff',
             'appointment_date',
             'date_completion',
             'inspect_date',

@@ -251,7 +251,7 @@ export const AssignmentPage = () => {
                                                         <td className={getStatusProps(assignment).bg}>
                                                             {getStatusProps(assignment).name}
                                                         </td>
-                                                        <td>{assignment.tariff?.tariff} </td>
+                                                        <td>{"ТАРИФ"} </td>
                                                         <td>
                                                             {
                                                                 `${assignment.executor?.last_name || ""} 

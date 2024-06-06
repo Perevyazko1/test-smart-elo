@@ -1,6 +1,5 @@
 import {Employee} from "@entities/Employee";
 import {Department} from "@entities/Department";
-import {Tariff} from "@entities/Tariff";
 import {EntityState} from "@reduxjs/toolkit";
 import {ApiList} from "@shared/types";
 import {OrderProduct} from "@entities/OrderProduct";
@@ -29,7 +28,6 @@ export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {
     order_product: OrderProduct;
     inspector: Employee | null;
     department: Department;
-    tariff: Tariff | null;
 }
 
 export interface AssignmentApiList extends ApiList<Assignment> {

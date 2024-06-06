@@ -1,7 +1,6 @@
 import {Fabric} from "@entities/Fabric";
 import {Order} from "@entities/Order";
 import {Product} from "@entities/Product";
-import {Tariff} from "@entities/Tariff";
 
 export interface BaseOrderProduct {
     id: number;

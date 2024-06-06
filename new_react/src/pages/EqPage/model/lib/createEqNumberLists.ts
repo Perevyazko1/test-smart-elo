@@ -1,6 +1,6 @@
-import {Assignment} from "@entities/Assignment";
+import {EqAssignment} from "@pages/EqPage/model/types";
 
-export const createEqNumberLists = (assignments: Assignment[], seriesSize: number) => {
+export const createEqNumberLists = (assignments: EqAssignment[], seriesSize: number) => {
     const primary: number[] = [];
     const secondary: number[] = [];
     const confirmed: number[] = [];
