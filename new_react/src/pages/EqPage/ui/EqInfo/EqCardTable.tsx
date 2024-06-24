@@ -137,9 +137,9 @@ export const EqCardTable = (props: EqCardTableProps) => {
                 </Button>
             </Link>
 
-            <Link to={
-                `/tariff?product__name=${card.product.name}`
-            }>
+            <Link
+                to={`/tariffication?product__name=${card.product.name}`}
+            >
                 <Button
                     className={'m-2'}
                     size={'sm'}
