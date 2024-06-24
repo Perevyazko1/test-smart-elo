@@ -28,9 +28,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const weekData = useAppSelector(getWeekData);
 
     useEffect(() => {
-        console.log('Сработал useEffect')
         if (weekData?.hasUpdated !== undefined && filtersReady) {
-            console.log('Пошел запрос недель')
             dispatch(fetchWeekData({
                 department_id: currentUser.current_department.id,
                 ...queryParameters

@@ -13,12 +13,14 @@ import {rtkAPI} from "@shared/api";
 import {AppNavbarSchema} from "@widgets/AppNavbar";
 import {TarifficationPageSchema} from "@pages/TarifficationPage";
 import {PostTarifficationSchema} from "@widgets/PostTarifficationWidget";
+import {TaskPageSchema} from "@pages/TaskPage";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
 
     // Асинхронные редюсеры
     tarifficationPage?: TarifficationPageSchema;
+    taskPage?: TaskPageSchema;
     eqPage?: EqPageSchema;
     appNavbar?: AppNavbarSchema;
     orderDetail?: OrderDetailsSchema;

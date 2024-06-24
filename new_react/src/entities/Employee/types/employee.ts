@@ -2,10 +2,11 @@ import {Group} from "@entities/Group";
 import {Department} from "@entities/Department";
 
 export interface BaseEmployee {
-    id?: number,
+    id: number,
     username: string,
     first_name: string | null,
     last_name: string | null,
+    patronymic: string | null,
     pin_code: number,
     current_department: number | null,
     departments: number[],

@@ -28,4 +28,5 @@ export const anonEmployee: Employee = {
     }],
     current_balance: '0',
     token: 'test_token',
+    patronymic: null,
 }

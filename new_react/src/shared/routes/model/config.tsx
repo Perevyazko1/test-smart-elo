@@ -12,6 +12,7 @@ import { ProductDetailsPage } from "@pages/ProductDetailsPage";
 import {OrdersPage} from "@pages/OrdersPage";
 import {OrderDetailPage} from "@pages/OrderDetailPage";
 import {TarifficationPage} from "@pages/TarifficationPage";
+import {TaskPage} from "@pages/TaskPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -33,6 +34,7 @@ enum AppRoutes {
     WAGES = 'wages',
     SPECIFICATIONS = 'specifications',
     ORDER_DETAILS = 'order_details',
+    TASK = 'task',
 }
 
 export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
@@ -47,6 +49,13 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         route: {path: '/eq', element: <EqPage/>, errorElement: <ErrorPage/>},
         name: 'ЭЛО',
         mobile: true,
+        navigate: true,
+        permissions: [APP_PERM.ELO_PAGE]
+    },
+    [AppRoutes.TASK]: {
+        route: {path: '/task', element: <TaskPage/>, errorElement: <ErrorPage/>},
+        name: 'Задачи',
+        mobile: false,
         navigate: true,
         permissions: [APP_PERM.ELO_PAGE]
     },

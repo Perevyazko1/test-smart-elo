@@ -6,11 +6,14 @@ from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+from staff.models import Department
+
 
 class EqNotificationActions(Enum):
     UPDATE_TARGET_LIST = 'update_eq_lists'
     UPDATE_TARGET_ITEM = 'update_target_item'
     UPDATE_NOTIFICATION = 'update_notification'
+    UPDATE_TARGET_TASK = 'update_target_task'
 
 
 @dataclass
@@ -61,6 +64,18 @@ def ws_group_updates(pin_code: str, notification_data: dict):
         async_to_sync(channel_layer.group_send)(
             str(department_number),
             {"type": "client_message", "message": asdict(result)}
+        )
+
+
+def ws_send_to_all(data):
+    channel_layer = get_channel_layer()
+    departments = Department.objects.all().exclude(
+        number__in=[0, 50]
+    )
+    for department in departments:
+        async_to_sync(channel_layer.group_send)(
+            str(department.number),
+            {"type": "client_message", "message": data}
         )
 
 

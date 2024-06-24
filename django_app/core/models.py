@@ -361,16 +361,6 @@ class ProductionStep(models.Model):
         blank=True
     )
 
-    # TODO удалить устаревший тариф
-    production_step_tariff = models.ForeignKey(
-        ProductionStepTariff,
-        verbose_name='Тарификация',
-        related_name="production_steps",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
-
     is_active = models.BooleanField('Этап задействован в производстве', default=True)
 
     confirmed_tariff = models.ForeignKey(

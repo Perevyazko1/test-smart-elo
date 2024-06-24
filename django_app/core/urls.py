@@ -24,7 +24,6 @@ urlpatterns = [
     path('', include('core.pages.eq.urls')),
     path('', include('core.pages.assignments_page.urls')),
     path('', include('core.pages.products_page.urls')),
-    path('', include('core.pages.new_tariff_page.urls')),
     path('', include('core.pages.orders_page.urls')),
 
     path('tariffication/', include('core.pages.tariffication_page.urls')),

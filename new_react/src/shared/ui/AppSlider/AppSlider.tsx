@@ -40,7 +40,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                 key={image}
             >
                 <img
-                    src={GET_STATIC_URL() + image}
+                    src={image.startsWith("http") || image.startsWith("blob")  ? image : GET_STATIC_URL() + image}
                     style={{maxWidth: width, maxHeight: height}}
                     className="rounded m-0 p-0"
                     alt={"Slide"}

@@ -5,21 +5,11 @@ import {eqPageActions} from "@pages/EqPage";
 import {SERVER_WS_ADDRESS} from "../../consts";
 import {ExtNotificationOptions} from "@shared/hooks";
 import {appNavbarActions} from "@widgets/AppNavbar";
+import {taskPageActions} from "@pages/TaskPage/model/slice";
 
 
 const MAX_RECONNECT_ATTEMPTS = 5;
 const RECONNECT_INTERVAL_MS = 5000;
-
-type WsMessageData = {
-    action: 'update_eq_lists' | 'update_target_item' | 'update_notification';
-    data: any;
-    lists: ['await' | 'in_work' | 'ready' | ''];
-}
-
-type WsMessage = {
-    initiator: number;
-    data: WsMessageData;
-}
 
 interface newWsConnectionProps {
     pin_code: number,
@@ -60,12 +50,13 @@ export const newWsConnection = (props: newWsConnectionProps) => {
                 } else {
                     showNotification("Соединение с сервером потеряно, перезагрузите страницу.")
                     console.error('Превышено количество попыток восстановления соединения: ', MAX_RECONNECT_ATTEMPTS);
+                    window.location.reload()
                 }
             }
         };
 
         socket.onmessage = (event) => {
-            const data: WsMessage = JSON.parse(event.data)
+            const data = JSON.parse(event.data)
             if (data.data.action === 'update_eq_lists' && data.initiator !== pin_code) {
                 data.data.lists.forEach((list_name: string) => {
                     switch (list_name) {
@@ -94,6 +85,13 @@ export const newWsConnection = (props: newWsConnectionProps) => {
             if (data.data.action === 'update_notification') {
                 dispatch(appNavbarActions.listHasUpdated())
             }
+
+            if (data.action === 'UPDATE_TASK') {
+                if (Number(data.exclude) !== pin_code) {
+                    dispatch(taskPageActions.addNoRelevantId(data.data))
+                }
+            }
+
         }
     }
     connect();

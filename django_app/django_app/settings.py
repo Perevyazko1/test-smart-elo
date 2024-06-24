@@ -46,6 +46,7 @@ INSTALLED_APPS = [
 
     'staff',
     'core',
+    'tasks',
 
     'django_celery_beat',
     'django_celery_results',

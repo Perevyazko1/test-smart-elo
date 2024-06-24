@@ -1,6 +1,6 @@
 import {memo, ReactNode, useContext, useEffect, useMemo} from "react";
 import {Button, Offcanvas} from "react-bootstrap";
-import {useNavigate} from "react-router-dom";
+import {Link, useLocation, useNavigate} from "react-router-dom";
 
 import {IsDesktopContext} from "@app";
 import {AppNavigation} from "@widgets/AppNavigation";
@@ -18,8 +18,8 @@ import {fetchHasNotifications} from "../model/api/fetchHasNotifications";
 
 
 interface AppNavbarProps {
-    showNav: boolean;
-    closeClb: () => void;
+    showNav?: boolean;
+    closeClb?: () => void;
     children?: ReactNode;
 }
 
@@ -34,8 +34,9 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     const hasUpdated = useAppSelector(getNavHasUpdated);
     const navHasNotifications = useAppSelector(getNavHasNotifications);
     const dispatch = useAppDispatch();
-    
-    
+
+    const location = useLocation();
+
     const isDesktop = useContext(IsDesktopContext);
     const {openModal, closeModal} = useAppModal();
     const {currentUser} = useCurrentUser();
@@ -61,68 +62,97 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
         navigate(-1);
     }
 
-    const logoOpacity = useMemo(() => (
-        window.history.length > 1 ? '1' : '0.6'
-    ), [])
+    const backBtnActive = useMemo(() => {
+        return window.history.length > 1;
+    }, [])
 
     if (isDesktop) {
         return (
             <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-                <div className={'bg-black text-white d-flex align-items-center justify-content-center p-3 appNavbar'}>
+                <div className={'bg-black text-white d-flex align-items-center justify-content-center appNavbar'}>
                     <div className={'d-flex'}
                          style={{minWidth: '1150px', maxWidth: '100%'}}
                     >
-                        <div className={'d-flex justify-content-between align-items-center gap-3'}
-                             style={{minWidth: '1150px', maxWidth: '100%'}}
+                        <div className={'d-flex justify-content-between align-items-center gap-2'}
+                             style={{minWidth: '1220px', maxWidth: '100%'}}
                         >
-                            <div className={'d-flex flex-fill align-items-center gap-3'}
-                                 style={{maxWidth: '85%'}}>
+                            <div>
+                                <Button variant={'outline-dark'}
+                                        onClick={backHandler}
+                                        disabled={!backBtnActive}
+                                        style={{
+                                            width: '35px',
+                                        }}
+                                        className={'me-1'}
+                                >
+                                    <i className={`${backBtnActive && 'text-white'} fas fa-chevron-left`}/>
+                                </Button>
+
+                                <Button variant={'outline-dark'}
+                                        onClick={() => window.location.reload()}
+                                        style={{
+                                            width: '35px',
+                                        }}
+                                        className={'px-0'}
+                                >
+                                    <i className="text-white fas fa-sync-alt"/>
+                                </Button>
+                            </div>
+                            <div
+                                className={'d-flex flex-fill align-items-center gap-3'}
+                                style={{maxWidth: '85%'}}
+                            >
+
+
                                 <div>
-                                    <img src={Logo} alt={'SZMK logo'} style={{
-                                        maxHeight: '38px',
-                                        opacity: logoOpacity,
-                                    }} onClick={backHandler}/>
+                                    <Link to={location.pathname !== 'task'
+                                            ? 'task'
+                                            : ''
+                                    }>
+                                        <img
+                                            src={Logo}
+                                            alt={'SZMK logo'}
+                                            style={{
+                                                maxHeight: '38px',
+                                            }}
+                                        />
+                                    </Link>
                                 </div>
                                 <div className={'d-flex gap-1'}>
                                     {children}
-                                    <Button variant={'outline-dark'}
-                                            onClick={() => window.location.reload()}
-                                    >
-                                        <i className="text-white fas fa-sync-alt fs-6"/>
-                                    </Button>
                                 </div>
-                            </div>
-
-                            <div className={'d-flex align-items-center'}>
-                                {isBoss &&
-                                    <Button variant={'black'}
-                                            onClick={notificationHandler}
-                                    >
-                                        {isLoading ?
-                                            <i className="far fa-bell text-muted"/>
-                                            :
-                                            <>
-                                                {navHasNotifications ?
-
-                                                    <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
-                                                        <i className="far fa-bell"/>
-                                                    </IndicatorWrapper>
-                                                    :
-                                                    <i className="far fa-bell"/>
-                                                }
-                                            </>
-                                        }
-                                    </Button>
-                                }
-
-                                <AppNavigation isDesktop={isDesktop}/>
-                            </div>
                         </div>
 
+                        <div className={'d-flex align-items-center'}>
+                            {isBoss &&
+                                <Button variant={'black'}
+                                        onClick={notificationHandler}
+                                >
+                                    {isLoading ?
+                                        <i className="far fa-bell text-muted"/>
+                                        :
+                                        <>
+                                            {navHasNotifications ?
+
+                                                <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
+                                                    <i className="far fa-bell"/>
+                                                </IndicatorWrapper>
+                                                :
+                                                <i className="far fa-bell"/>
+                                            }
+                                        </>
+                                    }
+                                </Button>
+                            }
+
+                            <AppNavigation isDesktop={isDesktop}/>
+                        </div>
                     </div>
+
                 </div>
-            </DynamicComponent>
-        )
+            </div>
+    </DynamicComponent>
+    )
     }
 
     return (

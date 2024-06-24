@@ -12,7 +12,7 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = Employee
-    list_display = ['username', 'first_name', "last_name", 'pin_code']
+    list_display = ['username', 'first_name', "last_name", 'pin_code', 'current_department']
     list_display_links = ['username']
     readonly_fields = ['current_balance']
 

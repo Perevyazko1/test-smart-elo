@@ -23,7 +23,6 @@ export const fetchWeekData = createAsyncThunk<WeekInfo, fetchWeekDataProps, Thun
                 }
             });
             if (response.data) {
-                console.log(response.data)
                 return response.data;
             } else {
                 throw new Error();

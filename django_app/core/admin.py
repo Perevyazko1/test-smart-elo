@@ -80,8 +80,8 @@ class AssignmentAdmin(admin.ModelAdmin):
 
 @admin.register(ProductionStep)
 class ProductionStepAdmin(admin.ModelAdmin):
-    list_display = ['department', 'product', 'production_step_tariff']
-    list_display_links = ['department', 'product', 'production_step_tariff']
+    list_display = ['department', 'product', 'confirmed_tariff']
+    list_display_links = ['department', 'product', 'confirmed_tariff']
 
     list_filter = ['department']
 
