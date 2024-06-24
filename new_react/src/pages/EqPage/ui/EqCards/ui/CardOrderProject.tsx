@@ -26,7 +26,7 @@ export const CardOrderProject = (props: CardOrderProjectProps) => {
              onClick={onClickHandler}
              style={{
                  fontSize: '14px',
-                 backgroundColor: currentUser.current_department.color || "#ffffff"
+                 backgroundColor: currentUser.current_department?.color || "#ffffff"
              }}
         >
             <div className={'fs-7 fw-bold text-center'}>

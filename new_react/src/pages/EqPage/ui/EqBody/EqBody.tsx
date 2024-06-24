@@ -51,7 +51,7 @@ export const EqBody = (props: EqBodyProps) => {
 
     // Поочередно запрашиваем обновленные данные по ID пока список не будет пуст. Список чистится внутри редьюсера.
     useEffect(() => {
-        if (noRelevantId && noRelevantId.length > 0) {
+        if (noRelevantId && noRelevantId.length > 0 && currentUser.current_department) {
             dispatch(fetchEqUpdCard({
                 mode: 'GET',
                 department_id: currentUser.current_department.id,

@@ -14,7 +14,7 @@ export const EqDepDetails = (props: EqDepDetailsProps) => {
 
     const {data, isLoading} = useDepDetails({
         series_id: seriesId,
-        department_id: currentUser.current_department.id,
+        department_id: currentUser.current_department?.id || 0,
     });
 
     return (

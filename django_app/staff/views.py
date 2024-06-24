@@ -12,6 +12,11 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            is_active=True
+        )
+
 
 class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()

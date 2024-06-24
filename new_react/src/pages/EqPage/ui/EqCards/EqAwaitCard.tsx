@@ -26,7 +26,7 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
 
     const {currentUser} = useCurrentUser();
     const {queryParameters} = useAppQuery();
-    
+
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
     const [cardDisabled, setCardDisabled] = useState(false);
@@ -41,6 +41,9 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
     ] = useState(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
 
     const getBtnClb = () => {
+        if (!currentUser.current_department) {
+            return;
+        }
         setCardDisabled(true)
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,

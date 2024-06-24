@@ -54,7 +54,11 @@ export const TaskForm = (props: TaskFormProps) => {
     }, [formData]);
 
     const sortedUserList = [...(userList || [])].sort((a, b) => {
-        return a.current_department.number - b.current_department.number;
+        if (a.current_department && b.current_department) {
+            return a.current_department.number - b.current_department.number;
+        } else {
+            return a.id - b.id
+        }
     });
 
     const handleSubmit = (e: FormEvent) => {

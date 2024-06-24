@@ -28,7 +28,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             loading={props.isLoading}
             options={props.userList}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
-            groupBy={(option: Employee) => option.current_department.name}
+            groupBy={(option: Employee) => option.current_department?.name || ""}
             sx={{width: 350}}
             onChange={(event: any, newValue: Employee[] | null) => {
                 console.log(newValue?.map(user => user.id))

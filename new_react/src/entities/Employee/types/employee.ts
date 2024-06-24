@@ -18,5 +18,5 @@ export interface BaseEmployee {
 export interface Employee extends Omit<BaseEmployee, 'groups' | 'departments' | 'current_department'>{
     groups: Group[],
     departments: Department[],
-    current_department: Department,
+    current_department: Department | null,
 }

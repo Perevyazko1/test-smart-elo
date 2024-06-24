@@ -34,7 +34,7 @@ export const EqNav = (props: EqNavProps) => {
 
             <EqFilters/>
 
-            {!currentUser.current_department.single && !isViewer &&
+            {!currentUser.current_department?.single && !isViewer &&
                 <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
             }
 

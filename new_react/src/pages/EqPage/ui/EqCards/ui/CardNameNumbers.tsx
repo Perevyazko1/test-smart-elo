@@ -59,7 +59,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
         <div className={cls.nameNumberBlock + ' bg-light rounded'}>
             <div className={cls.productName}>
                 {card.further_packaging && "📦"}
-                {currentUser.current_department.piecework_wages &&
+                {currentUser.current_department?.piecework_wages &&
                     <Button
                         size={"sm"}
                         className={'p-0 px-1 me-1 fs-7'}

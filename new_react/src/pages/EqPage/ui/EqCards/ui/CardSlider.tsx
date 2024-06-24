@@ -55,7 +55,7 @@ export const CardSlider = (props: CardSliderProps) => {
                         ? " bg-warning"
                         : " bg-danger"
                 }
-                price={currentUser.current_department.piecework_wages
+                price={currentUser.current_department?.piecework_wages
                     ?
                     card.card_info.tariff
                         ? card.card_info.tariff

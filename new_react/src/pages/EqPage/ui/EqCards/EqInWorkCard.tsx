@@ -58,6 +58,9 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
     }, [card.assignments, queryParameters.series_size])
 
     const getBtnClb = (first: boolean) => {
+        if (!currentUser.current_department) {
+            return;
+        }
         if (returnLocked && !first) {
             openModal(
                 <h4 className={'mx-4'}>

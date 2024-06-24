@@ -40,7 +40,7 @@ export const EqDepWidget = () => {
     };
 
     const setDepClb = (depName: string) => {
-        if (depName !== currentUser.current_department.name) {
+        if (depName !== currentUser.current_department?.name) {
             setIsLoading(true);
             fetchData(depName).then(() => {
                 dispatch(eqPageActions.allListClear())
@@ -62,7 +62,7 @@ export const EqDepWidget = () => {
             </div>
         )
     }
-    if (error) {
+    if (error || !currentUser.current_department) {
         return (<div>{error}</div>)
     }
 

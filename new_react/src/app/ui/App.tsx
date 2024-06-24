@@ -35,17 +35,17 @@ export const App = () => {
             socketRef.current = null;
         }
         // Далее проверка не анонимный ли пользователь
-        if (currentUser.current_department.number !== 0) {
+        if (currentUser.current_department?.number !== 0) {
             socketRef.current = newWsConnection({
                     pin_code: currentUser.pin_code,
-                    department_number: currentUser.current_department.number,
+                    department_number: currentUser.current_department?.number || 1,
                     showNotification,
                     dispatch
                 }
             )
         }
 
-    }, [currentUser.current_department.number, currentUser.pin_code, dispatch, showNotification])
+    }, [currentUser.current_department?.number, currentUser.pin_code, dispatch, showNotification])
 
 
     useEffect(() => {

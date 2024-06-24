@@ -49,6 +49,9 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
 
 
     const confirmClb = (first: boolean) => {
+        if (!currentUser.current_department) {
+            return;
+        }
         setCardDisabled(true)
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
@@ -58,7 +61,7 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
             ...queryParameters,
         })).then(() => {
             setCardDisabled(false);
-            if (currentUser.current_department.piecework_wages) {
+            if (currentUser.current_department?.piecework_wages) {
                 dispatch(eqPageActions.weekDataHasUpdated());
             }
         })
@@ -67,16 +70,16 @@ export const EqReadyCard = memo((props: EqReadyCardProps) => {
     const getBtnClb = (first: boolean) => {
         confirmClb(first);
     };
-    
+
     const showFirstBtn = useMemo(() => {
-        return assignmentsLists.primary.length > 0 
-            && !!card.product.technological_process 
-            && visaPerm 
+        return assignmentsLists.primary.length > 0
+            && !!card.product.technological_process
+            && visaPerm
             && !isViewer;
     }, [assignmentsLists.primary.length, card.product.technological_process, isViewer, visaPerm]);
-    
+
     const showSecondBtn = useMemo(() => {
-        return assignmentsLists.primary.length > 0 
+        return assignmentsLists.primary.length > 0
             && !isViewer
     }, [assignmentsLists.primary.length, isViewer])
 

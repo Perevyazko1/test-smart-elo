@@ -28,7 +28,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const weekData = useAppSelector(getWeekData);
 
     useEffect(() => {
-        if (weekData?.hasUpdated !== undefined && filtersReady) {
+        if (weekData?.hasUpdated !== undefined && filtersReady && currentUser.current_department) {
             dispatch(fetchWeekData({
                 department_id: currentUser.current_department.id,
                 ...queryParameters
@@ -70,7 +70,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
             className={'d-flex justify-content-between align-items-center px-2 rounded border border-1'}
             style={{
                 height: '36px',
-                backgroundColor: currentUser.current_department.color || '#ffffff',
+                backgroundColor: currentUser.current_department?.color || '#ffffff',
                 opacity: isDragging ? 0.5 : 1,
             }}
         >

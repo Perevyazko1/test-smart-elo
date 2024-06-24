@@ -26,7 +26,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
             options={props.userList}
             loading={props.isLoading}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
-            groupBy={(option: Employee) => option.current_department.name}
+            groupBy={(option: Employee) => option.current_department?.name || ""}
             sx={{width: 200}}
             onChange={(event: any, newValue: Employee | null) => {
                 props.setFormTask({

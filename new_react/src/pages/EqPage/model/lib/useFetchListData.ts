@@ -42,7 +42,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                         target_list: listType,
                         offset: 0,
                         limit: limit,
-                        department_id: currentUser.current_department.id,
+                        department_id: currentUser.current_department?.id || 0,
                         reqId,
                         ...queryParameters,
                     })).unwrap();
@@ -53,7 +53,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                             target_list: listType,
                             limit: initialResponse.count - limit, // Запрашиваем оставшиеся элементы
                             offset: limit,
-                            department_id: currentUser.current_department.id,
+                            department_id: currentUser.current_department?.id || 0,
                             reqId,
                             ...queryParameters, // Запрашиваем все элементы
                         })).unwrap();
@@ -67,7 +67,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
         }
         //eslint-disable-next-line
     }, [...deps,
-        filtersReady,
+        filtersReady
     ]);
 
     return;

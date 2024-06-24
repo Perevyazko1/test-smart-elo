@@ -37,7 +37,7 @@ export const EqFilters = () => {
     }, [behalfPerm, bossPerm, isViewer, viewModes?.filters]);
 
     useEffect(() => {
-        if (currentUser.current_department.number && !initialLoad) {
+        if (currentUser.current_department?.number && !initialLoad) {
             if (!bossPerm) {
                 setQueryParam('view_mode', '');
             }
@@ -47,7 +47,7 @@ export const EqFilters = () => {
             }));
         }
         // eslint-disable-next-line
-    }, [bossPerm, currentUser.current_department.number, dispatch, initialLoad, queryParameters.mode]);
+    }, [bossPerm, currentUser.current_department?.number, dispatch, initialLoad, queryParameters.mode]);
 
     useEffect(() => {
         let edited = false;

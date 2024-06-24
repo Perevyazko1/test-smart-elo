@@ -59,7 +59,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
 
     const awaitTechProcessClb = () => {
         navigate("/?view_mode=boss");
-        if (currentUser.current_department.number !== 1) {
+        if (currentUser.current_department?.number !== 1) {
             alert("После перенаправления на страницу ЭЛО переключитесь на конструкторский отдел.")
         }
         props.closeClb();
