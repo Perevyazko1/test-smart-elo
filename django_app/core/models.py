@@ -260,65 +260,6 @@ class OrderProductComment(models.Model):
         return '{}'.format(f'{self.author}: {self.order_product.series_id} - {self.text[:50]}')
 
 
-class ProductionStepTariff(models.Model):
-    """Класс хранящий данные о тарификации этапа производства"""
-
-    class Meta:
-        verbose_name = 'Тарификация этапа'
-        verbose_name_plural = 'Тарификации этапов'
-
-    product = models.ForeignKey(
-        Product,
-        verbose_name='Изделие',
-        related_name='production_step_tariffs',
-        on_delete=models.CASCADE
-    )
-
-    department = models.ForeignKey(
-        Department,
-        verbose_name='Отдел',
-        related_name='production_step_tariffs',
-        on_delete=models.CASCADE
-    )
-
-    tariff = models.IntegerField("Утвержденный тариф", default=0)
-    proposed_tariff = models.IntegerField("Предложенный тариф", default=0)
-
-    confirmation_date = models.DateTimeField(
-        'Дата/Время утверждения',
-        blank=True,
-        null=True,
-    )
-    proposed_date = models.DateTimeField(
-        'Дата/Время предложения',
-        blank=True,
-        null=True,
-    )
-
-    approved_by = models.ForeignKey(
-        Employee,
-        verbose_name='Тарификацию утвердил',
-        related_name='production_step_tariffs',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
-
-    proposed_by = models.ForeignKey(
-        Employee,
-        verbose_name='Тарификацию предложил',
-        related_name='production_step_proposed_tariffs',
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
-
-    def __str__(self):
-        confirmation_date = self.confirmation_date.date() if self.confirmation_date else 'Без даты'
-        return '{}'.format(f'{self.tariff} {self.department.name} '
-                           f'{confirmation_date} {self.product} {self.approved_by}')
-
-
 class Tariff(models.Model):
     """Class for different tariffs. """
     amount = models.IntegerField("Сумма", default=0)
@@ -406,16 +347,6 @@ class Assignment(models.Model):
 
     notes = models.CharField('Заметки', max_length=250, blank=True)
     status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")
-
-    # TODO удалить устаревший тариф
-    tariff = models.ForeignKey(
-        ProductionStepTariff,
-        related_name='assignments',
-        verbose_name='Тарификация',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-    )
 
     new_tariff = models.ForeignKey(
         Tariff,

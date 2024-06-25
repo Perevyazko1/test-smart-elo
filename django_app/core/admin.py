@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from core.models import Product, ProductPicture, Fabric, Order, OrderProduct, Assignment, ProductionStep, \
-    TechnologicalProcess, ProductionStepTariff, OrderProductComment, Tariff
+    TechnologicalProcess, OrderProductComment, Tariff
 
 
 @admin.register(Product)
@@ -100,7 +100,6 @@ class TechnologicalProcessAdmin(admin.ModelAdmin):
     search_fields = ['name', 'schema']
 
 
-admin.site.register(ProductionStepTariff)
 admin.site.register(Fabric)
 admin.site.register(OrderProductComment)
 admin.site.register(Tariff)

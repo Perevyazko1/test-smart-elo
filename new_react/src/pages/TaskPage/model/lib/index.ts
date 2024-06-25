@@ -40,6 +40,8 @@ export const getViewModeText = (view_mode: TaskViewMode): string => {
             return 'Видна отделу';
         case TaskViewMode.EveryoneVisible:
             return 'Видна всем';
+        case TaskViewMode.ForParticipants:
+            return 'Мне и исполнителям';
         default:
             return 'Неизвестный режим видимости';
     }

@@ -4,11 +4,11 @@ import {getEmployeeName} from "@shared/lib";
 
 
 interface AppointedByBlockProps {
-    value?: Employee;
+    value: Employee;
 }
 
 
-export const AppointedByBlock = (props: AppointedByBlockProps) => {
+export const CreatedByBlock = (props: AppointedByBlockProps) => {
 
     return (
         <Autocomplete
@@ -30,7 +30,7 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
-                    label="Задачу назначил"
+                    label="Задачу создал"
                     variant="standard"
                 />}
         />

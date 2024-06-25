@@ -19,6 +19,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
 
     return (
         <Autocomplete
+            className={'flex-fill'}
             size={'small'}
             readOnly={props.disabled}
             value={getCoExecutors}
@@ -29,7 +30,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             options={props.userList}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             groupBy={(option: Employee) => option.current_department?.name || ""}
-            sx={{width: 350}}
+            sx={{width: 450}}
             onChange={(event: any, newValue: Employee[] | null) => {
                 console.log(newValue?.map(user => user.id))
                 props.setFormTask({

@@ -19,7 +19,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):
-    queryset = Department.objects.all()
+    queryset = Department.objects.all().exclude(
+        number__in=[0, 50]
+    )
     serializer_class = DepartmentSerializer
 
 

@@ -36,6 +36,15 @@ class Employee(AbstractUser):
     departments = models.ManyToManyField(Department, related_name='employees', verbose_name='Отделы', blank=True)
     patronymic = models.CharField('Отчество', max_length=256, blank=True, null=True)
 
+    boss = models.ForeignKey(
+        'Employee',
+        verbose_name='Кому подчиняется',
+        related_name='boss_for',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+
     current_department = models.ForeignKey(
         Department,
         related_name='employees_current',

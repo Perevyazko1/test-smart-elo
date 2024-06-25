@@ -17,7 +17,7 @@ class AssignmentGenerator:
     ):
         assignment_tariff = ProductionStep.objects.get(
             product=order_product.product, department=department
-        ).production_step_tariff
+        ).confirmed_tariff
 
         if department.single:
             numbers = [1]

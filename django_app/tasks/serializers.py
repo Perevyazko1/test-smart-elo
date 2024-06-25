@@ -23,8 +23,8 @@ class TaskReadSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'status', 'urgency', 'view_mode', 'for_department',
-            'title', 'description', 'deadline', 'created', 'ready_at',
-            'verified_at', 'appointed_by', 'executor', 'co_executors',
+            'title', 'description', 'deadline', 'created_at', 'ready_at',
+            'verified_at', 'appointed_at', 'appointed_by', 'executor', 'co_executors',
             'task_images',
         ]
 
@@ -34,6 +34,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
         child=serializers.ImageField(), write_only=True, required=False
     )
     title = serializers.CharField(required=False)
+    created_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
     appointed_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
     executor = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), allow_null=True, required=False)
     co_executors = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), many=True, required=False)
@@ -46,7 +47,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
             'id', 'status', 'urgency', 'view_mode', 'for_department',
             'title', 'description', 'deadline',
             'appointed_by', 'executor', 'co_executors',
-            'images', 'ready_at', 'verified_at',
+            'images', 'appointed_at', 'ready_at', 'verified_at', 'created_by',
         ]
 
     def create(self, validated_data):

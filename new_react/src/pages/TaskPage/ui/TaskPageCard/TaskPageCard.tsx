@@ -91,24 +91,35 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
     const getActionData = (first: boolean): UpdateTask => {
         if (cardType === TaskStatus.Pending) {
-            return {
+            const data: UpdateTask = {
                 id: card.id,
                 status: TaskStatus.InProgress,
-                executor: currentUser.id,
+                executor: card.executor?.id || currentUser.id,
+                appointed_by: currentUser.id,
             };
+            if (!card.appointed_at) {
+                data.appointed_at = new Date().toISOString();
+            }
+            return data;
+        } else if (cardType === TaskStatus.InProgress && !first) {
+            const data: UpdateTask = {
+                id: card.id,
+                status: TaskStatus.Pending,
+            }
+            if (card.executor?.id === card.appointed_by?.id) {
+                data.executor = null;
+            }
+            if (card.appointed_by?.id === currentUser.id) {
+                data.appointed_at = '';
+            }
+            return data;
         } else if (cardType === TaskStatus.InProgress && first) {
             return {
                 id: card.id,
                 status: TaskStatus.Completed,
                 ready_at: new Date().toISOString(),
             };
-        } else if (cardType === TaskStatus.InProgress && !first) {
-            return {
-                id: card.id,
-                status: TaskStatus.Pending,
-                executor: null,
-            };
-        } else if (cardType === TaskStatus.Completed && first) {
+        }  else if (cardType === TaskStatus.Completed && first) {
             return {
                 id: card.id,
                 verified_at: new Date().toISOString(),
@@ -180,7 +191,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     <hr className={'m-0 p-0'}/>
                     ВИД:<b>{getViewModeText(card.view_mode)}</b>
                     <hr className={'m-0 p-0'}/>
-                    CОЗД:<b>{getHumansDatetime(card.created || "", 'short')}</b>
+                    CОЗД:<b>{getHumansDatetime(card.created_at || "", 'short')}</b>
                 </div>
 
                 <div

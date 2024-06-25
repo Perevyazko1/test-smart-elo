@@ -45,6 +45,7 @@ class Task(models.Model):
         ('1', 'Только мне'),
         ('2', 'Видна отделу'),
         ('3', 'Видна всем'),
+        ('4', 'Мне и исполнителям'),
     ]
     view_mode = models.CharField(
         "Видимость",
@@ -65,15 +66,27 @@ class Task(models.Model):
     description = models.TextField("Описание", max_length=5000, blank=True, null=True)
 
     deadline = models.DateTimeField("Крайний срок", blank=True, null=True)
-    created = models.DateTimeField("Когда создана", auto_now_add=True)
+    created_at = models.DateTimeField("Когда создана", auto_now_add=True)
     ready_at = models.DateTimeField("Когда готова", blank=True, null=True)
     verified_at = models.DateTimeField("Когда завизирована", blank=True, null=True)
+    appointed_at = models.DateTimeField("Когда назначена", blank=True, null=True)
+
+    created_by = models.ForeignKey(
+        Employee,
+        verbose_name="Кем создана",
+        related_name="created_tasks",
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
 
     appointed_by = models.ForeignKey(
         Employee,
         verbose_name="Кем назначена",
         related_name="appointed_tasks",
         on_delete=models.CASCADE,
+        blank=True,
+        null=True,
     )
 
     executor = models.ForeignKey(

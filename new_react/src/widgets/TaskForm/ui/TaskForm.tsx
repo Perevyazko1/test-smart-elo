@@ -9,7 +9,7 @@ import {useCreateTask, useEmployeeList, useUpdateTask} from "../model/api";
 
 import {ImageUploadBlock} from "./ui/ImageUploadBlock";
 import {DatesBlock} from "./ui/DatesBlock";
-import {AppointedByBlock} from "./ui/AppointedByBlock";
+import {CreatedByBlock} from "./ui/CreatedByBlock";
 import {ExecutorBlock} from "./ui/ExecutorBlock";
 import {CoExecutorBlock} from "./ui/CoExecutorBlock";
 import {ViewModeBlock} from "./ui/ViewModeBlock";
@@ -17,6 +17,9 @@ import {ForDepartmentBlock} from "./ui/ForDepartmentBlock";
 import {RatingBlock} from "./ui/RatingBlock";
 import {TextBlock} from "./ui/TextBlock";
 import {convertDateTime, prepareFormData} from "@shared/lib";
+import {AppointedByBlock} from "@widgets/TaskForm/ui/ui/AppointedByBlock";
+import {DeadlineBlock} from "@widgets/TaskForm/ui/ui/DeadlineBlock";
+import {InputGroup} from "react-bootstrap";
 
 
 interface TaskFormProps {
@@ -35,7 +38,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
     const [formData, setFormData] = useState<CreateTask>({
         deadline: task?.deadline ? convertDateTime(task.deadline) : "",
-        appointed_by: task?.appointed_by?.id || currentUser.id,
+        created_by: task?.created_by?.id || currentUser.id,
         status: task?.status || TaskStatus.Pending,
         title: task?.title || '',
         description: task?.description || '',
@@ -92,7 +95,7 @@ export const TaskForm = (props: TaskFormProps) => {
             onSubmit={handleSubmit}
         >
             {task ?
-                <h4>Задача № {task.id}</h4>
+                <h4>Задача № {task.id} </h4>
                 :
                 <h4>Новая задача</h4>
             }
@@ -105,20 +108,43 @@ export const TaskForm = (props: TaskFormProps) => {
                     formTask={formData}
                     setFormTask={setFormData}
                 />
-                <DatesBlock
-                    task={task}
-                    disabled={variant === "read_only"}
-                    onChange={handleChange}
-                    formData={formData}
-                />
+                <div>
+
+                    <DeadlineBlock
+                        disabled={variant === "read_only"}
+                        onChange={handleChange}
+                        formData={formData}
+                    />
+                    <hr/>
+                    <DatesBlock
+                        task={task}
+                    />
+                </div>
             </div>
 
             <hr/>
 
-            <div className="d-flex gap-3 mb-3">
-                <AppointedByBlock
-                    value={task?.appointed_by || currentUser}
+            <div className="d-flex align-items-end gap-3 mb-3">
+                <CreatedByBlock
+                    value={task?.created_by || currentUser}
                 />
+                <AppointedByBlock
+                    value={task?.appointed_by}
+                />
+
+                <InputGroup className={'w-auto'}>
+                    <InputGroup.Text style={{width: '150px'}} className={'text-muted'}>
+                        Назначена:
+                    </InputGroup.Text>
+                    <input
+                        type="datetime-local"
+                        disabled
+                        value={convertDateTime(task?.appointed_at)}
+                    />
+                </InputGroup>
+            </div>
+
+            <div className="d-flex gap-3 mb-3">
                 <ExecutorBlock
                     disabled={variant === 'read_only'}
                     setFormTask={setFormData}
@@ -153,7 +179,6 @@ export const TaskForm = (props: TaskFormProps) => {
                     setFormTask={setFormData}
                 />
             </div>
-
             <hr/>
 
             <TextBlock
@@ -161,6 +186,9 @@ export const TaskForm = (props: TaskFormProps) => {
                 formTask={formData}
                 setFormTask={setFormData}
             />
+
+            <hr/>
+
 
             {variant === "create" &&
                 <Button

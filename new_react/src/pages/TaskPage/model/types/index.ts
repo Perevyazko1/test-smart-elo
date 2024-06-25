@@ -1,9 +1,8 @@
 import {Department} from "@entities/Department";
 import {Employee} from "@entities/Employee";
+import {ApiList} from "@shared/types";
 
 import {TaskStatus, TaskUrgency, TaskViewMode} from "../consts";
-import {ApiList} from "@shared/types";
-import {CreateTask} from "@widgets/TaskForm/model/types";
 import {WeekData} from "@pages/EqPage/model/types/weekInfo";
 
 interface TaskImage {
@@ -22,10 +21,12 @@ export interface Task {
     description?: string;
 
     deadline?: string;
-    created?: string;
+    created_at?: string;
     ready_at?: string;
     verified_at?: string;
+    appointed_at?: string;
 
+    created_by?: Employee;
     appointed_by?: Employee;
     executor?: Employee;
     co_executors?: Employee[];

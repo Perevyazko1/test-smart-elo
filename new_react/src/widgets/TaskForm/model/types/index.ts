@@ -9,10 +9,12 @@ type ExtendedFields =
     'id' |
     'created' |
     'ready_at' |
+    'created_by' |
     'verified_at';
 
 export interface CreateTask extends Omit<Task, ExtendedFields> {
-    appointed_by: number | null;
+    created_by: number;
+    appointed_by?: number | null;
     for_department?: number;
     executor: number | null;
     co_executors: number[];

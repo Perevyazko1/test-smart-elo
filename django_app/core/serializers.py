@@ -105,7 +105,6 @@ class ProductionStepSerializer(serializers.ModelSerializer):
             'id',
             'product',
             'department',
-            'production_step_tariff',
         ]
 
 

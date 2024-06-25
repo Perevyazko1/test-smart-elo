@@ -26,6 +26,7 @@ class CustomUserAdmin(UserAdmin):
             "email",
             'pin_code',
             'current_balance',
+            'boss',
             'departments',
             'current_department')
         }),

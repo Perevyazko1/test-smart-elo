@@ -15,5 +15,6 @@ export enum TaskUrgency {
 export enum TaskViewMode {
     OnlyMe = '1',
     DepartmentVisible = '2',
-    EveryoneVisible = '3'
+    EveryoneVisible = '3',
+    ForParticipants = '4',
 }
