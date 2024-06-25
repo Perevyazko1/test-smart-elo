@@ -21,12 +21,12 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         return queryset.filter(
-            Q(view_mode='1', appointed_by=self.request.user) |
-            Q(view_mode='2', appointed_by=self.request.user) |
+            Q(view_mode='1', created_by=self.request.user) |
+            Q(view_mode='2', created_by=self.request.user) |
             Q(view_mode='2', for_department__in=self.request.user.departments.all()) |
             Q(view_mode='2', for_department__isnull=True) |
             Q(view_mode='3') |
-            Q(view_mode='4', appointed_by=self.request.user) |
+            Q(view_mode='4', created_by=self.request.user) |
             Q(view_mode='4', executor=self.request.user) |
             Q(view_mode='4', co_executors=self.request.user)
         )

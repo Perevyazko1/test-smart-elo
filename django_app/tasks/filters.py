@@ -23,7 +23,7 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.filter(status=value).filter(
                 Q(executor=self.request.user) |
                 Q(co_executors=self.request.user) |
-                Q(appointed_by=self.request.user)
+                Q(created_by=self.request.user)
             )
         if value == '3':
             year = self.request.query_params.get("year")
@@ -36,7 +36,7 @@ class TaskModelFilter(django_filters.FilterSet):
             ).filter(
                 Q(executor=self.request.user) |
                 Q(co_executors=self.request.user) |
-                Q(appointed_by=self.request.user)
+                Q(created_by=self.request.user)
             )
         if value == '4':
             return queryset.filter(
