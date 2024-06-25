@@ -119,7 +119,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 status: TaskStatus.Completed,
                 ready_at: new Date().toISOString(),
             };
-        }  else if (cardType === TaskStatus.Completed && first) {
+        } else if (cardType === TaskStatus.Completed && first) {
             return {
                 id: card.id,
                 verified_at: new Date().toISOString(),
@@ -127,7 +127,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         } else {
             return {
                 id: card.id,
-                verified_at: '',
+                ready_at: '',
                 status: TaskStatus.InProgress,
             };
         }
@@ -233,6 +233,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                         {getButtonIcon(false)}
                     </button>
                 }
+
             </div>
 
         </div>
