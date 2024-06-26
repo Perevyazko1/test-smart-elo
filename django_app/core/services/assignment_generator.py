@@ -34,7 +34,7 @@ class AssignmentGenerator:
                 number=number,
                 order_product=order_product,
                 department=department,
-                tariff=assignment_tariff,
+                new_tariff=assignment_tariff,
                 notes='Создан автоматически',
                 status=status,
             )
