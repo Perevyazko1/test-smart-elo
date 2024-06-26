@@ -218,3 +218,74 @@ input[type="datetime-local"]:disabled {
   overflow-x: hidden;
   overflow-y: auto;
 }
+
+/* Стили для datetime-local input */
+input[type="date"] {
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+/* Стили для активного datetime-local input */
+input[type="date"]:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: inset 0 0 0 .2rem rgba(0, 123, 255, .25);
+}
+
+/* Стили для datetime-local input в состоянии hover */
+input[type="date"]:hover {
+  color: #495057;
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Стили для отключенного datetime-local input */
+input[type="date"]:disabled {
+  background-color: #e9ecef;
+  opacity: 1;
+}
+
+
+/* Стили для datetime-local input */
+input[type="time"] {
+  padding: .375rem .75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+/* Стили для активного datetime-local input */
+input[type="time"]:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: inset 0 0 0 .2rem rgba(0, 123, 255, .25);
+}
+
+/* Стили для datetime-local input в состоянии hover */
+input[type="time"]:hover {
+  color: #495057;
+  background-color: #e9ecef;
+  border-color: #adb5bd;
+}
+
+/* Стили для отключенного datetime-local input */
+input[type="time"]:disabled {
+  background-color: #e9ecef;
+  opacity: 1;
+}

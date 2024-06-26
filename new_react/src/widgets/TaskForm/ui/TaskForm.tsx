@@ -1,4 +1,4 @@
-import React, {ChangeEvent, FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useState} from "react";
 import {Button} from "@mui/material";
 
 import {useCurrentUser} from "@shared/hooks";
@@ -20,6 +20,7 @@ import {convertDateTime, prepareFormData} from "@shared/lib";
 import {AppointedByBlock} from "@widgets/TaskForm/ui/ui/AppointedByBlock";
 import {DeadlineBlock} from "@widgets/TaskForm/ui/ui/DeadlineBlock";
 import {InputGroup} from "react-bootstrap";
+import {UpdateTask} from "@pages/TaskPage/model/types";
 
 
 interface TaskFormProps {
@@ -80,13 +81,44 @@ export const TaskForm = (props: TaskFormProps) => {
         }
     };
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const {name, value} = e.target;
-        setFormData({
-            ...formData,
-            [name]: value
-        });
+    const cancelClb = () => {
+        if (task?.id) {
+            updateTask({
+                id: task.id,
+                data: prepareFormData({
+                    ...formData,
+                    status: TaskStatus.Cancelled,
+                    ready_at: new Date().toISOString(),
+                    co_executors: task.co_executors?.map(user => user.id),
+                }),
+                updateMode: 'all',
+            }).then(onSubmitClb)
+        }
     };
+
+    const returnClb = () => {
+        if (task?.id) {
+            const data: UpdateTask = {
+                id: task.id,
+                status: TaskStatus.Pending,
+                co_executors: task.co_executors?.map(user => user.id),
+                ready_at: '',
+            }
+            if (task.appointed_by?.id === currentUser.id) {
+                data.appointed_by = null;
+                data.appointed_at = '';
+                if (task.executor?.id === currentUser.id) {
+                    data.executor = null;
+                }
+            }
+
+            updateTask({
+                id: task.id,
+                data: prepareFormData(data),
+                updateMode: 'all',
+            }).then(onSubmitClb)
+        }
+    }
 
     return (
         <form
@@ -112,7 +144,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
                     <DeadlineBlock
                         disabled={variant === "read_only"}
-                        onChange={handleChange}
+                        setFormTask={setFormData}
                         formData={formData}
                     />
                     <hr/>
@@ -129,17 +161,21 @@ export const TaskForm = (props: TaskFormProps) => {
                     value={task?.created_by || currentUser}
                 />
                 <AppointedByBlock
-                    value={task?.appointed_by}
+                    value={formData.appointed_by ?
+                        currentUser
+                        :
+                        task?.appointed_by
+                    }
                 />
 
                 <InputGroup className={'w-auto'}>
-                    <InputGroup.Text style={{width: '150px'}} className={'text-muted'}>
+                    <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
                         Назначена:
                     </InputGroup.Text>
                     <input
                         type="datetime-local"
                         disabled
-                        value={convertDateTime(task?.appointed_at)}
+                        value={convertDateTime(formData.appointed_at || task?.appointed_at)}
                     />
                 </InputGroup>
             </div>
@@ -202,14 +238,42 @@ export const TaskForm = (props: TaskFormProps) => {
             }
 
             {variant === 'edit' &&
-                <Button
-                    variant={'outlined'}
-                    color="inherit"
-                    type={"submit"}
-                    disableElevation
-                >
-                    Изменить
-                </Button>
+                <div>
+                    <Button
+                        className={'me-2'}
+                        variant={'outlined'}
+                        color="inherit"
+                        type={"submit"}
+                        disableElevation
+                    >
+                        Изменить
+                    </Button>
+
+                    {formData.status !== TaskStatus.Cancelled
+                        ?
+                        <Button
+                            variant={'outlined'}
+                            color="warning"
+                            type={"button"}
+                            disableElevation
+                            onClick={cancelClb}
+                        >
+                            Отменить
+                        </Button>
+                        :
+
+                        <Button
+                            variant={'outlined'}
+                            color="warning"
+                            type={"button"}
+                            disableElevation
+                            onClick={returnClb}
+                        >
+                            Вернуть
+                        </Button>
+                    }
+
+                </div>
             }
         </form>
     );

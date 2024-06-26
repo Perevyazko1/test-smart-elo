@@ -3,6 +3,7 @@ import {Department} from "@entities/Department";
 import React, {useMemo} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {useDepartmentList} from "@widgets/TaskForm/model/api";
+import {TaskViewMode} from "@pages/TaskPage";
 
 interface ForDepartmentBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -45,6 +46,7 @@ export const ForDepartmentBlock = (props: ForDepartmentBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
+                    required={formTask.view_mode === TaskViewMode.DepartmentVisible}
                     label="Отдел"
                     variant="standard"
                 />}

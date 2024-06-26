@@ -15,6 +15,7 @@ class TaskImageSerializer(serializers.ModelSerializer):
 class TaskReadSerializer(serializers.ModelSerializer):
     task_images = TaskImageSerializer(many=True, read_only=True)
     appointed_by = EmployeeSerializer()
+    created_by = EmployeeSerializer()
     executor = EmployeeSerializer()
     co_executors = EmployeeSerializer(many=True)
     for_department = DepartmentSerializer()
@@ -23,7 +24,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'status', 'urgency', 'view_mode', 'for_department',
-            'title', 'description', 'deadline', 'created_at', 'ready_at',
+            'title', 'description', 'deadline', 'created_at', 'created_by', 'ready_at',
             'verified_at', 'appointed_at', 'appointed_by', 'executor', 'co_executors',
             'task_images',
         ]
@@ -35,7 +36,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
     )
     title = serializers.CharField(required=False)
     created_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
-    appointed_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False)
+    appointed_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False, allow_null=True)
     executor = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), allow_null=True, required=False)
     co_executors = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), many=True, required=False)
     for_department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), allow_null=True,

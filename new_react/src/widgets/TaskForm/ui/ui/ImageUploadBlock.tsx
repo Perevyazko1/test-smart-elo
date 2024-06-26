@@ -49,10 +49,10 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
             setImagesUrl([]);
             alert('Please upload valid image files.');
         }
-        console.log(imagesUrl)
     };
 
-    return (<div className={'d-flex gap-3 flex-fill'}>
+    return (
+        <div className={'d-flex gap-3 flex-fill'}>
             <Button
                 disabled={disabled}
                 component="label"

@@ -17,13 +17,23 @@ export const ReadySection = () => {
 
     useEffect(() => {
         if (filtersInited) {
-            dispatch(getTaskCards({
-                status: TaskStatus.Completed,
-                sort_mode: queryParameters.sort_mode,
-                view_mode: queryParameters.view_mode,
-                week: queryParameters.week,
-                year: queryParameters.year,
-            }))
+            if (queryParameters.view_mode !== '3') {
+                dispatch(getTaskCards({
+                    status: TaskStatus.Completed,
+                    sort_mode: queryParameters.sort_mode,
+                    view_mode: queryParameters.view_mode,
+                    week: queryParameters.week,
+                    year: queryParameters.year,
+                }))
+            } else {
+                dispatch(getTaskCards({
+                    status: TaskStatus.Cancelled,
+                    sort_mode: queryParameters.sort_mode,
+                    view_mode: queryParameters.view_mode,
+                    week: queryParameters.week,
+                    year: queryParameters.year,
+                }))
+            }
         }
     }, [dispatch, filtersInited, queryParameters.sort_mode, queryParameters.view_mode, queryParameters.week, queryParameters.year]);
 

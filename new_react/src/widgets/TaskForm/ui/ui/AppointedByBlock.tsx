@@ -9,13 +9,14 @@ interface AppointedByBlockProps {
 
 
 export const AppointedByBlock = (props: AppointedByBlockProps) => {
+    const {value} = props;
 
     return (
         <Autocomplete
             size={'small'}
             disablePortal
             readOnly
-            defaultValue={props.value}
+            value={value}
             options={[]}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             sx={{

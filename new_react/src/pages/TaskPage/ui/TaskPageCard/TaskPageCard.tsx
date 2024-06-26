@@ -44,17 +44,27 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
             />
         )
     };
-    
-    const editLocked = useMemo(() => {
-        return card.appointed_by?.id !== currentUser.id;
-    }, [card.appointed_by, currentUser])
 
-    const locked = false;
+    const editLocked = useMemo(() => {
+        return card.created_by?.id !== currentUser.id;
+    }, [card.created_by, currentUser]);
+
+    const locked = useMemo(() => {
+        if (cardType === TaskStatus.InProgress) {
+            return card.appointed_by?.id !== currentUser.id
+        }
+        if (cardType === TaskStatus.Completed) {
+            return card.created_by?.id !== currentUser.id
+        }
+        return false
+    }, [card.appointed_by?.id, card.created_by?.id, cardType, currentUser.id]);
 
     const getButtonIcon = useCallback((first: boolean) => {
         if (cardType === TaskStatus.Pending) {
             return <i className="fas fa-angle-double-left fs-2"/>;
-        } else if (locked) {
+        } else if (cardType === TaskStatus.InProgress && locked && !first) {
+            return <i className="fas fa-lock fs-5"/>;
+        } else if (cardType === TaskStatus.Completed && locked && first) {
             return <i className="fas fa-lock fs-5"/>;
         } else if (cardType === TaskStatus.InProgress && first) {
             return <i className="fas fa-check fs-3"/>;
@@ -86,7 +96,26 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     }
 
     const updClb = (first: boolean) => {
-        dispatch(updateTask(getActionData(first)));
+        if (cardType === TaskStatus.InProgress && !first && locked) {
+            openModal(
+                <>
+                    <h4 className={'my-5'}>
+                        Задачу нельзя вернуть в ожидание так как она была назначена персонально.
+                    </h4>
+                    <h4 className={'my-5'}>
+                        Вернуть задачу в ожидание может пользователь назначивший задачу.
+                    </h4>
+                </>
+            )
+        } else if (cardType === TaskStatus.Completed && first && locked) {
+            openModal(
+                <h4 className={'my-5'}>
+                    Завизировать выполнение задачи может пользователь, который создал данную задачу.
+                </h4>
+            )
+        } else {
+            dispatch(updateTask(getActionData(first)));
+        }
     }
 
     const getActionData = (first: boolean): UpdateTask => {
@@ -95,22 +124,25 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 id: card.id,
                 status: TaskStatus.InProgress,
                 executor: card.executor?.id || currentUser.id,
-                appointed_by: currentUser.id,
+                co_executors: card.co_executors?.map(user => user.id),
             };
             if (!card.appointed_at) {
                 data.appointed_at = new Date().toISOString();
+            }
+            if (!card.appointed_by) {
+                data.appointed_by = currentUser.id;
             }
             return data;
         } else if (cardType === TaskStatus.InProgress && !first) {
             const data: UpdateTask = {
                 id: card.id,
                 status: TaskStatus.Pending,
-            }
-            if (card.executor?.id === card.appointed_by?.id) {
-                data.executor = null;
+                co_executors: card.co_executors?.map(user => user.id),
             }
             if (card.appointed_by?.id === currentUser.id) {
-                data.appointed_at = '';
+                if (card.executor?.id === currentUser.id) {
+                    data.executor = null;
+                }
             }
             return data;
         } else if (cardType === TaskStatus.InProgress && first) {
@@ -118,28 +150,34 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 id: card.id,
                 status: TaskStatus.Completed,
                 ready_at: new Date().toISOString(),
+                co_executors: card.co_executors?.map(user => user.id),
             };
         } else if (cardType === TaskStatus.Completed && first) {
             return {
                 id: card.id,
                 verified_at: new Date().toISOString(),
+                co_executors: card.co_executors?.map(user => user.id),
             };
         } else {
             return {
                 id: card.id,
                 ready_at: '',
                 status: TaskStatus.InProgress,
+                co_executors: card.co_executors?.map(user => user.id),
             };
         }
     }
 
     const hideFirstBtn = useMemo(() => {
-        return cardType === TaskStatus.Completed && card.verified_at
-    }, [card.verified_at, cardType]);
+        if (cardType === TaskStatus.Completed && card.verified_at) {
+            return true;
+        }
+        return card.status === TaskStatus.Cancelled;
+    }, [card.status, card.verified_at, cardType]);
 
     const hideSecondBtn = useMemo(() => {
-        return cardType === TaskStatus.Pending || card.verified_at
-    }, [card.verified_at, cardType]);
+        return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;
+    }, [card.status, card.verified_at, cardType]);
 
     return (
         <div style={{padding: ".1rem"}}>
@@ -157,6 +195,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     <button
                         className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant(true)}`}
                         onClick={() => updClb(true)}
+                        style={{minWidth: '39px', maxWidth: '39px'}}
                     >
                         {getButtonIcon(true)}
                     </button>
@@ -217,18 +256,26 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     </div>
                 </div>
 
-                <div className={'bg-light rounded fs-7'} style={{padding: '0 .1rem'}}>
-                    Назначил:<br/>
-                    <b>{getEmployeeName(card.appointed_by, 'short')}</b>
+                <div className={'bg-light rounded fs-7'}
+                     style={{
+                         padding: '0 .3rem 0 .1rem',
+                         overflowY: 'hidden',
+                         overflowX: 'auto',
+                         minWidth: '90px'
+                     }}
+                >
+                    Создал:<br/>
+                    <b className={'text-nowrap'}>{getEmployeeName(card.created_by, 'short')}</b>
                     <br/>
-                    Ответственный:<br/>
-                    <b>{getEmployeeName(card.executor, 'short')}</b>
+                    Исполнитель:<br/>
+                    <b className={'text-nowrap'}>{getEmployeeName(card.executor, 'short')}</b>
                 </div>
 
                 {!hideSecondBtn &&
                     <button
                         className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant(false)}`}
                         onClick={() => updClb(false)}
+                        style={{minWidth: '39px', maxWidth: '39px'}}
                     >
                         {getButtonIcon(false)}
                     </button>

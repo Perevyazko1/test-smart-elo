@@ -41,8 +41,8 @@ export const getViewModeText = (view_mode: TaskViewMode): string => {
         case TaskViewMode.EveryoneVisible:
             return 'Видна всем';
         case TaskViewMode.ForParticipants:
-            return 'Мне и исполнителям';
+            return 'Исполнителям';
         default:
-            return 'Неизвестный режим видимости';
+            return 'Ошибка';
     }
 };

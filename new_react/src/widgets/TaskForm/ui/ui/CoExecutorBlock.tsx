@@ -32,7 +32,6 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             groupBy={(option: Employee) => option.current_department?.name || ""}
             sx={{width: 450}}
             onChange={(event: any, newValue: Employee[] | null) => {
-                console.log(newValue?.map(user => user.id))
                 props.setFormTask({
                     ...props.formTask,
                     co_executors: newValue?.map(user => user.id) || [],

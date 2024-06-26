@@ -15,7 +15,7 @@ export const DatesBlock = (props: DatesBlockProps) => {
         <div>
 
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted'}>
+                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
                     Создана:
                 </InputGroup.Text>
                 <input
@@ -27,7 +27,7 @@ export const DatesBlock = (props: DatesBlockProps) => {
 
 
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted'}>
+                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
                     Готова:
                 </InputGroup.Text>
                 <input
@@ -37,7 +37,7 @@ export const DatesBlock = (props: DatesBlockProps) => {
                 />
             </InputGroup>
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted'}>
+                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
                     Завизирована:
                 </InputGroup.Text>
                 <input

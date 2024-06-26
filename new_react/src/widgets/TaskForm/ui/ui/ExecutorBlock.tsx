@@ -3,6 +3,7 @@ import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
 import React, {useMemo} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
+import {useCurrentUser} from "@shared/hooks";
 
 interface ExecutorBlockProps {
     disabled: boolean;
@@ -13,27 +14,42 @@ interface ExecutorBlockProps {
 }
 
 export const ExecutorBlock = (props: ExecutorBlockProps) => {
-    const getInitialValue = useMemo (() => {
-        return props.userList.find(user => user.id === props.formTask.executor) || null;
-    }, [props.formTask.executor, props.userList])
+    const {disabled, formTask, userList, isLoading, setFormTask} = props;
+    const {currentUser} = useCurrentUser();
+    const getInitialValue = useMemo(() => {
+        return props.userList.find(user => user.id === formTask.executor) || null;
+    }, [formTask.executor, props.userList])
+
+    const changeClb = (event: any, newValue: Employee | null) => {
+        if (newValue) {
+            setFormTask({
+                ...formTask,
+                executor: newValue?.id || null,
+                appointed_at: new Date().toISOString(),
+                appointed_by: currentUser.id,
+            })
+        } else {
+            props.setFormTask({
+                ...formTask,
+                executor: null,
+                appointed_at: "",
+                appointed_by: null,
+            })
+        }
+    }
 
     return (
         <Autocomplete
             size={'small'}
-            readOnly={props.disabled}
+            readOnly={disabled}
             disablePortal
             value={getInitialValue}
-            options={props.userList}
-            loading={props.isLoading}
+            options={userList}
+            loading={isLoading}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             groupBy={(option: Employee) => option.current_department?.name || ""}
             sx={{width: 200}}
-            onChange={(event: any, newValue: Employee | null) => {
-                props.setFormTask({
-                    ...props.formTask,
-                    executor: newValue?.id || null,
-                })
-            }}
+            onChange={changeClb}
             renderInput={(params) =>
                 <TextField
                     {...params}

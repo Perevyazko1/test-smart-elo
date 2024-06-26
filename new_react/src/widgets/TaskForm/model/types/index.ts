@@ -7,7 +7,6 @@ type ExtendedFields =
     'co_executors' |
     'for_department' |
     'id' |
-    'created' |
     'ready_at' |
     'created_by' |
     'verified_at';

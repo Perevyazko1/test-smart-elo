@@ -46,17 +46,27 @@ class TaskModelFilter(django_filters.FilterSet):
 
     def filter_view_mode(self, queryset: QuerySet, name, value):
         if value == '0':
-            return queryset
+            return queryset.exclude(
+                status='4',
+            )
         if value == '1':
             return queryset.filter(
                 view_mode='1'
+            ).exclude(
+                status='4',
             )
         if value == '2':
             return queryset.filter(
                 view_mode='2',
                 for_department__in=self.request.user.departments.all()
+            ).exclude(
+                status='4',
             )
-        return queryset
+        if value == '3':
+            return queryset.filter(
+                status='4',
+            )
+        return []
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):
         if value == '0':

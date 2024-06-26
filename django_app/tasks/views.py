@@ -29,7 +29,7 @@ class TaskViewSet(viewsets.ModelViewSet):
             Q(view_mode='4', created_by=self.request.user) |
             Q(view_mode='4', executor=self.request.user) |
             Q(view_mode='4', co_executors=self.request.user)
-        )
+        ).distinct()
 
     def get_serializer_class(self):
         if self.action in ['list', 'retrieve']:
