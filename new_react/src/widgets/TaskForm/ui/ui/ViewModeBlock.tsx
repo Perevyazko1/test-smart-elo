@@ -26,7 +26,9 @@ export const ViewModeBlock = (props: ViewModeBlockProps) => {
     }));
 
     return (
-        <FormControl sx={{width: 200}}>
+        <FormControl sx={{
+            width: 200
+        }}>
             <InputLabel id="view-mode-select-label">Видимость</InputLabel>
             <Select
                 readOnly={disabled}

@@ -20,8 +20,6 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
 
-    const timeLeft = useCountdown(card.deadline);
-
     const cardHeight = 80;
     const {openModal, closeModal} = useAppModal();
 
@@ -175,6 +173,8 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         }
         return card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
+
+    const timeLeft = useCountdown(hideFirstBtn ? undefined :card.deadline);
 
     const hideSecondBtn = useMemo(() => {
         return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;

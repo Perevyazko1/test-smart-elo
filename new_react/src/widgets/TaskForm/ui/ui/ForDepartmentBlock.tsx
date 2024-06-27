@@ -42,7 +42,9 @@ export const ForDepartmentBlock = (props: ForDepartmentBlockProps) => {
             options={departmentList || []}
             getOptionLabel={(option: Department) => option.name}
             onChange={editClb}
-            sx={{width: 200}}
+            sx={{
+                width: 200
+            }}
             renderInput={(params) =>
                 <TextField
                     {...params}

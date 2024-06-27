@@ -48,7 +48,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
             loading={isLoading}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             groupBy={(option: Employee) => option.current_department?.name || ""}
-            sx={{width: 200}}
+            sx={{ width: 200 }}
             onChange={changeClb}
             renderInput={(params) =>
                 <TextField

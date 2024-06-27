@@ -30,7 +30,9 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             options={props.userList}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             groupBy={(option: Employee) => option.current_department?.name || ""}
-            sx={{width: 450}}
+            sx={{
+                width: 450
+            }}
             onChange={(event: any, newValue: Employee[] | null) => {
                 props.setFormTask({
                     ...props.formTask,
