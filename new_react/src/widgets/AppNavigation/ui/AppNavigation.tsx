@@ -75,7 +75,7 @@ export const AppNavigation = (props: {isDesktop: boolean}) => {
     }
 
     return (
-        <AppDropdown selected={getSelectedName()}>
+        <AppDropdown selected={getSelectedName()} >
             {renderOptions}
             <div className={'py-2'}>
                 <AppSwitch checked={isCompactMode} label={'Сжатый вид'} onSwitch={switchCompactMode}/>

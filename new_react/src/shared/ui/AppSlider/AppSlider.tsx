@@ -58,7 +58,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
             spaceBetween={50}
             slidesPerView={1}
             pagination={{
-                type: 'bullets',
+                dynamicBullets: true,
                 horizontalClass: cls.swiperPagination,
             }}
             style={{width: width, height: height}}

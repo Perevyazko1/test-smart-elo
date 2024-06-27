@@ -21,6 +21,7 @@ import {AppointedByBlock} from "@widgets/TaskForm/ui/ui/AppointedByBlock";
 import {DeadlineBlock} from "@widgets/TaskForm/ui/ui/DeadlineBlock";
 import {InputGroup} from "react-bootstrap";
 import {UpdateTask} from "@pages/TaskPage/model/types";
+import {getStatusText} from "@pages/TaskPage/model/lib";
 
 
 interface TaskFormProps {
@@ -34,8 +35,8 @@ export const TaskForm = (props: TaskFormProps) => {
     const {task, variant, onSubmitClb} = props;
     const {currentUser} = useCurrentUser();
     const {data: userList, isLoading: usersIsLoading} = useEmployeeList({});
-    const [createTask] = useCreateTask();
-    const [updateTask] = useUpdateTask();
+    const [createTask, {isLoading: isCreated}] = useCreateTask();
+    const [updateTask, {isLoading: isUpdated}] = useUpdateTask();
 
     const [formData, setFormData] = useState<CreateTask>({
         deadline: task?.deadline ? convertDateTime(task.deadline) : "",
@@ -72,51 +73,76 @@ export const TaskForm = (props: TaskFormProps) => {
                 id: task.id,
                 data: prepareFormData(formData),
                 updateMode: 'all',
-            }).then(onSubmitClb)
+            }).then(() => {
+                alert('Задача изменена ✅');
+                if (onSubmitClb) {
+                    onSubmitClb();
+                }
+            })
         } else {
             createTask({
                 data: prepareFormData(formData),
                 updateMode: 'all',
-            }).then(onSubmitClb)
+            }).then(() => {
+                alert('Задача создана ✅');
+                if (onSubmitClb) {
+                    onSubmitClb();
+                }
+            });
         }
     };
 
     const cancelClb = () => {
         if (task?.id) {
-            updateTask({
-                id: task.id,
-                data: prepareFormData({
-                    ...formData,
-                    status: TaskStatus.Cancelled,
-                    ready_at: new Date().toISOString(),
-                    co_executors: task.co_executors?.map(user => user.id),
-                }),
-                updateMode: 'all',
-            }).then(onSubmitClb)
+            if (window.confirm("Отменить задачу?")) {
+                updateTask({
+                    id: task.id,
+                    data: prepareFormData({
+                        ...formData,
+                        status: TaskStatus.Cancelled,
+                        ready_at: new Date().toISOString(),
+                        co_executors: task.co_executors?.map(user => user.id),
+                    }),
+                    updateMode: 'all',
+                }).then(() => {
+                    alert('Задача отменена ❌. Найти данную задачу можно в режиме просмотра "Отмененные" => раздел завершенных. ');
+                    if (onSubmitClb) {
+                        onSubmitClb();
+                    }
+                });
+            }
         }
     };
 
     const returnClb = () => {
         if (task?.id) {
-            const data: UpdateTask = {
-                id: task.id,
-                status: TaskStatus.Pending,
-                co_executors: task.co_executors?.map(user => user.id),
-                ready_at: '',
-            }
-            if (task.appointed_by?.id === currentUser.id) {
-                data.appointed_by = null;
-                data.appointed_at = '';
-                if (task.executor?.id === currentUser.id) {
-                    data.executor = null;
-                }
-            }
+            if (window.confirm("Вернуть задачу?")) {
 
-            updateTask({
-                id: task.id,
-                data: prepareFormData(data),
-                updateMode: 'all',
-            }).then(onSubmitClb)
+                const data: UpdateTask = {
+                    id: task.id,
+                    status: TaskStatus.Pending,
+                    co_executors: task.co_executors?.map(user => user.id),
+                    ready_at: '',
+                }
+                if (task.appointed_by?.id === currentUser.id) {
+                    data.appointed_by = null;
+                    data.appointed_at = '';
+                    if (task.executor?.id === currentUser.id) {
+                        data.executor = null;
+                    }
+                }
+
+                updateTask({
+                    id: task.id,
+                    data: prepareFormData(data),
+                    updateMode: 'all',
+                }).then(() => {
+                    alert('Задача возвращена в блок ожидания. Что бы увидеть задачу - переключите режим просмотра. ');
+                    if (onSubmitClb) {
+                        onSubmitClb();
+                    }
+                });
+            }
         }
     }
 
@@ -127,7 +153,7 @@ export const TaskForm = (props: TaskFormProps) => {
             onSubmit={handleSubmit}
         >
             {task ?
-                <h4>Задача № {task.id} </h4>
+                <h4>Задача № {task.id} (статус: {getStatusText(task.status)}) </h4>
                 :
                 <h4>Новая задача</h4>
             }
@@ -232,6 +258,7 @@ export const TaskForm = (props: TaskFormProps) => {
                     color="inherit"
                     type={"submit"}
                     disableElevation
+                    disabled={isCreated || isUpdated}
                 >
                     Создать задачу
                 </Button>
@@ -245,6 +272,7 @@ export const TaskForm = (props: TaskFormProps) => {
                         color="inherit"
                         type={"submit"}
                         disableElevation
+                        disabled={isCreated || isUpdated}
                     >
                         Изменить
                     </Button>
@@ -257,6 +285,7 @@ export const TaskForm = (props: TaskFormProps) => {
                             type={"button"}
                             disableElevation
                             onClick={cancelClb}
+                            disabled={isCreated || isUpdated}
                         >
                             Отменить
                         </Button>
@@ -268,6 +297,7 @@ export const TaskForm = (props: TaskFormProps) => {
                             type={"button"}
                             disableElevation
                             onClick={returnClb}
+                            disabled={isCreated || isUpdated}
                         >
                             Вернуть
                         </Button>

@@ -50,11 +50,18 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                     body: props.data,
                 }),
             }),
+            deleteTaskImage: build.mutation<void, number>({
+                query: (id: number) => ({
+                    url: `/tasks/task_images/${id}/`,
+                    method: 'DELETE',
+                }),
+            }),
         }),
     })
 ;
 
 export const useCreateTask = TaskFormApi.useCreateTaskMutation;
 export const useUpdateTask = TaskFormApi.useUpdateTaskMutation;
+export const useDeleteTaskImage = TaskFormApi.useDeleteTaskImageMutation;
 export const useEmployeeList = TaskFormApi.useGetUserListQuery;
 export const useDepartmentList = TaskFormApi.useGetDepartmentListQuery;

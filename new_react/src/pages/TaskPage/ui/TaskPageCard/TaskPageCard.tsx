@@ -1,6 +1,6 @@
 import {AppSlider} from "@shared/ui";
 import cls from "../TaskPage.module.scss";
-import {useAppDispatch, useAppModal, useCurrentUser} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useCountdown, useCurrentUser} from "@shared/hooks";
 import {TaskForm} from "@widgets/TaskForm";
 
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
@@ -20,6 +20,8 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
 
+    const timeLeft = useCountdown(card.deadline);
+
     const cardHeight = 80;
     const {openModal, closeModal} = useAppModal();
 
@@ -38,7 +40,6 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 variant={'edit'}
                 task={card}
                 onSubmitClb={() => {
-                    alert('Задача успешно изменена')
                     closeModal()
                 }}
             />
@@ -197,6 +198,16 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                         onClick={() => updClb(true)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >
+                        {timeLeft &&
+                            <>
+                                <div style={{fontSize: '10px'}}>
+                                    <b>{timeLeft.days}д{timeLeft.hours}ч</b>
+                                    <br/>
+                                    <b>{timeLeft.minutes}м{timeLeft.seconds}с</b>
+                                </div>
+                                <br/>
+                            </>
+                        }
                         {getButtonIcon(true)}
                     </button>
                 }
@@ -206,6 +217,15 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                          width: '72px',
                          minWidth: '72px',
                          maxWidth: '72px',
+                     }}
+                     onClick={() => {
+                         openModal(
+                             <AppSlider
+                                 width={'100%'}
+                                 height={'100%'}
+                                 images={card.task_images?.map(image => image.image)}
+                             />
+                         )
                      }}
                 >
                     <AppSlider
@@ -284,5 +304,6 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
             </div>
 
         </div>
-    );
+    )
+        ;
 };

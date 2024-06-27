@@ -10,8 +10,8 @@ from rest_framework.response import Response
 from core.consumers import ws_send_to_all
 from core.services.get_week_info import GetWeekInfo
 from .filters import TaskModelFilter
-from .models import Task
-from .serializers import TaskReadSerializer, TaskWriteSerializer
+from .models import Task, TaskImage
+from .serializers import TaskReadSerializer, TaskWriteSerializer, TaskImageSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):
@@ -93,3 +93,21 @@ def get_week_data(request):
     week_info = GetWeekInfo(week=week, year=year).execute()
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
+
+
+class TaskImageViewSet(viewsets.ModelViewSet):
+    queryset = TaskImage.objects.all()
+    serializer_class = TaskImageSerializer
+
+    def perform_destroy(self, instance: TaskImage):
+        instance_task_id = instance.task.id
+        super().perform_destroy(instance)
+        self.after_delete(instance_task_id)
+
+    def after_delete(self, task_id: int):
+        ws_send_to_all(
+            {
+                'action': 'UPDATE_TASK',
+                'data': task_id
+            }
+        )
