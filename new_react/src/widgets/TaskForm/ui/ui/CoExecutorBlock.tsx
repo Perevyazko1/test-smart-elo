@@ -22,7 +22,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             className={'flex-fill'}
             size={'small'}
             readOnly={props.disabled}
-            value={getCoExecutors}
+            defaultValue={getCoExecutors}
             multiple
             disablePortal
             limitTags={2}
@@ -40,7 +40,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
-                    label="Соисполнители"
+                    label="Соисполнители / Наблюдатели"
                     variant="standard"
                 />}
         />

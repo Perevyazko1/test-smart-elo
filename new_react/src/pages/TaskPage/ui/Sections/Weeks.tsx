@@ -23,7 +23,6 @@ export const Weeks = () => {
             <TaskForm
                 variant={'create'}
                 onSubmitClb={() => {
-                    alert('Задача успешно создана!')
                     closeModal()
                 }}
             />
