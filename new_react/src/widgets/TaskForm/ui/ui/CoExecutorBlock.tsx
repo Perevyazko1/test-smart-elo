@@ -14,7 +14,7 @@ interface CoExecutorBlockProps {
 
 export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     const {userList, formTask, disabled, isLoading, setFormTask} = props;
-    
+
     const getOptionLabel = useCallback((option: number) => {
         return getEmployeeName(userList.find(user => user.id === option))
     }, [userList])
@@ -41,7 +41,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
-                    label="Соисполнители / Наблюдатели"
+                    label={isLoading ? "Загрузка..." : "Соисполнители / Наблюдатели"}
                     variant="standard"
                 />}
         />

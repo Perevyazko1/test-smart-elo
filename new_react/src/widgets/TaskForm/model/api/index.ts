@@ -22,11 +22,13 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                 query: (props: {}) => ({
                     url: '/staff/employees/',
                 }),
+                keepUnusedDataFor: 6000,
             }),
             getDepartmentList: build.query<Department[], {}>({
                 query: (props: {}) => ({
                     url: '/staff/departments/',
                 }),
+                keepUnusedDataFor: 6000,
             }),
             createTask: build.mutation<Task, CreateTaskProps>({
                 query: (props: CreateTaskProps) => ({

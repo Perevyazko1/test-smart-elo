@@ -53,7 +53,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
-                    label="Исполнитель"
+                    label={isLoading ? "Загрузка..." : "Исполнитель"}
                     variant="standard"
                 />}
         />
