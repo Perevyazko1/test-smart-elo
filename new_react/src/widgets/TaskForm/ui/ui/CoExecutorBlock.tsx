@@ -1,7 +1,7 @@
 import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
-import React, {useMemo} from "react";
+import React, {useCallback} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 
 interface CoExecutorBlockProps {
@@ -13,30 +13,29 @@ interface CoExecutorBlockProps {
 }
 
 export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
-    const getCoExecutors = useMemo(() => {
-        return props.userList.filter(user => props.formTask.co_executors.includes(user.id))
-    }, [props.formTask.co_executors, props.userList])
+    const {userList, formTask, disabled, isLoading, setFormTask} = props;
+    
+    const getOptionLabel = useCallback((option: number) => {
+        return getEmployeeName(userList.find(user => user.id === option))
+    }, [userList])
 
     return (
         <Autocomplete
             className={'flex-fill'}
             size={'small'}
-            readOnly={props.disabled}
-            defaultValue={getCoExecutors}
+            readOnly={disabled}
+            value={formTask.co_executors}
             multiple
             disablePortal
             limitTags={2}
-            loading={props.isLoading}
-            options={props.userList}
-            getOptionLabel={(option: Employee) => getEmployeeName(option)}
-            groupBy={(option: Employee) => option.current_department?.name || ""}
-            sx={{
-                width: 450
-            }}
-            onChange={(event: any, newValue: Employee[] | null) => {
-                props.setFormTask({
+            loading={isLoading}
+            options={userList.map(user => user.id)}
+            getOptionLabel={getOptionLabel}
+            sx={{width: 450}}
+            onChange={(event: any, newValue: number[] | null) => {
+                setFormTask({
                     ...props.formTask,
-                    co_executors: newValue?.map(user => user.id) || [],
+                    co_executors: newValue || [],
                 })
             }}
             renderInput={(params) =>

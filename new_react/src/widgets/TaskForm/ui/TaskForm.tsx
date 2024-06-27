@@ -68,6 +68,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
+        console.log(formData)
         if (task?.id) {
             updateTask({
                 id: task.id,
