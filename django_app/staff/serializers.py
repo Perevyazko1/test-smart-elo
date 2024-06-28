@@ -30,6 +30,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
     departments = DepartmentSerializer(many=True)
     boss = serializers.SerializerMethodField()
     current_department = DepartmentSerializer(many=False)
+    permanent_department = DepartmentSerializer(many=False)
     groups = GroupSerializer(many=True)
     token = serializers.SerializerMethodField()
 

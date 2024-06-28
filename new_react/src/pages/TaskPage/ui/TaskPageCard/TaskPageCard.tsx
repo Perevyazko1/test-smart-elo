@@ -178,7 +178,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         return card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
 
-    const timeLeft = useCountdown(hideFirstBtn ? undefined :card.deadline);
+    const timeLeft = useCountdown(hideFirstBtn ? undefined : card.deadline);
 
     const hideSecondBtn = useMemo(() => {
         return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;
@@ -225,8 +225,8 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                      onClick={() => {
                          card.task_images && card.task_images.length > 0 && openModal(
                              <AppSlider
-                                 width={'100%'}
-                                 height={'100%'}
+                                 width={'90vw'}
+                                 height={'90vh'}
                                  images={card.task_images?.map(image => image.image)}
                              />
                          )
