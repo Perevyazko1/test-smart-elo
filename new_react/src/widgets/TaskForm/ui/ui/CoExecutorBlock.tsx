@@ -1,7 +1,7 @@
 import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
-import React, {useCallback} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 
 interface CoExecutorBlockProps {
@@ -15,28 +15,52 @@ interface CoExecutorBlockProps {
 export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     const {userList, formTask, disabled, isLoading, setFormTask} = props;
 
-    const getOptionLabel = useCallback((option: number) => {
-        return getEmployeeName(userList.find(user => user.id === option))
-    }, [userList])
+    const [value, setValue] = useState<Employee[]>([]);
+    const [inited, setInited] = useState<boolean>(false);
+
+
+    useEffect(() => {
+        console.log('Триггер первого useEffect')
+        if (!inited && userList.length > 0) {
+            console.log("Инициализация списка")
+            setValue(
+                userList.filter(user => formTask.co_executors?.includes(user.id))
+            )
+            setInited(true)
+        }
+    }, [formTask.co_executors, inited, userList]);
+
+    const coExecutorIds = useMemo(() => {
+        return value.map(user => user.id)
+    }, [value])
+
+    useEffect(() => {
+        console.log('Триггер второго useEffect')
+        if (inited && coExecutorIds !== formTask.co_executors) {
+            setFormTask({
+                ...formTask,
+                co_executors: coExecutorIds,
+            })
+        }
+        // eslint-disable-next-line
+    }, [inited, coExecutorIds, formTask.co_executors])
 
     return (
         <Autocomplete
             className={'flex-fill'}
             size={'small'}
             readOnly={disabled}
-            value={formTask.co_executors}
+            value={value}
             multiple
             disablePortal
             limitTags={2}
             loading={isLoading}
-            options={userList.map(user => user.id)}
-            getOptionLabel={getOptionLabel}
+            options={userList}
+            groupBy={(option: Employee) => option.permanent_department?.name || ""}
+            getOptionLabel={(option: Employee) => getEmployeeName(option)}
             sx={{width: 450}}
-            onChange={(event: any, newValue: number[] | null) => {
-                setFormTask({
-                    ...props.formTask,
-                    co_executors: newValue || [],
-                })
+            onChange={(event: any, newValue: Employee[] | null) => {
+                setValue(newValue || [])
             }}
             renderInput={(params) =>
                 <TextField

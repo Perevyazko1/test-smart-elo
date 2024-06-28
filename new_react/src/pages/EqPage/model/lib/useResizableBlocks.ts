@@ -69,7 +69,7 @@ function throttle(func: (arg: any) => void, limit: number) {
     }
 }
 
-const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: Offset) => {
+export const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: Offset) => {
     // поднимаем стейт с диспатчем для работы с параметрами размеров блоков
     const [state, dispatch] = useReducer(reducer, initialState(windowWidth, windowHeight));
 
@@ -157,5 +157,3 @@ const useResizableBlocks = (windowWidth: number, windowHeight: number, offset: O
         drag
     }
 }
-
-export default useResizableBlocks;

@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 
-const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
+export const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
     // Поднимаем два стейта где будем хранить высоту и ширину блока. Инициализируем с учетом переданных параметров
     const [windowWidth, setWindowWidth] = useState(window.innerWidth + widthEdit);
     const [windowHeight, setWindowHeight] = useState(window.innerHeight + heightEdit);
@@ -22,5 +22,3 @@ const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
         windowHeight
     }
 };
-
-export default useWindowDimensions;

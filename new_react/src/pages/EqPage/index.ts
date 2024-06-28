@@ -1,4 +1,5 @@
 export {eqPageReducer, eqPageActions} from "./model/slice/eqPageSlice";
 export {EqPage} from './ui/EqPage/EqPage';
 export type {EqPageSchema} from "./model/types/eqPageSchema";
-
+export {useResizableBlocks} from "./model/lib/useResizableBlocks";
+export {useWindowDimensions} from "./model/lib/useWindowDimensions";

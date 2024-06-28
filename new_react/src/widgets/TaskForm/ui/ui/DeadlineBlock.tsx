@@ -21,6 +21,7 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
     const [time, setTime] = useState<string>(initialTime || "");
 
     useEffect(() => {
+        console.log("XXXXX")
         if (date) {
             const newTime = time || "18:00";
             const newDeadline = `${date}T${newTime}`;
@@ -32,7 +33,8 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
                 });
             }
         }
-    }, [date, formData, setFormTask, time]);
+        //eslint-disable-next-line
+    }, [date, formData.deadline, setFormTask, time]);
 
     const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
         setDate(e.target.value);

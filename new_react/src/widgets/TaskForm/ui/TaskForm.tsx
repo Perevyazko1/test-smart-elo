@@ -1,4 +1,4 @@
-import React, {FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useMemo, useState} from "react";
 import {Button} from "@mui/material";
 
 import {useCurrentUser} from "@shared/hooks";
@@ -51,24 +51,27 @@ export const TaskForm = (props: TaskFormProps) => {
     });
 
     useEffect(() => {
+        console.log("YYYY")
         if (formData.view_mode !== TaskViewMode.DepartmentVisible && formData.for_department) {
             const newValue = {...formData};
             delete newValue.for_department;
             setFormData(newValue)
         }
-    }, [formData]);
+        // eslint-disable-next-line
+    }, [formData.view_mode]);
 
-    const sortedUserList = [...(userList || [])].sort((a, b) => {
-        if (a.current_department && b.current_department) {
-            return a.current_department.number - b.current_department.number;
-        } else {
-            return a.id - b.id
-        }
-    });
+    const sortedUserList = useMemo(() => {
+        return [...(userList || [])].sort((a, b) => {
+            if (a.current_department && b.current_department) {
+                return a.current_department.number - b.current_department.number;
+            } else {
+                return a.id - b.id
+            }
+        })
+    }, [userList]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        console.log(formData)
         if (task?.id) {
             updateTask({
                 id: task.id,

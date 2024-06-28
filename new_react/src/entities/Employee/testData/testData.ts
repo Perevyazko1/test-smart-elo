@@ -18,6 +18,14 @@ export const anonEmployee: Employee = {
         piecework_wages: false,
         single: false,
     },
+    permanent_department: {
+        id: 0,
+        name: 'СЗМК',
+        number: 0,
+        color: '',
+        piecework_wages: false,
+        single: false,
+    },
     departments: [{
         id: 0,
         name: 'СЗМК',

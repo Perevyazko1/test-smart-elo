@@ -30,6 +30,8 @@ export const InWorkSection = () => {
             height: `100%`,
             overflowX: "hidden",
             overflowY: "auto",
+            width: "100%",
+            maxWidth: "1300px",
         }}>
 
             {inWorkData?.isLoading

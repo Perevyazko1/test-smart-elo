@@ -14,11 +14,10 @@ export const getUserRouteConfig = (user: Employee | undefined, navOnly: boolean 
     }
 
     const permittedRoutes = appRoutes.filter(route => {
-        return route.permissions.some(permission => {
+        return route.permissions.length === 0 || route.permissions.some(permission => {
             return user?.groups.some(group => group.name === permission)
-        })
+        });
     })
-
 
     const getDefaultRoute = (): AppRoute => {
         if (permittedRoutes.length > 0) {

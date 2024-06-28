@@ -1,6 +1,6 @@
 import {Employee} from "@entities/Employee";
 
-type variants = 'short' | 'full' | 'nameLastName' | 'initials';
+type variants = 'short' | 'full' | 'nameLastName' | 'initials' | 'shortName';
 
 export const getEmployeeName = (employee: Employee | undefined | null, variant: variants = 'nameLastName'): string => {
     if (!employee) {
@@ -13,7 +13,13 @@ export const getEmployeeName = (employee: Employee | undefined | null, variant: 
         ${employee.patronymic?.slice(0, 1) || ''}`
     } else if (variant === 'short') {
         if (employee.last_name) {
-            return `${employee.last_name || ""} ${employee.first_name?.slice(0, 1) || ''} `
+            return `${employee.last_name || ""} ${employee.first_name?.slice(0, 1) || ''}. `
+        } else {
+            return `${employee.first_name}`
+        }
+    } else if (variant === 'shortName') {
+        if (employee.last_name) {
+            return `${employee.first_name || ""} ${employee.last_name?.slice(0, 1) || ''}. `
         } else {
             return `${employee.first_name}`
         }

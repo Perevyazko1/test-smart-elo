@@ -12,7 +12,14 @@ class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = Employee
-    list_display = ['username', 'first_name', "last_name", 'pin_code', 'current_department']
+    list_display = [
+        'username',
+        'first_name',
+        "last_name",
+        'pin_code',
+        'permanent_department',
+        'boss',
+    ]
     list_display_links = ['username']
     readonly_fields = ['current_balance']
 
@@ -28,7 +35,8 @@ class CustomUserAdmin(UserAdmin):
             'current_balance',
             'boss',
             'departments',
-            'current_department')
+            'current_department',
+            'permanent_department')
         }),
         (
             _("Permissions"),
@@ -53,7 +61,6 @@ admin.site.register(Department)
 
 @admin.register(Transaction)
 class TransactionAdmin(admin.ModelAdmin):
-
     list_display = [
         'add_date',
         'transaction_type',

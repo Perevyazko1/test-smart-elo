@@ -1,7 +1,8 @@
 import {AppSlider} from "@shared/ui";
-import cls from "../TaskPage.module.scss";
-import {useAppDispatch, useAppModal, useCountdown, useCurrentUser} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser} from "@shared/hooks";
 import {TaskForm} from "@widgets/TaskForm";
+
+import cls from "../TaskPage.module.scss";
 
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
 import {getViewModeText, TaskStatus} from "@pages/TaskPage";
@@ -22,6 +23,8 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
     const cardHeight = 80;
     const {openModal, closeModal} = useAppModal();
+
+    const playSound = useClickSound();
 
     const viewClb = () => {
         openModal(
@@ -95,6 +98,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     }
 
     const updClb = (first: boolean) => {
+        playSound()
         if (cardType === TaskStatus.InProgress && !first && locked) {
             openModal(
                 <>
@@ -181,7 +185,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     }, [card.status, card.verified_at, cardType]);
 
     return (
-        <div style={{padding: ".1rem"}}>
+        <div style={{padding: ".1rem", maxWidth: '1300px'}}>
             <div className={'d-flex justify-content-start rounded rounded-2 border border-1 bg-black'}
                  style={{
                      width: "100%",
@@ -219,7 +223,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                          maxWidth: '72px',
                      }}
                      onClick={() => {
-                         openModal(
+                         card.task_images && card.task_images.length > 0 && openModal(
                              <AppSlider
                                  width={'100%'}
                                  height={'100%'}

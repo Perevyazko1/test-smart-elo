@@ -1,14 +1,17 @@
-import useResizableBlocks from "@pages/EqPage/model/lib/useResizableBlocks";
 import React, {useContext, useEffect} from "react";
-import useWindowDimensions from "@pages/EqPage/model/lib/useWindowDimensions";
+
 import {IsDesktopContext} from "@app";
-import {EqWeeks} from "@pages/EqPage/ui/EqBody/EqWeeks";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
-import {getNoRelevantId} from "@pages/EqPage/model/selectors/cardSelectors";
-import {fetchEqUpdCard} from "@pages/EqPage/model/api/fetchEqUpdCard";
-import {EqAwaitSection} from "@pages/EqPage/ui/EqSections/EqAwaitSection";
-import {EqInWorkSection} from "@pages/EqPage/ui/EqSections/EqInWorkSection";
-import {EqReadySection} from "@pages/EqPage/ui/EqSections/EqReadySection";
+
+import {useResizableBlocks} from "../../model/lib/useResizableBlocks";
+import {useWindowDimensions} from "../../model/lib/useWindowDimensions";
+import {getNoRelevantId} from "../../model/selectors/cardSelectors";
+import {fetchEqUpdCard} from "../../model/api/fetchEqUpdCard";
+import {EqAwaitSection} from "../../ui/EqSections/EqAwaitSection";
+import {EqInWorkSection} from "../../ui/EqSections/EqInWorkSection";
+import {EqReadySection} from "../../ui/EqSections/EqReadySection";
+
+import {EqWeeks} from "./EqWeeks";
 
 interface EqBodyProps {
     showClb: () => void;

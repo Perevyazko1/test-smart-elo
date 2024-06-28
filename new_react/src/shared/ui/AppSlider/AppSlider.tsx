@@ -3,6 +3,7 @@ import React, {memo, useMemo} from 'react';
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination} from 'swiper/modules';
 
+import logoImg2 from "@shared/assets/images/logoImg.png";
 import cls from './Slider.module.scss';
 
 import 'swiper/css';
@@ -40,8 +41,11 @@ export const AppSlider = memo((props: AppSliderProps) => {
                 key={image}
             >
                 <img
-                    src={image.startsWith("http") || image.startsWith("blob")  ? image : GET_STATIC_URL() + image}
-                    style={{maxWidth: width, maxHeight: height}}
+                    src={image.startsWith("http") || image.startsWith("blob") ? image : GET_STATIC_URL() + image}
+                    style={{
+                        maxWidth: width,
+                        maxHeight: '90vh',
+                    }}
                     className="rounded m-0 p-0"
                     alt={"Slide"}
                     loading={"lazy"}
@@ -104,7 +108,29 @@ export const AppSlider = memo((props: AppSliderProps) => {
             </>
 
 
-            {Sliders}
+            {images && images?.length > 0 ?
+                Sliders
+                :
+                [
+                    <SwiperSlide
+                        style={{width: width, height: height}}
+                        className={"d-flex justify-content-center align-items-center"}
+                    >
+                        <img
+                            src={logoImg2}
+                            style={{
+                                maxWidth: width,
+                                maxHeight: '100%',
+                                // height: height,
+                                objectFit: 'contain',
+                                objectPosition: 'center',
+                            }}
+                            className="rounded m-0 p-0"
+                            alt={"Slide"}
+                        />
+                    </SwiperSlide>
+                ]
+            }
 
         </Swiper>
     );

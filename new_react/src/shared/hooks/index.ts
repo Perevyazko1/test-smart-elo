@@ -1,3 +1,4 @@
+export {useClickSound} from "./useClickSound/useClickSound";
 export {useCountdown} from "./useCountdown/useCountdown";
 export {useNotification} from "./useNotification/useNotification";
 export type {ExtNotificationOptions} from './useNotification/useNotification';

@@ -57,7 +57,7 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         name: 'Задачи',
         mobile: false,
         navigate: true,
-        permissions: [APP_PERM.ELO_PAGE]
+        permissions: []
     },
     [AppRoutes.ASSIGNMENT]: {
         route: {path: '/assignment', element: <AssignmentPage/>, errorElement: <ErrorPage/>},

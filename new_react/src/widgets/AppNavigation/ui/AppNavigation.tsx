@@ -4,7 +4,7 @@ import {useCallback, useContext} from "react";
 
 import {AppInCompactMode, CurrentUserContext} from "@app";
 import {anonEmployee} from "@entities/Employee";
-import {getUserRouteConfig} from "@shared/lib";
+import {getEmployeeName, getUserRouteConfig} from "@shared/lib";
 import {AppDropdown, AppSwitch} from "@shared/ui";
 import {APP_COMPACT_MODE, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {useAppModal} from "@shared/hooks";
@@ -75,7 +75,7 @@ export const AppNavigation = (props: {isDesktop: boolean}) => {
     }
 
     return (
-        <AppDropdown selected={getSelectedName()} >
+        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')} >
             {renderOptions}
             <div className={'py-2'}>
                 <AppSwitch checked={isCompactMode} label={'Сжатый вид'} onSwitch={switchCompactMode}/>

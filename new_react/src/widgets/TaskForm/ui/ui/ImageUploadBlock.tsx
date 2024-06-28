@@ -131,17 +131,17 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
             <div className={'bg-light border border-1 border-black rounded p-1'}>
                 <AppSlider
                     images={sliderUrls}
-                    width={'190px'}
-                    height={'190px'}
+                    width={'180px'}
+                    height={'180px'}
                 />
             </div>
 
-            {!disabled &&
+            {!disabled && sliderUrls.length > 0 &&
                 <div className={'d-block h-100 border border-1 border-black rounded p-2'}
                      style={{
                          overflowY: 'auto',
                          overflowX: 'hidden',
-                         maxHeight: '180px'
+                         maxHeight: '190px'
                      }}
                 >
                     {editImagesList.map(image => (

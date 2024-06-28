@@ -10,9 +10,9 @@ import {fetchWeekData} from "../../model/api/fetchWeekData";
 
 interface EqWeeksProps {
     blockWidthPx: number;
-    isDragging: boolean;
     showClb: () => void;
     drag: ConnectDragSource;
+    isDragging: boolean;
     resetSize: () => void;
 }
 

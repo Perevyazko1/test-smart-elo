@@ -19,6 +19,7 @@ class Department(models.Model):
     single = models.BooleanField('Отдел разово участвует в производстве', blank=True)
     piecework_wages = models.BooleanField('В отделе установлена сдельная оплата труда', default=False)
     color = models.CharField(max_length=9, validators=[validate_color], default='#ffffff')
+    is_industrial = models.BooleanField('Отдел производственный', blank=True, default=True)
 
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.name}')
@@ -48,6 +49,14 @@ class Employee(AbstractUser):
     current_department = models.ForeignKey(
         Department,
         related_name='employees_current',
+        verbose_name="Текущий отдел",
+        blank=True, null=True,
+        on_delete=models.SET_NULL,
+    )
+    permanent_department = models.ForeignKey(
+        Department,
+        related_name='employees_permanent',
+        verbose_name="Постоянный отдел",
         blank=True, null=True,
         on_delete=models.SET_NULL,
     )

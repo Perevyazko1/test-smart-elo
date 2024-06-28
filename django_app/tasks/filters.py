@@ -66,6 +66,14 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.filter(
                 status='4',
             )
+        if value == '4':
+            return queryset.filter(
+                executor=self.request.user,
+            )
+        if value == '5':
+            return queryset.filter(
+                co_executors=self.request.user,
+            )
         return []
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):

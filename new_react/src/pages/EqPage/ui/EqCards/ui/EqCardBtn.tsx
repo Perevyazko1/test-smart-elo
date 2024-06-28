@@ -2,6 +2,7 @@ import {ButtonHTMLAttributes, memo, useMemo} from "react";
 import {Spinner} from "react-bootstrap";
 
 import {ListTypes} from "../../../model/consts/listTypes";
+import {useClickSound} from "@shared/hooks";
 
 
 interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -13,7 +14,8 @@ interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export const EqCardBtn = memo((props: EqCardBtnProps) => {
-    const {cardType, urgency, first, locked, plane_date, ...otherProps} = props;
+    const {cardType, urgency, first, locked, plane_date, onClick, ...otherProps} = props;
+    const playSound = useClickSound();
 
     const planeDateTime: { date: string, time: string } = useMemo(() => {
         if (!plane_date) {
@@ -72,7 +74,14 @@ export const EqCardBtn = memo((props: EqCardBtnProps) => {
     }
 
     return (
-        <button className={'appBtn p-1 rounded rounded-2 h-100 ' + getButtonVariant()} {...otherProps}>
+        <button
+            onClick={(e) => {
+                playSound()
+                onClick && onClick(e)
+            }}
+            className={'appBtn p-1 rounded rounded-2 h-100 ' + getButtonVariant()}
+            {...otherProps}
+        >
             <div className={'fs-7'}>
                 <b>{planeDateTime.date}</b>
                 <br/>

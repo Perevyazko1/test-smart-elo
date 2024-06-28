@@ -11,13 +11,29 @@ import {AwaitSection} from "../Sections/AwaitSection";
 import {Weeks} from "../Sections/Weeks";
 import {InWorkSection} from "../Sections/InWorkSection";
 import {ReadySection} from "../Sections/ReadySection";
+import {useResizableBlocks, useWindowDimensions} from "@pages/EqPage";
 
 
 export const TaskPageBody = () => {
-    const [blockHeight] = useState((window.innerHeight - 87) / 2);
     const {queryParameters} = useQueryParams();
     const noRelevantId = useAppSelector(getNoRelevantId);
     const dispatch = useAppDispatch();
+
+    const {windowWidth, windowHeight} = useWindowDimensions(-50);
+    const {
+        leftBlockWidth,
+        rightBlockWidth,
+        inWorkHeight,
+        readyHeight,
+        isDragging,
+        resetSize,
+        drag
+    } = useResizableBlocks(windowWidth, windowHeight, {
+        // Устанавливаем смещение относительно кнопки которая будет drag элементом (подобрано в ручную)
+        x: 27,
+        // Для мобилок смещение устанавливается с учетом того, что не будет навбара сверху
+        y: -62,
+    });
 
     useEffect(() => {
         if (noRelevantId && noRelevantId?.length > 0) {
@@ -30,24 +46,28 @@ export const TaskPageBody = () => {
 
     return (
         <div className={'pageContent d-flex'} style={{background: 'var(--bs-gray-300)'}}>
-            <div className={cls.leftBlock}>
-                <div style={{
-                    height: `${blockHeight}px`,
-                    overflowX: "hidden",
-                    overflowY: "auto",
-                    padding: ".15rem 0"
-                }}>
+            <div className={cls.leftBlock} style={{width: `${leftBlockWidth}px`}}>
+                <div
+                    className={'d-flex justify-content-end'}
+                    style={{
+                        height: `${inWorkHeight}px`,
+                        overflowX: "hidden",
+                        overflowY: "auto",
+                        padding: ".15rem 0",
+                    }}>
                     <InWorkSection/>
                 </div>
 
-                <Weeks/>
+                <div className={'d-flex justify-content-end'} style={{width: `${leftBlockWidth}px`}}>
+                    <Weeks blockWidthPx={leftBlockWidth} drag={drag} isDragging={isDragging} resetSize={resetSize}/>
+                </div>
 
-                <div style={{height: `${blockHeight}px`}}>
+                <div style={{height: `${readyHeight}px`}} className={'d-flex justify-content-end'}>
                     <ReadySection/>
                 </div>
             </div>
 
-            <div className={cls.rightBlock}>
+            <div className={cls.rightBlock} style={{width: `${rightBlockWidth}px`}}>
                 <AwaitSection/>
             </div>
 

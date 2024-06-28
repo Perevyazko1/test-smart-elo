@@ -38,11 +38,16 @@ export const ReadySection = () => {
     }, [dispatch, filtersInited, queryParameters.sort_mode, queryParameters.view_mode, queryParameters.week, queryParameters.year]);
 
     return (
-        <div style={{
-            height: `100%`,
-            overflowX: "hidden",
-            overflowY: "auto",
-        }}>
+        <div
+            style={{
+                display: 'block',
+                height: `100%`,
+                overflowX: "hidden",
+                overflowY: "auto",
+                width: "100%",
+                maxWidth: "1300px",
+            }}
+        >
             {readyData?.isLoading
                 ?
                 <>

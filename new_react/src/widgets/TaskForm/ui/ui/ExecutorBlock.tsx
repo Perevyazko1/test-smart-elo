@@ -47,7 +47,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
             options={userList}
             loading={isLoading}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
-            groupBy={(option: Employee) => option.current_department?.name || ""}
+            groupBy={(option: Employee) => option.permanent_department?.name || ""}
             sx={{ width: 200 }}
             onChange={changeClb}
             renderInput={(params) =>

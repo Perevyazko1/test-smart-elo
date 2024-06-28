@@ -1,13 +1,14 @@
 """Initial methods and scripts. """
-from tasks.models import Task
+from staff.models import Employee
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    tasks = Task.objects.all()
+    users = Employee.objects.all().filter(
+        is_active=True
+    )
 
-    for task in tasks:
-        task.created_by = task.appointed_by
-        task.appointed_by = None
-        task.save()
+    for user in users:
+        user.permanent_department = user.current_department
+        user.save()

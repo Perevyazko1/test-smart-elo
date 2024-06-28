@@ -10,15 +10,19 @@ export interface BaseEmployee {
     boss: number | null,
     pin_code: number,
     current_department: number | null,
+    permanent_department: number | null,
     departments: number[],
     groups: number[],
     current_balance: string,
     token: string,
 }
 
-export interface Employee extends Omit<BaseEmployee, 'groups' | 'departments' | 'current_department' | 'boss'>{
+type ExtendedFields = 'groups' | 'departments' | 'current_department' | 'boss' | 'permanent_department';
+
+export interface Employee extends Omit<BaseEmployee, ExtendedFields>{
     groups: Group[],
     departments: Department[],
     current_department: Department | null,
+    permanent_department: Department | null,
     boss: Employee | null,
 }
