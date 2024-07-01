@@ -1,5 +1,6 @@
 """Initial methods and scripts. """
 from staff.models import Employee
+from django.contrib.auth.models import Group
 
 
 def init_data():
@@ -9,6 +10,7 @@ def init_data():
         is_active=True
     )
 
+    target_group = Group.objects.get(name='Страница задач')
+
     for user in users:
-        user.permanent_department = user.current_department
-        user.save()
+        user.groups.add(target_group)

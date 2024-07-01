@@ -79,22 +79,19 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         }
     }, [cardType, locked]);
 
-    const getButtonVariant = (first: boolean) => {
-        if (first) {
-            switch (card.urgency) {
-                case '4':
-                    return "redBtn"
-                case '3':
-                    return "yellowBtn"
-                case '2':
-                    return "greenBtn"
-                case '1':
-                    return "greyBtn"
-                default:
-                    return "greenBtn"
-            }
+    const getButtonVariant = () => {
+        switch (card.urgency) {
+            case '4':
+                return "redBtn"
+            case '3':
+                return "yellowBtn"
+            case '2':
+                return "greenBtn"
+            case '1':
+                return "greyBtn"
+            default:
+                return "greenBtn"
         }
-        return "greenBtn"
     }
 
     const updClb = (first: boolean) => {
@@ -198,7 +195,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
                 {!hideFirstBtn &&
                     <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant(true)}`}
+                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant()}`}
                         onClick={() => updClb(true)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >
@@ -297,7 +294,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
                 {!hideSecondBtn &&
                     <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant(false)}`}
+                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant()}`}
                         onClick={() => updClb(false)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >
