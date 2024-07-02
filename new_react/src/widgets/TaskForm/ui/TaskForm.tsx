@@ -62,8 +62,8 @@ export const TaskForm = (props: TaskFormProps) => {
 
     const sortedUserList = useMemo(() => {
         return [...(userList || [])].sort((a, b) => {
-            if (a.current_department && b.current_department) {
-                return a.current_department.number - b.current_department.number;
+            if (a.permanent_department && b.permanent_department) {
+                return a.permanent_department.number - b.permanent_department.number;
             } else {
                 return a.id - b.id
             }

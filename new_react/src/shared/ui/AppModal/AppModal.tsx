@@ -1,4 +1,4 @@
-import {ReactNode, useEffect} from "react";
+import {ReactNode, useCallback, useEffect} from "react";
 
 import cls from './AppModal.module.scss';
 
@@ -7,34 +7,47 @@ interface AppModalProps {
     isOpen: boolean;
     onClose: () => void;
     children: ReactNode;
+    confirmClose?: boolean;
 }
 
 
 export const AppModal = (props: AppModalProps) => {
-    const {isOpen, onClose, children} = props;
+    const {isOpen, onClose, children, confirmClose = false} = props;
 
-    useEffect(() => {
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
+    const closeClb = useCallback(() => {
+        if (confirmClose) {
+            if (window.confirm('Закрыть модальное окно?')) {
                 onClose();
             }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [onClose]);
+        } else {
+            onClose();
+        }
+    }, [confirmClose, onClose]);
+
+    useEffect(() => {
+            const handleKeyDown = (event: KeyboardEvent) => {
+                if (event.key === 'Escape') {
+                    closeClb()
+                }
+            };
+            window.addEventListener('keydown', handleKeyDown);
+            return () => {
+                window.removeEventListener('keydown', handleKeyDown);
+            };
+        }, [closeClb, confirmClose, onClose]
+    );
+
 
     return (
         <div
             className={`${isOpen && cls.modalActive} ${cls.modalBackdrop}`}
-            onClick={onClose}
+            onClick={closeClb}
         >
             <div
                 className={`${isOpen && cls.modalContentActive} ${cls.modalContent}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <button className={cls.modalBtn} onClick={onClose}>
+                <button className={cls.modalBtn} onClick={closeClb}>
                     <i className="fas fa-times mx-xl-3 fs-3 text-black"/>
                 </button>
 

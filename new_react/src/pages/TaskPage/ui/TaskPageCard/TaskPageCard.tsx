@@ -27,23 +27,30 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     const playSound = useClickSound();
 
     const viewClb = () => {
-        openModal(
-            <TaskForm
-                variant={'read_only'}
-                task={card}
-            />
+        openModal({
+                content: (
+                    <TaskForm
+                        variant={'read_only'}
+                        task={card}
+                    />
+                )
+            }
         )
     };
 
     const editClb = () => {
-        openModal(
-            <TaskForm
-                variant={'edit'}
-                task={card}
-                onSubmitClb={() => {
-                    closeModal()
-                }}
-            />
+        openModal({
+                content: (
+                    <TaskForm
+                        variant={'edit'}
+                        task={card}
+                        onSubmitClb={() => {
+                            closeModal()
+                        }}
+                    />
+                ),
+                confirmClose: true,
+            }
         )
     };
 
@@ -79,39 +86,30 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         }
     }, [cardType, locked]);
 
-    const getButtonVariant = () => {
-        switch (card.urgency) {
-            case '4':
-                return "redBtn"
-            case '3':
-                return "yellowBtn"
-            case '2':
-                return "greenBtn"
-            case '1':
-                return "greyBtn"
-            default:
-                return "greenBtn"
-        }
-    }
-
     const updClb = (first: boolean) => {
         playSound()
         if (cardType === TaskStatus.InProgress && !first && locked) {
-            openModal(
-                <>
-                    <h4 className={'my-5'}>
-                        Задачу нельзя вернуть в ожидание так как она была назначена персонально.
-                    </h4>
-                    <h4 className={'my-5'}>
-                        Вернуть задачу в ожидание может пользователь назначивший задачу.
-                    </h4>
-                </>
+            openModal({
+                    content: (
+                        <>
+                            <h4 className={'my-5'}>
+                                Задачу нельзя вернуть в ожидание так как она была назначена персонально.
+                            </h4>
+                            <h4 className={'my-5'}>
+                                Вернуть задачу в ожидание может пользователь назначивший задачу.
+                            </h4>
+                        </>
+                    )
+                }
             )
         } else if (cardType === TaskStatus.Completed && first && locked) {
-            openModal(
-                <h4 className={'my-5'}>
-                    Завизировать выполнение задачи может пользователь, который создал данную задачу.
-                </h4>
+            openModal({
+                    content: (
+                        <h4 className={'my-5'}>
+                            Завизировать выполнение задачи может пользователь, который создал данную задачу.
+                        </h4>
+                    )
+                }
             )
         } else {
             dispatch(updateTask(getActionData(first)));
@@ -181,6 +179,39 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
 
+    const getButtonVariant = useMemo(() => {
+        if ((timeLeft && timeLeft?.days > 0) || (!timeLeft)) {
+            switch (card.urgency) {
+                case '4':
+                    return "redBtn"
+                case '3':
+                    return "yellowBtn"
+                case '2':
+                    return "greenBtn"
+                case '1':
+                    return "greyBtn"
+                default:
+                    return "greenBtn"
+            }
+        } else if (timeLeft && timeLeft?.hours > 2) {
+            switch (card.urgency) {
+                case '4':
+                    return "redBtn"
+                case '3':
+                    return "yellowBtn"
+                case '2':
+                    return "yellowBtn"
+                case '1':
+                    return "yellowBtn"
+                default:
+                    return "yellowBtn"
+            }
+        } else {
+            return "redBtn"
+        }
+        //eslint-disable-next-line
+    }, [card.urgency, timeLeft?.hours, timeLeft?.days]);
+
     return (
         <div style={{padding: ".1rem", maxWidth: '1300px'}}>
             <div className={'d-flex justify-content-start rounded rounded-2 border border-1 bg-black'}
@@ -195,7 +226,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
                 {!hideFirstBtn &&
                     <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant()}`}
+                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant}`}
                         onClick={() => updClb(true)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >
@@ -220,12 +251,15 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                          maxWidth: '72px',
                      }}
                      onClick={() => {
-                         card.task_images && card.task_images.length > 0 && openModal(
-                             <AppSlider
-                                 width={'90vw'}
-                                 height={'90vh'}
-                                 images={card.task_images?.map(image => image.image)}
-                             />
+                         card.task_images && card.task_images.length > 0 && openModal({
+                                 content: (
+                                     <AppSlider
+                                         width={'90vw'}
+                                         height={'90vh'}
+                                         images={card.task_images?.map(image => image.image)}
+                                     />
+                                 )
+                             }
                          )
                      }}
                 >
@@ -280,9 +314,10 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 <div className={'bg-light rounded fs-7'}
                      style={{
                          padding: '0 .3rem 0 .1rem',
-                         overflowY: 'hidden',
+                         overflowY: 'auto',
                          overflowX: 'auto',
-                         minWidth: '90px'
+                         minWidth: '90px',
+                         lineHeight: '12px'
                      }}
                 >
                     Создал:<br/>
@@ -290,11 +325,19 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     <br/>
                     Исполнитель:<br/>
                     <b className={'text-nowrap'}>{getEmployeeName(card.executor, 'short')}</b>
+                    <br/>
+                    Соисполнит.:<br/>
+                    {card.co_executors?.map(user => (
+                        <b className={'text-nowrap'}>
+                            {getEmployeeName(user, 'short')}
+                            <br/>
+                        </b>
+                    ))}
                 </div>
 
                 {!hideSecondBtn &&
                     <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant()}`}
+                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant}`}
                         onClick={() => updClb(false)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >

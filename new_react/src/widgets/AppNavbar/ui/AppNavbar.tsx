@@ -54,7 +54,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
 
     const notificationHandler = () => {
         openModal(
-            <NotificationWidget closeClb={closeModal}/>
+            {content: <NotificationWidget closeClb={closeModal}/>}
         )
     }
 
@@ -106,8 +106,8 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
 
                                 <div>
                                     <Link to={location.pathname !== 'task'
-                                            ? 'task'
-                                            : ''
+                                        ? 'task'
+                                        : ''
                                     }>
                                         <img
                                             src={Logo}
@@ -121,38 +121,38 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 <div className={'d-flex gap-1'}>
                                     {children}
                                 </div>
-                        </div>
+                            </div>
 
-                        <div className={'d-flex align-items-center'}>
-                            {isBoss &&
-                                <Button variant={'black'}
-                                        onClick={notificationHandler}
-                                >
-                                    {isLoading ?
-                                        <i className="far fa-bell text-muted"/>
-                                        :
-                                        <>
-                                            {navHasNotifications ?
+                            <div className={'d-flex align-items-center'}>
+                                {isBoss &&
+                                    <Button variant={'black'}
+                                            onClick={notificationHandler}
+                                    >
+                                        {isLoading ?
+                                            <i className="far fa-bell text-muted"/>
+                                            :
+                                            <>
+                                                {navHasNotifications ?
 
-                                                <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
+                                                    <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
+                                                        <i className="far fa-bell"/>
+                                                    </IndicatorWrapper>
+                                                    :
                                                     <i className="far fa-bell"/>
-                                                </IndicatorWrapper>
-                                                :
-                                                <i className="far fa-bell"/>
-                                            }
-                                        </>
-                                    }
-                                </Button>
-                            }
+                                                }
+                                            </>
+                                        }
+                                    </Button>
+                                }
 
-                            <AppNavigation isDesktop={isDesktop}/>
+                                <AppNavigation isDesktop={isDesktop}/>
+                            </div>
                         </div>
-                    </div>
 
+                    </div>
                 </div>
-            </div>
-    </DynamicComponent>
-    )
+            </DynamicComponent>
+        )
     }
 
     return (

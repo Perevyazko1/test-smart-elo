@@ -45,14 +45,17 @@ export const TableElement = (props: TableElementProps) => {
 
     const setConfirmedTariff = () => {
         if (item.has_assignments) {
-            openModal(
-                <PostTarifficationWidget
-                    production_step__id={item.id}
-                    onSuccess={() => {
-                        closeModal();
-                        dispatch(tarifficationPageActions.addNoRelevantId(item.id));
-                    }}
-                />
+            openModal({
+                    content: (
+                        <PostTarifficationWidget
+                            production_step__id={item.id}
+                            onSuccess={() => {
+                                closeModal();
+                                dispatch(tarifficationPageActions.addNoRelevantId(item.id));
+                            }}
+                        />
+                    )
+                }
             );
         } else if (item.proposed_tariff) {
             setIsLoading(true);
@@ -83,14 +86,14 @@ export const TableElement = (props: TableElementProps) => {
     };
 
     const proposedIsBlocked = useMemo(() => {
-        return !billingPerm 
-            || item.proposed_tariff?.amount === tariffInput 
+        return !billingPerm
+            || item.proposed_tariff?.amount === tariffInput
             || tariffInput === "";
     }, [billingPerm, item.proposed_tariff?.amount, tariffInput])
 
     const confirmIsBlocked = useMemo(() => {
-        return !confirmPerm 
-            || !item.proposed_tariff?.amount 
+        return !confirmPerm
+            || !item.proposed_tariff?.amount
             || item.proposed_tariff?.amount === item.confirmed_tariff?.amount
     }, [confirmPerm, item.confirmed_tariff?.amount, item.proposed_tariff?.amount])
 
@@ -98,130 +101,143 @@ export const TableElement = (props: TableElementProps) => {
     return (
         <>
             {/*Первая строка карточки*/}
-            <tr>
-                <td rowSpan={2} onClick={() => openModal(
-                    <AppSlider images={item.product_images.images} width={'100%'} height={'100%'}/>
-                )}>
-                    <AppSlider
-                        images={item.product_images.thumbnail}
-                        width={'70px'}
-                        height={'70px'}
-                    />
-                </td>
-
-                <td rowSpan={2}>
-                    {item.product_name}
-                    <Button
-                        size={'sm'}
-                        className={'fs-7 p-0 px-1 m-1'}
-                        variant={'outline-dark'}
-                        onClick={() => openModal(
-                            <OrderDetailWidget
-                                order_id={item.last_order_id}
-                            />
-                        )}
-                    >
-                        Последняя спецификация
-                    </Button>
-                </td>
-
-                <td>
-                    {item.department.name}
-                </td>
-
-                <td>
-                    <div className={'text-nowrap fs-7'}>
-                        Предложено
-                        {elementIsLoading
-                            ? <Spinner size={'sm'} className={'px-1'} animation={'grow'}/>
-                            : <i className={`fas fa-arrow-circle-right px-1 ${!proposedIsBlocked && 'text-success'}`}/>
+                <tr>
+                    <td rowSpan={2} onClick={() => openModal({
+                            content: (
+                                <AppSlider images={item.product_images.images} width={'100%'} height={'100%'}/>
+                            )
                         }
-                    </div>
-                </td>
+                    )}>
+                        <AppSlider
+                            images={item.product_images.thumbnail}
+                            width={'70px'}
+                            height={'70px'}
+                        />
+                    </td>
 
-                <td>
-                    <AppInput
-                        type={'number'}
-                        style={{width: "100px"}}
-                        value={tariffInput}
-                        onChange={(e) => setTariffClb(e.target.value)}
-                    />
-                </td>
+                    <td rowSpan={2}>
+                        {item.product_name}
+                        <Button
+                            size={'sm'}
+                            className={'fs-7 p-0 px-1 m-1'}
+                            variant={'outline-dark'}
+                            onClick={() => openModal({
+                                    content: (
+                                        <OrderDetailWidget
+                                            order_id={item.last_order_id}
+                                        />
+                                    )
+                                }
+                            )}
+                        >
+                            Последняя спецификация
+                        </Button>
+                    </td>
 
-                <td className={'fs-7'}>
-                    {getHumansDatetime(item.proposed_tariff?.add_date || "")}
-                </td>
+                    <td>
+                        {item.department.name}
+                    </td>
+
+                    <td>
+                        <div className={'text-nowrap fs-7'}>
+                            Предложено
+                            {elementIsLoading
+                                ? <Spinner size={'sm'} className={'px-1'} animation={'grow'}/>
+                                :
+                                <i className={`fas fa-arrow-circle-right px-1 ${!proposedIsBlocked && 'text-success'}`}/>
+                            }
+                        </div>
+                    </td>
+
+                    <td>
+                        <AppInput
+                            type={'number'}
+                            style={{width: "100px"}}
+                            value={tariffInput}
+                            onChange={(e) => setTariffClb(e.target.value)}
+                        />
+                    </td>
+
+                    <td className={'fs-7'}>
+                        {getHumansDatetime(item.proposed_tariff?.add_date || "")}
+                    </td>
 
 
-                <td className={'fs-7'}>
-                    {getEmployeeName(item.proposed_tariff?.created_by)}
-                </td>
+                    <td className={'fs-7'}>
+                        {getEmployeeName(item.proposed_tariff?.created_by)}
+                    </td>
 
-                <td>
-                    <Button
-                        size={'sm'}
-                        variant={proposedIsBlocked ? 'outline-warning' : 'warning'}
-                        onClick={setProposedTariffHandler}
-                        disabled={isLoading || proposedIsBlocked}
-                    >
-                        Предложить
-                    </Button>
-                </td>
+                    <td>
+                        <Button
+                            size={'sm'}
+                            variant={proposedIsBlocked ? 'outline-warning' : 'warning'}
+                            onClick={setProposedTariffHandler}
+                            disabled={isLoading || proposedIsBlocked}
+                        >
+                            Предложить
+                        </Button>
+                    </td>
 
-            </tr>
+                </tr>
 
-            {/*Вторая строка карточки*/}
-            <tr>
-                <td>
-                    <Button
-                        size={'sm'}
-                        variant={'outline-dark'}
-                        disabled={!item.proposed_tariff}
-                        onClick={() =>
-                            openModal(<TarifficationStoryWidget production_step__id={item.id}/>)
-                        }
-                    >
-                        История
-                    </Button>
-                </td>
-                <td>
-                    <div className={'text-nowrap fs-7'}>
-                        Утверждено
-                        {elementIsLoading
-                            ? <Spinner size={'sm'} className={'px-1'} animation={'grow'}/>
-                            : <i className={`fas fa-arrow-circle-right px-1 ${!confirmIsBlocked && 'text-danger'}`}/>
-                        }
-                    </div>
-                </td>
+                {/*Вторая строка карточки*/}
+                <tr>
+                    <td>
+                        <Button
+                            size={'sm'}
+                            variant={'outline-dark'}
+                            disabled={!item.proposed_tariff}
+                            onClick={() =>
+                                openModal(
+                                    {
+                                        content: (
+                                            <TarifficationStoryWidget production_step__id={item.id}/>
+                                        )
+                                    })
+                            }
+                        >
+                            История
+                        </Button>
+                    </td>
+                    <td>
+                        <div className={'text-nowrap fs-7'}>
+                            Утверждено
+                            {elementIsLoading
+                                ? <Spinner size={'sm'} className={'px-1'} animation={'grow'}/>
+                                :
+                                <i className={`fas fa-arrow-circle-right px-1 ${!confirmIsBlocked && 'text-danger'}`}/>
+                            }
+                        </div>
+                    </td>
 
-                <td>
-                    <AppInput
-                        disabled
-                        type={'number'}
-                        style={{width: "100px"}}
-                        value={item.confirmed_tariff?.amount || ""}
-                    />
-                </td>
+                    <td>
+                        <AppInput
+                            disabled
+                            type={'number'}
+                            style={{width: "100px"}}
+                            value={item.confirmed_tariff?.amount || ""}
+                        />
+                    </td>
 
-                <td className={'fs-7'}>
-                    {getHumansDatetime(item.confirmed_tariff?.add_date || "")}
-                </td>
+                    <td className={'fs-7'}>
+                        {getHumansDatetime(item.confirmed_tariff?.add_date || "")}
+                    </td>
 
-                <td className={'fs-7'}>
-                    {getEmployeeName(item.confirmed_tariff?.created_by)}
-                </td>
+                    <td className={'fs-7'}>
+                        {getEmployeeName(item.confirmed_tariff?.created_by)}
+                    </td>
 
-                <td>
-                    <Button
-                        size={'sm'}
-                        variant={confirmIsBlocked ? 'outline-dark' : 'dark'}
-                        disabled={confirmIsBlocked}
-                        onClick={setConfirmedTariff}
-                    >
-                        Утвердить
-                    </Button>
-                </td>
-            </tr>
+                    <td>
+                        <Button
+                            size={'sm'}
+                            variant={confirmIsBlocked ? 'outline-dark' : 'dark'}
+                            disabled={confirmIsBlocked}
+                            onClick={setConfirmedTariff}
+                        >
+                            Утвердить
+                        </Button>
+                    </td>
+                </tr>
         </>
     );
 };

@@ -50,8 +50,11 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     }, [card.assignments, queryParameters.series_size]);
 
     const openTarifficationWidget = () => {
-        openModal(
-            <TarifficationWidget production_step__id={card.card_info.production_step__id}/>
+        openModal({
+                content: (
+                    <TarifficationWidget production_step__id={card.card_info.production_step__id}/>
+                )
+            }
         )
     }
 

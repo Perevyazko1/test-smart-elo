@@ -16,8 +16,11 @@ export const CardOrderProject = (props: CardOrderProjectProps) => {
     const {openModal} = useAppModal();
 
     const onClickHandler = () => {
-        openModal(
-            <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
+        openModal({
+                content: (
+                    <OrderDetailWidget order_id={card.order.id} scrollToId={card.id}/>
+                )
+            }
         )
     };
 

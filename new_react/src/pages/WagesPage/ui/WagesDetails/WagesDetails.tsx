@@ -47,24 +47,30 @@ export const WagesDetails = (props: WagesDetailsProps) => {
         transaction_type: keyof typeof TRANSACTION_TYPES,
         details: keyof typeof TRANSACTION_DETAILS,
     }) => {
-        openModal(
-            <AddTransactionForm
-                title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
-                employee={employee}
-                transaction_type={props.transaction_type}
-                details={props.details}
-            />
+        openModal({
+                content: (
+                    <AddTransactionForm
+                        title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
+                        employee={employee}
+                        transaction_type={props.transaction_type}
+                        details={props.details}
+                    />
+                )
+            }
         )
     }
 
     const showTransactionClb = (transaction: Transaction) => {
-        openModal(
-            <AddTransactionForm
-                title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
-                employee={employee}
-                transaction={transaction}
-                deleteClb={closeModal}
-            />
+        openModal({
+                content: (
+                    <AddTransactionForm
+                        title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
+                        employee={employee}
+                        transaction={transaction}
+                        deleteClb={closeModal}
+                    />
+                )
+            }
         )
     }
 

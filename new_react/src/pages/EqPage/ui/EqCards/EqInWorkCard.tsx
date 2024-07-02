@@ -63,10 +63,14 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
         }
         if (returnLocked && !first) {
             openModal(
-                <h4 className={'mx-4'}>
-                    Один или несколько выбранных нарядов назначены бригадиром. <br/>
-                    Вернуть в ожидание такие наряды может только бригадир.
-                </h4>
+                {
+                    content: (
+                        <h4 className={'mx-4'}>
+                            Один или несколько выбранных нарядов назначены бригадиром. <br/>
+                            Вернуть в ожидание такие наряды может только бригадир.
+                        </h4>
+                    )
+                }
             )
         } else {
             setCardDisabled(true)

@@ -61,56 +61,59 @@ export const LoginPage = () => {
                                 </h1>
                             </div>
                         </div>
-
-                        <div className="row d-flex justify-content-center">
-                            <div className="col-md-6 col-xl-4">
-                                <div className="mb-1 mb-xl-5 border rounded">
-                                    <div className="d-flex flex-column align-items-center p-3 gap-2">
-                                        <img
-                                            className="px-xl-0 pe-xl-0 mx-xl-3 my-xl-1 mt-xl-0 py-xl-1 mb-2"
-                                            src={logo} width="50%"
-                                            alt={"LOGO"}
-                                        />
-
-                                        {errorMsg &&
-                                            <h6 className={'text-danger'}>{errorMsg}</h6>
-                                        }
-
-                                        <input className={"form-control text-center form-control-lg mb-2"}
-                                               type="password"
-                                               placeholder="ПИН-код (6 цифр)"
-                                               title="Разрешено использовать только цифры"
-                                               pattern="[0-9]+$"
-                                               autoFocus
-                                               inputMode="numeric"
-                                               maxLength={6}
-                                               minLength={6}
-                                               required
-                                               onChange={(e) => setPinCode(Number(e.target.value))}
-                                        />
-
-                                        <div
-                                            className="w-100 d-xl-flex justify-content-start p-1 mb-1 mb-xl-2"
-                                        >
-                                            <AppSwitch checked={rememberMe} onSwitch={(value) => setRememberMe(value)}
-                                                       label={'Оставаться в системе'}
+                        <form autoComplete="off">
+                            <div className="row d-flex justify-content-center">
+                                <div className="col-md-6 col-xl-4">
+                                    <div className="mb-1 mb-xl-5 border rounded">
+                                        <div className="d-flex flex-column align-items-center p-3 gap-2">
+                                            <img
+                                                className="px-xl-0 pe-xl-0 mx-xl-3 my-xl-1 mt-xl-0 py-xl-1 mb-2"
+                                                src={logo} width="50%"
+                                                alt={"LOGO"}
                                             />
+
+                                            {errorMsg &&
+                                                <h6 className={'text-danger'}>{errorMsg}</h6>
+                                            }
+
+                                            <input className={"password-field form-control text-center form-control-lg mb-2"}
+                                                   type="text"
+                                                   placeholder="ПИН-код (6 цифр)"
+                                                   title="Разрешено использовать только цифры"
+                                                   pattern="[0-9]+$"
+                                                   autoFocus
+                                                   inputMode="numeric"
+                                                   maxLength={6}
+                                                   minLength={6}
+                                                   required
+                                                   autoComplete="new-password"
+                                                   onChange={(e) => setPinCode(Number(e.target.value))}
+                                            />
+
+                                            <div
+                                                className="w-100 d-xl-flex justify-content-start p-1 mb-1 mb-xl-2"
+                                            >
+                                                <AppSwitch checked={rememberMe}
+                                                           onSwitch={(value) => setRememberMe(value)}
+                                                           label={'Оставаться в системе'}
+                                                />
+                                            </div>
+
+                                            <Button
+                                                className={"btn-primary d-block w-100 mb-1 mb-xl-2"}
+                                                onClick={loginHandle}
+                                                disabled={String(pinCode).length < 6}
+                                            >
+                                                Войти
+                                            </Button>
+
+                                            <p className="text-muted">ПИН-код выдается администратором системы.</p>
+
                                         </div>
-
-                                        <Button
-                                            className={"btn-primary d-block w-100 mb-1 mb-xl-2"}
-                                            onClick={loginHandle}
-                                            disabled={String(pinCode).length < 6}
-                                        >
-                                            Войти
-                                        </Button>
-
-                                        <p className="text-muted">ПИН-код выдается администратором системы.</p>
-
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
                 </section>
             </ModalProvider>

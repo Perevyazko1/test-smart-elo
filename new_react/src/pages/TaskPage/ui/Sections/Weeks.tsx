@@ -30,13 +30,17 @@ export const Weeks = (props: WeeksProps) => {
     const weekData = useAppSelector(getStateWeekData);
 
     const addAction = () => {
-        openModal(
-            <TaskForm
-                variant={'create'}
-                onSubmitClb={() => {
-                    closeModal()
-                }}
-            />
+        openModal({
+                content: (
+                    <TaskForm
+                        variant={'create'}
+                        onSubmitClb={() => {
+                            closeModal()
+                        }}
+                    />
+                ),
+                confirmClose: true,
+            }
         )
     }
 

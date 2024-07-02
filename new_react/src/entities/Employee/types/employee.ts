@@ -26,3 +26,4 @@ export interface Employee extends Omit<BaseEmployee, ExtendedFields>{
     permanent_department: Department | null,
     boss: Employee | null,
 }
+

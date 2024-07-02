@@ -24,10 +24,13 @@ export const CardCounter = (props: CardCounterProps) => {
     const dispatch = useAppDispatch();
 
     const openModalWithInfo = useCallback(() => {
-        openModal(
-            <EqInfo card={card} updCallback={
-                () => dispatch(eqPageActions.addNotRelevantId(card.series_id))
-            }/>
+        openModal({
+                content: (
+                    <EqInfo card={card} updCallback={
+                        () => dispatch(eqPageActions.addNotRelevantId(card.series_id))
+                    }/>
+                )
+            }
         )
     }, [card, dispatch, openModal]);
 

@@ -10,7 +10,7 @@ import {APP_COMPACT_MODE, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {useAppModal} from "@shared/hooks";
 import {UserActions} from "@widgets/UserActions";
 
-export const AppNavigation = (props: {isDesktop: boolean}) => {
+export const AppNavigation = (props: { isDesktop: boolean }) => {
     const currentUser = useContext(CurrentUserContext);
     const {openModal} = useAppModal();
 
@@ -53,16 +53,6 @@ export const AppNavigation = (props: {isDesktop: boolean}) => {
         )
     });
 
-    const getSelectedName = () => {
-        const user = currentUser.currentUser;
-
-        if (user.last_name) {
-            return `${user.first_name} ${user.last_name[0]}.`
-        } else {
-            return `${user.first_name}`
-        }
-    }
-
     const exitHandle = () => {
         localStorage.removeItem(USER_LOCALSTORAGE_TOKEN);
         currentUser.setCurrentUser(anonEmployee);
@@ -70,12 +60,12 @@ export const AppNavigation = (props: {isDesktop: boolean}) => {
 
     const showUserActionsClb = () => {
         openModal(
-            <UserActions/>
+            {content: <UserActions/>}
         )
     }
 
     return (
-        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')} >
+        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')}>
             {renderOptions}
             <div className={'py-2'}>
                 <AppSwitch checked={isCompactMode} label={'Сжатый вид'} onSwitch={switchCompactMode}/>

@@ -289,3 +289,8 @@ input[type="time"]:disabled {
   background-color: #e9ecef;
   opacity: 1;
 }
+
+.password-field {
+  -webkit-text-security: disc; /* Для Chrome, Safari, и Opera */
+  text-security: disc; /* Для Firefox и других браузеров */
+}

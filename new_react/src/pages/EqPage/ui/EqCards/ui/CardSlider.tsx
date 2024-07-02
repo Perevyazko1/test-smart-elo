@@ -37,12 +37,15 @@ export const CardSlider = (props: CardSliderProps) => {
             minWidth: sliderWidth,
             maxWidth: sliderWidth,
         }}
-             onClick={() => openModal(
-                 <AppSlider
-                     images={sliderImages.images}
-                     width={'90vw'}
-                     height={'90vh'}
-                 />
+             onClick={() => openModal({
+                     content: (
+                         <AppSlider
+                             images={sliderImages.images}
+                             width={'90vw'}
+                             height={'90vh'}
+                         />
+                     )
+                 }
              )}
         >
             <AppSlider

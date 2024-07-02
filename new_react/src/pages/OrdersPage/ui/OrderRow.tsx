@@ -10,8 +10,11 @@ export const OrderRow = (props: { order: OrderItem }) => {
     const {openModal} = useAppModal();
 
     const onClickHandler = () => {
-        openModal(
-            <OrderDetailWidget order_id={props.order.id}/>
+        openModal({
+                content: (
+                    <OrderDetailWidget order_id={props.order.id}/>
+                )
+            }
         )
     }
     return (

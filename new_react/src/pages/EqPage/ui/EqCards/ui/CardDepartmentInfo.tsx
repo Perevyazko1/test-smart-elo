@@ -16,8 +16,11 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
     return (
         <div
             className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
-            onClick={() => openModal(
-                <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+            onClick={() => openModal({
+                    content: (
+                        <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+                    )
+                }
             )}
         >
             {card.department_info.map((info, index) => (
