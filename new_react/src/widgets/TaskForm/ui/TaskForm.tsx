@@ -1,4 +1,4 @@
-import React, {FormEvent, useEffect, useMemo, useState} from "react";
+import React, {FormEvent, useMemo, useState} from "react";
 import {Button} from "@mui/material";
 
 import {useCurrentUser} from "@shared/hooks";
@@ -46,19 +46,10 @@ export const TaskForm = (props: TaskFormProps) => {
         description: task?.description || '',
         urgency: task?.urgency || TaskUrgency.Normal,
         view_mode: task?.view_mode || TaskViewMode.OnlyMe,
+        for_department: task?.for_department?.id || null,
         executor: task?.executor?.id || null,
         co_executors: task?.co_executors?.map(item => item.id) || [],
     });
-
-    useEffect(() => {
-        console.log("YYYY")
-        if (formData.view_mode !== TaskViewMode.DepartmentVisible && formData.for_department) {
-            const newValue = {...formData};
-            delete newValue.for_department;
-            setFormData(newValue)
-        }
-        // eslint-disable-next-line
-    }, [formData.view_mode]);
 
     const sortedUserList = useMemo(() => {
         return [...(userList || [])].sort((a, b) => {
@@ -235,7 +226,7 @@ export const TaskForm = (props: TaskFormProps) => {
                     setFormTask={setFormData}
                 />
                 <ForDepartmentBlock
-                    active={formData.view_mode === TaskViewMode.DepartmentVisible}
+                    active={formData.view_mode === TaskViewMode.DepartmentVisible && variant !== "read_only"}
                     formTask={formData}
                     setFormTask={setFormData}
                 />

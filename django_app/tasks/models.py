@@ -105,7 +105,7 @@ class Task(models.Model):
     )
 
     def __str__(self):
-        return '{}'.format(f'{self.appointed_by.username} => {self.title}')
+        return '{}'.format(f'{self.created_by.username} => {self.title}')
 
 
 class TaskImage(models.Model):
