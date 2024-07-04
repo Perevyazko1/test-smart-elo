@@ -1,4 +1,4 @@
-export const SERVER_HOST = `http://${window.location.hostname}`;
+export const SERVER_HOST = `https://${window.location.hostname}`;
 export const WS_HOST = `ws://${window.location.hostname}`;
 export const SERVER_PORT = '8000';
 
