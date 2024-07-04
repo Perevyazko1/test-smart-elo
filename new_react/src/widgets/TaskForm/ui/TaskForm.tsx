@@ -15,13 +15,14 @@ import {CoExecutorBlock} from "./ui/CoExecutorBlock";
 import {ViewModeBlock} from "./ui/ViewModeBlock";
 import {ForDepartmentBlock} from "./ui/ForDepartmentBlock";
 import {RatingBlock} from "./ui/RatingBlock";
-import {TextBlock} from "./ui/TextBlock";
+import {TextTitleBlock} from "./ui/TextTitleBlock";
 import {convertDateTime, prepareFormData} from "@shared/lib";
 import {AppointedByBlock} from "@widgets/TaskForm/ui/ui/AppointedByBlock";
 import {DeadlineBlock} from "@widgets/TaskForm/ui/ui/DeadlineBlock";
 import {InputGroup} from "react-bootstrap";
 import {UpdateTask} from "@pages/TaskPage/model/types";
 import {getStatusText} from "@pages/TaskPage/model/lib";
+import {TextDescriptionBlock} from "@widgets/TaskForm/ui/ui/TextDescriptionBlock";
 
 
 interface TaskFormProps {
@@ -238,7 +239,13 @@ export const TaskForm = (props: TaskFormProps) => {
             </div>
             <hr/>
 
-            <TextBlock
+            <TextTitleBlock
+                disabled={variant === "read_only"}
+                formTask={formData}
+                setFormTask={setFormData}
+            />
+
+            <TextDescriptionBlock
                 disabled={variant === "read_only"}
                 formTask={formData}
                 setFormTask={setFormData}
