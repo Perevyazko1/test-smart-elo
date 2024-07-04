@@ -7,5 +7,5 @@ export const GET_STATIC_URL = () => {
 }
 
 // export const SERVER_HTTP_ADDRESS = `${SERVER_HOST}:${SERVER_PORT}`
-export const SERVER_HTTP_ADDRESS = `elo.szmk.pro`
+export const SERVER_HTTP_ADDRESS = `https://elo.szmk.pro`
 export const SERVER_WS_ADDRESS = `${WS_HOST}:${SERVER_PORT}`
