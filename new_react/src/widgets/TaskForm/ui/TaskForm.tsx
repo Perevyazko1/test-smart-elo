@@ -289,7 +289,7 @@ export const TaskForm = (props: TaskFormProps) => {
                             onClick={cancelClb}
                             disabled={isCreated || isUpdated}
                         >
-                            Отменить
+                            Удалить
                         </Button>
                         :
 
