@@ -1,13 +1,14 @@
-import { useCallback, useRef } from 'react';
-import clickSound from "@shared/assets/sounds/click.mp3";
-
+import {useCallback, useContext} from 'react';
+import {AudioContext} from "@app";
 
 export const useClickSound = () => {
-    const audioRef = useRef(new Audio(clickSound));
+    const audio = useContext(AudioContext);
 
     const playClick = useCallback(() => {
-        audioRef.current.play().then();
-    }, []);
+        if (audio) {
+            audio.play().then();
+        }
+    }, [audio]);
 
     return playClick;
 };
