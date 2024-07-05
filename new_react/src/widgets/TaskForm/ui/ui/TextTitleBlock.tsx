@@ -115,6 +115,7 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
             <Form.Control
                 required
                 as={"input"}
+                maxLength={255}
                 ref={inputRef}
                 readOnly={disabled}
                 value={formTask.title}

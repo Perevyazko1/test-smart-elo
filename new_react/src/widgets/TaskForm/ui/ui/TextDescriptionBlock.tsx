@@ -119,6 +119,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                 as="textarea"
                 ref={inputRef}
                 readOnly={disabled}
+                maxLength={5000}
                 value={formTask.description}
                 onChange={handleInputChange}
                 onClick={handleMouseUp}
