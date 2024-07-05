@@ -203,7 +203,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
             <div className="d-flex gap-3 mb-3">
                 <ExecutorBlock
-                    disabled={variant === 'read_only' || task?.status !== TaskStatus.Pending}
+                    disabled={variant === 'read_only' || (!!task && task?.status !== TaskStatus.Pending) }
                     setFormTask={setFormData}
                     formTask={formData}
                     isLoading={usersIsLoading}
