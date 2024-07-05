@@ -226,13 +226,16 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
 
                 {!hideFirstBtn &&
                     <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant}`}
+                        className={`appBtn rounded rounded-2 h-100 ${getButtonVariant}`}
                         onClick={() => updClb(true)}
                         style={{minWidth: '39px', maxWidth: '39px'}}
                     >
                         {timeLeft &&
                             <>
-                                <div style={{fontSize: '10px'}}>
+                                <div style={{fontSize: '9px'}}>
+                                    {timeLeft.weeks &&
+                                        <b>{timeLeft.weeks}нед<br/></b>
+                                    }
                                     <b>{timeLeft.days}д{timeLeft.hours}ч</b>
                                     <br/>
                                     <b>{timeLeft.minutes}м{timeLeft.seconds}с</b>
@@ -328,7 +331,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     <br/>
                     Соисполнит.:<br/>
                     {card.co_executors?.map(user => (
-                        <b className={'text-nowrap'}>
+                        <b className={'text-nowrap'} key={user.id}>
                             {getEmployeeName(user, 'short')}
                             <br/>
                         </b>
@@ -346,7 +349,6 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 }
 
             </div>
-
         </div>
     )
         ;

@@ -10,7 +10,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 import 'swiper/css/scrollbar';
-import {GET_STATIC_URL} from "@shared/consts";
+import {STATIC_URL} from "@shared/consts";
 
 
 interface AppSliderProps {
@@ -41,7 +41,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                 key={image}
             >
                 <img
-                    src={image.startsWith("http") || image.startsWith("blob") ? image : GET_STATIC_URL() + image}
+                    src={image.startsWith("http") || image.startsWith("blob") ? image : STATIC_URL + image}
                     style={{
                         maxWidth: width,
                         maxHeight: height,
@@ -117,6 +117,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     <SwiperSlide
                         style={{width: width, height: height}}
                         className={"d-flex justify-content-center align-items-center"}
+                        key={logoImg2}
                     >
                         <img
                             src={logoImg2}

@@ -21,7 +21,7 @@ function buildOrgChart(employees: Employee[]): RawNodeDatum | undefined {
     for (const employee of employees) {
         const node = employeeMap.get(employee.id)!;
         if (employee.boss) {
-            const bossNode = employeeMap.get(employee.boss.id)!;
+            const bossNode = employeeMap.get(employee.boss)!;
             bossNode.children!.push(node);
         } else {
             root = node;

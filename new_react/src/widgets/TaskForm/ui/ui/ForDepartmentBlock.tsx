@@ -1,6 +1,6 @@
+import React, {useEffect, useMemo} from "react";
 import {Autocomplete, TextField} from "@mui/material";
 import {Department} from "@entities/Department";
-import React, {useEffect, useMemo, useState} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {useDepartmentList} from "@widgets/TaskForm/model/api";
 import {TaskViewMode} from "@pages/TaskPage";

@@ -21,7 +21,6 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
     const [time, setTime] = useState<string>(initialTime || "");
 
     useEffect(() => {
-        console.log("XXXXX")
         if (date) {
             const newTime = time || "18:00";
             const newDeadline = `${date}T${newTime}`;

@@ -28,7 +28,6 @@ class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
 
 class EmployeeSerializer(serializers.ModelSerializer):
     departments = DepartmentSerializer(many=True)
-    boss = serializers.SerializerMethodField()
     current_department = DepartmentSerializer(many=False)
     permanent_department = DepartmentSerializer(many=False)
     groups = GroupSerializer(many=True)
@@ -61,11 +60,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
     def get_token(self, obj):
         token, created = Token.objects.get_or_create(user=obj)
         return token.key
-
-    def get_boss(self, obj):
-        if obj.boss:
-            return EmployeeSerializer(obj.boss, context=self.context).data
-        return None
 
 
 class AuditSerializer(serializers.ModelSerializer):

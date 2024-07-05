@@ -1,4 +1,4 @@
-import {APP_PERM, GET_STATIC_URL} from "@shared/consts";
+import {APP_PERM, STATIC_URL} from "@shared/consts";
 import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import {TechProcessConstructor} from "@widgets/TechProcessWidget/ui/TechProcessConstructor";
 import React, {useCallback, useState} from "react";
@@ -84,7 +84,7 @@ export const TpSelected = (props: TPSelectedProps) => {
     const getImageWidget = () => {
         if (getImageUrl()) {
             return (
-                <img src={GET_STATIC_URL() + getImageUrl()}
+                <img src={STATIC_URL+ getImageUrl()}
                      alt={'Без изображения'}
                      loading={"lazy"}
                      style={{maxHeight: '400px', maxWidth: '600px'}}

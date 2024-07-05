@@ -31,13 +31,13 @@
     "react-scripts": "5.0.1",
     "react-speech-recognition": "^3.10.0",
     "react-window": "^1.8.9",
-    "serve": "^14.2.1",
+    "serve": "^14.2.3",
     "swiper": "^11.0.4",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "set \"REACT_APP_DEV_MODE=true\" && craco start",
+    "start": "craco start",
     "build": "craco build",
     "test": "craco test",
     "eject": "craco eject"

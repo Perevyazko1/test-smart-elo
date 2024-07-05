@@ -1,7 +1,7 @@
 import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import { useTechProcessList } from "../model/api/api";
 import {Button, Table} from "react-bootstrap";
-import {GET_STATIC_URL} from "@shared/consts";
+import {STATIC_URL} from "@shared/consts";
 
 interface TechProcessListProps {
     constructorCallback: (schema: TechProcessSchema) => void;
@@ -44,7 +44,7 @@ export const TechProcessList = (props: TechProcessListProps) => {
                         <tr key={tech_process.name}>
                             <td>
                                 <img
-                                    src={GET_STATIC_URL() + tech_process.image}
+                                    src={STATIC_URL + tech_process.image}
                                     alt={tech_process.name}
                                     style={{maxWidth: "500px", maxHeight: "400px"}}
                                     loading={'lazy'}

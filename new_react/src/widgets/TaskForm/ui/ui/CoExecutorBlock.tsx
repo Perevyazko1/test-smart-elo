@@ -20,9 +20,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
 
 
     useEffect(() => {
-        console.log('Триггер первого useEffect')
         if (!inited && userList.length > 0) {
-            console.log("Инициализация списка")
             setValue(
                 userList.filter(user => formTask.co_executors?.includes(user.id))
             )
@@ -35,7 +33,6 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     }, [value])
 
     useEffect(() => {
-        console.log('Триггер второго useEffect')
         if (inited && coExecutorIds !== formTask.co_executors) {
             setFormTask({
                 ...formTask,

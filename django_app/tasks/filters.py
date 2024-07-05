@@ -74,6 +74,10 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.filter(
                 co_executors=self.request.user,
             )
+        if value == '6':
+            return queryset.filter(
+                appointed_by=self.request.user,
+            )
         return []
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):

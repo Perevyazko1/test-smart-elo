@@ -2,7 +2,6 @@ import json
 import requests
 
 from core.api_moy_sklad.config import BASE_URL, POST_AUTH
-from core.api_moy_sklad.metadata import READY_ORDER_METADATA
 
 
 def set_eq_link_in_order(order_id: str, link: str):
@@ -18,7 +17,7 @@ def set_eq_link_in_order(order_id: str, link: str):
                 "id": "90b92313-1cb9-11ee-0a80-08bf000d91ed",
                 "name": "Ссылка на спец-ю:",
                 "type": "link",
-                "value": f"http://172.16.1.212/orders/{link}"
+                "value": f"https://elo.szmk.pro/orders/{link}"
             }
         ]
     }

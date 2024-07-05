@@ -1,10 +1,11 @@
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {Form, InputGroup} from "react-bootstrap";
-import React, {useEffect} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Fab} from "@mui/material";
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
 import {useSpeechRecognition} from "@shared/hooks";
 import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
+import ClearIcon from "@mui/icons-material/Clear";
 
 interface TextDescriptionBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -15,21 +16,69 @@ interface TextDescriptionBlockProps {
 export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
     const {formTask, setFormTask, disabled} = props;
     const {isListening, transcript, startListening} = useSpeechRecognition();
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [cursorPosition, setCursorPosition] = useState<number | null>(formTask.description?.length || 0);
 
     useEffect(() => {
-        if (transcript) {
+        if (transcript && cursorPosition !== null && inputRef.current) {
+            const currentText = formTask.description || '';
+
+            const beforeCursor = currentText.slice(0, cursorPosition);
+            const afterCursor = currentText.slice(cursorPosition);
+            const addSpaceBefore = beforeCursor && beforeCursor.slice(-1) !== ' ' ? ' ' : '';
+            const addSpaceAfter = afterCursor && afterCursor[0] !== ' ' ? ' ' : '';
+
+            const newText = beforeCursor + addSpaceBefore + transcript + addSpaceAfter + afterCursor;
+
             setFormTask({
                 ...formTask,
-                description: transcript,
-            })
+                description: newText,
+            });
+            // Reset cursor position
+            setCursorPosition(cursorPosition + transcript.length);
         }
-        //eslint-disable-next-line
+        // eslint-disable-next-line
     }, [transcript]);
+
+    useEffect(() => {
+        if (inputRef.current && cursorPosition !== null) {
+            inputRef.current.setSelectionRange(cursorPosition, cursorPosition);
+        }
+    }, [formTask.description, cursorPosition]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const newValue = e.target.value;
+        setCursorPosition(e.target.selectionStart);
+        setFormTask({
+            ...formTask,
+            description: newValue,
+        });
+    };
+
+    const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
+        setCursorPosition(e.currentTarget.selectionStart);
+    };
+
+    const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        setCursorPosition(e.currentTarget.selectionStart);
+    };
+
+    const handleSelect = (e: React.SyntheticEvent<HTMLInputElement>) => {
+        const input = e.currentTarget as HTMLInputElement;
+        setCursorPosition(input.selectionStart);
+    };
+
+    const cleanClb = () => {
+        setFormTask({
+            ...formTask,
+            description: '',
+        });
+    };
 
     return (
         <InputGroup className={'mb-3'}>
 
-            <InputGroup.Text id="basic-addon1" className={'ps-5 fs-7'}>
+            <InputGroup.Text id="basic-addon1" className={'ps-5 fs-7 position-relative'}>
                 <Fab
                     size="small"
                     color="inherit"
@@ -48,14 +97,34 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                     }
                 </Fab>
                 Описание:
+
+                {!disabled && formTask.description &&
+                    <button
+                        className={'appBtn border-1 border-secondary text-secondary fs-7 position-absolute'}
+                        type={'button'}
+                        style={{
+                            borderRadius: '50%',
+                            padding: '.1rem',
+                            top: '-6px',
+                            right: '-6px',
+                            zIndex: '100'
+                        }}
+                        onClick={cleanClb}
+                    >
+                        <ClearIcon fontSize={'inherit'} className={'text-secondary fs-7'}/>
+                    </button>
+                }
             </InputGroup.Text>
-            <Form.Control as="textarea"
-                          readOnly={disabled}
-                          value={formTask.description}
-                          onChange={(e) => setFormTask({
-                              ...formTask,
-                              description: e.target.value,
-                          })}/>
+            <Form.Control
+                as="textarea"
+                ref={inputRef}
+                readOnly={disabled}
+                value={formTask.description}
+                onChange={handleInputChange}
+                onClick={handleMouseUp}
+                onKeyUp={handleKeyUp}
+                onSelect={handleSelect}
+            />
         </InputGroup>
     );
 };

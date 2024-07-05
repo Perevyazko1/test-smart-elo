@@ -3,7 +3,7 @@ import {Table} from "react-bootstrap";
 
 import altLogo from "./products.png";
 
-import {GET_STATIC_URL} from "@shared/consts";
+import {STATIC_URL} from "@shared/consts";
 
 import {OrderProduct} from "../model/types";
 
@@ -49,7 +49,7 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
                 </td>
                 <td rowSpan={departmentInfoLength}>
                     {orderProduct.product_image_url ?
-                        <img src={GET_STATIC_URL() + orderProduct.product_image_url} alt={'product'}/>
+                        <img src={STATIC_URL + orderProduct.product_image_url} alt={'product'}/>
                         :
                         <img src={altLogo} width={'120px'} height={'100px'} alt={'product'}/>
                     }

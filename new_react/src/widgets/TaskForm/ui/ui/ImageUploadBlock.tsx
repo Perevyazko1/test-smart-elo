@@ -6,7 +6,7 @@ import {AppSlider} from "@shared/ui";
 import {styled} from "@mui/material/styles";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {Task} from "@pages/TaskPage";
-import {GET_STATIC_URL} from "@shared/consts";
+import {STATIC_URL} from "@shared/consts";
 import ClearIcon from "@mui/icons-material/Clear";
 import {useDeleteTaskImage} from "@widgets/TaskForm/model/api";
 
@@ -163,7 +163,7 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
                             <img
                                 src={image.url.startsWith("http") || image.url.startsWith("blob")
                                     ? image.url
-                                    : GET_STATIC_URL() + image.url
+                                    : STATIC_URL + image.url
                                 }
                                 style={{maxWidth: "70px", maxHeight: "70px"}}
                                 className={`rounded m-0 p-0 ${image.isNew && "border-success border-2 border"}`}

@@ -12,6 +12,7 @@ const ViewModes: { [key: string]: string } = {
     '3': 'Отмененные',
     '4': 'Я исполнитель',
     '5': 'Я соисполнитель',
+    '6': 'Я назначил',
 }
 
 export const ViewModeNav = () => {

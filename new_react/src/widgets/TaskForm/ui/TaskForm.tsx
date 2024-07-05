@@ -50,6 +50,7 @@ export const TaskForm = (props: TaskFormProps) => {
         for_department: task?.for_department?.id || null,
         executor: task?.executor?.id || null,
         co_executors: task?.co_executors?.map(item => item.id) || [],
+        appointed_by: task?.appointed_by?.id || null,
     });
 
     const sortedUserList = useMemo(() => {
@@ -183,11 +184,9 @@ export const TaskForm = (props: TaskFormProps) => {
                     value={task?.created_by || currentUser}
                 />
                 <AppointedByBlock
-                    value={formData.appointed_by ?
-                        currentUser
-                        :
-                        task?.appointed_by
-                    }
+                    isLoading={usersIsLoading}
+                    userList={sortedUserList || []}
+                    value={task?.appointed_by?.id || formData.appointed_by || null}
                 />
 
                 <InputGroup className={'w-auto'}>
@@ -204,7 +203,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
             <div className="d-flex gap-3 mb-3">
                 <ExecutorBlock
-                    disabled={variant === 'read_only'}
+                    disabled={variant === 'read_only' || task?.status !== TaskStatus.Pending}
                     setFormTask={setFormData}
                     formTask={formData}
                     isLoading={usersIsLoading}

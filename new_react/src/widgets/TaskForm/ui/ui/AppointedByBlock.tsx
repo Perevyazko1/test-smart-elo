@@ -1,22 +1,29 @@
 import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
+import {useMemo} from "react";
 
 
 interface AppointedByBlockProps {
-    value?: Employee;
+    value: number | null;
+    userList: Employee[];
+    isLoading: boolean;
 }
 
 
 export const AppointedByBlock = (props: AppointedByBlockProps) => {
-    const {value} = props;
+    const {value, userList, isLoading} = props;
+    
+    const getValue = useMemo(() => {
+        return userList.find(user => user.id === value) || null;
+    }, [userList, value])
 
     return (
         <Autocomplete
             size={'small'}
             disablePortal
             readOnly
-            value={value}
+            value={getValue}
             options={[]}
             getOptionLabel={(option: Employee) => getEmployeeName(option)}
             sx={{
@@ -31,7 +38,7 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
             renderInput={(params) =>
                 <TextField
                     {...params}
-                    label="Задачу назначил"
+                    label={isLoading ? "Загрузка..." : "Задачу назначил"}
                     variant="standard"
                 />}
         />
