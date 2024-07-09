@@ -25,9 +25,9 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
             readOnly
             value={getValue}
             options={[]}
-            getOptionLabel={(option: Employee) => getEmployeeName(option)}
+            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
             sx={{
-                width: 200,
+                width: 250,
                 "& .MuiAutocomplete-popupIndicator": {
                     display: "none",
                 },

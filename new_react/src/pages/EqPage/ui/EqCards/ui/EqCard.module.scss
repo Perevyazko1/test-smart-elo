@@ -58,17 +58,13 @@
 }
 
 .orderProjectBlock {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
   padding: 0 0.15rem;
   height: 100%;
   width: 70px;
   min-width: 70px;
   max-width: 70px;
   overflow-y: auto;
-  overflow-x: hidden;
+  overflow-x: auto;
 }
 
 .depInfoBlock {

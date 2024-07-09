@@ -16,31 +16,45 @@ export const RatingBlock = (props: RatingBlockProps) => {
         return `Срочность: ${getUrgencyText(value)}`;
     }
 
+    const onChangeClb = (option: number | null) => {
+        if (option) {
+            setFormTask(
+                {
+                    ...formTask,
+                    urgency: String(option) as TaskUrgency
+                }
+            )
+        } else {
+            setFormTask(
+                {
+                    ...formTask,
+                    urgency: TaskUrgency.Normal
+                }
+            )
+        }
+    }
+
     return (
         <Box
             sx={{
-                width: 200,
+                width: 180,
                 display: 'flex',
                 alignItems: 'center',
             }}
         >
-            <Box className={'fs-7'} sx={{ml: 2}}>
-                {getLabelText(formTask.urgency)}
-            </Box>
             <Rating
                 disabled={disabled}
                 name="hover-feedback"
                 value={Number(formTask.urgency)}
                 max={4}
                 getLabelText={option => getLabelText(String(option) as TaskUrgency)}
-                onChange={(event, newValue) => {
-                    setFormTask({
-                        ...formTask,
-                        urgency: String(newValue) as TaskUrgency || TaskUrgency.Normal
-                    })
-                }}
+                onChange={(event, newValue) => onChangeClb(newValue)}
                 emptyIcon={<StarIcon style={{opacity: 0.55}} fontSize="inherit"/>}
             />
+
+            <Box className={'fs-7'} sx={{ml: 2}}>
+                {getLabelText(formTask.urgency)}
+            </Box>
         </Box>
     );
 };

@@ -29,7 +29,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
                 appointed_by: currentUser.id,
             })
         } else {
-            props.setFormTask({
+            setFormTask({
                 ...formTask,
                 executor: null,
                 appointed_at: "",
@@ -46,9 +46,9 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
             value={getInitialValue}
             options={userList}
             loading={isLoading}
-            getOptionLabel={(option: Employee) => getEmployeeName(option)}
+            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
             groupBy={(option: Employee) => option.permanent_department?.name || ""}
-            sx={{ width: 200 }}
+            sx={{ width: 250 }}
             onChange={changeClb}
             renderInput={(params) =>
                 <TextField

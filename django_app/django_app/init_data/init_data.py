@@ -1,16 +1,13 @@
 """Initial methods and scripts. """
-from staff.models import Employee
+from tasks.models import Task
 from django.contrib.auth.models import Group
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    users = Employee.objects.all().filter(
-        is_active=True
-    )
+    tasks = Task.objects.all()
 
-    target_group = Group.objects.get(name='Страница задач')
-
-    for user in users:
-        user.groups.add(target_group)
+    for task in tasks:
+        if task.for_department:
+            task.for_departments.add(task.for_department)

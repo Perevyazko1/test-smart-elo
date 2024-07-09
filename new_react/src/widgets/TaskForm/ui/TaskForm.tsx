@@ -1,8 +1,12 @@
-import React, {FormEvent, useMemo, useState} from "react";
+import React, {FormEvent, useEffect, useMemo, useState} from "react";
+import {InputGroup} from "react-bootstrap";
 import {Button} from "@mui/material";
 
+import {convertDateTime, prepareFormData} from "@shared/lib";
 import {useCurrentUser} from "@shared/hooks";
 import {Task, TaskStatus, TaskUrgency, TaskViewMode} from "@pages/TaskPage";
+import {UpdateTask} from "@pages/TaskPage/model/types";
+import {getStatusText} from "@pages/TaskPage/model/lib";
 
 import {CreateTask} from "../model/types";
 import {useCreateTask, useEmployeeList, useUpdateTask} from "../model/api";
@@ -13,16 +17,12 @@ import {CreatedByBlock} from "./ui/CreatedByBlock";
 import {ExecutorBlock} from "./ui/ExecutorBlock";
 import {CoExecutorBlock} from "./ui/CoExecutorBlock";
 import {ViewModeBlock} from "./ui/ViewModeBlock";
-import {ForDepartmentBlock} from "./ui/ForDepartmentBlock";
 import {RatingBlock} from "./ui/RatingBlock";
 import {TextTitleBlock} from "./ui/TextTitleBlock";
-import {convertDateTime, prepareFormData} from "@shared/lib";
-import {AppointedByBlock} from "@widgets/TaskForm/ui/ui/AppointedByBlock";
-import {DeadlineBlock} from "@widgets/TaskForm/ui/ui/DeadlineBlock";
-import {InputGroup} from "react-bootstrap";
-import {UpdateTask} from "@pages/TaskPage/model/types";
-import {getStatusText} from "@pages/TaskPage/model/lib";
-import {TextDescriptionBlock} from "@widgets/TaskForm/ui/ui/TextDescriptionBlock";
+import {AppointedByBlock} from "./ui/AppointedByBlock";
+import {DeadlineBlock} from "./ui/DeadlineBlock";
+import {TextDescriptionBlock} from "./ui/TextDescriptionBlock";
+import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
 
 
 interface TaskFormProps {
@@ -46,8 +46,8 @@ export const TaskForm = (props: TaskFormProps) => {
         title: task?.title || '',
         description: task?.description || '',
         urgency: task?.urgency || TaskUrgency.Normal,
-        view_mode: task?.view_mode || TaskViewMode.OnlyMe,
-        for_department: task?.for_department?.id || null,
+        view_mode: task?.view_mode || TaskViewMode.ForParticipants,
+        for_departments: task?.for_departments?.map(department => department.id) || [],
         executor: task?.executor?.id || null,
         co_executors: task?.co_executors?.map(item => item.id) || [],
         appointed_by: task?.appointed_by?.id || null,
@@ -143,6 +143,25 @@ export const TaskForm = (props: TaskFormProps) => {
         }
     }
 
+    useEffect(() => {
+        if (formData.view_mode !== TaskViewMode.DepartmentVisible && formData.for_departments) {
+            setFormData({
+                ...formData,
+                for_departments: []
+            })
+        }
+        if (formData.view_mode === TaskViewMode.OnlyMe && formData.executor !== currentUser.id) {
+            setFormData({
+                ...formData,
+                executor: currentUser.id,
+                co_executors: [],
+                appointed_at: new Date().toISOString(),
+                appointed_by: currentUser.id,
+            })
+        }
+        //eslint-disable-next-line
+    }, [formData.view_mode]);
+
     return (
         <form
             data-bs-theme={'light'}
@@ -203,7 +222,10 @@ export const TaskForm = (props: TaskFormProps) => {
 
             <div className="d-flex gap-3 mb-3">
                 <ExecutorBlock
-                    disabled={variant === 'read_only' || (!!task && task?.status !== TaskStatus.Pending) }
+                    disabled={variant === 'read_only'
+                        || (!!task && task?.status !== TaskStatus.Pending)
+                        || formData.view_mode === TaskViewMode.OnlyMe
+                    }
                     setFormTask={setFormData}
                     formTask={formData}
                     isLoading={usersIsLoading}
@@ -225,7 +247,7 @@ export const TaskForm = (props: TaskFormProps) => {
                     formTask={formData}
                     setFormTask={setFormData}
                 />
-                <ForDepartmentBlock
+                <ForDepartmentsBlock
                     active={formData.view_mode === TaskViewMode.DepartmentVisible && variant !== "read_only"}
                     formTask={formData}
                     setFormTask={setFormData}

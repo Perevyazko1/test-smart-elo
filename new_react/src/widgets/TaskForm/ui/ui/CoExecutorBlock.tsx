@@ -54,7 +54,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             loading={isLoading}
             options={userList}
             groupBy={(option: Employee) => option.permanent_department?.name || ""}
-            getOptionLabel={(option: Employee) => getEmployeeName(option)}
+            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
             sx={{width: 450}}
             onChange={(event: any, newValue: Employee[] | null) => {
                 setValue(newValue || [])

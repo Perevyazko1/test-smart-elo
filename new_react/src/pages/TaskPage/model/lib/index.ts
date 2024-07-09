@@ -37,7 +37,7 @@ export const getViewModeText = (view_mode: TaskViewMode): string => {
         case TaskViewMode.OnlyMe:
             return 'Только мне';
         case TaskViewMode.DepartmentVisible:
-            return 'Видна отделу';
+            return 'Видна отделам';
         case TaskViewMode.EveryoneVisible:
             return 'Видна всем';
         case TaskViewMode.ForParticipants:

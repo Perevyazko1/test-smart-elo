@@ -5,7 +5,7 @@ type ExtendedFields =
     'appointed_by' |
     'executor' |
     'co_executors' |
-    'for_department' |
+    'for_departments' |
     'id' |
     'ready_at' |
     'created_by' |
@@ -14,7 +14,7 @@ type ExtendedFields =
 export interface CreateTask extends Omit<Task, ExtendedFields> {
     created_by: number;
     appointed_by?: number | null;
-    for_department?: number | null;
+    for_departments?: number[] | null;
     executor: number | null;
     co_executors: number[];
     images?: File[];

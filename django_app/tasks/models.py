@@ -62,8 +62,16 @@ class Task(models.Model):
         blank=True,
     )
 
+    for_departments = models.ManyToManyField(
+        Department,
+        verbose_name="Видна в отделах",
+        related_name='tasks_for_department',
+        blank=True,
+    )
+
     title = models.CharField("Название", max_length=255)
     description = models.TextField("Описание", max_length=5000, blank=True, null=True)
+    execution_comment = models.TextField("Комментарий к выполнению", max_length=5000, blank=True, null=True)
 
     deadline = models.DateTimeField("Крайний срок", blank=True, null=True)
     created_at = models.DateTimeField("Когда создана", auto_now_add=True)

@@ -18,12 +18,12 @@ class TaskReadSerializer(serializers.ModelSerializer):
     created_by = EmployeeSerializer()
     executor = EmployeeSerializer()
     co_executors = EmployeeSerializer(many=True)
-    for_department = DepartmentSerializer()
+    for_departments = DepartmentSerializer(many=True)
 
     class Meta:
         model = Task
         fields = [
-            'id', 'status', 'urgency', 'view_mode', 'for_department',
+            'id', 'status', 'urgency', 'view_mode', 'for_departments',
             'title', 'description', 'deadline', 'created_at', 'created_by', 'ready_at',
             'verified_at', 'appointed_at', 'appointed_by', 'executor', 'co_executors',
             'task_images',
@@ -39,13 +39,12 @@ class TaskWriteSerializer(serializers.ModelSerializer):
     appointed_by = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), required=False, allow_null=True)
     executor = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), allow_null=True, required=False)
     co_executors = serializers.PrimaryKeyRelatedField(queryset=Employee.objects.all(), many=True, required=False)
-    for_department = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), allow_null=True,
-                                                        required=False)
+    for_departments = serializers.PrimaryKeyRelatedField(queryset=Department.objects.all(), many=True, required=False)
 
     class Meta:
         model = Task
         fields = [
-            'id', 'status', 'urgency', 'view_mode', 'for_department',
+            'id', 'status', 'urgency', 'view_mode', 'for_departments',
             'title', 'description', 'deadline',
             'appointed_by', 'executor', 'co_executors',
             'images', 'appointed_at', 'ready_at', 'verified_at', 'created_by',

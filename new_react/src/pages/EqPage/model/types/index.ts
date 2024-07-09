@@ -24,6 +24,7 @@ export interface EqOrder {
     comment_base: string;
     comment_case: string;
     moment: string;
+    inner_number: string;
 }
 
 export interface EqFabric {

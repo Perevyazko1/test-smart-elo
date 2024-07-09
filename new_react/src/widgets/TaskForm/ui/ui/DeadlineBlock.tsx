@@ -33,7 +33,7 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
             }
         }
         //eslint-disable-next-line
-    }, [date, formData.deadline, setFormTask, time]);
+    }, [date, formData.deadline, time]);
 
     const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
         setDate(e.target.value);

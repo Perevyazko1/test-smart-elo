@@ -46,6 +46,13 @@ class Employee(AbstractUser):
         null=True,
     )
 
+    favorite_users = models.ManyToManyField(
+        'Employee',
+        verbose_name='Избранные пользователи',
+        related_name='favorites',
+        blank=True
+    )
+
     current_department = models.ForeignKey(
         Department,
         related_name='employees_current',

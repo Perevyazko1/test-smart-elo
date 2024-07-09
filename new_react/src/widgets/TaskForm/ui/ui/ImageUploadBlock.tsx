@@ -74,7 +74,8 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
                 images: fileList,
             });
         }
-    }, [formTask, newImages, setFormTask])
+        //eslint-disable-next-line
+    }, [formTask.images, newImages, setFormTask])
 
     const deleteClb = async (imageUrl: string) => {
         if (imageUrl.startsWith('blob')) {

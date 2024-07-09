@@ -118,7 +118,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                         />
                                     </Link>
                                 </div>
-                                <div className={'d-flex gap-1'}>
+                                <div className={'d-flex justify-content-end gap-1'}>
                                     {children}
                                 </div>
                             </div>

@@ -28,20 +28,22 @@ export const CardOrderProject = (props: CardOrderProjectProps) => {
         <div className={cls.orderProjectBlock + ' rounded'}
              onClick={onClickHandler}
              style={{
-                 fontSize: '14px',
+                 lineHeight: '16px',
                  backgroundColor: currentUser.current_department?.color || "#ffffff"
              }}
         >
-            <div className={'fs-7 fw-bold text-center'}>
-                Заказ:
-                <br/>
+            <div className={'fs-7 fw-bold text-nowrap'}>
                 {card.series_id}
-                <hr className={'m-0 p-0'}/>
             </div>
-            <div className={'fs-7 text-center'}>
+            <hr className={'m-0 p-0'}/>
+            <div className={'fs-7 text-nowrap'}>
+                {card.order.inner_number || "-"}
+            </div>
+            <hr className={'m-0 p-0'}/>
+            <div className={'fs-7 text-nowrap'}>
                 Проект:
                 <br/>
-                {card.order.project}
+                {card.order.project || '-'}
             </div>
         </div>
     );

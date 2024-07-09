@@ -14,6 +14,7 @@ export const ViewModeBlock = (props: ViewModeBlockProps) => {
 
     const handleChange = (event: SelectChangeEvent<TaskViewMode>) => {
         const selectedValue = event.target.value as TaskViewMode;
+        console.log(typeof selectedValue)
         setFormTask({
             ...formTask,
             view_mode: selectedValue,

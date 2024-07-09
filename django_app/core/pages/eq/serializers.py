@@ -79,6 +79,7 @@ class EqOrderSerializer(serializers.ModelSerializer):
             'comment_base',
             'comment_case',
             'moment',
+            'inner_number',
         ]
 
 

@@ -39,6 +39,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'id',
             'first_name',
             'last_name',
+            'patronymic',
             'username',
             'departments',
             'boss',

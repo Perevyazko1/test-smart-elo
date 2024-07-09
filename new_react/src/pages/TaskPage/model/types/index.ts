@@ -16,7 +16,7 @@ export interface Task {
     status: TaskStatus;
     urgency: TaskUrgency;
     view_mode: TaskViewMode;
-    for_department?: Department;
+    for_departments?: Department[];
     title: string;
     description?: string;
 
@@ -41,6 +41,7 @@ type UpdateTaskOmitFields =
     'appointed_by' |
     'executor' |
     'co_executors' |
+    'for_departments' |
     'task_images';
 
 export interface UpdateTask extends Omit<Task, UpdateTaskOmitFields> {
@@ -51,6 +52,7 @@ export interface UpdateTask extends Omit<Task, UpdateTaskOmitFields> {
     appointed_by?: number | null;
     executor?: number | null;
     co_executors?: number[];
+    for_departments?: number[];
     task_images?: File[];
 }
 
