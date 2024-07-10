@@ -10,6 +10,7 @@ def get_view_modes(department: Department):
 
     users = Employee.objects.filter(departments=department).exclude(
         is_staff=True,
+        is_active=False,
     )
 
     for user in users:

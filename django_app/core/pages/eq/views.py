@@ -77,9 +77,9 @@ def update_card(request):
 @api_view(['GET'])
 def get_eq_filters(request):
     eq_params = get_eq_req_params(request)
-    mode = request.query_params.get('project_mode')
+    project_mode = request.query_params.get('project_mode')
 
-    project_filters = get_project_filters(mode)
+    project_filters = get_project_filters(project_mode)
     view_modes = get_view_modes(eq_params['department'])
 
     return JsonResponse({

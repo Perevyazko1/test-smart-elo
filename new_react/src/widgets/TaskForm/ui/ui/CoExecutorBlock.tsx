@@ -1,8 +1,8 @@
-import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
 import React, {useEffect, useMemo, useState} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
+import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 interface CoExecutorBlockProps {
     disabled: boolean;
@@ -43,28 +43,20 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     }, [inited, coExecutorIds, formTask.co_executors])
 
     return (
-        <Autocomplete
-            className={'flex-fill'}
-            size={'small'}
+        <AppAutocomplete
+            variant={"multiple"}
+            label={isLoading ? "Загрузка..." : "Соисполнители / Наблюдатели"}
             readOnly={disabled}
+            className={'flex-fill'}
             value={value}
-            multiple
-            disablePortal
-            limitTags={2}
             loading={isLoading}
             options={userList}
             groupBy={(option: Employee) => option.permanent_department?.name || ""}
-            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
-            sx={{width: 450}}
-            onChange={(event: any, newValue: Employee[] | null) => {
+            onChangeClb={(newValue: Employee[] | null) => {
                 setValue(newValue || [])
             }}
-            renderInput={(params) =>
-                <TextField
-                    {...params}
-                    label={isLoading ? "Загрузка..." : "Соисполнители / Наблюдатели"}
-                    variant="standard"
-                />}
+            limitTags={2}
+            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
         />
     );
 };

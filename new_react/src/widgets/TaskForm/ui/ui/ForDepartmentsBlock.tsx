@@ -1,8 +1,8 @@
 import React, {useCallback, useMemo} from "react";
-import {Autocomplete, TextField} from "@mui/material";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {useDepartmentList} from "@widgets/TaskForm/model/api";
 import {TaskViewMode} from "@pages/TaskPage";
+import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 interface ForDepartmentsBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -31,29 +31,23 @@ export const ForDepartmentsBlock = (props: ForDepartmentsBlockProps) => {
         }
     }, [formTask.for_departments, formTask.view_mode])
     return (
-        <Autocomplete
+        <AppAutocomplete
             className={'flex-fill'}
-            size={'small'}
-            disablePortal
-            multiple
+            variant={'multiple'}
             readOnly={!active}
-            loading={departmentsIsLoading}
             value={formTask.for_departments || []}
+            label={"Отделы"}
+            required={isRequired}
             options={departmentIds || []}
+            loading={departmentsIsLoading}
             getOptionLabel={getOptionLabel}
-            onChange={(event: any, newValue: number[] | null) => {
+            limitTags={2}
+            onChangeClb={(newValue: number[] | null) => {
                 setFormTask({
                     ...formTask,
                     for_departments: newValue,
                 });
             }}
-            renderInput={(params) =>
-                <TextField
-                    {...params}
-                    required={isRequired}
-                    label="Отделы"
-                    variant="standard"
-                />}
         />
     );
 };

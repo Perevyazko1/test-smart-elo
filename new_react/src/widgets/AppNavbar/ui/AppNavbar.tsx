@@ -69,21 +69,20 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     if (isDesktop) {
         return (
             <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-                <div className={'bg-black text-white d-flex align-items-center justify-content-center appNavbar'}>
-                    <div className={'d-flex'}
-                         style={{minWidth: '1150px', maxWidth: '100%'}}
+                <div className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}>
+                    <div className={'d-flex align-items-stretch'}
+                         style={{minWidth: '1150px', maxWidth: '1600px'}}
                     >
-                        <div className={'d-flex justify-content-between align-items-center gap-2'}
+                        <div className={'d-flex justify-content-between align-items-stretch gap-3'}
                              style={{minWidth: '1220px', maxWidth: '100%'}}
                         >
-                            <div>
+                            <div className={'d-flex align-self-center flex-nowrap gap-1'} style={{width: '175px'}}>
                                 <Button variant={'outline-dark'}
                                         onClick={backHandler}
                                         disabled={!backBtnActive}
                                         style={{
                                             width: '35px',
                                         }}
-                                        className={'me-1'}
                                 >
                                     <i className={`${backBtnActive && 'text-white'} fas fa-chevron-left`}/>
                                 </Button>
@@ -97,14 +96,8 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 >
                                     <i className="text-white fas fa-sync-alt"/>
                                 </Button>
-                            </div>
-                            <div
-                                className={'d-flex flex-fill align-items-center gap-3'}
-                                style={{maxWidth: '85%'}}
-                            >
 
-
-                                <div>
+                                <div className={'align-self-center'}>
                                     <Link to={location.pathname !== 'task'
                                         ? 'task'
                                         : ''
@@ -118,9 +111,12 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                         />
                                     </Link>
                                 </div>
-                                <div className={'d-flex justify-content-end gap-1'}>
-                                    {children}
-                                </div>
+                            </div>
+                            <div
+                                className={'d-flex gap-1 flex-fill justify-content-start align-items-center'}
+                                style={{maxWidth: 'calc(100wv - 400px)'}}
+                            >
+                                {children}
                             </div>
 
                             <div className={'d-flex align-items-center'}>

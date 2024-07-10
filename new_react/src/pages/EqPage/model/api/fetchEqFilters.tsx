@@ -7,11 +7,10 @@ import {ViewMode} from "../types/viewMode";
 
 type fetchEqFiltersProps = {
     department_id: number,
-    mode: string | undefined;
+    project_mode: string | undefined;
 }
 
 interface EqFilters {
-    mode: string | undefined;
     view_modes: ViewMode[];
     project_filters: string[];
 }

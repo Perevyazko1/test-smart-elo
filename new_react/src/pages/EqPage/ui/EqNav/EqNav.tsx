@@ -22,7 +22,6 @@ export const EqNav = (props: EqNavProps) => {
     const {currentUser} = useCurrentUser();
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
-
     const seriesSizeClb = (item: string) => {
         setQueryParam('series_size', item)
     }

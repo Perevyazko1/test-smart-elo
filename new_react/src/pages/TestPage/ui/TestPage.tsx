@@ -2,7 +2,6 @@ import React, {memo, useState} from "react";
 import {AppNavbar} from "@widgets/AppNavbar";
 import {QueryContext} from "@features";
 import {ModalProvider} from "@app";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 export const TestPage = memo(() => {
     const [showCanvas, setShowCanvas] = useState<boolean>(false);
@@ -11,11 +10,11 @@ export const TestPage = memo(() => {
         <QueryContext>
             <ModalProvider>
                 <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
-                    <AppAutocomplete variant={'dark'}/>
+                    <div className={'d-flex align-items-end pb-1 align-self-stretch'}>
+                    </div>
                 </AppNavbar>
                 {/*<TestPageBody/>*/}
                 <div className={'d-flex'}>
-                    <AppAutocomplete variant={'light'}/>
                 </div>
             </ModalProvider>
         </QueryContext>

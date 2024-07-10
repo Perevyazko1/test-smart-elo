@@ -1,3 +1,4 @@
+import {HTMLAttributes} from "react";
 import {Autocomplete, TextField} from "@mui/material";
 import {styled} from "@mui/material/styles";
 
@@ -6,18 +7,19 @@ interface StyledAutocompleteProps {
 }
 
 const StyledAutocompleteWrapper = styled('div')<StyledAutocompleteProps>(({colorScheme}) => ({
-    backgroundColor: colorScheme === 'dark' ? '#000000' : '#ffffff',
-    margin: '4px 0 0 1px',
+    backgroundColor: colorScheme === 'dark' ? '#000000' : 'inherit',
+    padding: '10px 0 2px 0',
+    margin: '2px 0 0 1px',
     '& .MuiAutocomplete-popper': {
         '& .MuiAutocomplete-listbox': {
-            backgroundColor: colorScheme === 'dark' ? '#000000' : '#ffffff', // Цвет заднего фона поппера
+            // backgroundColor: colorScheme === 'dark' ? '#000000' : '#ffffff', // Цвет заднего фона поппера
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             '& .MuiAutocomplete-option[data-focus="true"]': {
-                backgroundColor: colorScheme === 'dark' ? '#333333' : '#e0e0e0', // Цвет фона для выбранного элемента
+                // backgroundColor: colorScheme === 'dark' ? '#333333' : '#e0e0e0', // Цвет фона для выбранного элемента
                 color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             },
             '& .MuiAutocomplete-option[aria-selected="true"]': {
-                backgroundColor: colorScheme === 'dark' ? '#555555' : '#d3d3d3', // Цвет фона для элемента при фокусе
+                // backgroundColor: colorScheme === 'dark' ? '#555555' : '#d3d3d3', // Цвет фона для элемента при фокусе
                 color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             },
         },
@@ -40,7 +42,7 @@ const StyledTextField = styled(TextField)<StyledAutocompleteProps>(({colorScheme
         transform: 'scaleX(1)',
     },
     "& .MuiInputBase-root::before": {
-        borderBottom: `1px solid ${colorScheme === 'dark' ? '#ffffff' : '#000000'}`,
+        borderBottom: `1px solid ${colorScheme === 'dark' ? '#ffffff' : '#575757'}`,
         left: 0,
         bottom: 0,
         position: 'absolute',
@@ -77,11 +79,12 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
         fontSize: '12px',
         lineHeight: '1',
         top: '-2px',
-        color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        color: colorScheme === 'dark' ? '#ffffff' : 'var(--bs-secondary-color)',
         transform: 'translate(0, 8px) scale(1)',
     },
     '& .MuiInputLabel-shrink': {
-        transform: 'translate(0, -1.5px) scale(0.75)',
+        color: 'var(--bs-secondary-color)',
+        transform: 'translate(0, -12px) scale(1)',
     },
     // кнопки
     "& .MuiAutocomplete-popupIndicator": {
@@ -92,10 +95,11 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
     },
     // стиль выбранных элементов в инпуте
     '& .MuiChip-root': {
-        backgroundColor: colorScheme === 'dark' ? '#444444' : '#e0e0e0',
-        color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        // fontSize: '12px',
+        backgroundColor: colorScheme === 'dark' ? '#343434' : '#d0d0d0',
+        color: colorScheme === 'dark' ? '#000000' : '#000000',
         '& .MuiChip-deleteIcon': {
-            color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+            color: colorScheme === 'dark' ? '#000000' : '#000000',
         },
     },
     '& .MuiAutocomplete-tag': {
@@ -103,37 +107,116 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
     }
 }));
 
-interface AppAutocompleteProps {
-    variant: 'dark' | 'light';
+interface AppAutocompleteBaseProps<T> extends HTMLAttributes<HTMLDivElement> {
+    className?: string;
+    colorScheme?: 'dark' | 'light';
+    label: string;
+    options?: T[];
+    loading?: boolean;
+    getOptionLabel?: (option: T) => string;
+    width?: number;
+    groupBy?: (option: T) => string;
+    readOnly?: boolean;
+    limitHeight?: boolean;
+    limitTags?: number;
+    required?: boolean;
 }
 
+interface AppAutocompleteMultipleProps<T> extends AppAutocompleteBaseProps<T> {
+    variant: 'multiple';
+    value: T[] | null;
+    onChangeClb?: (newValue: T[] | null) => void;
+}
 
-export const AppAutocomplete = (props: AppAutocompleteProps) => {
-    const {variant} = props;
-    const top100Films = ['Конструктора', 'Обивка', 'Крой', "Пошив", "ППУ"];
+interface AppAutocompleteSelectProps<T> extends AppAutocompleteBaseProps<T> {
+    variant: 'select';
+    value: T | null;
+    onChangeClb?: (newValue: T | null) => void;
+}
+
+interface AppAutocompleteDropdownProps<T> extends AppAutocompleteBaseProps<T> {
+    variant: 'dropdown';
+    value: T;
+    onChangeClb?: (newValue: T) => void;
+}
+
+type AppAutocompleteProps<T> =
+    AppAutocompleteMultipleProps<T>
+    | AppAutocompleteSelectProps<T>
+    | AppAutocompleteDropdownProps<T>;
+
+export const AppAutocomplete = <T, >(props: AppAutocompleteProps<T>) => {
+    const {
+        colorScheme = 'light',
+        variant,
+        getOptionLabel,
+        loading,
+        onChangeClb,
+        label,
+        options,
+        value,
+        width,
+        groupBy,
+        readOnly = false,
+        limitHeight = false,
+        limitTags = 1,
+        className,
+        required = false,
+        ...otherProps
+    } = props;
+
+    const extendsSx = readOnly ? {
+        "& .MuiAutocomplete-popupIndicator": {
+            display: "none",
+        },
+        "& .MuiAutocomplete-clearIndicator": {
+            display: "none",
+        },
+    } : variant === 'dropdown' ?
+        {
+            "& .MuiAutocomplete-clearIndicator": {
+                display: "none",
+            },
+        }
+        : {};
+
+    const extendDivSx = limitHeight ? {
+        maxHeight: '36px',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+    } : {};
 
     return (
-        <StyledAutocompleteWrapper colorScheme={variant}>
-
-            <StyledAutocomplete
-                colorScheme={props.variant}
-                size="small"
-                options={top100Films}
-                disablePortal={true}
-                multiple
-                limitTags={1}
-                sx={{
-                    width: 220,
-                }}
-                renderInput={(params) => (
-                    <StyledTextField
-                        {...params}
-                        colorScheme={variant}
-                        variant="standard"
-                        label="Отдел"
-                    />
-                )}
-            />
-        </StyledAutocompleteWrapper>
+        <div className={'d-flex align-items-end pb-1 align-self-stretch ' + className} {...otherProps}>
+            <StyledAutocompleteWrapper colorScheme={colorScheme} sx={extendDivSx} className={'flex-fill'}>
+                <StyledAutocomplete
+                    readOnly={readOnly}
+                    colorScheme={colorScheme}
+                    size="small"
+                    options={options || []}
+                    getOptionLabel={getOptionLabel ? (option) => getOptionLabel(option as T) : undefined}
+                    disablePortal={true}
+                    multiple={variant === 'multiple'}
+                    limitTags={limitTags}
+                    value={value}
+                    loading={loading}
+                    groupBy={groupBy ? (option) => groupBy(option as T) : undefined}
+                    sx={{
+                        width: width,
+                        ...extendsSx,
+                    }}
+                    onChange={onChangeClb ? (e, newValue) => onChangeClb(newValue as (T[] & T) | (null & T)) : undefined}
+                    renderInput={(params) => (
+                        <StyledTextField
+                            {...params}
+                            colorScheme={colorScheme}
+                            variant="standard"
+                            required={required}
+                            label={label}
+                        />
+                    )}
+                />
+            </StyledAutocompleteWrapper>
+        </div>
     );
 };

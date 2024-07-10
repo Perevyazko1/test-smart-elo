@@ -11,7 +11,7 @@ export const AppInput = (props: InputProps) => {
         className,
         children,
         ...otherProps
-    } = props
+    } = props;
 
 
     return (

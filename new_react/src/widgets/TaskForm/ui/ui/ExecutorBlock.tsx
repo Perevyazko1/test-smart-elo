@@ -1,9 +1,9 @@
-import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
 import React, {useMemo} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {useCurrentUser} from "@shared/hooks";
+import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 interface ExecutorBlockProps {
     disabled: boolean;
@@ -20,7 +20,7 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
         return props.userList.find(user => user.id === formTask.executor) || null;
     }, [formTask.executor, props.userList])
 
-    const changeClb = (event: any, newValue: Employee | null) => {
+    const changeClb = (newValue: Employee | null) => {
         if (newValue) {
             setFormTask({
                 ...formTask,
@@ -39,23 +39,18 @@ export const ExecutorBlock = (props: ExecutorBlockProps) => {
     }
 
     return (
-        <Autocomplete
-            size={'small'}
-            readOnly={disabled}
-            disablePortal
+        <AppAutocomplete
+            variant={'select'}
             value={getInitialValue}
-            options={userList}
+            groupBy={(option: Employee | null) => option?.permanent_department?.name || ""}
+            getOptionLabel={(option: Employee | null) => getEmployeeName(option, 'listNameInitials')}
             loading={isLoading}
-            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
-            groupBy={(option: Employee) => option.permanent_department?.name || ""}
-            sx={{ width: 250 }}
-            onChange={changeClb}
-            renderInput={(params) =>
-                <TextField
-                    {...params}
-                    label={isLoading ? "Загрузка..." : "Исполнитель"}
-                    variant="standard"
-                />}
+            width={250}
+            onChangeClb={changeClb}
+            colorScheme={'light'}
+            label={isLoading ? "Загрузка..." : "Исполнитель"}
+            options={userList}
+            readOnly={disabled}
         />
     );
 };

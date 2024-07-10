@@ -1,6 +1,6 @@
-import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
+import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 
 interface AppointedByBlockProps {
@@ -11,28 +11,13 @@ interface AppointedByBlockProps {
 export const CreatedByBlock = (props: AppointedByBlockProps) => {
 
     return (
-        <Autocomplete
-            size={'small'}
-            disablePortal
+        <AppAutocomplete
+            variant={'select'}
+            value={props.value}
+            label={"Задачу создал"}
+            width={250}
             readOnly
-            defaultValue={props.value}
-            options={[]}
             getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
-            sx={{
-                width: 250,
-                "& .MuiAutocomplete-popupIndicator": {
-                    display: "none",
-                },
-                "& .MuiAutocomplete-clearIndicator": {
-                    display: "none",
-                },
-            }}
-            renderInput={(params) =>
-                <TextField
-                    {...params}
-                    label="Задачу создал"
-                    variant="standard"
-                />}
         />
     );
 };

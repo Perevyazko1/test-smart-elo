@@ -43,11 +43,11 @@ export const EqFilters = () => {
             }
             dispatch(fetchEqFilters({
                 department_id: currentUser.current_department.id,
-                mode: queryParameters.mode,
+                project_mode: queryParameters.project_mode,
             }));
         }
         // eslint-disable-next-line
-    }, [bossPerm, currentUser.current_department?.number, dispatch, initialLoad, queryParameters.mode]);
+    }, [bossPerm, currentUser.current_department?.number, dispatch, initialLoad, queryParameters.project_mode]);
 
     useEffect(() => {
         let edited = false;

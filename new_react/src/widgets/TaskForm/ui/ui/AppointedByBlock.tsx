@@ -1,7 +1,7 @@
-import {Autocomplete, TextField} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
 import {useMemo} from "react";
+import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 
 
 interface AppointedByBlockProps {
@@ -19,28 +19,13 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
     }, [userList, value])
 
     return (
-        <Autocomplete
-            size={'small'}
-            disablePortal
-            readOnly
+        <AppAutocomplete
+            variant={'select'}
             value={getValue}
-            options={[]}
+            label={isLoading ? "Загрузка..." : "Задачу назначил"}
+            width={250}
+            readOnly
             getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
-            sx={{
-                width: 250,
-                "& .MuiAutocomplete-popupIndicator": {
-                    display: "none",
-                },
-                "& .MuiAutocomplete-clearIndicator": {
-                    display: "none",
-                },
-            }}
-            renderInput={(params) =>
-                <TextField
-                    {...params}
-                    label={isLoading ? "Загрузка..." : "Задачу назначил"}
-                    variant="standard"
-                />}
         />
     );
 };
