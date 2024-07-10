@@ -8,9 +8,9 @@ def get_view_modes(department: Department):
         {'name': 'Режим недоделки', 'key': 'unfinished'},
     ]
 
-    users = Employee.objects.filter(departments=department).exclude(
-        is_staff=True,
-        is_active=False,
+    users = Employee.objects.filter(departments=department).filter(
+        is_staff=False,
+        is_active=True,
     )
 
     for user in users:
