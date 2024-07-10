@@ -8,7 +8,8 @@ def get_view_modes(department: Department):
         {'name': 'Режим недоделки', 'key': 'unfinished'},
     ]
 
-    users = Employee.objects.filter(departments=department).filter(
+    users = Employee.objects.filter(
+        departments=department,
         is_staff=False,
         is_active=True,
     )
