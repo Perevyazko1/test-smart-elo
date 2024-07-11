@@ -1,22 +1,31 @@
-export const setTargetNumber = (primary: number[], secondary: number[], confirmed: number[], value: number) => {
-    // Создаем 2 новых массива
-    const newArray1 = [value];
-    const newArray2 = [];
+import {EqNumberListTipe} from "@pages/EqPage/model/lib/createEqNumberLists";
 
-    // Добавляем элементы из arr1 в newArray2
-    for (let i = 0; i < primary.length; i++) {
-        if (primary[i] !== value) {
-            newArray2.push(primary[i]);
-        }
-    }
+export interface setTargetNumberProps extends EqNumberListTipe {
+    value: number
+}
 
-    // Добавляем элементы из arr2 в newArray2
-    for (let i = 0; i < secondary.length; i++) {
-        if (secondary[i] !== value) {
-            newArray2.push(secondary[i]);
-        }
+export const setTargetNumber = (props: setTargetNumberProps): EqNumberListTipe => {
+    const {confirmed, lockedNums, primary, secondary, selectedLocked, value} = props;
+
+    let newPrimary: number[] = [];
+    let newSecondary: number[] = [];
+    let newLockedNums: number[] = [];
+    let newSelectedLocked: number[] = [];
+
+    if (lockedNums.includes(value) || selectedLocked.includes(value)) {
+        newSelectedLocked = [value];
+        newLockedNums = [...lockedNums.filter(num => num !== value), ...selectedLocked.filter(num => num !== value)];
+    } else if (primary.includes(value) || secondary.includes(value)) {
+        newPrimary = [value];
+        newSecondary = [...primary.filter(num => num !== value), ...secondary.filter(num => num !== value)];
     }
 
     // Возвращаем оба массива
-    return {primary: newArray1, secondary: newArray2, confirmed: confirmed};
+    return {
+        primary: newPrimary,
+        secondary: newSecondary,
+        confirmed,
+        selectedLocked: newSelectedLocked,
+        lockedNums: newLockedNums
+    };
 }

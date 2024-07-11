@@ -16,4 +16,5 @@ def get_eq_req_params(request):
         'department': department,
         'week': request.query_params.get("week"),
         'year': request.query_params.get("year"),
+        'assembled': request.query_params.get("assembled"),
     }

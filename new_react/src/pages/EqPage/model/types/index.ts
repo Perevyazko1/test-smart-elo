@@ -40,6 +40,7 @@ export interface EqAssignment {
     status: 'in_work' | 'await' | 'ready' | 'created';
     inspector: number | null;
     appointed_by_boss: boolean;
+    assembled: boolean;
 }
 
 export interface EqDepartmentInfo {
@@ -107,6 +108,7 @@ export interface ResponseDepInfo {
 export interface ProductionInfo {
     department_name: string,
     await: number,
+    assembled: number,
     in_work: number,
     ready: number,
     confirmed: number,

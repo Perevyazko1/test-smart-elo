@@ -6,7 +6,7 @@ import {useAppModal, useAppQuery, useCurrentUser} from "@shared/hooks";
 import cls from "./EqCard.module.scss";
 
 import {setTargetNumber} from "../../../model/lib/setTargetNumber";
-import {createEqNumberLists} from "../../../model/lib/createEqNumberLists";
+import {createEqNumberLists, EqNumberListTipe} from "../../../model/lib/createEqNumberLists";
 
 import {EqNumbers} from "./EqNumbers";
 import {TarifficationWidget} from "@widgets/TarifficationWidget";
@@ -14,16 +14,8 @@ import {EqOrderProduct} from "@pages/EqPage/model/types";
 
 interface CardNameNumbersProps {
     card: EqOrderProduct;
-    assignmentsLists: {
-        primary: number[];
-        secondary: number[];
-        confirmed: number[];
-    };
-    setAssignmentsLists: (props: {
-        primary: number[];
-        secondary: number[];
-        confirmed: number[];
-    }) => void;
+    assignmentsLists: EqNumberListTipe;
+    setAssignmentsLists: (props: EqNumberListTipe) => void;
 }
 
 export const CardNameNumbers = (props: CardNameNumbersProps) => {
@@ -35,11 +27,10 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
 
 
     const setNumber = (assignment_number: number) => {
-        setAssignmentsLists(setTargetNumber(
-            assignmentsLists.primary,
-            assignmentsLists.secondary,
-            assignmentsLists.confirmed,
-            assignment_number),
+        setAssignmentsLists(setTargetNumber({
+                ...assignmentsLists,
+                value: assignment_number
+            })
         );
         setQueryParam('series_size', '');
     }

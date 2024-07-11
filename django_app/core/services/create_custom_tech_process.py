@@ -1,8 +1,7 @@
 from core.models import TechnologicalProcess, Product
 
 
-def create_and_set_tech_process(schema: dict, product_id: str) -> TechnologicalProcess:
-    product = Product.objects.get(pk=product_id)
+def create_and_set_tech_process(schema: dict, product: Product) -> TechnologicalProcess:
 
     # Проверка наличия технологического процесса с изображением, то есть заготовленного шаблона
     check_usual_schema = TechnologicalProcess.objects.exclude(

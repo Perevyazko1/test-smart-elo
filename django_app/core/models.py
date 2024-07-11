@@ -393,6 +393,7 @@ class Assignment(models.Model):
     plane_date = models.DateTimeField('План дата готовности', null=True, blank=True)
     inspect_date = models.DateTimeField('Дата визирования', null=True, blank=True)
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
+    assembled = models.BooleanField('Укомплектован', blank=True, default=True)
 
     def save(self, *args, **kwargs):
         # Если inspector был изменен и теперь не равен None, установить inspect_date

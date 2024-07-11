@@ -48,6 +48,7 @@ class ImportOrders:
             """Формирование и сохранение товаров и тканей"""
             for product_info in order_entity.products_info:
                 product_entity = self.get_product_entity_from_product_info(product_info)
+                """Тут же создаются первые этапы производства если товар новый. """
                 ProductEntityToDB().execute(product_entity)
 
                 """Импорт изображений"""
@@ -56,4 +57,5 @@ class ImportOrders:
             """Формирование и сохранение позиций заказа"""
             order_product_entities = CreateOrderProductEntities().execute(order_entity)
             for order_product_entity in order_product_entities:
+                """Создаются позиции заказов и инициализируются наряды для новых позиций. """
                 OrderProductEntityToDB().execute(order_product_entity)

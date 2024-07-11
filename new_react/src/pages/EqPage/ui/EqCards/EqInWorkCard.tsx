@@ -72,12 +72,29 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
                     )
                 }
             )
+        } else if (first && assignmentsLists.primary.length === 0) {
+            openModal(
+                {
+                    content: (
+                        <h4 className={'mx-4'}>
+                            Выбранный наряд не может быть отмечен готовым по причине:
+                            <br/>
+                            <br/>
+                            Наряды не укомплектованы полуфабрикатами из предыдущих отделов.
+                            <br/>
+                            Дождитесь готовности изделия в предыдущем отделе.
+                        </h4>
+                    )
+                }
+            )
         } else {
             setCardDisabled(true)
             dispatch(fetchEqUpdCard({
                 series_id: card.series_id,
                 department_id: currentUser.current_department.id,
-                numbers: assignmentsLists.primary,
+                numbers: first
+                    ? assignmentsLists.primary
+                    : [...assignmentsLists.primary, ...assignmentsLists.selectedLocked],
                 action: getAction(first),
                 ...queryParameters,
             })).then(() => {
@@ -97,6 +114,7 @@ export const EqInWorkCard = memo((props: EqInWorkCardProps) => {
                     urgency={card.urgency}
                     onClick={() => getBtnClb(true)}
                     disabled={cardDisabled}
+                    locked={assignmentsLists.primary.length === 0}
                 />
             }
 

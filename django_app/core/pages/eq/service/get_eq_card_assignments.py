@@ -23,7 +23,6 @@ def get_in_work_assignments(assignments, eq_params):
     return assignments[:30]
 
 
-
 def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
     if eq_params['view_mode_key'] not in ['boss', 'unfinished', 'self'] and eq_params['view_mode_key'] is not None:
@@ -32,20 +31,34 @@ def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: Or
     match target_list:
         case 'await':
             if eq_params['view_mode_key'] == 'boss':
-                assignments = order_product.assignments.filter(
-                    department=eq_params['department'],
-                    status='await'
-                )[:30]
+                if eq_params['assembled']:
+                    assignments = order_product.assignments.filter(
+                        department=eq_params['department'],
+                        status='await'
+                    )[:30]
+                else:
+                    assignments = order_product.assignments.filter(
+                        department=eq_params['department'],
+                        status='await',
+                        assembled=True
+                    )[:30]
             elif eq_params['view_mode_key'] == 'unfinished':
                 assignments = order_product.assignments.filter(
                     department=eq_params['department'],
                     status='await'
                 )[:30]
             else:
-                assignments = order_product.assignments.filter(
-                    department=eq_params['department'],
-                    status='await'
-                )[:30]
+                if eq_params['assembled']:
+                    assignments = order_product.assignments.filter(
+                        department=eq_params['department'],
+                        status='await'
+                    )[:30]
+                else:
+                    assignments = order_product.assignments.filter(
+                        department=eq_params['department'],
+                        status='await',
+                        assembled=True,
+                    )[:30]
             return SimpleAssignmentSerializer(assignments, many=True).data
         case 'in_work':
             assignments = order_product.assignments.filter(

@@ -1,7 +1,7 @@
 from django.db import transaction
 
 from staff.models import Department
-from ..consumers import ws_update_notification
+from ..consumers import ws_update_notification, ws_group_updates, EqNotificationActions
 
 from ..models import OrderProduct, Assignment, ProductionStep
 
@@ -13,8 +13,9 @@ class AssignmentGenerator:
             order_product: OrderProduct,
             department: Department,
             quantity: int = 1,
-            status: str = 'await',
+            assembled: bool = True,
     ):
+        notification_data = {}
         assignment_tariff = ProductionStep.objects.get(
             product=order_product.product, department=department
         ).confirmed_tariff
@@ -30,50 +31,76 @@ class AssignmentGenerator:
             numbers = [i for i in range(start_position + 1, last_position + 1)]
 
         for number in numbers:
-            Assignment.objects.create(
+            Assignment.objects.update_or_create(
                 number=number,
                 order_product=order_product,
                 department=department,
-                new_tariff=assignment_tariff,
-                notes='Создан автоматически',
-                status=status,
+                defaults={
+                    "new_tariff": assignment_tariff,
+                    "notes": 'Создан автоматически',
+                    "assembled": assembled,
+                }
             )
+        notification_data[department.number] = {
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': order_product.series_id,
+        }
+        ws_group_updates(pin_code="", notification_data=notification_data)
+        ws_update_notification(department.number)
 
     def init_order_product_assignments(self, order_product: OrderProduct):
         """Инициализация первого уровня нарядов связанных со стартовым"""
 
-        """
-        Если в отделе конструкторов есть наряд в разработке с данным товаром -
-         игнорируем генерацию новых нарядов
-        """
-        if Assignment.objects.filter(
-            order_product__product=order_product.product,
-            department__number=1
-        ).exclude(status='ready', inspector__isnull=False):
-            return
-
-        production_steps = order_product.product.production_steps.all().exclude(is_active=False)
-        start_production_steps = order_product.product.production_steps.get(department__number=0)
-
-        for production_step in production_steps:
-            """Пропускаем отделы старт и готово"""
-            if production_step.department.number in [0, 50]:
-                continue
-
-            """Если отдел находится в списке стартовых - генерируем наряд в статусе ожидает"""
-            if production_step in start_production_steps.next_step.all():
+        """ Проверяем наличие техпроцесса. """
+        if not order_product.product.technological_process:
+            if Assignment.objects.filter(
+                    order_product__product=order_product.product,
+                    department__number=1
+            ).exclude(status='ready', inspector__isnull=False):
+                """
+                Если нет техпроцесса и есть наряд в разработке на данное изделие - игнорируем дальнейшие действия. 
+                """
+                return
+            else:
+                """ Если нет техпроцесса и нет наряда на разработку - создаем наряд на разработку. """
                 self.create_new_assignments(
                     order_product=order_product,
-                    department=production_step.department,
-                    quantity=int(order_product.quantity)
+                    department=Department.objects.get(number=1),
+                    quantity=1,
+                    assembled=True,
                 )
-                ws_update_notification(production_step.department.number)
+                return
+        else:
+            """Делаем выборку этапов производства исключая Конструкторов, Старт и Готово"""
+            production_steps = order_product.product.production_steps.filter(
+                is_active=True,
+            ).exclude(department__number__in=[0, 50, 1])
+
+            if order_product.product.technological_process_confirmed:
+                """Если технологический процесс уже утвержден - то создаем и активируем наряды по схеме. """
+                start_production_steps = order_product.product.production_steps.get(department__number=0)
+                for production_step in production_steps:
+                    """Если отдел находится в списке стартовых - генерируем наряд в статусе ожидает"""
+                    if production_step in start_production_steps.next_step.all():
+                        self.create_new_assignments(
+                            order_product=order_product,
+                            department=production_step.department,
+                            quantity=int(order_product.quantity),
+                            assembled=True,
+                        )
+                    else:
+                        self.create_new_assignments(
+                            order_product=order_product,
+                            department=production_step.department,
+                            quantity=int(order_product.quantity),
+                            assembled=False,
+                        )
             else:
-                """Если отдел не в списке стартовых и отдел не конструкторов - генерируем наряд в статусе создан"""
-                if not production_step.department.number == 1:
+                """Если технологический процесс еще не утвержден - то создаем наряды без активации согласно схеме. """
+                for production_step in production_steps:
                     self.create_new_assignments(
                         order_product=order_product,
                         department=production_step.department,
                         quantity=int(order_product.quantity),
-                        status='created',
+                        assembled=False,
                     )

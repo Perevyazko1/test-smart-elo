@@ -15,11 +15,20 @@ def get_filtered_await_queryset(queryset, eq_params):
             ).distinct()
         else:
             # Извлекаем все не закрытые серии производства
-            queryset = queryset.filter(
-                status="0",
-                assignments__department=eq_params['department'],
-                assignments__status__in=['await', 'in_work', 'created'],
-            ).distinct()
+
+            if eq_params['assembled']:
+                queryset = queryset.filter(
+                    status="0",
+                    assignments__department=eq_params['department'],
+                    assignments__status__in=['await', 'in_work'],
+                ).distinct()
+            else:
+                queryset = queryset.filter(
+                    status="0",
+                    assignments__department=eq_params['department'],
+                    assignments__assembled=True,
+                    assignments__status__in=['await', 'in_work'],
+                ).distinct()
 
     # Фильтр при включенном режима недоделки
     elif eq_params['view_mode_key'] == 'unfinished':
@@ -45,11 +54,19 @@ def get_filtered_await_queryset(queryset, eq_params):
             elif not order_product.quantity == assignments_count:
                 queryset = queryset.exclude(series_id=order_product.series_id)
     else:
-        queryset = queryset.filter(
-            status="0",
-            assignments__department=eq_params['department'],
-            assignments__status__in=['await', 'in_work'],
-        ).distinct()
+        if eq_params['assembled']:
+            queryset = queryset.filter(
+                status="0",
+                assignments__department=eq_params['department'],
+                assignments__status__in=['await', 'in_work'],
+            ).distinct()
+        else:
+            queryset = queryset.filter(
+                status="0",
+                assignments__department=eq_params['department'],
+                assignments__assembled=True,
+                assignments__status__in=['await', 'in_work'],
+            ).distinct()
     return queryset.order_by('urgency', 'order', 'id')
 
 

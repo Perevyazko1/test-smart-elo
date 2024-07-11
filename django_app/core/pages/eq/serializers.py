@@ -129,7 +129,6 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
             'department_info',
             'plane_date',
             'card_info',
-            'card_info',
         ]
 
     def get_assignments(self, obj: OrderProduct):

@@ -19,6 +19,7 @@ export interface BaseAssignment {
     inspect_date: string | null;
     plane_date: string | null;
     appointed_by_boss: boolean;
+    assembled: boolean;
 }
 
 type ExtendedFields = 'department' | 'executor' | 'inspector' | 'tariff' | 'order_product';

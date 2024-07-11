@@ -179,7 +179,6 @@ def update_assignments(request):
                 product=assignment.order_product.product,
             )
 
-            # TODO сделать алгоритм для единичных не конструкторских отделов
             # В случае если отменяемый наряд конструкторского отдела - удаляем все остальные созданные наряды
             if base_ps.department.number == 1:
                 other_assignments = Assignment.objects.filter(
@@ -206,7 +205,6 @@ def update_assignments(request):
                 processed_ps = []
                 for original_next_ps in base_ps.next_step.all():
                     if original_next_ps.department.single:
-                        # TODO сделать обработку если следующий отдел единичный
                         continue
                     if original_next_ps.id not in processed_ps:
                         processed_ps.append(original_next_ps.id)
@@ -243,11 +241,12 @@ def update_assignments(request):
                             target_assignments = Assignment.objects.filter(
                                 order_product=assignment.order_product,
                                 department=original_next_ps.department,
-                                status='await'
+                                status='await',
+                                assembled=True,
                             )
                             if target_assignments.count() == min_assign_with_visa_in_dependents_departments:
                                 target_assignment = target_assignments.latest('number')
-                                target_assignment.status = 'created'
+                                target_assignment.assembled = False
                                 target_assignment.save()
 
                                 assignment.inspector = None
@@ -255,7 +254,7 @@ def update_assignments(request):
                                 assignment.save()
                             else:
                                 return JsonResponse({
-                                    f'error': f'Ошибка. '
+                                    f'error': f'Ошибка. \n'
                                               f'Для снятия визы наряды последующего отдела должны быть в статусе '
                                               f'Ожидает.'
                                 }, status=400, json_dumps_params={"ensure_ascii": False})

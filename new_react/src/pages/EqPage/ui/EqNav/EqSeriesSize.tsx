@@ -33,7 +33,7 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
 
 
     return (
-        <AppDropdown selected={`Размер серии X${queryParameters.series_size || baseSeriesSize}`}
+        <AppDropdown selected={`Выбрать X${queryParameters.series_size || baseSeriesSize}`}
                      active={!!queryParameters.series_size}
                      items={['Подтвердить']}
                      onSelect={() => clb(seriesSize === baseSeriesSize ? '' : seriesSize)}

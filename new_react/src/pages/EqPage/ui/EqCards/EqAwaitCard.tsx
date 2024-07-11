@@ -47,7 +47,7 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
         setCardDisabled(true)
         dispatch(fetchEqUpdCard({
             series_id: card.series_id,
-            numbers: assignmentsLists.primary,
+            numbers: [...assignmentsLists.primary, ...assignmentsLists.selectedLocked],
             department_id: currentUser.current_department.id,
             action: getAction(),
             ...queryParameters,
@@ -57,8 +57,8 @@ export const EqAwaitCard = memo((props: EqAwaitCardProps) => {
     };
 
     const showFirstBtn = useMemo(() => {
-        return !isViewer && assignmentsLists.primary.length > 0
-    }, [assignmentsLists.primary.length, isViewer])
+        return !isViewer && (assignmentsLists.primary.length > 0 || assignmentsLists.selectedLocked.length > 0)
+    }, [assignmentsLists.primary.length, assignmentsLists.selectedLocked.length, isViewer])
 
     return (
         <EqCardBody card={card} {...otherProps}>

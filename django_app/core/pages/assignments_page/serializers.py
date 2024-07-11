@@ -15,6 +15,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'number',
             'status',
             'inspector',
+            'assembled',
             'appointed_by_boss',
         ]
 
@@ -36,6 +37,7 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'order_product',
             'department',
             'executor',
+            'assembled',
             'inspector',
             'appointment_date',
             'date_completion',

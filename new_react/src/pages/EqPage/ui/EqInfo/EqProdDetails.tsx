@@ -20,7 +20,9 @@ export const EqProdDetails = (props: EqProdDetailsProps) => {
                     <thead>
                     <tr>
                         <th>Отдел</th>
-                        <th>Ожидает</th>
+
+                        <th>Не укомплектовано</th>
+                        <th>Доступно (укомпл.)</th>
                         <th>В работе</th>
                         <th>Готово</th>
                         <th>Подтверждено</th>
@@ -31,6 +33,7 @@ export const EqProdDetails = (props: EqProdDetailsProps) => {
                         <tr key={info.department_name}>
                             <td>{info.department_name}</td>
                             <td className={"fw-bolder"}>{info.await > 0 ? info.await : ""}</td>
+                            <td className={"fw-bolder"}>{info.assembled > 0 ? info.assembled : ""}</td>
                             <td className={"fw-bolder"}>{info.in_work > 0 ? info.in_work : ""}</td>
                             <td className={"fw-bolder"}>{info.ready > 0 ? info.ready : ""}</td>
                             <td className={"fw-bolder"}>{info.confirmed > 0 ? info.confirmed : ""}</td>
