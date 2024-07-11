@@ -2,13 +2,14 @@ import cls from './AppSwitch.module.scss';
 import {ChangeEvent} from "react";
 
 interface AppSwitchProps {
+    idSwitch: string;
     checked: boolean;
     onSwitch: (value: boolean) => void;
     label?: string;
 }
 
 export const AppSwitch = (props: AppSwitchProps) => {
-    const {onSwitch, label, checked} = props;
+    const {onSwitch, label, checked, idSwitch} = props;
     const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
         onSwitch(event.target.checked);
     };
@@ -21,9 +22,9 @@ export const AppSwitch = (props: AppSwitchProps) => {
                     checked={checked}
                     onChange={handleInputChange}
                     className={cls.switchInput}
-                    id="switch-component"
+                    id={idSwitch}
                 />
-                <label htmlFor="switch-component" className={cls.switchLabel}></label>
+                <label htmlFor={idSwitch} className={cls.switchLabel}></label>
             </div>
             <span className={cls.switchText}>{label}</span>
         </div>

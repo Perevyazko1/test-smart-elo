@@ -50,6 +50,7 @@ export const EqNav = (props: EqNavProps) => {
             }
 
             <AppSwitch
+                idSwitch={'eq-nav-assembled-switch'}
                 checked={!!queryParameters.assembled}
                 onSwitch={showAssembledOnly}
                 label={queryParameters.assembled ? "Все" : "Дост."}

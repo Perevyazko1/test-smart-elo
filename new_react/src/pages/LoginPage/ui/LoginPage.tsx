@@ -96,6 +96,7 @@ export const LoginPage = () => {
                                                 <AppSwitch checked={rememberMe}
                                                            onSwitch={(value) => setRememberMe(value)}
                                                            label={'Оставаться в системе'}
+                                                           idSwitch={'login-page-remember-switch'}
                                                 />
                                             </div>
 
