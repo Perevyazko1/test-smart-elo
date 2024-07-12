@@ -102,12 +102,13 @@ class OrderProductSerializer(serializers.ModelSerializer):
                 order_product=obj,
                 department=production_step.department
             )
-            result[production_step.department.name] = {
-                "await": assignments.filter(status="await").count(),
-                "created": assignments.filter(status="created").count(),
-                "in_work": assignments.filter(status="in_work").count(),
-                "ready": assignments.filter(status="ready").count(),
-            }
+            if assignments.exists():
+                result[production_step.department.name] = {
+                    "await": assignments.filter(status="await").count(),
+                    "created": assignments.filter(status="created").count(),
+                    "in_work": assignments.filter(status="in_work").count(),
+                    "ready": assignments.filter(status="ready").count(),
+                }
         return result
 
 
