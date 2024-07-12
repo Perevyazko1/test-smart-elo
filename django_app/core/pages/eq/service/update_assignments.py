@@ -5,9 +5,7 @@ from django.db import transaction
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import ws_group_updates, EqNotificationActions, ws_update_notification
-from core.services.assignment_generator import AssignmentGenerator
 from core.models import OrderProduct, Assignment, ProductionStep
-from core.services.update_production_steps import update_production_steps
 from staff.models import Employee, Department, Audit, Transaction
 
 
@@ -210,38 +208,61 @@ class UpdateAssignments:
 
     def _activate_assignments(self):
         """Делаем проверку готовности в других отделах и активируем нужное количество нарядов"""
-        target_department = self.department
-        if target_department.number == 1:
-            target_department = Department.objects.get(number=0)
+        if self.department.number == 1:
+            active_order_products = OrderProduct.objects.filter(
+                product=self.order_product.product,
+                status="0"
+            )
+            next_steps = ProductionStep.objects.get(
+                product=self.order_product.product,
+                department=Department.objects.get(number=0)
+            ).next_step.all()
 
-        next_steps = ProductionStep.objects.get(
-            product=self.order_product.product,
-            department=target_department
-        ).next_step.all()
+            for order_product in active_order_products:
+                for next_step in next_steps:
+                    """
+                    Итерируемся по всем последующим отделам. Игнорируем не активные этапы
+                    """
+                    if not next_step.is_active:
+                        continue
 
-        for next_step in next_steps:
-            """
-            Итерируемся по всем последующим отделам. 
-            Если отдел Готово - выполняем инструкцию по готовности и выходим.
-            """
+                    Assignment.objects.filter(
+                        order_product=order_product,
+                        department=next_step.department,
+                        assembled=False,
+                    ).update(assembled=True)
+                    self.notification_data[next_step.department.number] = {
+                        'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                        'data': self.order_product.series_id,
+                    }
+                    ws_update_notification(next_step.department.number)
 
-            if next_step.department.name == "Готово":
-                self._ready_department_instruction()
-                break
+        else:
+            next_steps = ProductionStep.objects.get(
+                product=self.order_product.product,
+                department=self.department
+            ).next_step.all()
 
-            """Игнорируем не активные этапы"""
-            if not next_step.is_active:
-                continue
+            for next_step in next_steps:
+                """
+                Итерируемся по всем последующим отделам. 
+                Если отдел Готово - выполняем инструкцию по готовности и выходим.
+                """
 
-            """Вычисляем количество нарядов к обновлению"""
-            target_size = self._get_target_size_for_activate_assignments(next_step)
+                if next_step.department.name == "Готово":
+                    self._ready_department_instruction()
+                    break
 
-            if target_size:
-                """Если количество отлично от нуля переводим наряды в статус ожидает"""
-                ws_update_notification(next_step.department.number)
-                if self.department.single:
-                    numbers = [1]
-                else:
+                """Игнорируем не активные этапы"""
+                if not next_step.is_active:
+                    continue
+
+                """Вычисляем количество нарядов к обновлению"""
+                target_size = self._get_target_size_for_activate_assignments(next_step)
+
+                if target_size:
+                    """Если количество отлично от нуля переводим наряды в статус ожидает"""
+                    ws_update_notification(next_step.department.number)
                     start_position = Assignment.objects.filter(
                         order_product=self.order_product,
                         department=next_step.department,
@@ -253,15 +274,16 @@ class UpdateAssignments:
                         last_position = self.order_product.quantity
                     numbers = [i for i in range(start_position + 1, last_position + 1)]
 
-                Assignment.objects.filter(
-                    order_product=self.order_product,
-                    department=next_step.department,
-                    number__in=numbers
-                ).update(assembled=True)
-                self.notification_data[next_step.department.number] = {
-                    'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                    'data': self.order_product.series_id,
-                }
+                    Assignment.objects.filter(
+                        order_product=self.order_product,
+                        department=next_step.department,
+                        number__in=numbers,
+                        assembled=False,
+                    ).update(assembled=True)
+                    self.notification_data[next_step.department.number] = {
+                        'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                        'data': self.order_product.series_id,
+                    }
 
     def _confirmation_instructions(self):
         """Действия при визировании бригадиром наряда"""

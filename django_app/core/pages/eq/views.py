@@ -192,7 +192,7 @@ def update_assignments(request):
                                   f'Устраните несоответствие или обратитесь к администратору.'
                     }, status=400, json_dumps_params={"ensure_ascii": False})
                 else:
-                    other_assignments.delete()
+                    other_assignments.update(assembled=False)
                     order_product.product.technological_process_confirmed = None
                     order_product.product.save()
                     assignment.inspect_date = False
