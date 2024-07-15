@@ -12,14 +12,14 @@ const StyledAutocompleteWrapper = styled('div')<StyledAutocompleteProps>(({color
     margin: '2px 0 0 1px',
     '& .MuiAutocomplete-popper': {
         '& .MuiAutocomplete-listbox': {
-            // backgroundColor: colorScheme === 'dark' ? '#000000' : '#ffffff', // Цвет заднего фона поппера
+            backgroundColor: colorScheme === 'dark' ? '#000000' : '#ffffff', // Цвет заднего фона поппера
             color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             '& .MuiAutocomplete-option[data-focus="true"]': {
-                // backgroundColor: colorScheme === 'dark' ? '#333333' : '#e0e0e0', // Цвет фона для выбранного элемента
+                backgroundColor: colorScheme === 'dark' ? '#333333' : '#e0e0e0', // Цвет фона для выбранного элемента
                 color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             },
             '& .MuiAutocomplete-option[aria-selected="true"]': {
-                // backgroundColor: colorScheme === 'dark' ? '#555555' : '#d3d3d3', // Цвет фона для элемента при фокусе
+                backgroundColor: colorScheme === 'dark' ? '#555555' : '#d3d3d3', // Цвет фона для элемента при фокусе
                 color: colorScheme === 'dark' ? '#ffffff' : '#000000',
             },
         },
@@ -42,7 +42,7 @@ const StyledTextField = styled(TextField)<StyledAutocompleteProps>(({colorScheme
         transform: 'scaleX(1)',
     },
     "& .MuiInputBase-root::before": {
-        borderBottom: `1px solid ${colorScheme === 'dark' ? '#ffffff' : '#575757'}`,
+        borderBottom: `1px solid ${colorScheme === 'dark' ? '#ffffff' : '#2c2c2c'}`,
         left: 0,
         bottom: 0,
         position: 'absolute',
@@ -68,7 +68,7 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
         fontSize: '16px',
         padding: '0',
         margin: '0',
-        color: colorScheme === 'dark' ? '#ffffff' : '#000000',
+        color: colorScheme === 'dark' ? '#ececec' : '#000000',
     },
     '& .MuiAutocomplete-inputRoot': {
         padding: '0 0 0 4px',
@@ -79,12 +79,12 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
         fontSize: '12px',
         lineHeight: '1',
         top: '-2px',
-        color: colorScheme === 'dark' ? '#ffffff' : 'var(--bs-secondary-color)',
-        transform: 'translate(0, 8px) scale(1)',
+        color: colorScheme === 'dark' ? 'var(--bs-secondary-color)' : 'var(--bs-secondary-color)',
+        transform: 'translate(0, 4px) scale(1)',
     },
     '& .MuiInputLabel-shrink': {
         color: 'var(--bs-secondary-color)',
-        transform: 'translate(0, -12px) scale(1)',
+        transform: 'translate(0, -10px) scale(1)',
     },
     // кнопки
     "& .MuiAutocomplete-popupIndicator": {
@@ -95,12 +95,16 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
     },
     // стиль выбранных элементов в инпуте
     '& .MuiChip-root': {
-        // fontSize: '12px',
-        backgroundColor: colorScheme === 'dark' ? '#343434' : '#d0d0d0',
-        color: colorScheme === 'dark' ? '#000000' : '#000000',
+        backgroundColor: colorScheme === 'dark' ? '#252525' : '#d0d0d0',
+        color: colorScheme === 'dark' ? '#c9c9c9' : '#000000',
         '& .MuiChip-deleteIcon': {
             color: colorScheme === 'dark' ? '#000000' : '#000000',
         },
+        height: '23px',
+        padding: '0',
+        fontSize: '14px',
+        lineHeight: '1',
+        margin: '0 0 1px 0'
     },
     '& .MuiAutocomplete-tag': {
         maxWidth: 'calc(100% - 24px)',
@@ -187,7 +191,7 @@ export const AppAutocomplete = <T, >(props: AppAutocompleteProps<T>) => {
     } : {};
 
     return (
-        <div className={'d-flex align-items-end pb-1 align-self-stretch ' + className} {...otherProps}>
+        <div className={'d-flex align-items-end align-self-start ' + className} {...otherProps}>
             <StyledAutocompleteWrapper colorScheme={colorScheme} sx={extendDivSx} className={'flex-fill'}>
                 <StyledAutocomplete
                     readOnly={readOnly}

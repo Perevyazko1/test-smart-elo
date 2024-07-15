@@ -24,6 +24,7 @@ export const ReadySection = () => {
                     view_mode: queryParameters.view_mode,
                     week: queryParameters.week,
                     year: queryParameters.year,
+                    users: queryParameters.users,
                 }))
             } else {
                 dispatch(getTaskCards({
@@ -32,10 +33,19 @@ export const ReadySection = () => {
                     view_mode: queryParameters.view_mode,
                     week: queryParameters.week,
                     year: queryParameters.year,
+                    users: queryParameters.users,
                 }))
             }
         }
-    }, [dispatch, filtersInited, queryParameters.sort_mode, queryParameters.view_mode, queryParameters.week, queryParameters.year]);
+    }, [
+        dispatch,
+        filtersInited,
+        queryParameters.sort_mode,
+        queryParameters.users,
+        queryParameters.view_mode,
+        queryParameters.week,
+        queryParameters.year,
+    ]);
 
     return (
         <div

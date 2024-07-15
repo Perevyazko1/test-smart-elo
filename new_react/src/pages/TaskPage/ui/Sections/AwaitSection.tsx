@@ -21,9 +21,10 @@ export const AwaitSection = () => {
                 status: TaskStatus.Pending,
                 sort_mode: queryParameters.sort_mode,
                 view_mode: queryParameters.view_mode,
+                users: queryParameters.users,
             }))
         }
-    }, [dispatch, filtersInited, queryParameters.sort_mode, queryParameters.view_mode]);
+    }, [dispatch, filtersInited, queryParameters.sort_mode, queryParameters.view_mode, queryParameters.users]);
 
     return (
         <div style={{

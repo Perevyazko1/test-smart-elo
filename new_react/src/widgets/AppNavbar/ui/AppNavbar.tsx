@@ -114,7 +114,10 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                             </div>
                             <div
                                 className={'d-flex gap-1 flex-fill justify-content-start align-items-center'}
-                                style={{maxWidth: 'calc(100wv - 400px)'}}
+                                style={{
+                                    maxWidth: 'calc(100wv - 400px)',
+                                    minHeight: '45px'
+                                }}
                             >
                                 {children}
                             </div>

@@ -9,6 +9,7 @@ class TaskModelFilter(django_filters.FilterSet):
     status = django_filters.CharFilter(method="filter_status")
     view_mode = django_filters.CharFilter(method="filter_view_mode")
     sort_mode = django_filters.CharFilter(method="filter_sort_mode")
+    users = django_filters.CharFilter(method="filter_users")
 
     class Meta:
         model = Task
@@ -87,4 +88,20 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.order_by('-urgency')
         if value == '2':
             return queryset.order_by('-id')
+        return queryset
+
+    def filter_users(self, queryset: QuerySet, name: str, value: str):
+        if value:
+            print(value)
+            user_ids = value.split(',')
+            int_ids = []
+            for user_id in user_ids:
+                if user_id.isdigit():
+                    int_ids.append(int(user_id))
+            return queryset.filter(
+                Q(executor__id__in=int_ids) |
+                Q(co_executors__in=int_ids) |
+                Q(created_by__id__in=int_ids)
+            )
+
         return queryset
