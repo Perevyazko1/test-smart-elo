@@ -25,8 +25,10 @@ export const TextResultBlock = (props: TextResultBlockProps) => {
     const [disabled, setDisabled] = useState<boolean>(true);
 
     useEffect(() => {
-        setDisabled(!(formTask.executor === currentUser.id || formTask.co_executors.includes(currentUser.id)));
-    }, [currentUser.id, formTask.co_executors, formTask.executor]);
+        setDisabled(!(formTask.executor === currentUser.id || formTask.co_executors.includes(currentUser.id))
+        || !!task?.verified_at
+        );
+    }, [currentUser.id, formTask.co_executors, formTask.executor, task?.verified_at]);
 
     useEffect(() => {
         if (disabled) {

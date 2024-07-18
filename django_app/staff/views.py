@@ -24,6 +24,11 @@ class DepartmentViewSet(viewsets.ModelViewSet):
     )
     serializer_class = DepartmentSerializer
 
+    def get_queryset(self):
+        return super().get_queryset().filter(
+            id__in=self.request.user.departments.all()
+        )
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

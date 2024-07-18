@@ -289,9 +289,10 @@ export const TaskForm = (props: TaskFormProps) => {
                     }
 
                     {
-                        (variant === 'edit' ||
+                        (variant !== 'create' && !task?.verified_at &&
                             (formData.executor === currentUser.id ||
-                                formData.co_executors.includes(currentUser.id)
+                                formData.co_executors.includes(currentUser.id) ||
+                                    (variant === 'edit' && formData.created_by === currentUser.id)
                             )
                         ) &&
                         <Button
