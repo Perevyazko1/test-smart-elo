@@ -12,7 +12,7 @@ export const TestPage = memo(() => {
             <ModalProvider>
                 <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
                     <AppAutocomplete
-                        colorScheme={'dark'}
+                        colorscheme={'dark'}
                         label={'Сотрудники'}
                         variant={'multiple'}
                         value={['Петров', 'Сидоров', 'Иванов']}
@@ -21,7 +21,7 @@ export const TestPage = memo(() => {
                         limitHeight={true}
                     />
                     <AppAutocomplete
-                        colorScheme={'dark'}
+                        colorscheme={'dark'}
                         label={'Сотрудники'}
                         variant={'select'}
                         value={'Петров'}
@@ -31,7 +31,7 @@ export const TestPage = memo(() => {
                 </AppNavbar>
 
                 <AppAutocomplete
-                        colorScheme={'light'}
+                        colorscheme={'light'}
                         label={'Сотрудники'}
                         variant={'multiple'}
                         value={['Петров']}
@@ -40,7 +40,7 @@ export const TestPage = memo(() => {
 
                     />
                     <AppAutocomplete
-                        colorScheme={'light'}
+                        colorscheme={'light'}
                         label={'Сотрудники'}
                         variant={'select'}
                         value={'Петров'}

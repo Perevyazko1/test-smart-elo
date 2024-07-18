@@ -58,6 +58,13 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                     method: 'DELETE',
                 }),
             }),
+            addToFavorite: build.mutation<Employee, {data: number}>({
+                query: (props: {data: number}) => ({
+                    url: '/staff/add_to_favorite/',
+                    method: 'POST',
+                    body: props,
+                }),
+            }),
         }),
     })
 ;
@@ -66,4 +73,5 @@ export const useCreateTask = TaskFormApi.useCreateTaskMutation;
 export const useUpdateTask = TaskFormApi.useUpdateTaskMutation;
 export const useDeleteTaskImage = TaskFormApi.useDeleteTaskImageMutation;
 export const useEmployeeList = TaskFormApi.useGetUserListQuery;
+export const useAddToFavorite = TaskFormApi.useAddToFavoriteMutation;
 export const useDepartmentList = TaskFormApi.useGetDepartmentListQuery;

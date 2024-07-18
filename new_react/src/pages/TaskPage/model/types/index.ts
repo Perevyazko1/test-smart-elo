@@ -19,6 +19,7 @@ export interface Task {
     for_departments?: Department[];
     title: string;
     description?: string;
+    execution_comment?: string;
 
     deadline?: string;
     created_at?: string;

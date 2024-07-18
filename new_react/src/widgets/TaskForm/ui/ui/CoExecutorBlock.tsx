@@ -1,12 +1,13 @@
-import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
 import React, {useEffect, useMemo, useState} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {UserListRender} from "@widgets/UserListRender/UserListRender";
+import {GroupedEmployeeItem} from "@entities/Employee";
 
 interface CoExecutorBlockProps {
     disabled: boolean;
-    userList: Employee[];
+    userList: GroupedEmployeeItem[];
     isLoading: boolean;
     setFormTask: (task: CreateTask) => void;
     formTask: CreateTask;
@@ -15,21 +16,21 @@ interface CoExecutorBlockProps {
 export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     const {userList, formTask, disabled, isLoading, setFormTask} = props;
 
-    const [value, setValue] = useState<Employee[]>([]);
+    const [value, setValue] = useState<GroupedEmployeeItem[]>([]);
     const [inited, setInited] = useState<boolean>(false);
 
 
     useEffect(() => {
         if (!inited && userList.length > 0) {
             setValue(
-                userList.filter(user => formTask.co_executors?.includes(user.id))
+                userList.filter(option => formTask.co_executors?.includes(option.user.id))
             )
             setInited(true)
         }
     }, [formTask.co_executors, inited, userList]);
 
     const coExecutorIds = useMemo(() => {
-        return value.map(user => user.id)
+        return value.map(user => user.user.id)
     }, [value])
 
     useEffect(() => {
@@ -51,12 +52,18 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             value={value}
             loading={isLoading}
             options={userList}
-            groupBy={(option: Employee) => option.permanent_department?.name || ""}
-            onChangeClb={(newValue: Employee[] | null) => {
+            groupBy={(option: GroupedEmployeeItem) => option.group}
+            onChangeClb={(newValue: GroupedEmployeeItem[] | null) => {
                 setValue(newValue || [])
             }}
+            renderOption={(props, option) => option ?
+                <UserListRender
+                    props={props}
+                    option={option.user}
+                    key={option.user.id}
+                /> : undefined}
             limitTags={2}
-            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
+            getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'listNameInitials')}
         />
     );
 };

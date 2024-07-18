@@ -1,3 +1,5 @@
+export {useSortedUserList} from "./lib/useSortedUserList";
+
 export {anonEmployee} from "./testData/testData";
 
-export type {Employee, BaseEmployee} from "./types/employee";
+export type {Employee, BaseEmployee, GroupedEmployeeItem} from "./types/employee";

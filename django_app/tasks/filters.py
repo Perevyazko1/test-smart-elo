@@ -10,6 +10,7 @@ class TaskModelFilter(django_filters.FilterSet):
     view_mode = django_filters.CharFilter(method="filter_view_mode")
     sort_mode = django_filters.CharFilter(method="filter_sort_mode")
     users = django_filters.CharFilter(method="filter_users")
+    departments = django_filters.CharFilter(method="filter_departments")
 
     class Meta:
         model = Task
@@ -46,10 +47,6 @@ class TaskModelFilter(django_filters.FilterSet):
         return queryset
 
     def filter_view_mode(self, queryset: QuerySet, name, value):
-        if value == '0':
-            return queryset.exclude(
-                status='4',
-            )
         if value == '1':
             return queryset.filter(
                 view_mode='1'
@@ -79,20 +76,19 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.filter(
                 appointed_by=self.request.user,
             )
-        return []
+        return queryset.exclude(
+            status='4',
+        )
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):
-        if value == '0':
-            return queryset.order_by('deadline')
         if value == '1':
             return queryset.order_by('-urgency')
         if value == '2':
             return queryset.order_by('-id')
-        return queryset
+        return queryset.order_by('deadline')
 
     def filter_users(self, queryset: QuerySet, name: str, value: str):
         if value:
-            print(value)
             user_ids = value.split(',')
             int_ids = []
             for user_id in user_ids:
@@ -105,3 +101,17 @@ class TaskModelFilter(django_filters.FilterSet):
             )
 
         return queryset
+
+    def filter_departments(self, queryset: QuerySet, name: str, value: str):
+        if value:
+            department_ids = value.split(',')
+            int_ids = []
+            for department_id in department_ids:
+                if department_id.isdigit():
+                    int_ids.append(int(department_id))
+            return queryset.filter(
+                Q(for_departments__in=int_ids)
+            )
+
+        return queryset
+

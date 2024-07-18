@@ -45,6 +45,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'boss',
             'current_department',
             'permanent_department',
+            'favorite_users',
             'pin_code',
             'groups',
             'token',

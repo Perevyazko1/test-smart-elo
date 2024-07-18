@@ -22,9 +22,16 @@ export const InWorkSection = () => {
                 sort_mode: queryParameters.sort_mode,
                 view_mode: queryParameters.view_mode,
                 users: queryParameters.users,
+                departments: queryParameters.departments,
             }))
         }
-    }, [dispatch, filtersInited, queryParameters.view_mode, queryParameters.sort_mode, queryParameters.users]);
+    }, [dispatch,
+        filtersInited,
+        queryParameters.view_mode,
+        queryParameters.sort_mode,
+        queryParameters.users,
+        queryParameters.departments,
+    ]);
 
     return (
         <div style={{

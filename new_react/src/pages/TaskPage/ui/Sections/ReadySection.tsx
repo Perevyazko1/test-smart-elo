@@ -25,6 +25,7 @@ export const ReadySection = () => {
                     week: queryParameters.week,
                     year: queryParameters.year,
                     users: queryParameters.users,
+                    departments: queryParameters.departments,
                 }))
             } else {
                 dispatch(getTaskCards({
@@ -34,6 +35,7 @@ export const ReadySection = () => {
                     week: queryParameters.week,
                     year: queryParameters.year,
                     users: queryParameters.users,
+                    departments: queryParameters.departments,
                 }))
             }
         }
@@ -45,6 +47,7 @@ export const ReadySection = () => {
         queryParameters.view_mode,
         queryParameters.week,
         queryParameters.year,
+        queryParameters.departments,
     ]);
 
     return (

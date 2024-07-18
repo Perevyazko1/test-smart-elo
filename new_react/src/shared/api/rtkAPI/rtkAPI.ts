@@ -15,7 +15,8 @@ const customFetchBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
         {
             baseUrl: SERVER_HTTP_ADDRESS + '/api/v1',
             headers: {
-                'Authorization': `Token ${token}`
+                'Authorization': `Token ${token}`,
+                // 'Content-Type': 'application/json',
             }
         });
 
@@ -27,7 +28,7 @@ const customFetchBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQu
         // Обработка ошибки
         errorApiHandler(error);
         // Возвращаем объект ошибки в соответствии с ожидаемым типом
-        return { error: { status: 'CUSTOM_ERROR', error: String(error) }};
+        return {error: {status: 'CUSTOM_ERROR', error: String(error)}};
     }
 };
 

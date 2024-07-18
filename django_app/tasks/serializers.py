@@ -24,7 +24,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'status', 'urgency', 'view_mode', 'for_departments',
-            'title', 'description', 'deadline', 'created_at', 'created_by', 'ready_at',
+            'title', 'description', 'execution_comment', 'deadline', 'created_at', 'created_by', 'ready_at',
             'verified_at', 'appointed_at', 'appointed_by', 'executor', 'co_executors',
             'task_images',
         ]
@@ -45,7 +45,7 @@ class TaskWriteSerializer(serializers.ModelSerializer):
         model = Task
         fields = [
             'id', 'status', 'urgency', 'view_mode', 'for_departments',
-            'title', 'description', 'deadline',
+            'title', 'description', 'execution_comment', 'deadline',
             'appointed_by', 'executor', 'co_executors',
             'images', 'appointed_at', 'ready_at', 'verified_at', 'created_by',
         ]

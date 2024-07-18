@@ -12,6 +12,7 @@ export interface BaseEmployee {
     current_department: number | null,
     permanent_department: number | null,
     departments: number[],
+    favorite_users: number[],
     groups: number[],
     current_balance: string,
     token: string,
@@ -26,3 +27,7 @@ export interface Employee extends Omit<BaseEmployee, ExtendedFields>{
     permanent_department: Department | null,
 }
 
+export interface GroupedEmployeeItem {
+    group: string,
+    user: Employee,
+}

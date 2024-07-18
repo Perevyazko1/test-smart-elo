@@ -67,3 +67,30 @@ def get_audit_list(request):
     audit_list = Audit.objects.filter(employee=request.user).order_by('-date')[:100]
     data = AuditSerializer(audit_list, many=True).data
     return JsonResponse({'data': data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def add_to_favorite(request):
+    data = request.data.get('data')
+
+    if not data:
+        return Response('Не указан ID пользователя', status=400)
+
+    try:
+        user: Employee = request.user
+        print(request.user)
+        favorite_user = Employee.objects.get(id=data)
+
+        if favorite_user in user.favorite_users.all():
+            user.favorite_users.remove(favorite_user)
+            action = 'removed'
+        else:
+            user.favorite_users.add(favorite_user)
+            action = 'added'
+
+        serialized_user = EmployeeSerializer(user, context={'request': request}).data
+        return Response(serialized_user, status=200)
+    except Employee.DoesNotExist:
+        return Response('Пользователь не найден', status=400)
+    except Exception as e:
+        return Response(str(e), status=400)

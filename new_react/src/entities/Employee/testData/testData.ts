@@ -38,4 +38,5 @@ export const anonEmployee: Employee = {
     token: 'test_token',
     patronymic: null,
     boss: null,
+    favorite_users: [],
 }

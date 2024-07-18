@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 
 interface TimeLeft {
     weeks: number;
@@ -8,25 +8,26 @@ interface TimeLeft {
     seconds: number;
 }
 
-export const useCountdown = (targetDate: string | undefined): TimeLeft | undefined => {
+interface UseCountdownOptions {
+    targetDate: string | undefined;
+    startDate?: string | undefined;
+}
+
+export const useCountdown = ({ targetDate, startDate }: UseCountdownOptions): TimeLeft | undefined => {
     const calculateTimeLeft = (): TimeLeft | undefined => {
         if (!targetDate) {
             return undefined;
         }
-        const difference = +new Date(targetDate) - +new Date();
-        let timeLeft: TimeLeft = {weeks: 0, days: 0, hours: 0, minutes: 0, seconds: 0};
+        const start = startDate ? new Date(startDate).getTime() : new Date().getTime();
+        const difference = +new Date(targetDate) - start;
 
-        if (difference > 0) {
-            timeLeft = {
-                weeks: Math.floor(difference / (1000 * 60 * 60 * 24 * 7)),
-                days: Math.floor((difference / (1000 * 60 * 60 * 24)) % 7),
-                hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                minutes: Math.floor((difference / 1000 / 60) % 60),
-                seconds: Math.floor((difference / 1000) % 60),
-            };
-        }
-
-        return timeLeft;
+        return {
+            weeks: Math.trunc(difference / (1000 * 60 * 60 * 24 * 7)),
+            days: Math.trunc((difference / (1000 * 60 * 60 * 24)) % 7),
+            hours: Math.trunc((difference / (1000 * 60 * 60)) % 24),
+            minutes: Math.trunc((difference / 1000 / 60) % 60),
+            seconds: Math.trunc((difference / 1000) % 60),
+        };
     };
 
     const [timeLeft, setTimeLeft] = useState<TimeLeft | undefined>(calculateTimeLeft());
@@ -38,7 +39,7 @@ export const useCountdown = (targetDate: string | undefined): TimeLeft | undefin
 
         return () => clearTimeout(timer);
         //eslint-disable-next-line
-    }, [timeLeft, targetDate]);
+    }, [timeLeft, targetDate, startDate]);
 
     return timeLeft;
 }

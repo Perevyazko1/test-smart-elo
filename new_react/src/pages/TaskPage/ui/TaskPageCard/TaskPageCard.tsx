@@ -1,15 +1,15 @@
-import {AppSlider} from "@shared/ui";
-import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser} from "@shared/hooks";
-import {TaskForm} from "@widgets/TaskForm";
+import {useMemo} from "react";
 
 import cls from "../TaskPage.module.scss";
 
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
 import {getViewModeText, TaskStatus} from "@pages/TaskPage";
+import {AppSlider} from "@shared/ui";
+import {useAppModal, useCurrentUser} from "@shared/hooks";
+import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {TaskForm} from "@widgets/TaskForm";
 
-import {Task, UpdateTask} from "../../model/types";
-import {useCallback, useMemo} from "react";
-import {updateTask} from "@pages/TaskPage/model/api/updateTask";
+import {Task} from "../../model/types";
+import {TaskBtn} from "./ui/TaskBtn";
 
 interface TaskPageCardProps {
     card: Task;
@@ -18,13 +18,10 @@ interface TaskPageCardProps {
 
 export const TaskPageCard = (props: TaskPageCardProps) => {
     const {card, cardType} = props;
-    const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
 
     const cardHeight = 80;
     const {openModal, closeModal} = useAppModal();
-
-    const playSound = useClickSound();
 
     const viewClb = () => {
         openModal({
@@ -32,6 +29,9 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                     <TaskForm
                         variant={'read_only'}
                         task={card}
+                        onSubmitClb={() => {
+                            closeModal()
+                        }}
                     />
                 )
             }
@@ -58,114 +58,6 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         return card.created_by?.id !== currentUser.id;
     }, [card.created_by, currentUser]);
 
-    const locked = useMemo(() => {
-        if (cardType === TaskStatus.InProgress) {
-            return card.appointed_by?.id !== currentUser.id
-        }
-        if (cardType === TaskStatus.Completed) {
-            return card.created_by?.id !== currentUser.id
-        }
-        return false
-    }, [card.appointed_by?.id, card.created_by?.id, cardType, currentUser.id]);
-
-    const getButtonIcon = useCallback((first: boolean) => {
-        if (cardType === TaskStatus.Pending) {
-            return <i className="fas fa-angle-double-left fs-2"/>;
-        } else if (cardType === TaskStatus.InProgress && locked && !first) {
-            return <i className="fas fa-lock fs-5"/>;
-        } else if (cardType === TaskStatus.Completed && locked && first) {
-            return <i className="fas fa-lock fs-5"/>;
-        } else if (cardType === TaskStatus.InProgress && first) {
-            return <i className="fas fa-check fs-3"/>;
-        } else if (cardType === TaskStatus.InProgress && !first) {
-            return <i className="fas fa-angle-double-right fs-2"/>;
-        } else if (cardType === TaskStatus.Completed && first) {
-            return <i className="fas fa-check-double fs-3"/>;
-        } else {
-            return <i className="fas fa-angle-double-up fs-2"/>;
-        }
-    }, [cardType, locked]);
-
-    const updClb = (first: boolean) => {
-        playSound()
-        if (cardType === TaskStatus.InProgress && !first && locked) {
-            openModal({
-                    content: (
-                        <>
-                            <h4 className={'my-5'}>
-                                Задачу нельзя вернуть в ожидание так как она была назначена персонально.
-                            </h4>
-                            <h4 className={'my-5'}>
-                                Вернуть задачу в ожидание может пользователь назначивший задачу.
-                            </h4>
-                        </>
-                    )
-                }
-            )
-        } else if (cardType === TaskStatus.Completed && first && locked) {
-            openModal({
-                    content: (
-                        <h4 className={'my-5'}>
-                            Завизировать выполнение задачи может пользователь, который создал данную задачу.
-                        </h4>
-                    )
-                }
-            )
-        } else {
-            dispatch(updateTask(getActionData(first)));
-        }
-    }
-
-    const getActionData = (first: boolean): UpdateTask => {
-        if (cardType === TaskStatus.Pending) {
-            const data: UpdateTask = {
-                id: card.id,
-                status: TaskStatus.InProgress,
-                executor: card.executor?.id || currentUser.id,
-                co_executors: card.co_executors?.map(user => user.id),
-            };
-            if (!card.appointed_at) {
-                data.appointed_at = new Date().toISOString();
-            }
-            if (!card.appointed_by) {
-                data.appointed_by = currentUser.id;
-            }
-            return data;
-        } else if (cardType === TaskStatus.InProgress && !first) {
-            const data: UpdateTask = {
-                id: card.id,
-                status: TaskStatus.Pending,
-                co_executors: card.co_executors?.map(user => user.id),
-            }
-            if (card.appointed_by?.id === currentUser.id) {
-                if (card.executor?.id === currentUser.id) {
-                    data.executor = null;
-                }
-            }
-            return data;
-        } else if (cardType === TaskStatus.InProgress && first) {
-            return {
-                id: card.id,
-                status: TaskStatus.Completed,
-                ready_at: new Date().toISOString(),
-                co_executors: card.co_executors?.map(user => user.id),
-            };
-        } else if (cardType === TaskStatus.Completed && first) {
-            return {
-                id: card.id,
-                verified_at: new Date().toISOString(),
-                co_executors: card.co_executors?.map(user => user.id),
-            };
-        } else {
-            return {
-                id: card.id,
-                ready_at: '',
-                status: TaskStatus.InProgress,
-                co_executors: card.co_executors?.map(user => user.id),
-            };
-        }
-    }
-
     const hideFirstBtn = useMemo(() => {
         if (cardType === TaskStatus.Completed && card.verified_at) {
             return true;
@@ -173,44 +65,9 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         return card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
 
-    const timeLeft = useCountdown(hideFirstBtn ? undefined : card.deadline);
-
     const hideSecondBtn = useMemo(() => {
         return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
-
-    const getButtonVariant = useMemo(() => {
-        if ((timeLeft && timeLeft?.days > 0) || (!timeLeft)) {
-            switch (card.urgency) {
-                case '4':
-                    return "redBtn"
-                case '3':
-                    return "yellowBtn"
-                case '2':
-                    return "greenBtn"
-                case '1':
-                    return "greyBtn"
-                default:
-                    return "greenBtn"
-            }
-        } else if (timeLeft && timeLeft?.hours > 2) {
-            switch (card.urgency) {
-                case '4':
-                    return "redBtn"
-                case '3':
-                    return "yellowBtn"
-                case '2':
-                    return "yellowBtn"
-                case '1':
-                    return "yellowBtn"
-                default:
-                    return "yellowBtn"
-            }
-        } else {
-            return "redBtn"
-        }
-        //eslint-disable-next-line
-    }, [card.urgency, timeLeft?.hours, timeLeft?.days]);
 
     return (
         <div style={{padding: ".1rem", maxWidth: '1300px'}}>
@@ -225,26 +82,11 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
             >
 
                 {!hideFirstBtn &&
-                    <button
-                        className={`appBtn rounded rounded-2 h-100 ${getButtonVariant}`}
-                        onClick={() => updClb(true)}
-                        style={{minWidth: '39px', maxWidth: '39px'}}
-                    >
-                        {timeLeft &&
-                            <>
-                                <div style={{fontSize: '9px'}}>
-                                    {timeLeft.weeks &&
-                                        <b>{timeLeft.weeks}нед<br/></b>
-                                    }
-                                    <b>{timeLeft.days}д{timeLeft.hours}ч</b>
-                                    <br/>
-                                    <b>{timeLeft.minutes}м{timeLeft.seconds}с</b>
-                                </div>
-                                <br/>
-                            </>
-                        }
-                        {getButtonIcon(true)}
-                    </button>
+                    <TaskBtn
+                        first={true}
+                        card={card}
+                        cardType={cardType}
+                    />
                 }
 
                 <div className={cls.sliderBlock + ' bg-light rounded'}
@@ -276,9 +118,18 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 <div className={'bg-light rounded ' + cls.textBlock}>
                     № {card.id} {card.title}
                     <hr className={'m-0 p-0'}/>
-                    <p className={'fs-7'}>
+                    <div className={'fs-7'}>
                         {card.description}
-                    </p>
+                    </div>
+                    {card.execution_comment &&
+                        <>
+                            <hr className={'m-0 p-0'}/>
+                            <div className={'fs-7'}>
+                                <b>Результат:</b> {card.execution_comment}
+                            </div>
+                        </>
+                    }
+
                 </div>
 
                 <div className={'bg-light rounded fs-7 text-nowrap'} style={{padding: '0 .1rem'}}>
@@ -339,13 +190,11 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                 </div>
 
                 {!hideSecondBtn &&
-                    <button
-                        className={`appBtn p-1 rounded rounded-2 h-100 ${getButtonVariant}`}
-                        onClick={() => updClb(false)}
-                        style={{minWidth: '39px', maxWidth: '39px'}}
-                    >
-                        {getButtonIcon(false)}
-                    </button>
+                    <TaskBtn
+                        first={false}
+                        card={card}
+                        cardType={cardType}
+                    />
                 }
 
             </div>
