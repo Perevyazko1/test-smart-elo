@@ -1,10 +1,11 @@
 import {Button, Spinner, Table} from "react-bootstrap";
 import {useEditAssignmentInfo, useGetAssignmentInfo} from "../model/api/api";
-import {useCurrentUser, usePermission} from "@shared/hooks";
+import {useAppDispatch, useCurrentUser, usePermission} from "@shared/hooks";
 import {AssignmentInfoRow} from "@widgets/AssignmentInfo/ui/AssignmentInfoRow";
 import React, {useEffect, useMemo, useState} from "react";
 import {AppSkeleton} from "@shared/ui";
 import {APP_PERM} from "@shared/consts";
+import {eqPageActions} from "@pages/EqPage";
 
 interface AssignmentInfoProps {
     seriesId: string;
@@ -13,6 +14,7 @@ interface AssignmentInfoProps {
 
 export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const {seriesId, title} = props;
+    const dispatch = useAppDispatch();
     const unconfirmedPerm = usePermission(APP_PERM.ASSIGNMENT_UNCONFIRMED);
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
 
@@ -73,6 +75,8 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                 date: inputDate,
                 ids: selectedIds,
                 mode: mode,
+            }).then(() => {
+                dispatch(eqPageActions.weekDataHasUpdated());
             })
         }
     }

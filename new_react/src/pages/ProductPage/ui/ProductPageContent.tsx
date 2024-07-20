@@ -3,7 +3,7 @@ import React, {useCallback, useEffect, useMemo, useState} from "react";
 import cls from './ProductPage.module.scss';
 
 import {Product} from "@entities/Product";
-import {getPaginationSize} from "@shared/lib";
+import {getEmployeeName, getPaginationSize} from "@shared/lib";
 import {useAppDispatch, useAppQuery, useAppSelector} from "@shared/hooks";
 
 import {getProductsList, getProductsProps} from "../model/selectors/productsSelector";
@@ -146,17 +146,13 @@ export const ProductPageContent = () => {
                                     </th>
                                     <th>
                                         <Link to={`/product/${product.id}`}
-
                                         >
                                             {product.name}
                                         </Link>
                                     </th>
                                     <th>{product.technological_process?.name || ''}</th>
                                     <th>
-                                        {
-                                            `${product.technological_process_confirmed?.last_name || ""} 
-                                            ${product.technological_process_confirmed?.first_name || ""}`
-                                        }
+                                        {getEmployeeName(product.technological_process_confirmed)}
                                     </th>
                                 </tr>
                             ))}

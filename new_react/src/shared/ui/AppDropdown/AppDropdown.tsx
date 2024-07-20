@@ -30,7 +30,7 @@ export const AppDropdown = (props: AppDropdownProps) => {
                         active={item === selected}
                         className={'text-nowrap w-100'}
                 >
-                    {item}
+                    {item || 'Без названия'}
                 </Button>
                 <hr className={'p-0 m-0'}/>
             </div>

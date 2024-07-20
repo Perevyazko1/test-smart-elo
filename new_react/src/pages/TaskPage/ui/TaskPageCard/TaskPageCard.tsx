@@ -1,4 +1,4 @@
-import {useMemo} from "react";
+import {HTMLAttributes, useMemo} from "react";
 
 import cls from "../TaskPage.module.scss";
 
@@ -11,13 +11,13 @@ import {TaskForm} from "@widgets/TaskForm";
 import {Task} from "../../model/types";
 import {TaskBtn} from "./ui/TaskBtn";
 
-interface TaskPageCardProps {
+interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement>{
     card: Task;
     cardType: TaskStatus;
 }
 
 export const TaskPageCard = (props: TaskPageCardProps) => {
-    const {card, cardType} = props;
+    const {card, cardType, ...otherProps} = props;
     const {currentUser} = useCurrentUser();
 
     const cardHeight = 80;
@@ -70,7 +70,7 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     }, [card.status, card.verified_at, cardType]);
 
     return (
-        <div style={{padding: ".1rem", maxWidth: '1300px'}}>
+        <div style={{padding: ".1rem", maxWidth: '1300px'}} {...otherProps}>
             <div className={'d-flex justify-content-start rounded rounded-2 border border-1 bg-black'}
                  style={{
                      width: "100%",

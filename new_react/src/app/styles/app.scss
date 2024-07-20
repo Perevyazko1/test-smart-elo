@@ -305,3 +305,19 @@ input[type="time"]:disabled {
   -webkit-text-security: disc; /* Для Chrome, Safari, и Opera */
   text-security: disc; /* Для Firefox и других браузеров */
 }
+
+.jump {
+  animation: jump 1.5s;
+}
+
+@keyframes jump {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(0);
+  }
+  85% {
+    transform: translateX(-10px);
+  }
+  95% {
+    transform: translateX(10px);
+  }
+}

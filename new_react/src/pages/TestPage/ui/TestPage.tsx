@@ -2,52 +2,48 @@ import React, {memo, useState} from "react";
 import {AppNavbar} from "@widgets/AppNavbar";
 import {QueryContext} from "@features";
 import {ModalProvider} from "@app";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {Button} from "@mui/material";
 
 export const TestPage = memo(() => {
     const [showCanvas, setShowCanvas] = useState<boolean>(false);
+
+    const newNotification = () => {
+        setTimeout(() =>
+                navigator.serviceWorker?.ready.then(registration => {
+                    const title = "ЭЛО - Имеются новые задачи!";
+                    const options = {
+                        icon: '/logo192.png',
+                        badge: '/logo192.png',
+                        tag: 'newTask',
+                        vibrate: [200, 100, 200],
+                        data: {url: "/task"},
+                        actions: [
+                            {
+                                action: "open",
+                                title: "Открыть",
+                            },
+                            {
+                                action: "dismiss",
+                                title: "Закрыть",
+                            },
+                        ]
+                    };
+                    registration.showNotification(title, options)
+                })
+            , 1000
+        )
+    }
 
     return (
         <QueryContext>
             <ModalProvider>
                 <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
-                    <AppAutocomplete
-                        colorscheme={'dark'}
-                        label={'Сотрудники'}
-                        variant={'multiple'}
-                        value={['Петров', 'Сидоров', 'Иванов']}
-                        options={['Петров', 'Сидоров', 'Иванов']}
-                        width={300}
-                        limitHeight={true}
-                    />
-                    <AppAutocomplete
-                        colorscheme={'dark'}
-                        label={'Сотрудники'}
-                        variant={'select'}
-                        value={'Петров'}
-                        options={['Петров', 'Сидоров', 'Иванов']}
-                        width={300}
-                    />
                 </AppNavbar>
 
-                <AppAutocomplete
-                        colorscheme={'light'}
-                        label={'Сотрудники'}
-                        variant={'multiple'}
-                        value={['Петров']}
-                        options={['Петров', 'Сидоров', 'Иванов']}
-                        width={300}
+                <Button onClick={newNotification}>
+                    Уведомление
+                </Button>
 
-                    />
-                    <AppAutocomplete
-                        colorscheme={'light'}
-                        label={'Сотрудники'}
-                        variant={'select'}
-                        value={'Петров'}
-                        options={['Петров', 'Сидоров', 'Иванов']}
-                        width={300}
-
-                    />
             </ModalProvider>
         </QueryContext>
     );

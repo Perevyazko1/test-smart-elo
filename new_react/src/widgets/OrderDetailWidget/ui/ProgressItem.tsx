@@ -1,15 +1,14 @@
 interface ProgressItemProps {
-    lightCount: number;
     successCount: number;
     secondaryCount: number;
     dangerCount: number;
 }
 
 export const ProgressItem = (props: ProgressItemProps) => {
-    const {successCount, secondaryCount, dangerCount, lightCount} = props;
+    const {successCount, secondaryCount, dangerCount} = props;
 
     const getItemWidth = (count: number) => {
-        const total = successCount + secondaryCount + dangerCount + lightCount;
+        const total = successCount + secondaryCount + dangerCount;
 
         return `${count / total * 100}%`
     }
@@ -41,14 +40,6 @@ export const ProgressItem = (props: ProgressItemProps) => {
                          overflow: 'hidden',
                      }}>
                     {secondaryCount} доступны
-                </div>
-                <div className={'bg-light-subtle rounded px-1'}
-                     style={{
-                         width: getItemWidth(lightCount),
-                         height: '25px',
-                         overflow: 'hidden',
-                     }}>
-                    {lightCount} ожидают
                 </div>
             </div>
         </div>

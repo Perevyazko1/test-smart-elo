@@ -11,7 +11,7 @@ import {TaskCardSkeleton} from "@pages/TaskPage/ui/TaskPageCard/TaskCardSkeleton
 
 export const InWorkSection = () => {
     const dispatch = useAppDispatch();
-    const {queryParameters} = useQueryParams();
+    const {queryParameters, setQueryParam} = useQueryParams();
     const filtersInited = useAppSelector(allFiltersInited);
     const inWorkData = useAppSelector(getInWorkData);
 
@@ -33,6 +33,18 @@ export const InWorkSection = () => {
         queryParameters.departments,
     ]);
 
+    useEffect(() => {
+        if (queryParameters.in_work_scroll_to && inWorkData && !inWorkData?.isLoading) {
+            const element = document.getElementById(`in-work-task-id-${queryParameters.in_work_scroll_to}`);
+            if (element) {
+                element.scrollIntoView({behavior: 'smooth', block: 'start'});
+                element.classList.add('jump')
+            }
+            setQueryParam('in_work_scroll_to', '')
+        }
+        // eslint-disable-next-line
+    }, [inWorkData?.isLoading, queryParameters.in_work_scroll_to]);
+
     return (
         <div style={{
             height: `100%`,
@@ -53,6 +65,7 @@ export const InWorkSection = () => {
                 <>
                     {inWorkData?.results?.map(card => (
                         <TaskPageCard
+                            id={`in-work-task-id-${card.id}`}
                             key={card.id}
                             card={card}
                             cardType={TaskStatus.InProgress}

@@ -3,7 +3,8 @@ import React, {useEffect, useMemo, useState} from "react";
 import {useAppQuery, useDebounce} from "@shared/hooks";
 import {AppDropdown, AppInput} from "@shared/ui";
 
-import { useProjectsList } from "../model/api/rtk";
+import {useProjectsList} from "../model/api/rtk";
+import {Button} from "react-bootstrap";
 
 export const OrderPageNav = () => {
     const [showCanvas, setShowCanvas] = useState<boolean>(false);
@@ -55,7 +56,7 @@ export const OrderPageNav = () => {
             setQueryParam("status", "1")
         }
     }
-    
+
     const getCurrentStatus = useMemo(() => {
         if (queryParameters.status === "0") {
             return "В работе";
@@ -86,8 +87,17 @@ export const OrderPageNav = () => {
                 selected={getCurrentStatus}
                 active={!!queryParameters.status}
                 items={statuses}
+                childrenPos={'bottom'}
                 onSelect={setStatus}
-            />
+            >
+                <Button className={'w-100 p-0 mt-3'}
+                        style={{height: '25px'}}
+                        variant={'secondary'}
+                        onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
+                >
+                    {queryParameters.project_mode ? 'Актуальные' : 'Показать все'}
+                </Button>
+            </AppDropdown>
         </AppNavbar>
     );
 };

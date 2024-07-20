@@ -79,6 +79,13 @@ def ws_send_to_all(data):
         )
 
 
+def ws_send_to_department(department_number, data):
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        str(department_number),
+        {"type": "client_message", "message": data}
+    )
+
 def ws_update_notification(department_number):
     """Send command to update notification. """
     channel_layer = get_channel_layer()

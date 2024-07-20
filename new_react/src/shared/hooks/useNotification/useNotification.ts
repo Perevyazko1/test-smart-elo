@@ -20,8 +20,31 @@ export const useNotification = () => {
 
     const showNotification = useCallback((title: string, options?: ExtNotificationOptions) => {
         // Проверяем, разрешено ли отображать уведомления
-        if (permission === 'granted' && options?.condition !== false) {
-            new Notification(title, options);
+        if (permission === 'granted' && options?.condition !== false && navigator.serviceWorker) {
+
+            navigator.serviceWorker?.ready.then(registration => {
+                const swOptions = {
+                        icon: '/logo192.png',
+                        badge: '/logo192.png',
+                        vibrate: [200, 100, 200],
+                        ...options
+                        // tag: 'newTask',
+                        // data: {url: "/task"},
+                        // actions: [
+                        //     {
+                        //         action: "open",
+                        //         title: "Открыть",
+                        //     },
+                        //     {
+                        //         action: "dismiss",
+                        //         title: "Закрыть",
+                        //     },
+                        // ],
+                    }
+                ;
+                registration.showNotification(title, swOptions)
+            })
+
         } else {
             // Если уведомления не разрешены или условие не соответствует, используем alert
             alert(`${title}\n${options?.body || ''}`);

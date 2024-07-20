@@ -1,22 +1,23 @@
-
 /* Устанавливаем ширину скроллбара */
 ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+  width: 4px;
+  height: 4px;
 }
 
-/* Устанавливаем стиль для "трека" (полосы, по которой движется "бегунок") */
-::-webkit-scrollbar-track {
-    //background: #252525;
+textarea::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
 }
 
 /* Устанавливаем стиль для "бегунка" */
 ::-webkit-scrollbar-thumb {
-    background: var(--bs-gray-600);
-    border-radius: 4px;
+  background: var(--bs-gray-600);
+  border-radius: 2px;
+  transition: transform 0.3s, background 0.3s; /* Добавляем плавный переход */
+  transform-origin: center;
 }
 
-/* Изменяем цвет "бегунка" при наведении */
+/* Изменяем цвет и масштаб "бегунка" при наведении */
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--bs-gray-900);
+  background: var(--bs-gray-900);
 }

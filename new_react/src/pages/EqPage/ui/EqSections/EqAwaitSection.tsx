@@ -81,7 +81,10 @@ export const EqAwaitSection = (props: EqAwaitSectionProps) => {
                             top: '0',
                             transform: `translateY(${virtualItem.offsetTop}px)`,
                             width: '100%',
-                        }} key={item.id}>
+                        }}
+                             id={`await-card-id-${item.id}`}
+                             key={item.id}
+                        >
                             <EqAwaitCard card={item}/>
                         </div>
                     )

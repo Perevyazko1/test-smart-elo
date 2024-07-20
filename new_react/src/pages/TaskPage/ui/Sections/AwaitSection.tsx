@@ -11,7 +11,7 @@ import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 
 export const AwaitSection = () => {
     const dispatch = useAppDispatch();
-    const {queryParameters} = useQueryParams();
+    const {queryParameters, setQueryParam} = useQueryParams();
     const filtersInited = useAppSelector(allFiltersInited);
     const awaitData = useAppSelector(getAwaitData);
 
@@ -33,6 +33,18 @@ export const AwaitSection = () => {
         queryParameters.departments,
     ]);
 
+    useEffect(() => {
+        if (queryParameters.await_scroll_to && awaitData && !awaitData.isLoading) {
+            const element = document.getElementById(`await-task-id-${queryParameters.await_scroll_to}`);
+            if (element) {
+                element.scrollIntoView({behavior: 'smooth', block: 'start'});
+                element.classList.add('jump')
+            }
+            setQueryParam('await_scroll_to', '')
+        }
+        // eslint-disable-next-line
+    }, [awaitData?.isLoading, queryParameters.await_scroll_to]);
+
     return (
         <div style={{
             height: `100%`,
@@ -52,6 +64,7 @@ export const AwaitSection = () => {
                 <>
                     {awaitData?.results?.map(card => (
                         <TaskPageCard
+                            id={`await-task-id-${card.id}`}
                             key={card.id}
                             card={card}
                             cardType={TaskStatus.Pending}

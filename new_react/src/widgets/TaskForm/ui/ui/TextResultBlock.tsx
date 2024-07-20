@@ -43,12 +43,14 @@ export const TextResultBlock = (props: TextResultBlockProps) => {
     useEffect(() => {
         if (transcript && cursorPosition !== null && inputRef.current) {
             const currentText = formTask.execution_comment || '';
+
             const beforeCursor = currentText.slice(0, cursorPosition);
             const afterCursor = currentText.slice(cursorPosition);
             const addSpaceBefore = beforeCursor && beforeCursor.slice(-1) !== ' ' ? ' ' : '';
             const addSpaceAfter = afterCursor && afterCursor[0] !== ' ' ? ' ' : '';
 
             const newText = beforeCursor + addSpaceBefore + transcript + addSpaceAfter + afterCursor;
+
             setFormTask({
                 ...formTask,
                 execution_comment: newText,
@@ -75,16 +77,22 @@ export const TextResultBlock = (props: TextResultBlockProps) => {
     };
 
     const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
-        setCursorPosition(e.currentTarget.selectionStart);
+        if (e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
+            setCursorPosition(e.currentTarget.selectionStart);
+        }
     };
 
     const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        setCursorPosition(e.currentTarget.selectionStart);
+        if (e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
+            setCursorPosition(e.currentTarget.selectionStart);
+        }
     };
 
     const handleSelect = (e: React.SyntheticEvent<HTMLInputElement>) => {
         const input = e.currentTarget as HTMLInputElement;
-        setCursorPosition(input.selectionStart);
+        if (input.selectionStart === input.selectionEnd) {
+            setCursorPosition(input.selectionStart);
+        }
     };
 
     const cleanClb = () => {
@@ -92,7 +100,6 @@ export const TextResultBlock = (props: TextResultBlockProps) => {
             ...formTask,
             execution_comment: '',
         });
-        setCursorPosition(0);
     }
 
     return (

@@ -7,7 +7,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
-from core.consumers import ws_send_to_all
+from core.consumers import ws_send_to_all, ws_send_to_department
 from core.services.get_week_info import GetWeekInfo
 from .filters import TaskModelFilter
 from .models import Task, TaskImage
@@ -75,6 +75,23 @@ class TaskViewSet(viewsets.ModelViewSet):
                     'action': 'UPDATE_TASK',
                     'data': instance.id,
                     'exclude': self.request.user.pin_code,
+                }
+            )
+        if (instance.executor
+                and not instance.executor == instance.created_by
+                and not instance.executor == self.request.user):
+            ws_send_to_department(
+                instance.executor.current_department.number,
+                {
+                    'action': 'NEW_NOTIFICATION',
+                    'title': "ЭЛО - Имеются новые задачи",
+                    'body': instance.title,
+                    'for_user': instance.executor.pin_code,
+                    'tag': f'task{instance.id}',
+                    'url': f'/task?'
+                           f'await_scroll_to={instance.id}&'
+                           f'in_work_scroll_to={instance.id}&'
+                           f'ready_scroll_to={instance.id}'
                 }
             )
 

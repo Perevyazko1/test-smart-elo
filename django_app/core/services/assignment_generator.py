@@ -1,7 +1,7 @@
 from django.db import transaction
 
 from staff.models import Department
-from ..consumers import ws_update_notification, ws_group_updates, EqNotificationActions
+from ..consumers import ws_update_notification, ws_group_updates, EqNotificationActions, ws_send_to_department
 
 from ..models import OrderProduct, Assignment, ProductionStep
 
@@ -69,6 +69,17 @@ class AssignmentGenerator:
                     quantity=1,
                     assembled=True,
                 )
+                ws_send_to_department(
+                    1,
+                    {
+                        'action': 'NEW_NOTIFICATION',
+                        'title': "ЭЛО - Новое изделие в разработке",
+                        'body': order_product.product.name,
+                        'tag': f'product{order_product.id}',
+                        'url': f'/eq'
+                    }
+                )
+
                 return
         else:
             """Делаем выборку этапов производства исключая Конструкторов, Старт и Готово"""

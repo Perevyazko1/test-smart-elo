@@ -98,9 +98,9 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 </Button>
 
                                 <div className={'align-self-center'}>
-                                    <Link to={location.pathname !== 'task'
-                                        ? 'task'
-                                        : ''
+                                    <Link to={location.pathname !== '/task'
+                                        ? '/task'
+                                        : '/'
                                     }>
                                         <img
                                             src={Logo}

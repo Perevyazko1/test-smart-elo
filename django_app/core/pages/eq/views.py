@@ -168,18 +168,19 @@ def update_assignments(request):
                               f'серии {assignment.order_product.series_id} не содержит визы бригадира. '
                 }, status=400, json_dumps_params={"ensure_ascii": False})
 
+            # Условно в Пошиве 10 нарядов с визой
             assignments_with_visa_in_original_dep_count = Assignment.objects.filter(
                 department=assignment.department,
                 inspector__isnull=False,
                 order_product=order_product,
             ).count()
-            # Получаем исходный этап производства
+            # Получаем исходный этап производства (условно Пошив)
             base_ps = ProductionStep.objects.get(
                 department=assignment.department,
                 product=assignment.order_product.product,
             )
 
-            # В случае если отменяемый наряд конструкторского отдела - удаляем все остальные созданные наряды
+            # В случае если отменяемый наряд конструкторского отдела - отменяем комплектацию всех нарядов
             if base_ps.department.number == 1:
                 other_assignments = Assignment.objects.filter(
                     order_product__series_id=series_id,
@@ -195,22 +196,21 @@ def update_assignments(request):
                     other_assignments.update(assembled=False)
                     order_product.product.technological_process_confirmed = None
                     order_product.product.save()
-                    assignment.inspect_date = False
-                    assignment.inspector = None
-                    assignment.save()
 
             # Для остальных нарядов вычисляем количество нарядов к отмене и отменяем
             else:
                 # Храним ID этапов которые уже были обработаны
+                # вычисляем по каждому последующему отделу относительно исходного наряда
+                # от каких отделов зависел данный отдел и сколько в них минимальное количество готовых нарядов
                 processed_ps = []
                 for original_next_ps in base_ps.next_step.all():
+                    # Тут условно получили original_next_ps = [Обивка]
                     if original_next_ps.department.single:
                         continue
                     if original_next_ps.id not in processed_ps:
                         processed_ps.append(original_next_ps.id)
 
-                        # Вычисляем по каждому последующему отделу относительно исходного наряда
-                        # от каких отделов зависел данный отдел и сколько в них минимальное количество готовых нарядов
+                        # Тут условно получили previous_ps = [Пошив, Малярка, Сборка]
                         previous_ps = ProductionStep.objects.filter(
                             next_step__exact=original_next_ps.id,
                         )
@@ -231,33 +231,50 @@ def update_assignments(request):
                         """
                         Если количество нарядов с визой в отделах от которых зависит исходный отдел меньше
                         то мы просто снимаем проверяющего и дату проверки с наряда. Иначе нам нужно взять последний
-                        номер наряда в исходном отделе и перевести его в статус Созданного
+                        номер наряда в исходном отделе и отметить его не укомплектованным. 
+                        условно [Пошив 10, Сборка 20, Малярка 30]
                         """
-                        if min_assign_with_visa_in_dependents_departments < assignments_with_visa_in_original_dep_count:
-                            assignment.inspector = None
-                            assignment.inspect_date = None
-                            assignment.save()
-                        else:
+                        # Если бы в пошиве было больше завизированных нарядов чем в других отделах -
+                        # то просто сняли бы визу
+                        if not (min_assign_with_visa_in_dependents_departments <
+                                assignments_with_visa_in_original_dep_count):
+                            # Иначе получаем количество нарядов с визой в Обивке в ожидании или в работе
                             target_assignments = Assignment.objects.filter(
                                 order_product=assignment.order_product,
                                 department=original_next_ps.department,
-                                status='await',
+                                status__in=['await', 'in_work'],
                                 assembled=True,
                             )
-                            if target_assignments.count() == min_assign_with_visa_in_dependents_departments:
+                            # Если таковы имеются - переводим их в статус неукомплектованных начиная с последнего
+                            if target_assignments.exists():
                                 target_assignment = target_assignments.latest('number')
                                 target_assignment.assembled = False
                                 target_assignment.save()
 
-                                assignment.inspector = None
-                                assignment.inspect_date = None
-                                assignment.save()
                             else:
+                                # Иначе бросаем ошибку, что нужно наряды возвращать
                                 return JsonResponse({
                                     f'error': f'Ошибка. \n'
                                               f'Для снятия визы наряды последующего отдела должны быть в статусе '
                                               f'Ожидает.'
                                 }, status=400, json_dumps_params={"ensure_ascii": False})
+
+            assignment.inspector = None
+            assignment.inspect_date = None
+            assignment.save()
+
+            if assignment.new_tariff:
+                if assignment.new_tariff.amount:
+                    description = f'Отмена производства полуфабриката {assignment} {assignment.department.name}'
+                    Transaction.objects.create(
+                        transaction_type='debiting',
+                        details='wages',
+                        amount=assignment.new_tariff.amount,
+                        employee=assignment.executor,
+                        executor=request.user,
+                        inspector=request.user,
+                        description=description,
+                    )
 
     else:
         if date == '':

@@ -1,11 +1,13 @@
-import {CreateTask} from "@widgets/TaskForm/model/types";
-import {Form, InputGroup} from "react-bootstrap";
-import React, {useEffect, useRef, useState} from "react";
-import {Fab} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+
+import { Form, InputGroup } from "react-bootstrap";
+import { Fab } from "@mui/material";
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
-import {useSpeechRecognition} from "@shared/hooks";
 import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
 import ClearIcon from "@mui/icons-material/Clear";
+import { useSpeechRecognition } from "@shared/hooks";
+
+import { CreateTask } from "../../model/types";
 
 interface TextDescriptionBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -14,8 +16,8 @@ interface TextDescriptionBlockProps {
 }
 
 export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
-    const {formTask, setFormTask, disabled} = props;
-    const {isListening, transcript, startListening} = useSpeechRecognition();
+    const { formTask, setFormTask, disabled } = props;
+    const { isListening, transcript, startListening } = useSpeechRecognition();
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [cursorPosition, setCursorPosition] = useState<number | null>(formTask.description?.length || 0);
 
@@ -46,7 +48,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
         }
     }, [formTask.description, cursorPosition]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value;
         setCursorPosition(e.target.selectionStart);
         setFormTask({
@@ -55,17 +57,23 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
         });
     };
 
-    const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
-        setCursorPosition(e.currentTarget.selectionStart);
+    const handleMouseUp = (e: React.MouseEvent<HTMLTextAreaElement>) => {
+        if (e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
+            setCursorPosition(e.currentTarget.selectionStart);
+        }
     };
 
-    const handleKeyUp = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        setCursorPosition(e.currentTarget.selectionStart);
+    const handleKeyUp = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
+            setCursorPosition(e.currentTarget.selectionStart);
+        }
     };
 
-    const handleSelect = (e: React.SyntheticEvent<HTMLInputElement>) => {
-        const input = e.currentTarget as HTMLInputElement;
-        setCursorPosition(input.selectionStart);
+    const handleSelect = (e: React.SyntheticEvent<HTMLTextAreaElement>) => {
+        const input = e.currentTarget as HTMLTextAreaElement;
+        if (input.selectionStart === input.selectionEnd) {
+            setCursorPosition(input.selectionStart);
+        }
     };
 
     const cleanClb = () => {
@@ -77,7 +85,6 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
 
     return (
         <InputGroup className={'mb-2'}>
-
             <InputGroup.Text id="basic-addon1" className={'ps-5 fs-7 position-relative'}>
                 <Fab
                     size="small"
@@ -91,13 +98,12 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                     }}
                 >
                     {isListening ?
-                        <MicOutlinedIcon fontSize={'small'}/>
+                        <MicOutlinedIcon fontSize={'small'} />
                         :
-                        <KeyboardVoiceOutlinedIcon fontSize={'small'}/>
+                        <KeyboardVoiceOutlinedIcon fontSize={'small'} />
                     }
                 </Fab>
                 Описание:
-
                 {!disabled && formTask.description &&
                     <button
                         className={'appBtn border-1 border-secondary text-secondary fs-7 position-absolute'}
@@ -111,7 +117,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                         }}
                         onClick={cleanClb}
                     >
-                        <ClearIcon fontSize={'inherit'} className={'text-secondary fs-7'}/>
+                        <ClearIcon fontSize={'inherit'} className={'text-secondary fs-7'} />
                     </button>
                 }
             </InputGroup.Text>
@@ -122,7 +128,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                 maxLength={5000}
                 value={formTask.description}
                 onChange={handleInputChange}
-                onClick={handleMouseUp}
+                onMouseUp={handleMouseUp}
                 onKeyUp={handleKeyUp}
                 onSelect={handleSelect}
             />

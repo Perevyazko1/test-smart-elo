@@ -11,7 +11,7 @@ import {TaskCardSkeleton} from "@pages/TaskPage/ui/TaskPageCard/TaskCardSkeleton
 
 export const ReadySection = () => {
     const dispatch = useAppDispatch();
-    const {queryParameters} = useQueryParams();
+    const {queryParameters, setQueryParam} = useQueryParams();
     const filtersInited = useAppSelector(allFiltersInited);
     const readyData = useAppSelector(getReadyData);
 
@@ -50,6 +50,19 @@ export const ReadySection = () => {
         queryParameters.departments,
     ]);
 
+
+    useEffect(() => {
+        if (queryParameters.ready_scroll_to && readyData && !readyData?.isLoading) {
+            const element = document.getElementById(`ready-task-id-${queryParameters.ready_scroll_to}`);
+            if (element) {
+                element.scrollIntoView({behavior: 'smooth', block: 'start'});
+                element.classList.add('jump')
+            }
+            setQueryParam('ready_scroll_to', '')
+        }
+        // eslint-disable-next-line
+    }, [readyData?.isLoading, queryParameters.ready_scroll_to]);
+
     return (
         <div
             style={{
@@ -72,6 +85,7 @@ export const ReadySection = () => {
                 <>
                     {readyData?.results?.map(card => (
                         <TaskPageCard
+                            id={`ready-task-id-${card.id}`}
                             key={card.id}
                             card={card}
                             cardType={TaskStatus.Completed}

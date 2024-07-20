@@ -87,7 +87,6 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
                             <td><b>{name}</b></td>
                             <td>
                                 <ProgressItem
-                                    lightCount={info.created}
                                     dangerCount={info.in_work}
                                     secondaryCount={info.await}
                                     successCount={info.ready}
