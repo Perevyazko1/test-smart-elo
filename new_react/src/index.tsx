@@ -25,10 +25,10 @@ if ('serviceWorker' in navigator) {
 
 root.render(
     <StoreProvider>
-        <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
-            <ContextProvider>
+        <ContextProvider>
+            <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
                 <App/>
-            </ContextProvider>
-        </DndProvider>
+            </DndProvider>
+        </ContextProvider>
     </StoreProvider>
 );

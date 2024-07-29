@@ -28,7 +28,7 @@ export const AudioContext = createContext<HTMLAudioElement | null>(null);
 
 
 export const ContextProvider = (props: ContextProviderProps) => {
-    const isDesktop = useMediaQuery({minDeviceWidth: 1201});
+    const isDesktop = useMediaQuery({minWidth: 1279});
 
     const [clickSound, setClickSound] = useState<HTMLAudioElement | null>(null);
     const [currentUser, setCurrentUser] = useState<Employee>(anonEmployee);

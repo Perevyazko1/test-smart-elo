@@ -94,7 +94,7 @@ def set_proposed_tariff(request):
     for order_product in active_order_products:
         notification_data = {str(request.user.current_department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-            'data': order_product.series_id,
+            'data': order_product.id,
         }}
 
         ws_group_updates(
@@ -162,7 +162,7 @@ def set_confirmed_tariff(request):
     for order_product in active_order_products:
         notification_data = {str(request.user.current_department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-            'data': order_product.series_id,
+            'data': order_product.id,
         }}
 
         ws_group_updates(
@@ -249,7 +249,7 @@ def set_post_tariffication(request):
     for order_product in active_order_products:
         notification_data = {str(request.user.current_department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-            'data': order_product.series_id,
+            'data': order_product.id,
         }}
 
         ws_group_updates(

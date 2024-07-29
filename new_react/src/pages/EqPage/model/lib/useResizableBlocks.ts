@@ -134,8 +134,6 @@ export const useResizableBlocks = (windowWidth: number, windowHeight: number, of
                 // Считываем положение элемента
                 const position = monitor.getClientOffset();
                 if (position) {
-
-                    console.log('rerender')
                     // По отдельности вызываем коллбеки для изменения размеров
                     throttledAdjustWidth(position.x + offset.x);
                     throttledAdjustHeight(position.y + offset.y);

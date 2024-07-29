@@ -7,14 +7,11 @@ import {useAppModal} from "@shared/hooks";
 import {OrderItem} from "../model/types";
 
 export const OrderRow = (props: { order: OrderItem }) => {
-    const {openModal} = useAppModal();
+    const {handleOpen} = useAppModal();
 
     const onClickHandler = () => {
-        openModal({
-                content: (
-                    <OrderDetailWidget order_id={props.order.id}/>
-                )
-            }
+        handleOpen(
+            <OrderDetailWidget order_id={props.order.id}/>
         )
     }
     return (

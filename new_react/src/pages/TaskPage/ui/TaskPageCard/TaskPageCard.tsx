@@ -11,7 +11,7 @@ import {TaskForm} from "@widgets/TaskForm";
 import {Task} from "../../model/types";
 import {TaskBtn} from "./ui/TaskBtn";
 
-interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement>{
+interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement> {
     card: Task;
     cardType: TaskStatus;
 }
@@ -21,38 +21,28 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
     const {currentUser} = useCurrentUser();
 
     const cardHeight = 80;
-    const {openModal, closeModal} = useAppModal();
+    const {handleOpen, handleClose} = useAppModal();
 
     const viewClb = () => {
-        openModal({
-                content: (
-                    <TaskForm
-                        variant={'read_only'}
-                        task={card}
-                        onSubmitClb={() => {
-                            closeModal()
-                        }}
-                    />
-                )
-            }
+        handleOpen(
+            <TaskForm
+                variant={'read_only'}
+                task={card}
+                onSubmitClb={handleClose}
+            />
         )
     };
 
-    const editClb = () => {
-        openModal({
-                content: (
-                    <TaskForm
-                        variant={'edit'}
-                        task={card}
-                        onSubmitClb={() => {
-                            closeModal()
-                        }}
-                    />
-                ),
-                confirmClose: true,
-            }
-        )
-    };
+    const editClb = () => handleOpen(
+        <TaskForm
+            variant={'edit'}
+            task={card}
+            onSubmitClb={() => {
+                handleClose()
+            }}
+        />
+        , true
+    )
 
     const editLocked = useMemo(() => {
         return card.created_by?.id !== currentUser.id;
@@ -96,15 +86,12 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
                          maxWidth: '72px',
                      }}
                      onClick={() => {
-                         card.task_images && card.task_images.length > 0 && openModal({
-                                 content: (
-                                     <AppSlider
-                                         width={'90vw'}
-                                         height={'90vh'}
-                                         images={card.task_images?.map(image => image.image)}
-                                     />
-                                 )
-                             }
+                         card.task_images && card.task_images.length > 0 && handleOpen(
+                             <AppSlider
+                                 width={'90vw'}
+                                 height={'90vh'}
+                                 images={card.task_images?.map(image => image.image)}
+                             />
                          )
                      }}
                 >

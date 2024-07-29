@@ -4,7 +4,7 @@ import {IndicatorWrapper} from "@shared/ui";
 import {Link} from "react-router-dom";
 import {useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
-import {EqOrderProduct} from "@pages/EqPage/model/types";
+import {EqOrderProduct} from "@widgets/EqCardList";
 
 
 interface EqCardTableProps {

@@ -4,8 +4,7 @@ import {Button, Container, Spinner, Table} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 
 import {$axiosAPI} from "@shared/api"
-import {useAppDispatch, useCurrentUser} from "@shared/hooks";
-import {eqPageActions} from "@pages/EqPage";
+import {useCurrentUser} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 
@@ -21,7 +20,6 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState<NotificationType>({});
     const {currentUser} = useCurrentUser();
-    const dispatch = useAppDispatch();
     const navigate = useNavigate();
 
     const getData = async () => {
@@ -38,17 +36,11 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
 
     const awaitVisaClb = () => {
         navigate("/?view_mode=unfinished");
-        dispatch(eqPageActions.awaitUpdated());
-        dispatch(eqPageActions.inWorkUpdated());
-        dispatch(eqPageActions.readyUpdated());
         props.closeClb();
     }
 
     const awaitTariffClb = () => {
         navigate("/?view_mode=boss");
-        dispatch(eqPageActions.awaitUpdated());
-        dispatch(eqPageActions.inWorkUpdated());
-        dispatch(eqPageActions.readyUpdated());
         props.closeClb();
     }
 

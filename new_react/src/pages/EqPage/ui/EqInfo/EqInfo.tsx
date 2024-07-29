@@ -5,7 +5,7 @@ import {TechProcessWidget} from "@widgets/TechProcessWidget/ui/TechProcessWidget
 import {Accordion} from "react-bootstrap";
 import {useMemo} from "react";
 import {IndicatorWrapper} from "@shared/ui";
-import {EqOrderProduct} from "@pages/EqPage/model/types";
+import {EqOrderProduct} from "@widgets/EqCardList";
 
 interface EqInfoProps {
     card: EqOrderProduct;

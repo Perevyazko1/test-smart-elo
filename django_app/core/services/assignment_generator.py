@@ -43,7 +43,7 @@ class AssignmentGenerator:
             )
         notification_data[department.number] = {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-            'data': order_product.series_id,
+            'data': order_product.id,
         }
         ws_group_updates(pin_code="", notification_data=notification_data)
         ws_update_notification(department.number)

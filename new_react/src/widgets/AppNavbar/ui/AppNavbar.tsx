@@ -1,5 +1,5 @@
 import {memo, ReactNode, useContext, useEffect, useMemo} from "react";
-import {Button, Offcanvas} from "react-bootstrap";
+import {Button} from "react-bootstrap";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 
 import {IsDesktopContext} from "@app";
@@ -15,6 +15,7 @@ import {DynamicComponent, ReducersList} from "@features";
 import {appNavbarReducer} from "../model/slice";
 import {getNavHasNotifications, getNavHasUpdated, getNavIsLoading} from "../model/selectors";
 import {fetchHasNotifications} from "../model/api/fetchHasNotifications";
+import {Box, Drawer} from "@mui/material";
 
 
 interface AppNavbarProps {
@@ -38,7 +39,8 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     const location = useLocation();
 
     const isDesktop = useContext(IsDesktopContext);
-    const {openModal, closeModal} = useAppModal();
+
+    const {handleOpen, handleClose} = useAppModal();
     const {currentUser} = useCurrentUser();
     const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
@@ -53,9 +55,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     let navigate = useNavigate();
 
     const notificationHandler = () => {
-        openModal(
-            {content: <NotificationWidget closeClb={closeModal}/>}
-        )
+        handleOpen(<NotificationWidget closeClb={handleClose}/>)
     }
 
     const backHandler = () => {
@@ -69,7 +69,9 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     if (isDesktop) {
         return (
             <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-                <div className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}>
+                <div
+                    className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}
+                >
                     <div className={'d-flex align-items-stretch'}
                          style={{minWidth: '1150px', maxWidth: '1600px'}}
                     >
@@ -156,17 +158,33 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
 
     return (
         <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-            <Offcanvas show={showNav} onHide={closeClb} data-bs-theme={'dark'} style={{maxWidth: '320px'}}>
-                <Offcanvas.Header closeButton className={'p-3 pb-1'}>
-                    <Offcanvas.Title>
-                        <img src={Logo} alt={'SZMK logo'} style={{maxWidth: '80px'}}/>
-                    </Offcanvas.Title>
-                </Offcanvas.Header>
-                <Offcanvas.Body className={'d-flex flex-column gap-3 p-2'}>
-                    {children}
-                    <AppNavigation isDesktop={isDesktop}/>
-                </Offcanvas.Body>
-            </Offcanvas>
+            <Drawer
+                open={showNav}
+                onClose={closeClb}
+                ModalProps={{
+                    keepMounted: true,
+                }}
+                sx={{
+                    '& .MuiDrawer-paper': {
+                        backgroundColor: 'black',
+                        color: 'white',
+                    },
+                }}
+            >
+                <Box data-bs-theme={'dark'}>
+                    <div className={'d-flex flex-column gap-3 p-2'}>
+                        <div>
+                            <img src={Logo} alt={'SZMK logo'} style={{maxWidth: '120px'}}/>
+                        </div>
+                        <div className={'d-flex flex-column gap-3 p-2'} style={{
+                            minWidth: '320px',
+                        }}>
+                            {children}
+                            <AppNavigation isDesktop={isDesktop}/>
+                        </div>
+                    </div>
+                </Box>
+            </Drawer>
         </DynamicComponent>
     )
 })

@@ -25,7 +25,7 @@ export const WagesDetails = (props: WagesDetailsProps) => {
 
     const addPermission = usePermission(APP_PERM.WAGES_ADD_TRANSACTION);
     const {queryParameters, setQueryParam} = useAppQuery();
-    const {openModal, closeModal} = useAppModal();
+    const {handleOpen, handleClose} = useAppModal();
 
     const {data} = GetWagesWeekInfo({
         employee__id: employee.id,
@@ -47,30 +47,24 @@ export const WagesDetails = (props: WagesDetailsProps) => {
         transaction_type: keyof typeof TRANSACTION_TYPES,
         details: keyof typeof TRANSACTION_DETAILS,
     }) => {
-        openModal({
-                content: (
-                    <AddTransactionForm
-                        title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
-                        employee={employee}
-                        transaction_type={props.transaction_type}
-                        details={props.details}
-                    />
-                )
-            }
+        handleOpen(
+            <AddTransactionForm
+                title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
+                employee={employee}
+                transaction_type={props.transaction_type}
+                details={props.details}
+            />
         )
     }
 
     const showTransactionClb = (transaction: Transaction) => {
-        openModal({
-                content: (
-                    <AddTransactionForm
-                        title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
-                        employee={employee}
-                        transaction={transaction}
-                        deleteClb={closeModal}
-                    />
-                )
-            }
+        handleOpen(
+            <AddTransactionForm
+                title={`Создание начисления сотруднику ${employee.first_name} ${employee.last_name}`}
+                employee={employee}
+                transaction={transaction}
+                deleteClb={handleClose}
+            />
         )
     }
 

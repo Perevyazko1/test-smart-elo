@@ -1,28 +1,36 @@
 import React, {useContext, useEffect, useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
+import {motion} from "framer-motion";
 
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
+import {AppSkeleton} from "@shared/ui";
 
 interface EqWeeksProps {
-    blockWidthPx: number;
+    rightBlockWidth: number;
+    leftBlockWidth: number;
     showClb: () => void;
     drag: ConnectDragSource;
     isDragging: boolean;
     resetSize: () => void;
+    expanded: boolean;
+    inWorkHeight: number;
 }
 
 export const EqWeeks = (props: EqWeeksProps) => {
+    const {leftBlockWidth, rightBlockWidth, isDragging, showClb, drag, resetSize, expanded, inWorkHeight} = props;
+
+    const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
+
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
     const filtersReady = useAppSelector(eqFiltersReady);
 
-    const {blockWidthPx, isDragging, showClb, drag, resetSize} = props;
     const isDesktop = useContext(IsDesktopContext);
     const handleDoubleTap = useDoubleTap(resetSize);
     const weekData = useAppSelector(getWeekData);
@@ -66,13 +74,24 @@ export const EqWeeks = (props: EqWeeksProps) => {
     }
 
     return (
-        <div
-            className={'d-flex justify-content-between align-items-center px-2 rounded border border-1'}
+        <motion.div
+            className={'d-flex justify-content-between align-items-center px-2 gap-2 rounded border border-1'}
             style={{
                 height: '36px',
                 backgroundColor: currentUser.current_department?.color || '#ffffff',
                 opacity: isDragging ? 0.5 : 1,
+                width: `${blockWidthPx}px`,
+                position: 'absolute',
+                top: `${inWorkHeight}px`,
+                ...(expanded ? {right: '0'} : {left: '0'}),
             }}
+            initial={{
+                right: expanded ? 0 : rightBlockWidth,
+            }}
+            animate={{
+                right: expanded ? 0 : rightBlockWidth,
+            }}
+            transition={{duration: 0.3}}
         >
             {!isDesktop &&
                 <div className={'bg-dark rounded d-flex align-items-center justify-content-center me-2'}
@@ -92,13 +111,14 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         variant={'dark'}
                         size={'sm'}
                         style={{width: "50px", height: "29px"}}
+                        disabled={expanded}
                         onClick={() => setQueryParam('week', `${weekData?.previous_week_data?.week}`)}
                 >
                     <i className="fas fa-angle-double-left fs-3"/>
                 </Button>
 
-                <div>
-                    {getWeekString()}
+                <div className={'d-flex flex-fill justify-content-center'}>
+                    {!weekData?.isLoading ? getWeekString() : <AppSkeleton className={'h-100 flex-fill'}/>}
                 </div>
 
 
@@ -106,6 +126,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         type={"button"}
                         variant={'dark'}
                         size={'sm'}
+                        disabled={expanded}
                         style={{width: "50px", height: "29px"}}
                         onClick={() => setQueryParam('week', `${weekData?.next_week_data?.week}`)}
                 >
@@ -114,12 +135,13 @@ export const EqWeeks = (props: EqWeeksProps) => {
             </div>
 
             {!!drag &&
-                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center ms-2'}
+                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center'}
                      style={{
                          width: "40px",
                          height: "29px",
                          touchAction: 'none',
                          cursor: 'grab',
+                         order: expanded ? "-1" : "1",
                      }}
                      ref={drag}
                      onDoubleClick={resetSize}
@@ -130,6 +152,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     }
                 </div>
             }
-        </div>
+        </motion.div>
     )
 }

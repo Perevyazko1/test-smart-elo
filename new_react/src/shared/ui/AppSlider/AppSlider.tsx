@@ -76,7 +76,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                         style={{
                             position: "absolute",
                             bottom: "1px",
-                            left: "2px",
+                            left: "0",
                             margin: "auto",
                             zIndex: "999",
                             opacity: "0.7",
@@ -95,7 +95,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                         style={{
                             position: "absolute",
                             bottom: "1px",
-                            right: "2px",
+                            right: "0",
                             margin: "auto",
                             zIndex: "999",
                             opacity: "0.7",

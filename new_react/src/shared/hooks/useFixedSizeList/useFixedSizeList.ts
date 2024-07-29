@@ -1,28 +1,24 @@
-import {useEffect, useLayoutEffect, useMemo, useState} from "react";
+import {useLayoutEffect, useMemo, useState} from "react";
 
 interface useFixedSizeListProps {
     itemsCount: number;
     itemHeight: number;
     overScan?: number;
-    scrollingDelay?: number;
     getScrollElement: () => HTMLElement | null;
 }
 
-const DEFAULT_OVERSCAN = 3;
-const DEFAULT_SCROLLING_DELAY = 100;
+const DEFAULT_OVERSCAN = 1;
 
 export const useFixedSizeList = (props: useFixedSizeListProps) => {
     const {
         itemsCount,
         itemHeight,
         overScan = DEFAULT_OVERSCAN,
-        scrollingDelay = DEFAULT_SCROLLING_DELAY,
         getScrollElement,
     } = props;
 
     const [listHeight, setListHeight] = useState(0);
     const [scrollTop, setScrollTop] = useState(0);
-    const [isScrolling, setIsScrolling] = useState(false);
 
     useLayoutEffect(() => {
         const scrollElement = getScrollElement();
@@ -67,34 +63,6 @@ export const useFixedSizeList = (props: useFixedSizeListProps) => {
         return () => scrollElement.removeEventListener('scroll', handleScroll);
     }, [getScrollElement]);
 
-    useEffect(() => {
-        const scrollElement = getScrollElement();
-        if (!scrollElement) {
-            return;
-        }
-
-        let timeoutId: NodeJS.Timeout | null = null;
-        const handleScroll = () => {
-            setIsScrolling(true);
-
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-            timeoutId = setTimeout(() => {
-                setIsScrolling(false);
-            }, scrollingDelay)
-        }
-
-        scrollElement.addEventListener('scroll', handleScroll);
-
-        return () => {
-            if (timeoutId) {
-                clearTimeout(timeoutId);
-            }
-        };
-    }, [getScrollElement, scrollingDelay]);
-
-
     const {virtualItems, startIndex, endIndex} = useMemo(() => {
         const rangeStart = scrollTop;
         const rangeEnd = scrollTop + listHeight;
@@ -119,5 +87,5 @@ export const useFixedSizeList = (props: useFixedSizeListProps) => {
 
     const totalHeight = itemHeight * itemsCount;
 
-    return {virtualItems, startIndex, endIndex, isScrolling, totalHeight}
+    return {virtualItems, startIndex, endIndex, totalHeight}
 }

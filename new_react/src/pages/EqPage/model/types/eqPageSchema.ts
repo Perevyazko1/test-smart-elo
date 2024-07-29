@@ -1,17 +1,5 @@
-import {EntityState} from "@reduxjs/toolkit";
-
-import {ApiList} from "@shared/types";
-
 import {ViewMode} from "../types/viewMode";
 import {WeekData} from "../types/weekInfo";
-import {EqOrderProduct} from "./index";
-
-export interface EqListData extends Omit<ApiList<EqOrderProduct>, 'results'> {
-    results: EntityState<EqOrderProduct>;
-    isLoading: boolean | undefined;
-    hasUpdated: boolean | undefined;
-    reqId: number;
-}
 
 interface EqFilters<T> {
     currentFilter: T,
@@ -28,12 +16,7 @@ export interface EqPageSchema {
     // Блок недель
     weekData: WeekData;
 
-    // Списки карточек
-    awaitList: EqListData;
-    inWorkList: EqListData;
-    readyList: EqListData;
-
-    notRelevantId: string[];
+    notRelevantIds: number[];
     filtersReady: boolean;
     filtersInited: boolean;
 }
@@ -72,44 +55,7 @@ export const InitialEqBodySchema: EqPageSchema = {
         inited: false,
     },
 
-    awaitList: {
-        results: {
-            ids: [],
-            entities: {},
-        },
-        count: 0,
-        isLoading: true,
-        hasUpdated: false,
-        next: null,
-        previous: null,
-        reqId: 0,
-    },
-    inWorkList: {
-        results: {
-            ids: [],
-            entities: {},
-        },
-        count: 0,
-        isLoading: true,
-        hasUpdated: false,
-        next: null,
-        previous: null,
-        reqId: 0,
-    },
-    readyList: {
-        results: {
-            ids: [],
-            entities: {},
-        },
-        count: 0,
-        isLoading: true,
-        hasUpdated: false,
-        next: null,
-        previous: null,
-        reqId: 0,
-    },
-
-    notRelevantId: [],
+    notRelevantIds: [],
     filtersReady: false,
     filtersInited: false,
 }

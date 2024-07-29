@@ -1,10 +1,11 @@
 """Views for EQ Page. """
 from dataclasses import asdict
 
-from django.http import JsonResponse
+from django.http import JsonResponse, Http404
 from django.db.models import Sum
 
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from core.models import (
@@ -40,38 +41,31 @@ class EqCardsViewSet(viewsets.ModelViewSet):
         qs = get_eq_card_queryset(queryset=qs, request=self.request)
         return qs
 
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            return super().retrieve(request, *args, **kwargs)
+        except Http404:
+            # Возвращаем пустой ответ со статусом 200
+            return Response(status=status.HTTP_200_OK)
+
 
 @api_view(['POST'])
 def update_card(request):
     eq_params = get_eq_req_params(request=request)
-    series_id: str = request.data.get('series_id')
+    op_id: str = request.data.get('op_id')
     numbers: list[int] = request.data.get('numbers')
     action: str = request.data.get('action')
 
-    UpdateAssignments(series_id=series_id,
+    UpdateAssignments(op_id=op_id,
                       department=eq_params['department'],
                       numbers=numbers,
                       action=action,
                       employee=eq_params['user'],
+                      selected_user=eq_params['selected_user'],
                       view_mode=eq_params['view_mode_key']
                       ).execute()
 
-    queryset = OrderProduct.objects.get(series_id=series_id)
-
-    return JsonResponse({
-        "await": EqOrderProductSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'await',
-        }).data,
-        "in_work": EqOrderProductSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'in_work',
-        }).data,
-        "ready": EqOrderProductSerializer(queryset, context={
-            'eq_params': eq_params,
-            'target_list': 'ready',
-        }).data,
-    }, json_dumps_params={"ensure_ascii": False})
+    return JsonResponse({}, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['GET'])
@@ -92,7 +86,7 @@ def get_eq_filters(request):
 def get_week_data(request):
     eq_params = get_eq_req_params(request=request)
 
-    if eq_params['view_mode_key'] not in ['self', 'boss', 'unfinished'] and eq_params['view_mode_key'] is not None:
+    if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
@@ -315,7 +309,7 @@ def update_assignments(request):
                 "result": 'ok'}, json_dumps_params={"ensure_ascii": False})
     notification_data = {str(department.number): {
         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-        'data': series_id,
+        'data': OrderProduct.objects.get(series_id=series_id).id,
     }}
 
     ws_group_updates(

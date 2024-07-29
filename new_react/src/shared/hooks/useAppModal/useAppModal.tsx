@@ -1,13 +1,11 @@
 import {useContext} from "react";
-import {ModalContext} from "@app";
+import {ModalContext, ModalContextProps} from "@app";
 
 
-export const useAppModal = () => {
-    const appModal = useContext(ModalContext);
-
-    if (!appModal) {
-        throw new Error("SomeComponent must be used within a ModalContext.Provider");
+export const useAppModal = (): ModalContextProps => {
+    const context = useContext(ModalContext);
+    if (!context) {
+        throw new Error("useAppModal must be used within a ModalProvider");
     }
-
-    return appModal;
+    return context;
 };

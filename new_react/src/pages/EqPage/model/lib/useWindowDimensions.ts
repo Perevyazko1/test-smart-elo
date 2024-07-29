@@ -9,6 +9,7 @@ export const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 
         const handleResize = () => {
             setWindowWidth(window.innerWidth + widthEdit);
             setWindowHeight(window.innerHeight + heightEdit);
+            console.log('Window resized:', window.innerWidth, window.innerHeight);
         };
         // Добавляем слушатель событий который при изменении размеров окна будет изменять стейт
         window.addEventListener('resize', handleResize);

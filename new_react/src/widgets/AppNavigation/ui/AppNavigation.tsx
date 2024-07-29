@@ -12,7 +12,7 @@ import {UserActions} from "@widgets/UserActions";
 
 export const AppNavigation = (props: { isDesktop: boolean }) => {
     const currentUser = useContext(CurrentUserContext);
-    const {openModal} = useAppModal();
+    const {handleOpen} = useAppModal();
 
     if (!currentUser) {
         throw new Error("SomeComponent must be used within a AppInCompactMode.Provider");
@@ -59,9 +59,7 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
     }
 
     const showUserActionsClb = () => {
-        openModal(
-            {content: <UserActions/>}
-        )
+        handleOpen(<UserActions/>)
     }
 
     return (

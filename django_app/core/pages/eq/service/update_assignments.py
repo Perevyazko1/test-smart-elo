@@ -10,11 +10,12 @@ from staff.models import Employee, Department, Audit, Transaction
 
 
 class UpdateAssignments:
-    def __init__(self, series_id, numbers, department, action, employee, view_mode):
-        self.series_id: str = series_id
+    def __init__(self, op_id, numbers, department, action, employee, view_mode, selected_user):
+        self.op_id: str = op_id
         self.numbers: list[int] = numbers
         self.department: Department = department
         self.action: str = action
+        self.selected_user: str = selected_user
         self.employee: Employee = employee
         self.view_mode: str | None = view_mode
 
@@ -25,15 +26,16 @@ class UpdateAssignments:
 
     def _check_view_mode_by_id(self):
         self.original_user = self.employee
-        if self.view_mode not in ['self', 'boss', 'unfinished'] and self.view_mode is not None:
-            self.employee = Employee.objects.get(id=self.view_mode)
+        if str(self.view_mode).isdigit() or self.view_mode == "distribute":
+            target_id = self.selected_user if self.view_mode == "distribute" else self.view_mode
+            self.employee = Employee.objects.get(id=target_id)
 
     def _update_target_numbers(self):
         """Изменение нарядов/поручений с переданным списком номеров"""
         for number in self.numbers:
             assignment = Assignment.objects.get(
                 number=number,
-                order_product__series_id=self.series_id,
+                order_product__id=self.op_id,
                 department=self.department,
             )
             match self.action:
@@ -41,7 +43,8 @@ class UpdateAssignments:
                     if assignment.status == 'await':
                         self.action_name = 'Взял в работу'
 
-                        if self.view_mode not in ['self', 'boss', 'unfinished', 'None']:
+                        if (str(self.view_mode).isdigit() or
+                                (self.view_mode == 'distribute' and self.selected_user)):
                             assignment.appointed_by_boss = True
 
                         assignment.status = 'in_work'
@@ -50,7 +53,36 @@ class UpdateAssignments:
                         assignment.save()
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.series_id,
+                            'data': assignment.order_product.id,
+                        }
+                    continue
+
+                case 'in_work_to_in_work_distribute':
+                    if assignment.status == 'in_work':
+                        self.action_name = 'Назначил '
+
+                        assignment.appointed_by_boss = True
+                        assignment.executor = self.employee
+                        assignment.appointment_date = datetime.datetime.now()
+                        assignment.save()
+                        self.notification_data[self.department.number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
+                        }
+                    continue
+
+                case 'in_work_to_await_distribute':
+                    if assignment.status == 'in_work':
+                        self.action_name = 'Вернул в распределение'
+
+                        assignment.appointed_by_boss = False
+                        assignment.status = 'in_work'
+                        assignment.executor = self.original_user
+                        assignment.save()
+
+                        self.notification_data[self.department.number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': assignment.order_product.id,
                         }
                     continue
 
@@ -66,7 +98,7 @@ class UpdateAssignments:
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.series_id,
+                            'data': assignment.order_product.id,
                         }
                     continue
 
@@ -82,7 +114,7 @@ class UpdateAssignments:
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.series_id,
+                            'data': assignment.order_product.id,
                         }
                     continue
 
@@ -98,7 +130,7 @@ class UpdateAssignments:
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.series_id,
+                            'data': assignment.order_product.id,
                         }
                     continue
 
@@ -118,7 +150,7 @@ class UpdateAssignments:
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                            'data': assignment.order_product.series_id,
+                            'data': assignment.order_product.id,
                         }
                     continue
 
@@ -233,7 +265,7 @@ class UpdateAssignments:
                     ).update(assembled=True)
                     self.notification_data[next_step.department.number] = {
                         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                        'data': self.order_product.series_id,
+                        'data': self.order_product.id,
                     }
                     ws_update_notification(next_step.department.number)
 
@@ -282,12 +314,12 @@ class UpdateAssignments:
                     ).update(assembled=True)
                     self.notification_data[next_step.department.number] = {
                         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                        'data': self.order_product.series_id,
+                        'data': self.order_product.id,
                     }
 
     def _confirmation_instructions(self):
         """Действия при визировании бригадиром наряда"""
-        self.order_product = OrderProduct.objects.get(series_id=self.series_id)
+        self.order_product = OrderProduct.objects.get(id=self.op_id)
 
         """Проверяем условие, что происходит подтверждение в отделе конструкторов и тех-процесс выбран"""
         if self.department.number == 1 and self.order_product.product.technological_process is not None:
@@ -296,7 +328,7 @@ class UpdateAssignments:
         self._activate_assignments()
 
     def _get_audit_details(self) -> str:
-        order_product = OrderProduct.objects.get(series_id=self.series_id)
+        order_product = OrderProduct.objects.get(id=self.op_id)
 
         result = ''
 

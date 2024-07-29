@@ -43,9 +43,8 @@ export const EqDepWidget = () => {
         if (depName !== currentUser.current_department?.name) {
             setIsLoading(true);
             fetchData(depName).then(() => {
-                dispatch(eqPageActions.allListClear())
+                setIsLoading(false);
             });
-            setIsLoading(false);
         }
     }
 

@@ -28,7 +28,7 @@ export const EqFilters = () => {
             result = result?.filter(mode => mode.name !== 'Режим бригадира');
         }
         if (!behalfPerm) {
-            result = result?.filter(mode => ['self', 'boss', 'unfinished'].includes(String(mode.key)));
+            result = result?.filter(mode => ['self', 'boss', 'unfinished', 'distribute'].includes(String(mode.key)));
         }
         if (isViewer) {
             result = result?.filter(mode => mode.name !== 'Личные наряды');
@@ -103,22 +103,11 @@ export const EqFilters = () => {
         setQueryParam,
         viewModes?.filters
     ]);
-
-    const updTargetItemsBeforeSetViewMode = (prevViewMode: string, newViewMode: string) => {
-        if (['unfinished', 'boss'].includes(prevViewMode) || ['unfinished', 'boss'].includes(newViewMode)) {
-            dispatch(eqPageActions.awaitUpdated());
-        }
-        dispatch(eqPageActions.inWorkUpdated());
-        dispatch(eqPageActions.readyUpdated());
-    }
-
     const viewModeClb = (item: string) => {
         const newState = viewModes?.filters.find(viewMode => viewMode.name === item)?.key;
-        const prevState = queryParameters.view_mode;
         if (newState) {
             setQueryParam('view_mode', newState === viewModes.default.key ? '' : String(newState));
         }
-        updTargetItemsBeforeSetViewMode(prevState, String(newState))
     };
 
     const getSelectedViewMode = viewModes ?
@@ -132,9 +121,6 @@ export const EqFilters = () => {
 
     const projectClb = (item: string) => {
         setQueryParam('project', item === projects?.default ? '' : item);
-        dispatch(eqPageActions.awaitUpdated());
-        dispatch(eqPageActions.inWorkUpdated());
-        dispatch(eqPageActions.readyUpdated());
     };
 
 

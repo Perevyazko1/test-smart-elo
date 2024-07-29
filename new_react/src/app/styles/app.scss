@@ -13,6 +13,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
 .appNavbar {
   height: $app-navbar-height;
   width: 100vw;
+  max-width: 100vw;
 }
 
 .xOverflow {

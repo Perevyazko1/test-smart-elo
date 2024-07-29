@@ -1,0 +1,1 @@
+export {EqCard} from "./ui/EqCard";

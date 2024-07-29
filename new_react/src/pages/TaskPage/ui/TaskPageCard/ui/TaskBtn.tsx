@@ -14,13 +14,13 @@ export const TaskBtn = (props: TaskBtnProps) => {
     const {card, cardType, first} = props;
 
     const {currentUser} = useCurrentUser();
-    const {openModal} = useAppModal();
+    const {handleOpen} = useAppModal();
     const playSound = useClickSound();
     const dispatch = useAppDispatch();
 
     const initialTimer = {
         targetDate: first ? card.deadline : undefined,
-        startDate:  card.ready_at || undefined,
+        startDate: card.ready_at || undefined,
     }
 
     const timeLeft = useCountdown(initialTimer);
@@ -145,27 +145,21 @@ export const TaskBtn = (props: TaskBtnProps) => {
     const updClb = () => {
         playSound()
         if (cardType === TaskStatus.InProgress && !first && locked) {
-            openModal({
-                    content: (
-                        <>
-                            <h4 className={'my-5'}>
-                                Задачу нельзя вернуть в ожидание так как она была назначена персонально.
-                            </h4>
-                            <h4 className={'my-5'}>
-                                Вернуть задачу в ожидание может пользователь назначивший задачу.
-                            </h4>
-                        </>
-                    )
-                }
+            handleOpen(
+                <>
+                    <h4 className={'my-5'}>
+                        Задачу нельзя вернуть в ожидание так как она была назначена персонально.
+                    </h4>
+                    <h4 className={'my-5'}>
+                        Вернуть задачу в ожидание может пользователь назначивший задачу.
+                    </h4>
+                </>
             )
         } else if (cardType === TaskStatus.Completed && first && locked) {
-            openModal({
-                    content: (
-                        <h4 className={'my-5'}>
-                            Завизировать выполнение задачи может пользователь, который создал данную задачу.
-                        </h4>
-                    )
-                }
+            handleOpen(
+                <h4 className={'my-5'}>
+                    Завизировать выполнение задачи может пользователь, который создал данную задачу.
+                </h4>
             )
         } else {
             dispatch(updateTask(getActionData()));

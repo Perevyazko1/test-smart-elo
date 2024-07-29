@@ -3,7 +3,7 @@ import {useState} from "react";
 import {TechProcessList} from "@widgets/TechProcessWidget/ui/TechProcessList";
 import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import {TpSelected} from "@widgets/TechProcessWidget/ui/TPSelected";
-import {EqProduct} from "@pages/EqPage/model/types";
+import {EqProduct} from "@widgets/EqCardList/model/types";
 
 
 interface TechProcessWidgetProps {

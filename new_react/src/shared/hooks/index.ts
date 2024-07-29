@@ -19,3 +19,4 @@ export {usePermittedRoutes} from "./usePermittedRoutes/usePermittedRoutes";
 export type {UseQueryParamsResult} from "./useQueryParams/useQueryParams";
 export {usePermission} from "./usePermission/usePermission";
 export {useDebounce} from "./useDebounce/useDebounce";
+export {useQueue} from "./useQueue";

@@ -17,12 +17,10 @@ const initialReducers: ReducersList = {
 export const EqPage = () => {
     // Устанавливаем состояние отображения мобильной панели
     const [showCanvas, setShowCanvas] = useState<boolean>(false);
-
     // Устанавливаем коллбек для закрытия шторки меню для мобилок
     const closeClb = useCallback(() => {
         setShowCanvas(false)
     }, []);
-
 
     return (
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>

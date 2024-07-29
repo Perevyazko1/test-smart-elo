@@ -22,27 +22,22 @@ interface WeeksProps {
 
 export const Weeks = (props: WeeksProps) => {
     const {drag, isDragging, resetSize, blockWidthPx} = props;
-    const {openModal, closeModal} = useAppModal();
+    const {handleOpen, handleClose} = useAppModal();
     const handleDoubleTap = useDoubleTap(resetSize);
     const dispatch = useAppDispatch();
     const {initialLoad, queryParameters, setQueryParam} = useAppQuery();
 
     const weekData = useAppSelector(getStateWeekData);
 
-    const addAction = () => {
-        openModal({
-                content: (
-                    <TaskForm
-                        variant={'create'}
-                        onSubmitClb={() => {
-                            closeModal()
-                        }}
-                    />
-                ),
-                confirmClose: true,
-            }
-        )
-    }
+    const addAction = () => handleOpen(
+        <TaskForm
+            variant={'create'}
+            onSubmitClb={() => {
+                handleClose()
+            }}
+        />,
+        true
+    );
 
     useEffect(() => {
         if (!initialLoad) {

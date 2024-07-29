@@ -25,7 +25,7 @@ def get_in_work_assignments(assignments, eq_params):
 
 def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: OrderProduct):
     # Делаем проверку на режим просмотра от вида другого пользователя
-    if eq_params['view_mode_key'] not in ['boss', 'unfinished', 'self'] and eq_params['view_mode_key'] is not None:
+    if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     match target_list:
@@ -61,6 +61,13 @@ def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: Or
                     )[:30]
             return SimpleAssignmentSerializer(assignments, many=True).data
         case 'in_work':
+            assignments = order_product.assignments.filter(
+                department=eq_params['department']
+            ).distinct()
+            assignments = get_in_work_assignments(assignments, eq_params)
+            return SimpleAssignmentSerializer(assignments, many=True).data
+
+        case 'distribute':
             assignments = order_product.assignments.filter(
                 department=eq_params['department']
             ).distinct()

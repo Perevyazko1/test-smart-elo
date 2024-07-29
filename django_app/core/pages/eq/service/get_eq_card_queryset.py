@@ -4,6 +4,20 @@ from core.pages.eq.service.get_eq_req_params import get_eq_req_params
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
 
+from django.db.models import Count, Case, When, IntegerField
+
+
+def annotate_with_await_status(queryset):
+    # Аннотируем кверисет, добавляя поле, которое содержит количество нарядов в статусе 'await'
+    return queryset.annotate(
+        await_count=Count(
+            Case(
+                When(assignments__status='await', then=1),
+                output_field=IntegerField()
+            )
+        )
+    )
+
 
 def get_filtered_await_queryset(queryset, eq_params):
     # Фильтр при включенном режима бригадира
@@ -15,7 +29,6 @@ def get_filtered_await_queryset(queryset, eq_params):
             ).distinct()
         else:
             # Извлекаем все не закрытые серии производства
-
             if eq_params['assembled']:
                 queryset = queryset.filter(
                     status="0",
@@ -67,12 +80,15 @@ def get_filtered_await_queryset(queryset, eq_params):
                 assignments__assembled=True,
                 assignments__status__in=['await', 'in_work'],
             ).distinct()
-    return queryset.order_by('urgency', 'order', 'id')
+
+    # Аннотируем кверисет
+    queryset = annotate_with_await_status(queryset)
+    return queryset.order_by('-await_count', 'urgency', 'order', 'id')
 
 
 def get_filtered_in_work_queryset(queryset, eq_params):
     # Если получаем ключ - делаем подмену пин-кода для дальнейшей фильтрации
-    if eq_params['view_mode_key'] not in ['boss', 'unfinished', 'self'] and eq_params['view_mode_key'] is not None:
+    if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
@@ -97,8 +113,8 @@ def get_filtered_in_work_queryset(queryset, eq_params):
 
 def get_filtered_ready_queryset(queryset, eq_params):
     # Делаем проверку на режим просмотра под пользователем
-    # Если таков задан - переопределяем пин-код
-    if eq_params['view_mode_key'] not in ['boss', 'unfinished', 'self'] and eq_params['view_mode_key'] is not None:
+    # Если таков задан - переопределяем пользователя
+    if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
@@ -145,12 +161,22 @@ def get_eq_card_queryset(queryset, request):
     if eq_params['project_filter'] is not None:
         queryset = queryset.filter(order__project=eq_params['project_filter']).distinct()
 
+    # Предварительная загрузка связанных данных
+    queryset = queryset.select_related(
+        'product', 'order', 'main_fabric', 'second_fabric', 'third_fabric'
+    ).prefetch_related(
+        'assignments'
+    )
+
     # Индивидуально прогоняем каждый сценарий запроса
     match target_list:
         case "await":
             return get_filtered_await_queryset(queryset, eq_params)
 
         case "in_work":
+            return get_filtered_in_work_queryset(queryset, eq_params)
+
+        case "distribute":
             return get_filtered_in_work_queryset(queryset, eq_params)
 
         case "ready":

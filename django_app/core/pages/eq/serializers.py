@@ -76,6 +76,7 @@ class EqOrderSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'project',
+            'planned_date',
             'comment_base',
             'comment_case',
             'moment',
