@@ -247,11 +247,12 @@ export const EqBody = (props: EqBodyProps) => {
         >
             {distributeBlock}
 
-            <div className={'h-100 bg-black'} style={{
-                position: 'absolute',
-                width: '2px',
-                left: `${leftBlockWidth}px`
-            }}/>
+            <div className={'h-100 bg-black'}
+                 style={{
+                     position: 'absolute',
+                     width: '2px',
+                     left: `${leftBlockWidth}px`
+                 }}/>
 
             {inWorkBlock}
 

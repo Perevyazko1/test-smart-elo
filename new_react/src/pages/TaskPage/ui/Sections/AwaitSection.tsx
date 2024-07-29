@@ -51,7 +51,6 @@ export const AwaitSection = () => {
             maxWidth: '1300px',
             overflowX: "hidden",
             overflowY: "auto",
-            padding: ".15rem 0"
         }}>
             {awaitData?.isLoading
                 ?

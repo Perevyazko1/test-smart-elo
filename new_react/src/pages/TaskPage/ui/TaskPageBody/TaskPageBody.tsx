@@ -19,7 +19,7 @@ export const TaskPageBody = () => {
     const noRelevantId = useAppSelector(getNoRelevantId);
     const dispatch = useAppDispatch();
 
-    const {windowWidth, windowHeight} = useWindowDimensions(-50);
+    const {windowWidth, windowHeight} = useWindowDimensions(-45);
     const {
         leftBlockWidth,
         rightBlockWidth,
@@ -45,7 +45,13 @@ export const TaskPageBody = () => {
     }, [dispatch, noRelevantId, queryParameters]);
 
     return (
-        <div className={'pageContent d-flex'} style={{background: 'var(--bs-gray-300)'}}>
+        <div
+            className={'d-flex'}
+            style={{
+                background: 'var(--bs-gray-300)',
+                height: `${windowHeight}px`
+            }}
+        >
             <div className={cls.leftBlock} style={{width: `${leftBlockWidth}px`}}>
                 <div
                     className={'d-flex justify-content-end'}
@@ -53,7 +59,6 @@ export const TaskPageBody = () => {
                         height: `${inWorkHeight}px`,
                         overflowX: "hidden",
                         overflowY: "auto",
-                        padding: ".15rem 0",
                     }}>
                     <InWorkSection/>
                 </div>
