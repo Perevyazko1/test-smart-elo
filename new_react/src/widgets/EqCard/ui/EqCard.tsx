@@ -60,7 +60,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const getTargetNumbers = useCallback((first: boolean) => {
         if (listType === "await"
-            || (listType === "in_work" && !expanded && first)
+            || (listType === "in_work" && !expanded && !first)
             || (listType === "in_work" && expanded)
             || (listType === "distribute")
         ) {
