@@ -1,4 +1,4 @@
-import {useEffect} from "react";
+import React, {useEffect} from "react";
 
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
@@ -71,6 +71,7 @@ export const AwaitSection = () => {
                     ))}
                 </>
             }
+
         </div>
     );
 };

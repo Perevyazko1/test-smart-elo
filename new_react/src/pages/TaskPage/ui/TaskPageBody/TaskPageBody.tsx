@@ -1,4 +1,4 @@
-import {useContext, useEffect} from "react";
+import React, {useContext, useEffect} from "react";
 
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 import {useResizableBlocks, useWindowDimensions} from "@pages/EqPage";
@@ -13,6 +13,7 @@ import {Weeks} from "../Sections/Weeks";
 import {InWorkSection} from "../Sections/InWorkSection";
 import {ReadySection} from "../Sections/ReadySection";
 import {IsDesktopContext} from "@app";
+import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
 
 
 export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
@@ -74,11 +75,13 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
                     <div
                         className={'d-flex justify-content-end'}
                         style={{
+                            position: 'relative',
                             height: `${inWorkHeight}px`,
                             overflowX: "hidden",
                             overflowY: "auto",
                         }}>
                         <InWorkSection/>
+                        <BlockName name={"В РАБОТЕ"}/>
                     </div>
 
                     <div className={'d-flex justify-content-end'} style={{width: `${leftBlockWidth}px`}}>
@@ -91,13 +94,21 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
                         />
                     </div>
 
-                    <div style={{height: `${readyHeight}px`}} className={'d-flex justify-content-end'}>
+                    <div
+                        style={{
+                            position: 'relative',
+                            height: `${readyHeight}px`
+                        }}
+                        className={'d-flex justify-content-end'}
+                    >
                         <ReadySection/>
+                        <BlockName name={"ГОТОВЫЕ"}/>
                     </div>
                 </div>
 
                 <div className={cls.rightBlock} style={{width: `${rightBlockWidth}px`}}>
                     <AwaitSection/>
+                    <BlockName name={"В ОЖИДАНИИ"}/>
                 </div>
 
             </div>
