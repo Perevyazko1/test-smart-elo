@@ -20,10 +20,10 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
 
     return (
         <AppAutocomplete
+            className={'flex-fill'}
             variant={'select'}
             value={getValue}
             label={isLoading ? "Загрузка..." : "Задачу назначил"}
-            width={250}
             readOnly
             getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'listNameInitials')}
         />

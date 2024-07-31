@@ -195,9 +195,9 @@ export const TaskForm = (props: TaskFormProps) => {
 
                 <hr className={'m-2'}/>
 
-                <div className={'d-flex gap-2 flex-wrap'}>
+                <div className={'d-flex gap-2 flex-column'}>
 
-                    <div className="d-flex flex-wrap align-items-end gap-2">
+                    <div className="d-flex flex-wrap flex-fill gap-2 pe-3">
                         <CreatedByBlock
                             value={task?.created_by || currentUser}
                         />
@@ -207,12 +207,11 @@ export const TaskForm = (props: TaskFormProps) => {
                             value={task?.appointed_by?.id || formData.appointed_by || null}
                         />
 
-                        <InputGroup className={'d-flex flex-nowrap'} style={{maxWidth: "370px"}}>
+                        <InputGroup className={'d-flex flex-nowrap'} style={{maxWidth: "270px"}}>
                             <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
                                 Назначена:
                             </InputGroup.Text>
                             <input
-                                className={'flex-fill'}
                                 type="datetime-local"
                                 disabled
                                 value={convertDateTime(formData.appointed_at || task?.appointed_at)}
@@ -220,7 +219,7 @@ export const TaskForm = (props: TaskFormProps) => {
                         </InputGroup>
                     </div>
 
-                    <div className="d-flex gap-2 flex-fill">
+                    <div className="d-flex gap-2 flex-fill flex-wrap">
                         <ExecutorBlock
                             disabled={variant === 'read_only'
                                 || (!!task && task?.status !== TaskStatus.Pending)
@@ -241,7 +240,7 @@ export const TaskForm = (props: TaskFormProps) => {
 
                     </div>
 
-                    <div className="d-flex gap-2 flex-fill">
+                    <div className="d-flex gap-2 flex-fill flex-wrap">
                         <ViewModeBlock
                             disabled={variant === "read_only"}
                             formTask={formData}
