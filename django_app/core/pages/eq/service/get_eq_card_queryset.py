@@ -1,5 +1,5 @@
 """Get filtered queryset for EQ request. """
-from django.db.models import Q
+from django.db.models import Q, BooleanField
 
 from core.models import Assignment
 from core.pages.eq.service.get_eq_req_params import get_eq_req_params
@@ -10,13 +10,12 @@ from django.db.models import Count, Case, When, IntegerField
 
 
 def annotate_with_await_status(queryset):
-    # Аннотируем кверисет, добавляя поле, которое содержит количество нарядов в статусе 'await'
+    # Аннотируем кверисет, добавляя поле, которое указывает на наличие нарядов в статусе 'await'
     return queryset.annotate(
-        await_count=Count(
-            Case(
-                When(assignments__status='await', then=1),
-                output_field=IntegerField()
-            )
+        has_await=Case(
+            When(assignments__status='await', then=True),
+            default=False,
+            output_field=BooleanField()
         )
     )
 
@@ -85,7 +84,7 @@ def get_filtered_await_queryset(queryset, eq_params):
 
     # Аннотируем кверисет
     queryset = annotate_with_await_status(queryset)
-    return queryset.order_by('-await_count', 'urgency', 'order', 'id')
+    queryset = queryset.order_by('-has_await', 'urgency', 'order', 'id')
 
 
 def get_filtered_in_work_queryset(queryset, eq_params):
