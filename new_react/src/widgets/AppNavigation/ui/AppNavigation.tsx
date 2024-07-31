@@ -63,7 +63,7 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
     }
 
     return (
-        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')}>
+        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')} minWidth={'165px'}>
             {renderOptions}
             <div className={'py-2'}>
                 <AppSwitch

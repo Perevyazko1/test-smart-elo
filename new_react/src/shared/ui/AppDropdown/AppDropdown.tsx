@@ -10,10 +10,11 @@ interface AppDropdownProps {
     active?: boolean;
     children?: ReactNode;
     childrenPos?: 'top' | 'bottom';
+    minWidth?: string;
 }
 
 export const AppDropdown = (props: AppDropdownProps) => {
-    const {items, selected, onSelect, active, children, childrenPos = 'top'} = props;
+    const {items, selected, onSelect, active, children, minWidth, childrenPos = 'top'} = props;
 
     const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -49,6 +50,11 @@ export const AppDropdown = (props: AppDropdownProps) => {
                     <Button
                         variant={'outline-dark'}
                         className={'text-nowrap text-light'}
+                        style={{
+                            ...(minWidth && {
+                                minWidth: minWidth,
+                            })
+                        }}
                         disabled
                         onClick={() => setIsOpen(!isOpen)}
                     >
@@ -59,7 +65,15 @@ export const AppDropdown = (props: AppDropdownProps) => {
                 :
                 <>
                     <div>
-                        <Button variant={'black'} onClick={() => setIsOpen(!isOpen)} className={'text-nowrap'}>
+                        <Button
+                            style={{
+                                ...(minWidth && {
+                                    minWidth: minWidth,
+                                })
+                            }}
+                            variant={'black'}
+                            onClick={() => setIsOpen(!isOpen)} className={'text-nowrap'}
+                        >
                             {selected}
                             <i className={`fas fa-chevron-down ms-2 ${cls.dropIcon} ${isOpen && cls.rotate} ${active && ' text-danger'}`}/>
                         </Button>

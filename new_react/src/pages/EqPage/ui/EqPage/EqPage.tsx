@@ -29,11 +29,11 @@ export const EqPage = () => {
             {/*Оборачиваем контент в контекст для использования query параметров*/}
             <QueryContext>
                 <ModalProvider>
-                    {/*Компонент навбара*/}
-                    <EqNav closeClb={closeClb} showCanvas={showCanvas}/>
+                        {/*Компонент навбара*/}
+                        <EqNav closeClb={closeClb} showCanvas={showCanvas}/>
 
-                    {/*Контент страницы*/}
-                    <EqBody showClb={() => setShowCanvas(true)}/>
+                        {/*Контент страницы*/}
+                        <EqBody showClb={() => setShowCanvas(true)}/>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

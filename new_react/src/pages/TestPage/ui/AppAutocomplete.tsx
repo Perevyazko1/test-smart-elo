@@ -15,6 +15,7 @@ const StyledAutocompleteWrapper = styled('div')<StyledAutocompleteProps>(({color
         '& .MuiAutocomplete-listbox': {
             backgroundColor: colorscheme === 'dark' ? '#000000' : '#ffffff', // Цвет заднего фона поппера
             color: colorscheme === 'dark' ? '#ffffff' : '#000000',
+
             '& .MuiAutocomplete-option[data-focus="true"]': {
                 backgroundColor: colorscheme === 'dark' ? '#333333' : '#e0e0e0', // Цвет фона для выбранного элемента
                 color: colorscheme === 'dark' ? '#ffffff' : '#000000',
@@ -70,7 +71,8 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
     // базовый инпут
     '& .MuiInputBase-root': {
         minWidth: '0',
-        fontSize: '16px',
+        fontSize: '14px',
+        lineHeight: 0.8,
         padding: '0',
         margin: '0',
         color: colorscheme === 'dark' ? '#ececec' : '#000000',
@@ -81,7 +83,7 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
     // label к инпуту
     '& .MuiInputLabel-root': {
         zIndex: '1000',
-        fontSize: '12px',
+        fontSize: '10px',
         lineHeight: '1',
         top: '-2px',
         color: colorscheme === 'dark' ? 'var(--bs-secondary-color)' : 'var(--bs-secondary-color)',
@@ -105,10 +107,10 @@ const StyledAutocomplete = styled(Autocomplete)<StyledAutocompleteProps>(({color
         '& .MuiChip-deleteIcon': {
             color: colorscheme === 'dark' ? '#000000' : '#000000',
         },
-        height: '23px',
+        height: '19px',
         padding: '0',
-        fontSize: '14px',
-        lineHeight: '1',
+        fontSize: '12px',
+        lineHeight: '0.8',
         margin: '0 0 1px 0'
     },
     '& .MuiAutocomplete-tag': {

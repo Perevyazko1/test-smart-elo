@@ -1,4 +1,4 @@
-import {HTMLAttributes, useMemo} from "react";
+import {HTMLAttributes, memo, useMemo} from "react";
 
 import cls from "../TaskPage.module.scss";
 
@@ -16,7 +16,7 @@ interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement> {
     cardType: TaskStatus;
 }
 
-export const TaskPageCard = (props: TaskPageCardProps) => {
+export const TaskPageCard = memo((props: TaskPageCardProps) => {
     const {card, cardType, ...otherProps} = props;
     const {currentUser} = useCurrentUser();
 
@@ -188,4 +188,4 @@ export const TaskPageCard = (props: TaskPageCardProps) => {
         </div>
     )
         ;
-};
+});

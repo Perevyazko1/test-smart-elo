@@ -24,7 +24,7 @@ interface ResizableBlocksActions {
 }
 
 
-const MIN_WIDTH = 210;
+const MIN_WIDTH = 130;
 const VERTICAL_PADDING = 18;
 
 const initialState = (windowWidth: number, windowHeight: number): ResizableBlocksState => ({
@@ -119,7 +119,7 @@ export const useResizableBlocks = (windowWidth: number, windowHeight: number, of
 
     // Коллбек сброса размеров блоков до значений по умолчанию
     const resetSize = useCallback(() => {
-        dispatch({type: 'RESET', windowWidth, windowHeight});
+        dispatch({type: 'RESET', windowWidth: windowWidth, windowHeight: windowHeight});
     }, [windowWidth, windowHeight]);
 
     // Оборачиваем коллбеки изменения размеров в троттлер для оптимизации
@@ -144,7 +144,7 @@ export const useResizableBlocks = (windowWidth: number, windowHeight: number, of
                 isDragging: monitor.isDragging(),
             };
         },
-    }));
+    }), [windowWidth, windowHeight, offset.x, offset.y]);
 
     // Возвращаем размеры блоков из стейта, состояние отслеживаемого элемента, коллбек для сброса размеров и drag ref
     // элемента, который будем отслеживать

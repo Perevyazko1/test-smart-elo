@@ -6,10 +6,16 @@ import {ExecutorFilter} from "./ui/ExecutorFilter";
 import {DepartmentFilter} from "./ui/DepartmentFilter";
 
 
-export const TaskPageNav = () => {
+interface TaskPageNavProps {
+    showNav?: boolean;
+    closeClb?: () => void;
+}
+
+
+export const TaskPageNav = (props: TaskPageNavProps) => {
 
     return (
-        <AppNavbar>
+        <AppNavbar showNav={props.showNav} closeClb={props.closeClb}>
             <SortModeNav/>
             <ViewModeNav/>
             <ExecutorFilter/>

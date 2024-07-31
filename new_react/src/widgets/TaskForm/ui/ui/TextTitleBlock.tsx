@@ -82,7 +82,7 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
     };
 
     return (
-        <InputGroup className="mb-2">
+        <InputGroup>
             <InputGroup.Text id="basic-addon1" className={'ps-5 fs-7 position-relative'}>
                 <Fab
                     size="small"

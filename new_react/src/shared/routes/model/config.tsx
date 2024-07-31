@@ -55,7 +55,7 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
     [AppRoutes.TASK]: {
         route: {path: '/task', element: <TaskPage/>, errorElement: <ErrorPage/>},
         name: 'Задачи',
-        mobile: false,
+        mobile: true,
         navigate: true,
         permissions: [APP_PERM.TASK_PAGE]
     },

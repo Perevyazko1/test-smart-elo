@@ -1,11 +1,11 @@
 import {AppNavbar} from "@widgets/AppNavbar";
 import {useCurrentUser, usePermission, useQueryParams} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
+import {AppSwitch} from "@shared/ui";
 
 import {EqSeriesSize} from "./EqSeriesSize";
 import {EqDepWidget} from "./EqDepWidget";
-import {EqFilters} from "@pages/EqPage/ui/EqNav/EqFilters";
-import {APP_PERM} from "@shared/consts";
-import {AppSwitch} from "@shared/ui";
+import {EqFilters} from "./EqFilters";
 
 interface EqNavProps {
     showCanvas: boolean;

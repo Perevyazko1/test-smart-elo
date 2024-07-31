@@ -3,7 +3,6 @@ import React, {memo, useMemo} from 'react';
 import {Swiper, SwiperSlide} from "swiper/react";
 import {Pagination} from 'swiper/modules';
 
-import logoImg2 from "@shared/assets/images/logoImg.png";
 import cls from './Slider.module.scss';
 
 import 'swiper/css';
@@ -117,10 +116,10 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     <SwiperSlide
                         style={{width: width, height: height}}
                         className={"d-flex justify-content-center align-items-center"}
-                        key={logoImg2}
+                        key={'logo_vertical'}
                     >
                         <img
-                            src={logoImg2}
+                            src={"/szmk_logo_v.png"}
                             style={{
                                 maxWidth: width,
                                 maxHeight: '100%',
@@ -128,7 +127,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                                 objectFit: 'contain',
                                 objectPosition: 'center',
                             }}
-                            className="rounded m-0 p-0"
+                            className="rounded m-0 p-3"
                             alt={"Slide"}
                         />
                     </SwiperSlide>

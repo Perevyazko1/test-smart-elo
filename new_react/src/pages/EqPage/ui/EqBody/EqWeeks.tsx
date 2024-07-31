@@ -75,7 +75,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
     return (
         <motion.div
-            className={'d-flex justify-content-between align-items-center px-2 gap-2 rounded border border-1'}
+            className={'d-flex justify-content-between align-items-center px-1 gap-1 rounded border border-1'}
             style={{
                 height: '36px',
                 backgroundColor: currentUser.current_department?.color || '#ffffff',
@@ -94,7 +94,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
             transition={{duration: 0.3}}
         >
             {!isDesktop &&
-                <div className={'bg-dark rounded d-flex align-items-center justify-content-center me-2'}
+                <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
                      style={{
                          width: "40px",
                          height: "90%",
@@ -106,34 +106,35 @@ export const EqWeeks = (props: EqWeeksProps) => {
                 </div>
             }
 
-            <div className={'d-flex justify-content-between flex-fill align-items-center'}>
-                <Button className={"me-2 p-0 d-flex align-items-center justify-content-center"}
-                        variant={'dark'}
-                        size={'sm'}
-                        style={{width: "50px", height: "29px"}}
-                        disabled={expanded}
-                        onClick={() => setQueryParam('week', `${weekData?.previous_week_data?.week}`)}
-                >
-                    <i className="fas fa-angle-double-left fs-3"/>
-                </Button>
+            {blockWidthPx > 300 &&
+                <div className={'d-flex justify-content-between flex-fill align-items-center gap-1'}>
+                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
+                            variant={'dark'}
+                            size={'sm'}
+                            style={{width: "50px", height: "29px"}}
+                            disabled={expanded}
+                            onClick={() => setQueryParam('week', `${weekData?.previous_week_data?.week}`)}
+                    >
+                        <i className="fas fa-angle-double-left fs-3"/>
+                    </Button>
 
-                <div className={'d-flex flex-fill justify-content-center'}>
-                    {!weekData?.isLoading ? getWeekString() : <AppSkeleton className={'h-100 flex-fill'}/>}
+                    <div className={'d-flex flex-fill justify-content-center'}>
+                        {!weekData?.isLoading ? getWeekString() : <AppSkeleton className={'h-100 flex-fill'}/>}
+                    </div>
+
+
+                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
+                            type={"button"}
+                            variant={'dark'}
+                            size={'sm'}
+                            disabled={expanded}
+                            style={{width: "50px", height: "29px"}}
+                            onClick={() => setQueryParam('week', `${weekData?.next_week_data?.week}`)}
+                    >
+                        <i className="fas fa-angle-double-right fs-3"/>
+                    </Button>
                 </div>
-
-
-                <Button className={"ms-2 p-0 d-flex align-items-center justify-content-center"}
-                        type={"button"}
-                        variant={'dark'}
-                        size={'sm'}
-                        disabled={expanded}
-                        style={{width: "50px", height: "29px"}}
-                        onClick={() => setQueryParam('week', `${weekData?.next_week_data?.week}`)}
-                >
-                    <i className="fas fa-angle-double-right fs-3"/>
-                </Button>
-            </div>
-
+            }
             {!!drag &&
                 <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center'}
                      style={{

@@ -1,15 +1,18 @@
-import {useState, useEffect} from 'react';
+import {useEffect, useState} from 'react';
+
 
 export const useWindowDimensions = (heightEdit: number = 0, widthEdit: number = 0) => {
     // Поднимаем два стейта где будем хранить высоту и ширину блока. Инициализируем с учетом переданных параметров
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth + widthEdit);
+    const [windowWidth, setWindowWidth] = useState(
+        window.innerWidth < 2400 ? window.innerWidth + widthEdit : 2400);
     const [windowHeight, setWindowHeight] = useState(window.innerHeight + heightEdit);
 
     useEffect(() => {
         const handleResize = () => {
-            setWindowWidth(window.innerWidth + widthEdit);
+            setWindowWidth(window.innerWidth < 2400 ? window.innerWidth + widthEdit : 2400);
             setWindowHeight(window.innerHeight + heightEdit);
-            console.log('Window resized:', window.innerWidth, window.innerHeight);
+            console.log('Window resized:', window.innerWidth + widthEdit, window.innerHeight + heightEdit)
+            ;
         };
         // Добавляем слушатель событий который при изменении размеров окна будет изменять стейт
         window.addEventListener('resize', handleResize);

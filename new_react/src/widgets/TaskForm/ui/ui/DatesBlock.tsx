@@ -12,13 +12,13 @@ export const DatesBlock = (props: DatesBlockProps) => {
     const {task} = props;
 
     return (
-        <div>
-
+        <div className={'d-flex flex-column gap-1'}>
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
+                <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
                     Создана:
                 </InputGroup.Text>
                 <input
+                    className={'flex-fill'}
                     type="datetime-local"
                     disabled
                     value={convertDateTime(task?.created_at)}
@@ -27,20 +27,22 @@ export const DatesBlock = (props: DatesBlockProps) => {
 
 
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
+                <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
                     Готова:
                 </InputGroup.Text>
                 <input
+                    className={'flex-fill'}
                     type="datetime-local"
                     disabled
                     value={convertDateTime(task?.ready_at)}
                 />
             </InputGroup>
             <InputGroup>
-                <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
+                <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
                     Завизирована:
                 </InputGroup.Text>
                 <input
+                    className={'flex-fill'}
                     type="datetime-local"
                     disabled
                     value={convertDateTime(task?.verified_at)}

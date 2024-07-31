@@ -173,10 +173,21 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
             >
                 <Box data-bs-theme={'dark'}>
                     <div className={'d-flex flex-column gap-3 p-2'}>
-                        <div>
-                            <img src={Logo} alt={'SZMK logo'} style={{maxWidth: '120px'}}/>
+                        <div className={'px-3 pt-2'}>
+                            <Link to={location.pathname !== '/task'
+                                ? '/task'
+                                : '/'
+                            }>
+                                <img
+                                    src={Logo}
+                                    alt={'SZMK logo'}
+                                    style={{
+                                        maxHeight: '38px',
+                                    }}
+                                />
+                            </Link>
                         </div>
-                        <div className={'d-flex flex-column gap-3 p-2'} style={{
+                        <div className={'d-flex flex-column gap-3 p-2 justify-content-start align-items-start'} style={{
                             minWidth: '320px',
                         }}>
                             {children}

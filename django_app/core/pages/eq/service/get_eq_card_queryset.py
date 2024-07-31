@@ -1,4 +1,6 @@
 """Get filtered queryset for EQ request. """
+from django.db.models import Q
+
 from core.models import Assignment
 from core.pages.eq.service.get_eq_req_params import get_eq_req_params
 from core.services.get_week_info import GetWeekInfo
@@ -119,26 +121,61 @@ def get_filtered_ready_queryset(queryset, eq_params):
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
     if eq_params['view_mode_key'] is None or eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+        current_week = GetWeekInfo(week=None, year=None).execute()
         week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
-        queryset = queryset.filter(
-            assignments__executor=eq_params['user'],
-            assignments__department=eq_params['department'],
-            assignments__status='ready',
-            assignments__date_completion__gt=week_info.date_range[0],
-            assignments__date_completion__lte=week_info.date_range[1],
-        ).distinct().order_by('-assignments__inspector')
+        if current_week.week == week_info.week and current_week.year == week_info.year:
+            queryset = queryset.filter(
+                Q(
+                    assignments__executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspect_date__gt=week_info.date_range[0],
+                    assignments__inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    assignments__executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspector__isnull=True,
+                )
+            ).distinct().order_by('-assignments__inspector')
+        else:
+            queryset = queryset.filter(
+                assignments__executor=eq_params['user'],
+                assignments__department=eq_params['department'],
+                assignments__status='ready',
+                assignments__inspect_date__gt=week_info.date_range[0],
+                assignments__inspect_date__lte=week_info.date_range[1],
+            ).distinct().order_by('-assignments__inspector')
 
     # В режиме бригадира фильтрацию по пин-коду не делаем
     if eq_params['view_mode_key'] == 'boss':
+        current_week = GetWeekInfo(week=None, year=None).execute()
         week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
-        queryset = queryset.filter(
-            assignments__department=eq_params['department'],
-            assignments__status='ready',
-            assignments__date_completion__gt=week_info.date_range[0],
-            assignments__date_completion__lte=week_info.date_range[1],
-        ).distinct().order_by('-assignments__inspector')
+        if current_week.week == week_info.week and current_week.year == week_info.year:
+            queryset = queryset.filter(
+                Q(
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspect_date__gt=week_info.date_range[0],
+                    assignments__inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    assignments__executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspector__isnull=True,
+                )
+            ).distinct().order_by('-assignments__inspector')
+        else:
+            queryset = queryset.filter(
+                assignments__department=eq_params['department'],
+                assignments__status='ready',
+                assignments__inspect_date__gt=week_info.date_range[0],
+                assignments__inspect_date__lte=week_info.date_range[1],
+            ).distinct().order_by('-assignments__inspector')
 
     # В режиме недоделок не фильтруем по пин-коду и по дате
     if eq_params['view_mode_key'] == 'unfinished':

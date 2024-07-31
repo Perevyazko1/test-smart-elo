@@ -56,8 +56,8 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
     }
 
     return (
-        <InputGroup>
-            <InputGroup.Text style={{width: '118px'}} className={'fs-7'}>
+        <InputGroup className={'d-flex flex-nowrap w-100'}>
+            <InputGroup.Text style={{width: '120px'}} className={'fs-7'}>
                 Крайний срок:
                 {date && !disabled &&
                     <button
@@ -75,7 +75,7 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
             </InputGroup.Text>
             <input
                 className={'fs-7'}
-                style={{width: '140px'}}
+                style={{minWidth: '140px'}}
                 type="date"
                 value={date}
                 disabled={disabled}
@@ -83,7 +83,7 @@ export const DeadlineBlock = (props: DeadlineBlockProps) => {
             />
             <input
                 className={'fs-7'}
-                style={{width: '100px'}}
+                style={{minWidth: '100px'}}
                 type="time"
                 value={time}
                 disabled={disabled}

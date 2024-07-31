@@ -237,39 +237,44 @@ export const EqBody = (props: EqBodyProps) => {
     ), [expanded, inWorkHeight, leftBlockWidth, rightBlockWidth, readyHeight, windowHeight, durationValue, filtersReady, listUpdated.await, noRelevantIds]);
 
     return (
-        <div
-            style={{
-                position: 'relative',
-                height: `${windowHeight}px`,
-                background: "var(--bs-gray-300)",
-                overflow: 'hidden',
-            }}
-        >
-            {distributeBlock}
+        <div className={'d-flex justify-content-center'} style={{
+            background: "var(--bs-gray-300)",
+            overflow: 'hidden',
+        }}>
+            <div
+                style={{
+                    position: 'relative',
+                    height: `${windowHeight}px`,
+                    width: `${windowWidth}px`,
+                }}
+            >
+                {distributeBlock}
 
-            <div className={'h-100 bg-black'}
-                 style={{
-                     position: 'absolute',
-                     width: '2px',
-                     left: `${leftBlockWidth}px`
-                 }}/>
+                <div className={'h-100 bg-black'}
+                     style={{
+                         position: 'absolute',
+                         width: '2px',
+                         left: `${leftBlockWidth}px`
+                     }}/>
 
-            {inWorkBlock}
+                {inWorkBlock}
 
-            <EqWeeks
-                inWorkHeight={inWorkHeight}
-                rightBlockWidth={rightBlockWidth}
-                leftBlockWidth={leftBlockWidth}
-                expanded={expanded}
-                isDragging={isDragging}
-                showClb={showClb}
-                drag={drag}
-                resetSize={resetSize}
-            />
+                <EqWeeks
+                    inWorkHeight={inWorkHeight}
+                    rightBlockWidth={rightBlockWidth}
+                    leftBlockWidth={leftBlockWidth}
+                    expanded={expanded}
+                    isDragging={isDragging}
+                    showClb={showClb}
+                    drag={drag}
+                    resetSize={resetSize}
+                />
 
-            {readyBlock}
+                {readyBlock}
 
-            {awaitBlock}
+                {awaitBlock}
+            </div>
+
         </div>
     );
 };

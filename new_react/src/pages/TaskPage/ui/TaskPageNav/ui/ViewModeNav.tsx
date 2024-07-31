@@ -51,10 +51,9 @@ export const ViewModeNav = () => {
     }, [dispatch, filtersInited, initialLoad, queryParameters.view_mode, setQueryParam]);
 
     return (
-
         <AppAutocomplete
             colorscheme={'dark'}
-            style={{zIndex: "1000", marginTop: "3px"}}
+            style={{marginTop: "3px"}}
             label={selectedViewMode ? 'Видимость' : 'Видимость (Все)'}
             variant={'select'}
             value={selectedViewMode}

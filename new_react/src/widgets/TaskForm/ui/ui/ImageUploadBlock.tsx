@@ -116,19 +116,7 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
     }, [initialImages, newImages])
 
     return (
-        <div className={'d-flex gap-3 flex-fill'}>
-            <Button
-                disabled={disabled}
-                component="label"
-                role={undefined}
-                variant="outlined"
-                color={'inherit'}
-                tabIndex={-1}
-            >
-                <AddAPhotoIcon fontSize={'inherit'} className={'fs-3'}/>
-                <VisuallyHiddenInput type="file" onChange={handleFileChange} multiple/>
-            </Button>
-
+        <div className={'d-flex gap-1'}>
             <div className={'bg-light border border-1 border-black rounded p-1'}>
                 <AppSlider
                     images={sliderUrls}
@@ -137,14 +125,26 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
                 />
             </div>
 
-            {!disabled && sliderUrls.length > 0 &&
-                <div className={'d-block h-100 border border-1 border-black rounded p-2'}
+            {!disabled &&
+                <div className={'d-flex flex-column gap-1 h-100 border border-1 border-black rounded p-1'}
                      style={{
                          overflowY: 'auto',
                          overflowX: 'hidden',
                          maxHeight: '190px'
                      }}
                 >
+                    <Button
+                        disabled={disabled}
+                        component="label"
+                        role={undefined}
+                        variant="outlined"
+                        color={'inherit'}
+                        tabIndex={-1}
+                    >
+                        <AddAPhotoIcon fontSize={'inherit'} className={'fs-3'}/>
+                        <VisuallyHiddenInput type="file" onChange={handleFileChange} multiple/>
+                    </Button>
+
                     {editImagesList.map(image => (
                         <div key={image.url} className={'position-relative'}>
                             <button
@@ -171,7 +171,7 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
                                 alt={"Slide"}
                                 loading={"lazy"}
                             />
-                            <hr/>
+                            <hr className={'m-1 p-0'}/>
                         </div>
                     ))}
                 </div>

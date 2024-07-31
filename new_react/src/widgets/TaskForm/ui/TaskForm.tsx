@@ -160,6 +160,7 @@ export const TaskForm = (props: TaskFormProps) => {
         return (
             <form
                 data-bs-theme={'light'}
+                className={'d-flex flex-column gap-1 p-1'}
                 style={{minWidth: "50vw"}}
                 onSubmit={handleSubmit}
             >
@@ -168,23 +169,24 @@ export const TaskForm = (props: TaskFormProps) => {
                     :
                     <h4>Новая задача</h4>
                 }
-                <hr className={'m-2'}/>
+                <hr className={'m-1'}/>
 
-                <div className={'d-flex justify-content-between gap-3'}>
+                <div className={'d-flex justify-content-between gap-2'}>
                     <ImageUploadBlock
                         disabled={variant === "read_only"}
                         task={task}
                         formTask={formData}
                         setFormTask={setFormData}
                     />
-                    <div>
-
+                    <div
+                        style={{maxWidth: "370px"}}
+                    >
                         <DeadlineBlock
                             disabled={variant === "read_only"}
                             setFormTask={setFormData}
                             formData={formData}
                         />
-                        <hr className={'m-2'}/>
+                        <hr className={'m-1'}/>
                         <DatesBlock
                             task={task}
                         />
@@ -193,88 +195,96 @@ export const TaskForm = (props: TaskFormProps) => {
 
                 <hr className={'m-2'}/>
 
-                <div className="d-flex align-items-end gap-3 mb-2">
-                    <CreatedByBlock
-                        value={task?.created_by || currentUser}
-                    />
-                    <AppointedByBlock
-                        isLoading={usersIsLoading}
-                        userList={sortedUserList || []}
-                        value={task?.appointed_by?.id || formData.appointed_by || null}
-                    />
+                <div className={'d-flex gap-2 flex-wrap'}>
 
-                    <InputGroup className={'w-auto'}>
-                        <InputGroup.Text style={{width: '150px'}} className={'text-muted fs-7'}>
-                            Назначена:
-                        </InputGroup.Text>
-                        <input
-                            type="datetime-local"
-                            disabled
-                            value={convertDateTime(formData.appointed_at || task?.appointed_at)}
+                    <div className="d-flex flex-wrap align-items-end gap-2">
+                        <CreatedByBlock
+                            value={task?.created_by || currentUser}
                         />
-                    </InputGroup>
+                        <AppointedByBlock
+                            isLoading={usersIsLoading}
+                            userList={sortedUserList || []}
+                            value={task?.appointed_by?.id || formData.appointed_by || null}
+                        />
+
+                        <InputGroup className={'d-flex flex-nowrap'} style={{maxWidth: "370px"}}>
+                            <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
+                                Назначена:
+                            </InputGroup.Text>
+                            <input
+                                className={'flex-fill'}
+                                type="datetime-local"
+                                disabled
+                                value={convertDateTime(formData.appointed_at || task?.appointed_at)}
+                            />
+                        </InputGroup>
+                    </div>
+
+                    <div className="d-flex gap-2 flex-fill">
+                        <ExecutorBlock
+                            disabled={variant === 'read_only'
+                                || (!!task && task?.status !== TaskStatus.Pending)
+                                || formData.view_mode === TaskViewMode.OnlyMe
+                            }
+                            setFormTask={setFormData}
+                            formTask={formData}
+                            isLoading={usersIsLoading}
+                            userList={sortedUserList}
+                        />
+                        <CoExecutorBlock
+                            disabled={variant === 'read_only'}
+                            setFormTask={setFormData}
+                            formTask={formData}
+                            isLoading={usersIsLoading}
+                            userList={sortedUserList}
+                        />
+
+                    </div>
+
+                    <div className="d-flex gap-2 flex-fill">
+                        <ViewModeBlock
+                            disabled={variant === "read_only"}
+                            formTask={formData}
+                            setFormTask={setFormData}
+                        />
+                        <ForDepartmentsBlock
+                            active={formData.view_mode === TaskViewMode.DepartmentVisible && variant !== "read_only"}
+                            formTask={formData}
+                            setFormTask={setFormData}
+                        />
+                        <RatingBlock
+                            disabled={variant === "read_only"}
+                            formTask={formData}
+                            setFormTask={setFormData}
+                        />
+                    </div>
+
+                    <hr className={'m-1'}/>
                 </div>
 
-                <div className="d-flex gap-3 mb-2">
-                    <ExecutorBlock
-                        disabled={variant === 'read_only'
-                            || (!!task && task?.status !== TaskStatus.Pending)
-                            || formData.view_mode === TaskViewMode.OnlyMe
-                        }
-                        setFormTask={setFormData}
-                        formTask={formData}
-                        isLoading={usersIsLoading}
-                        userList={sortedUserList}
-                    />
-                    <CoExecutorBlock
-                        disabled={variant === 'read_only'}
-                        setFormTask={setFormData}
-                        formTask={formData}
-                        isLoading={usersIsLoading}
-                        userList={sortedUserList}
-                    />
-
-                </div>
-
-                <div className="d-flex gap-3">
-                    <ViewModeBlock
+                <div className={'d-flex flex-wrap gap-2'}>
+                    <TextTitleBlock
                         disabled={variant === "read_only"}
                         formTask={formData}
                         setFormTask={setFormData}
                     />
-                    <ForDepartmentsBlock
-                        active={formData.view_mode === TaskViewMode.DepartmentVisible && variant !== "read_only"}
-                        formTask={formData}
-                        setFormTask={setFormData}
-                    />
-                    <RatingBlock
+
+                    <TextDescriptionBlock
                         disabled={variant === "read_only"}
                         formTask={formData}
                         setFormTask={setFormData}
                     />
+
+                    <TextResultBlock
+                        task={task}
+                        formTask={formData}
+                        setFormTask={setFormData}
+                    />
                 </div>
-                <hr className={'m-2'}/>
 
-                <TextTitleBlock
-                    disabled={variant === "read_only"}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
+                <hr className={'m-1'}/>
 
-                <TextDescriptionBlock
-                    disabled={variant === "read_only"}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
-
-                <TextResultBlock
-                    task={task}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
-
-                <hr className={'m-3'}/>
-                <div className={'d-flex gap-3'}>
+                <div className={'d-flex gap-2 pb-3'}>
 
                     {variant === "create" &&
                         <Button
@@ -292,11 +302,10 @@ export const TaskForm = (props: TaskFormProps) => {
                         (variant !== 'create' && !task?.verified_at &&
                             (formData.executor === currentUser.id ||
                                 formData.co_executors.includes(currentUser.id) ||
-                                    (variant === 'edit' && formData.created_by === currentUser.id)
+                                (variant === 'edit' && formData.created_by === currentUser.id)
                             )
                         ) &&
                         <Button
-                            className={'me-2'}
                             variant={'outlined'}
                             color="inherit"
                             type={"submit"}

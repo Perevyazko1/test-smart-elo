@@ -1,4 +1,4 @@
-import React, {useEffect} from "react";
+import React, {useContext, useEffect} from "react";
 
 import {Button} from "react-bootstrap";
 import {Fab} from "@mui/material";
@@ -10,6 +10,7 @@ import {TaskForm} from "@widgets/TaskForm";
 import {getStateWeekData} from "../../model/selectors";
 import {getWeekData} from "../../model/api/getWeekData";
 import {ConnectDragSource} from "react-dnd";
+import {IsDesktopContext} from "@app";
 
 
 interface WeeksProps {
@@ -17,13 +18,15 @@ interface WeeksProps {
     drag: ConnectDragSource;
     isDragging: boolean;
     resetSize: () => void;
+    setShowNavbar: () => void;
 }
 
 
 export const Weeks = (props: WeeksProps) => {
-    const {drag, isDragging, resetSize, blockWidthPx} = props;
+    const {drag, isDragging, resetSize, setShowNavbar, blockWidthPx} = props;
     const {handleOpen, handleClose} = useAppModal();
     const handleDoubleTap = useDoubleTap(resetSize);
+    const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
     const {initialLoad, queryParameters, setQueryParam} = useAppQuery();
 
@@ -65,7 +68,7 @@ export const Weeks = (props: WeeksProps) => {
 
     return (
         <div
-            className={'d-flex justify-content-between align-items-center px-2 rounded border border-1 w-100'}
+            className={'d-flex justify-content-between px-1 align-items-center gap-1 rounded border border-1 w-100'}
             style={{
                 height: '36px',
                 backgroundColor: '#ffffff',
@@ -73,15 +76,28 @@ export const Weeks = (props: WeeksProps) => {
             }}
         >
 
-            <div className={'me-2'}>
+            <div className={'d-flex align-items-center h-100 gap-1'}>
+                {!isDesktop &&
+                    <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
+                         style={{
+                             width: "40px",
+                             height: "90%",
+                             cursor: 'pointer',
+                         }}
+                         onClick={setShowNavbar}
+                    >
+                        <i className="fas fa-filter text-light fs-6"/>
+                    </div>
+                }
+
                 <Fab size="small" color="inherit" aria-label="add" onClick={addAction}>
                     <AddIcon/>
                 </Fab>
             </div>
 
             {blockWidthPx > 300 &&
-                <div className={'d-flex justify-content-between flex-fill align-items-center'}>
-                    <Button className={"me-2 p-0 d-flex align-items-center justify-content-center"}
+                <div className={'d-flex gap-1 justify-content-between flex-fill align-items-center'}>
+                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
                             variant={'dark'}
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
@@ -98,7 +114,7 @@ export const Weeks = (props: WeeksProps) => {
                     </div>
 
 
-                    <Button className={"ms-2 p-0 d-flex align-items-center justify-content-center"}
+                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
                             type={"button"}
                             variant={'dark'}
                             size={'sm'}
@@ -114,7 +130,7 @@ export const Weeks = (props: WeeksProps) => {
             }
 
             {!!drag &&
-                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center ms-2'}
+                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center'}
                      style={{
                          width: "40px",
                          height: "29px",

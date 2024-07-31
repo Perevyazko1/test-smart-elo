@@ -46,6 +46,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     return (
         <AppAutocomplete
             variant={"multiple"}
+            style={{minWidth: 400}}
             label={isLoading ? "Загрузка..." : "Соисполнители / Наблюдатели"}
             readOnly={disabled}
             className={'flex-fill'}

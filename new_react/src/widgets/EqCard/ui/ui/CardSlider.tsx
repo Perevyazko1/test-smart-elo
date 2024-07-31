@@ -35,7 +35,7 @@ export const CardSlider = (props: CardSliderProps) => {
             minWidth: sliderWidth,
             maxWidth: sliderWidth,
         }}
-             onClick={() => handleOpen(
+             onClick={() => sliderImages.thumbnails.length > 0 && handleOpen(
                  <AppSlider
                      images={sliderImages.images}
                      width={'90vw'}
