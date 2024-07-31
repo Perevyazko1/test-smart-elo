@@ -1,23 +1,10 @@
 """Get filtered queryset for EQ request. """
-from django.db.models import Q, BooleanField
+from django.db.models import Q
 
 from core.models import Assignment
 from core.pages.eq.service.get_eq_req_params import get_eq_req_params
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
-
-from django.db.models import Count, Case, When, IntegerField
-
-
-def annotate_with_await_status(queryset):
-    # Аннотируем кверисет, добавляя поле, которое указывает на наличие нарядов в статусе 'await'
-    return queryset.annotate(
-        has_await=Case(
-            When(assignments__status='await', then=True),
-            default=False,
-            output_field=BooleanField()
-        )
-    )
 
 
 def get_filtered_await_queryset(queryset, eq_params):
@@ -64,9 +51,9 @@ def get_filtered_await_queryset(queryset, eq_params):
             ).count()
             if eq_params['department'].single:
                 if not assignments_count:
-                    queryset = queryset.exclude(series_id=order_product.series_id)
+                    queryset = queryset.exclude(id=order_product.id)
             elif not order_product.quantity == assignments_count:
-                queryset = queryset.exclude(series_id=order_product.series_id)
+                queryset = queryset.exclude(id=order_product.id)
     else:
         if eq_params['assembled']:
             queryset = queryset.filter(
@@ -83,8 +70,7 @@ def get_filtered_await_queryset(queryset, eq_params):
             ).distinct()
 
     # Аннотируем кверисет
-    queryset = annotate_with_await_status(queryset)
-    queryset = queryset.order_by('-has_await', 'urgency', 'order', 'id')
+    return queryset.order_by('urgency', 'order', 'id').distinct()
 
 
 def get_filtered_in_work_queryset(queryset, eq_params):
