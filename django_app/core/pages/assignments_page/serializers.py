@@ -1,7 +1,7 @@
 """Assignments serializers. """
 from rest_framework import serializers
 
-from core.models import Assignment
+from core.models import Assignment, Tariff, AssignmentCoExecutor
 from core.serializers import OrderProductSerializer
 from staff.serializers import EmployeeSerializer, DepartmentSerializer
 
@@ -20,11 +20,39 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
         ]
 
 
+class AssignmentTariffSerializer(serializers.ModelSerializer):
+    class Meta:
+        """Meta. """
+        model = Tariff
+        fields = [
+            'id',
+            'amount',
+        ]
+
+
+class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
+    co_executor = EmployeeSerializer(read_only=True)
+    co_executor_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        """Meta. """
+        model = AssignmentCoExecutor
+        fields = [
+            'id',
+            'co_executor',
+            'amount',
+            'co_executor_id',
+            'assignment',
+        ]
+
+
 class AssignmentExtendedSerializer(serializers.ModelSerializer):
     executor = EmployeeSerializer()
+    co_executors = AssignmentCoExecutorSerializer(source='assignmentcoexecutor_set', many=True)
     inspector = EmployeeSerializer()
     department = DepartmentSerializer()
     order_product = OrderProductSerializer()
+    new_tariff = AssignmentTariffSerializer()
 
     class Meta:
         """Meta. """
@@ -32,6 +60,7 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'number',
+            'co_executors',
             'notes',
             'status',
             'order_product',
@@ -44,4 +73,5 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'inspect_date',
             'plane_date',
             'appointed_by_boss',
+            'new_tariff',
         ]

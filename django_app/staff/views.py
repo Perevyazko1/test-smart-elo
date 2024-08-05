@@ -6,10 +6,12 @@ from rest_framework.response import Response
 
 from .models import Employee, Department, Audit
 from .serializers import EmployeeSerializer, DepartmentSerializer, AuditSerializer
+from .filters import EmployeeModelFilter
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
+    filterset_class = EmployeeModelFilter
     serializer_class = EmployeeSerializer
 
     def get_queryset(self):

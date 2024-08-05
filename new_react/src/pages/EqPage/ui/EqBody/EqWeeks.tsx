@@ -113,7 +113,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
                             disabled={expanded}
-                            onClick={() => setQueryParam('week', `${weekData?.previous_week_data?.week}`)}
+                            onClick={() => {
+                                setQueryParam('week', `${weekData?.previous_week_data?.week}`)
+                                setQueryParam('year', `${weekData?.previous_week_data?.year}`)
+                            }}
                     >
                         <i className="fas fa-angle-double-left fs-3"/>
                     </Button>
@@ -129,7 +132,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
                             size={'sm'}
                             disabled={expanded}
                             style={{width: "50px", height: "29px"}}
-                            onClick={() => setQueryParam('week', `${weekData?.next_week_data?.week}`)}
+                            onClick={() => {
+                                setQueryParam('week', `${weekData?.next_week_data?.week}`)
+                                setQueryParam('year', `${weekData?.next_week_data?.year}`)
+                            }}
                     >
                         <i className="fas fa-angle-double-right fs-3"/>
                     </Button>

@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 
-from core.models import Assignment
+from core.models import Assignment, AssignmentCoExecutor
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
 
@@ -17,3 +17,8 @@ class AssignmentViewSet(viewsets.ModelViewSet):
         )
 
         return qs
+
+
+class AssignmentCoExecutorViewSet(viewsets.ModelViewSet):
+    queryset = AssignmentCoExecutor.objects.all()
+    serializer_class = AssignmentExtendedSerializer

@@ -67,6 +67,7 @@ class Product(models.Model):
 
 class ProductPicture(models.Model):
     """Изображения изделий"""
+
     class Meta:
         verbose_name = "Изображение изделия"
         verbose_name_plural = "Изображения изделий"
@@ -159,6 +160,7 @@ class Fabric(models.Model):
 
 class Order(models.Model):
     """Order model. """
+
     class Meta:
         verbose_name = 'Заказ'
         verbose_name_plural = 'Заказы'
@@ -244,6 +246,7 @@ class OrderProduct(models.Model):
 
 class OrderProductComment(models.Model):
     """Комментарий к позиции производства. """
+
     class Meta:
         verbose_name = 'Комментарий к ПЗ'
         verbose_name_plural = 'Комментарии к ПЗ'
@@ -380,6 +383,13 @@ class Assignment(models.Model):
         null=True,
         blank=True,
     )
+    co_executors = models.ManyToManyField(
+        Employee,
+        through='AssignmentCoExecutor',
+        related_name='co_executed_assignments',
+        verbose_name='Соисполнители'
+    )
+
     appointment_date = models.DateTimeField('Дата взятия в работу', null=True, blank=True)
 
     inspector = models.ForeignKey(
@@ -408,6 +418,17 @@ class Assignment(models.Model):
 
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.order_product.series_id}')
+
+
+class AssignmentCoExecutor(models.Model):
+    assignment = models.ForeignKey('Assignment', on_delete=models.CASCADE)
+    co_executor = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    amount = models.IntegerField("Сумма", default=0)
+
+    class Meta:
+        unique_together = ['assignment', 'co_executor']
+        verbose_name = 'Соисполнитель'
+        verbose_name_plural = 'Соисполнители'
 
 
 class TechnologicalProcess(models.Model):

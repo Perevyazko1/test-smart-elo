@@ -3,7 +3,6 @@ import React from "react";
 import {TarifficationProduct} from "./TarifficationProduct";
 import {useGetTariffCard} from "../model/api";
 
-
 interface TarifficationWidgetProps {
     production_step__id: number;
 }
@@ -29,7 +28,6 @@ export const TarifficationWidget = (props: TarifficationWidgetProps) => {
                 :
                 <>Загрузка...</>
             }
-
         </div>
     );
 };

@@ -17,7 +17,8 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
         <div
             className={cls.depInfoBlock + ' bg-light rounded fs-7 fw-bold'}
             onClick={() => handleOpen(
-                <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>
+                <AssignmentInfo seriesId={card.series_id} title={card.product.name}/>,
+                true
             )}
         >
             {card.department_info.map((info, index) => (

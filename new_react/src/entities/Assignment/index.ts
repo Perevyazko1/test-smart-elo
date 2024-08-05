@@ -1,2 +1,4 @@
 export {AssignmentAdapter} from './adapter/adapter';
-export type {Assignment, AssignmentApiList, NorAssignmentList} from './types/assignment';
+export type {
+    Assignment, AssignmentApiList, NorAssignmentList, AssignmentCoExecutor, AssignmentCoExecutorWrite
+} from './types/assignment';

@@ -24,7 +24,7 @@ interface WeeksProps {
 
 export const Weeks = (props: WeeksProps) => {
     const {drag, isDragging, resetSize, setShowNavbar, blockWidthPx} = props;
-    const {handleOpen, handleClose} = useAppModal();
+    const {handleOpen, closeNoConfirm} = useAppModal();
     const handleDoubleTap = useDoubleTap(resetSize);
     const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
@@ -35,9 +35,7 @@ export const Weeks = (props: WeeksProps) => {
     const addAction = () => handleOpen(
         <TaskForm
             variant={'create'}
-            onSubmitClb={() => {
-                handleClose()
-            }}
+            onSubmitClb={closeNoConfirm}
         />,
         true
     );

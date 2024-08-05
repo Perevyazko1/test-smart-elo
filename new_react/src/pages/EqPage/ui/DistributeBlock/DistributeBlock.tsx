@@ -2,7 +2,6 @@ import React, {useEffect, useMemo} from "react";
 import {useAppSelector, useCurrentUser, useQueryParams} from "@shared/hooks";
 import {eqFiltersReady, getEqViewMode} from "@pages/EqPage/model/selectors/filterSelectors";
 import {EqCardList} from "@widgets/EqCardList";
-import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
 
 
 interface DistributeBlockProps {
@@ -84,8 +83,6 @@ export const DistributeBlock = (props: DistributeBlockProps) => {
                     />
                 </div>
             ))}
-
-            <BlockName name={"НАЗНАЧЕНЫ"}/>
         </div>
     );
 };

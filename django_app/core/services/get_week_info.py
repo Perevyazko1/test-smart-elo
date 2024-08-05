@@ -21,10 +21,10 @@ class GetWeekInfo:
 
     def _get_initial_values(self):
         if not self.week or not self.week.isdigit():
-            self.week = datetime.datetime.today().isocalendar()[1]
+            self.week = str(datetime.datetime.today().isocalendar()[1])
 
         if not self.year or not self.year.isdigit():
-            self.year = datetime.datetime.now().year
+            self.year = str(datetime.datetime.now().year)
 
     def execute(self) -> WeekInfo:
         self._get_initial_values()

@@ -26,7 +26,7 @@ export const TextResultBlock = (props: TextResultBlockProps) => {
 
     useEffect(() => {
         setDisabled(!(formTask.executor === currentUser.id || formTask.co_executors.includes(currentUser.id))
-        || !!task?.verified_at
+            || !!task?.verified_at
         );
     }, [currentUser.id, formTask.co_executors, formTask.executor, task?.verified_at]);
 

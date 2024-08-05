@@ -13,6 +13,7 @@ import {eqPageActions} from "../../model/slice/eqPageSlice";
 import {DistributeBlock} from "../DistributeBlock/DistributeBlock";
 
 import {EqWeeks} from "./EqWeeks";
+import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
 
 interface EqBodyProps {
     showClb: () => void;
@@ -57,7 +58,6 @@ export const EqBody = (props: EqBodyProps) => {
         const timeoutId = setTimeout(() => {
             resetSize();
         }, 200);
-        console.log('Effect:', windowWidth, windowHeight);
 
         return () => {
             clearTimeout(timeoutId);
@@ -145,6 +145,7 @@ export const EqBody = (props: EqBodyProps) => {
                     deps={[listUpdated.inWork]}
                     noRelevantIds={noRelevantIds || []}
                 />
+                <BlockName name={"НАЗНАЧЕНЫ"}/>
             </motion.div>
         )
     ), [expanded, leftBlockWidth, windowHeight, durationValue, listUpdated.inWork, noRelevantIds]);

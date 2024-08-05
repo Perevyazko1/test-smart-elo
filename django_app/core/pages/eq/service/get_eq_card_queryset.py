@@ -105,7 +105,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
-    if eq_params['view_mode_key'] is None or eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
         current_week = GetWeekInfo(week=None, year=None).execute()
         week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
@@ -148,7 +148,6 @@ def get_filtered_ready_queryset(queryset, eq_params):
                     assignments__inspect_date__lte=week_info.date_range[1],
                 ) |
                 Q(
-                    assignments__executor=eq_params['user'],
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
                     assignments__inspector__isnull=True,

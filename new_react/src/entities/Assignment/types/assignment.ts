@@ -12,7 +12,7 @@ export interface BaseAssignment {
     department: number;
     executor: number;
     inspector: number;
-    tariff: number;
+    new_tariff: number;
     order_product: number;
     appointment_date: string | null;
     date_completion: string | null;
@@ -22,13 +22,32 @@ export interface BaseAssignment {
     assembled: boolean;
 }
 
-type ExtendedFields = 'department' | 'executor' | 'inspector' | 'tariff' | 'order_product';
+type ExtendedFields = 'department' | 'executor' | 'inspector' | 'new_tariff' | 'order_product';
+
+interface AssignmentTariff {
+    id: number;
+    amount: number;
+}
+
+export interface AssignmentCoExecutor {
+    id: number;
+    amount: number;
+    co_executor: Employee;
+}
+
+export interface AssignmentCoExecutorWrite extends Omit<AssignmentCoExecutor, 'id' | 'co_executor'> {
+    amount: number;
+    co_executor_id: number;
+    assignment: number;
+}
 
 export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {
     executor: Employee | null;
+    co_executors: AssignmentCoExecutor[];
     order_product: OrderProduct;
     inspector: Employee | null;
     department: Department;
+    new_tariff: AssignmentTariff | null;
 }
 
 export interface AssignmentApiList extends ApiList<Assignment> {

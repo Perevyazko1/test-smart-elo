@@ -16,11 +16,18 @@ interface CreateTaskProps {
 }
 
 
+interface GetUserListProps {
+    departments?: number[];
+    is_staff?: boolean;
+}
+
+
 const TaskFormApi = rtkAPI.injectEndpoints({
         endpoints: (build) => ({
             getUserList: build.query<Employee[], {}>({
-                query: (props: {}) => ({
+                query: (props: GetUserListProps) => ({
                     url: '/staff/employees/',
+                    params: props,
                 }),
                 keepUnusedDataFor: 6000,
             }),

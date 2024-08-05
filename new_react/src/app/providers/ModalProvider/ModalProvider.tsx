@@ -19,6 +19,7 @@ interface ModalState {
 export interface ModalContextProps {
     handleOpen: (content: ReactNode, confirmClose?: boolean) => void;
     handleClose: () => void;
+    closeNoConfirm: () => void;
 }
 
 
@@ -63,7 +64,14 @@ export const ModalProvider = (props: { children: ReactNode }) => {
         });
     }, []);
 
-    const value = {handleOpen, handleClose};
+    const closeNoConfirm = useCallback(() => {
+        setModals(prevModals => {
+            if (prevModals.length === 0) return prevModals;
+            return prevModals.slice(0, -1);
+        });
+    }, []);
+
+    const value = {handleOpen, handleClose, closeNoConfirm};
 
     return (
         <ModalContext.Provider value={value}>
@@ -81,7 +89,7 @@ export const ModalProvider = (props: { children: ReactNode }) => {
                     aria-describedby="modal-description"
                 >
                     <Box sx={style}>
-                        <button className={cls.modalBtn} onClick={handleClose}>
+                        <button className={cls.modalBtn} onClick={closeNoConfirm}>
                             <i className="fas fa-times mx-xl-3 fs-3 text-black"/>
                         </button>
                         <div

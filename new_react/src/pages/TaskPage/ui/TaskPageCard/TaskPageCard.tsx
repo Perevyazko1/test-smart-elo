@@ -21,15 +21,16 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
     const {currentUser} = useCurrentUser();
 
     const cardHeight = 80;
-    const {handleOpen, handleClose} = useAppModal();
+    const {handleOpen, closeNoConfirm} = useAppModal();
 
     const viewClb = () => {
         handleOpen(
             <TaskForm
                 variant={'read_only'}
                 task={card}
-                onSubmitClb={handleClose}
-            />
+                onSubmitClb={closeNoConfirm}
+            />,
+            true,
         )
     };
 
@@ -37,9 +38,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
         <TaskForm
             variant={'edit'}
             task={card}
-            onSubmitClb={() => {
-                handleClose()
-            }}
+            onSubmitClb={closeNoConfirm}
         />
         , true
     )

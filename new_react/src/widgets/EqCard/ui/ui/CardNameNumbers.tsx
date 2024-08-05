@@ -42,7 +42,9 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
 
     const openTarifficationWidget = () => {
         handleOpen(
-            <TarifficationWidget production_step__id={card.card_info.production_step__id}/>
+            <TarifficationWidget
+                production_step__id={card.card_info.production_step__id}
+            />
         )
     }
 

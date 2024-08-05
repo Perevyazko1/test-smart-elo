@@ -43,6 +43,12 @@ $app-body-height: calc(100vh - $app-navbar-height);
   padding: 0 .15rem .15rem 0;
 }
 
+.circleBtn {
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+}
+
 .appBtn {
   display: flex;
   justify-content: center;
