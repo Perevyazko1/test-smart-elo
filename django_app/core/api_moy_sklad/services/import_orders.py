@@ -1,4 +1,5 @@
 from typing import Iterable
+import json
 
 from .import_images import ImportImages
 from ..adapters.create_order_product_entities import CreateOrderProductEntities
@@ -11,10 +12,6 @@ from ..db_methods.product_entities_to_db import ProductEntityToDB
 from ..network.get_orders_data import GetOrdersData
 from ..network.get_product_data import GetProductData
 from ..network.get_variant_data import GetVariantData
-
-
-import json
-
 from ..network.set_eq_link_in_order import set_eq_link_in_order
 
 
@@ -38,7 +35,8 @@ class ImportOrders:
     def execute(self):
         """Импорт данных с моего склада и формирование данных"""
         order_data: dict = GetOrdersData().execute()
-        order_entities: Iterable[OrderEntity] = OrderAdapter().execute(order_data)
+
+        order_entities: Iterable[OrderEntity] | None = OrderAdapter().execute(order_data)
 
         for order_entity in order_entities:
             order = order_entities_to_db(order_entity)

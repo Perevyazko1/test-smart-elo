@@ -3,6 +3,7 @@ from transliterate import translit
 import requests
 
 from ..config import GET_AUTH
+from ..services.solid_requests import solid_get_request
 
 
 @dataclass
@@ -19,4 +20,4 @@ class GetImageData:
     @staticmethod
     def execute(image_info: ImageInfo):
         """Получение бинарных данных о файле изображения"""
-        return requests.get(image_info.download_url, headers=GET_AUTH).content
+        return solid_get_request(image_info.download_url).content

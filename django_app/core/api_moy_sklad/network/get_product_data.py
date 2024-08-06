@@ -1,7 +1,7 @@
 import json
-import requests
 
-from ..config import GET_AUTH, PRODUCT_EXPAND, BASE_URL
+from ..config import PRODUCT_EXPAND, BASE_URL
+from ..services.solid_requests import solid_get_request
 
 
 class GetProductData:
@@ -19,5 +19,5 @@ class GetProductData:
         return self.product_base_url + "/" + product_id + "?" + self._make_product_expand()
 
     def execute(self, product_id: str):
-        req = requests.get(self._get_product_url(product_id), headers=GET_AUTH)
+        req = solid_get_request(self._get_product_url(product_id))
         return json.loads(req.text)
