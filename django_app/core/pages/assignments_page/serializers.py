@@ -15,6 +15,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'number',
             'status',
             'inspector',
+            'plane_date',
             'assembled',
             'appointed_by_boss',
         ]
@@ -32,7 +33,6 @@ class AssignmentTariffSerializer(serializers.ModelSerializer):
 
 class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
     co_executor = EmployeeSerializer(read_only=True)
-    co_executor_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         """Meta. """
@@ -41,7 +41,6 @@ class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
             'id',
             'co_executor',
             'amount',
-            'co_executor_id',
             'assignment',
         ]
 

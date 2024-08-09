@@ -169,20 +169,14 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
 
         min_plane_date = None
 
-        # Пройдитесь по каждому объекту в данных
         for assignment in assignment_data:
-            # Получите plane_date из текущего объекта
             plane_date = assignment.get('plane_date')
-            # Если plane_date не равна None и это первая не None дата или она меньше текущей минимальной даты
             if plane_date is not None and (min_plane_date is None or plane_date < min_plane_date):
                 min_plane_date = plane_date
 
-        # Верните результат
         if min_plane_date is not None:
-            # Если найдена ненулевая дата, верните ее
             result = min_plane_date
         else:
-            # Если все даты plane_date равны None, верните None
             result = None
         return result
 

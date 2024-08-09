@@ -1,12 +1,13 @@
 import React from "react";
 
+import {AppSkeleton} from "@shared/ui";
 import {Transaction} from "@entities/Transaction";
 
 import {GetTransactionList} from "../../model/api/api";
-import {AppSkeleton} from "@shared/ui";
 
 interface DayDetailProps {
-    daySrt: string;
+    startDate: string;
+    endDate: string;
     employeeId: number;
     onClick: (transaction: Transaction) => void;
 }
@@ -14,15 +15,17 @@ interface DayDetailProps {
 
 export const DayDetail = (props: DayDetailProps) => {
     const {
-        daySrt,
+        startDate,
+        endDate,
         employeeId,
         onClick,
     } = props;
 
     const {data, isLoading} = GetTransactionList({
         employee: employeeId,
-        add_date: daySrt.slice(0, 10),
-    })
+        start_date: startDate.slice(0, 10),
+        end_date: endDate.slice(0, 10),
+    });
 
     return (
         <>
@@ -34,9 +37,9 @@ export const DayDetail = (props: DayDetailProps) => {
                         style={{
                             cursor: 'pointer',
                             backgroundColor: transaction.inspect_date ? '#cee0c7' : '#ffc5c5',
-                    }}>
+                        }}>
                         <b>
-                            {`${transaction.transaction_type === "accrual" 
+                            {`${transaction.transaction_type === "accrual"
                                 ? "➕"
                                 : "➖"
                             }
@@ -61,7 +64,7 @@ export const DayDetail = (props: DayDetailProps) => {
             {data && data.length === 0 &&
                 <tr>
                     <td colSpan={3}>
-                        <h5>Нет транзакций за {daySrt.slice(0, 10)}</h5>
+                        <h6>Нет транзакций за {startDate.slice(0, 10)} - {endDate.slice(0, 10)}</h6>
                     </td>
                 </tr>
             }

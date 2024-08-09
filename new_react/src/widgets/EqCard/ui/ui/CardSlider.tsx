@@ -61,7 +61,7 @@ export const CardSlider = (props: CardSliderProps) => {
                             ? card.card_info.proposed_tariff
                             : 0
                     : undefined}
-                date={card.order.planned_date?.slice(-5)}
+                // date={card.order.planned_date?.slice(-5)}
             />
         </div>
     );

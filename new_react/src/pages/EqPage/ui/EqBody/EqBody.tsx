@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {motion} from "framer-motion";
 
 import {IsDesktopContext} from "@app";
@@ -127,116 +127,6 @@ export const EqBody = (props: EqBodyProps) => {
         };
     }, [dispatch, noRelevantIds]);
 
-    const distributeBlock = useMemo(() => (
-        expanded && (
-            <motion.div
-                initial={{opacity: 0}}
-                animate={{opacity: 1}}
-                style={{
-                    position: 'absolute',
-                    width: `${leftBlockWidth}px`,
-                    left: 0,
-                    top: 0,
-                    height: `${windowHeight}px`,
-                }}
-                transition={{duration: durationValue}}
-            >
-                <DistributeBlock
-                    deps={[listUpdated.inWork]}
-                    noRelevantIds={noRelevantIds || []}
-                />
-                <BlockName name={"НАЗНАЧЕНЫ"}/>
-            </motion.div>
-        )
-    ), [expanded, leftBlockWidth, windowHeight, durationValue, listUpdated.inWork, noRelevantIds]);
-
-    const inWorkBlock = useMemo(() => (
-        <motion.div
-            style={{
-                position: 'absolute',
-                top: 0,
-                ...(expanded ? {right: '0'} : {left: '0'}),
-                width: expanded ? rightBlockWidth : leftBlockWidth,
-                height: `${inWorkHeight}px`,
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                padding: '0 0 0 0.25rem',
-            }}
-            initial={{
-                right: expanded ? 0 : rightBlockWidth,
-            }}
-            animate={{
-                right: expanded ? 0 : rightBlockWidth,
-            }}
-            transition={{duration: durationValue}}
-        >
-            <EqCardList
-                listType={'in_work'}
-                expanded={expanded}
-                inited={filtersReady || false}
-                deps={[listUpdated.inWork]}
-                noRelevantIds={noRelevantIds}
-            />
-        </motion.div>
-    ), [expanded, rightBlockWidth, leftBlockWidth, inWorkHeight, durationValue, filtersReady, listUpdated.inWork, noRelevantIds]);
-
-    const readyBlock = useMemo(() => (
-        !expanded && (
-            <motion.div
-                style={{
-                    position: 'absolute',
-                    top: `${inWorkHeight + 36}px`,
-                    left: 0,
-                    width: leftBlockWidth,
-                    height: readyHeight,
-                    overflowX: 'hidden',
-                    overflowY: 'auto',
-                    padding: '0 0 0 0.15rem',
-                }}
-            >
-                <EqCardList
-                    listType={'ready'}
-                    expanded={expanded}
-                    inited={filtersReady || false}
-                    deps={[listUpdated.ready]}
-                    noRelevantIds={noRelevantIds}
-                />
-            </motion.div>
-        )
-    ), [expanded, inWorkHeight, leftBlockWidth, readyHeight, filtersReady, listUpdated.ready, noRelevantIds]);
-
-    const awaitBlock = useMemo(() => (
-        <motion.div
-            style={{
-                position: 'absolute',
-                top: expanded ? `${inWorkHeight + 36}px` : 0,
-                left: leftBlockWidth,
-                width: rightBlockWidth,
-                height: expanded ? windowHeight : readyHeight,
-                overflowX: 'hidden',
-                overflowY: 'auto',
-                padding: '0 0 0 .25rem',
-            }}
-            initial={{
-                top: expanded ? `${inWorkHeight + 36}px` : 0,
-                height: expanded ? `${readyHeight}px` : `${windowHeight}px`,
-            }}
-            animate={{
-                top: expanded ? `${inWorkHeight + 36}px` : 0,
-                height: expanded ? `${readyHeight}px` : `${windowHeight}px`,
-            }}
-            transition={{duration: durationValue}}
-        >
-            <EqCardList
-                listType={'await'}
-                expanded={expanded}
-                inited={filtersReady || false}
-                deps={[listUpdated.await]}
-                noRelevantIds={noRelevantIds}
-            />
-        </motion.div>
-    ), [expanded, inWorkHeight, leftBlockWidth, rightBlockWidth, readyHeight, windowHeight, durationValue, filtersReady, listUpdated.await, noRelevantIds]);
-
     return (
         <div className={'d-flex justify-content-center'} style={{
             background: "var(--bs-gray-300)",
@@ -249,17 +139,69 @@ export const EqBody = (props: EqBodyProps) => {
                     width: `${windowWidth}px`,
                 }}
             >
-                {distributeBlock}
+
+                {/*DISTRIBUTE BLOCK*/}
+                {expanded && (
+                    <motion.div
+                        initial={{opacity: 0}}
+                        animate={{opacity: 1}}
+                        style={{
+                            position: 'absolute',
+                            width: leftBlockWidth,
+                            maxWidth: '1200px',
+                            right: rightBlockWidth,
+                            top: 0,
+                            height: windowHeight,
+                        }}
+                        transition={{duration: durationValue}}
+                    >
+                        <DistributeBlock
+                            deps={[listUpdated.inWork]}
+                            noRelevantIds={noRelevantIds || []}
+                        />
+                        <BlockName name={"НАЗНАЧЕНЫ"}/>
+                    </motion.div>
+                )}
 
                 <div className={'h-100 bg-black'}
                      style={{
                          position: 'absolute',
                          width: '2px',
-                         left: `${leftBlockWidth}px`
+                         left: leftBlockWidth,
                      }}/>
 
-                {inWorkBlock}
+                {/*IN WORK BLOCK*/}
+                <motion.div
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
+                        width: expanded ? rightBlockWidth : leftBlockWidth,
+                        maxWidth: '1200px',
+                        height: inWorkHeight,
+                        overflowX: 'hidden',
+                        overflowY: 'auto',
+                        padding: '0 0 0 0.25rem',
+                    }}
+                    initial={{
+                        left: expanded ? leftBlockWidth: 0,
+                        right: expanded ? 0 : rightBlockWidth,
+                    }}
+                    animate={{
+                        ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
+                    }}
+                    transition={{duration: durationValue}}
+                >
+                    <EqCardList
+                        listType={'in_work'}
+                        expanded={expanded}
+                        inited={filtersReady || false}
+                        deps={[listUpdated.inWork]}
+                        noRelevantIds={noRelevantIds}
+                    />
+                </motion.div>
 
+                {/*WEEK BLOCK*/}
                 <EqWeeks
                     inWorkHeight={inWorkHeight}
                     rightBlockWidth={rightBlockWidth}
@@ -269,11 +211,64 @@ export const EqBody = (props: EqBodyProps) => {
                     showClb={showClb}
                     drag={drag}
                     resetSize={resetSize}
+                    durationValue={durationValue}
                 />
 
-                {readyBlock}
+                {/*READY BLOCK*/}
+                {!expanded && (
+                    <motion.div
+                        style={{
+                            position: 'absolute',
+                            top: inWorkHeight + 36,
+                            right: rightBlockWidth,
+                            width: leftBlockWidth,
+                            maxWidth: "1200px",
+                            height: readyHeight,
+                            overflowX: 'hidden',
+                            overflowY: 'auto',
+                            padding: '0 0 0 0.15rem',
+                        }}
+                    >
+                        <EqCardList
+                            listType={'ready'}
+                            expanded={expanded}
+                            inited={filtersReady || false}
+                            deps={[listUpdated.ready]}
+                            noRelevantIds={noRelevantIds}
+                        />
+                    </motion.div>
+                )}
 
-                {awaitBlock}
+                {/*AWAIT BLOCK*/}
+                <motion.div
+                    style={{
+                        position: 'absolute',
+                        top: expanded ? inWorkHeight + 36 : 0,
+                        left: leftBlockWidth,
+                        width: rightBlockWidth,
+                        height: expanded ? windowHeight : readyHeight,
+                        overflowX: 'hidden',
+                        overflowY: 'auto',
+                        padding: '0 0 0 .25rem',
+                    }}
+                    initial={{
+                        top: expanded ? inWorkHeight + 36 : 0,
+                        height: expanded ? readyHeight : windowHeight,
+                    }}
+                    animate={{
+                        top: expanded ? inWorkHeight + 36 : 0,
+                        height: expanded ? readyHeight : windowHeight,
+                    }}
+                    transition={{duration: durationValue}}
+                >
+                    <EqCardList
+                        listType={'await'}
+                        expanded={expanded}
+                        inited={filtersReady || false}
+                        deps={[listUpdated.await]}
+                        noRelevantIds={noRelevantIds}
+                    />
+                </motion.div>
             </div>
 
         </div>

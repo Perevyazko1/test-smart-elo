@@ -20,7 +20,6 @@ export const WagesWeek = (props: WagesWeekProps) => {
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
 
-
     return (
         <>
             <tr>
@@ -44,12 +43,12 @@ export const WagesWeek = (props: WagesWeekProps) => {
 
             {showDetails &&
                 <DayDetail
-                    daySrt={weekInfo.dt_dates[index]}
+                    startDate={weekInfo.dt_dates[index]}
+                    endDate={weekInfo.dt_dates[index]}
                     employeeId={employeeId}
                     onClick={(transaction) => onClick(transaction)}
                 />
             }
-
         </>
     )
 }

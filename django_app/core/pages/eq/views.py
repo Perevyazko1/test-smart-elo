@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 
 from core.models import (
-    OrderProduct, Assignment, ProductionStep,
+    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor,
 )
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
@@ -90,23 +90,31 @@ def get_week_data(request):
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
-    earned = Assignment.objects.filter(
-        executor=eq_params['user'],
-        department=eq_params['department'],
-        inspector__isnull=False,
-        date_completion__gte=week_info.date_range[0],
-        date_completion__lt=week_info.date_range[1],
-    ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
+    earned = Transaction.objects.filter(
+        employee=eq_params['user'],
+        inspect_date__gte=week_info.date_range[0],
+        inspect_date__lt=week_info.date_range[1],
+        transaction_type='accrual',
+        details='wages',
+    ).aggregate(Sum('amount')).get('amount__sum')
+
+    debiting = Transaction.objects.filter(
+        employee=eq_params['user'],
+        inspect_date__gte=week_info.date_range[0],
+        inspect_date__lt=week_info.date_range[1],
+        transaction_type='debiting',
+        details='wages',
+    ).aggregate(Sum('amount')).get('amount__sum')
 
     transactions_sum = Transaction.objects.filter(
         employee=eq_params['user'],
         inspect_date__gte=week_info.date_range[0],
         inspect_date__lt=week_info.date_range[1],
         transaction_type="accrual",
-        details__in=['prize', 'fine']
+        details='prize',
     ).aggregate(Sum('amount')).get('amount__sum')
 
-    week_info.earned = f'{earned or "0"}'
+    week_info.earned = f'{int((earned or 0) - (debiting or 0))}'
     if transactions_sum:
         week_info.earned += f' + {int(transactions_sum)}(доп)'
 
@@ -260,10 +268,25 @@ def update_assignments(request):
             if assignment.new_tariff:
                 if assignment.new_tariff.amount:
                     description = f'Отмена производства полуфабриката {assignment} {assignment.department.name}'
+                    co_executors = AssignmentCoExecutor.objects.filter(
+                        assignment=assignment
+                    )
+                    for co_executor in co_executors:
+                        Transaction.objects.create(
+                            transaction_type='debiting',
+                            details='wages',
+                            amount=co_executor.amount,
+                            employee=co_executor.co_executor,
+                            executor=user,
+                            inspector=user,
+                            description=description,
+                        )
+                    difference = co_executors.aggregate(total=Sum('amount'))['total'] or 0
+                    tariff = assignment.new_tariff.amount or 0
                     Transaction.objects.create(
                         transaction_type='debiting',
                         details='wages',
-                        amount=assignment.new_tariff.amount,
+                        amount=tariff - difference,
                         employee=assignment.executor,
                         executor=request.user,
                         inspector=request.user,
@@ -282,25 +305,9 @@ def update_assignments(request):
 
         if qs.exists():
             match mode:
-                case 'in_work':
-                    qs.filter(
-                        status='in_work'
-                    ).update(
-                        plane_date=date
-                    )
-                case 'all':
-                    qs.update(
-                        plane_date=date
-                    )
                 case 'selected':
                     qs.filter(
                         id__in=ids
-                    ).update(
-                        plane_date=date
-                    )
-                case 'await':
-                    qs.filter(
-                        status='await'
                     ).update(
                         plane_date=date
                     )

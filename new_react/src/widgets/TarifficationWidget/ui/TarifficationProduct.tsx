@@ -72,12 +72,23 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
 
     const setConfirmedTariff = () => {
         if (tariffCard.proposed_tariff) {
-            confirmTariff({
-                production_step__id: tariffCard.id,
-                tariff__id: tariffCard.proposed_tariff.id
-            })
+            if (tariffCard.confirmed_tariff) {
+                const confirmText = 'Внимание❗ При установлении нового тарифа все установленные ставки ' +
+                    'соисполнителей нарядов в рамках данного изделия БЕЗ ВИЗЫ будут обнулены. Продолжить?';
+                if (window.confirm(confirmText)) {
+                    confirmTariff({
+                        production_step__id: tariffCard.id,
+                        tariff__id: tariffCard.proposed_tariff.id
+                    });
+                }
+            } else {
+                confirmTariff({
+                    production_step__id: tariffCard.id,
+                    tariff__id: tariffCard.proposed_tariff.id
+                });
+            }
         }
-    }
+    };
 
     return (
 

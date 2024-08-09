@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit, Department
+from .consumers import ws_group_updates, ws_send_to_all, EqNotificationActions
 from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
 from .serializers import TechProcessSerializer
 from .services.assignment_generator import AssignmentGenerator
@@ -216,7 +217,10 @@ def set_tech_process(request):
 
         for order_product in active_order_products:
             AssignmentGenerator().init_order_product_assignments(order_product=order_product)
-
+            ws_send_to_all({
+                'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                'data': order_product.id,
+            })
         serializer = TechProcessSerializer
         data = serializer(technological_process, context={'request': request}).data
 

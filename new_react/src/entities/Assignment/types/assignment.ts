@@ -30,15 +30,21 @@ interface AssignmentTariff {
 }
 
 export interface AssignmentCoExecutor {
-    id: number;
+    id?: number;
     amount: number;
+    assignment: number;
     co_executor: Employee;
 }
 
-export interface AssignmentCoExecutorWrite extends Omit<AssignmentCoExecutor, 'id' | 'co_executor'> {
-    amount: number;
-    co_executor_id: number;
-    assignment: number;
+export interface AssignmentCoExecutorWrite {
+    action: 'delete' | 'update_or_create';
+    co_executor_ids?: number[];
+    assignment_ids?: number[];
+    data?: {
+        co_executor__id: number;
+        amount: number;
+    };
+
 }
 
 export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {

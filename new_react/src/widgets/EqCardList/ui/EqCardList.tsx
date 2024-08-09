@@ -102,6 +102,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
             <div
                 style={{
                     width: '100%',
+                    maxWidth: '1200px',
                     height: '100%',
                     overflowX: 'hidden',
                     overflowY: 'auto',

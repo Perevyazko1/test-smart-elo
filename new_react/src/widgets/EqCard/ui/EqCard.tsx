@@ -71,21 +71,31 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     }, [assignmentsLists.primary, assignmentsLists.selectedLocked, expanded, listType]);
 
     const hideFirstBtn = useMemo(() => {
-        if (isViewer) return true;
-        if (listType === 'await' && card.assignments.length === 0) return true;
-        if (listType === 'distribute') return true;
-        if (listType === 'ready' && (!isBoss || assignmentsLists.primary.length === 0)) return true;
-        return false;
-    }, [assignmentsLists.primary.length, card.assignments.length, isBoss, isViewer, listType]);
+            if (isViewer) return true;
+            if (listType === 'await' && card.assignments.length === 0) return true;
+            if (listType === 'distribute') return true;
+            if (listType === 'ready' && (!isBoss || assignmentsLists.primary.length === 0)) return true;
+            if (listType === 'ready' && !card.product.technological_process) return true;
+            return false;
+        },
+        [
+            assignmentsLists.primary.length,
+            card.assignments.length,
+            card.product.technological_process,
+            isBoss,
+            isViewer,
+            listType
+        ]
+    );
 
     const hideSecondBtn = useMemo(() => {
         if (isViewer) return true;
         if (listType === 'ready' && assignmentsLists.primary.length === 0) return true;
         return false;
     }, [assignmentsLists.primary.length, isViewer, listType]);
-    
+
     const firstBtnIsLocked = useMemo(() => {
-        if (listType === 'in_work' && 
+        if (listType === 'in_work' &&
             !expanded &&
             assignmentsLists.primary.length === 0
         ) {
@@ -153,15 +163,34 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         queryParameters,
         returnLocked
     ]);
-    
-    
+
+    const getPlaneDate = useCallback((first: boolean) => {
+        const targetDate = () => {
+            if (card.plane_date) {
+                return card.plane_date;
+            } else if (card.order.planned_date) {
+                return card.order.planned_date;
+            }
+        }
+        if (listType === 'await' && first) {
+            return targetDate();
+        } else if (listType === 'in_work' && !expanded && !first) {
+            return targetDate();
+        } else if (listType === 'in_work' && expanded && first) {
+            return targetDate();
+        } else if (listType === 'distribute' && !first) {
+            return targetDate();
+        } else {
+            return;
+        }
+    }, [card.order.planned_date, card.plane_date, expanded, listType])
 
 
     return (
         <EqCardBody card={card} {...otherProps}>
             {!hideFirstBtn &&
                 <EqCardBtn
-                    plane_date={card.plane_date}
+                    plane_date={getPlaneDate(true)}
                     expanded={expanded}
                     style={{minWidth: '39px', maxWidth: '39px'}}
                     cardType={listType}
@@ -190,6 +219,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             {!hideSecondBtn &&
                 <EqCardBtn
                     style={{minWidth: '39px', maxWidth: '39px'}}
+                    plane_date={getPlaneDate(false)}
                     cardType={listType}
                     expanded={expanded}
                     first={false}

@@ -93,9 +93,8 @@ export const ModalProvider = (props: { children: ReactNode }) => {
                             <i className="fas fa-times mx-xl-3 fs-3 text-black"/>
                         </button>
                         <div
-                            className={'p-md-2 p-sm-1 p-4 m-1 d-flex'}
+                            className={'m-1 p-md-2 p-sm-2 p-4'}
                             style={{
-                                height: '100%',
                                 overflowX: 'hidden',
                                 overflowY: 'auto',
                                 minWidth: '25dvw',

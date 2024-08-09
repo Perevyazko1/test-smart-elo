@@ -60,6 +60,10 @@ export const useWebSocket = () => {
             }
         }
 
+        if (data.action === 'WEEK_INFO_UPDATED') {
+            dispatch(eqPageActions.weekDataHasUpdated());
+        }
+
         if (data.action === 'NEW_NOTIFICATION') {
             if (data.for_user === currentUser.pin_code || !data.for_user) {
                 showNotification(data.title, {

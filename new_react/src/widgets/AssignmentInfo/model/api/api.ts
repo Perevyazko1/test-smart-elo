@@ -1,5 +1,5 @@
 import {rtkAPI} from "@shared/api";
-import {Assignment} from "@entities/Assignment";
+import {Assignment, AssignmentCoExecutorWrite} from "@entities/Assignment";
 
 interface AssignmentInfoApiProps {
     department__id: number;
@@ -27,17 +27,28 @@ const AssignmentInfoApi = rtkAPI.injectEndpoints({
             providesTags: () => [{type: 'AssignmentInfo', id: 'AssignmentInfo'}]
         }),
         editAssignments: build.mutation<any, EditAssignmentsInfoProps>({
-                    query: (props: EditAssignmentsInfoProps) => ({
-                        url: '/core/update_assignments_info/',
-                        method: 'POST',
-                        body: props,
-                    }),
-                    invalidatesTags: [
-                        {type: 'AssignmentInfo', id: 'AssignmentInfo'},
-                    ],
-                }),
+            query: (props: EditAssignmentsInfoProps) => ({
+                url: '/core/update_assignments_info/',
+                method: 'POST',
+                body: props,
+            }),
+            invalidatesTags: [
+                {type: 'AssignmentInfo', id: 'AssignmentInfo'},
+            ],
+        }),
+        updateCoExecutor: build.mutation<any, AssignmentCoExecutorWrite>({
+            query: (props: AssignmentCoExecutorWrite) => ({
+                url: `/core/update_co_executor/`,
+                method: 'POST',
+                body: props,
+            }),
+            invalidatesTags: [
+                {type: 'AssignmentInfo', id: 'AssignmentInfo'},
+            ],
+        }),
     }),
 });
 
 export const useGetAssignmentInfo = AssignmentInfoApi.useGetAssignmentsInfoQuery;
 export const useEditAssignmentInfo = AssignmentInfoApi.useEditAssignmentsMutation;
+export const useUpdateCoExecutor = AssignmentInfoApi.useUpdateCoExecutorMutation;

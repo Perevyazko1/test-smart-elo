@@ -27,14 +27,9 @@ class EmployeeModelFilter(django_filters.FilterSet):
 
 class TransactionModelFilter(django_filters.FilterSet):
     employee = django_filters.NumberFilter(field_name='employee__id')
-    add_date = django_filters.DateFilter(method='filter_by_add_date')
+    start_date = django_filters.DateFilter(field_name='add_date__date', lookup_expr='gte')
+    end_date = django_filters.DateFilter(field_name='add_date__date', lookup_expr='lte')
 
     class Meta:
         model = Transaction
-        fields = ['employee', 'add_date']
-
-    def filter_by_add_date(self, queryset, name, value):
-        if value:
-            return queryset.filter(add_date__date=value)
-        return queryset
-
+        fields = ['employee', 'start_date', 'end_date']

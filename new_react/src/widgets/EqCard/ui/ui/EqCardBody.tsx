@@ -19,7 +19,7 @@ export const EqCardBody = (props: EqCardBodyProps) => {
     }, [card.assignments.length])
 
     return (
-        <div className={'mt-1 pb-05'} {...otherProps} style={{height: `${cardHeight}px`}}>
+        <div className={'mt-1 pb-05'} {...otherProps} style={{height: `${cardHeight}px`, maxWidth: '1200px'}}>
             <div className={cls.overflowWrapper + ` bg-black rounded rounded-2 ${getScaled}`}>
                 {children}
             </div>

@@ -1,10 +1,12 @@
-import {Assignment, AssignmentCoExecutorWrite} from "@entities/Assignment";
+import {Assignment, AssignmentCoExecutor} from "@entities/Assignment";
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
-import React, {useMemo, useState} from "react";
+import React, {ReactNode, useEffect, useMemo, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {CoExecutorRow} from "@widgets/AssignmentInfo/ui/CoExecutorRow";
 import {Input} from "@mui/material";
 import {Employee} from "@entities/Employee";
+import {useCurrentUser, usePermission} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
 
 interface AssignmentInfoRowProps {
     assignment: Assignment;
@@ -15,77 +17,124 @@ interface AssignmentInfoRowProps {
 
 export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
     const {assignment, selected, onSelect, userList} = props;
-    const [newCoExecutors, setNewCoExecutors] = useState<AssignmentCoExecutorWrite[]>([]);
+    const [coExecutorsList, setCoExecutorsList] = useState<AssignmentCoExecutor[]>(assignment.co_executors);
+    const {currentUser} = useCurrentUser();
+    const hasBehalfPermission = usePermission(APP_PERM.BEHALF_ACTIONS)
 
-    const getStatusProps = useMemo((): { bg: string, name: string } => {
+    const getStatusProps = useMemo((): { icon: ReactNode, name: string } => {
         switch (assignment.status) {
             case 'await':
-                return {bg: 'bg-light', name: 'В ожидании'}
+                return {icon: '', name: 'В ожидании'}
             case 'in_work':
-                return {bg: 'bg-primary', name: 'В работе'}
+                return {icon: <i className="fas fa-tools text-warning me-2 fs-6"/>, name: 'В работе'}
             case 'ready':
                 if (assignment.inspector) {
-                    return {bg: 'bg-success', name: 'Готов'}
+                    return {icon: <i className="far fa-check-circle text-success me-2 fs-6"/>, name: 'Готов'}
                 } else {
-                    return {bg: 'bg-danger', name: 'Готов'}
+                    return {icon: <i className="far fa-check-circle text-danger me-2 fs-6"/>, name: 'Готов'}
                 }
             case 'created':
-                return {bg: 'bg-secondary', name: 'Создан'}
+                return {icon: '', name: 'Создан'}
         }
     }, [assignment.inspector, assignment.status]);
 
-
     const usersInList = useMemo((): Employee[] => {
-        const newUsers = newCoExecutors.map(coExecutor => coExecutor.co_executor_id);
-        const oldUsers = assignment.co_executors.map(co_executor => co_executor.co_executor.id);
-        const existIds = [...newUsers, ...oldUsers, assignment.executor && assignment.executor.id];
+        const oldUsers = coExecutorsList.map(co_executor => co_executor.co_executor.id);
+        const existIds = [...oldUsers, assignment.executor && assignment.executor.id];
 
         return userList.filter(user => !existIds.includes(user.id));
-    }, [assignment.co_executors, assignment.executor, newCoExecutors, userList]);
+    }, [assignment.executor, coExecutorsList, userList]);
+
+    useEffect(() => {
+        setCoExecutorsList(prevState => {
+            let newState = [...prevState];
+
+            assignment.co_executors.forEach(co_executor => {
+                const existingItem = newState.find(
+                    item => item.co_executor.id === co_executor.co_executor.id
+                );
+
+                if (existingItem) {
+                    newState = newState.map(item =>
+                        item.co_executor.id === co_executor.co_executor.id ? co_executor : item
+                    );
+                } else {
+                    newState.push(co_executor);
+                }
+            });
+            return newState;
+        });
+    }, [assignment.co_executors]);
 
 
     const addNewCoexecutor = () => {
-        if (usersInList.length > 1) {
-            setNewCoExecutors(prevState => {
+        if (usersInList.length > 0) {
+            setCoExecutorsList(prevState => {
                 return [...prevState, {
                     amount: 0,
                     assignment: assignment.id,
-                    co_executor_id: usersInList[0].id,
+                    co_executor: usersInList[0],
                 }]
             })
         }
     };
 
-    const setCoExecutor = (co_executor: AssignmentCoExecutorWrite) => {
-        setNewCoExecutors(prevCoExecutors => {
-            const existingIndex = prevCoExecutors.findIndex(
-                coExecutor => coExecutor.co_executor_id === co_executor.co_executor_id
-            );
-
-            if (existingIndex !== -1) {
-                const updatedCoExecutors = [...prevCoExecutors];
-                updatedCoExecutors[existingIndex] = co_executor;
-                return updatedCoExecutors;
-            } else {
-                return prevCoExecutors;
-            }
-        });
-    }
-
     const maxAddAmount = useMemo(() => {
         let newTax = 0;
-        newCoExecutors.forEach(item => newTax += item.amount);
-        assignment.co_executors.forEach(item => newTax += item.amount);
+        coExecutorsList.forEach(item => newTax += item.amount);
 
         return newTax;
-    }, [assignment.co_executors, newCoExecutors]);
+    }, [coExecutorsList]);
 
     const inputValue = useMemo(() => {
         if (assignment.new_tariff) {
             return assignment.new_tariff.amount - maxAddAmount;
         }
         return 0;
-    }, [assignment.new_tariff, maxAddAmount])
+    }, [assignment.new_tariff, maxAddAmount]);
+
+    const setValueClb = (executorId: number, newValue: number) => {
+        setCoExecutorsList(prevState => {
+            return prevState.map(item =>
+                item.co_executor.id === executorId ?
+                    {
+                        ...item,
+                        amount: newValue
+                    } :
+                    item
+            );
+        });
+    };
+
+    const setUserClb = (prevUserId: number, newUserId: number | null) => {
+        setCoExecutorsList(prevState => {
+            const newUser = usersInList.find(user => user.id === newUserId)
+            if (newUser && newUserId) {
+                return prevState.map(item =>
+                    item.co_executor.id === prevUserId ?
+                        {
+                            ...item,
+                            co_executor: newUser
+                        } :
+                        item
+                );
+            } else {
+                return prevState.filter(item => item.co_executor.id !== prevUserId)
+            }
+        });
+    };
+
+    const showNewCoExecutor = useMemo(() => {
+        if (!!assignment.executor && !assignment.inspector) {
+            if (assignment.executor?.id === currentUser.id) {
+                return true;
+            }
+            if (hasBehalfPermission) {
+                return true;
+            }
+        }
+        return false;
+    }, [assignment.executor, assignment.inspector, currentUser.id, hasBehalfPermission]);
 
     return (
         <>
@@ -99,29 +148,31 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                     />
                 </td>
                 <td>{assignment.appointed_by_boss && <i className="far fa-check-circle text-success"/>}</td>
-                <td>{assignment.number}</td>
-                <td className={'fs-7'}>
+                <td className={'fs-6 fw-bold'}>{assignment.number}</td>
+                <td className={'fs-7 text-danger fw-bold'}>
                     {getHumansDatetime(assignment.plane_date || '')}
                 </td>
-
 
                 <td>
                     {getEmployeeName(assignment.executor)}
                 </td>
 
                 <td>
-                    {/*<button*/}
-                    {/*    className={'appBtn circleBtn greenBtn fs-7'}*/}
-                    {/*    onClick={addNewCoexecutor}*/}
-                    {/*    style={{height: '25px', width: '25px'}}*/}
-                    {/*>*/}
-                    {/*    <PersonAddIcon fontSize={'small'}/>*/}
-                    {/*</button>*/}
+                    {showNewCoExecutor &&
+                        <button
+                            className={'appBtn circleBtn fs-7'}
+                            onClick={addNewCoexecutor}
+                            style={{height: '25px', width: '25px'}}
+                        >
+                            <PersonAddIcon fontSize={'small'}/>
+                        </button>
+                    }
                 </td>
 
 
-                <td className={getStatusProps.bg}>
-                    {getStatusProps.name}
+                <td className={'text-nowrap'}>
+                    {getStatusProps.icon}
+                    <b>{getStatusProps.name}</b>
                 </td>
 
 
@@ -142,35 +193,35 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                     {getHumansDatetime(assignment.inspect_date || "")}
                 </td>
 
-                <td className={'align-middle pb-0'}>
-                    <Input
-                        value={inputValue}
-                        size="small"
-                        readOnly
-                        className={'fw-bold'}
-                        inputProps={{
-                            type: 'number',
-                            sx: {
-                                padding: 0,
-                            }
-                        }}
-                    />
-                </td>
+                {!!assignment.new_tariff &&
+                    <td className={'align-middle pb-0'}>
+                        <Input
+                            value={inputValue}
+                            size="small"
+                            readOnly
+                            className={'fw-bold'}
+                            inputProps={{
+                                type: 'number',
+                                sx: {
+                                    padding: 0,
+                                }
+                            }}
+                        />
+                    </td>
+                }
             </tr>
 
-            {/*{assignment.co_executors.map(co_executor => (*/}
-            {/*    <CoExecutorRow maxValue={maxAddAmount + inputValue} co_executor={co_executor} key={co_executor.id}/>*/}
-            {/*))}*/}
-
-            {/*{newCoExecutors.map((co_executor, index) =>*/}
-            {/*    <CoExecutorRow*/}
-            {/*        maxValue={co_executor.amount + inputValue}*/}
-            {/*        setCoExecutor={setCoExecutor}*/}
-            {/*        new_co_executor={co_executor}*/}
-            {/*        userList={usersInList}*/}
-            {/*        key={co_executor.co_executor_id || index}*/}
-            {/*    />*/}
-            {/*)}*/}
+            {coExecutorsList.map(co_executor => (
+                <CoExecutorRow
+                    disabled={!showNewCoExecutor}
+                    maxValue={co_executor.amount + inputValue}
+                    setValue={setValueClb}
+                    setUser={setUserClb}
+                    userList={co_executor.id ? [] : usersInList}
+                    co_executor={co_executor}
+                    key={co_executor.co_executor.id}
+                />
+            ))}
         </>
     );
 };

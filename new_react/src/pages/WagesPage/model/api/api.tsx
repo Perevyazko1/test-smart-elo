@@ -11,7 +11,8 @@ interface GetWagesWeekInfoProps {
 
 interface GetTransactionProps {
     employee: number,
-    add_date: string,
+    start_date: string,
+    end_date: string,
 }
 
 interface CreateTransactionProps {
@@ -26,84 +27,85 @@ interface GetAssignmentsCount {
 
 const WagesApi = rtkAPI.injectEndpoints({
         endpoints: (build) => ({
-                getWagesList: build.query<WagesList, GetWagesListProps>({
-                    query: (props: GetWagesListProps) => ({
-                        url: '/staff/wages_list/',
-                        params: {
-                            ...props,
-                            ordering: 'first_name',
-                        }
-                    }),
-                    providesTags: (result) => [{type: 'WagesList', id: 'WagesList'}]
+            getWagesList: build.query<WagesList, GetWagesListProps>({
+                query: (props: GetWagesListProps) => ({
+                    url: '/staff/wages_list/',
+                    params: {
+                        ...props,
+                        ordering: 'first_name',
+                    }
                 }),
-                getWagesWeekInfo: build.query<WagesWeekInfo, GetWagesWeekInfoProps>({
-                    query: (props: GetWagesWeekInfoProps) => ({
-                        url: '/staff/get_wages_week_info/',
-                        params: {
-                            ...props
-                        }
-                    }),
-                    providesTags: (result) => result ? [{type: 'WagesWeekInfo', id: "WagesWeekInfo"}] : [],
+                providesTags: (result) => [{type: 'WagesList', id: 'WagesList'}]
+            }),
+            getWagesWeekInfo: build.query<WagesWeekInfo, GetWagesWeekInfoProps>({
+                query: (props: GetWagesWeekInfoProps) => ({
+                    url: '/staff/get_wages_week_info/',
+                    params: {
+                        ...props
+                    }
                 }),
-                getTransaction: build.query<Transaction[], GetTransactionProps>({
-                    query: (props: GetTransactionProps) => ({
-                        url: '/staff/transactions/',
-                        params: {
-                            ...props,
-                            ordering: '-inspector',
-                        }
-                    }),
-                    providesTags: (result?: Transaction[]) =>
-                        result ? [{type: 'Transaction', id: 'ALL'}]: [],
+                providesTags: (result) => result ? [{type: 'WagesWeekInfo', id: "WagesWeekInfo"}] : [],
+            }),
+            getTransaction: build.query<Transaction[], GetTransactionProps>({
+                query: (props: GetTransactionProps) => ({
+                    url: '/staff/transactions/',
+                    params: {
+                        employee: props.employee,
+                        start_date: props.start_date,
+                        end_date: props.end_date,
+                        ordering: '-inspector',
+                    }
                 }),
-                createTransaction: build.mutation<Transaction, CreateTransactionProps>({
-                    query: (props: CreateTransactionProps) => ({
-                        url: '/staff/transactions/',
-                        method: 'POST',
-                        body: props.transactionData,
-                    }),
-                    invalidatesTags: [
-                        {type: 'Transaction', id: 'ALL'},
-                        {type: 'WagesList', id: 'WagesList'},
-                        {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
-                    ],
+                providesTags: (result?: Transaction[]) =>
+                    result ? [{type: 'Transaction', id: 'ALL'}] : [],
+            }),
+            createTransaction: build.mutation<Transaction, CreateTransactionProps>({
+                query: (props: CreateTransactionProps) => ({
+                    url: '/staff/transactions/',
+                    method: 'POST',
+                    body: props.transactionData,
                 }),
+                invalidatesTags: [
+                    {type: 'Transaction', id: 'ALL'},
+                    {type: 'WagesList', id: 'WagesList'},
+                    {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
+                ],
+            }),
 
-                updateTransaction: build.mutation<Transaction, { id: number, transactionData: Partial<Transaction> }>({
-                    query: ({id, transactionData}) => ({
-                        url: `/staff/transactions/${id}/`,
-                        method: 'PATCH',
-                        body: transactionData
-                    }),
-                    invalidatesTags: (result, error, {id}) => [
-                        {type: 'Transaction', id: 'ALL'},
-                        {type: 'WagesList', id: 'WagesList'},
-                        {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
-                    ],
+            updateTransaction: build.mutation<Transaction, { id: number, transactionData: Partial<Transaction> }>({
+                query: ({id, transactionData}) => ({
+                    url: `/staff/transactions/${id}/`,
+                    method: 'PATCH',
+                    body: transactionData
                 }),
+                invalidatesTags: (result, error, {id}) => [
+                    {type: 'Transaction', id: 'ALL'},
+                    {type: 'WagesList', id: 'WagesList'},
+                    {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
+                ],
+            }),
 
-                deleteTransaction: build.mutation<{ success: boolean, id: number }, number>({
-                    query: (id) => ({
-                        url: `/staff/transactions/${id}/`,
-                        method: 'DELETE',
-                    }),
-                    invalidatesTags: (result, error) => [
-                        {type: 'Transaction', id: 'ALL'},
-                        {type: 'WagesList', id: 'WagesList'},
-                        {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
-                    ],
+            deleteTransaction: build.mutation<{ success: boolean, id: number }, number>({
+                query: (id) => ({
+                    url: `/staff/transactions/${id}/`,
+                    method: 'DELETE',
                 }),
+                invalidatesTags: (result, error) => [
+                    {type: 'Transaction', id: 'ALL'},
+                    {type: 'WagesList', id: 'WagesList'},
+                    {type: 'WagesWeekInfo', id: "WagesWeekInfo"},
+                ],
+            }),
 
-                getAssignmentCounts: build.query<{results: AssignmentsCounter[]}, GetAssignmentsCount>({
-                    query: (props: GetWagesListProps) => ({
-                        url: '/staff/get_assignment_counts/',
-                        params: {
-                            ...props,
-                        }
-                    }),
+            getAssignmentCounts: build.query<{ results: AssignmentsCounter[] }, GetAssignmentsCount>({
+                query: (props: GetWagesListProps) => ({
+                    url: '/staff/get_assignment_counts/',
+                    params: {
+                        ...props,
+                    }
                 }),
-            }
-        )
+            }),
+        })
     })
 ;
 

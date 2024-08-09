@@ -9,7 +9,7 @@ from core.models import (
     ProductionStep,
     OrderProduct,
     Tariff,
-    Assignment,
+    Assignment, AssignmentCoExecutor,
 )
 from staff.models import (
     Audit, Transaction,
@@ -139,13 +139,18 @@ def set_confirmed_tariff(request):
     production_step.confirmed_tariff = new_tariff
     production_step.save()
 
-    Assignment.objects.filter(
+    assignments_for_update = Assignment.objects.filter(
         order_product__product=production_step.product,
         department=production_step.department,
         inspector__isnull=True,
-    ).update(
+    )
+
+    assignments_for_update.update(
         new_tariff=new_tariff
     )
+    AssignmentCoExecutor.objects.filter(
+        assignment__in=assignments_for_update
+    ).distinct().update(amount=0)
 
     detail = f'Утвердил тариф в размере {new_tariff.amount} для этапа производства id: {production_step.id}'
     Audit.objects.create(

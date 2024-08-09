@@ -1,11 +1,12 @@
 import datetime
 
 from django.db import transaction
+from django.db.models import Sum
 
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
-from core.consumers import ws_group_updates, EqNotificationActions, ws_update_notification
-from core.models import OrderProduct, Assignment, ProductionStep
+from core.consumers import ws_group_updates, EqNotificationActions, ws_update_notification, ws_send_to_department
+from core.models import OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor
 from staff.models import Employee, Department, Audit, Transaction
 
 
@@ -80,6 +81,8 @@ class UpdateAssignments:
                         assignment.executor = self.original_user
                         assignment.save()
 
+                        assignment.co_executors.all().delete()
+
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                             'data': assignment.order_product.id,
@@ -127,6 +130,7 @@ class UpdateAssignments:
                         assignment.executor = None
                         assignment.appointment_date = None
                         assignment.save()
+                        assignment.co_executors.all().delete()
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -350,16 +354,40 @@ class UpdateAssignments:
             )
             if target_assignment.new_tariff:
                 if target_assignment.new_tariff.amount:
-                    description = f'Производство полуфабриката {target_assignment} {target_assignment.department.name}'
+                    co_executors = AssignmentCoExecutor.objects.filter(
+                        assignment=target_assignment
+                    )
+                    description = (f'Соисполнитель в производстве полуфабриката {target_assignment} '
+                                   f'{target_assignment.department.name}')
+                    for co_executor in co_executors:
+                        Transaction.objects.create(
+                            transaction_type='accrual',
+                            details='wages',
+                            amount=co_executor.amount,
+                            employee=co_executor.co_executor,
+                            executor=target_assignment.inspector,
+                            inspector=target_assignment.inspector,
+                            description=description,
+                        )
+
+                    description = (f'Производство полуфабриката {target_assignment} '
+                                   f'{target_assignment.department.name}')
+                    difference = co_executors.aggregate(total=Sum('amount'))['total'] or 0
+                    tariff = target_assignment.new_tariff.amount or 0
                     Transaction.objects.create(
                         transaction_type='accrual',
                         details='wages',
-                        amount=target_assignment.new_tariff.amount,
+                        amount=tariff - difference,
                         employee=target_assignment.executor,
                         executor=target_assignment.inspector,
                         inspector=target_assignment.inspector,
                         description=description,
                     )
+
+        ws_send_to_department(
+            self.department.number,
+            {'action': 'WEEK_INFO_UPDATED'}
+        )
 
     @transaction.atomic
     def execute(self):

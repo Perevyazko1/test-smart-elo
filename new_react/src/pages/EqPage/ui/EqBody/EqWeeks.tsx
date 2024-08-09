@@ -1,14 +1,17 @@
 import React, {useContext, useEffect, useMemo} from "react";
-import {Button} from "react-bootstrap";
+import {Button, Table} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 import {motion} from "framer-motion";
 
 import {IsDesktopContext} from "@app";
-import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
 import {AppSkeleton} from "@shared/ui";
+import {DayDetail} from "@pages/WagesPage/ui/WagesWeek/DayDetail";
+import {Transaction} from "@entities/Transaction";
+import {TransactionInfo} from "@pages/EqPage/ui/EqBody/TransactionInfo";
 
 interface EqWeeksProps {
     rightBlockWidth: number;
@@ -19,14 +22,26 @@ interface EqWeeksProps {
     resetSize: () => void;
     expanded: boolean;
     inWorkHeight: number;
+    durationValue: number;
 }
 
 export const EqWeeks = (props: EqWeeksProps) => {
-    const {leftBlockWidth, rightBlockWidth, isDragging, showClb, drag, resetSize, expanded, inWorkHeight} = props;
+    const {
+        leftBlockWidth,
+        rightBlockWidth,
+        isDragging,
+        showClb,
+        drag,
+        resetSize,
+        expanded,
+        inWorkHeight,
+        durationValue,
+    } = props;
 
     const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
 
     const dispatch = useAppDispatch();
+    const {handleOpen} = useAppModal();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
     const filtersReady = useAppSelector(eqFiltersReady);
@@ -53,17 +68,83 @@ export const EqWeeks = (props: EqWeeksProps) => {
         currentUser.current_department
     ]);
 
-    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned])
+    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]);
 
-    const getWeekString = () => {
+    useEffect(() => {
+
+    }, [queryParameters.view_mode])
+
+    const wagesBtn = useMemo(() => {
+        const viewMode = queryParameters.view_mode;
+        let useId = currentUser.id
+        if (!isNaN(Number(viewMode))) {
+            useId = Number(viewMode)
+        }
+        return (
+            weekData ?
+                <button
+                    className={'appBtn rounded px-1 mx-1 p-0'}
+                    style={{
+                        backgroundColor: currentUser.current_department?.color || '#ffffff',
+                        lineHeight: '12px'
+                    }}
+                    onClick={() => handleOpen(
+                        <Table bordered striped hover>
+                            <tbody>
+                            <DayDetail
+                                onClick={(transaction: Transaction) =>
+                                    handleOpen(<TransactionInfo transaction={transaction}/>)
+                                }
+                                employeeId={useId}
+                                startDate={weekData.dt_dates[0].slice(0, 10) || ""}
+                                endDate={weekData.dt_dates[6].slice(0, 10) || ""}
+                            />
+                            </tbody>
+                        </Table>
+                    )}
+                >
+                    {getEarnedSum}
+                </button>
+                :
+                <></>
+        )
+    }, [
+        currentUser.current_department?.color,
+        currentUser.id,
+        getEarnedSum,
+        handleOpen,
+        queryParameters.view_mode,
+        weekData
+    ]);
+
+    const getWeekString = useMemo(() => {
         if (blockWidthPx > 650) {
-            return `Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
-            по ${weekData?.str_dates ? weekData.str_dates[6] : ''}   | ЗП: ${getEarnedSum}`;
+            return (
+                <>
+                    {`Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''}
+                    по ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `}
+                    {wagesBtn}
+                </>
+            );
         } else if (blockWidthPx > 550) {
-            return `Нед. ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
-            по ${weekData?.str_dates ? weekData.str_dates[6] : ''}   | ЗП: ${getEarnedSum}`;
+            return (
+                <>
+                    {
+                        `Нед. ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} по 
+                        ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `
+                    }
+                    {wagesBtn}
+                </>
+            );
         } else if (blockWidthPx > 400) {
-            return `Нед. ${weekData?.week} | ЗП: ${getEarnedSum}`;
+            return (
+                <>
+                    {
+                        `Нед. ${weekData?.week} | ЗП: `
+                    }
+                    {wagesBtn}
+                </>
+            );
         } else if (blockWidthPx > 300) {
             return `Нед. ${weekData?.week}`;
         } else if (blockWidthPx > 250) {
@@ -71,27 +152,29 @@ export const EqWeeks = (props: EqWeeksProps) => {
         } else {
             return '';
         }
-    }
+    }, [blockWidthPx, wagesBtn, weekData?.str_dates, weekData?.week])
 
     return (
         <motion.div
-            className={'d-flex justify-content-between align-items-center px-1 gap-1 rounded border border-1'}
+            className={`d-flex justify-content-${expanded ? "start" : "end"} align-items-center px-1 gap-1 rounded border border-1 `}
             style={{
                 height: '36px',
                 backgroundColor: currentUser.current_department?.color || '#ffffff',
                 opacity: isDragging ? 0.5 : 1,
-                width: `${blockWidthPx}px`,
+                width: blockWidthPx,
+                maxWidth: '1200px',
                 position: 'absolute',
                 top: `${inWorkHeight}px`,
-                ...(expanded ? {right: '0'} : {left: '0'}),
+                ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
             }}
             initial={{
+                left: expanded ? leftBlockWidth : 0,
                 right: expanded ? 0 : rightBlockWidth,
             }}
             animate={{
-                right: expanded ? 0 : rightBlockWidth,
+                ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
             }}
-            transition={{duration: 0.3}}
+            transition={{duration: durationValue}}
         >
             {!isDesktop &&
                 <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
@@ -122,7 +205,12 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     </Button>
 
                     <div className={'d-flex flex-fill justify-content-center'}>
-                        {!weekData?.isLoading ? getWeekString() : <AppSkeleton className={'h-100 flex-fill'}/>}
+                        {!weekData?.isLoading ?
+                            <>
+                                {getWeekString}
+                            </> :
+                            <AppSkeleton className={'h-100 flex-fill'}/>
+                        }
                     </div>
 
 
