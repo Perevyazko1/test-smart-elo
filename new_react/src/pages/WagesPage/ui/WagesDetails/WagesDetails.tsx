@@ -84,68 +84,71 @@ export const WagesDetails = (props: WagesDetailsProps) => {
                             <p>{employee.description || 'У сотрудника нет описания'}</p>
                             <div className={'gap-2 d-flex flex-wrap'}>
                                 {employee.departments?.map((department) => (
-                                    <Button
-                                        size={"sm"}
+                                    <button
                                         key={department.id}
+                                        className={'appBtn fs-7 p-1'}
                                         style={{backgroundColor: department.color}}
-                                        variant={'outline-dark'}
                                         onClick={() => setQueryParam(
                                             'department__name',
                                             department.name || ""
                                         )}
                                     >
                                         {department.name}
-                                    </Button>
+                                    </button>
                                 ))}
                             </div>
                         </div>
 
                         <div style={{
-                            minWidth: "250px",
-                            maxWidth: "250px",
+                            minWidth: "270px",
+                            maxWidth: "270px",
                         }}
                              className={'gap-1 d-flex flex-wrap'}
                         >
                             {addPermission &&
-                                <Button variant={'warning'}
-                                        style={{height: "62px", width: "120px"}}
+                                <button
+                                    className={'appBtn p-1 yellowBtn text-black'}
+                                    style={{width: "130px"}}
                                         onClick={() => showWagesModalClb(
                                             {transaction_type: 'cash', details: 'wages'}
                                         )}
                                 >
-                                    ➕ Зарплата
-                                </Button>
+                                    ➕ Выдача
+                                </button>
                             }
                             {addPermission &&
-                                <Button variant={'danger'}
-                                        style={{height: "62px", width: "120px"}}
+                                <button
+                                    className={'appBtn p-1 redBtn text-black'}
+                                    style={{width: "130px"}}
                                         onClick={() => showWagesModalClb({
                                             transaction_type: 'debiting',
                                             details: 'fine'
                                         })}
                                 >
                                     ➖ Штраф
-                                </Button>
+                                </button>
                             }
 
-                            <Button variant={'secondary'}
-                                    style={{height: "62px", width: "120px"}}
+                            <button
+                                    className={'appBtn p-1 greyBtn text-black'}
+                                    style={{width: "130px"}}
                                     onClick={() => alert('Функция печати данных за неделю находится в разработке.')}
+                                    disabled
                             >
                                 🖨️ Печать
-                            </Button>
+                            </button>
 
 
                             {addPermission &&
-                                <Button
-                                    variant={'success'}
-                                    style={{height: "62px", width: "120px"}}
+                                <button
+                                    className={'appBtn p-1 greenBtn text-black'}
+                                    style={{width: "130px"}}
                                     onClick={() => showWagesModalClb(
                                         {transaction_type: 'accrual', details: 'wages'}
                                     )}
                                 >
-                                    ➕ Начислить
-                                </Button>
+                                    ➕ Начисление
+                                </button>
                             }
                         </div>
                     </Col>

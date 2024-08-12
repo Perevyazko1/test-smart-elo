@@ -1,5 +1,5 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
-import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
+import {Col, Form, InputGroup, Row} from "react-bootstrap";
 
 
 import {WagesItem} from "../../model/types/types";
@@ -249,21 +249,33 @@ export const AddTransactionForm = (props: AddTransactionFormProps) => {
 
                 <div className={'d-flex gap-3 pt-3'}>
                     {!transaction && !formData.id && addPermission &&
-                        <Button onClick={handleCreate} disabled={isLoading}>
+                        <button
+                            className={'p-1 appBtn greyBtn px-2 text-black'}
+                            onClick={handleCreate}
+                            disabled={isLoading}
+                        >
                             Создать транзакцию
-                        </Button>
+                        </button>
                     }
                     {!transaction?.inspect_date && !formData.inspect_date &&
                         <>
                             {confirmPermission &&
-                                <Button variant={'success'} onClick={handleConfirm} disabled={isUpdating}>
+                                <button
+                                    className={'p-1 appBtn greenBtn px-2 text-black'}
+                                    onClick={handleConfirm}
+                                    disabled={isUpdating}
+                                >
                                     Завизировать
-                                </Button>
+                                </button>
                             }
                             {deletePermissions &&
-                                <Button variant={'danger'} onClick={handleDelete} disabled={isDeleting}>
+                                <button
+                                    className={'p-1 appBtn redBtn px-2 text-black'}
+                                    onClick={handleDelete}
+                                    disabled={isDeleting}
+                                >
                                     Удалить
-                                </Button>
+                                </button>
                             }
                         </>
                     }
