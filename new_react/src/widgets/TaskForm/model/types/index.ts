@@ -6,6 +6,7 @@ type ExtendedFields =
     'executor' |
     'co_executors' |
     'for_departments' |
+    'new_comment_count' |
     'id' |
     'ready_at' |
     'created_by' |

@@ -108,7 +108,6 @@ export const TaskBtn = (props: TaskBtnProps) => {
                 status: TaskStatus.Pending,
                 co_executors: card.co_executors?.map(user => user.id),
                 for_departments: card.for_departments?.map(department => department.id),
-                execution_comment: '',
             }
             if (card.appointed_by?.id === currentUser.id) {
                 if (card.executor?.id === currentUser.id) {

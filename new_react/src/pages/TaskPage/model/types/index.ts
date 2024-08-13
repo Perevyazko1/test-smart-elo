@@ -19,9 +19,10 @@ export interface Task {
     for_departments?: Department[];
     title: string;
     description?: string;
-    execution_comment?: string;
 
     deadline?: string;
+    new_comment_count: number;
+    last_comment?: TaskComment;
     created_at?: string;
     ready_at?: string;
     verified_at?: string;
@@ -34,12 +35,24 @@ export interface Task {
     task_images?: TaskImage[];
 }
 
+export interface TaskComment {
+    id: number;
+    author: number;
+    task: number;
+    comment: string;
+    add_date: string;
+}
+
+export interface NewTaskComment extends Omit<TaskComment, 'id' | 'add_date'>{
+}
+
 type UpdateTaskOmitFields =
     'status' |
     'urgency' |
     'view_mode' |
     'title' |
     'appointed_by' |
+    'new_comment_count' |
     'executor' |
     'co_executors' |
     'for_departments' |

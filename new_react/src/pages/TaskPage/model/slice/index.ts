@@ -101,19 +101,23 @@ const taskPageSlice = createSlice({
             })
 
             .addCase(getTaskCard.fulfilled, (state, action) => {
-                state.await.results = state.await.results.filter(item => item.id !== action.payload.id)
-                state.inWork.results = state.inWork.results.filter(item => item.id !== action.payload.id)
-                state.ready.results = state.ready.results.filter(item => item.id !== action.payload.id)
+                const updateList = (list: typeof state.await.results) => {
+                    const index = list.findIndex(item => item.id === action.payload.id);
+                    if (index !== -1) {
+                        list[index] = action.payload;
+                    } else {
+                        return list.filter(item => item.id !== action.payload.id);
+                    }
+                    return list;
+                };
 
-                if (action.payload.status === TaskStatus.Pending) {
-                    state.await.results = [...state.await.results, action.payload];
-                } else if (action.payload.status === TaskStatus.InProgress) {
-                    state.inWork.results = [...state.inWork.results, action.payload];
-                } else {
-                    state.ready.results = [...state.ready.results, action.payload];
-                }
+                state.await.results = updateList(state.await.results);
+                state.inWork.results = updateList(state.inWork.results);
+                state.ready.results = updateList(state.ready.results);
+
                 state.noRelevantIds = state.noRelevantIds.filter(item => item !== action.payload.id);
             })
+
             .addCase(getTaskCard.rejected, (state, action) => {
                 state.await.results = state.await.results.filter(item => item.id !== action.meta.arg.id)
                 state.inWork.results = state.inWork.results.filter(item => item.id !== action.meta.arg.id)

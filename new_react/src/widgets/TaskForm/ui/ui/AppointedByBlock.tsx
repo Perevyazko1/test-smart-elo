@@ -21,6 +21,9 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
     return (
         <AppAutocomplete
             className={'flex-fill'}
+            style={{
+                minWidth: '250px'
+            }}
             variant={'select'}
             value={getValue}
             label={isLoading ? "Загрузка..." : "Задачу назначил"}

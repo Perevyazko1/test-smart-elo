@@ -1,22 +1,31 @@
 from dataclasses import asdict
+from datetime import datetime
 
+from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 
 from core.consumers import ws_send_to_all, ws_send_to_department
 from core.services.get_week_info import GetWeekInfo
-from .filters import TaskModelFilter
-from .models import Task, TaskImage
-from .serializers import TaskReadSerializer, TaskWriteSerializer, TaskImageSerializer
+from .filters import TaskModelFilter, TaskCommentModelFilter
+from .models import Task, TaskImage, TaskComment, TaskViewInfo
+from .serializers import TaskReadSerializer, TaskWriteSerializer, TaskImageSerializer, TaskCommentSerializer, \
+    TaskViewInfoSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     filterset_class = TaskModelFilter
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['user'] = self.request.user
+        return context
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -128,3 +137,44 @@ class TaskImageViewSet(viewsets.ModelViewSet):
                 'data': task_id
             }
         )
+
+
+class TaskCommentViewSet(viewsets.ModelViewSet):
+    queryset = TaskComment.objects.all()
+    filterset_class = TaskCommentModelFilter
+    serializer_class = TaskCommentSerializer
+
+
+class TaskViewInfoViewSet(viewsets.ModelViewSet):
+    queryset = TaskViewInfo.objects.all()
+    serializer_class = TaskViewInfoSerializer
+
+    @action(detail=False, methods=['post'], url_path='update_view')
+    def update_view_date(self, request):
+        employee_id = request.data.get('employee_id')
+        task_id = request.data.get('task_id')
+
+        if not employee_id or not task_id:
+            return Response({"detail": "Invalid data."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            TaskViewInfo.objects.update_or_create(
+                employee_id=employee_id,
+                task_id=task_id,
+            )
+            return Response(
+                {"detail": "Task view date updated successfully."},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Переопределяем метод list для фильтрации по task_id
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        task_id = self.request.query_params.get('task_id')
+
+        if task_id:
+            queryset = queryset.filter(task_id=task_id)
+
+        return queryset

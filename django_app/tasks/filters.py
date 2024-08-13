@@ -2,7 +2,14 @@ import django_filters
 from django.db.models import QuerySet, Q
 
 from core.services.get_week_info import GetWeekInfo
-from .models import Task
+from .models import Task, TaskComment
+
+
+class TaskCommentModelFilter(django_filters.FilterSet):
+
+    class Meta:
+        model = TaskComment
+        fields = ['task']
 
 
 class TaskModelFilter(django_filters.FilterSet):

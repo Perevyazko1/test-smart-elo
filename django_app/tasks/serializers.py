@@ -3,13 +3,31 @@ from rest_framework import serializers
 from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer, DepartmentSerializer
 
-from .models import Task, TaskImage
+from .models import Task, TaskImage, TaskComment, TaskViewInfo
 
 
 class TaskImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = TaskImage
         fields = ['id', 'image', 'thumbnail']
+
+
+class TaskViewInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskViewInfo
+        fields = ['id', 'employee', 'task', 'last_date']
+
+
+class TaskCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TaskComment
+        fields = [
+            'id',
+            'add_date',
+            'author',
+            'comment',
+            'task',
+        ]
 
 
 class TaskReadSerializer(serializers.ModelSerializer):
@@ -20,15 +38,42 @@ class TaskReadSerializer(serializers.ModelSerializer):
     co_executors = EmployeeSerializer(many=True)
     for_departments = DepartmentSerializer(many=True)
 
+    new_comment_count = serializers.SerializerMethodField(read_only=True)
+    last_comment = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Task
         fields = [
             'id', 'status', 'urgency', 'view_mode', 'for_departments',
             'title', 'description', 'execution_comment', 'deadline', 'created_at', 'created_by', 'ready_at',
             'verified_at', 'appointed_at', 'appointed_by', 'executor', 'co_executors',
-            'task_images',
+            'task_images', 'new_comment_count', 'last_comment',
         ]
 
+    def get_new_comment_count(self, obj: Task):
+        """Get image url method. """
+        last_check = TaskViewInfo.objects.filter(
+            employee=self.context.get('user'),
+            task=obj,
+        )
+        if last_check.exists():
+            return TaskComment.objects.filter(
+                task=obj,
+                add_date__gt=last_check[0].last_date
+            ).count()
+        else:
+            return TaskComment.objects.filter(
+                task=obj,
+            ).count()
+
+    def get_last_comment(self, obj: Task):
+        """Get image url method. """
+        last_comment = TaskComment.objects.filter(
+            task=obj,
+        )
+        if last_comment.exists():
+            return TaskCommentSerializer(last_comment[0]).data
+        return None
 
 class TaskWriteSerializer(serializers.ModelSerializer):
     images = serializers.ListField(

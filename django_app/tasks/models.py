@@ -111,9 +111,65 @@ class Task(models.Model):
         verbose_name="Соисполнители",
         related_name="co_executors_tasks",
     )
+    amount = models.IntegerField("Сумма/Вознаграждение", default=0)
 
     def __str__(self):
         return '{}'.format(f'{self.created_by.username} => {self.title}')
+
+
+class TaskComment(models.Model):
+    class Meta:
+        verbose_name = 'Комментарий к задаче'
+        verbose_name_plural = 'Комментарии к задачам'
+        ordering = ['-add_date']
+
+    author = models.ForeignKey(
+        Employee,
+        verbose_name="Автор",
+        related_name="task_comment_author",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    task = models.ForeignKey(
+        Task,
+        verbose_name="Задача",
+        related_name="task_comments",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    comment = models.CharField("Комментарий", max_length=255)
+    add_date = models.DateTimeField('Дата добавления', auto_now_add=True, blank=True,
+                                    null=True)
+
+    def __str__(self):
+        return '{}'.format(f'{self.author}: {self.task.id} - {self.comment[:50]}')
+
+
+class TaskViewInfo(models.Model):
+    class Meta:
+        verbose_name = 'Просмотр задачи'
+        verbose_name_plural = 'Просмотры задач'
+
+    employee = models.ForeignKey(
+        Employee,
+        verbose_name="Пользователь",
+        related_name="task_employee_view",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    task = models.ForeignKey(
+        Task,
+        verbose_name="Задача",
+        related_name="task_view_info",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    last_date = models.DateTimeField(
+        'Дата просмотра', blank=True, null=True, auto_now=True
+    )
+
+    def __str__(self):
+        return '{}'.format(f'{self.employee}: {self.task.id} - {self.last_date}')
 
 
 class TaskImage(models.Model):

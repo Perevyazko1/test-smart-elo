@@ -1,7 +1,9 @@
 import React, {useContext, useEffect} from "react";
 
-import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
+import {IsDesktopContext} from "@app";
+import {BlockName} from "@widgets/EqCardList";
 import {useResizableBlocks, useWindowDimensions} from "@pages/EqPage";
+import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import cls from "../TaskPage.module.scss";
 
@@ -12,8 +14,6 @@ import {AwaitSection} from "../Sections/AwaitSection";
 import {Weeks} from "../Sections/Weeks";
 import {InWorkSection} from "../Sections/InWorkSection";
 import {ReadySection} from "../Sections/ReadySection";
-import {IsDesktopContext} from "@app";
-import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
 
 
 export const TaskPageBody = (props: { setShowNavbar: () => void }) => {

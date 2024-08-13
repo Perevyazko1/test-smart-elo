@@ -3,13 +3,13 @@ import {InputGroup} from "react-bootstrap";
 import {Button} from "@mui/material";
 
 import {convertDateTime, prepareFormData} from "@shared/lib";
-import {useCurrentUser} from "@shared/hooks";
-import {Task, TaskStatus, TaskUrgency, TaskViewMode} from "@pages/TaskPage";
+import {useAppDispatch, useCurrentUser} from "@shared/hooks";
+import {Task, taskPageActions, TaskStatus, TaskUrgency, TaskViewMode} from "@pages/TaskPage";
 import {UpdateTask} from "@pages/TaskPage/model/types";
 import {getStatusText} from "@pages/TaskPage/model/lib";
 
 import {CreateTask} from "../model/types";
-import {useCreateTask, useUpdateTask} from "../model/api";
+import {useCreateTask, useTaskUpdateViewInfo, useUpdateTask} from "../model/api";
 
 import {ImageUploadBlock} from "./ui/ImageUploadBlock";
 import {DatesBlock} from "./ui/DatesBlock";
@@ -23,8 +23,9 @@ import {AppointedByBlock} from "./ui/AppointedByBlock";
 import {DeadlineBlock} from "./ui/DeadlineBlock";
 import {TextDescriptionBlock} from "./ui/TextDescriptionBlock";
 import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
-import {TextResultBlock} from "@widgets/TaskForm/ui/ui/TextResultBlock";
+import {CommentInputBlock} from "@widgets/TaskForm/ui/ui/CommentInputBlock";
 import {useSortedUserList} from "@entities/Employee";
+import {CommentList} from "@widgets/TaskForm/ui/ui/CommentList";
 
 
 interface TaskFormProps {
@@ -37,9 +38,11 @@ interface TaskFormProps {
 export const TaskForm = (props: TaskFormProps) => {
     const {task, variant, onSubmitClb} = props;
     const {currentUser} = useCurrentUser();
+    const dispatch = useAppDispatch();
     const {sortedUserList, usersIsLoading} = useSortedUserList();
     const [createTask, {isLoading: isCreated}] = useCreateTask();
     const [updateTask, {isLoading: isUpdated}] = useUpdateTask();
+    const [updateViewInfo] = useTaskUpdateViewInfo();
 
 
     const [formData, setFormData] = useState<CreateTask>({
@@ -54,9 +57,18 @@ export const TaskForm = (props: TaskFormProps) => {
         executor: task?.executor?.id || null,
         co_executors: task?.co_executors?.map(item => item.id) || [],
         appointed_by: task?.appointed_by?.id || null,
-        execution_comment: task?.execution_comment || '',
     });
 
+    useEffect(() => {
+        if (task?.id) {
+            updateViewInfo({
+                employeeId: currentUser.id,
+                taskId: task.id,
+            }).then(() => {
+                dispatch(taskPageActions.addNoRelevantId(task.id));
+            })
+        }
+    }, [currentUser.id, dispatch, task?.id, updateViewInfo]);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -274,14 +286,18 @@ export const TaskForm = (props: TaskFormProps) => {
                     setFormTask={setFormData}
                 />
 
-                <TextResultBlock
-                    task={task}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
+                {task?.id &&
+                    <>
+                        <CommentInputBlock task={task}/>
+                        <CommentList
+                            taskId={task.id}
+                        />
+                    </>
+
+                }
+                <hr className={'m-1'}/>
             </div>
 
-            <hr className={'m-1'}/>
 
             <div className={'d-flex gap-2 pb-3'}>
 
@@ -298,12 +314,9 @@ export const TaskForm = (props: TaskFormProps) => {
                 }
 
                 {
-                    (variant !== 'create' && !task?.verified_at &&
-                        (formData.executor === currentUser.id ||
-                            formData.co_executors.includes(currentUser.id) ||
-                            (variant === 'edit' && formData.created_by === currentUser.id)
-                        )
-                    ) &&
+                    !task?.verified_at &&
+                    variant === 'edit' &&
+                    formData.created_by === currentUser.id &&
                     <Button
                         variant={'outlined'}
                         color="inherit"

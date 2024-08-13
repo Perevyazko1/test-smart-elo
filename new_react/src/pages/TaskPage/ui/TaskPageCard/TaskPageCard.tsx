@@ -31,7 +31,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                 onSubmitClb={closeNoConfirm}
             />,
             true,
-        )
+        );
     };
 
     const editClb = () => handleOpen(
@@ -78,7 +78,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                     />
                 }
 
-                <div className={cls.sliderBlock + ' bg-light rounded'}
+                <div className={cls.sliderBlock + ' bg-light rounded position-relative'}
                      style={{
                          width: '72px',
                          minWidth: '72px',
@@ -99,19 +99,43 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                         height={'100%'}
                         images={card.task_images?.map(image => image.thumbnail)}
                     />
+                    {card.new_comment_count > 0 &&
+                        <div
+                            className={'position-absolute bg-danger d-flex justify-content-center align-items-center border border-dark border-1'}
+                            style={{
+                                fontSize: '8px',
+                                borderRadius: '50%',
+                                height: '12px',
+                                width: '12px',
+                                top: 0,
+                                right: 0,
+                            }}
+                        >
+                            <b>{card.new_comment_count}</b>
+                        </div>
+                    }
                 </div>
 
                 <div className={'bg-light rounded ' + cls.textBlock}>
                     № {card.id} {card.title}
-                    <hr className={'m-0 p-0'}/>
-                    <div className={'fs-7'}>
-                        {card.description}
-                    </div>
-                    {card.execution_comment &&
+
+                    {card.description &&
                         <>
-                            <hr className={'m-0 p-0'}/>
+                            <hr className={'mt-1 m-0 p-0'}/>
+                            <div className={'fs-7 pb-1'}>
+                                {card.description}
+                            </div>
+                        </>
+                    }
+
+                    {card.last_comment &&
+                        <>
+                            <hr className={'mt-1 m-0 p-0'}/>
                             <div className={'fs-7'}>
-                                <b>Результат:</b> {card.execution_comment}
+                                <b>Посл. комментарий:</b>
+                                <div className={'fs-7'}>
+                                    {card.last_comment.comment}
+                                </div>
                             </div>
                         </>
                     }
