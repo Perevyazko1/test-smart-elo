@@ -60,10 +60,14 @@ class TaskReadSerializer(serializers.ModelSerializer):
             return TaskComment.objects.filter(
                 task=obj,
                 add_date__gt=last_check[0].last_date
+            ).exclude(
+                author=self.context.get('user'),
             ).count()
         else:
             return TaskComment.objects.filter(
                 task=obj,
+            ).exclude(
+                author=self.context.get('user'),
             ).count()
 
     def get_last_comment(self, obj: Task):
@@ -74,6 +78,7 @@ class TaskReadSerializer(serializers.ModelSerializer):
         if last_comment.exists():
             return TaskCommentSerializer(last_comment[0]).data
         return None
+
 
 class TaskWriteSerializer(serializers.ModelSerializer):
     images = serializers.ListField(
