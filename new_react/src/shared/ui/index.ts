@@ -1,3 +1,4 @@
+export {AppSelect} from "@shared/ui/AppSelect/AppSelect";
 export {AppInput} from "@shared/ui/AppInput/AppInput";
 export {IndicatorWrapper} from "@shared/ui/IndicatorWrapper/IndicatorWrapper";
 export {AppSlider} from "@shared/ui/AppSlider/AppSlider";

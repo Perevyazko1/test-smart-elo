@@ -1,29 +1,26 @@
 """Views for EQ Page. """
 from dataclasses import asdict
 
-from django.http import JsonResponse, Http404
 from django.db.models import Sum
-
+from django.http import JsonResponse, Http404
 from rest_framework import viewsets, status
-from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from core.models import (
     OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor,
 )
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
-
-from ...consumers import EqNotificationActions, ws_group_updates
-from ...services.get_week_info import GetWeekInfo
-
 from .serializers import EqOrderProductSerializer
-
 from .service.get_eq_card_queryset import get_eq_card_queryset
 from .service.get_eq_req_params import get_eq_req_params
 from .service.get_project_filter import get_project_filters
 from .service.get_view_modes import get_view_modes
 from .service.update_assignments import UpdateAssignments
+from ...consumers import EqNotificationActions, ws_group_updates
+from ...services.get_week_info import GetWeekInfo
+from ...signals import update_assignments_and_clean_cache
 
 
 class EqCardsViewSet(viewsets.ModelViewSet):
@@ -90,33 +87,32 @@ def get_week_data(request):
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
-    earned = Transaction.objects.filter(
-        employee=eq_params['user'],
-        inspect_date__gte=week_info.date_range[0],
-        inspect_date__lt=week_info.date_range[1],
-        transaction_type='accrual',
-        details='wages',
-    ).aggregate(Sum('amount')).get('amount__sum')
 
-    debiting = Transaction.objects.filter(
-        employee=eq_params['user'],
-        inspect_date__gte=week_info.date_range[0],
-        inspect_date__lt=week_info.date_range[1],
-        transaction_type='debiting',
-        details='wages',
-    ).aggregate(Sum('amount')).get('amount__sum')
+    if eq_params['view_mode_key'] == 'boss':
+        assignments_sum = Assignment.objects.filter(
+            inspect_date__gte=week_info.date_range[0],
+            inspect_date__lt=week_info.date_range[1],
+        ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
-    transactions_sum = Transaction.objects.filter(
-        employee=eq_params['user'],
-        inspect_date__gte=week_info.date_range[0],
-        inspect_date__lt=week_info.date_range[1],
-        transaction_type="accrual",
-        details='prize',
-    ).aggregate(Sum('amount')).get('amount__sum')
+        transactions_sum = 0
+    else:
+        assignments_sum = Assignment.objects.filter(
+            executor=eq_params['user'],
+            inspect_date__gte=week_info.date_range[0],
+            inspect_date__lt=week_info.date_range[1],
+        ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
-    week_info.earned = f'{int((earned or 0) - (debiting or 0))}'
+        transactions_sum = Transaction.objects.filter(
+            employee=eq_params['user'],
+            inspect_date__gte=week_info.date_range[0],
+            inspect_date__lt=week_info.date_range[1],
+            transaction_type="accrual",
+            details__in=['prize', 'other'],
+        ).aggregate(Sum('amount')).get('amount__sum')
+
+    week_info.earned = f'{assignments_sum or 0}'
     if transactions_sum:
-        week_info.earned += f' + {int(transactions_sum)}(доп)'
+        week_info.earned += f'/{int(transactions_sum)}(доп)'
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
@@ -195,7 +191,12 @@ def update_assignments(request):
                                   f'Устраните несоответствие или обратитесь к администратору.'
                     }, status=400, json_dumps_params={"ensure_ascii": False})
                 else:
-                    other_assignments.update(assembled=False)
+                    update_assignments_and_clean_cache(
+                        other_assignments,
+                        order_product.id,
+                        None,
+                        assembled=False
+                    )
                     order_product.product.technological_process_confirmed = None
                     order_product.product.save()
 
@@ -304,13 +305,12 @@ def update_assignments(request):
         )
 
         if qs.exists():
+            qs = qs.filter(id__in=ids)
             match mode:
                 case 'selected':
-                    qs.filter(
-                        id__in=ids
-                    ).update(
-                        plane_date=date
-                    )
+                    for assignment in qs:
+                        assignment.plane_date = date
+                        assignment.save()
         else:
             return JsonResponse({
                 "result": 'ok'}, json_dumps_params={"ensure_ascii": False})

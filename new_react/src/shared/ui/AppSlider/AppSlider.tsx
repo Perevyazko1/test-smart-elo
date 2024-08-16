@@ -14,7 +14,7 @@ import {STATIC_URL} from "@shared/consts";
 
 interface AppSliderProps {
     price?: number,
-    // date?: string,
+    totalPrice?: number,
     images?: string[],
     width?: string,
     height?: string,
@@ -25,7 +25,7 @@ interface AppSliderProps {
 export const AppSlider = memo((props: AppSliderProps) => {
     const {
         price,
-        // date,
+        totalPrice,
         images,
         bgColor = ' bg-light',
         width = '100px',
@@ -89,23 +89,23 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     </div>
                 }
 
-                {/*{date &&*/}
-                {/*    <div*/}
-                {/*        style={{*/}
-                {/*            position: "absolute",*/}
-                {/*            bottom: "1px",*/}
-                {/*            right: "0",*/}
-                {/*            margin: "auto",*/}
-                {/*            zIndex: "999",*/}
-                {/*            opacity: "0.7",*/}
-                {/*            pointerEvents: "none",*/}
-                {/*        }}*/}
-                {/*    >*/}
-                {/*        <div className={"fw-bolder bg-light border rounded fs-7"} style={{padding: "0 0.1rem"}}>*/}
-                {/*            {date}*/}
-                {/*        </div>*/}
-                {/*    </div>*/}
-                {/*}*/}
+                {totalPrice &&
+                    <div
+                        style={{
+                            position: "absolute",
+                            bottom: "1px",
+                            right: "0",
+                            margin: "auto",
+                            zIndex: "999",
+                            opacity: "0.7",
+                            pointerEvents: "none",
+                        }}
+                    >
+                        <div className={"fw-bolder bg-light border rounded fs-7"} style={{padding: "0 0.1rem"}}>
+                            {totalPrice}
+                        </div>
+                    </div>
+                }
             </>
 
 

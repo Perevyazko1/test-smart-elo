@@ -7,24 +7,25 @@ import {EqOrderProduct} from "@widgets/EqCardList";
 import cls from "./EqCard.module.scss";
 
 import {createEqNumberLists, EqNumberListTipe} from "../../model/lib/createEqNumberLists";
-import { setTargetNumber } from "../../model/lib/setTargetNumber";
+import {setTargetNumber} from "../../model/lib/setTargetNumber";
 
 import {EqNumbers} from "./EqNumbers";
 import {TarifficationWidget} from "@widgets/TarifficationWidget";
 
 interface CardNameNumbersProps {
+    getUserInitials?: (assignmentNumber: number) => string;
+    getTariff?: (assignmentNumber: number) => number | undefined;
     card: EqOrderProduct;
     assignmentsLists: EqNumberListTipe;
     setAssignmentsLists: (props: EqNumberListTipe) => void;
 }
 
 export const CardNameNumbers = (props: CardNameNumbersProps) => {
-    const {card, assignmentsLists, setAssignmentsLists} = props;
+    const {card, assignmentsLists, setAssignmentsLists, getUserInitials, getTariff} = props;
     const {handleOpen} = useAppModal();
 
     const {queryParameters, setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
-
 
     const setNumber = (assignment_number: number) => {
         setAssignmentsLists(setTargetNumber({
@@ -51,7 +52,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     return (
         <div className={cls.nameNumberBlock + ' bg-light rounded'}>
             <div className={cls.productName}>
-                {card.further_packaging && "📦"}
+                {card.card_info.further_packaging && "📦"}
                 {currentUser.current_department?.piecework_wages &&
                     <Button
                         size={"sm"}
@@ -75,7 +76,17 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <hr className={'m-0 p-0'}/>
 
             <div className={cls.numbersBlock}>
-                <EqNumbers assignmentsLists={assignmentsLists} setNumber={setNumber}/>
+                {card.assignments.length > 1 &&
+                    <div className={'d-flex h-100 align-items-center fw-bold fs-7'}>
+                        {card.assignments.length}:
+                    </div>
+                }
+                <EqNumbers
+                    getUserInitials={getUserInitials}
+                    assignmentsLists={assignmentsLists}
+                    setNumber={setNumber}
+                    getTariff={getTariff}
+                />
             </div>
         </div>
     );

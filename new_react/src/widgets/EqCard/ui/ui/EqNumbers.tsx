@@ -1,70 +1,73 @@
 import React from "react";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
+import {EqNumberBtn} from "@widgets/EqCard/ui/ui/EqNumberBtn";
 
 interface EqNumbersProps {
+    getUserInitials?: (assignmentNumber: number) => string;
+    getTariff?: (assignmentNumber: number) => number | undefined;
     assignmentsLists: EqNumberListTipe,
     setNumber: (number: number) => void;
 }
 
 export const EqNumbers = (props: EqNumbersProps) => {
-    const {assignmentsLists, setNumber} = props;
+    const {assignmentsLists, setNumber, getUserInitials, getTariff} = props;
 
 
     return (
         <>
             {assignmentsLists.primary.map((number) => (
-                <button
-                    className={'appBtn blueBtn p-1 rounded h-100 fw-bold'}
-                    style={{minWidth: '35px'}}
+                <EqNumberBtn
+                    getTariff={getTariff}
+                    getUserInitials={getUserInitials}
+                    number={number}
                     key={number}
-                    onClick={() => setNumber(number)}
-                >
-                    {number}
-                </button>
+                    setNumber={setNumber}
+                    colorCls={'blueBtn'}
+                />
             ))}
 
             {assignmentsLists.selectedLocked.map((number) => (
-                <button
-                    className={'appBtn blackBtn p-1 rounded h-100 fw-bold'}
-                    style={{minWidth: '35px'}}
+                <EqNumberBtn
+                    getTariff={getTariff}
+                    getUserInitials={getUserInitials}
+                    number={number}
                     key={number}
-                    onClick={() => setNumber(number)}
-                >
-                    {number}
-                </button>
+                    setNumber={setNumber}
+                    colorCls={'blackBtn'}
+                />
             ))}
 
             {assignmentsLists.secondary.map((number) => (
-                <button
-                    className={'appBtn greyBtn p-1 rounded h-100 fw-bold'}
-                    style={{minWidth: '35px'}}
+                <EqNumberBtn
+                    getTariff={getTariff}
+                    getUserInitials={getUserInitials}
+                    number={number}
                     key={number}
-                    onClick={() => setNumber(number)}
-                >
-                    {number}
-                </button>
+                    setNumber={setNumber}
+                    colorCls={'greyBtn'}
+                />
             ))}
 
             {assignmentsLists.lockedNums.map((number) => (
-                <button
-                    className={'appBtn p-1 rounded h-100 fw-bold'}
-                    style={{minWidth: '35px'}}
+                <EqNumberBtn
+                    getTariff={getTariff}
+                    getUserInitials={getUserInitials}
+                    number={number}
                     key={number}
-                    onClick={() => setNumber(number)}
-                >
-                    {number}
-                </button>
+                    setNumber={setNumber}
+                    colorCls={''}
+                />
             ))}
 
             {assignmentsLists.confirmed.map((number) => (
-                <button
-                    className={'appBtn greenBtn p-1 rounded h-100 fw-bold'}
-                    style={{minWidth: '35px'}}
+                <EqNumberBtn
+                    getTariff={getTariff}
+                    getUserInitials={getUserInitials}
+                    number={number}
                     key={number}
-                >
-                    {number}
-                </button>
+                    colorCls={'greenBtn'}
+                />
             ))}
         </>
     );

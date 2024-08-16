@@ -1,6 +1,6 @@
 import React, {useMemo} from "react";
 
-import {EqOrderProduct} from "@widgets/EqCardList";
+import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {AppSlider} from "@shared/ui";
 import {useAppModal, useCompactMode, useCurrentUser} from "@shared/hooks";
 
@@ -11,13 +11,20 @@ import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
 
 interface CardSliderProps {
     card: EqOrderProduct;
+    cardType: ListTypes,
 }
 
 export const CardSlider = (props: CardSliderProps) => {
-    const {card} = props;
+    const {card, cardType} = props;
     const {isCompactMode} = useCompactMode();
     const {currentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
+
+    const totalCount = useMemo(() => {
+        let total = 0;
+        card.assignments.forEach(item => item.new_tariff?.amount ? total += item.new_tariff.amount : null)
+        return total;
+    }, [card.assignments]);
 
     const sliderWidth = useMemo(() => {
         if (isCompactMode) {
@@ -61,7 +68,7 @@ export const CardSlider = (props: CardSliderProps) => {
                             ? card.card_info.proposed_tariff
                             : 0
                     : undefined}
-                // date={card.order.planned_date?.slice(-5)}
+                totalPrice={cardType !== 'await' ? totalCount : 0}
             />
         </div>
     );

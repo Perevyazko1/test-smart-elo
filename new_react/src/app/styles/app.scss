@@ -98,7 +98,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
   &.greenBtn {
     background-color: #347051;
     border: 1.5px solid #419b6b;
-    color: #ccffd9;
+    color: #dbffe2;
 
     &:active {
       background-color: #1f553a;
@@ -108,9 +108,9 @@ $app-body-height: calc(100vh - $app-navbar-height);
   }
 
   &.yellowBtn {
-    background-color: #bb9300;
+    background-color: #ffe480;
     border: 1.5px solid #ffd83f;
-    color: #fff4d0;
+    color: #282214;
 
     &:active {
       background-color: #e6b800;
@@ -121,7 +121,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
 
   &.blueBtn {
     background-color: #1955b2;
-    border: 1.5px solid #164da2;
+    border: 1.5px solid #122d5b;
     color: #e4dfdc;
 
     &:active {
@@ -132,9 +132,9 @@ $app-body-height: calc(100vh - $app-navbar-height);
   }
 
   &.redBtn {
-    background-color: #a92824;
+    background-color: #e15555;
     border: 1.5px solid #d9534f;
-    color: #ffbcb8;
+    color: #211515;
 
     &:active {
       background-color: #b52b27;

@@ -6,21 +6,6 @@ from core.serializers import OrderProductSerializer
 from staff.serializers import EmployeeSerializer, DepartmentSerializer
 
 
-class SimpleAssignmentSerializer(serializers.ModelSerializer):
-    class Meta:
-        """Meta. """
-        model = Assignment
-        fields = [
-            'id',
-            'number',
-            'status',
-            'inspector',
-            'plane_date',
-            'assembled',
-            'appointed_by_boss',
-        ]
-
-
 class AssignmentTariffSerializer(serializers.ModelSerializer):
     class Meta:
         """Meta. """
@@ -28,6 +13,25 @@ class AssignmentTariffSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'amount',
+        ]
+
+
+class SimpleAssignmentSerializer(serializers.ModelSerializer):
+    new_tariff = AssignmentTariffSerializer()
+
+    class Meta:
+        """Meta. """
+        model = Assignment
+        fields = [
+            'id',
+            'new_tariff',
+            'executor',
+            'number',
+            'status',
+            'inspector',
+            'plane_date',
+            'assembled',
+            'appointed_by_boss',
         ]
 
 

@@ -25,7 +25,6 @@ def get_eq_card_count_data(order_product: OrderProduct, department: Department):
 
         queryset = order_product.assignments.filter(department=department)
         in_work_count = queryset.filter(status='in_work').count(),
-
         ready_count = queryset.filter(status='ready').count(),
         await_count = queryset.filter(status='await').count(),
     else:

@@ -1,5 +1,5 @@
 import {Transaction, TRANSACTION_DETAILS, TRANSACTION_TYPES} from "@entities/Transaction";
-import {Button, Col, Form, InputGroup, Row} from "react-bootstrap";
+import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import React from "react";
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
 

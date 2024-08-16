@@ -1,17 +1,14 @@
 import React, {useContext, useEffect, useMemo} from "react";
-import {Button, Table} from "react-bootstrap";
+import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 import {motion} from "framer-motion";
 
 import {IsDesktopContext} from "@app";
-import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
+import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
 import {AppSkeleton} from "@shared/ui";
-import {DayDetail} from "@pages/WagesPage/ui/WagesWeek/DayDetail";
-import {Transaction} from "@entities/Transaction";
-import {TransactionInfo} from "@pages/EqPage/ui/EqBody/TransactionInfo";
 
 interface EqWeeksProps {
     rightBlockWidth: number;
@@ -41,7 +38,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
 
     const dispatch = useAppDispatch();
-    const {handleOpen} = useAppModal();
     const {currentUser} = useCurrentUser();
     const {queryParameters, setQueryParam} = useAppQuery();
     const filtersReady = useAppSelector(eqFiltersReady);
@@ -74,56 +70,13 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
     }, [queryParameters.view_mode])
 
-    const wagesBtn = useMemo(() => {
-        const viewMode = queryParameters.view_mode;
-        let useId = currentUser.id
-        if (!isNaN(Number(viewMode))) {
-            useId = Number(viewMode)
-        }
-        return (
-            weekData ?
-                <button
-                    className={'appBtn rounded px-1 mx-1 p-0'}
-                    style={{
-                        backgroundColor: currentUser.current_department?.color || '#ffffff',
-                        lineHeight: '12px'
-                    }}
-                    onClick={() => handleOpen(
-                        <Table bordered striped hover>
-                            <tbody>
-                            <DayDetail
-                                onClick={(transaction: Transaction) =>
-                                    handleOpen(<TransactionInfo transaction={transaction}/>)
-                                }
-                                employeeId={useId}
-                                startDate={weekData.dt_dates[0].slice(0, 10) || ""}
-                                endDate={weekData.dt_dates[6].slice(0, 10) || ""}
-                            />
-                            </tbody>
-                        </Table>
-                    )}
-                >
-                    {getEarnedSum}
-                </button>
-                :
-                <></>
-        )
-    }, [
-        currentUser.current_department?.color,
-        currentUser.id,
-        getEarnedSum,
-        handleOpen,
-        queryParameters.view_mode,
-        weekData
-    ]);
-
     const getWeekString = useMemo(() => {
         if (blockWidthPx > 650) {
             return (
                 <>
                     {`Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''}
                     по ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `}
-                    {wagesBtn}
+                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 550) {
@@ -133,7 +86,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         `Нед. ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} по 
                         ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `
                     }
-                    {wagesBtn}
+                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 400) {
@@ -142,7 +95,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     {
                         `Нед. ${weekData?.week} | ЗП: `
                     }
-                    {wagesBtn}
+                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 300) {
@@ -152,7 +105,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
         } else {
             return '';
         }
-    }, [blockWidthPx, wagesBtn, weekData?.str_dates, weekData?.week])
+    }, [blockWidthPx, getEarnedSum, weekData?.str_dates, weekData?.week])
 
     return (
         <motion.div

@@ -21,7 +21,7 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
                 true
             )}
         >
-            {card.department_info.map((info, index) => (
+            {card.card_info.employees_info.map((info, index) => (
                 <div key={index}>
                     {info.full_name} {info.count_in_work} ({info.count_all})
                     <hr className={'m-0 p-0'}/>

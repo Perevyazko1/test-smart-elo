@@ -3,7 +3,7 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 import {getEmployeeName} from "@shared/lib";
-import {AppRangeInput} from "@shared/ui/AppRangeInput";
+import {AppRangeInput} from "@shared/ui/AppRangeInput/AppRangeInput";
 import {AppSkeleton} from "@shared/ui";
 import {Employee} from "@entities/Employee";
 import {Assignment} from "@entities/Assignment";

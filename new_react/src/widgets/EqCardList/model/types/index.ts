@@ -1,5 +1,6 @@
 import {TechProcess} from "@entities/TechProcess";
 import {Employee} from "@entities/Employee";
+import {Tariff} from "@pages/TarifficationPage";
 
 export type ListTypes = 'await' | 'in_work' | 'ready' | 'distribute';
 
@@ -35,9 +36,17 @@ export interface EqFabric {
     thumbnail: string | null;
 }
 
+export interface EqTariff {
+    id: number;
+    amount: number;
+}
+
 export interface EqAssignment {
     id: number;
+    new_tariff: EqTariff | null;
+    executor: number | null;
     number: number;
+    plane_date: string | null;
     status: 'in_work' | 'await' | 'ready' | 'created';
     inspector: number | null;
     appointed_by_boss: boolean;
@@ -52,12 +61,14 @@ export interface EqDepartmentInfo {
 
 export interface EqCardInfo {
     count_all: number;
+    further_packaging: boolean;
     count_in_work: number;
     count_ready: number;
     count_await: number;
     tariff: number;
     proposed_tariff: number;
     production_step__id: number;
+    employees_info: EqDepartmentInfo[];
 }
 
 export interface EqOrderProduct {
@@ -70,8 +81,6 @@ export interface EqOrderProduct {
     second_fabric: EqFabric | null;
     third_fabric: EqFabric | null;
     assignments: EqAssignment[];
-    further_packaging: boolean;
-    department_info: EqDepartmentInfo[];
     plane_date: string | null;
     card_info: EqCardInfo;
 }

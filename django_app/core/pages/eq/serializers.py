@@ -8,11 +8,11 @@ from core.models import (
     Order,
     Fabric, ProductionStep,
 )
+from src.log_time import log_time
 from staff.serializers import EmployeeSerializer
 
 from .service.get_eq_card_assignments import get_eq_card_assignments
-from .service.get_eq_card_count_data import get_eq_card_count_data
-from .service.get_eq_card_department_info import get_eq_card_department_info
+from .service.get_eq_card_info import get_eq_card_info
 from ...serializers import TechProcessSerializer
 
 
@@ -108,9 +108,6 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
     second_fabric = EqFabricSerializer(read_only=True)
     third_fabric = EqFabricSerializer(read_only=True)
     assignments = serializers.SerializerMethodField(read_only=True)
-    further_packaging = serializers.SerializerMethodField(read_only=True)
-    department_info = serializers.SerializerMethodField(read_only=True)
-    plane_date = serializers.SerializerMethodField(read_only=True)
     card_info = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -126,9 +123,6 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
             'second_fabric',
             'third_fabric',
             'assignments',
-            'further_packaging',
-            'department_info',
-            'plane_date',
             'card_info',
         ]
 
@@ -143,46 +137,9 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
             order_product=obj,
         )
 
-    def get_further_packaging(self, obj: OrderProduct):
-        eq_params = self.context.get('eq_params')
-        production_step = ProductionStep.objects.filter(
-            product=obj.product,
-            department=eq_params['department']
-        )
-        if production_step.exists():
-            return production_step.first().next_step.all().filter(
-                department__name="Упаковка"
-            ).exists()
-        else:
-            return False
-
-    def get_department_info(self, obj: OrderProduct):
-        eq_params = self.context.get('eq_params')
-        return get_eq_card_department_info(
-            order_product=obj,
-            department=eq_params['department']
-        )
-
-    def get_plane_date(self, obj: OrderProduct):
-        """Get planned date. """
-        assignment_data = self.get_assignments(obj)
-
-        min_plane_date = None
-
-        for assignment in assignment_data:
-            plane_date = assignment.get('plane_date')
-            if plane_date is not None and (min_plane_date is None or plane_date < min_plane_date):
-                min_plane_date = plane_date
-
-        if min_plane_date is not None:
-            result = min_plane_date
-        else:
-            result = None
-        return result
-
     def get_card_info(self, obj: OrderProduct):
         eq_params = self.context.get('eq_params')
-        return get_eq_card_count_data(
+        return get_eq_card_info(
             order_product=obj,
             department=eq_params['department'],
         )

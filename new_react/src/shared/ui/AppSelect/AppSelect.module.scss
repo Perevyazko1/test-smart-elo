@@ -1,0 +1,56 @@
+.InputContainer {
+  position: relative;
+}
+
+.Input {
+  background-color: transparent;
+
+  height: 33px;
+
+  padding: 1rem 55px 0 .2rem;
+
+  color: var(--bs-black);
+  font-size: 14px;
+
+  border: none;
+  border-bottom: var(--bs-black) 1px solid;
+
+  &.darkInput {
+    color: var(--bs-light);
+    border: none;
+    border-bottom: var(--bs-light) 1px solid;
+  }
+
+  &:focus {
+    border: none;
+    border-bottom: var(--bs-primary) 1px solid;
+    outline: none;
+  }
+}
+
+.DropdownIconStyle {
+  transition: transform 0.1s ease-in-out;
+  color: var(--bs-black);
+  position: absolute;
+  right: 5px;
+  bottom: 1px;
+
+  &.darkInput {
+    color: var(--bs-light);
+  }
+}
+
+.flipActive {
+    transform: rotate(180deg);
+}
+
+.ClearIconStyle {
+  color: var(--bs-black);
+  position: absolute;
+  right: 30px;
+  bottom: 3px;
+
+  &.darkInput {
+    color: var(--bs-light);
+  }
+}

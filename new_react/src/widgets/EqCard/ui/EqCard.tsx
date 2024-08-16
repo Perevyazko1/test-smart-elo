@@ -16,6 +16,8 @@ import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
+import {useEmployeeList} from "@widgets/TaskForm/model/api";
+import {getEmployeeName} from "@shared/lib";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     noRelevant?: boolean;
@@ -30,6 +32,26 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const {handleOpen} = useAppModal();
     const {currentUser} = useCurrentUser();
+    const {data: userList} = useEmployeeList({
+        departments: [currentUser.current_department?.id],
+    });
+
+    const getUserInitials = useCallback((assignmentNumber: number): string => {
+        if (!userList) {
+            return ""
+        }
+        const targetAssignment = card.assignments.find(item => item.number === assignmentNumber)
+        return getEmployeeName(userList.find(item => item.id === targetAssignment?.executor), 'initials')
+    }, [card.assignments, userList]);
+
+    const getTariff = useCallback((assignmentNumber: number): number | undefined => {
+        if (!userList) {
+            return;
+        }
+        const targetAssignment = card.assignments.find(item => item.number === assignmentNumber);
+        return targetAssignment?.new_tariff?.amount;
+    }, [card.assignments, userList]);
+
     const {queryParameters} = useAppQuery();
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
     const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
@@ -166,11 +188,13 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const getPlaneDate = useCallback((first: boolean) => {
         const targetDate = () => {
-            if (card.plane_date) {
-                return card.plane_date;
-            } else if (card.order.planned_date) {
-                return card.order.planned_date;
-            }
+            const assignment_dates = card.assignments
+                .map(item => item.plane_date ? new Date(item.plane_date) : null)
+                .filter(date => date !== null) as Date[];
+
+            const minDate = assignment_dates.reduce((min, current) => current < min ? current : min, assignment_dates[0]);
+            const minDateString = minDate ? minDate.toISOString() : null;
+            return minDateString || card.order.planned_date;
         }
         if (listType === 'await' && first) {
             return targetDate();
@@ -183,8 +207,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         } else {
             return;
         }
-    }, [card.order.planned_date, card.plane_date, expanded, listType])
-
+    }, [card.assignments, card.order.planned_date, expanded, listType]);
 
     return (
         <EqCardBody card={card} {...otherProps}>
@@ -202,11 +225,20 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
                 />
             }
 
-            <CardSlider card={card}/>
+            <CardSlider
+                card={card}
+                cardType={listType}
+            />
 
             <CardCounter card={card}/>
 
             <CardNameNumbers
+                getTariff={currentUser.current_department?.piecework_wages ? getTariff : undefined}
+                getUserInitials={
+                    listType !== 'await' && queryParameters.view_mode ?
+                        getUserInitials :
+                        undefined
+                }
                 card={card}
                 assignmentsLists={assignmentsLists}
                 setAssignmentsLists={setAssignmentsLists}

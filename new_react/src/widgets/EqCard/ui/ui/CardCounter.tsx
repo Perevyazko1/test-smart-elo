@@ -46,21 +46,22 @@ export const CardCounter = (props: CardCounterProps) => {
                     color={' bg-danger'}
                     top={`${!!card.order.comment_base || !!card.order.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
                 >
-                    <div>
+                    <div className={card.card_info.count_all === 0 ? 'text-muted' : ''}>
                         Всего:{card.card_info.count_all}
                     </div>
                     <hr className={cls.contentHr}/>
-                    <div>
+
+                    <div className={card.card_info.count_in_work === 0 ? 'text-muted' : ''}>
                         В_раб:{card.card_info.count_in_work}
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div>
+                    <div className={card.card_info.count_await === 0 ? 'text-muted' : ''}>
                         Своб:{card.card_info.count_await}
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={'text-muted'}>
+                    <div className={card.card_info.count_ready === 0 ? 'text-muted' : ''}>
                         Готов:{card.card_info.count_ready}
                     </div>
                 </IndicatorWrapper>
