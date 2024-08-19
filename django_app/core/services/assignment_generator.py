@@ -37,6 +37,7 @@ class AssignmentGenerator:
                 department=department,
                 defaults={
                     "new_tariff": assignment_tariff,
+                    "amount": assignment_tariff.amount,
                     "notes": 'Создан автоматически',
                     "assembled": assembled,
                 }
