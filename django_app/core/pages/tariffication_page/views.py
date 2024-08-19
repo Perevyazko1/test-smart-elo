@@ -150,7 +150,8 @@ def set_confirmed_tariff(request):
     )
 
     assignments_for_update.update(
-        new_tariff=new_tariff
+        new_tariff=new_tariff,
+        amount=new_tariff.amount,
     )
     AssignmentCoExecutor.objects.filter(
         assignment__in=assignments_for_update

@@ -89,7 +89,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     </div>
                 }
 
-                {totalPrice &&
+                {totalPrice ?
                     <div
                         style={{
                             position: "absolute",
@@ -105,6 +105,8 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             {totalPrice}
                         </div>
                     </div>
+                    :
+                    null
                 }
             </>
 

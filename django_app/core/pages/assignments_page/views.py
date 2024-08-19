@@ -7,6 +7,8 @@ from core.models import Assignment, AssignmentCoExecutor
 from staff.models import Employee
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
+from ...consumers import EqNotificationActions, ws_group_updates, ws_send_to_department
+from ...signals import clean_eq_card_cache
 
 
 class AssignmentViewSet(viewsets.ModelViewSet):
@@ -35,8 +37,13 @@ def update_co_executor(request):
             id__in=co_executor_ids
         ).delete()
     if action == 'update_or_create':
+        department = None
+        order_product = None
+
         for assignment_id in assignment_ids:
             target_assignment = Assignment.objects.get(id=assignment_id)
+            department = target_assignment.department
+            order_product = target_assignment.order_product
             new_amount = 0
             if target_assignment.new_tariff:
                 current_amount = AssignmentCoExecutor.objects.filter(
@@ -53,8 +60,16 @@ def update_co_executor(request):
                 co_executor=Employee.objects.get(id=data.get('co_executor__id')),
                 assignment=target_assignment,
                 defaults={
-                    'amount': new_amount
+                    'amount': new_amount,
                 }
             )
+
+        clean_eq_card_cache(order_product.id, department.id)
+
+        notification_data = {department.number: {
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': order_product.id,
+        }}
+        ws_group_updates(pin_code="", notification_data=notification_data)
 
     return JsonResponse({"result": 'ok'}, json_dumps_params={"ensure_ascii": False})

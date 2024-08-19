@@ -90,17 +90,26 @@ def get_week_data(request):
 
     if eq_params['view_mode_key'] == 'boss':
         assignments_sum = Assignment.objects.filter(
+            department=eq_params['department'],
             inspect_date__gte=week_info.date_range[0],
             inspect_date__lt=week_info.date_range[1],
         ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
         transactions_sum = 0
     else:
-        assignments_sum = Assignment.objects.filter(
+        assignments_sum = 0
+        assignments = Assignment.objects.filter(
             executor=eq_params['user'],
             inspect_date__gte=week_info.date_range[0],
             inspect_date__lt=week_info.date_range[1],
-        ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
+        )
+
+        assignments_sum += assignments.aggregate(Sum('amount')).get('amount__sum') or 0
+
+        assignments_sum += AssignmentCoExecutor.objects.filter(
+            assignment__in=assignments,
+            co_executor=eq_params['user'],
+        ).aggregate(Sum('amount')).get('amount__sum') or 0
 
         transactions_sum = Transaction.objects.filter(
             employee=eq_params['user'],

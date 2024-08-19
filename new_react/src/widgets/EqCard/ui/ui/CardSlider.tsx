@@ -22,7 +22,7 @@ export const CardSlider = (props: CardSliderProps) => {
 
     const totalCount = useMemo(() => {
         let total = 0;
-        card.assignments.forEach(item => item.new_tariff?.amount ? total += item.new_tariff.amount : null)
+        card.assignments.forEach(item => item.amount ? total += item.amount : null)
         return total;
     }, [card.assignments]);
 

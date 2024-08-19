@@ -1,20 +1,26 @@
 """Initial methods and scripts. """
-from staff.models import Employee
+from django.db.models import Sum
 
-from tasks.models import TaskComment, Task
+from core.models import Assignment, AssignmentCoExecutor
+from staff.models import Department
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    target_tasks = Task.objects.all()
+    target_departments = Department.objects.filter(
+        piecework_wages=True
+    )
 
-    for task in target_tasks:
-        if task.execution_comment:
-            TaskComment.objects.create(
-                author=Employee.objects.get(id=1),
-                task=task,
-                comment=task.execution_comment,
-            )
-            task.execution_comment = ""
-            task.save()
+    target_assignments = Assignment.objects.filter(
+        department__in=target_departments,
+        new_tariff__isnull=False,
+    )
+
+    for assignment in target_assignments:
+        all_co_executors_sum = AssignmentCoExecutor.objects.filter(
+            assignment=assignment
+        ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+        assignment.amount = assignment.new_tariff.amount - all_co_executors_sum
+        assignment.save()

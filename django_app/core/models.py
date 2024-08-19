@@ -351,6 +351,7 @@ class Assignment(models.Model):
     notes = models.CharField('Заметки', max_length=250, blank=True)
     status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")
 
+    amount = models.IntegerField("Вознаграждение", default=0)
     new_tariff = models.ForeignKey(
         Tariff,
         related_name='assignments_set',

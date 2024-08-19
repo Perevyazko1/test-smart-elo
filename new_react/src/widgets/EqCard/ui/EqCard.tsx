@@ -49,7 +49,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             return;
         }
         const targetAssignment = card.assignments.find(item => item.number === assignmentNumber);
-        return targetAssignment?.new_tariff?.amount;
+        return targetAssignment?.amount;
     }, [card.assignments, userList]);
 
     const {queryParameters} = useAppQuery();

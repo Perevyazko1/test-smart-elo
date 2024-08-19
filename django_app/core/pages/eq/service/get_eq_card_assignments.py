@@ -19,7 +19,7 @@ def get_in_work_assignments(assignments, eq_params):
 # @log_time
 def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: OrderProduct):
     cache_key = (
-        f'assignments_{order_product.id}_{eq_params["department"].id}'
+        f'assignments_{order_product.id}_{eq_params["department"].id}_{eq_params["user"].id}'
         f'_{target_list}_{eq_params["view_mode_key"]}'
         f'_{eq_params.get("week", "")}_{eq_params.get("year", "")}'
     )

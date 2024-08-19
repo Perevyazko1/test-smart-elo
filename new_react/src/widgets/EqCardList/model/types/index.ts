@@ -45,6 +45,7 @@ export interface EqAssignment {
     id: number;
     new_tariff: EqTariff | null;
     executor: number | null;
+    amount: number;
     number: number;
     plane_date: string | null;
     status: 'in_work' | 'await' | 'ready' | 'created';

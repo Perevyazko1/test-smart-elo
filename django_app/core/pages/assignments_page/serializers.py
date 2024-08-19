@@ -24,6 +24,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
         model = Assignment
         fields = [
             'id',
+            'amount',
             'new_tariff',
             'executor',
             'number',

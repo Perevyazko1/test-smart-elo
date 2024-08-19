@@ -1,11 +1,11 @@
 from typing import Type
 
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Sum
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 
-from core.models import Assignment
+from core.models import Assignment, AssignmentCoExecutor
 
 
 def update_assignments_and_clean_cache(
@@ -35,6 +35,20 @@ def clean_eq_card_info_cache(order_product__id: int, department__id: int = None)
 
 
 @receiver([post_save, post_delete], sender=Assignment)
-def clear_assignment_cache(sender, instance, **kwargs):
+def clear_assignment_cache(sender, instance: Assignment, **kwargs):
     clean_eq_card_cache(instance.order_product.id, instance.department.id)
     clean_eq_card_info_cache(instance.order_product.id, instance.department.id)
+
+
+@receiver([post_save, post_delete], sender=AssignmentCoExecutor)
+def clear_assignment_cache(sender, instance: AssignmentCoExecutor, **kwargs):
+    if instance.assignment.department.piecework_wages:
+        clean_eq_card_cache(instance.assignment.order_product.id, instance.assignment.department.id)
+        clean_eq_card_info_cache(instance.assignment.order_product.id, instance.assignment.department.id)
+
+        all_co_executors_sum = AssignmentCoExecutor.objects.filter(
+            assignment=instance.assignment
+        ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+        instance.assignment.amount = instance.assignment.new_tariff.amount - all_co_executors_sum
+        instance.assignment.save()

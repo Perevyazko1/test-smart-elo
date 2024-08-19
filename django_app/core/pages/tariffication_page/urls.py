@@ -21,8 +21,8 @@ router.register(r'tariffication_list', TarifficationPageListViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('projects/', get_projects),
-    path('set_proposed_tariff/', set_proposed_tariff),
     path('get_post_tariffication_list/', get_post_tariffication_list),
+    path('set_proposed_tariff/', set_proposed_tariff),
     path('set_confirmed_tariff/', set_confirmed_tariff),
     path('set_post_tariffication/', set_post_tariffication),
     path('get_tariffication_history/', get_tariffication_history),
