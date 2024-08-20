@@ -42,7 +42,7 @@ def clear_assignment_cache(sender, instance: Assignment, **kwargs):
 
 @receiver([post_save, post_delete], sender=AssignmentCoExecutor)
 def clear_assignment_cache(sender, instance: AssignmentCoExecutor, **kwargs):
-    if instance.assignment.department.piecework_wages:
+    if instance.assignment.department.piecework_wages and instance.assignment.new_tariff:
         clean_eq_card_cache(instance.assignment.order_product.id, instance.assignment.department.id)
         clean_eq_card_info_cache(instance.assignment.order_product.id, instance.assignment.department.id)
 
