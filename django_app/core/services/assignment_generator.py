@@ -31,13 +31,18 @@ class AssignmentGenerator:
             numbers = [i for i in range(start_position + 1, last_position + 1)]
 
         for number in numbers:
+            amount = 0
+
+            if assignment_tariff:
+                amount = assignment_tariff.amount
+
             Assignment.objects.update_or_create(
                 number=number,
                 order_product=order_product,
                 department=department,
                 defaults={
                     "new_tariff": assignment_tariff,
-                    "amount": assignment_tariff.amount,
+                    "amount": amount,
                     "notes": 'Создан автоматически',
                     "assembled": assembled,
                 }
