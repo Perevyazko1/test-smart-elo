@@ -1,4 +1,5 @@
 """Initial methods and scripts. """
+from datetime import datetime
 
 from core.models import Assignment, AssignmentCoExecutor
 from staff.models import Employee
@@ -12,15 +13,17 @@ def init_data():
     )
 
     Assignment.objects.filter(
-        inspector__isnull=True,
-        inspect_date__isnull=False,
-    ).update(
-        inspector=velikiy
-    )
-
-    Assignment.objects.filter(
+        status='ready',
         executor__isnull=True,
-        appointment_date__isnull=False,
     ).update(
         executor=velikiy
+    )
+
+    date_limit = datetime(2024, 7, 31)
+
+    Assignment.objects.filter(
+        inspector__isnull=True,
+        date_completion__lt=date_limit,
+    ).update(
+        inspector=velikiy
     )
