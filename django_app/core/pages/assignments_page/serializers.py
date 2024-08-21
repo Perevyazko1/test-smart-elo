@@ -52,7 +52,7 @@ class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
 
 class AssignmentExtendedSerializer(serializers.ModelSerializer):
     executor = EmployeeSerializer()
-    co_executors = AssignmentCoExecutorSerializer(source='assignmentcoexecutor_set', many=True)
+    co_executors = AssignmentCoExecutorSerializer(many=True)
     inspector = EmployeeSerializer()
     department = DepartmentSerializer()
     order_product = OrderProductSerializer()

@@ -271,7 +271,7 @@ class Tariff(models.Model):
         Employee,
         verbose_name='Создал',
         related_name='tariffs',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
@@ -384,12 +384,6 @@ class Assignment(models.Model):
         null=True,
         blank=True,
     )
-    co_executors = models.ManyToManyField(
-        Employee,
-        through='AssignmentCoExecutor',
-        related_name='co_executed_assignments',
-        verbose_name='Соисполнители'
-    )
 
     appointment_date = models.DateTimeField('Дата взятия в работу', null=True, blank=True)
 
@@ -422,8 +416,12 @@ class Assignment(models.Model):
 
 
 class AssignmentCoExecutor(models.Model):
-    assignment = models.ForeignKey('Assignment', on_delete=models.CASCADE)
-    co_executor = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    assignment = models.ForeignKey('Assignment',
+                                   related_name='co_executors',
+                                   on_delete=models.CASCADE)
+    co_executor = models.ForeignKey(Employee,
+                                    related_name='co_executed_assignments',
+                                    on_delete=models.CASCADE)
     amount = models.IntegerField("Сумма", default=0)
 
     class Meta:

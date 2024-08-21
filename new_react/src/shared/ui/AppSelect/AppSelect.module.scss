@@ -1,5 +1,29 @@
+.MainContainer {
+  position: relative;
+  display: flex;
+  width: auto;
+}
+
 .InputContainer {
   position: relative;
+}
+
+.Label {
+  position: absolute;
+  color: var(--bs-primary);
+  top: 67%;
+  left: 0.3rem;
+  transform: translateY(-50%);
+  transition: all 0.3s ease;
+  font-size: 14px;
+  pointer-events: none;
+
+  &.Active {
+    top: 15px;
+    left: 0;
+    transform: translateY(-100%) scale(0.8);
+    font-size: 12px;
+  }
 }
 
 .Input {
@@ -7,7 +31,7 @@
 
   height: 33px;
 
-  padding: 1rem 55px 0 .2rem;
+  padding: 1rem 50px 0 .2rem;
 
   color: var(--bs-black);
   font-size: 14px;
@@ -15,42 +39,131 @@
   border: none;
   border-bottom: var(--bs-black) 1px solid;
 
+  &:focus {
+    border: none;
+    border-bottom: var(--bs-primary) 2px solid;
+    outline: none;
+  }
+
+  &.Active {
+    border: none;
+    border-bottom: var(--bs-primary) 2px solid;
+    outline: none;
+  }
+
   &.darkInput {
     color: var(--bs-light);
     border: none;
     border-bottom: var(--bs-light) 1px solid;
+
+    &.Active {
+      border: none;
+      border-bottom: var(--bs-primary) 2px solid;
+      outline: none;
+    }
   }
 
-  &:focus {
-    border: none;
-    border-bottom: var(--bs-primary) 1px solid;
-    outline: none;
-  }
+}
+
+
+.flipActive {
+  transform: rotate(180deg);
 }
 
 .DropdownIconStyle {
-  transition: transform 0.1s ease-in-out;
-  color: var(--bs-black);
+  transition: transform 0.2s ease-in-out;
+}
+
+.IconBtn {
   position: absolute;
-  right: 5px;
-  bottom: 1px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--bs-black);
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: transparent;
 
   &.darkInput {
     color: var(--bs-light);
   }
+
+  &.DropdownBtn {
+    right: -2px;
+    bottom: 1px;
+  }
+
+  &.ClearBtn {
+    right: 21px;
+    bottom: 1px;
+    opacity: 0;
+
+    &.Show {
+      opacity: 1;
+    }
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+
+  &:hover {
+    background-color: rgba(52, 58, 64, 0.2);
+  }
 }
 
-.flipActive {
-    transform: rotate(180deg);
-}
-
-.ClearIconStyle {
-  color: var(--bs-black);
+.OptionsContainer {
   position: absolute;
-  right: 30px;
-  bottom: 3px;
+  font-size: 13px;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 8px 0;
 
   &.darkInput {
     color: var(--bs-light);
+    background-color: var(--bs-black);
+    border: 1px solid #1c1c1c;
+  }
+}
+
+.Option {
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f0f0f0;
+
+    &.darkInput {
+      color: var(--bs-light);
+      background-color: var(--bs-secondary-bg);
+    }
+  }
+
+  &:active {
+    background-color: #e0e0e0;
+
+    &.darkInput {
+      color: var(--bs-light);
+      background-color: var(--bs-secondary-bg);
+    }
+  }
+
+  &.selected {
+    background-color: #d0d0d0;
+
+    &.darkInput {
+      color: var(--bs-light);
+      background-color: var(--bs-secondary-bg);
+    }
   }
 }

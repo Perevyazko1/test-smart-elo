@@ -82,7 +82,9 @@ class UpdateAssignments:
                         assignment.executor = self.original_user
                         assignment.save()
 
-                        assignment.co_executors.all().delete()
+                        AssignmentCoExecutor.objects.filter(
+                            assignment=assignment
+                        ).delete()
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -131,7 +133,10 @@ class UpdateAssignments:
                         assignment.executor = None
                         assignment.appointment_date = None
                         assignment.save()
-                        assignment.co_executors.all().delete()
+
+                        AssignmentCoExecutor.objects.filter(
+                            assignment=assignment
+                        ).delete()
 
                         self.notification_data[self.department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
