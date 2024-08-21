@@ -19,6 +19,13 @@ def init_data():
         executor=velikiy
     )
 
+    Assignment.objects.filter(
+        status='in_work',
+        executor__isnull=True,
+    ).update(
+        executor=velikiy
+    )
+
     date_limit = datetime(2024, 7, 31)
 
     Assignment.objects.filter(
