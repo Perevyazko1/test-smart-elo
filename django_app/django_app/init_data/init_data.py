@@ -1,8 +1,9 @@
 """Initial methods and scripts. """
 from datetime import datetime
 
-from core.models import Assignment, AssignmentCoExecutor
+from core.models import Assignment, ProductionStep
 from staff.models import Employee
+from tasks.models import Task
 
 
 def init_data():
@@ -34,3 +35,21 @@ def init_data():
     ).update(
         inspector=velikiy
     )
+
+    Task.objects.filter(
+        appointed_by__isnull=False,
+        executor__isnull=True,
+    ).exclude(
+        view_mode='2'
+    ).update(
+        executor=velikiy
+    )
+
+    target_ps = ProductionStep.objects.filter(
+        proposed_tariff__isnull=True,
+        confirmed_tariff__isnull=False,
+    )
+
+    for ps in target_ps:
+        ps.proposed_tariff = ps.confirmed_tariff
+        ps.save()

@@ -83,7 +83,7 @@ class Task(models.Model):
         Employee,
         verbose_name="Кем создана",
         related_name="created_tasks",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
@@ -92,7 +92,7 @@ class Task(models.Model):
         Employee,
         verbose_name="Кем назначена",
         related_name="appointed_tasks",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
     )
@@ -127,7 +127,7 @@ class TaskComment(models.Model):
         Employee,
         verbose_name="Автор",
         related_name="task_comment_author",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
     )
     task = models.ForeignKey(

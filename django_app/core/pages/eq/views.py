@@ -181,6 +181,7 @@ def update_assignments(request):
                 inspector__isnull=False,
                 order_product=order_product,
             ).count()
+
             # Получаем исходный этап производства (условно Пошив)
             base_ps = ProductionStep.objects.get(
                 department=assignment.department,
