@@ -6,7 +6,6 @@ from django.dispatch import receiver
 from django.core.cache import cache
 
 from core.models import Assignment, AssignmentCoExecutor
-from src.log_time import log_time
 
 
 def update_assignments_and_clean_cache(
