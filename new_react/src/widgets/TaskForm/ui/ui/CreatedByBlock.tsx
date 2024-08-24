@@ -1,6 +1,6 @@
 import {Employee} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {AppSelect} from "@shared/ui";
 
 
 interface AppointedByBlockProps {
@@ -11,13 +11,15 @@ interface AppointedByBlockProps {
 export const CreatedByBlock = (props: AppointedByBlockProps) => {
 
     return (
-        <AppAutocomplete
-            variant={'select'}
-            value={props.value}
+        <AppSelect
+            bordered
             label={"Задачу создал"}
-            width={250}
+            variant={'select'}
+            style={{minWidth: 250}}
+            value={props.value}
             readOnly
             getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
+            colorScheme={'lightInput'}
         />
     );
 };

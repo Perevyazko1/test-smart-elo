@@ -7,89 +7,122 @@ from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
 
 
-def get_in_work_assignments(assignments, eq_params):
-    assignments = assignments.filter(status="in_work").distinct()
-
-    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
-        executor = eq_params['user']
-        assignments = assignments.filter(executor=executor)[:30]
-    return assignments[:30]
-
-
 # @log_time
 def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: OrderProduct):
+    if str(eq_params['view_mode_key']).isdigit():
+        eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
+
+    match target_list:
+        case 'await':
+            return _handle_await(eq_params, order_product)
+        case 'in_work':
+            return _handle_in_work(eq_params, order_product)
+        case 'distribute':
+            return _handle_distribute(eq_params, order_product)
+        case 'ready':
+            return _handle_ready(eq_params, order_product)
+
+
+def _handle_await(eq_params, order_product):
     cache_key = (
-        f'assignments_{order_product.id}_{eq_params["department"].id}_{eq_params["user"].id}'
-        f'_{target_list}_{eq_params["view_mode_key"]}'
-        f'_{eq_params.get("week", "")}_{eq_params.get("year", "")}'
+        f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_await_{eq_params['assembled']}'
     )
+    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+        cache_key += f'_{eq_params['view_mode_key']}'
+
     cached_data = cache.get(cache_key)
     if cached_data:
         return cached_data
 
-    if str(eq_params['view_mode_key']).isdigit():
-        eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
-
-    assignments = None
-
-    match target_list:
-        case 'await':
-            assignments = _handle_await(eq_params, order_product)
-        case 'in_work':
-            assignments = _handle_in_work(eq_params, order_product)
-        case 'distribute':
-            assignments = _handle_distribute(eq_params, order_product)
-        case 'ready':
-            assignments = _handle_ready(eq_params, order_product)
-
-    result = SimpleAssignmentSerializer(assignments, many=True).data
-    cache.set(cache_key, result, timeout=60 * 60 * 24)
-
-    return result
-
-
-def _handle_await(eq_params, order_product):
     if eq_params['view_mode_key'] == 'boss':
         if eq_params['assembled']:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 department=eq_params['department'], status='await'
             )[:30]
         else:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 department=eq_params['department'], status='await', assembled=True
             )[:30]
     elif eq_params['view_mode_key'] == 'unfinished':
-        return order_product.assignments.filter(
+        assignments = order_product.assignments.filter(
             department=eq_params['department'], status='await'
         )[:30]
     else:
         if eq_params['assembled']:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 department=eq_params['department'], status='await'
             )[:30]
         else:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 department=eq_params['department'], status='await', assembled=True
             )[:30]
 
+    result = SimpleAssignmentSerializer(assignments, many=True).data
+    """Кешируем результат. """
+    cache.set(cache_key, result, timeout=60 * 60 * 8)
+
+    return result
+
 
 def _handle_in_work(eq_params, order_product):
-    assignments = order_product.assignments.filter(department=eq_params['department']).distinct()
-    return get_in_work_assignments(assignments, eq_params)
+    cache_key = (
+        f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_in_work_'
+    )
+    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+        cache_key += f"_{eq_params['user'].id}"
+    else:
+        cache_key += f"_{eq_params['view_mode_key']}"
+
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
+    qs_filter = {
+        "department": eq_params['department'],
+        "status": "in_work",
+    }
+
+    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+        qs_filter['executor'] = eq_params['user']
+
+    assignments = order_product.assignments.filter(**qs_filter).distinct()
+
+    result = SimpleAssignmentSerializer(assignments, many=True).data
+    """Кешируем результат. """
+    cache.set(cache_key, result, timeout=60 * 60 * 8)
+
+    return result
 
 
 def _handle_distribute(eq_params, order_product):
-    assignments = order_product.assignments.filter(department=eq_params['department']).distinct()
-    return get_in_work_assignments(assignments, eq_params)
+    return _handle_in_work(eq_params, order_product)
 
 
 def _handle_ready(eq_params, order_product):
-    current_week = GetWeekInfo(week=None, year=None).execute()
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
+    current_week = GetWeekInfo(week=None, year=None).execute()
+
+    cache_key = (
+        f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_ready_'
+        f'{week_info.week}_{week_info.year}'
+    )
+    if current_week.week == week_info.week and current_week.year == week_info.year:
+        cache_key += '_current'
+    else:
+        cache_key += '_not_current'
+
+    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
+        cache_key += f"_{eq_params['user'].id}"
+    else:
+        cache_key += f"_{eq_params['view_mode_key']}"
+
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
 
     if eq_params['view_mode_key'] not in ["boss", "unfinished"]:
         if current_week.week == week_info.week and current_week.year == week_info.year:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 Q(
                     executor=eq_params['user'],
                     department=eq_params['department'],
@@ -103,18 +136,18 @@ def _handle_ready(eq_params, order_product):
                     status='ready',
                     inspector__isnull=True,
                 )
-            ).distinct().order_by('-inspector')[:30]
+            ).distinct().order_by('-inspector')
         else:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 executor=eq_params['user'],
                 department=eq_params['department'],
                 status='ready',
                 inspect_date__gt=week_info.date_range[0],
                 inspect_date__lte=week_info.date_range[1],
-            ).distinct().order_by('-inspector')[:30]
+            ).distinct().order_by('-inspector')
     elif eq_params['view_mode_key'] == "boss":
         if current_week.week == week_info.week and current_week.year == week_info.year:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 Q(
                     department=eq_params['department'],
                     status='ready',
@@ -126,17 +159,23 @@ def _handle_ready(eq_params, order_product):
                     status='ready',
                     inspector__isnull=True,
                 )
-            ).distinct().order_by('-inspector')[:30]
+            ).distinct().order_by('-inspector')
         else:
-            return order_product.assignments.filter(
+            assignments = order_product.assignments.filter(
                 department=eq_params['department'],
                 status='ready',
                 inspect_date__gt=week_info.date_range[0],
                 inspect_date__lte=week_info.date_range[1],
-            ).distinct().order_by('-inspector')[:30]
+            ).distinct().order_by('-inspector')
     else:
-        return order_product.assignments.filter(
+        assignments = order_product.assignments.filter(
             department=eq_params['department'],
             status="ready",
             inspector__isnull=True,
         ).distinct().order_by('-inspector')[:30]
+
+    result = SimpleAssignmentSerializer(assignments, many=True).data
+    """Кешируем результат. """
+    cache.set(cache_key, result, timeout=60 * 60 * 8)
+
+    return result

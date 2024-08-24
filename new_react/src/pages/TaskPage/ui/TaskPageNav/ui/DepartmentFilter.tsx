@@ -1,8 +1,8 @@
 import {useDepartmentList} from "@widgets/TaskForm/model/api";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 import React, {useEffect, useMemo, useState} from "react";
 import {Department} from "@entities/Department";
 import {useQueryParams} from "@shared/hooks";
+import {AppSelect} from "@shared/ui";
 
 export const DepartmentFilter = () => {
     const {data, isLoading} = useDepartmentList({});
@@ -26,28 +26,17 @@ export const DepartmentFilter = () => {
         }
     }, [queryParameters.departments, data]);
 
-    const getLabel = useMemo(() => {
-        if (isLoading) {
-            return 'Загрузка...';
-        } else if (selectedDepartments.length === 0) {
-            return  'Отделы (все)';
-        } else {
-            return 'Отделы';
-        }
-    }, [isLoading, selectedDepartments.length]);
-
     return (
-        <AppAutocomplete
-            colorscheme={'dark'}
-            style={{zIndex: "1000", marginTop: "3px"}}
-            label={getLabel}
+        <AppSelect
+            style={{width: 160}}
+            isLoading={isLoading}
             variant={'multiple'}
+            colorScheme={'darkInput'}
+            label={'Отделы'}
             value={selectedDepartments}
-            onChangeClb={selectClb}
+            onSelect={selectClb}
             getOptionLabel={option => option.name}
             options={data}
-            loading={isLoading}
-            width={200}
         />
     );
 };

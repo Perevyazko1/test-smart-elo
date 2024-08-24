@@ -8,7 +8,7 @@ from staff.models import Employee
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
 from ...consumers import EqNotificationActions, ws_group_updates, ws_send_to_department
-from ...signals import clean_eq_card_cache
+from ...signals import clean_all_eq_card_info_cache
 
 
 class AssignmentViewSet(viewsets.ModelViewSet):
@@ -64,7 +64,7 @@ def update_co_executor(request):
                 }
             )
 
-        clean_eq_card_cache(order_product.id, department.id)
+        clean_all_eq_card_info_cache(order_product.id, department.id)
 
         notification_data = {department.number: {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,

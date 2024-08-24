@@ -1,7 +1,7 @@
 import {getEmployeeName} from "@shared/lib";
 import {useMemo} from "react";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 import {GroupedEmployeeItem} from "@entities/Employee";
+import {AppSelect} from "@shared/ui";
 
 
 interface AppointedByBlockProps {
@@ -16,18 +16,19 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
     
     const getValue = useMemo(() => {
         return userList.find(user => user.user.id === value) || null;
-    }, [userList, value])
+    }, [userList, value]);
 
     return (
-        <AppAutocomplete
-            className={'flex-fill'}
-            style={{
-                minWidth: '250px'
-            }}
+        <AppSelect
             variant={'select'}
+            colorScheme={'lightInput'}
+            bordered
+            className={'flex-fill'}
+            label={"Задачу назначил"}
+            style={{minWidth: '250px'}}
             value={getValue}
-            label={isLoading ? "Загрузка..." : "Задачу назначил"}
             readOnly
+            isLoading={isLoading}
             getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'listNameInitials')}
         />
     );

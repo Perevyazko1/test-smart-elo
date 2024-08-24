@@ -13,7 +13,7 @@ def get_project_filters(mode: str) -> list[str]:
         )
 
     result = ['Все проекты']
-
+    projects.remove("")
     result += projects
 
     return result

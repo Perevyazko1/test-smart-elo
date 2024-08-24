@@ -1,5 +1,5 @@
 import {Button} from "react-bootstrap";
-import {AppDropdown} from "@shared/ui";
+import {AppSelect} from "@shared/ui";
 import {useRef, useState} from "react";
 
 interface EqSeriesSizeProps {
@@ -33,12 +33,14 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
 
 
     return (
-        <AppDropdown selected={`Выбрать X${queryParameters.series_size || baseSeriesSize}`}
-                     active={!!queryParameters.series_size}
-                     items={['Подтвердить']}
-                     onSelect={() => clb(seriesSize === baseSeriesSize ? '' : seriesSize)}
+        <AppSelect
+            label={'Размер серии'}
+            colorScheme={'darkInput'}
+            variant={'select'}
+            style={{width: 100}}
+            value={`X${queryParameters.series_size || baseSeriesSize}`}
         >
-            <div className={'p-2'}>
+            <div className={'p-2 d-flex justify-content-center flex-nowrap flex-column align-items-center'}>
                 <div className={'d-flex gap-3 fs-3 text-nowrap'}>
                     <Button
                         onClick={() => incrementSeriesSize(-1)}
@@ -54,19 +56,23 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
                         <i className="fas fa-plus fs-4"/>
                     </Button>
                 </div>
-                <div>
-                    <input
-                        className={"mt-3 w-100"}
-                        type="range"
-                        defaultValue={queryParameters.series_size || baseSeriesSize}
-                        min={1}
-                        max={30}
-                        step={1}
-                        ref={seriesSizeRef}
-                        onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}
-                    />
-                </div>
+                <input
+                    className={"mt-3 w-100"}
+                    type="range"
+                    defaultValue={queryParameters.series_size || baseSeriesSize}
+                    min={1}
+                    max={30}
+                    step={1}
+                    ref={seriesSizeRef}
+                    onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}
+                />
+
+                <button className={'appBtn greenBtn px-3 py-1 mt-3'}
+                        onClick={() => clb(seriesSize === baseSeriesSize ? '' : seriesSize)}
+                >
+                    Подтвердить
+                </button>
             </div>
-        </AppDropdown>
-    )
+        </AppSelect>
+    );
 }

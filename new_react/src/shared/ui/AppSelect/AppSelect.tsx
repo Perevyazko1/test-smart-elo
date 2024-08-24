@@ -1,4 +1,13 @@
-import {ChangeEvent, HTMLAttributes, useCallback, useEffect, useMemo, useRef, useState} from "react";
+import React, {
+    ChangeEvent,
+    HTMLAttributes,
+    ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState
+} from "react";
 
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ClearIcon from '@mui/icons-material/Clear';
@@ -6,61 +15,72 @@ import ClearIcon from '@mui/icons-material/Clear';
 import classNames from 'classnames';
 
 import cls from './AppSelect.module.scss';
+import {Spinner} from "react-bootstrap";
+import {AppSelectMenu, GetRenderOptionProps} from "./AppSelectMenu";
 
 
-interface AppSelectBaseProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+interface AppSelectBaseProps<T> extends Omit<HTMLAttributes<HTMLDivElement>, 'onSelect'> {
+    noInput?: boolean;
     colorScheme: 'lightInput' | 'darkInput';
-    readonly?: boolean;
+    isLoading?: boolean;
+    bordered?: boolean;
     label?: string;
+    readOnly?: boolean;
+    required?: boolean;
+    getOptionLabel?: (option: T) => string;
+    getRenderOption?: (props: GetRenderOptionProps<T>) => ReactNode;
 }
 
-interface AppSelectAnyOptionProps<T> extends AppSelectBaseProps {
+interface AppSelectOptionProps<T> extends AppSelectBaseProps<T> {
     variant: 'select';
     value: T | null;
     options?: T[];
     onSelect?: (option: T | null) => void;
-    getOptionLabel?: (option: T | null) => string;
 }
 
-interface AppDropdownAnyOptionProps<T> extends AppSelectBaseProps {
+interface AppDropdownOptionProps<T> extends AppSelectBaseProps<T> {
     variant: 'dropdown';
     value: T;
     options?: T[];
     onSelect?: (option: T) => void;
-    getOptionLabel?: (option: T) => string;
 }
 
-// interface AppMultipleOptionProps<T> extends AppSelectBaseProps {
-//     variant: 'multiple';
-//     value?: T extends string ? string[] : T[];
-//     options?: T[];
-//     onSelect?: (options: T[]) => void;
-//     getOptionLabel?: T extends string ? never : (option: T) => string;
-// }
+interface AppMultipleOptionProps<T> extends AppSelectBaseProps<T> {
+    variant: 'multiple';
+    value: T[];
+    options?: T[];
+    onSelect?: (options: T[]) => void;
+}
 
 
 type AppSelectProps<T> =
-    AppDropdownAnyOptionProps<T> |
-    AppSelectAnyOptionProps<T>
-// | AppMultipleOptionProps<T>;
+    AppMultipleOptionProps<T> |
+    AppDropdownOptionProps<T> |
+    AppSelectOptionProps<T>;
 
 
 export const AppSelect = <T, >(props: AppSelectProps<T>) => {
     const {
         value,
+        required,
+        noInput,
+        isLoading,
+        bordered = false,
         variant,
         label,
         options,
         colorScheme,
         onSelect,
         getOptionLabel,
-        readonly = false,
+        readOnly = false,
         className,
+        children,
+        getRenderOption,
         ...divProps
     } = props;
 
-    const getStringOptionValue = useCallback((option: T | null | string): string => {
-        if (typeof option === 'string') {
+    const getStringOptionValue = useCallback((option: T | null): string => {
+        if (typeof option === 'string' && !getOptionLabel) {
             return option;
         } else if (getOptionLabel && option) {
             return getOptionLabel(option);
@@ -69,42 +89,148 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         }
     }, [getOptionLabel]);
 
-    const [filter, setFilter] = useState<string>(getStringOptionValue(value));
+    const stringValue = useMemo(() => {
+        if (variant === 'multiple') {
+            return value.map(getStringOptionValue).join(', ');
+        } else {
+            return getStringOptionValue(value);
+        }
+    }, [getStringOptionValue, value, variant]);
 
-    const [showOptions, setShowOptions] = useState(false);
+    const [inputValue, setInputValue] = useState<string>(stringValue);
+    const [spanValue, setSpanValue] = useState<string>(stringValue);
 
     const containerRef = useRef<HTMLDivElement>(null);
+    const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
     const inputNotEqualValue = useMemo(() => {
-        if (typeof value === 'string') {
-            return value !== filter;
+        return stringValue !== inputValue;
+    }, [inputValue, stringValue]);
+
+    const toggleOptions = (event: React.MouseEvent<HTMLElement>) => {
+        if (!readOnly) {
+            setAnchorEl(anchorEl ? null : event.currentTarget);
         }
-        if (getOptionLabel && value) {
-            console.log(getOptionLabel(value), filter, getOptionLabel(value) !== filter)
-            return getOptionLabel(value) !== filter;
+    };
+
+    const isSelected = useCallback((option: T) => {
+        if (variant === 'multiple') {
+            return value.some(item => getStringOptionValue(item) === getStringOptionValue(option));
         }
-        return false;
-    }, [filter, getOptionLabel, value]);
+        return getStringOptionValue(value) === getStringOptionValue(option);
+    }, [getStringOptionValue, value, variant]);
+
+    const handleSelect = useCallback((option: T | null) => {
+        if (variant === 'multiple' && option) {
+            const newValue = isSelected(option)
+                ? value.filter(v => getStringOptionValue(v) !== getStringOptionValue(option))
+                : [...value, option];
+            onSelect?.(newValue);
+            setInputValue('');
+        } else if (onSelect && variant === 'dropdown' && option) {
+            onSelect(option);
+            setInputValue(getStringOptionValue(option));
+            setSpanValue(getStringOptionValue(option));
+        } else if (onSelect && variant === 'select') {
+            onSelect(option);
+            setInputValue("");
+            setSpanValue(stringValue);
+        }
+        setAnchorEl(null);
+    }, [getStringOptionValue, isSelected, onSelect, stringValue, value, variant]);
 
     const handleClean = useCallback(() => {
         if (variant === 'dropdown') {
-            setFilter(getStringOptionValue(value));
+            setInputValue(getStringOptionValue(value));
+            setSpanValue(getStringOptionValue(value));
         }
         if (variant === 'select') {
-            setFilter("");
+            handleSelect(null);
         }
-    }, [getStringOptionValue, value, variant]);
+        if (variant === 'multiple' && onSelect) {
+            onSelect([]);
+        }
+    }, [getStringOptionValue, handleSelect, onSelect, value, variant]);
+
+    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+        setInputValue(e.target.value || "");
+    };
+
+    const filteredOptions = useMemo(() => {
+        if (options && inputNotEqualValue) {
+            return options.filter(option => {
+                if (typeof option === 'string') {
+                    if (getOptionLabel) {
+                        return getOptionLabel(option).toLowerCase().includes(inputValue.toLowerCase());
+                    }
+                    return option.toLowerCase().includes(inputValue.toLowerCase());
+                }
+                if (!getOptionLabel) {
+                    return false;
+                }
+                return getOptionLabel(option).toLowerCase().includes(inputValue.toLowerCase());
+            });
+        }
+        return options || [];
+    }, [options, inputNotEqualValue, getOptionLabel, inputValue]);
+
+    const sortedOptions = useMemo(() => {
+        const selectedOptions = value instanceof Array
+            ? value.filter(option => filteredOptions.includes(option)) // Проверка наличия в options
+            : value && filteredOptions.includes(value) ? [value] : [];
+
+        const unselectedOptions = filteredOptions.filter(
+            option => !isSelected(option)
+        );
+
+        return [...selectedOptions, ...unselectedOptions];
+    }, [filteredOptions, isSelected, value]);
+
+    const inputDisabled = useMemo(() => {
+        if (readOnly || noInput) {
+            return true;
+        }
+        return false;
+    }, [noInput, readOnly]);
+
+    const hideCleanBtn = useMemo(() => {
+        if (readOnly || !options) {
+            return true;
+        }
+        if (variant === 'select') {
+            return false;
+        }
+        if (variant === "dropdown") {
+            return !inputNotEqualValue;
+        }
+        if (variant === 'multiple') {
+            return value.length === 0;
+        }
+        return true;
+    }, [inputNotEqualValue, options, readOnly, value, variant]);
+
+    useEffect(() => {
+        if (variant !== 'multiple') {
+            setInputValue(stringValue);
+            setSpanValue(stringValue);
+        } else {
+            setSpanValue(stringValue);
+        }
+    }, [stringValue, variant]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-                setShowOptions(false);
-                if (inputNotEqualValue) {
+
+                setAnchorEl(null);
+                if (inputNotEqualValue && variant !== "multiple") {
                     handleClean();
+                } else if (variant === "multiple") {
+                    setInputValue("");
                 }
             }
         };
-        if (showOptions) {
+        if (anchorEl) {
             document.addEventListener('mousedown', handleClickOutside);
         } else {
             document.removeEventListener('mousedown', handleClickOutside);
@@ -113,103 +239,53 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [getOptionLabel, getStringOptionValue, handleClean, inputNotEqualValue, showOptions, value]);
-
-    const toggleOptions = () => {
-        setShowOptions(prev => !prev);
-    };
-
-    const renderOptionLabel = useCallback((option: T) => {
-        if (getOptionLabel) {
-            return getOptionLabel(option);
-        }
-        if (typeof value === 'string') {
-            return value;
-        }
-
-        return '';
-    }, [getOptionLabel, value]);
-
-    const handleSelect = (option: T | null) => {
-        if (onSelect && variant === 'dropdown' && option) {
-            onSelect(option);
-            setFilter(getStringOptionValue(option));
-        }
-        if (onSelect && variant === 'select') {
-            onSelect(option);
-            setFilter(getStringOptionValue(option));
-        }
-        setShowOptions(false);
-    };
-
-    const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-        setFilter(e.target.value || "");
-        setShowOptions(true);
-    };
-
-    const filteredOptions = useMemo(() => {
-        if (options && inputNotEqualValue) {
-            return options.filter(option => {
-                if (typeof option === 'string') {
-                    return option.toLowerCase().includes(filter.toLowerCase());
-                }
-                if (!getOptionLabel) {
-                    return false;
-                }
-                return getOptionLabel(option).toLowerCase().includes(filter.toLowerCase());
-            });
-        }
-        return options || [];
-    }, [options, inputNotEqualValue, getOptionLabel, filter]);
-
-    const inputDisabled = useMemo(() => {
-        if (readonly) {
-            return true;
-        }
-        return false;
-    }, [readonly]);
-
-    const showCleanBtn = useMemo(() => {
-        if (variant === 'select') {
-            return showOptions || inputNotEqualValue;
-        }
-        if (variant === "dropdown") {
-            return inputNotEqualValue;
-        }
-        return false;
-    }, [inputNotEqualValue, showOptions, variant]);
+    }, [anchorEl, getOptionLabel, getStringOptionValue, handleClean, inputNotEqualValue, value, variant]);
 
     return (
         <div {...divProps} ref={containerRef} className={classNames(cls.MainContainer, className)}>
             <div
-                className={classNames(cls.InputContainer, cls[colorScheme])}
-                onClick={toggleOptions}
+                className={classNames(
+                    cls.InputContainer,
+                    cls[colorScheme],
+                    {[cls.Bordered]: bordered},
+                )}
+                onClick={(e) => toggleOptions(e)}
             >
                 {label &&
                     <label className={classNames(
                         cls.Label,
                         cls[colorScheme],
-                        {[cls.Active]: showOptions || filter}
+                        {[cls.Active]: !!anchorEl || inputValue || spanValue}
                     )}>
                         {label}
+                        {required && <span className={cls.RequiredMarker}>*</span>}
                     </label>
                 }
                 <input
-                    value={filter}
+                    value={inputValue}
+                    required={required}
                     onChange={handleInputChange}
-                    readOnly={inputDisabled}
+                    readOnly={inputDisabled || !options}
                     className={classNames(
                         cls.Input,
                         cls[colorScheme],
-                        {[cls.Active]: showOptions}
+                        {[cls.Active]: !!anchorEl},
                     )}
                 />
+                <span className={classNames(
+                    cls.InputPlaceholder,
+                    cls[colorScheme],
+                    {[cls.Active]: !anchorEl}
+                )}>
+                    {spanValue}
+                </span>
                 <button
+                    type={'button'}
                     className={classNames(
                         cls.IconBtn,
                         cls[colorScheme],
                         cls.ClearBtn,
-                        {[cls.Show]: showCleanBtn}
+                        {[cls.Hide]: hideCleanBtn}
                     )}
                     onClick={handleClean}
                 >
@@ -218,33 +294,53 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                     />
                 </button>
 
-                <button className={classNames(
-                    cls.IconBtn,
-                    cls[colorScheme],
-                    cls.DropdownBtn
-                )}>
-                    <ArrowDropDownIcon
+                {isLoading ?
+                    <button
+                        type={'button'}
                         className={classNames(
-                            cls.DropdownIconStyle,
-                            {[cls.flipActive]: showOptions}
+                            cls.IconBtn,
+                            cls[colorScheme],
+                            cls.DropdownBtn,
                         )}
-                    />
-                </button>
+                    >
+                        <Spinner
+                            size={'sm'}
+                            animation={'grow'}
+                            className={classNames(
+                                cls.DropdownIconStyle,
+                                {[cls.flipActive]: !!anchorEl}
+                            )}/>
+                    </button> :
+                    <button
+                        type={'button'}
+                        className={classNames(
+                            cls.IconBtn,
+                            cls[colorScheme],
+                            cls.DropdownBtn,
+                            {[cls.Hide]: readOnly},
+                        )}
+                    >
+                        <ArrowDropDownIcon
+                            className={classNames(
+                                cls.DropdownIconStyle,
+                                {[cls.flipActive]: !!anchorEl}
+                            )}
+                        />
+                    </button>
+                }
             </div>
 
-            {showOptions && filteredOptions.length > 0 && (
-                <div className={classNames(cls.OptionsContainer, cls[colorScheme])}>
-                    {filteredOptions.map((option, index) => (
-                        <div
-                            key={index}
-                            onClick={() => handleSelect(option)}
-                            className={classNames(cls.Option, cls[colorScheme])}
-                        >
-                            {renderOptionLabel(option)}
-                        </div>
-                    ))}
-                </div>
-            )}
+            <AppSelectMenu
+                isSelected={isSelected}
+                getStringOptionValue={getStringOptionValue}
+                getRenderOption={getRenderOption}
+                isLoading={isLoading}
+                handleSelect={handleSelect}
+                sortedOptions={sortedOptions}
+                children={children}
+                colorScheme={colorScheme}
+                anchorEl={anchorEl}
+            />
         </div>
     );
 };

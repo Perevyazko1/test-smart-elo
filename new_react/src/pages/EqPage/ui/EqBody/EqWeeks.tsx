@@ -1,7 +1,6 @@
 import React, {useContext, useEffect, useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
-import {motion} from "framer-motion";
 
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
@@ -18,8 +17,6 @@ interface EqWeeksProps {
     isDragging: boolean;
     resetSize: () => void;
     expanded: boolean;
-    inWorkHeight: number;
-    durationValue: number;
 }
 
 export const EqWeeks = (props: EqWeeksProps) => {
@@ -31,8 +28,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
         drag,
         resetSize,
         expanded,
-        inWorkHeight,
-        durationValue,
     } = props;
 
     const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
@@ -108,7 +103,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
     }, [blockWidthPx, getEarnedSum, weekData?.str_dates, weekData?.week])
 
     return (
-        <motion.div
+        <div
             className={`d-flex justify-content-${expanded ? "start" : "end"} align-items-center px-1 gap-1 rounded border border-1 `}
             style={{
                 height: '36px',
@@ -117,17 +112,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                 width: blockWidthPx,
                 maxWidth: '1200px',
                 position: 'absolute',
-                top: `${inWorkHeight}px`,
-                ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
             }}
-            initial={{
-                left: expanded ? leftBlockWidth : 0,
-                right: expanded ? 0 : rightBlockWidth,
-            }}
-            animate={{
-                ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
-            }}
-            transition={{duration: durationValue}}
         >
             {!isDesktop &&
                 <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
@@ -200,6 +185,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     }
                 </div>
             }
-        </motion.div>
+        </div>
     )
 }

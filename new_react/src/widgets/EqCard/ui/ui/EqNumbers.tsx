@@ -1,71 +1,80 @@
-import React from "react";
+import React, {useCallback} from "react";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
 import {EqNumberBtn} from "@widgets/EqCard/ui/ui/EqNumberBtn";
+import {EqAssignment} from "@widgets/EqCardList/model/types";
+import {getEmployeeName} from "@shared/lib";
+import {useEmployeeList} from "@widgets/TaskForm/model/api";
+import {useCurrentUser} from "@shared/hooks";
 
 interface EqNumbersProps {
-    getUserInitials?: (assignmentNumber: number) => string;
-    getTariff?: (assignmentNumber: number) => number | undefined;
     assignmentsLists: EqNumberListTipe,
-    setNumber: (number: number) => void;
+    setNumber: (item: EqAssignment) => void;
 }
 
 export const EqNumbers = (props: EqNumbersProps) => {
-    const {assignmentsLists, setNumber, getUserInitials, getTariff} = props;
+    const {assignmentsLists, setNumber} = props;
+    const {currentUser} = useCurrentUser();
+
+    const {data: userList} = useEmployeeList({
+        departments: [currentUser.current_department?.id],
+    });
+
+    const getUserInitials = useCallback((assignment: EqAssignment): string => {
+        if (!userList) {
+            return ""
+        }
+        return getEmployeeName(userList.find(item => item.id === assignment.executor), 'initials')
+    }, [userList]);
 
 
     return (
         <>
-            {assignmentsLists.primary.map((number) => (
+            {assignmentsLists.primary.map((item) => (
                 <EqNumberBtn
-                    getTariff={getTariff}
+                    key={item.id}
+                    item={item}
                     getUserInitials={getUserInitials}
-                    number={number}
-                    key={number}
-                    setNumber={setNumber}
+                    onClick={() => setNumber(item)}
                     colorCls={'blueBtn'}
                 />
             ))}
 
-            {assignmentsLists.selectedLocked.map((number) => (
+            {assignmentsLists.selectedLocked.map((item) => (
                 <EqNumberBtn
-                    getTariff={getTariff}
+                    key={item.id}
+                    item={item}
                     getUserInitials={getUserInitials}
-                    number={number}
-                    key={number}
-                    setNumber={setNumber}
+                    onClick={() => setNumber(item)}
                     colorCls={'blackBtn'}
                 />
             ))}
 
-            {assignmentsLists.secondary.map((number) => (
+            {assignmentsLists.secondary.map((item) => (
                 <EqNumberBtn
-                    getTariff={getTariff}
+                    key={item.id}
+                    item={item}
                     getUserInitials={getUserInitials}
-                    number={number}
-                    key={number}
-                    setNumber={setNumber}
+                    onClick={() => setNumber(item)}
                     colorCls={'greyBtn'}
                 />
             ))}
 
-            {assignmentsLists.lockedNums.map((number) => (
+            {assignmentsLists.lockedNums.map((item) => (
                 <EqNumberBtn
-                    getTariff={getTariff}
+                    key={item.id}
+                    item={item}
                     getUserInitials={getUserInitials}
-                    number={number}
-                    key={number}
-                    setNumber={setNumber}
+                    onClick={() => setNumber(item)}
                     colorCls={''}
                 />
             ))}
 
-            {assignmentsLists.confirmed.map((number) => (
+            {assignmentsLists.confirmed.map((item) => (
                 <EqNumberBtn
-                    getTariff={getTariff}
+                    key={item.id}
+                    item={item}
                     getUserInitials={getUserInitials}
-                    number={number}
-                    key={number}
                     colorCls={'greenBtn'}
                 />
             ))}

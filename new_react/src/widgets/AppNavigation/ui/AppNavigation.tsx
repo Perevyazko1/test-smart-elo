@@ -1,29 +1,18 @@
 import {Button} from "react-bootstrap";
 import {Link, useLocation} from "react-router-dom";
-import {useCallback, useContext} from "react";
-
-import {AppInCompactMode, CurrentUserContext} from "@app";
+import {useCallback} from "react";
 import {anonEmployee} from "@entities/Employee";
 import {getEmployeeName, getUserRouteConfig} from "@shared/lib";
-import {AppDropdown, AppSwitch} from "@shared/ui";
+import {AppSelect, AppSwitch} from "@shared/ui";
 import {APP_COMPACT_MODE, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
-import {useAppModal} from "@shared/hooks";
+import {useAppModal, useCompactMode, useCurrentUser} from "@shared/hooks";
 import {UserActions} from "@widgets/UserActions";
 
 export const AppNavigation = (props: { isDesktop: boolean }) => {
-    const currentUser = useContext(CurrentUserContext);
+    const {currentUser, setCurrentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
 
-    if (!currentUser) {
-        throw new Error("SomeComponent must be used within a AppInCompactMode.Provider");
-    }
-
-    const compactModeContext = useContext(AppInCompactMode);
-    if (!compactModeContext) {
-        throw new Error("SomeComponent must be used within a AppInCompactMode.Provider");
-    }
-
-    const {isCompactMode, setCompactMode} = compactModeContext;
+    const {isCompactMode, setCompactMode} = useCompactMode();
 
     const switchCompactMode = (value: boolean) => {
         setCompactMode(!isCompactMode);
@@ -34,8 +23,8 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
     const location = useLocation();
 
     const getRoutesConfig = useCallback(() => {
-        return getUserRouteConfig(currentUser.currentUser, true, props.isDesktop);
-    }, [currentUser.currentUser, props.isDesktop]);
+        return getUserRouteConfig(currentUser, true, props.isDesktop);
+    }, [currentUser, props.isDesktop]);
 
     const renderOptions = getRoutesConfig().map((routeConfig) => {
         return (
@@ -55,7 +44,7 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
 
     const exitHandle = () => {
         localStorage.removeItem(USER_LOCALSTORAGE_TOKEN);
-        currentUser.setCurrentUser(anonEmployee);
+        setCurrentUser(anonEmployee);
     }
 
     const showUserActionsClb = () => {
@@ -63,9 +52,15 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
     }
 
     return (
-        <AppDropdown selected={getEmployeeName(currentUser.currentUser, 'short')} minWidth={'165px'}>
+        <AppSelect
+            label={'Пользователь'}
+            variant={'dropdown'}
+            style={{width: 155}}
+            value={getEmployeeName(currentUser, 'short')}
+            colorScheme={'darkInput'}
+        >
             {renderOptions}
-            <div className={'py-2'}>
+            <div className={'p-2 pt-3'}>
                 <AppSwitch
                     checked={isCompactMode}
                     label={'Сжатый вид'}
@@ -78,12 +73,11 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
                     История
                 </Button>
             </div>
-
             <div>
                 <Button onClick={exitHandle} className={'w-100 bg-black'} variant={'dark'}>
                     Выход
                 </Button>
             </div>
-        </AppDropdown>
-    )
+        </AppSelect>
+    );
 }

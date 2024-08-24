@@ -18,8 +18,8 @@ export const TaskPageNav = (props: TaskPageNavProps) => {
         <AppNavbar showNav={props.showNav} closeClb={props.closeClb}>
             <SortModeNav/>
             <ViewModeNav/>
-            <ExecutorFilter/>
             <DepartmentFilter/>
+            <ExecutorFilter/>
         </AppNavbar>
     );
 };

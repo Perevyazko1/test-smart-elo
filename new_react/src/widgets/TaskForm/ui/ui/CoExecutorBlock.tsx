@@ -1,9 +1,9 @@
 import {getEmployeeName} from "@shared/lib";
 import React, {useEffect, useMemo, useState} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
-import {UserListRender} from "@widgets/UserListRender/UserListRender";
 import {GroupedEmployeeItem} from "@entities/Employee";
+import {AppSelect} from "@shared/ui";
+import {UserOptionRender} from "@widgets/UserOptionRender/UserListRender";
 
 interface CoExecutorBlockProps {
     disabled: boolean;
@@ -41,30 +41,25 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             })
         }
         // eslint-disable-next-line
-    }, [inited, coExecutorIds, formTask.co_executors])
+    }, [inited, coExecutorIds, formTask.co_executors]);
 
     return (
-        <AppAutocomplete
-            variant={"multiple"}
+        <AppSelect
+            bordered
+            variant={'multiple'}
+            colorScheme={'lightInput'}
+            label={"Соисполнители / Наблюдатели"}
             style={{minWidth: 400}}
-            label={isLoading ? "Загрузка..." : "Соисполнители / Наблюдатели"}
-            readOnly={disabled}
             className={'flex-fill'}
+            readOnly={disabled}
+            isLoading={isLoading}
             value={value}
-            loading={isLoading}
-            options={userList}
-            groupBy={(option: GroupedEmployeeItem) => option.group}
-            onChangeClb={(newValue: GroupedEmployeeItem[] | null) => {
+            onSelect={(newValue: GroupedEmployeeItem[] | null) => {
                 setValue(newValue || [])
             }}
-            renderOption={(props, option) => option ?
-                <UserListRender
-                    props={props}
-                    option={option.user}
-                    key={option.user.id}
-                /> : undefined}
-            limitTags={2}
-            getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'listNameInitials')}
+            options={userList}
+            getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'initials')}
+            getRenderOption={(props) => <UserOptionRender {...props}/>}
         />
     );
 };

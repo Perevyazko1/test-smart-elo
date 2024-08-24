@@ -1,9 +1,9 @@
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
 import {GroupedEmployeeItem, useSortedUserList} from "@entities/Employee";
-import {UserListRender} from "@widgets/UserListRender/UserListRender";
 import {getEmployeeName} from "@shared/lib";
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useQueryParams} from "@shared/hooks";
+import {AppSelect} from "@shared/ui";
+import {UserOptionRender} from "@widgets/UserOptionRender/UserListRender";
 
 export const ExecutorFilter = () => {
     const {sortedUserList, usersIsLoading} = useSortedUserList();
@@ -27,36 +27,18 @@ export const ExecutorFilter = () => {
         }
     }, [queryParameters.users, sortedUserList]);
 
-    const getLabel = useMemo(() => {
-        if (usersIsLoading) {
-            return 'Загрузка...';
-        } else if (selectedUsers.length === 0) {
-            return  'Исполнители (все)';
-        } else {
-            return 'Исполнители';
-        }
-    }, [usersIsLoading, selectedUsers.length]);
-
-
     return (
-        <AppAutocomplete
-            colorscheme={'dark'}
-            style={{zIndex: "1000", marginTop: "3px"}}
-            label={getLabel}
+        <AppSelect
+            style={{width: 160}}
+            isLoading={usersIsLoading}
+            colorScheme={'darkInput'}
             variant={'multiple'}
+            label={'Исполнители'}
             value={selectedUsers}
-            groupBy={(option: GroupedEmployeeItem) => option.group}
-            onChangeClb={selectUserFilterClb}
-            renderOption={(props, option) => option ?
-                <UserListRender
-                    props={props}
-                    option={option.user}
-                    key={option.user.id}
-                /> : undefined}
-            getOptionLabel={option => getEmployeeName(option.user, 'listNameInitials')}
             options={sortedUserList}
-            loading={usersIsLoading}
-            width={250}
+            onSelect={selectUserFilterClb}
+            getOptionLabel={option => getEmployeeName(option.user, 'initials')}
+            getRenderOption={(props) => <UserOptionRender {...props}/>}
         />
     );
 };

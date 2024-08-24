@@ -1,37 +1,36 @@
 import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 export interface EqNumberListTipe {
-    primary: number[];
-    secondary: number[];
-    lockedNums: number[];
-    selectedLocked: number[];
-    confirmed: number[];
+    primary: EqAssignment[];
+    secondary: EqAssignment[];
+    lockedNums: EqAssignment[];
+    selectedLocked: EqAssignment[];
+    confirmed: EqAssignment[];
 }
 
-export const createEqNumberLists = (assignments: EqAssignment[], seriesSize: number) => {
-    const primary: number[] = [];
-    const secondary: number[] = [];
-    const lockedNums: number[] = [];
-    const selectedLocked: number[] = [];
-    const confirmed: number[] = [];
+export const createEqNumberLists = (assignments: EqAssignment[], seriesSize: number): EqNumberListTipe => {
+    const primary: EqAssignment[] = [];
+    const secondary: EqAssignment[] = [];
+    const lockedNums: EqAssignment[] = [];
+    const selectedLocked: EqAssignment[] = [];
+    const confirmed: EqAssignment[] = [];
 
     for (let i = 0; i < assignments.length; i++) {
         const assignment = assignments[i];
-        const assignmentNumber = assignment.number;
 
         if (assignment.inspector) {
-            confirmed.push(assignmentNumber)
+            confirmed.push(assignment)
         } else if ((primary.length + selectedLocked.length) < seriesSize) {
             if (assignment.assembled) {
-                primary.push(assignmentNumber)
+                primary.push(assignment)
             } else {
-                selectedLocked.push(assignmentNumber)
+                selectedLocked.push(assignment)
             }
         } else {
             if (assignment.assembled) {
-                secondary.push(assignmentNumber);
+                secondary.push(assignment);
             } else {
-                lockedNums.push(assignmentNumber)
+                lockedNums.push(assignment)
             }
 
         }

@@ -13,11 +13,11 @@ from core.models import (
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
 from .serializers import EqOrderProductSerializer
+from .service.eq_update_assignments_status import EqUpdateAssignmentsStatus
 from .service.get_eq_card_queryset import get_eq_card_queryset
 from .service.get_eq_req_params import get_eq_req_params
 from .service.get_project_filter import get_project_filters
 from .service.get_view_modes import get_view_modes
-from .service.update_assignments import UpdateAssignments
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
 from ...signals import update_assignments_and_clean_cache
@@ -50,17 +50,18 @@ class EqCardsViewSet(viewsets.ModelViewSet):
 def update_card(request):
     eq_params = get_eq_req_params(request=request)
     op_id: str = request.data.get('op_id')
-    numbers: list[int] = request.data.get('numbers')
+    assignment_ids: list[int] = request.data.get('assignment_ids')
     action: str = request.data.get('action')
 
-    UpdateAssignments(op_id=op_id,
-                      department=eq_params['department'],
-                      numbers=numbers,
-                      action=action,
-                      employee=eq_params['user'],
-                      selected_user=eq_params['selected_user'],
-                      view_mode=eq_params['view_mode_key']
-                      ).execute()
+    EqUpdateAssignmentsStatus(
+        op_id=op_id,
+        department=eq_params['department'],
+        assignment_ids=assignment_ids,
+        action=action,
+        employee=eq_params['user'],
+        selected_user=eq_params['selected_user'],
+        view_mode=eq_params['view_mode_key']
+    ).execute()
 
     return JsonResponse({}, json_dumps_params={"ensure_ascii": False})
 
@@ -205,7 +206,7 @@ def update_assignments(request):
                         other_assignments,
                         order_product.id,
                         None,
-                        assembled=False
+                        assembled=False,
                     )
                     order_product.product.technological_process_confirmed = None
                     order_product.product.save()
@@ -292,12 +293,10 @@ def update_assignments(request):
                             inspector=user,
                             description=description,
                         )
-                    difference = co_executors.aggregate(total=Sum('amount'))['total'] or 0
-                    tariff = assignment.new_tariff.amount or 0
                     Transaction.objects.create(
                         transaction_type='debiting',
                         details='wages',
-                        amount=tariff - difference,
+                        amount=assignment.amount,
                         employee=assignment.executor,
                         executor=request.user,
                         inspector=request.user,

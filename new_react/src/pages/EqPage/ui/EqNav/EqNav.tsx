@@ -45,12 +45,14 @@ export const EqNav = (props: EqNavProps) => {
                 <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
             }
 
-            <AppSwitch
-                idSwitch={'eq-nav-assembled-switch'}
-                checked={!!queryParameters.assembled}
-                onSwitch={showAssembledOnly}
-                label={queryParameters.assembled ? "Все" : "Дост."}
-            />
+            <div style={{transform: "scale(0.8)"}}>
+                <AppSwitch
+                    idSwitch={'eq-nav-assembled-switch'}
+                    checked={!!queryParameters.assembled}
+                    onSwitch={showAssembledOnly}
+                    label={queryParameters.assembled ? "Все" : "Дост."}
+                />
+            </div>
 
         </AppNavbar>
     );

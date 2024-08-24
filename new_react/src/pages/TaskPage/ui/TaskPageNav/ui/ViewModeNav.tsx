@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 import {getViewModeInited} from "@pages/TaskPage/model/selectors";
 import {taskPageActions} from "@pages/TaskPage/model/slice";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {AppSelect} from "@shared/ui";
 
 
 const ViewModes: { [key: string]: string } = {
@@ -51,15 +51,16 @@ export const ViewModeNav = () => {
     }, [dispatch, filtersInited, initialLoad, queryParameters.view_mode, setQueryParam]);
 
     return (
-        <AppAutocomplete
-            colorscheme={'dark'}
-            style={{marginTop: "3px"}}
-            label={selectedViewMode ? 'Видимость' : 'Видимость (Все)'}
+        <AppSelect
+            noInput
+            style={{width: 150}}
+            isLoading={initialLoad}
             variant={'select'}
+            label={selectedViewMode ? 'Видимость' : 'Видимость (Все)'}
             value={selectedViewMode}
-            onChangeClb={setViewModeClb}
             options={viewModes}
-            width={190}
+            onSelect={setViewModeClb}
+            colorScheme={'darkInput'}
         />
     );
 };

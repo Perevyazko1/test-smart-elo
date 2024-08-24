@@ -115,7 +115,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 </div>
                             </div>
                             <div
-                                className={'d-flex gap-1 flex-fill justify-content-start align-items-center'}
+                                className={'d-flex gap-2 flex-fill justify-content-start align-items-center'}
                                 style={{
                                     maxWidth: 'calc(100wv - 400px)',
                                     minHeight: '45px'
@@ -124,22 +124,25 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                                 {children}
                             </div>
 
-                            <div className={'d-flex align-items-center'}>
+                            <div className={'d-flex align-items-center gap-2'}>
                                 {isBoss &&
                                     <Button variant={'black'}
                                             onClick={notificationHandler}
                                     >
                                         {isLoading ?
-                                            <i className="far fa-bell text-muted"/>
+                                            <i className="far fa-bell text-muted fs-7"/>
                                             :
                                             <>
                                                 {navHasNotifications ?
 
-                                                    <IndicatorWrapper indicator={"comment"} color={" bg-danger"}>
-                                                        <i className="far fa-bell"/>
+                                                    <IndicatorWrapper
+                                                        indicator={"comment"}
+                                                        color={" bg-danger"}
+                                                    >
+                                                        <i className="far fa-bell fs-7"/>
                                                     </IndicatorWrapper>
                                                     :
-                                                    <i className="far fa-bell"/>
+                                                    <i className="far fa-bell fs-7"/>
                                                 }
                                             </>
                                         }

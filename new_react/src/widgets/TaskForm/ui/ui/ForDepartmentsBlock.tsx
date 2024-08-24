@@ -2,7 +2,7 @@ import React, {useCallback, useMemo} from "react";
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {useDepartmentList} from "@widgets/TaskForm/model/api";
 import {TaskViewMode} from "@pages/TaskPage";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {AppSelect} from "@shared/ui";
 
 interface ForDepartmentsBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -16,7 +16,7 @@ export const ForDepartmentsBlock = (props: ForDepartmentsBlockProps) => {
 
     const departmentIds = useMemo(() => {
         return departmentList?.map(department => department.id)
-    }, [departmentList])
+    }, [departmentList]);
 
 
     const getOptionLabel = useCallback((option: number) => {
@@ -25,24 +25,26 @@ export const ForDepartmentsBlock = (props: ForDepartmentsBlockProps) => {
 
     const isRequired = useMemo(() => {
         if (formTask.view_mode === TaskViewMode.DepartmentVisible) {
-             return !!(formTask.for_departments && formTask.for_departments?.length < 1);
+            return !!(formTask.for_departments && formTask.for_departments?.length < 1);
         } else {
-            return false
+            return false;
         }
-    }, [formTask.for_departments, formTask.view_mode])
+    }, [formTask.for_departments, formTask.view_mode]);
+
     return (
-        <AppAutocomplete
+        <AppSelect
+            bordered
+            label={"Отделы"}
             className={'flex-fill'}
             variant={'multiple'}
-            readOnly={!active}
+            colorScheme={'lightInput'}
             value={formTask.for_departments || []}
-            label={"Отделы"}
-            required={isRequired}
             options={departmentIds || []}
-            loading={departmentsIsLoading}
             getOptionLabel={getOptionLabel}
-            limitTags={2}
-            onChangeClb={(newValue: number[] | null) => {
+            required={isRequired}
+            isLoading={departmentsIsLoading}
+            readOnly={!active}
+            onSelect={(newValue: number[]) => {
                 setFormTask({
                     ...formTask,
                     for_departments: newValue,

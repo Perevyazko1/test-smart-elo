@@ -400,17 +400,6 @@ class Assignment(models.Model):
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
     assembled = models.BooleanField('Укомплектован', blank=True, default=True)
 
-    def save(self, *args, **kwargs):
-        # Если inspector был изменен и теперь не равен None, установить inspect_date
-        if self.pk is not None:
-            orig = Assignment.objects.get(pk=self.pk)
-            if orig.inspector != self.inspector:
-                if self.inspector is not None:
-                    self.inspect_date = datetime.datetime.now()
-                else:
-                    self.inspect_date = None
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.order_product.series_id}')
 

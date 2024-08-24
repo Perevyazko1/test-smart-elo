@@ -11,26 +11,25 @@ import {setTargetNumber} from "../../model/lib/setTargetNumber";
 
 import {EqNumbers} from "./EqNumbers";
 import {TarifficationWidget} from "@widgets/TarifficationWidget";
+import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 interface CardNameNumbersProps {
-    getUserInitials?: (assignmentNumber: number) => string;
-    getTariff?: (assignmentNumber: number) => number | undefined;
     card: EqOrderProduct;
     assignmentsLists: EqNumberListTipe;
     setAssignmentsLists: (props: EqNumberListTipe) => void;
 }
 
 export const CardNameNumbers = (props: CardNameNumbersProps) => {
-    const {card, assignmentsLists, setAssignmentsLists, getUserInitials, getTariff} = props;
+    const {card, assignmentsLists, setAssignmentsLists} = props;
     const {handleOpen} = useAppModal();
 
     const {queryParameters, setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
 
-    const setNumber = (assignment_number: number) => {
+    const setNumber = (assignment: EqAssignment) => {
         setAssignmentsLists(setTargetNumber({
                 ...assignmentsLists,
-                value: assignment_number
+                value: assignment
             })
         );
         setQueryParam('series_size', '');
@@ -82,10 +81,8 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                     </div>
                 }
                 <EqNumbers
-                    getUserInitials={getUserInitials}
                     assignmentsLists={assignmentsLists}
                     setNumber={setNumber}
-                    getTariff={getTariff}
                 />
             </div>
         </div>

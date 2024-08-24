@@ -2,7 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 import {taskPageActions} from "@pages/TaskPage/model/slice";
 import {getSortModeInited} from "@pages/TaskPage/model/selectors";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {AppSelect} from "@shared/ui";
 
 const SortModes: { [key: string]: string } = {
     '0': 'По сроку',
@@ -43,17 +43,17 @@ export const SortModeNav = () => {
             }
         }, [dispatch, filtersInited, initialLoad]);
 
-
         return (
-            <AppAutocomplete
-                colorscheme={'dark'}
-                style={{marginTop: "3px"}}
-                label={selectedSortMode ? 'Сортировка' : 'Сорт. (По сроку)'}
+            <AppSelect
+                noInput
+                style={{width: 150}}
                 variant={'select'}
+                isLoading={initialLoad}
+                label={selectedSortMode ? 'Сортировка' : 'Сорт. (По сроку)'}
                 value={selectedSortMode}
-                onChangeClb={setSortModeClb}
+                colorScheme={'darkInput'}
                 options={sortVariants}
-                width={180}
+                onSelect={setSortModeClb}
             />
         );
     }

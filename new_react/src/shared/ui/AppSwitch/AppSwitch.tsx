@@ -26,7 +26,7 @@ export const AppSwitch = (props: AppSwitchProps) => {
                 />
                 <label htmlFor={idSwitch} className={cls.switchLabel}></label>
             </div>
-            <span className={cls.switchText}>{label}</span>
+            <label className={cls.switchText} htmlFor={idSwitch}>{label}</label>
         </div>
     );
 };

@@ -1,11 +1,10 @@
 import {useMemo, useState} from "react";
 import {AxiosError} from "axios";
-import {Spinner} from "react-bootstrap";
 
 import {useAppDispatch, useCurrentUser} from "@shared/hooks";
 import {$axiosAPI} from "@shared/api";
 import {Employee} from "@entities/Employee";
-import {AppDropdown} from "@shared/ui";
+import {AppSelect} from "@shared/ui";
 import {eqPageActions} from "@pages/EqPage";
 
 export const EqDepWidget = () => {
@@ -53,22 +52,20 @@ export const EqDepWidget = () => {
         [currentUser.departments]
     );
 
-
-    if (isLoading) {
-        return (
-            <div className={'d-flex justify-content-center align-items-center'} style={{minWidth: '80px'}}>
-                <Spinner size={'sm'}/>
-            </div>
-        )
-    }
     if (error || !currentUser.current_department) {
         return (<div>{error}</div>)
     }
 
     return (
-        <AppDropdown
-            selected={currentUser.current_department.name}
-            items={departments}
+        <AppSelect
+            noInput
+            variant={'dropdown'}
+            isLoading={isLoading}
+            style={{width: 140}}
+            label={'Отдел'}
+            value={currentUser.current_department.name}
+            options={departments}
+            colorScheme={'darkInput'}
             onSelect={setDepClb}
         />
     );

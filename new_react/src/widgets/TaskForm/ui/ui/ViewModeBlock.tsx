@@ -1,6 +1,6 @@
 import {CreateTask} from "@widgets/TaskForm/model/types";
 import {getViewModeText, TaskViewMode} from "@pages/TaskPage";
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
+import {AppSelect} from "@shared/ui";
 
 interface ViewModeBlockProps {
     setFormTask: (task: CreateTask) => void;
@@ -20,15 +20,17 @@ export const ViewModeBlock = (props: ViewModeBlockProps) => {
     };
 
     return (
-        <AppAutocomplete
-            variant={"dropdown"}
+        <AppSelect
+            bordered
+            label={"Видимость"}
+            variant={'dropdown'}
+            colorScheme={'lightInput'}
+            style={{width: 200}}
             readOnly={disabled}
             value={formTask.view_mode}
-            label={"Видимость"}
             options={Object.values(TaskViewMode)}
-            getOptionLabel={getViewModeText}
-            onChangeClb={handleChange}
-            width={200}
+            getOptionLabel={option => getViewModeText(option)}
+            onSelect={handleChange}
         />
-    );
+    )
 };

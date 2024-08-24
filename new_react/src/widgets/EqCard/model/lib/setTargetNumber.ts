@@ -1,16 +1,17 @@
 import { EqNumberListTipe } from "./createEqNumberLists";
+import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 export interface setTargetNumberProps extends EqNumberListTipe {
-    value: number
+    value: EqAssignment;
 }
 
 export const setTargetNumber = (props: setTargetNumberProps): EqNumberListTipe => {
     const {confirmed, lockedNums, primary, secondary, selectedLocked, value} = props;
 
-    let newPrimary: number[] = [];
-    let newSecondary: number[] = [];
-    let newLockedNums: number[] = [];
-    let newSelectedLocked: number[] = [];
+    let newPrimary: EqAssignment[] = [];
+    let newSecondary: EqAssignment[] = [];
+    let newLockedNums: EqAssignment[] = [];
+    let newSelectedLocked: EqAssignment[] = [];
 
     if (lockedNums.includes(value) || selectedLocked.includes(value)) {
         newSelectedLocked = [value];

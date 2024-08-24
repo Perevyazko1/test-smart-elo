@@ -6,6 +6,7 @@ from channels.generic.websocket import WebsocketConsumer
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+from src.log_time import log_time
 from staff.models import Department
 
 

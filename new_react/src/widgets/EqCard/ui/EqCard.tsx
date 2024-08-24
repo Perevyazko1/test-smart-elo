@@ -6,7 +6,7 @@ import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {useAppDispatch, useAppModal, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 
-import {createEqNumberLists} from "../model/lib/createEqNumberLists";
+import {createEqNumberLists, EqNumberListTipe} from "../model/lib/createEqNumberLists";
 import {Actions, fetchEqUpdCard} from "../model/api/fetchEqUpdCard";
 
 import {EqCardBtn} from "./ui/EqCardBtn";
@@ -16,8 +16,6 @@ import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
-import {useEmployeeList} from "@widgets/TaskForm/model/api";
-import {getEmployeeName} from "@shared/lib";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     noRelevant?: boolean;
@@ -32,25 +30,6 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const {handleOpen} = useAppModal();
     const {currentUser} = useCurrentUser();
-    const {data: userList} = useEmployeeList({
-        departments: [currentUser.current_department?.id],
-    });
-
-    const getUserInitials = useCallback((assignmentNumber: number): string => {
-        if (!userList) {
-            return ""
-        }
-        const targetAssignment = card.assignments.find(item => item.number === assignmentNumber)
-        return getEmployeeName(userList.find(item => item.id === targetAssignment?.executor), 'initials')
-    }, [card.assignments, userList]);
-
-    const getTariff = useCallback((assignmentNumber: number): number | undefined => {
-        if (!userList) {
-            return;
-        }
-        const targetAssignment = card.assignments.find(item => item.number === assignmentNumber);
-        return targetAssignment?.amount;
-    }, [card.assignments, userList]);
 
     const {queryParameters} = useAppQuery();
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
@@ -72,7 +51,12 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         }
     }, [listType, expanded]);
 
-    const [assignmentsLists, setAssignmentsLists] = useState(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
+    const [assignmentsLists, setAssignmentsLists] = useState<EqNumberListTipe>(
+        createEqNumberLists(
+            card.assignments,
+            Number(queryParameters.series_size) || 1
+        )
+    );
 
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
@@ -132,9 +116,9 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         }
         const bossAssignments = card.assignments.filter(assignment => assignment.appointed_by_boss);
         const primaryExists = bossAssignments.some(
-            assignment => assignmentsLists.primary.includes(assignment.number));
+            assignment => assignmentsLists.primary.includes(assignment));
         const lockedExists = bossAssignments.some(
-            assignment => assignmentsLists.selectedLocked.includes(assignment.number));
+            assignment => assignmentsLists.selectedLocked.includes(assignment));
         return lockedExists || primaryExists;
     }, [assignmentsLists.primary, assignmentsLists.selectedLocked, bossPerm, card.assignments, listType]);
 
@@ -165,7 +149,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             dispatch(fetchEqUpdCard({
                 op_id: card.id,
                 department_id: currentUser.current_department.id,
-                numbers: getTargetNumbers(first),
+                assignment_ids: getTargetNumbers(first).map(item => item.id),
                 action: getAction(first),
                 ...queryParameters,
             })).then(() => {
@@ -233,12 +217,6 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             <CardCounter card={card}/>
 
             <CardNameNumbers
-                getTariff={currentUser.current_department?.piecework_wages ? getTariff : undefined}
-                getUserInitials={
-                    listType !== 'await' && queryParameters.view_mode ?
-                        getUserInitials :
-                        undefined
-                }
                 card={card}
                 assignmentsLists={assignmentsLists}
                 setAssignmentsLists={setAssignmentsLists}

@@ -16,7 +16,7 @@ interface fetchEqUpdateCardProps {
     op_id: number,
     department_id: number,
     action?: Actions,
-    numbers?: number[],
+    assignment_ids?: number[],
     mode?: 'GET' | 'POST';
 }
 
@@ -37,12 +37,12 @@ export const fetchEqUpdCard = createAsyncThunk<{}, fetchEqUpdateCardProps, Thunk
                     }
                 });
             } else {
-                const {op_id, action, numbers, ...otherParams} = params;
+                const {op_id, action, assignment_ids, ...otherParams} = params;
                 response = await thunkAPI.extra.api.post<{}>('/core/update_card/',
                     {
                         op_id,
                         action,
-                        numbers,
+                        assignment_ids,
                     },
                     {
                         params: {

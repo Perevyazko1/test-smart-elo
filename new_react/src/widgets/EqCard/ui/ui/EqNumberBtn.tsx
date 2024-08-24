@@ -1,22 +1,21 @@
-import React, {memo, useMemo} from "react";
+import React, {HTMLAttributes, memo, useMemo} from "react";
 import {useCardHeight} from "@pages/EqPage";
+import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 
-interface EqNumberBtnProps {
-    number: number;
-    setNumber?: (number: number) => void;
-    getUserInitials?: (assignmentNumber: number) => string;
-    getTariff?: (assignmentNumber: number) => number | undefined;
+interface EqNumberBtnProps extends HTMLAttributes<HTMLButtonElement> {
+    item: EqAssignment;
+    getUserInitials?: (assignment: EqAssignment) => string;
     colorCls: 'blueBtn' | 'redBtn' | 'blackBtn' | 'greyBtn' | 'greenBtn' | '';
 }
 
 export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
-    const {setNumber, getUserInitials, number, getTariff, colorCls} = props;
+    const {getUserInitials, item, colorCls, ...buttonProps} = props;
     const cardHeight = useCardHeight();
 
     const userInitials = useMemo(() => {
-        return getUserInitials ? getUserInitials(number) : '';
-    }, [getUserInitials, number]);
+        return getUserInitials ? getUserInitials(item) : '';
+    }, [getUserInitials, item]);
 
     const fontSize = useMemo(() => {
         return cardHeight / 6.5;
@@ -26,10 +25,9 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
         <button
             className={`appBtn ${colorCls} p-1 rounded h-100 fw-bold position-relative`}
             style={{minWidth: '35px', fontSize: fontSize}}
-            key={number}
-            onClick={setNumber ? () => setNumber(number) : undefined}
+            {...buttonProps}
         >
-            {number}
+            {item.number}
             <div
                 className={'position-absolute'}
                 style={{
@@ -42,19 +40,17 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
                 {userInitials}
             </div>
 
-            {getTariff &&
-                <div
-                    className={'position-absolute'}
-                    style={{
-                        bottom: -4.8,
-                        fontSize: cardHeight / 11,
-                        left: '50%',
-                        transform: "translate(-50%)",
-                    }}
-                >
-                    {getTariff(number)}
-                </div>
-            }
+            <div
+                className={'position-absolute'}
+                style={{
+                    bottom: -4.8,
+                    fontSize: cardHeight / 11,
+                    left: '50%',
+                    transform: "translate(-50%)",
+                }}
+            >
+                {item.amount}
+            </div>
         </button>
     );
 });

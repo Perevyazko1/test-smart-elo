@@ -1,10 +1,9 @@
 import React, {useEffect, useMemo} from 'react';
-import {Button} from 'react-bootstrap';
 
 import {eqPageActions} from "@pages/EqPage";
 
 import {APP_PERM} from '@shared/consts';
-import {AppDropdown} from '@shared/ui';
+import {AppSelect} from '@shared/ui';
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission} from '@shared/hooks';
 
 import {fetchEqFilters} from '../../model/api/fetchEqFilters';
@@ -127,28 +126,35 @@ export const EqFilters = () => {
     return (
         <>
             {bossPerm &&
-                <AppDropdown
-                    selected={getSelectedViewMode}
-                    active={!!queryParameters.view_mode}
-                    items={viewModesList}
+                <AppSelect
+                    noInput
+                    variant={'dropdown'}
+                    style={{width: 170}}
+                    label={'Режим просмотра'}
+                    colorScheme={'darkInput'}
+                    value={getSelectedViewMode}
+                    options={viewModesList}
                     onSelect={viewModeClb}
                 />
             }
-            <AppDropdown
-                selected={getSelectedProject}
-                active={!!queryParameters.project}
-                items={projects?.filters}
+            <AppSelect
+                label={'Проект'}
+                variant={'dropdown'}
+                style={{width: 170}}
+                isLoading={!inited}
+                value={getSelectedProject}
+                colorScheme={'darkInput'}
+                options={projects?.filters}
                 onSelect={projectClb}
-                childrenPos={'bottom'}
             >
-                <Button className={'w-100 p-0 mt-3'}
-                        style={{height: '25px'}}
-                        variant={'secondary'}
-                        onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
+                <button
+                    className={'appBtn blackBtn w-100 p-0 mt-1 mb-3'}
+                    style={{height: '25px'}}
+                    onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
                 >
                     {queryParameters.project_mode ? 'Актуальные' : 'Показать все'}
-                </Button>
-            </AppDropdown>
+                </button>
+            </AppSelect>
         </>
     );
 };
