@@ -1,24 +1,26 @@
 import {HTMLAttributes, memo, useMemo} from "react";
 
+
+import {getViewModeText, Task, TaskStatus} from "@entities/Task";
+import {TaskForm} from "@widgets/TaskForm";
+import {AppSlider} from "@shared/ui";
+import {useAppModal, useCurrentUser, useEmployeeName} from "@shared/hooks";
+import {getHumansDatetime} from "@shared/lib";
+
 import cls from "../TaskPage.module.scss";
 
-import {getViewModeText, TaskStatus} from "@pages/TaskPage";
-import {AppSlider} from "@shared/ui";
-import {useAppModal, useCurrentUser} from "@shared/hooks";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
-import {TaskForm} from "@widgets/TaskForm";
-
-import {Task} from "../../model/types";
 import {TaskBtn} from "./ui/TaskBtn";
 
 interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement> {
     card: Task;
     cardType: TaskStatus;
+    scaled?: boolean;
 }
 
 export const TaskPageCard = memo((props: TaskPageCardProps) => {
-    const {card, cardType, ...otherProps} = props;
+    const {card, cardType, scaled, ...otherProps} = props;
     const {currentUser} = useCurrentUser();
+    const {getNameById} = useEmployeeName();
 
     const cardHeight = 80;
     const {handleOpen, closeNoConfirm} = useAppModal();
@@ -44,7 +46,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
     )
 
     const editLocked = useMemo(() => {
-        return card.created_by?.id !== currentUser.id;
+        return card.created_by !== currentUser.id;
     }, [card.created_by, currentUser]);
 
     const hideFirstBtn = useMemo(() => {
@@ -58,9 +60,22 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
         return cardType === TaskStatus.Pending || card.verified_at || card.status === TaskStatus.Cancelled;
     }, [card.status, card.verified_at, cardType]);
 
+    const userAmount = useMemo(() => {
+        const allCardExecutors = [card.new_executor, ...card.new_co_executors];
+
+        const currentExecutor = allCardExecutors.find(item => item?.employee === currentUser.id);
+
+        return currentExecutor?.amount || 0;
+    }, [card.new_co_executors, card.new_executor, currentUser.id]);
+
+    const cardAmount = useMemo(() => {
+        return card.confirmed_tariff?.amount || card.proposed_tariff?.amount || 0;
+    }, [card.confirmed_tariff?.amount, card.proposed_tariff?.amount]);
+
     return (
         <div style={{padding: ".1rem", maxWidth: '1300px'}} {...otherProps}>
-            <div className={'d-flex justify-content-start rounded rounded-2 border border-1 bg-black'}
+            <div
+                className={`d-flex justify-content-start rounded rounded-2 border border-1 bg-black ${scaled ? "scaled" : ""}`}
                  style={{
                      width: "100%",
                      height: `${cardHeight}px`,
@@ -98,6 +113,9 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                         width={'100%'}
                         height={'100%'}
                         images={card.task_images?.map(image => image.thumbnail)}
+                        price={userAmount}
+                        totalPrice={cardAmount}
+                        bgColor={card.confirmed_tariff ? " bg-light" : " bg-warning"}
                     />
                     {card.new_comment_count > 0 &&
                         <div
@@ -185,15 +203,15 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                      }}
                 >
                     Создал:<br/>
-                    <b className={'text-nowrap'}>{getEmployeeName(card.created_by, 'short')}</b>
+                    <b className={'text-nowrap'}>{getNameById(card.created_by, 'short')}</b>
                     <br/>
                     Исполнитель:<br/>
-                    <b className={'text-nowrap'}>{getEmployeeName(card.executor, 'short')}</b>
+                    <b className={'text-nowrap'}>{getNameById(card.new_executor?.employee, 'short')}</b>
                     <br/>
                     Соисполнит.:<br/>
-                    {card.co_executors?.map(user => (
-                        <b className={'text-nowrap'} key={user.id}>
-                            {getEmployeeName(user, 'short')}
+                    {card.new_co_executors?.map(co_executor => (
+                        <b className={'text-nowrap'} key={co_executor.id}>
+                            {getNameById(co_executor.employee, 'short')}
                             <br/>
                         </b>
                     ))}

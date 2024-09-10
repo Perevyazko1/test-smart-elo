@@ -1,3 +1,4 @@
+import React, {useState} from "react";
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import CheckIcon from '@mui/icons-material/Check';
 
@@ -8,7 +9,6 @@ import {AppRangeInput} from "@shared/ui/AppRangeInput/AppRangeInput";
 import {Employee} from "@entities/Employee";
 import {useUpdateCoExecutor} from "../model/api/api";
 import {Spinner} from "react-bootstrap";
-import React, {useState} from "react";
 
 
 interface CoExecutorRowProps {

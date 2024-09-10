@@ -14,6 +14,7 @@ import {AwaitSection} from "../Sections/AwaitSection";
 import {Weeks} from "../Sections/Weeks";
 import {InWorkSection} from "../Sections/InWorkSection";
 import {ReadySection} from "../Sections/ReadySection";
+import {taskPageActions} from "@pages/TaskPage";
 
 
 export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
@@ -45,8 +46,10 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
 
         return () => {
             clearTimeout(timeoutId);
+            dispatch(taskPageActions.viewModeInited(false));
+            dispatch(taskPageActions.sortModeInited(false));
         };
-    }, [resetSize, windowWidth, windowHeight]);
+    }, [resetSize, windowWidth, windowHeight, dispatch]);
 
 
     useEffect(() => {

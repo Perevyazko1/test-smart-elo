@@ -1,4 +1,5 @@
 """Task models. """
+from django.utils import timezone
 from django.db import models
 from django.core.files.base import ContentFile
 
@@ -6,6 +7,56 @@ from PIL import Image
 from io import BytesIO
 
 from staff.models import Employee, Department
+
+
+class TaskTariff(models.Model):
+    amount = models.PositiveIntegerField("Сумма", default=0)
+    add_date = models.DateTimeField('Дата добавления', blank=True, default=timezone.now)
+    created_by = models.ForeignKey(
+        Employee,
+        verbose_name='Создал',
+        related_name='tasks_created_tariffs',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    task = models.ForeignKey(
+        'Task',
+        verbose_name='Задача',
+        related_name='task_tariffs',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    comment = models.CharField('Комментарий', max_length=250, blank=True, null=True)
+
+
+class TaskExecutor(models.Model):
+    class Meta:
+        verbose_name = 'Исполнитель'
+        verbose_name_plural = 'Исполнители'
+        unique_together = ['employee', 'task']
+
+    amount = models.PositiveIntegerField("Сумма/Вознаграждение", default=0)
+    employee = models.ForeignKey(
+        Employee,
+        verbose_name="Исполнитель",
+        related_name="tasks_executor",
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+    task = models.ForeignKey(
+        'Task',
+        verbose_name='Задача',
+        related_name='task_executor',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+    )
+
+    def __str__(self):
+        return '{}'.format(f'{self.task} => {self.employee} => {self.amount}')
 
 
 class Task(models.Model):
@@ -106,15 +157,46 @@ class Task(models.Model):
         null=True,
     )
 
+    new_executor = models.OneToOneField(
+        TaskExecutor,
+        verbose_name='Исполнитель',
+        null=True,
+        blank=True,
+        related_name="task_new_executor",
+        on_delete=models.SET_NULL,
+    )
+
+    new_co_executors = models.ManyToManyField(
+        TaskExecutor,
+        verbose_name="Соисполнители",
+        related_name="task_new_co_executors",
+    )
+
     co_executors = models.ManyToManyField(
         Employee,
         verbose_name="Соисполнители",
         related_name="co_executors_tasks",
     )
-    amount = models.IntegerField("Сумма/Вознаграждение", default=0)
+
+    confirmed_tariff = models.OneToOneField(
+        TaskTariff,
+        verbose_name='Утвержденный тариф',
+        null=True,
+        blank=True,
+        related_name="task_confirmed_tariff",
+        on_delete=models.SET_NULL,
+    )
+    proposed_tariff = models.OneToOneField(
+        TaskTariff,
+        verbose_name='Предложенный тариф',
+        null=True,
+        blank=True,
+        related_name="task_proposed_tariff",
+        on_delete=models.SET_NULL,
+    )
 
     def __str__(self):
-        return '{}'.format(f'{self.created_by.username} => {self.title}')
+        return '{}'.format(f'{self.created_at} => {self.title}')
 
 
 class TaskComment(models.Model):
@@ -186,7 +268,13 @@ class TaskImage(models.Model):
 
     image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
 
-    image = models.ImageField('Ссылка на изображение', upload_to=f"images/tasks/", blank=True, null=True)
+    image = models.ImageField(
+        'Ссылка на изображение',
+        upload_to=f"images/tasks/",
+        max_length=255,
+        blank=True,
+        null=True
+    )
     thumbnail = models.ImageField('Миниатюра', upload_to=f"images/tasks/thumbnails/", blank=True, null=True)
 
     def save(self, *args, **kwargs):

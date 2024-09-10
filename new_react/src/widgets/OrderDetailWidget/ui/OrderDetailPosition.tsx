@@ -21,7 +21,7 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
         if (openDepInfo) {
             return Object.keys(orderProduct.departments_info).length + 1;
         } else {
-            return 2
+            return 2;
         }
     }, [openDepInfo, orderProduct.departments_info]);
 

@@ -1,8 +1,11 @@
 import {useCallback, useMemo} from "react";
+
+import {Task, TaskStatus, UpdateTask} from "@entities/Task";
 import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser} from "@shared/hooks";
-import {Task, TaskStatus} from "@pages/TaskPage";
-import {updateTask} from "@pages/TaskPage/model/api/updateTask";
-import {UpdateTask} from "@pages/TaskPage/model/types";
+
+import {updateTask} from "../../../model/api/updateTask";
+import {getTaskExecutor} from "@widgets/TaskForm";
+
 
 interface TaskBtnProps {
     cardType: TaskStatus;
@@ -27,13 +30,23 @@ export const TaskBtn = (props: TaskBtnProps) => {
 
     const locked = useMemo(() => {
         if (cardType === TaskStatus.InProgress) {
-            return card.appointed_by?.id !== currentUser.id
+            return card.appointed_by !== currentUser.id
         }
         if (cardType === TaskStatus.Completed) {
-            return card.created_by?.id !== currentUser.id
+            if (card.proposed_tariff?.amount !== card.confirmed_tariff?.amount) {
+                return true;
+            }
+            return card.created_by !== currentUser.id
         }
         return false
-    }, [card.appointed_by?.id, card.created_by?.id, cardType, currentUser.id]);
+    }, [
+        card.appointed_by,
+        card.confirmed_tariff?.amount,
+        card.created_by,
+        card.proposed_tariff?.amount,
+        cardType,
+        currentUser.id
+    ]);
 
     const getButtonVariant = useMemo(() => {
         if ((timeLeft && timeLeft?.days > 0) || (!timeLeft)) {
@@ -90,11 +103,11 @@ export const TaskBtn = (props: TaskBtnProps) => {
         if (cardType === TaskStatus.Pending) {
             const data: UpdateTask = {
                 id: card.id,
-                status: TaskStatus.InProgress,
-                executor: card.executor?.id || currentUser.id,
-                co_executors: card.co_executors?.map(user => user.id),
-                for_departments: card.for_departments?.map(department => department.id),
+                status: TaskStatus.InProgress
             };
+            if (!card.new_executor) {
+                data.new_executor = getTaskExecutor(currentUser.id, card);
+            }
             if (!card.appointed_at) {
                 data.appointed_at = new Date().toISOString();
             }
@@ -106,12 +119,11 @@ export const TaskBtn = (props: TaskBtnProps) => {
             const data: UpdateTask = {
                 id: card.id,
                 status: TaskStatus.Pending,
-                co_executors: card.co_executors?.map(user => user.id),
-                for_departments: card.for_departments?.map(department => department.id),
             }
-            if (card.appointed_by?.id === currentUser.id) {
-                if (card.executor?.id === currentUser.id) {
-                    data.executor = null;
+            if (card.appointed_by === currentUser.id) {
+                if (card.new_executor?.employee === currentUser.id) {
+                    data.appointed_at = null;
+                    data.new_executor = null;
                 }
             }
             return data;
@@ -120,23 +132,17 @@ export const TaskBtn = (props: TaskBtnProps) => {
                 id: card.id,
                 status: TaskStatus.Completed,
                 ready_at: new Date().toISOString(),
-                co_executors: card.co_executors?.map(user => user.id),
-                for_departments: card.for_departments?.map(department => department.id),
             };
         } else if (cardType === TaskStatus.Completed && first) {
             return {
                 id: card.id,
                 verified_at: new Date().toISOString(),
-                co_executors: card.co_executors?.map(user => user.id),
-                for_departments: card.for_departments?.map(department => department.id),
             };
         } else {
             return {
                 id: card.id,
-                ready_at: '',
+                ready_at: null,
                 status: TaskStatus.InProgress,
-                co_executors: card.co_executors?.map(user => user.id),
-                for_departments: card.for_departments?.map(department => department.id),
             };
         }
     }
@@ -154,6 +160,16 @@ export const TaskBtn = (props: TaskBtnProps) => {
                     </h4>
                 </>
             )
+        } else if (
+            cardType === TaskStatus.Completed
+            && first && locked
+            && card.proposed_tariff?.amount !== card.confirmed_tariff?.amount
+        ) {
+            handleOpen(
+                <h4 className={'my-5'}>
+                    В задаче установлена сделка не завизированная ответственным.
+                </h4>
+            )
         } else if (cardType === TaskStatus.Completed && first && locked) {
             handleOpen(
                 <h4 className={'my-5'}>
@@ -164,7 +180,6 @@ export const TaskBtn = (props: TaskBtnProps) => {
             dispatch(updateTask(getActionData()));
         }
     }
-
 
     return (
         <button

@@ -1,37 +1,21 @@
-import {Employee} from "@entities/Employee";
 import {rtkAPI} from "@shared/api";
 
-import {Department} from "@entities/Department";
-import {Task} from "@pages/TaskPage";
-import {NewTaskComment, TaskComment} from "@pages/TaskPage/model/types";
+import {NewTask, NewTaskComment, Task, TaskComment, UpdateTask} from "@entities/Task";
 
 interface UpdateTaskProps {
     id: number,
-    data: FormData,
+    data: UpdateTask,
     updateMode: 'all' | 'excludeMe' | 'none',
 }
 
 interface CreateTaskProps {
-    data: FormData,
+    data: NewTask,
     updateMode: 'all' | 'excludeMe' | 'none',
-}
-
-
-interface GetUserListProps {
-    departments?: number[];
-    is_staff?: boolean;
 }
 
 
 const TaskFormApi = rtkAPI.injectEndpoints({
         endpoints: (build) => ({
-            getUserList: build.query<Employee[], {}>({
-                query: (props: GetUserListProps) => ({
-                    url: '/staff/employees/',
-                    params: props,
-                }),
-                keepUnusedDataFor: 6000,
-            }),
             getTaskComments: build.query<TaskComment[], {task: number}>({
                 query: (props: {task: number}) => ({
                     url: '/tasks/task_comments/',
@@ -48,12 +32,6 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                 invalidatesTags: [
                     {type: 'TaskComments', id: 'ALL'},
                 ],
-            }),
-            getDepartmentList: build.query<Department[], {}>({
-                query: () => ({
-                    url: '/staff/departments/',
-                }),
-                keepUnusedDataFor: 6000,
             }),
             createTask: build.mutation<Task, CreateTaskProps>({
                 query: (props: CreateTaskProps) => ({
@@ -77,6 +55,21 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                     },
                 }),
             }),
+            createTaskImage: build.mutation<any, FormData>({
+                query: (props: FormData) => ({
+                    url: `/tasks/task_images/`,
+                    params: {},
+                    method: 'POST',
+                    data: props,
+                    body: props,
+                }),
+            }),
+            deleteTaskImage: build.mutation<void, number>({
+                query: (id: number) => ({
+                    url: `/tasks/task_images/${id}/`,
+                    method: 'DELETE',
+                }),
+            }),
             updateTask: build.mutation<Task, UpdateTaskProps>({
                 query: (props: UpdateTaskProps) => ({
                     url: `/tasks/tasks/${props.id}/`,
@@ -88,19 +81,6 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                     body: props.data,
                 }),
             }),
-            deleteTaskImage: build.mutation<void, number>({
-                query: (id: number) => ({
-                    url: `/tasks/task_images/${id}/`,
-                    method: 'DELETE',
-                }),
-            }),
-            addToFavorite: build.mutation<Employee, { data: number }>({
-                query: (props: { data: number }) => ({
-                    url: '/staff/add_to_favorite/',
-                    method: 'POST',
-                    body: props,
-                }),
-            }),
         }),
     })
 ;
@@ -109,8 +89,6 @@ export const useCreateTask = TaskFormApi.useCreateTaskMutation;
 export const useTaskCommentList = TaskFormApi.useGetTaskCommentsQuery;
 export const useUpdateTask = TaskFormApi.useUpdateTaskMutation;
 export const useDeleteTaskImage = TaskFormApi.useDeleteTaskImageMutation;
-export const useEmployeeList = TaskFormApi.useGetUserListQuery;
-export const useAddToFavorite = TaskFormApi.useAddToFavoriteMutation;
-export const useDepartmentList = TaskFormApi.useGetDepartmentListQuery;
 export const useTaskUpdateViewInfo = TaskFormApi.useUpdateTaskViewInfoMutation;
 export const useCreateTaskComment = TaskFormApi.useCreateTaskCommentMutation;
+export const useCreateTaskImage = TaskFormApi.useCreateTaskImageMutation;

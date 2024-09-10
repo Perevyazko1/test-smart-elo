@@ -7,7 +7,7 @@ interface useFixedSizeListProps {
     getScrollElement: () => HTMLElement | null;
 }
 
-const DEFAULT_OVERSCAN = 1;
+const DEFAULT_OVERSCAN = 5;
 
 export const useFixedSizeList = (props: useFixedSizeListProps) => {
     const {

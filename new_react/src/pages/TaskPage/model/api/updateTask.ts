@@ -2,9 +2,7 @@ import {createAsyncThunk} from "@reduxjs/toolkit";
 
 import {ThunkConfig} from "@app";
 import {errorApiHandler} from "@shared/api";
-import {prepareFormData} from "@shared/lib";
-
-import {Task, UpdateTask} from "../types";
+import {Task, UpdateTask} from "@entities/Task";
 
 
 export const updateTask = createAsyncThunk<Task, UpdateTask, ThunkConfig<string>>(
@@ -13,12 +11,10 @@ export const updateTask = createAsyncThunk<Task, UpdateTask, ThunkConfig<string>
         const {extra} = thunkAPI;
         const {id, ...otherFields} = params;
 
-        const formData = prepareFormData({...otherFields});
-
         try {
             const response = await extra.api.patch<Task>(
                 `/tasks/tasks/${id}/`,
-                formData,
+                otherFields,
                 {
                     params: {
                         update_mode: 'excludeMe'

@@ -1,10 +1,10 @@
 import React, {useEffect} from "react";
 
+import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
 import {allFiltersInited, getAwaitData} from "../../model/selectors";
-import {TaskStatus} from "../../model/consts";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
 import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
@@ -54,11 +54,7 @@ export const AwaitSection = () => {
         }}>
             {awaitData?.isLoading
                 ?
-                <>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                </>
+                <TaskCardSkeleton/>
                 :
                 <>
                     {awaitData?.results?.map(card => (

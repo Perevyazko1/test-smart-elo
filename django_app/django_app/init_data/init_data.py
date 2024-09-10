@@ -1,55 +1,28 @@
 """Initial methods and scripts. """
-from datetime import datetime
-
-from core.models import Assignment, ProductionStep
-from staff.models import Employee
-from tasks.models import Task
+from tasks.models import Task, TaskExecutor
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    velikiy = Employee.objects.get(
-        username="Vilikiy_D"
-    )
+    all_tasks = Task.objects.all()
 
-    Assignment.objects.filter(
-        status='ready',
-        executor__isnull=True,
-    ).update(
-        executor=velikiy
-    )
+    for task in all_tasks:
+        if task.co_executors:
+            co_executors = task.co_executors.all()
+            for co_executor in co_executors:
+                new_co_executor, created = TaskExecutor.objects.get_or_create(
+                    employee=co_executor,
+                    amount=0,
+                    task=task,
+                )
+                task.new_co_executors.add(new_co_executor)
+        if task.executor:
+            new_executor, created = TaskExecutor.objects.get_or_create(
+                employee=task.executor,
+                amount=0,
+                task=task,
+            )
+            task.new_executor = new_executor
 
-    Assignment.objects.filter(
-        status='in_work',
-        executor__isnull=True,
-    ).update(
-        executor=velikiy
-    )
-
-    date_limit = datetime(2024, 7, 31)
-
-    Assignment.objects.filter(
-        inspector__isnull=True,
-        date_completion__lt=date_limit,
-    ).update(
-        inspector=velikiy
-    )
-
-    Task.objects.filter(
-        appointed_by__isnull=False,
-        executor__isnull=True,
-    ).exclude(
-        view_mode='2'
-    ).update(
-        executor=velikiy
-    )
-
-    target_ps = ProductionStep.objects.filter(
-        proposed_tariff__isnull=True,
-        confirmed_tariff__isnull=False,
-    )
-
-    for ps in target_ps:
-        ps.proposed_tariff = ps.confirmed_tariff
-        ps.save()
+        task.save()

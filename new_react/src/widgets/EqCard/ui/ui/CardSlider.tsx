@@ -2,7 +2,7 @@ import React, {useMemo} from "react";
 
 import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {AppSlider} from "@shared/ui";
-import {useAppModal, useCompactMode, useCurrentUser} from "@shared/hooks";
+import {useAppModal, useCurrentUser} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
 
@@ -16,7 +16,6 @@ interface CardSliderProps {
 
 export const CardSlider = (props: CardSliderProps) => {
     const {card, cardType} = props;
-    const {isCompactMode} = useCompactMode();
     const {currentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
 
@@ -26,21 +25,13 @@ export const CardSlider = (props: CardSliderProps) => {
         return total;
     }, [card.assignments]);
 
-    const sliderWidth = useMemo(() => {
-        if (isCompactMode) {
-            return '72px';
-        } else {
-            return '100px';
-        }
-    }, [isCompactMode]);
-
     const sliderImages = createEqImageUrls(card);
 
     return (
         <div className={cls.sliderBlock + ' bg-light rounded'} style={{
-            width: sliderWidth,
-            minWidth: sliderWidth,
-            maxWidth: sliderWidth,
+            width: 72,
+            minWidth: 72,
+            maxWidth: 72,
         }}
              onClick={() => sliderImages.thumbnails.length > 0 && handleOpen(
                  <AppSlider

@@ -1,8 +1,7 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
 import {ThunkConfig} from "@app";
 import {errorApiHandler} from "@shared/api";
-import {Task} from "../types";
-import {TaskStatus} from "@pages/TaskPage";
+import {Task, TaskStatus} from "@entities/Task";
 
 interface getTaskCardsProps {
     status: TaskStatus;

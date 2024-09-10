@@ -5,23 +5,23 @@ interface AppRangeInputProps {
     disabled: boolean;
     value: number;
     maxValue: number;
-    setValue: (value: number) => void;
+    setValue?: (value: number) => void;
 }
 
 export const AppRangeInput = (props: AppRangeInputProps) => {
     const {value, maxValue, setValue, disabled} = props;
 
     const handleSliderChange = (event: Event, newValue: number | number[]) => {
-        setValue(newValue as number);
+        setValue && setValue(newValue as number);
     };
 
     const incrementValue = (incValue: number) => {
         if (value + incValue > maxValue) {
-            setValue(maxValue)
+            setValue && setValue(maxValue)
         } else if (value + incValue < 0) {
-            setValue(0)
+            setValue && setValue(0)
         } else {
-            setValue(value + incValue)
+            setValue && setValue(value + incValue)
         }
     }
 
@@ -39,7 +39,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
             inputValue = '0';
         }
 
-        setValue(Number(inputValue));
+        setValue && setValue(Number(inputValue));
     };
 
     const inputValue = useMemo(() => {
@@ -50,7 +50,17 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
             inputValue = '0';
         }
         return inputValue;
-    }, [value])
+    }, [value]);
+    
+    const stepValue = useMemo(() => {
+        if (maxValue < 1000) {
+            return 25;
+        } if (maxValue > 1000 && maxValue < 5000) {
+            return 100;
+        } else {
+            return 250;
+        }
+    }, [maxValue])
 
     return (
         <div className={'d-flex justify-content-evenly align-items-end gap-2 flex-nowrap'}>
@@ -60,6 +70,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
             >
                 <div className={'d-flex align-items-center gap-2'}>
                     <button
+                        type={'button'}
                         onClick={() => incrementValue(-1)}
                         className={'appBtn px-1 fs-7 greyBtn'}
                         style={{minHeight: '30px', minWidth: '30px'}}
@@ -68,6 +79,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                         <b>-1</b>
                     </button>
                     <button
+                        type={'button'}
                         onClick={() => incrementValue(-5)}
                         className={'appBtn px-1 fs-7 greyBtn'}
                         style={{minHeight: '30px', minWidth: '30px'}}
@@ -76,19 +88,20 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                         <b>-5</b>
                     </button>
                     <button
-                        onClick={() => incrementValue(-25)}
+                        type={'button'}
+                        onClick={() => incrementValue(-stepValue)}
                         className={'appBtn px-1 fs-7 greyBtn'}
                         style={{minHeight: '30px', minWidth: '30px'}}
                         disabled={disabled}
                     >
-                        <b>-25</b>
+                        <b>-{stepValue}</b>
                     </button>
                 </div>
 
                 <Slider
                     sx={{
                         maxWidth: 350,
-                        minWidth: 350,
+                        minWidth: 300,
                         padding: 0,
                         margin: 0,
                         '&.MuiSlider-root': {
@@ -111,7 +124,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                             color: '#909090', // Цвет активной метки
                         },
                     }}
-                    step={25}
+                    step={stepValue}
                     disabled={disabled}
                     marks
                     value={value}
@@ -121,6 +134,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                 />
                 <div className={'d-flex align-items-center gap-2'}>
                     <button
+                        type={'button'}
                         className={'appBtn fs-7 greyBtn px-1'}
                         style={{minHeight: '30px', minWidth: '30px'}}
                         onClick={() => incrementValue(1)}
@@ -129,6 +143,7 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                         <b>+1</b>
                     </button>
                     <button
+                        type={'button'}
                         onClick={() => incrementValue(5)}
                         className={'appBtn fs-7 greyBtn px-1'}
                         style={{minHeight: '30px', minWidth: '30px'}}
@@ -137,12 +152,13 @@ export const AppRangeInput = (props: AppRangeInputProps) => {
                         <b>+5</b>
                     </button>
                     <button
+                        type={'button'}
                         className={'appBtn fs-7 greyBtn px-1'}
-                        onClick={() => incrementValue(25)}
+                        onClick={() => incrementValue(stepValue)}
                         style={{minHeight: '30px', minWidth: '30px'}}
                         disabled={disabled}
                     >
-                        <b>+25</b>
+                        <b>+{stepValue}</b>
                     </button>
                 </div>
             </div>

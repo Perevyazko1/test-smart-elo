@@ -1,17 +1,17 @@
 import React, {useCallback, useMemo} from "react";
-import {CreateTask} from "@widgets/TaskForm/model/types";
-import {useDepartmentList} from "@widgets/TaskForm/model/api";
-import {TaskViewMode} from "@pages/TaskPage";
 import {AppSelect} from "@shared/ui";
+import {Task, TaskViewMode, UpdateTask} from "@entities/Task";
+import {useDepartmentList} from "@entities/Department";
 
 interface ForDepartmentsBlockProps {
-    setFormTask: (task: CreateTask) => void;
-    formTask: CreateTask;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    formTask: UpdateTask;
+    task?: Task;
     active: boolean;
 }
 
 export const ForDepartmentsBlock = (props: ForDepartmentsBlockProps) => {
-    const {formTask, setFormTask, active} = props;
+    const {formTask, task, setFormDataClb, active} = props;
     const {data: departmentList, isLoading: departmentsIsLoading} = useDepartmentList({});
 
     const departmentIds = useMemo(() => {
@@ -38,17 +38,14 @@ export const ForDepartmentsBlock = (props: ForDepartmentsBlockProps) => {
             className={'flex-fill'}
             variant={'multiple'}
             colorScheme={'lightInput'}
-            value={formTask.for_departments || []}
+            value={formTask.for_departments || task?.for_departments || []}
             options={departmentIds || []}
             getOptionLabel={getOptionLabel}
             required={isRequired}
             isLoading={departmentsIsLoading}
             readOnly={!active}
             onSelect={(newValue: number[]) => {
-                setFormTask({
-                    ...formTask,
-                    for_departments: newValue,
-                });
+                setFormDataClb('for_departments', newValue)
             }}
         />
     );

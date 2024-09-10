@@ -5,7 +5,7 @@ export {ModalContext} from "./providers/ModalProvider/ModalProvider";
 export {StoreProvider} from "./providers/StoreProvider/StoreProvider";
 export {App} from './ui/App';
 export {
-    IsDesktopContext, CurrentUserContext, AppInCompactMode, ContextProvider, AudioContext
+    IsDesktopContext, CurrentUserContext, AppInCompactMode, ContextProvider, AudioContext, UserListContext
 } from './providers/ContextProvider/ContextProvider';
 export type {AppDispatch} from './providers/StoreProvider/store';
 export type {

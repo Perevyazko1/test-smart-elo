@@ -3,14 +3,16 @@ import React, {useEffect, useRef, useState} from "react";
 import {Button, Form, InputGroup} from "react-bootstrap";
 
 import {Fab} from "@mui/material";
-import {useAppDispatch, useCurrentUser, useSpeechRecognition} from "@shared/hooks";
 import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
 import ClearIcon from "@mui/icons-material/Clear";
 import DoneAllIcon from '@mui/icons-material/DoneAll';
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
 
-import {Task, taskPageActions} from "@pages/TaskPage";
-import {useCreateTaskComment} from "@widgets/TaskForm/model/api";
+import {taskPageActions} from "@pages/TaskPage";
+import {Task} from "@entities/Task";
+import {useAppDispatch, useCurrentUser, useSpeechRecognition} from "@shared/hooks";
+
+import {useCreateTaskComment} from "../../model/api";
 
 
 interface TextResultBlockProps {
@@ -26,18 +28,6 @@ export const CommentInputBlock = (props: TextResultBlockProps) => {
     const [inputValue, setInputValue] = useState<string>("");
     const [cursorPosition, setCursorPosition] = useState<number | null>(0);
     const [createTaskComment, {isLoading}] = useCreateTaskComment();
-
-    const [disabled, setDisabled] = useState<boolean>(true);
-
-    useEffect(() => {
-        setDisabled(
-            !(
-                task?.executor?.id === currentUser.id ||
-                task?.created_by?.id === currentUser.id ||
-                task?.co_executors?.some(executor => executor.id === currentUser.id)
-            )
-        );
-    }, [currentUser.id, task?.co_executors, task?.created_by?.id, task?.executor?.id, task?.verified_at]);
 
     useEffect(() => {
         if (transcript && cursorPosition !== null && inputRef.current) {
@@ -121,7 +111,7 @@ export const CommentInputBlock = (props: TextResultBlockProps) => {
                     color="inherit"
                     aria-label="add"
                     onClick={startListening}
-                    disabled={isListening || disabled}
+                    disabled={isListening}
                     className={'position-absolute'}
                     style={{
                         left: '-10px'
@@ -135,7 +125,7 @@ export const CommentInputBlock = (props: TextResultBlockProps) => {
                 </Fab>
                 Комментарий:
 
-                {!disabled && inputValue &&
+                {inputValue &&
                     <button
                         className={'appBtn border-1 border-secondary text-secondary fs-7 position-absolute'}
                         type={'button'}
@@ -157,7 +147,6 @@ export const CommentInputBlock = (props: TextResultBlockProps) => {
                 as={"input"}
                 maxLength={255}
                 ref={inputRef}
-                readOnly={disabled}
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
@@ -169,7 +158,7 @@ export const CommentInputBlock = (props: TextResultBlockProps) => {
             <Button
                 variant="outline-dark"
                 className={'fs-7'}
-                disabled={disabled || isLoading || !inputValue}
+                disabled={isLoading || !inputValue}
                 onClick={createCommentClb}
             >
                 <b>Добавить</b> <DoneAllIcon fontSize={'small'}/>

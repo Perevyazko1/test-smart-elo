@@ -5,11 +5,13 @@ import {rtkAPI, $axiosAPI} from "@shared/api";
 
 import {createReducerManager} from "./reducerManager";
 import {StateSchema} from "./stateSchema";
+import {taskPageReducer} from "@pages/TaskPage/model/slice";
 
 
 export function createReduxStore(initialState?: StateSchema) {
     const rootReducers: ReducersMapObject<StateSchema> = {
         [rtkAPI.reducerPath]: rtkAPI.reducer,
+        taskPage: taskPageReducer,
     }
 
     const reducerManager = createReducerManager(rootReducers)

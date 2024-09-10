@@ -156,7 +156,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
 
 .scaled {
   opacity: 0.8;
-  transform: scale(0.95);
+  transform: scale(0.98);
   animation: 200ms scaled, opacity ease-in-out;
 }
 

@@ -1,47 +1,92 @@
-import {getEmployeeName} from "@shared/lib";
-import React, {useEffect, useMemo, useState} from "react";
-import {CreateTask} from "@widgets/TaskForm/model/types";
+import React, {useCallback, useMemo} from "react";
 import {GroupedEmployeeItem} from "@entities/Employee";
-import {AppSelect} from "@shared/ui";
-import {UserOptionRender} from "@widgets/UserOptionRender/UserListRender";
+import {AppSelect, UserOptionRender} from "@shared/ui";
+import {Task, TaskExecutor, TaskViewMode, UpdateTask} from "@entities/Task";
+
+import {getTaskExecutor} from "../../model/lib";
+import {useEmployeeName} from "@shared/hooks";
+import {GetRenderOptionProps} from "@shared/ui/AppSelect/AppSelectMenu";
+
 
 interface CoExecutorBlockProps {
     disabled: boolean;
     userList: GroupedEmployeeItem[];
     isLoading: boolean;
-    setFormTask: (task: CreateTask) => void;
-    formTask: CreateTask;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    formTask: UpdateTask;
+    task?: Task;
 }
 
 export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
-    const {userList, formTask, disabled, isLoading, setFormTask} = props;
+    const {userList, task, formTask, disabled, isLoading, setFormDataClb} = props;
+    const {getNameById} = useEmployeeName();
 
-    const [value, setValue] = useState<GroupedEmployeeItem[]>([]);
-    const [inited, setInited] = useState<boolean>(false);
+    const targetCoExecutors = useMemo(() => {
+        if (Object.keys(formTask).includes('new_co_executors')) {
+            return formTask.new_co_executors || [];
+        }
+        if (task && Object.keys(task).includes('new_co_executors')) {
+            return task.new_co_executors || [];
+        }
+        return [];
+    }, [formTask, task]);
 
+    const onSelectClb = (newValue: TaskExecutor[] | null) => {
+        const currentExecutor = formTask.new_executor || task?.new_executor;
 
-    useEffect(() => {
-        if (!inited && userList.length > 0) {
-            setValue(
-                userList.filter(option => formTask.co_executors?.includes(option.user.id))
+        // Если в новых соисполнителях есть ответственный за задачу - убираем его
+        if (newValue?.some(item => item.employee === currentExecutor?.employee)) {
+            setFormDataClb("new_executor", null);
+        }
+
+        setFormDataClb("new_co_executors", newValue || []);
+    };
+    
+    const coExecutorOptions = useMemo(() => {
+        return userList.map(user => getTaskExecutor(user.user.id))
+    },[userList]);
+
+    const getOptionLabelClb = useCallback((option: TaskExecutor) => {
+        const userName = getNameById(option.employee, 'initials');
+
+        if (option.amount) {
+            return `${userName} (${option.amount})`;
+        }
+        return userName;
+    }, [getNameById]);
+
+    const renderOption = useCallback((props: GetRenderOptionProps<TaskExecutor>) => {
+        const userOption = userList.find(item => item.user.id === props.option?.employee);
+        if (userOption) {
+            const newHandleSelect = (option: GroupedEmployeeItem | null) => {
+                if (option) {
+                    props.handleSelect(getTaskExecutor(option.user.id, task, formTask))
+                }
+            }
+            const newIsSelected = (option: GroupedEmployeeItem | null): boolean => {
+                return targetCoExecutors.some(item => item.employee === option?.user.id)
+            }
+            
+            const newProps: GetRenderOptionProps<GroupedEmployeeItem> = {
+                option: userOption,
+                handleSelect: newHandleSelect,
+                colorScheme: props.colorScheme,
+                isSelected: newIsSelected,
+            }
+            return (
+                <UserOptionRender {...newProps}/>
             )
-            setInited(true)
         }
-    }, [formTask.co_executors, inited, userList]);
+    }, [formTask, targetCoExecutors, task, userList]);
 
-    const coExecutorIds = useMemo(() => {
-        return value.map(user => user.user.id)
-    }, [value])
-
-    useEffect(() => {
-        if (inited && coExecutorIds !== formTask.co_executors) {
-            setFormTask({
-                ...formTask,
-                co_executors: coExecutorIds,
-            })
+    const lockedViewMode = useMemo(() => {
+        if (formTask.view_mode === TaskViewMode.OnlyMe) {
+            return true;
+        } else if (task?.view_mode === TaskViewMode.OnlyMe) {
+            return true;
         }
-        // eslint-disable-next-line
-    }, [inited, coExecutorIds, formTask.co_executors]);
+        return false;
+    }, [formTask.view_mode, task?.view_mode]);
 
     return (
         <AppSelect
@@ -49,17 +94,14 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
             variant={'multiple'}
             colorScheme={'lightInput'}
             label={"Соисполнители / Наблюдатели"}
-            style={{minWidth: 400}}
             className={'flex-fill'}
-            readOnly={disabled}
+            readOnly={disabled || lockedViewMode}
             isLoading={isLoading}
-            value={value}
-            onSelect={(newValue: GroupedEmployeeItem[] | null) => {
-                setValue(newValue || [])
-            }}
-            options={userList}
-            getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'initials')}
-            getRenderOption={(props) => <UserOptionRender {...props}/>}
+            value={targetCoExecutors}
+            onSelect={onSelectClb}
+            options={coExecutorOptions}
+            getOptionLabel={getOptionLabelClb}
+            getRenderOption={renderOption}
         />
     );
 };

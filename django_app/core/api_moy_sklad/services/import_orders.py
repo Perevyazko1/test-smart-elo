@@ -40,8 +40,7 @@ class ImportOrders:
 
         for order_entity in order_entities:
             order = order_entities_to_db(order_entity)
-            if not order_entity.link or order_entity.link.startswith('http://172.16.1.212/orders/'):
-                set_eq_link_in_order(order_entity.order_id, str(order.id))
+            set_eq_link_in_order(order_entity.order_id, order_entity.link, order.id)
 
             """Формирование и сохранение товаров и тканей"""
             for product_info in order_entity.products_info:

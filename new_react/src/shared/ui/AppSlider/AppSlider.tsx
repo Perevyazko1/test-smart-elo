@@ -74,6 +74,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     <div
                         style={{
                             position: "absolute",
+                            fontSize: '11px',
                             bottom: "1px",
                             left: "0",
                             margin: "auto",
@@ -82,8 +83,10 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             pointerEvents: "none",
                         }}
                     >
-                        <div className={"fw-bold text-black border rounded me-1 fs-7" + bgColor}
-                             style={{padding: "0 0.1rem"}}>
+                        <div
+                            className={"fw-bold text-black border rounded me-1" + bgColor}
+                            style={{padding: "0 0.1rem"}}
+                        >
                             {price}
                         </div>
                     </div>
@@ -99,9 +102,13 @@ export const AppSlider = memo((props: AppSliderProps) => {
                             zIndex: "999",
                             opacity: "0.7",
                             pointerEvents: "none",
+                            fontSize: '11px',
                         }}
                     >
-                        <div className={"fw-bolder bg-light border rounded fs-7"} style={{padding: "0 0.1rem"}}>
+                        <div
+                            className={"fw-bolder border rounded" + bgColor}
+                            style={{padding: "0 0.1rem"}}
+                        >
                             {totalPrice}
                         </div>
                     </div>

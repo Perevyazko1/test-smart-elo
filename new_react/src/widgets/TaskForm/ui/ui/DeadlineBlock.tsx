@@ -1,58 +1,50 @@
-import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
+import React, {ChangeEvent, useMemo, useState} from "react";
 import {InputGroup} from "react-bootstrap";
-import {CreateTask} from "@widgets/TaskForm/model/types";
 import ClearIcon from "@mui/icons-material/Clear";
+import {UpdateTask} from "@entities/Task";
+
 
 interface DeadlineBlockProps {
-    setFormTask: (task: CreateTask) => void;
-    formData: CreateTask;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    deadline: string | null;
     disabled: boolean;
 }
 
 
 export const DeadlineBlock = (props: DeadlineBlockProps) => {
-    const {setFormTask, formData, disabled} = props;
+    const {setFormDataClb, deadline, disabled} = props;
 
     const [initialDate, initialTime] = useMemo(() => {
-        return formData.deadline ? formData.deadline.split("T") : ["", ""];
-    }, [formData.deadline]);
+        if (deadline) {
+            const [datePart, timePart] = deadline.split("T");
+            const time = timePart?.slice(0, 5); // Удаляем секунды и смещение часового пояса
+            return [datePart, time];
+        }
+        return ["", ""];
+    }, [deadline]);
 
     const [date, setDate] = useState<string>(initialDate || "");
     const [time, setTime] = useState<string>(initialTime || "");
-
-    useEffect(() => {
-        if (date) {
-            const newTime = time || "18:00";
-            const newDeadline = `${date}T${newTime}`;
-
-            if (formData.deadline !== newDeadline) {
-                setFormTask({
-                    ...formData,
-                    deadline: newDeadline
-                });
-            }
-        }
-        //eslint-disable-next-line
-    }, [date, formData.deadline, time]);
 
     const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
         setDate(e.target.value);
         if (!time) {
             setTime("18:00");
         }
+        const newDeadline = `${e.target.value}T${time||"18:00"}`;
+        setFormDataClb('deadline', newDeadline);
     };
 
     const handleTimeChange = (e: ChangeEvent<HTMLInputElement>) => {
         setTime(e.target.value);
+        const newDeadline = `${date}T${e.target.value}`;
+        setFormDataClb('deadline', newDeadline);
     };
 
     const clearHandler = () => {
         setDate("");
         setTime("");
-        setFormTask({
-            ...formData,
-            deadline: ""
-        });
+        setFormDataClb('deadline', null)
     }
 
     return (

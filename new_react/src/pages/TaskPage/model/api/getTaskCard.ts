@@ -1,6 +1,8 @@
 import {createAsyncThunk} from "@reduxjs/toolkit";
+
 import {ThunkConfig} from "@app";
-import {Task} from "../types";
+
+import {Task} from "@entities/Task";
 
 interface getTaskCardProps {
     id: number;

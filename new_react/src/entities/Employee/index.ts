@@ -1,3 +1,5 @@
+export {useEmployeeList, useAddToFavorite} from "./api";
+
 export {useSortedUserList} from "./lib/useSortedUserList";
 
 export {anonEmployee} from "./testData/testData";

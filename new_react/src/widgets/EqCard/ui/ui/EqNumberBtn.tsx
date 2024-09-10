@@ -5,17 +5,13 @@ import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 interface EqNumberBtnProps extends HTMLAttributes<HTMLButtonElement> {
     item: EqAssignment;
-    getUserInitials?: (assignment: EqAssignment) => string;
+    userInitials: string;
     colorCls: 'blueBtn' | 'redBtn' | 'blackBtn' | 'greyBtn' | 'greenBtn' | '';
 }
 
 export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
-    const {getUserInitials, item, colorCls, ...buttonProps} = props;
+    const {userInitials, item, colorCls, ...buttonProps} = props;
     const cardHeight = useCardHeight();
-
-    const userInitials = useMemo(() => {
-        return getUserInitials ? getUserInitials(item) : '';
-    }, [getUserInitials, item]);
 
     const fontSize = useMemo(() => {
         return cardHeight / 6.5;

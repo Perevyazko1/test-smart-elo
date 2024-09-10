@@ -1,5 +1,5 @@
 """Orders page serializers. """
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 from rest_framework import serializers
 
@@ -92,8 +92,14 @@ class OrderProductSerializer(serializers.ModelSerializer):
         """Get departments info. """
         result = {}
         production_steps = ProductionStep.objects.filter(
-            product=obj.product,
-            is_active=True,
+            Q(
+                product=obj.product,
+                department__name="Конструктора"
+              ) |
+            Q(
+                product=obj.product,
+                is_active=True,
+            )
         ).exclude(
             department__name__in=["Старт", "Готово"]
         )

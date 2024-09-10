@@ -6,7 +6,6 @@ from .models import Task, TaskComment
 
 
 class TaskCommentModelFilter(django_filters.FilterSet):
-
     class Meta:
         model = TaskComment
         fields = ['task']
@@ -29,11 +28,7 @@ class TaskModelFilter(django_filters.FilterSet):
                 status=value
             )
         if value == '2':
-            return queryset.filter(status=value).filter(
-                Q(executor=self.request.user) |
-                Q(co_executors=self.request.user) |
-                Q(created_by=self.request.user)
-            )
+            return queryset.filter(status=value)
         if value == '3':
             year = self.request.query_params.get("year")
             week = self.request.query_params.get("week")
@@ -42,10 +37,6 @@ class TaskModelFilter(django_filters.FilterSet):
                 status=value,
                 ready_at__gt=week_info.date_range[0],
                 ready_at__lte=week_info.date_range[1],
-            ).filter(
-                Q(executor=self.request.user) |
-                Q(co_executors=self.request.user) |
-                Q(created_by=self.request.user)
             )
         if value == '4':
             return queryset.filter(
@@ -54,12 +45,14 @@ class TaskModelFilter(django_filters.FilterSet):
         return queryset
 
     def filter_view_mode(self, queryset: QuerySet, name, value):
+        # Режим только мне - убираем отмененные и оставляем задачи в режиме Только мне
         if value == '1':
             return queryset.filter(
                 view_mode='1'
             ).exclude(
                 status='4',
             )
+        # Режим в моих отделах - убираем отмененные и фильтруем по отделу пользователя
         if value == '2':
             return queryset.filter(
                 view_mode='2',
@@ -67,21 +60,46 @@ class TaskModelFilter(django_filters.FilterSet):
             ).exclude(
                 status='4',
             )
+        # Режим отмененные - оставляет только соответствующий кверисет
         if value == '3':
             return queryset.filter(
                 status='4',
             )
+        # Режим я исполнитель - фильтруем по пользователю в поле исполнитель
         if value == '4':
             return queryset.filter(
-                executor=self.request.user,
+                new_executor__employee=self.request.user,
             )
+
+        # Режим я соисполнитель - фильтруем по пользователю в поле соисполнители
         if value == '5':
             return queryset.filter(
-                co_executors=self.request.user,
+                new_co_executors__employee=self.request.user,
             )
+        # Режим назначенные мной
         if value == '6':
             return queryset.filter(
                 appointed_by=self.request.user,
+            )
+        # Режим ожидающих визы на тариф
+        if value == '7':
+            return queryset.filter(
+                proposed_tariff__isnull=False,
+                confirmed_tariff__isnull=True,
+            )
+        # Режим с утвержденной сделкой
+        if value == '8':
+            return queryset.filter(
+                confirmed_tariff__isnull=False,
+            )
+        # Режим завизированных со сделкой (из ЭЛО)
+        if value == '9':
+            return queryset.filter(
+                confirmed_tariff__isnull=False,
+                status='3',
+                verified_at__isnull=False,
+            ).exclude(
+                status='4',
             )
         return queryset.exclude(
             status='4',
@@ -102,8 +120,8 @@ class TaskModelFilter(django_filters.FilterSet):
                 if user_id.isdigit():
                     int_ids.append(int(user_id))
             return queryset.filter(
-                Q(executor__id__in=int_ids) |
-                Q(co_executors__in=int_ids) |
+                Q(new_executor__employee__id__in=int_ids) |
+                Q(new_co_executors__employee__in=int_ids) |
                 Q(created_by__id__in=int_ids)
             )
 
@@ -121,4 +139,3 @@ class TaskModelFilter(django_filters.FilterSet):
             )
 
         return queryset
-

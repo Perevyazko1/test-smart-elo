@@ -1,3 +1,5 @@
+export {useEmployeeName} from "./useEmployeeName";
+
 export {useSpeechRecognition} from "./useSpeechRecognition";
 export {useClickSound} from "./useClickSound/useClickSound";
 export {useCountdown} from "./useCountdown/useCountdown";

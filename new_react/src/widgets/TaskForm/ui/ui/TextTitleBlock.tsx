@@ -1,20 +1,25 @@
-import {CreateTask} from "@widgets/TaskForm/model/types";
+import React, {useEffect, useId, useRef, useState} from "react";
 import {Form, InputGroup} from "react-bootstrap";
-import React, {useEffect, useRef, useState} from "react";
 import {Fab} from "@mui/material";
-import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
-import {useSpeechRecognition} from "@shared/hooks";
+
 import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
 import ClearIcon from "@mui/icons-material/Clear";
+import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
+
+import {Task, UpdateTask} from "@entities/Task";
+import {useSpeechRecognition} from "@shared/hooks";
+
 
 interface TextTitleBlockProps {
-    setFormTask: (task: CreateTask) => void;
-    formTask: CreateTask;
+    task?: Task;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    formTask: UpdateTask;
     disabled: boolean;
 }
 
 export const TextTitleBlock = (props: TextTitleBlockProps) => {
-    const {formTask, setFormTask, disabled} = props;
+    const {formTask, setFormDataClb, disabled, task} = props;
+    const id = useId();
     const {isListening, transcript, startListening} = useSpeechRecognition();
     const inputRef = useRef<HTMLInputElement>(null);
     const [cursorPosition, setCursorPosition] = useState<number | null>(formTask.title?.length || 0);
@@ -29,11 +34,7 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
             const addSpaceAfter = afterCursor && afterCursor[0] !== ' ' ? ' ' : '';
 
             const newText = beforeCursor + addSpaceBefore + transcript + addSpaceAfter + afterCursor;
-
-            setFormTask({
-                ...formTask,
-                title: newText,
-            });
+            setFormDataClb('title', newText);
             // Reset cursor position
             setCursorPosition(cursorPosition + transcript.length);
         }
@@ -49,10 +50,8 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const newValue = e.target.value;
         setCursorPosition(e.target.selectionStart);
-        setFormTask({
-            ...formTask,
-            title: newValue,
-        });
+        setFormDataClb('title', newValue);
+
     };
 
     const handleMouseUp = (e: React.MouseEvent<HTMLInputElement>) => {
@@ -75,10 +74,7 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
     };
 
     const cleanClb = () => {
-        setFormTask({
-            ...formTask,
-            title: '',
-        });
+        setFormDataClb('description', null);
     };
 
     return (
@@ -122,11 +118,12 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
             </InputGroup.Text>
             <Form.Control
                 required
+                id={id}
                 as={"input"}
                 maxLength={255}
                 ref={inputRef}
                 readOnly={disabled}
-                value={formTask.title}
+                value={formTask.title || task?.title || ""}
                 onChange={handleInputChange}
                 onClick={handleMouseUp}
                 onKeyUp={handleKeyUp}

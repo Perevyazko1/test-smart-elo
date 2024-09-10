@@ -1,8 +1,8 @@
 import {Employee} from "@entities/Employee";
 
-type variants = 'short' | 'full' | 'nameLastName' | 'initials' | 'shortName' | 'listNameInitials';
+export type EmployeeNameVariants = 'short' | 'full' | 'nameLastName' | 'initials' | 'shortName' | 'listNameInitials';
 
-export const getEmployeeName = (employee: Employee | undefined | null, variant: variants = 'nameLastName'): string => {
+export const getEmployeeName = (employee: Employee | undefined | null, variant: EmployeeNameVariants = 'nameLastName'): string => {
     if (!employee) {
         return ''
     } else if (variant === 'nameLastName') {

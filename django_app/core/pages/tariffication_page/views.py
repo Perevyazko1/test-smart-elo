@@ -1,4 +1,5 @@
 """Views for tariffication page. """
+from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
@@ -20,7 +21,7 @@ from .serializers import (
     PostTarifficationSerializer, TariffSerializer,
 )
 from ...consumers import EqNotificationActions, ws_group_updates
-from ...signals import clean_all_eq_card_info_cache
+from ...signals import clean_all_eq_card_info_cache, update_assignments_and_clean_cache
 
 
 @api_view(['GET'])
@@ -204,6 +205,7 @@ def set_post_tariffication(request):
         created_by=request.user,
         comment=f'#PS-{production_step.id}# Утвержден тариф 0 для {len(zero_tariff__ids)} нарядов.'
     )
+
     Assignment.objects.filter(
         id__in=zero_tariff__ids
     ).update(new_tariff=zero_tariff)
@@ -217,6 +219,7 @@ def set_post_tariffication(request):
         created_by=request.user,
         comment=f'#PS-{production_step.id}# Утвержден тариф.'
     )
+
     production_step.confirmed_tariff = new_tariff
     production_step.save()
 
@@ -226,6 +229,7 @@ def set_post_tariffication(request):
     )
     assignments_qs.update(
         new_tariff=new_tariff,
+        amount=new_tariff.amount,
     )
 
     # Начисление ЗП по тарифицированным нарядам
@@ -251,13 +255,35 @@ def set_post_tariffication(request):
         details=detail,
     )
 
-    """Делаем рассылку на обновление карточек в ЭЛО. """
-    active_order_products = OrderProduct.objects.filter(
-        product=production_step.product,
-        status="0",
+    """Обновляем все оставшиеся активные наряды"""
+    assignments_for_update = Assignment.objects.filter(
+        order_product__product=production_step.product,
+        department=production_step.department,
+        inspector__isnull=True,
     )
 
-    for order_product in active_order_products:
+    assignments_for_update.update(
+        new_tariff=new_tariff,
+        amount=new_tariff.amount,
+    )
+    AssignmentCoExecutor.objects.filter(
+        assignment__in=assignments_for_update
+    ).distinct().update(amount=0)
+
+    all_ids = [*zero_tariff__ids, *target__ids]
+
+    """Делаем рассылку на обновление карточек в ЭЛО. """
+    order_products = OrderProduct.objects.filter(
+        Q(
+            assignments__id__in=all_ids
+        ) |
+        Q(
+            product=production_step.product,
+            status="0",
+        )
+    ).distinct()
+
+    for order_product in order_products:
         clean_all_eq_card_info_cache(order_product.id, production_step.department.id)
 
         notification_data = {str(production_step.department.number): {

@@ -1,42 +1,65 @@
 import React, {useEffect} from "react";
 
+import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
 import {allFiltersInited, getReadyData} from "../../model/selectors";
-import {TaskStatus} from "../../model/consts";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
-import {TaskCardSkeleton} from "@pages/TaskPage/ui/TaskPageCard/TaskCardSkeleton";
+import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 
-export const ReadySection = () => {
+interface ReadySectionProps {
+    eqMode?: boolean;
+}
+
+
+export const ReadySection = (props: ReadySectionProps) => {
+    const {eqMode = false} = props;
+
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
     const filtersInited = useAppSelector(allFiltersInited);
     const readyData = useAppSelector(getReadyData);
 
     useEffect(() => {
-        if (filtersInited) {
-            if (queryParameters.view_mode !== '3') {
-                dispatch(getTaskCards({
-                    status: TaskStatus.Completed,
-                    sort_mode: queryParameters.sort_mode,
-                    view_mode: queryParameters.view_mode,
-                    week: queryParameters.week,
-                    year: queryParameters.year,
-                    users: queryParameters.users,
-                    departments: queryParameters.departments,
-                }))
-            } else {
-                dispatch(getTaskCards({
-                    status: TaskStatus.Cancelled,
-                    sort_mode: queryParameters.sort_mode,
-                    view_mode: queryParameters.view_mode,
-                    week: queryParameters.week,
-                    year: queryParameters.year,
-                    users: queryParameters.users,
-                    departments: queryParameters.departments,
-                }))
+        if (eqMode) {
+            dispatch(getTaskCards({
+                status: TaskStatus.Completed,
+                sort_mode: '1',
+                view_mode: '9',
+                week: queryParameters.week,
+                year: queryParameters.year,
+                users: undefined,
+                departments: undefined,
+            }))
+        }
+    }, [dispatch, eqMode, queryParameters.week, queryParameters.year]);
+
+    useEffect(() => {
+        if (!eqMode) {
+            if (filtersInited) {
+                if (queryParameters.view_mode !== '3') {
+                    dispatch(getTaskCards({
+                        status: TaskStatus.Completed,
+                        sort_mode: queryParameters.sort_mode,
+                        view_mode: queryParameters.view_mode,
+                        week: queryParameters.week,
+                        year: queryParameters.year,
+                        users: queryParameters.users,
+                        departments: queryParameters.departments,
+                    }))
+                } else {
+                    dispatch(getTaskCards({
+                        status: TaskStatus.Cancelled,
+                        sort_mode: queryParameters.sort_mode,
+                        view_mode: queryParameters.view_mode,
+                        week: queryParameters.week,
+                        year: queryParameters.year,
+                        users: queryParameters.users,
+                        departments: queryParameters.departments,
+                    }))
+                }
             }
         }
     }, [
@@ -48,6 +71,7 @@ export const ReadySection = () => {
         queryParameters.week,
         queryParameters.year,
         queryParameters.departments,
+        eqMode
     ]);
 
 
@@ -67,7 +91,7 @@ export const ReadySection = () => {
         <div
             style={{
                 display: 'block',
-                height: `100%`,
+                // height: `100%`,
                 overflowX: "hidden",
                 overflowY: "auto",
                 width: "100%",
@@ -76,16 +100,13 @@ export const ReadySection = () => {
         >
             {readyData?.isLoading
                 ?
-                <>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                </>
+                <TaskCardSkeleton/>
                 :
                 <>
                     {readyData?.results?.map(card => (
                         <TaskPageCard
                             id={`ready-task-id-${card.id}`}
+                            scaled={eqMode}
                             key={card.id}
                             card={card}
                             cardType={TaskStatus.Completed}

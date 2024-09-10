@@ -3,17 +3,18 @@
 
 .InputContainer {
   position: relative;
+  border-bottom: 1px solid transparent;
 
   &.Active {
     color: var(--bs-black);
   }
 
   &:hover, &:focus, &.Active {
-    border-bottom: 1px solid var(--bs-primary);
+    border-bottom-color: var(--bs-primary);
   }
 
   &.Bordered {
-    border-bottom: 1px solid var(--bs-black);
+    border-bottom-color: var(--bs-black);
 
     &.darkInput {
       border-bottom-color: var(--bs-light);
@@ -59,6 +60,10 @@
   border: none;
   outline: none;
   transition: ease-in-out border-bottom-color 200ms;
+
+  &:read-only {
+    cursor: pointer;
+  }
 
   &.Active {
     color: var(--bs-black);

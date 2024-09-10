@@ -9,8 +9,8 @@ interface TimeLeft {
 }
 
 interface UseCountdownOptions {
-    targetDate: string | undefined;
-    startDate?: string | undefined;
+    targetDate: string | undefined | null;
+    startDate?: string | undefined | null;
 }
 
 export const useCountdown = ({ targetDate, startDate }: UseCountdownOptions): TimeLeft | undefined => {

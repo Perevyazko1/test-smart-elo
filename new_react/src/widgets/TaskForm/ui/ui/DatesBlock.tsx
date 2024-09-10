@@ -1,15 +1,19 @@
-import {InputGroup} from "react-bootstrap";
 import React from "react";
-import {Task} from "@pages/TaskPage";
+
+import {InputGroup} from "react-bootstrap";
+
+import {Task, UpdateTask} from "@entities/Task";
 import {convertDateTime} from "@shared/lib";
+
 
 interface DatesBlockProps {
     task?: Task;
+    formData: UpdateTask;
 }
 
 
 export const DatesBlock = (props: DatesBlockProps) => {
-    const {task} = props;
+    const {task, formData} = props;
 
     return (
         <div className={'d-flex flex-column gap-1'}>
@@ -22,6 +26,18 @@ export const DatesBlock = (props: DatesBlockProps) => {
                     type="datetime-local"
                     disabled
                     value={convertDateTime(task?.created_at)}
+                />
+            </InputGroup>
+
+            <InputGroup>
+                <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
+                    Назначена:
+                </InputGroup.Text>
+                <input
+                    className={'flex-fill'}
+                    type="datetime-local"
+                    disabled
+                    value={convertDateTime(formData.appointed_at || task?.appointed_at)}
                 />
             </InputGroup>
 

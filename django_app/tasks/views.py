@@ -1,11 +1,8 @@
 from dataclasses import asdict
-from datetime import datetime
 
-from django.utils import timezone
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
-
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
@@ -14,36 +11,36 @@ from core.consumers import ws_send_to_all, ws_send_to_department
 from core.services.get_week_info import GetWeekInfo
 from .filters import TaskModelFilter, TaskCommentModelFilter
 from .models import Task, TaskImage, TaskComment, TaskViewInfo
-from .serializers import TaskReadSerializer, TaskWriteSerializer, TaskImageSerializer, TaskCommentSerializer, \
+from .serializers import TaskSerializer, TaskImageSerializer, TaskCommentSerializer, \
     TaskViewInfoSerializer
 
 
 class TaskViewSet(viewsets.ModelViewSet):
     queryset = Task.objects.all()
     filterset_class = TaskModelFilter
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        view_mode = self.request.query_params.get('view_mode', None)
+        if view_mode not in ["7", "8", None]:
+            # Для каждого из возможных режимов просмотра задач - фильтруем доступные пользователю
+            return queryset.filter(
+                Q(view_mode='1', created_by=self.request.user) |
+                Q(view_mode='2', created_by=self.request.user) |
+                Q(view_mode='2', for_department__in=self.request.user.departments.all()) |
+                Q(view_mode='2', for_department__isnull=True) |
+                Q(view_mode='3') |
+                Q(view_mode='4', created_by=self.request.user) |
+                Q(view_mode='4', new_executor__employee=self.request.user) |
+                Q(view_mode='4', new_co_executors__employee=self.request.user)
+            ).distinct()
+        return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context['user'] = self.request.user
         return context
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        return queryset.filter(
-            Q(view_mode='1', created_by=self.request.user) |
-            Q(view_mode='2', created_by=self.request.user) |
-            Q(view_mode='2', for_department__in=self.request.user.departments.all()) |
-            Q(view_mode='2', for_department__isnull=True) |
-            Q(view_mode='3') |
-            Q(view_mode='4', created_by=self.request.user) |
-            Q(view_mode='4', executor=self.request.user) |
-            Q(view_mode='4', co_executors=self.request.user)
-        ).distinct()
-
-    def get_serializer_class(self):
-        if self.action in ['list', 'retrieve']:
-            return TaskReadSerializer
-        return TaskWriteSerializer
 
     def partial_update(self, request, *args, **kwargs):
         partial = kwargs.pop('partial', False)
@@ -52,14 +49,7 @@ class TaskViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        read_serializer = TaskReadSerializer(instance)
-
-        if getattr(instance, '_prefetched_objects_cache', None):
-            # If 'prefetch_related' has been applied to a queryset, we need to forcibly
-            # invalidate the prefetch cache on the instance.
-            instance._prefetched_objects_cache = {}
-
-        return Response(read_serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         super().perform_create(serializer)
@@ -128,9 +118,14 @@ class TaskImageViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance: TaskImage):
         instance_task_id = instance.task.id
         super().perform_destroy(instance)
-        self.after_delete(instance_task_id)
+        self.after_edit(instance_task_id)
 
-    def after_delete(self, task_id: int):
+    def perform_create(self, serializer):
+        super().perform_create(serializer)
+        self.after_edit(serializer.instance.task.id)
+
+    @staticmethod
+    def after_edit(task_id: int):
         ws_send_to_all(
             {
                 'action': 'UPDATE_TASK',

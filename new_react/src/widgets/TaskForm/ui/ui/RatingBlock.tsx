@@ -1,16 +1,18 @@
 import {Box, Rating} from "@mui/material";
-import {getUrgencyText, TaskUrgency} from "@pages/TaskPage";
 import StarIcon from "@mui/icons-material/Star";
-import {CreateTask} from "@widgets/TaskForm/model/types";
+
+import {getUrgencyText, Task, TaskUrgency, UpdateTask} from "@entities/Task";
+import {useMemo} from "react";
 
 interface RatingBlockProps {
-    setFormTask: (task: CreateTask) => void;
-    formTask: CreateTask;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    task?: Task;
+    formTask: UpdateTask;
     disabled: boolean;
 }
 
 export const RatingBlock = (props: RatingBlockProps) => {
-    const {disabled, formTask, setFormTask} = props;
+    const {disabled, task, formTask, setFormDataClb} = props;
 
     const getLabelText = (value: TaskUrgency) => {
         return `Срочность: ${getUrgencyText(value)}`;
@@ -18,21 +20,21 @@ export const RatingBlock = (props: RatingBlockProps) => {
 
     const onChangeClb = (option: number | null) => {
         if (option) {
-            setFormTask(
-                {
-                    ...formTask,
-                    urgency: String(option) as TaskUrgency
-                }
-            )
+            setFormDataClb('urgency', String(option) as TaskUrgency)
         } else {
-            setFormTask(
-                {
-                    ...formTask,
-                    urgency: TaskUrgency.Normal
-                }
-            )
+            setFormDataClb('urgency', TaskUrgency.Normal)
         }
     }
+
+    const getValue = useMemo(() => {
+        if (formTask.urgency) {
+            return Number(formTask.urgency)
+        } else if (task?.urgency) {
+            return Number(task.urgency)
+        } else {
+            return Number(TaskUrgency.Normal)
+        }
+    }, [formTask.urgency, task?.urgency])
 
     return (
         <Box
@@ -45,7 +47,7 @@ export const RatingBlock = (props: RatingBlockProps) => {
             <Rating
                 disabled={disabled}
                 name="hover-feedback"
-                value={Number(formTask.urgency)}
+                value={getValue}
                 max={4}
                 getLabelText={option => getLabelText(String(option) as TaskUrgency)}
                 onChange={(event, newValue) => onChangeClb(newValue)}
@@ -53,7 +55,7 @@ export const RatingBlock = (props: RatingBlockProps) => {
             />
 
             <Box className={'fs-7'} sx={{ml: 2}}>
-                {getLabelText(formTask.urgency)}
+                {getLabelText(formTask.urgency || task?.urgency || TaskUrgency.Normal)}
             </Box>
         </Box>
     );

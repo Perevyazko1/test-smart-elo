@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from "react";
+import React, {useContext, useEffect, useMemo, useState} from "react";
 
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
@@ -48,6 +48,25 @@ export const EqBody = (props: EqBodyProps) => {
         y: isDesktop ? -62 : -20,
     });
 
+    const [blockSizes, setBlockSizes] = useState({
+        leftBlockWidth: leftBlockWidth,
+        rightBlockWidth: rightBlockWidth,
+        inWorkHeight: inWorkHeight,
+        readyHeight: readyHeight,
+    });
+
+    useEffect(() => {
+        if (!isDragging) {
+            setBlockSizes({
+                leftBlockWidth: leftBlockWidth,
+                rightBlockWidth: rightBlockWidth,
+                inWorkHeight: inWorkHeight,
+                readyHeight: readyHeight,
+            })
+        }
+        //eslint-disable-next-line
+    }, [isDragging, rightBlockWidth]);
+
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             resetSize();
@@ -59,53 +78,45 @@ export const EqBody = (props: EqBodyProps) => {
     }, [resetSize, windowWidth, windowHeight]);
 
     const noRelevantIds = useAppSelector(getNoRelevantIds);
+    const [awaitUpdated, setAwaitUpdated] = useState(false);
+    const [inWorkUpdated, setInWorkUpdated] = useState(false);
+    const [readyUpdated, setReadyUpdated] = useState(false);
 
-    const [listUpdated, setListUpdated] = useState({
-        "inWork": false,
-        "await": false,
-        "ready": false,
-    });
+    const depsInWork = useMemo(() => [inWorkUpdated], [inWorkUpdated]);
+    const depsAwait = useMemo(() => [awaitUpdated], [awaitUpdated]);
+    const depsReady = useMemo(() => [readyUpdated], [readyUpdated]);
+
+
     const [prevViewMode, setPrevViewMode] = useState(queryParameters.view_mode);
 
     useEffect(() => {
-        setListUpdated({
-            await: !listUpdated.await,
-            inWork: !listUpdated.inWork,
-            ready: !listUpdated.ready,
-        });
+        setAwaitUpdated(prevState => !prevState);
+        setInWorkUpdated(prevState => !prevState);
+        setReadyUpdated(prevState => !prevState);
         // eslint-disable-next-line
     }, [queryParameters.project, currentUser.current_department]);
 
     useEffect(() => {
-        setListUpdated(prevData => {
-            const newData = {...prevData};
-            if (['unfinished', 'boss'].includes(prevViewMode) || ['unfinished', 'boss'].includes(queryParameters.view_mode)) {
-                newData.await = !prevData.await;
-            }
-            if (!([undefined, 'self', 'distribute'].includes(prevViewMode) && [undefined, 'self', 'distribute'].includes(queryParameters.view_mode))) {
-                newData.inWork = !prevData.inWork;
-            }
-            newData.ready = !prevData.ready;
+        if (['unfinished', 'boss'].includes(prevViewMode) || ['unfinished', 'boss'].includes(queryParameters.view_mode)) {
+            setAwaitUpdated(prevState => !prevState);
+        }
+        if (!([undefined, 'self', 'distribute'].includes(prevViewMode) && [undefined, 'self', 'distribute'].includes(queryParameters.view_mode))) {
+            setInWorkUpdated(prevState => !prevState);
+        }
 
-            return newData;
-        });
+        setReadyUpdated(prevState => !prevState);
+
         setPrevViewMode(queryParameters.view_mode);
         // eslint-disable-next-line
     }, [queryParameters.view_mode]);
 
     useEffect(() => {
-        setListUpdated(prevData => ({
-            ...prevData,
-            ready: !prevData.ready
-        }));
+        setReadyUpdated(prevState => !prevState);
         // eslint-disable-next-line
     }, [queryParameters.week]);
 
     useEffect(() => {
-        setListUpdated(prevData => ({
-            ...prevData,
-            await: !prevData.await
-        }));
+        setAwaitUpdated(prevState => !prevState);
         // eslint-disable-next-line
     }, [queryParameters.assembled]);
 
@@ -121,143 +132,167 @@ export const EqBody = (props: EqBodyProps) => {
         };
     }, [dispatch, noRelevantIds]);
 
+    const showResizeBlock = useMemo(() => {
+        return isDragging ? 'block' : 'none';
+    }, [isDragging])
+
     return (
-        <div className={'d-flex justify-content-center'} style={{
+        <div className={'d-flex justify-content-center position-relative'} style={{
             background: "var(--bs-gray-300)",
             overflow: 'hidden',
+            position: 'relative',
+            height: `${windowHeight}px`,
+            width: `${windowWidth}px`,
         }}>
-            <div
-                style={{
-                    position: 'relative',
-                    height: `${windowHeight}px`,
-                    width: `${windowWidth}px`,
-                }}
-            >
-
-                {/*DISTRIBUTE BLOCK*/}
-                {expanded && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            width: leftBlockWidth,
-                            maxWidth: '1200px',
-                            right: rightBlockWidth,
-                            top: 0,
-                            height: windowHeight,
-                        }}
-                    >
-                        <DistributeBlock
-                            deps={[listUpdated.inWork]}
-                            noRelevantIds={noRelevantIds || []}
-                        />
-                        <BlockName name={"НАЗНАЧЕНЫ"}/>
-                    </div>
-                )}
-
-                <div className={'h-100 bg-black'}
-                     style={{
-                         position: 'absolute',
-                         width: '2px',
-                         left: leftBlockWidth,
-                     }}/>
-
-                {/*IN WORK BLOCK*/}
+            <div style={{
+                width: '100%',
+                height: '100%',
+                zIndex: 100000,
+                position: 'absolute',
+                display: showResizeBlock,
+                opacity: 0.9,
+                background: "var(--bs-gray-800)",
+            }}>
                 <div
+                    className={'bg-danger'}
                     style={{
                         position: 'absolute',
-                        top: 0,
-                        ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
-                        width: expanded ? rightBlockWidth : leftBlockWidth,
-                        maxWidth: '1200px',
-                        height: inWorkHeight,
-                        overflowX: 'hidden',
-                        overflowY: 'auto',
-                        padding: '0 0 0 0.25rem',
+                        top: inWorkHeight,
+                        height: '2px',
+                        width: leftBlockWidth,
                     }}
                 >
-                    <EqCardList
-                        listType={'in_work'}
-                        expanded={expanded}
-                        inited={filtersReady || false}
-                        deps={[listUpdated.inWork]}
-                        noRelevantIds={noRelevantIds}
-                    />
-                </div>
 
-                {/*WEEK BLOCK*/}
+                </div>
                 <div
+                    className={'h-100 bg-danger'}
                     style={{
                         position: 'absolute',
-                        top: `${inWorkHeight}px`,
-                        ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
-                        width: expanded ? rightBlockWidth : leftBlockWidth,
-                        maxWidth: '1200px',
-                        height: inWorkHeight,
-                        overflowX: 'hidden',
-                        overflowY: 'auto',
-                        padding: '0 0 0 0.25rem',
-                    }}
-                >
-                    <EqWeeks
-                        rightBlockWidth={rightBlockWidth}
-                        leftBlockWidth={leftBlockWidth}
-                        expanded={expanded}
-                        isDragging={isDragging}
-                        showClb={showClb}
-                        drag={drag}
-                        resetSize={resetSize}
-                    />
-                </div>
-
-                {/*READY BLOCK*/}
-                {!expanded && (
-                    <div
-                        style={{
-                            position: 'absolute',
-                            top: inWorkHeight + 36,
-                            right: rightBlockWidth,
-                            width: leftBlockWidth,
-                            maxWidth: "1200px",
-                            height: readyHeight,
-                            overflowX: 'hidden',
-                            overflowY: 'auto',
-                            padding: '0 0 0 0.15rem',
-                        }}
-                    >
-                        <EqCardList
-                            listType={'ready'}
-                            expanded={expanded}
-                            inited={filtersReady || false}
-                            deps={[listUpdated.ready]}
-                            noRelevantIds={noRelevantIds}
-                        />
-                    </div>
-                )}
-
-                {/*AWAIT BLOCK*/}
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: expanded ? inWorkHeight + 36 : 0,
-                        height: expanded ? readyHeight : windowHeight,
+                        width: '2px',
                         left: leftBlockWidth,
-                        width: rightBlockWidth,
-                        maxWidth: "1200px",
-                        overflowX: 'hidden',
-                        overflowY: 'auto',
-                        padding: '0 0 0 .25rem',
                     }}
-                >
-                    <EqCardList
-                        listType={'await'}
-                        expanded={expanded}
-                        inited={filtersReady || false}
-                        deps={[listUpdated.await]}
-                        noRelevantIds={noRelevantIds}
-                    />
-                </div>
+                />
             </div>
 
+            {/*DISTRIBUTE BLOCK*/}
+            {expanded && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        width: blockSizes.leftBlockWidth,
+                        maxWidth: '1200px',
+                        right: blockSizes.rightBlockWidth,
+                        top: 0,
+                        height: windowHeight,
+                    }}
+                >
+                    <DistributeBlock
+                        deps={depsInWork}
+                        noRelevantIds={noRelevantIds || []}
+                    />
+                    <BlockName name={"НАЗНАЧЕНЫ"}/>
+                </div>
+            )}
+
+            <div className={'h-100 bg-black'}
+                 style={{
+                     position: 'absolute',
+                     width: '2px',
+                     left: blockSizes.leftBlockWidth,
+                 }}
+            />
+
+            {/*IN WORK BLOCK*/}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    ...(expanded ? {left: blockSizes.leftBlockWidth} : {right: blockSizes.rightBlockWidth}),
+                    width: expanded ? blockSizes.rightBlockWidth : blockSizes.leftBlockWidth,
+                    maxWidth: '1200px',
+                    height: blockSizes.inWorkHeight,
+                    overflowX: 'hidden',
+                    overflowY: 'auto',
+                }}
+            >
+                <EqCardList
+                    listType={'in_work'}
+                    expanded={expanded}
+                    inited={filtersReady || false}
+                    deps={depsInWork}
+                    noRelevantIds={noRelevantIds}
+                />
+            </div>
+
+            {/*WEEK BLOCK*/}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: `${blockSizes.inWorkHeight}px`,
+                    ...(expanded ? {left: blockSizes.leftBlockWidth} : {right: blockSizes.rightBlockWidth}),
+                    width: expanded ? blockSizes.rightBlockWidth : blockSizes.leftBlockWidth,
+                    maxWidth: '1200px',
+                    overflowX: 'hidden',
+                    overflowY: 'auto',
+                    height: '36px',
+                }}
+            >
+                <EqWeeks
+                    rightBlockWidth={blockSizes.rightBlockWidth}
+                    leftBlockWidth={blockSizes.leftBlockWidth}
+                    expanded={expanded}
+                    showClb={showClb}
+                    drag={drag}
+                    resetSize={resetSize}
+                />
+            </div>
+
+            {/*READY BLOCK*/}
+            {!expanded && (
+                <div
+                    style={{
+                        position: 'absolute',
+                        top: blockSizes.inWorkHeight + 36,
+                        right: blockSizes.rightBlockWidth,
+                        width: blockSizes.leftBlockWidth,
+                        maxWidth: "1200px",
+                        height: blockSizes.readyHeight,
+                        overflowX: 'hidden',
+                        overflowY: 'auto',
+                    }}
+                >
+                    <EqCardList
+                        listType={'ready'}
+                        expanded={expanded}
+                        inited={filtersReady || false}
+                        deps={depsReady}
+                        noRelevantIds={noRelevantIds}
+                    />
+                </div>
+            )}
+
+            {/*AWAIT BLOCK*/}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: expanded ? blockSizes.inWorkHeight + 36 : 0,
+                    height: expanded ? blockSizes.readyHeight : windowHeight,
+                    left: blockSizes.leftBlockWidth,
+                    width: blockSizes.rightBlockWidth,
+                    maxWidth: "1200px",
+                    overflowX: 'hidden',
+                    overflowY: 'auto',
+                }}
+            >
+                <EqCardList
+                    listType={'await'}
+                    expanded={expanded}
+                    inited={filtersReady || false}
+                    deps={depsAwait}
+                    noRelevantIds={noRelevantIds}
+                />
+
+            </div>
         </div>
     );
 };

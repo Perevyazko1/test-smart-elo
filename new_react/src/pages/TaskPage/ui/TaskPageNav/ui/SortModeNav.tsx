@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo} from "react";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 import {taskPageActions} from "@pages/TaskPage/model/slice";
 import {getSortModeInited} from "@pages/TaskPage/model/selectors";
@@ -11,50 +11,42 @@ const SortModes: { [key: string]: string } = {
 }
 
 export const SortModeNav = () => {
-        const {initialLoad, queryParameters, setQueryParam} = useQueryParams();
-        const dispatch = useAppDispatch();
-        const [selectedSortMode, setSelectedSortMode] = useState<string | null>(null);
-        const filtersInited = useAppSelector(getSortModeInited);
+    const {initialLoad, queryParameters, setQueryParam} = useQueryParams();
+    const dispatch = useAppDispatch();
+    const filtersInited = useAppSelector(getSortModeInited);
 
-        const sortVariants = Object.values(SortModes);
+    const sortVariants = Object.keys(SortModes);
 
-        const setSortModeClb = (sortValue: string | null) => {
-            const entry = Object.entries(SortModes).find(([key, val]) => val === sortValue);
-            if (!entry || !sortValue || sortValue === SortModes[0]) {
-                setQueryParam('sort_mode', '')
+    const setSortModeClb = (sortValue: string) => {
+        setQueryParam('sort_mode', sortValue)
+    };
+
+    useEffect(() => {
+        if (!initialLoad && !filtersInited) {
+            if (!queryParameters.sort_mode) {
+                setQueryParam('sort_mode', sortVariants[1])
             } else {
-                setQueryParam('sort_mode', entry[0])
+                dispatch(taskPageActions.sortModeInited(true));
             }
-        };
+        }
+    }, [dispatch, filtersInited, initialLoad, queryParameters.sort_mode, setQueryParam, sortVariants]);
 
-        useEffect(() => {
-            if (filtersInited) {
-                if (queryParameters.sort_mode && SortModes[queryParameters.sort_mode]) {
-                    setSelectedSortMode(SortModes[queryParameters.sort_mode]);
-                } else {
-                    setSelectedSortMode(null);
-                }
-            }
-        }, [filtersInited, queryParameters.sort_mode]);
+    const sortModeValue = useMemo(() => {
+        return queryParameters.sort_mode || '1';
+    }, [queryParameters.sort_mode]);
 
-        useEffect(() => {
-            if (!initialLoad && !filtersInited) {
-                dispatch(taskPageActions.sortModeInited());
-            }
-        }, [dispatch, filtersInited, initialLoad]);
-
-        return (
-            <AppSelect
-                noInput
-                style={{width: 150}}
-                variant={'select'}
-                isLoading={initialLoad}
-                label={selectedSortMode ? 'Сортировка' : 'Сорт. (По сроку)'}
-                value={selectedSortMode}
-                colorScheme={'darkInput'}
-                options={sortVariants}
-                onSelect={setSortModeClb}
-            />
-        );
-    }
-;
+    return (
+        <AppSelect
+            noInput
+            style={{width: 150}}
+            variant={'dropdown'}
+            isLoading={initialLoad}
+            label={'Сортировка'}
+            value={sortModeValue}
+            colorScheme={'darkInput'}
+            options={sortVariants}
+            getOptionLabel={option => SortModes[option]}
+            onSelect={setSortModeClb}
+        />
+    );
+};

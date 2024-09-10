@@ -1,4 +1,4 @@
-export const convertDateTime = (isoDate: string | undefined): string => {
+export const convertDateTime = (isoDate: string | undefined | null): string => {
     if (!isoDate) {
         return ""
     }

@@ -1,10 +1,9 @@
 import React, {useMemo, useState} from "react";
 import {Spinner, Table} from "react-bootstrap";
 
+import {useEmployeeList} from "@entities/Employee";
 import {useCurrentUser} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
-
-import {useEmployeeList} from "@widgets/TaskForm/model/api";
 
 import {useGetAssignmentInfo} from "../model/api/api";
 
@@ -49,9 +48,11 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
     const PageSkeleton = useMemo(() => (
         <tr>
-            <td colSpan={11}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
+            <td colSpan={currentUser.current_department?.piecework_wages ? 12 : 11}>
+                <AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/>
+            </td>
         </tr>
-    ), []);
+    ), [currentUser.current_department?.piecework_wages]);
 
 
 

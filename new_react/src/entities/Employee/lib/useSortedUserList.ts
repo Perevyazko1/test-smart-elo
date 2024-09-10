@@ -1,8 +1,10 @@
 import {useMemo} from "react";
-import {useEmployeeList} from "@widgets/TaskForm/model/api";
+
 import {useCurrentUser} from "@shared/hooks";
 
 import {GroupedEmployeeItem} from "../types/employee";
+import { useEmployeeList } from "../api";
+
 
 export const useSortedUserList = () => {
     const {data: userList, isLoading: usersIsLoading} = useEmployeeList({});

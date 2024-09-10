@@ -1,22 +1,16 @@
-import {getEmployeeName} from "@shared/lib";
-import {useMemo} from "react";
-import {GroupedEmployeeItem} from "@entities/Employee";
 import {AppSelect} from "@shared/ui";
+import {useEmployeeName} from "@shared/hooks";
 
 
 interface AppointedByBlockProps {
     value: number | null;
-    userList: GroupedEmployeeItem[];
-    isLoading: boolean;
 }
 
 
 export const AppointedByBlock = (props: AppointedByBlockProps) => {
-    const {value, userList, isLoading} = props;
-    
-    const getValue = useMemo(() => {
-        return userList.find(user => user.user.id === value) || null;
-    }, [userList, value]);
+    const {value} = props;
+
+    const {getNameById, isLoading} = useEmployeeName();
 
     return (
         <AppSelect
@@ -26,10 +20,10 @@ export const AppointedByBlock = (props: AppointedByBlockProps) => {
             className={'flex-fill'}
             label={"Задачу назначил"}
             style={{minWidth: '250px'}}
-            value={getValue}
+            value={value}
             readOnly
             isLoading={isLoading}
-            getOptionLabel={(option: GroupedEmployeeItem) => getEmployeeName(option.user, 'listNameInitials')}
+            getOptionLabel={(option: number) => getNameById(option, 'listNameInitials')}
         />
     );
 };

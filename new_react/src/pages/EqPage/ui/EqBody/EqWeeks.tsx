@@ -14,7 +14,6 @@ interface EqWeeksProps {
     leftBlockWidth: number;
     showClb: () => void;
     drag: ConnectDragSource;
-    isDragging: boolean;
     resetSize: () => void;
     expanded: boolean;
 }
@@ -23,7 +22,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const {
         leftBlockWidth,
         rightBlockWidth,
-        isDragging,
         showClb,
         drag,
         resetSize,
@@ -108,7 +106,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
             style={{
                 height: '36px',
                 backgroundColor: currentUser.current_department?.color || '#ffffff',
-                opacity: isDragging ? 0.5 : 1,
                 width: blockWidthPx,
                 maxWidth: '1200px',
                 position: 'absolute',
@@ -180,9 +177,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                      onDoubleClick={resetSize}
                      onTouchEnd={handleDoubleTap}
                 >
-                    {isDragging ? <i className="far fa-hand-rock fs-5 text-light"/>
-                        : <i className="far fa-hand-paper fs-5 text-light"/>
-                    }
+                    <i className="far fa-hand-paper fs-5 text-light"/>
                 </div>
             }
         </div>

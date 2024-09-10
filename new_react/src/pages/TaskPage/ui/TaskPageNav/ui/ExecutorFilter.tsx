@@ -1,9 +1,9 @@
+import React, {useEffect, useState} from "react";
+
 import {GroupedEmployeeItem, useSortedUserList} from "@entities/Employee";
 import {getEmployeeName} from "@shared/lib";
-import React, {useEffect, useState} from "react";
 import {useQueryParams} from "@shared/hooks";
-import {AppSelect} from "@shared/ui";
-import {UserOptionRender} from "@widgets/UserOptionRender/UserListRender";
+import {AppSelect, UserOptionRender} from "@shared/ui";
 
 export const ExecutorFilter = () => {
     const {sortedUserList, usersIsLoading} = useSortedUserList();

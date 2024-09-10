@@ -3,7 +3,7 @@ import React, {
     HTMLAttributes,
     ReactNode,
     useCallback,
-    useEffect,
+    useEffect, useId,
     useMemo,
     useRef,
     useState
@@ -88,6 +88,8 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
             return "";
         }
     }, [getOptionLabel]);
+
+    const id = useId();
 
     const stringValue = useMemo(() => {
         if (variant === 'multiple') {
@@ -210,13 +212,9 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
     }, [inputNotEqualValue, options, readOnly, value, variant]);
 
     useEffect(() => {
-        if (variant !== 'multiple') {
-            setInputValue(stringValue);
-            setSpanValue(stringValue);
-        } else {
-            setSpanValue(stringValue);
-        }
-    }, [stringValue, variant]);
+        setInputValue(stringValue);
+        setSpanValue(stringValue);
+    }, [stringValue]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -252,16 +250,19 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                 onClick={(e) => toggleOptions(e)}
             >
                 {label &&
-                    <label className={classNames(
-                        cls.Label,
-                        cls[colorScheme],
-                        {[cls.Active]: !!anchorEl || inputValue || spanValue}
-                    )}>
+                    <label
+                        htmlFor={id}
+                        className={classNames(
+                            cls.Label,
+                            cls[colorScheme],
+                            {[cls.Active]: !!anchorEl || inputValue || spanValue}
+                        )}>
                         {label}
                         {required && <span className={cls.RequiredMarker}>*</span>}
                     </label>
                 }
                 <input
+                    id={id}
                     value={inputValue}
                     required={required}
                     onChange={handleInputChange}

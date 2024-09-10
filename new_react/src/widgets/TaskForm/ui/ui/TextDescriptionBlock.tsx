@@ -1,22 +1,25 @@
-import React, { useEffect, useRef, useState } from "react";
-
-import { Form, InputGroup } from "react-bootstrap";
-import { Fab } from "@mui/material";
+import React, {useEffect, useId, useRef, useState} from "react";
+import {Form, InputGroup} from "react-bootstrap";
+import {Fab} from "@mui/material";
 import KeyboardVoiceOutlinedIcon from '@mui/icons-material/KeyboardVoiceOutlined';
 import MicOutlinedIcon from '@mui/icons-material/MicOutlined';
 import ClearIcon from "@mui/icons-material/Clear";
-import { useSpeechRecognition } from "@shared/hooks";
 
-import { CreateTask } from "../../model/types";
+
+import {Task, UpdateTask} from "@entities/Task";
+import {useSpeechRecognition} from "@shared/hooks";
+
 
 interface TextDescriptionBlockProps {
-    setFormTask: (task: CreateTask) => void;
-    formTask: CreateTask;
+    task?: Task;
+    setFormDataClb: <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => void;
+    formTask: UpdateTask;
     disabled: boolean;
 }
 
 export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
-    const { formTask, setFormTask, disabled } = props;
+    const { formTask, setFormDataClb, disabled, task } = props;
+    const id = useId();
     const { isListening, transcript, startListening } = useSpeechRecognition();
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const [cursorPosition, setCursorPosition] = useState<number | null>(formTask.description?.length || 0);
@@ -31,11 +34,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
             const addSpaceAfter = afterCursor && afterCursor[0] !== ' ' ? ' ' : '';
 
             const newText = beforeCursor + addSpaceBefore + transcript + addSpaceAfter + afterCursor;
-
-            setFormTask({
-                ...formTask,
-                description: newText,
-            });
+            setFormDataClb('description', newText);
             // Reset cursor position
             setCursorPosition(cursorPosition + transcript.length);
         }
@@ -51,10 +50,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const newValue = e.target.value;
         setCursorPosition(e.target.selectionStart);
-        setFormTask({
-            ...formTask,
-            description: newValue,
-        });
+        setFormDataClb('description', newValue || null);
     };
 
     const handleMouseUp = (e: React.MouseEvent<HTMLTextAreaElement>) => {
@@ -77,10 +73,7 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
     };
 
     const cleanClb = () => {
-        setFormTask({
-            ...formTask,
-            description: '',
-        });
+        setFormDataClb('description', null);
     };
 
     return (
@@ -122,11 +115,12 @@ export const TextDescriptionBlock = (props: TextDescriptionBlockProps) => {
                 }
             </InputGroup.Text>
             <Form.Control
+                id={id}
                 as="textarea"
                 ref={inputRef}
                 readOnly={disabled}
                 maxLength={5000}
-                value={formTask.description}
+                value={formTask.description || task?.description || ""}
                 onChange={handleInputChange}
                 onMouseUp={handleMouseUp}
                 onKeyUp={handleKeyUp}

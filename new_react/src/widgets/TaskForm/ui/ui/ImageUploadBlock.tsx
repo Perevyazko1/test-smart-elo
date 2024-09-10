@@ -1,14 +1,14 @@
 import React, {ChangeEvent, useEffect, useMemo, useState} from "react";
 import {Button} from "@mui/material";
+import {styled} from "@mui/material/styles";
 import AddAPhotoIcon from "@mui/icons-material/AddAPhoto";
+import ClearIcon from "@mui/icons-material/Clear";
 
 import {AppSlider} from "@shared/ui";
-import {styled} from "@mui/material/styles";
-import {CreateTask} from "@widgets/TaskForm/model/types";
-import {Task} from "@pages/TaskPage";
 import {STATIC_URL} from "@shared/consts";
-import ClearIcon from "@mui/icons-material/Clear";
-import {useDeleteTaskImage} from "@widgets/TaskForm/model/api";
+
+import {useDeleteTaskImage} from "../../model/api";
+import {Task} from "@entities/Task";
 
 
 const VisuallyHiddenInput = styled('input')({
@@ -25,8 +25,7 @@ const VisuallyHiddenInput = styled('input')({
 
 interface ImageUploadBlockProps {
     task?: Task;
-    formTask: CreateTask;
-    setFormTask: (task: CreateTask) => void;
+    setNewImageList: (images: File[]) => void;
     disabled: boolean;
 }
 
@@ -41,9 +40,10 @@ interface EditImage {
 }
 
 export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
-    const {task, formTask, setFormTask, disabled} = props;
+    const {task, setNewImageList, disabled} = props;
     const [initialImages, setInitialImages] = useState<string[]>(
-        task?.task_images ? task.task_images.map(image => image.image) : []
+        task?.task_images ? task.task_images.map(image => image.image) :
+            []
     );
     const [newImages, setNewImages] = useState<NewImage[]>([]);
     const [deleteTaskImage] = useDeleteTaskImage();
@@ -68,14 +68,8 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
 
     useEffect(() => {
         const fileList = newImages.map(newImage => newImage.file)
-        if (fileList !== formTask.images) {
-            setFormTask({
-                ...formTask,
-                images: fileList,
-            });
-        }
-        //eslint-disable-next-line
-    }, [formTask.images, newImages, setFormTask])
+        setNewImageList(fileList);
+    }, [newImages, setNewImageList])
 
     const deleteClb = async (imageUrl: string) => {
         if (imageUrl.startsWith('blob')) {
@@ -120,8 +114,8 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
             <div className={'bg-light border border-1 border-black rounded p-1'}>
                 <AppSlider
                     images={sliderUrls}
-                    width={'180px'}
-                    height={'180px'}
+                    width={'214px'}
+                    height={'214px'}
                 />
             </div>
 
@@ -130,7 +124,6 @@ export const ImageUploadBlock = (props: ImageUploadBlockProps) => {
                      style={{
                          overflowY: 'auto',
                          overflowX: 'hidden',
-                         maxHeight: '190px'
                      }}
                 >
                     <Button

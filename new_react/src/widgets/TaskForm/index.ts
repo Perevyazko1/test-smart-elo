@@ -1,1 +1,2 @@
-export {TaskForm} from "@widgets/TaskForm/ui/TaskForm";
+export {getTaskExecutor} from "./model/lib";
+export {TaskForm} from './ui/TaskForm';

@@ -3,22 +3,22 @@ import {Link, useLocation} from "react-router-dom";
 import {useCallback} from "react";
 import {anonEmployee} from "@entities/Employee";
 import {getEmployeeName, getUserRouteConfig} from "@shared/lib";
-import {AppSelect, AppSwitch} from "@shared/ui";
-import {APP_COMPACT_MODE, USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
-import {useAppModal, useCompactMode, useCurrentUser} from "@shared/hooks";
+import {AppSelect} from "@shared/ui";
+import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
+import {useAppModal, useCurrentUser} from "@shared/hooks";
 import {UserActions} from "@widgets/UserActions";
 
 export const AppNavigation = (props: { isDesktop: boolean }) => {
     const {currentUser, setCurrentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
 
-    const {isCompactMode, setCompactMode} = useCompactMode();
+    // const {isCompactMode, setCompactMode} = useCompactMode();
 
-    const switchCompactMode = (value: boolean) => {
-        setCompactMode(!isCompactMode);
-        value ? localStorage.setItem(APP_COMPACT_MODE, String(value))
-            : localStorage.removeItem(APP_COMPACT_MODE);
-    };
+    // const switchCompactMode = (value: boolean) => {
+    //     setCompactMode(!isCompactMode);
+    //     value ? localStorage.setItem(APP_COMPACT_MODE, String(value))
+    //         : localStorage.removeItem(APP_COMPACT_MODE);
+    // };
 
     const location = useLocation();
 
@@ -60,14 +60,14 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
             colorScheme={'darkInput'}
         >
             {renderOptions}
-            <div className={'p-2 pt-3'}>
-                <AppSwitch
-                    checked={isCompactMode}
-                    label={'Сжатый вид'}
-                    onSwitch={switchCompactMode}
-                    idSwitch={'compact-mode-switch'}
-                />
-            </div>
+            {/*<div className={'p-2 pt-3'}>*/}
+            {/*    <AppSwitch*/}
+            {/*        checked={isCompactMode}*/}
+            {/*        label={'Сжатый вид'}*/}
+            {/*        onSwitch={switchCompactMode}*/}
+            {/*        idSwitch={'compact-mode-switch'}*/}
+            {/*    />*/}
+            {/*</div>*/}
             <div className={'py-2'}>
                 <Button onClick={showUserActionsClb} className={'w-100 bg-black'} variant={'dark'}>
                     История

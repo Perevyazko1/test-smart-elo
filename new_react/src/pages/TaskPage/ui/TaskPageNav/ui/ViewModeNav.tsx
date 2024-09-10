@@ -1,64 +1,81 @@
-import React, {useEffect, useState} from "react";
-import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
-import {getViewModeInited} from "@pages/TaskPage/model/selectors";
-import {taskPageActions} from "@pages/TaskPage/model/slice";
+import React, {useEffect, useMemo} from "react";
+
+import {useAppDispatch, useAppSelector, usePermission, useQueryParams} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
 import {AppSelect} from "@shared/ui";
 
+import {getViewModeInited} from "../../../model/selectors";
+import {taskPageActions} from "../../../model/slice";
 
-const ViewModes: { [key: string]: string } = {
-    '0': 'Все',
-    '1': 'Только мне',
-    '2': 'В моих отделах',
-    '3': 'Отмененные',
-    '4': 'Я исполнитель',
-    '5': 'Я соисполнитель',
-    '6': 'Я назначил',
+interface ViewModeItem {
+    key: string,
+    name: string,
 }
+
+const DefaultViewMode: ViewModeItem = {key: '0', name: 'Все'};
+
+const ViewModes: ViewModeItem[] = [
+    {key: '1', name: 'Только мне'},
+    {key: '2', name: 'В моих отделах'},
+    {key: '3', name: 'Отмененные'},
+    {key: '4', name: 'Я исполнитель'},
+    {key: '5', name: 'Я соисполнитель'},
+    {key: '6', name: 'Я назначил'},
+    {key: '7', name: 'В тарификации'},
+]
+
+const TariffViewMode: ViewModeItem = {key: '8', name: 'Со сделкой'}
+
 
 export const ViewModeNav = () => {
     const {initialLoad, queryParameters, setQueryParam} = useQueryParams();
     const dispatch = useAppDispatch();
 
-    const [selectedViewMode, setSelectedViewMode] = useState<string | null>(null);
-    const viewModes = Object.values(ViewModes);
+    const confirmTariffPerm = usePermission(APP_PERM.TARIFFICATION_CONFIRM);
+
+    const allViewModes: ViewModeItem[] = useMemo(() => {
+        if (confirmTariffPerm) {
+            return [DefaultViewMode, ...ViewModes, TariffViewMode];
+        }
+        return [DefaultViewMode, ...ViewModes];
+    }, [confirmTariffPerm]);
+
     const filtersInited = useAppSelector(getViewModeInited);
 
-    const setViewModeClb = (viewValue: string | null) => {
-        const entry = Object.entries(ViewModes).find(([key, val]) => val === viewValue);
-
-        if (!viewValue || viewValue === ViewModes['0'] || !entry) {
-            setQueryParam('view_mode', '')
-        } else {
-            setQueryParam('view_mode', entry[0])
-        }
+    const setViewModeClb = (viewValue: ViewModeItem) => {
+        setQueryParam('view_mode', viewValue.key);
     };
 
     useEffect(() => {
-        if (filtersInited) {
+        if (!initialLoad && !filtersInited) {
             if (!queryParameters.view_mode) {
-                setSelectedViewMode(null);
+                setQueryParam('view_mode', DefaultViewMode.key);
             } else {
-                setSelectedViewMode(ViewModes[queryParameters.view_mode]);
+                const allowedViewMode: boolean = allViewModes.some(item => item.key === queryParameters.view_mode);
+                if (allowedViewMode) {
+                    dispatch(taskPageActions.viewModeInited(true));
+                } else {
+                    setQueryParam('view_mode', DefaultViewMode.key);
+                }
             }
         }
-    }, [filtersInited, queryParameters.view_mode]);
+    }, [allViewModes, dispatch, filtersInited, initialLoad, queryParameters.view_mode, setQueryParam]);
 
-
-    useEffect(() => {
-        if (!initialLoad && !filtersInited) {
-            dispatch(taskPageActions.viewModeInited());
-        }
-    }, [dispatch, filtersInited, initialLoad, queryParameters.view_mode, setQueryParam]);
+    const viewModeValue: ViewModeItem = useMemo(() => {
+        const targetViewMode = allViewModes.find(item => item.key === queryParameters.view_mode)
+        return targetViewMode || DefaultViewMode;
+    }, [allViewModes, queryParameters.view_mode])
 
     return (
         <AppSelect
             noInput
             style={{width: 150}}
             isLoading={initialLoad}
-            variant={'select'}
-            label={selectedViewMode ? 'Видимость' : 'Видимость (Все)'}
-            value={selectedViewMode}
-            options={viewModes}
+            variant={'dropdown'}
+            label={'Режим просмотра'}
+            value={viewModeValue || ''}
+            options={allViewModes}
+            getOptionLabel={option => option.name}
             onSelect={setViewModeClb}
             colorScheme={'darkInput'}
         />

@@ -1,14 +1,14 @@
-import {Employee} from "@entities/Employee";
-import {getEmployeeName} from "@shared/lib";
 import {AppSelect} from "@shared/ui";
+import {useEmployeeName} from "@shared/hooks";
 
 
 interface AppointedByBlockProps {
-    value: Employee;
+    value: number | null;
 }
 
 
 export const CreatedByBlock = (props: AppointedByBlockProps) => {
+    const {getNameById} = useEmployeeName();
 
     return (
         <AppSelect
@@ -18,7 +18,7 @@ export const CreatedByBlock = (props: AppointedByBlockProps) => {
             style={{minWidth: 250}}
             value={props.value}
             readOnly
-            getOptionLabel={(option: Employee) => getEmployeeName(option, 'listNameInitials')}
+            getOptionLabel={(option: number) => getNameById(option, 'listNameInitials')}
             colorScheme={'lightInput'}
         />
     );

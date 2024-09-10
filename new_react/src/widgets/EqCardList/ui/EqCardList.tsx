@@ -1,12 +1,14 @@
 import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 import {useCardHeight} from "@pages/EqPage";
+import {EqCard} from "@widgets/EqCard";
 import {useFixedSizeList, useQueue} from "@shared/hooks";
+import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
 import {BlockName} from "./ui/BlockName";
-import { VirtualizedList } from "./ui/VirtualizedList";
+import {ReadySection} from "@pages/TaskPage/ui/Sections/ReadySection";
 
 interface EqCardListProps {
     extraParams?: object;
@@ -29,9 +31,6 @@ export const EqCardList = memo((props: EqCardListProps) => {
             addToQueue(newItem);
         }
     }, [noRelevantIds, addToQueue]);
-
-    // Делаем элемент управляемым, чтобы отслеживать положение скролла
-    const scrollElementRef = useRef<HTMLDivElement>(null);
 
     const {isLoading, data, updateItem} = useFetchListData({
         inited: inited,
@@ -75,16 +74,6 @@ export const EqCardList = memo((props: EqCardListProps) => {
         }) || [])
     }, [data]);
 
-    const getItemsCount = useMemo(() => {
-        return isLoading ? data?.count || sortedList.length || 3 : sortedList.length;
-    }, [data?.count, isLoading, sortedList.length]);
-
-    const {virtualItems, totalHeight} = useFixedSizeList({
-        itemHeight: cardHeight,
-        itemsCount: getItemsCount,
-        getScrollElement: useCallback(() => scrollElementRef.current, []),
-    });
-
     const blockName = useMemo(() => {
         return (listType !== "distribute" &&
             <BlockName
@@ -96,6 +85,34 @@ export const EqCardList = memo((props: EqCardListProps) => {
             />
         )
     }, [listType]);
+
+    // Делаем элемент управляемым, чтобы отслеживать положение скролла
+    const scrollElementRef = useRef<HTMLDivElement>(null);
+
+    const getItemsCount = useMemo(() => {
+        if (sortedList) {
+            return sortedList.length;
+        }
+        return 0;
+    }, [sortedList]);
+
+    const {virtualItems, totalHeight} = useFixedSizeList({
+        itemHeight: cardHeight + 3,
+        itemsCount: getItemsCount,
+        getScrollElement: useCallback(() => scrollElementRef.current, []),
+    });
+
+    const getEqCard = useCallback((index: number) => {
+        const card = sortedList[index];
+        return (
+            <EqCard
+                noRelevant={queue.includes(card.id)}
+                card={card}
+                expanded={expanded}
+                listType={listType}
+            />
+        )
+    }, [expanded, listType, queue, sortedList])
 
     return (
         <>
@@ -110,16 +127,41 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 }}
                 ref={scrollElementRef}
             >
+                <div style={{height: totalHeight}}>
+                    {virtualItems.map(card => (
+                        <div
+                            key={card.index}
+                            style={{
+                                position: 'absolute',
+                                top: '0',
+                                transform: `translateY(${card.offsetTop}px)`,
+                                width: '100%',
+                                height: `${cardHeight}px`,
+                            }}
+                        >
+                            {getEqCard(card.index)}
+                        </div>
+                    ))}
+                </div>
 
-                {/* Вешаем отслеживатель скролла на обертку блока */}
-                <VirtualizedList
-                    expanded={expanded}
-                    listType={listType}
-                    height={data?.results && data.results.length > 0 ? totalHeight + 5 : 0}
-                    queue={queue}
-                    virtualItems={virtualItems}
-                    sortedList={sortedList}
-                />
+                {isLoading ?
+                    <AppSkeleton
+                        className={'rounded'}
+                        style={{
+                            margin: '0.15rem 0.25rem',
+                            height: `${cardHeight}px`,
+                        }}
+                    />
+                    : null
+                }
+                {listType === 'ready' &&
+                    <>
+                        <div className={'fw-bold ps-1'}>
+                            Выполненные задачи:
+                        </div>
+                        <ReadySection eqMode={true}/>
+                    </>
+                }
             </div>
 
             {blockName}

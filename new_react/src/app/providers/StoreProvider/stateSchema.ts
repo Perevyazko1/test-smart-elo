@@ -16,11 +16,11 @@ import {PostTarifficationSchema} from "@widgets/PostTarifficationWidget";
 import {TaskPageSchema} from "@pages/TaskPage";
 
 export interface StateSchema {
-    [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>
+    [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>;
+    taskPage: TaskPageSchema;
 
     // Асинхронные редюсеры
     tarifficationPage?: TarifficationPageSchema;
-    taskPage?: TaskPageSchema;
     eqPage?: EqPageSchema;
     appNavbar?: AppNavbarSchema;
     orderDetail?: OrderDetailsSchema;

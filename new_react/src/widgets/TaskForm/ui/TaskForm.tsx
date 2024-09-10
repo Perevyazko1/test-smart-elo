@@ -1,63 +1,79 @@
-import React, {FormEvent, useEffect, useState} from "react";
-import {InputGroup} from "react-bootstrap";
+import React, {FormEvent, useEffect, useMemo, useState} from "react";
+
 import {Button} from "@mui/material";
 
-import {convertDateTime, prepareFormData} from "@shared/lib";
+import {NewTask, Task, TaskStatus, TaskViewMode, UpdateTask} from "@entities/Task";
+import {useSortedUserList} from "@entities/Employee";
+import {taskPageActions} from "@pages/TaskPage";
+import {prepareFormData} from "@shared/lib";
 import {useAppDispatch, useCurrentUser} from "@shared/hooks";
-import {Task, taskPageActions, TaskStatus, TaskUrgency, TaskViewMode} from "@pages/TaskPage";
-import {UpdateTask} from "@pages/TaskPage/model/types";
-import {getStatusText} from "@pages/TaskPage/model/lib";
 
-import {CreateTask} from "../model/types";
-import {useCreateTask, useTaskUpdateViewInfo, useUpdateTask} from "../model/api";
+import {useCreateTask, useCreateTaskImage, useTaskUpdateViewInfo, useUpdateTask} from "../model/api";
 
+import {TaskTitle} from "./ui/TaskTitle";
 import {ImageUploadBlock} from "./ui/ImageUploadBlock";
+import {DeadlineBlock} from "./ui/DeadlineBlock";
 import {DatesBlock} from "./ui/DatesBlock";
 import {CreatedByBlock} from "./ui/CreatedByBlock";
+import {AppointedByBlock} from "./ui/AppointedByBlock";
+import {AmountBlock} from "./ui/AmountBlock";
 import {ExecutorBlock} from "./ui/ExecutorBlock";
 import {CoExecutorBlock} from "./ui/CoExecutorBlock";
+import {AmountDetailBlock} from "./ui/AmountDetailBlock";
 import {ViewModeBlock} from "./ui/ViewModeBlock";
+import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
 import {RatingBlock} from "./ui/RatingBlock";
 import {TextTitleBlock} from "./ui/TextTitleBlock";
-import {AppointedByBlock} from "./ui/AppointedByBlock";
-import {DeadlineBlock} from "./ui/DeadlineBlock";
 import {TextDescriptionBlock} from "./ui/TextDescriptionBlock";
-import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
-import {CommentInputBlock} from "@widgets/TaskForm/ui/ui/CommentInputBlock";
-import {useSortedUserList} from "@entities/Employee";
-import {CommentList} from "@widgets/TaskForm/ui/ui/CommentList";
+import {CommentInputBlock} from "./ui/CommentInputBlock";
+import {CommentList} from "./ui/CommentList";
 
 
 interface TaskFormProps {
-    variant: 'create' | 'read_only' | 'edit';
     task?: Task;
     onSubmitClb?: () => void;
+    variant: 'create' | 'read_only' | 'edit';
 }
-
 
 export const TaskForm = (props: TaskFormProps) => {
     const {task, variant, onSubmitClb} = props;
-    const {currentUser} = useCurrentUser();
     const dispatch = useAppDispatch();
+
+    const {currentUser} = useCurrentUser();
     const {sortedUserList, usersIsLoading} = useSortedUserList();
+
     const [createTask, {isLoading: isCreated}] = useCreateTask();
     const [updateTask, {isLoading: isUpdated}] = useUpdateTask();
+    const [createTaskImage, {isLoading}] = useCreateTaskImage();
     const [updateViewInfo] = useTaskUpdateViewInfo();
 
+    const [showAmountDetail, setShowAmountDetail] = useState(false);
 
-    const [formData, setFormData] = useState<CreateTask>({
-        deadline: task?.deadline ? convertDateTime(task.deadline) : "",
-        created_by: task?.created_by?.id || currentUser.id,
-        status: task?.status || TaskStatus.Pending,
-        title: task?.title || '',
-        description: task?.description || '',
-        urgency: task?.urgency || TaskUrgency.Normal,
-        view_mode: task?.view_mode || TaskViewMode.ForParticipants,
-        for_departments: task?.for_departments?.map(department => department.id) || [],
-        executor: task?.executor?.id || null,
-        co_executors: task?.co_executors?.map(item => item.id) || [],
-        appointed_by: task?.appointed_by?.id || null,
-    });
+    const [formData, setFormData] = useState<UpdateTask>({});
+    const [newImageList, setNewImageList] = useState<File[]>([]);
+
+    const setFormDataClb = <K extends keyof UpdateTask>(key: K, value: UpdateTask[K]) => {
+        setFormData((prevFormData) => {
+            const newFormData = {...prevFormData};
+
+            if (task) {
+                if (task[key] !== value) {
+                    newFormData[key] = value;
+                } else {
+                    delete newFormData[key];
+                }
+            } else {
+                if (!value) {
+                    delete newFormData[key];
+                } else {
+                    newFormData[key] = value;
+                }
+            }
+
+            console.log('TaskForm: ', newFormData)
+            return newFormData;
+        });
+    };
 
     useEffect(() => {
         if (task?.id) {
@@ -70,29 +86,49 @@ export const TaskForm = (props: TaskFormProps) => {
         }
     }, [currentUser.id, dispatch, task?.id, updateViewInfo]);
 
-    const handleSubmit = (e: FormEvent) => {
+    const uploadImages = async (taskId: number) => {
+        const fetchImage = async (image: File) => {
+            await createTaskImage(prepareFormData({
+                task: taskId,
+                image: image,
+            }))
+        }
+
+        if (newImageList.length > 0) {
+            newImageList.forEach(
+                file => fetchImage(file)
+            )
+        }
+    }
+
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (task?.id) {
-            updateTask({
-                id: task.id,
-                data: prepareFormData(formData),
-                updateMode: 'all',
-            }).then(() => {
-                alert('Задача изменена ✅');
-                if (onSubmitClb) {
-                    onSubmitClb();
-                }
-            })
+            if (Object.keys(formData).length > 0) {
+                await updateTask({
+                    id: task.id,
+                    data: formData,
+                    updateMode: 'all',
+                })
+            }
+            await uploadImages(task.id)
+
+            alert('Задача изменена ✅');
         } else {
-            createTask({
-                data: prepareFormData(formData),
+            const newTaskData: NewTask = {
+                ...formData,
+                created_by: currentUser.id,
+                view_mode: formData.view_mode || TaskViewMode.ForParticipants,
+            }
+            const data = await createTask({
+                data: newTaskData,
                 updateMode: 'all',
-            }).then(() => {
-                alert('Задача создана ✅');
-                if (onSubmitClb) {
-                    onSubmitClb();
-                }
-            });
+            }).unwrap()
+            await uploadImages(data.id)
+            alert('Задача создана ✅');
+        }
+        if (onSubmitClb) {
+            onSubmitClb();
         }
     };
 
@@ -101,12 +137,11 @@ export const TaskForm = (props: TaskFormProps) => {
             if (window.confirm("Отменить задачу?")) {
                 updateTask({
                     id: task.id,
-                    data: prepareFormData({
+                    data: {
                         ...formData,
                         status: TaskStatus.Cancelled,
                         ready_at: new Date().toISOString(),
-                        co_executors: task.co_executors?.map(user => user.id),
-                    }),
+                    },
                     updateMode: 'all',
                 }).then(() => {
                     alert('Задача отменена ❌. Найти данную задачу можно в режиме просмотра "Отмененные" раздел завершенных. ');
@@ -121,24 +156,22 @@ export const TaskForm = (props: TaskFormProps) => {
     const returnClb = () => {
         if (task?.id) {
             if (window.confirm("Вернуть задачу?")) {
-
                 const data: UpdateTask = {
                     id: task.id,
                     status: TaskStatus.Pending,
-                    co_executors: task.co_executors?.map(user => user.id),
-                    ready_at: '',
+                    ready_at: null,
                 }
-                if (task.appointed_by?.id === currentUser.id) {
+                if (task.appointed_by === currentUser.id) {
                     data.appointed_by = null;
-                    data.appointed_at = '';
-                    if (task.executor?.id === currentUser.id) {
-                        data.executor = null;
+                    data.appointed_at = null;
+                    if (task.new_executor?.employee === currentUser.id) {
+                        data.new_executor = null;
                     }
                 }
 
                 updateTask({
                     id: task.id,
-                    data: prepareFormData(data),
+                    data: data,
                     updateMode: 'all',
                 }).then(() => {
                     alert('Задача возвращена в блок ожидания. Что бы увидеть задачу - переключите режим просмотра. ');
@@ -148,26 +181,12 @@ export const TaskForm = (props: TaskFormProps) => {
                 });
             }
         }
-    }
+    };
 
-    useEffect(() => {
-        if (formData.view_mode !== TaskViewMode.DepartmentVisible && formData.for_departments) {
-            setFormData({
-                ...formData,
-                for_departments: []
-            })
-        }
-        if (formData.view_mode === TaskViewMode.OnlyMe && formData.executor !== currentUser.id) {
-            setFormData({
-                ...formData,
-                executor: currentUser.id,
-                co_executors: [],
-                appointed_at: new Date().toISOString(),
-                appointed_by: currentUser.id,
-            })
-        }
-        //eslint-disable-next-line
-    }, [formData.view_mode]);
+    const showEditBtn = useMemo(() => {
+        return !task?.verified_at &&
+            (Object.keys(formData).length > 0 || newImageList.length > 0)
+    }, [formData, newImageList.length, task?.verified_at]);
 
     return (
         <form
@@ -176,31 +195,28 @@ export const TaskForm = (props: TaskFormProps) => {
             style={{minWidth: "50vw"}}
             onSubmit={handleSubmit}
         >
-            {task ?
-                <h4>Задача № {task.id} (статус: {getStatusText(task.status)}) </h4>
-                :
-                <h4>Новая задача</h4>
-            }
+            <TaskTitle task={task}/>
             <hr className={'m-1'}/>
 
             <div className={'d-flex justify-content-between gap-2'}>
                 <ImageUploadBlock
+                    setNewImageList={setNewImageList}
                     disabled={variant === "read_only"}
                     task={task}
-                    formTask={formData}
-                    setFormTask={setFormData}
                 />
-                <div
-                    style={{maxWidth: "370px"}}
-                >
+
+                <div style={{maxWidth: "370px"}}>
                     <DeadlineBlock
                         disabled={variant === "read_only"}
-                        setFormTask={setFormData}
-                        formData={formData}
+                        setFormDataClb={setFormDataClb}
+                        deadline={formData.deadline || task?.deadline || null}
                     />
+
                     <hr className={'m-1'}/>
+
                     <DatesBlock
                         task={task}
+                        formData={formData}
                     />
                 </div>
             </div>
@@ -208,43 +224,41 @@ export const TaskForm = (props: TaskFormProps) => {
             <hr className={'m-2'}/>
 
             <div className={'d-flex gap-2 flex-column'}>
-
-                <div className="d-flex flex-wrap flex-fill gap-2 pe-3">
+                <div className="d-flex flex-wrap flex-fill gap-2">
                     <CreatedByBlock
-                        value={task?.created_by || currentUser}
+                        value={task?.created_by || currentUser.id}
                     />
                     <AppointedByBlock
-                        isLoading={usersIsLoading}
-                        userList={sortedUserList || []}
-                        value={task?.appointed_by?.id || formData.appointed_by || null}
+                        value={task?.appointed_by || formData.appointed_by || null}
                     />
 
-                    <InputGroup className={'d-flex flex-nowrap'} style={{maxWidth: "270px"}}>
-                        <InputGroup.Text style={{width: '120px'}} className={'text-muted fs-7'}>
-                            Назначена:
-                        </InputGroup.Text>
-                        <input
-                            type="datetime-local"
-                            disabled
-                            value={convertDateTime(formData.appointed_at || task?.appointed_at)}
-                        />
-                    </InputGroup>
+                    <AmountBlock
+                        task={task}
+                        disabled={variant === 'read_only'}
+                        formTask={formData}
+                        setFormDataClb={setFormDataClb}
+                        showAmountDetail={showAmountDetail}
+                        setShowAmountDetail={setShowAmountDetail}
+                    />
                 </div>
 
                 <div className="d-flex gap-2 flex-fill flex-wrap">
                     <ExecutorBlock
+                        task={task}
                         disabled={variant === 'read_only'
                             || (!!task && task?.status !== TaskStatus.Pending)
                             || formData.view_mode === TaskViewMode.OnlyMe
                         }
-                        setFormTask={setFormData}
+                        setFormDataClb={setFormDataClb}
                         formTask={formData}
                         isLoading={usersIsLoading}
                         userList={sortedUserList}
                     />
+
                     <CoExecutorBlock
                         disabled={variant === 'read_only'}
-                        setFormTask={setFormData}
+                        task={task}
+                        setFormDataClb={setFormDataClb}
                         formTask={formData}
                         isLoading={usersIsLoading}
                         userList={sortedUserList}
@@ -252,112 +266,126 @@ export const TaskForm = (props: TaskFormProps) => {
 
                 </div>
 
+                {showAmountDetail &&
+                    <div>
+                        <AmountDetailBlock
+                            task={task}
+                            formTask={formData}
+                            setFormDataClb={setFormDataClb}
+                        />
+                    </div>
+                }
                 <div className="d-flex gap-2 flex-fill flex-wrap">
                     <ViewModeBlock
+                        task={task}
                         disabled={variant === "read_only"}
                         formTask={formData}
-                        setFormTask={setFormData}
+                        setFormDataClb={setFormDataClb}
                     />
                     <ForDepartmentsBlock
-                        active={formData.view_mode === TaskViewMode.DepartmentVisible && variant !== "read_only"}
+                        task={task}
+                        active={variant !== "read_only" && (
+                            formData.view_mode === TaskViewMode.DepartmentVisible ||
+                            (!formData.view_mode && task?.view_mode === TaskViewMode.DepartmentVisible))
+                        }
                         formTask={formData}
-                        setFormTask={setFormData}
+                        setFormDataClb={setFormDataClb}
                     />
+
                     <RatingBlock
+                        task={task}
                         disabled={variant === "read_only"}
                         formTask={formData}
-                        setFormTask={setFormData}
+                        setFormDataClb={setFormDataClb}
                     />
                 </div>
 
                 <hr className={'m-1'}/>
-            </div>
+                <div className={'d-flex flex-wrap gap-2'}>
+                    <TextTitleBlock
+                        task={task}
+                        disabled={variant === "read_only"}
+                        formTask={formData}
+                        setFormDataClb={setFormDataClb}
+                    />
 
-            <div className={'d-flex flex-wrap gap-2'}>
-                <TextTitleBlock
-                    disabled={variant === "read_only"}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
+                    <TextDescriptionBlock
+                        task={task}
+                        disabled={variant === "read_only"}
+                        formTask={formData}
+                        setFormDataClb={setFormDataClb}
+                    />
 
-                <TextDescriptionBlock
-                    disabled={variant === "read_only"}
-                    formTask={formData}
-                    setFormTask={setFormData}
-                />
-
-                {task?.id &&
-                    <>
-                        <CommentInputBlock task={task}/>
-                        <CommentList
-                            taskId={task.id}
-                        />
-                    </>
-
-                }
+                    {task?.id &&
+                        <>
+                            <CommentInputBlock task={task}/>
+                            <CommentList
+                                taskId={task.id}
+                            />
+                        </>
+                    }
+                </div>
                 <hr className={'m-1'}/>
-            </div>
 
+                <div className={'d-flex gap-2 pb-3'}>
+                    {variant === "create" &&
+                        <Button
+                            variant={'outlined'}
+                            color="inherit"
+                            type={"submit"}
+                            disableElevation
+                            disabled={isCreated || isUpdated || isLoading}
+                        >
+                            Создать задачу
+                        </Button>
+                    }
+                    {
+                        showEditBtn &&
+                        <Button
+                            variant={'outlined'}
+                            color="inherit"
+                            type={"submit"}
+                            disableElevation
+                            disabled={isCreated || isUpdated || isLoading}
+                        >
+                            Изменить
+                        </Button>
+                    }
 
-            <div className={'d-flex gap-2 pb-3'}>
+                    {variant === 'edit' &&
+                        <>
+                            {
+                                task?.status !== TaskStatus.Cancelled
+                                    ?
+                                    <Button
+                                        variant={'outlined'}
+                                        color="warning"
+                                        type={"button"}
+                                        disableElevation
+                                        onClick={cancelClb}
+                                        disabled={isCreated || isUpdated || isLoading}
+                                    >
+                                        Удалить
+                                    </Button>
+                                    :
 
-                {variant === "create" &&
-                    <Button
-                        variant={'outlined'}
-                        color="inherit"
-                        type={"submit"}
-                        disableElevation
-                        disabled={isCreated || isUpdated}
-                    >
-                        Создать задачу
-                    </Button>
-                }
+                                    <Button
+                                        variant={'outlined'}
+                                        color="warning"
+                                        type={"button"}
+                                        disableElevation
+                                        onClick={returnClb}
+                                        disabled={isCreated || isUpdated || isLoading}
+                                    >
+                                        Вернуть
+                                    </Button>
+                            }
 
-                {
-                    !task?.verified_at &&
-                    variant === 'edit' &&
-                    formData.created_by === currentUser.id &&
-                    <Button
-                        variant={'outlined'}
-                        color="inherit"
-                        type={"submit"}
-                        disableElevation
-                        disabled={isCreated || isUpdated}
-                    >
-                        Изменить
-                    </Button>
-                }
-                {variant === 'edit' &&
-                    <>
-                        {
-                            formData.status !== TaskStatus.Cancelled
-                                ?
-                                <Button
-                                    variant={'outlined'}
-                                    color="warning"
-                                    type={"button"}
-                                    disableElevation
-                                    onClick={cancelClb}
-                                    disabled={isCreated || isUpdated}
-                                >
-                                    Удалить
-                                </Button>
-                                :
+                        </>
+                    }
 
-                                <Button
-                                    variant={'outlined'}
-                                    color="warning"
-                                    type={"button"}
-                                    disableElevation
-                                    onClick={returnClb}
-                                    disabled={isCreated || isUpdated}
-                                >
-                                    Вернуть
-                                </Button>
-                        }
+                </div>
 
-                    </>
-                }
             </div>
         </form>
     );

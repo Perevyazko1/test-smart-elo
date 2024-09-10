@@ -1,6 +1,6 @@
-import {useDepartmentList} from "@widgets/TaskForm/model/api";
-import React, {useEffect, useMemo, useState} from "react";
-import {Department} from "@entities/Department";
+import React, {useEffect, useState} from "react";
+
+import {Department, useDepartmentList} from "@entities/Department";
 import {useQueryParams} from "@shared/hooks";
 import {AppSelect} from "@shared/ui";
 

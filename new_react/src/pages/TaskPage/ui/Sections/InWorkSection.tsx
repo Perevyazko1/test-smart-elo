@@ -4,10 +4,10 @@ import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
 import {allFiltersInited, getInWorkData} from "../../model/selectors";
-import {TaskStatus} from "../../model/consts";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
-import {TaskCardSkeleton} from "@pages/TaskPage/ui/TaskPageCard/TaskCardSkeleton";
+import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
+import {TaskStatus} from "@entities/Task";
 
 export const InWorkSection = () => {
     const dispatch = useAppDispatch();
@@ -56,11 +56,7 @@ export const InWorkSection = () => {
 
             {inWorkData?.isLoading
                 ?
-                <>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                    <TaskCardSkeleton/>
-                </>
+                <TaskCardSkeleton/>
                 :
                 <>
                     {inWorkData?.results?.map(card => (

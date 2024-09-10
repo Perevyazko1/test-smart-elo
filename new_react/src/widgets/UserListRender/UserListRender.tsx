@@ -1,11 +1,10 @@
 import {HTMLAttributes} from "react";
-import {Employee} from "@entities/Employee";
+import {Employee, useAddToFavorite} from "@entities/Employee";
 import {Checkbox} from "@mui/material";
 import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import {getEmployeeName} from "@shared/lib";
 import {useCurrentUser} from "@shared/hooks";
-import {useAddToFavorite} from "@widgets/TaskForm/model/api";
 import {Spinner} from "react-bootstrap";
 
 interface UserListRenderProps {

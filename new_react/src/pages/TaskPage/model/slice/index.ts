@@ -1,10 +1,12 @@
-import {TaskPageSchema} from "@pages/TaskPage/model/types";
 import {createSlice} from "@reduxjs/toolkit";
-import {getTaskCards} from "@pages/TaskPage/model/api/getTaskCards";
-import {TaskStatus} from "@pages/TaskPage";
-import {updateTask} from "@pages/TaskPage/model/api/updateTask";
-import {getTaskCard} from "@pages/TaskPage/model/api/getTaskCard";
-import {getWeekData} from "@pages/TaskPage/model/api/getWeekData";
+
+import {TaskStatus} from "@entities/Task";
+
+import {TaskPageSchema} from "../types";
+import {getTaskCards} from "../api/getTaskCards";
+import {updateTask} from "../api/updateTask";
+import {getTaskCard} from "../api/getTaskCard";
+import {getWeekData} from "../api/getWeekData";
 
 export const initialState: TaskPageSchema = {
     week_data: null,
@@ -45,11 +47,11 @@ const taskPageSlice = createSlice({
         addNoRelevantId: (state, action) => {
             state.noRelevantIds = [...state.noRelevantIds, action.payload];
         },
-        viewModeInited: (state) => {
-            state.viewModeInited = true;
+        viewModeInited: (state, action) => {
+            state.viewModeInited = action.payload;
         },
-        sortModeInited: (state) => {
-            state.sortModeInited = true;
+        sortModeInited: (state, action) => {
+            state.sortModeInited = action.payload;
         },
     },
     extraReducers: (builder) => {
@@ -101,19 +103,21 @@ const taskPageSlice = createSlice({
             })
 
             .addCase(getTaskCard.fulfilled, (state, action) => {
-                const updateList = (list: typeof state.await.results) => {
+                const updateList = (list: typeof state.await.results, status: TaskStatus[]) => {
                     const index = list.findIndex(item => item.id === action.payload.id);
-                    if (index !== -1) {
+                    if (index !== -1 && status.includes(action.payload.status)) {
                         list[index] = action.payload;
+                    } else if (status.includes(action.payload.status)) {
+                        return [...list, action.payload];
                     } else {
                         return list.filter(item => item.id !== action.payload.id);
                     }
                     return list;
                 };
 
-                state.await.results = updateList(state.await.results);
-                state.inWork.results = updateList(state.inWork.results);
-                state.ready.results = updateList(state.ready.results);
+                state.await.results = updateList(state.await.results, [TaskStatus.Pending]);
+                state.inWork.results = updateList(state.inWork.results, [TaskStatus.InProgress]);
+                state.ready.results = updateList(state.ready.results, [TaskStatus.Completed, TaskStatus.Cancelled]);
 
                 state.noRelevantIds = state.noRelevantIds.filter(item => item !== action.payload.id);
             })

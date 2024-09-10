@@ -55,7 +55,7 @@ export const useWebSocket = () => {
         }
 
         if (data.action === 'UPDATE_TASK') {
-            if (Number(data.exclude) !== currentUser.pin_code) {
+            if (data.exclude !== currentUser.pin_code) {
                 dispatch(taskPageActions.addNoRelevantId(data.data));
             }
         }
@@ -92,12 +92,10 @@ export const useWebSocket = () => {
         if (socketRef.current) {
             socketRef.current.close();
             socketRef.current = null;
-            console.log('Old WS close')
         }
         // Далее проверка не анонимный ли пользователь
         if (currentUser.current_department && currentUser.current_department.number !== 0) {
             connect();
-            console.log('New WS connect')
         }
         return () => {
             socketRef.current?.close();
