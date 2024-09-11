@@ -2,6 +2,10 @@ import {memo, ReactNode, useContext, useEffect, useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 
+import {Box, Drawer} from "@mui/material";
+import KeyboardArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardArrowLeftOutlined';
+import CachedOutlinedIcon from '@mui/icons-material/CachedOutlined';
+
 import {IsDesktopContext} from "@app";
 import {AppNavigation} from "@widgets/AppNavigation";
 import {NotificationWidget} from "@widgets/NotificationWidget";
@@ -15,7 +19,6 @@ import {DynamicComponent, ReducersList} from "@features";
 import {appNavbarReducer} from "../model/slice";
 import {getNavHasNotifications, getNavHasUpdated, getNavIsLoading} from "../model/selectors";
 import {fetchHasNotifications} from "../model/api/fetchHasNotifications";
-import {Box, Drawer} from "@mui/material";
 
 
 interface AppNavbarProps {
@@ -78,28 +81,32 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
                         <div className={'d-flex justify-content-between align-items-stretch gap-3'}
                              style={{minWidth: '1220px', maxWidth: '100%'}}
                         >
-                            <div className={'d-flex align-self-center flex-nowrap gap-1'} style={{width: '175px'}}>
-                                <Button variant={'outline-dark'}
+                            <div className={'d-flex align-self-center flex-nowrap gap-2'} style={{width: '175px'}}>
+                                <button type={'button'}
+                                        className={'appBtn blackBtn rounded my-1'}
                                         onClick={backHandler}
                                         disabled={!backBtnActive}
                                         style={{
                                             width: '35px',
                                         }}
                                 >
-                                    <i className={`${backBtnActive && 'text-white'} fas fa-chevron-left`}/>
-                                </Button>
+                                    <KeyboardArrowLeftOutlinedIcon
+                                        className={`${backBtnActive && 'text-white'}`}
+                                    />
+                                </button>
 
-                                <Button variant={'outline-dark'}
-                                        onClick={() => window.location.reload()}
-                                        style={{
-                                            width: '35px',
-                                        }}
-                                        className={'px-0'}
+                                <button
+                                    type={'button'}
+                                    className={'appBtn blackBtn rounded my-1'}
+                                    onClick={() => window.location.reload()}
+                                    style={{
+                                        width: '35px',
+                                    }}
                                 >
-                                    <i className="text-white fas fa-sync-alt"/>
-                                </Button>
+                                    <CachedOutlinedIcon fontSize={'small'}/>
+                                </button>
 
-                                <div className={'align-self-center'}>
+                                <div className={'align-self-center ms-1'}>
                                     <Link to={location.pathname !== '/task'
                                         ? '/task'
                                         : '/'

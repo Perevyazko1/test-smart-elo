@@ -2,9 +2,9 @@ import {useCallback, useMemo} from "react";
 
 import {Task, TaskStatus, UpdateTask} from "@entities/Task";
 import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser} from "@shared/hooks";
+import {getTaskExecutor} from "@widgets/TaskForm";
 
 import {updateTask} from "../../../model/api/updateTask";
-import {getTaskExecutor} from "@widgets/TaskForm";
 
 
 interface TaskBtnProps {

@@ -170,6 +170,6 @@ class PostTarifficationSerializer(serializers.ModelSerializer):
             order_product__product=obj.product,
             department=obj.department,
             new_tariff__isnull=True,
-            executor__isnull=False,
+            inspector__isnull=False,
         )
         return AssignmentTariffSerializer(assignments_qs, many=True).data

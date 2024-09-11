@@ -11,6 +11,8 @@ import {useCurrentUser} from "@shared/hooks";
 import classNames from "classnames";
 import cls from "@shared/ui/AppSelect/AppSelect.module.scss";
 import {GetRenderOptionProps} from "@shared/ui/AppSelect/AppSelectMenu";
+import CheckIcon from "@mui/icons-material/Check";
+import React from "react";
 
 
 export const UserOptionRender = (listProps: GetRenderOptionProps<GroupedEmployeeItem>) => {
@@ -39,6 +41,13 @@ export const UserOptionRender = (listProps: GetRenderOptionProps<GroupedEmployee
                 {[cls.Selected]: isSelected(option)}
             )}
         >
+            {isSelected(option) &&
+                <CheckIcon
+                    sx={{m: 0, p: 0}}
+                    fontSize={'small'}
+                    color={'info'}
+                />
+            }
             <Checkbox
                 onClick={(event) => event.stopPropagation()}
                 icon={isLoading ?

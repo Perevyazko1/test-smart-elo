@@ -13,45 +13,11 @@ export const getUserRouteConfig = (user: Employee | undefined, navOnly: boolean 
         appRoutes = appRoutes.filter(route => route.mobile);
     }
 
-    const permittedRoutes = appRoutes.filter(route => {
+    return appRoutes.filter(route => {
         return route.permissions.length === 0 || route.permissions.some(permission => {
             return user?.groups.some(group => group.name === permission)
         });
     })
-
-    const getDefaultRoute = (): AppRoute => {
-        if (permittedRoutes.length > 0) {
-            const firstRoute = permittedRoutes.shift();
-
-            if (firstRoute) {
-                return {
-                    route: {
-                        path: '/',
-                        element: firstRoute.route.element,
-                        errorElement: firstRoute.route.errorElement,
-                    },
-                    mobile: firstRoute.mobile,
-                    name: firstRoute.name,
-                    navigate: firstRoute.navigate,
-                    permissions: firstRoute.permissions,
-                }
-            }
-        }
-
-        return {
-            route: {
-                path: '/',
-                element: AppRoutesConfig.error.route.element,
-                errorElement: AppRoutesConfig.error.route.element,
-            },
-            name: AppRoutesConfig.error.name,
-            mobile: AppRoutesConfig.error.mobile,
-            navigate: AppRoutesConfig.error.navigate,
-            permissions: AppRoutesConfig.error.permissions,
-        }
-    }
-
-    return [getDefaultRoute(), ...permittedRoutes,]
 }
 
 
@@ -64,11 +30,20 @@ export const getUserRoutes = (user: Employee | undefined, isDesktop: boolean): R
         return route.route;
     });
 
+    // Получаем первый доступный роут
+    const firstAvailableRoute = appRoutes[0]?.route.path || '/login';
+
+    // Добавляем редирект для главной страницы
+    routes.push({
+        path: '/',
+        element: <Navigate to={firstAvailableRoute} replace />,
+    });
+
     // Добавьте редирект для всех неопределенных путей
     routes.push({
         path: '*',
-        element: <Navigate to={user ? '/' : '/login'} replace />,
+        element: <Navigate to={user ? firstAvailableRoute : '/login'} replace />,
     });
 
     return routes;
-}
+};

@@ -53,6 +53,7 @@ export const ViewModeBlock = (props: ViewModeBlockProps) => {
     return (
         <AppSelect
             bordered
+            noInput
             label={"Видимость"}
             variant={'dropdown'}
             colorScheme={'lightInput'}

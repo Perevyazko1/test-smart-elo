@@ -192,11 +192,17 @@ class TaskSerializer(serializers.ModelSerializer):
                 author=self.context.get('user'),
             ).count()
         else:
-            return TaskComment.objects.filter(
+            task_comments = TaskComment.objects.filter(
                 task=obj,
             ).exclude(
                 author=self.context.get('user'),
-            ).count()
+            )
+            if task_comments.exists():
+                return task_comments.count()
+            elif self.context.get('user') == obj.created_by:
+                return 0
+            else:
+                return 1
 
     def get_last_comment(self, obj: Task):
         """Get image url method. """
@@ -206,5 +212,3 @@ class TaskSerializer(serializers.ModelSerializer):
         if last_comment.exists():
             return TaskCommentSerializer(last_comment[0]).data
         return None
-
-

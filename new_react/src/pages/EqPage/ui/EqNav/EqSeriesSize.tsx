@@ -31,9 +31,9 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
         }
     }
 
-
     return (
         <AppSelect
+            noInput
             label={'Размер серии'}
             colorScheme={'darkInput'}
             variant={'select'}

@@ -53,6 +53,7 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
 
     return (
         <AppSelect
+            noInput
             label={'Пользователь'}
             variant={'dropdown'}
             style={{width: 155}}

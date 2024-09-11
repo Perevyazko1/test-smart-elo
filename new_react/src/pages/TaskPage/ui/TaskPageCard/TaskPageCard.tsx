@@ -65,7 +65,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
 
         const currentExecutor = allCardExecutors.find(item => item?.employee === currentUser.id);
 
-        return currentExecutor?.amount || 0;
+        return currentExecutor?.amount || undefined;
     }, [card.new_co_executors, card.new_executor, currentUser.id]);
 
     const cardAmount = useMemo(() => {

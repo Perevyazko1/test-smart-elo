@@ -23,8 +23,9 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         view_mode = self.request.query_params.get('view_mode', None)
-        if view_mode not in ["7", "8", None]:
-            # Для каждого из возможных режимов просмотра задач - фильтруем доступные пользователю
+        # В случае, если были переданы режимы просмотра Админ и для тарификаций - не применяем базовую фильтрацию QS
+        if view_mode not in ["7", "8", "10", None]:
+            # Фильтруем доступные пользователю
             return queryset.filter(
                 Q(view_mode='1', created_by=self.request.user) |
                 Q(view_mode='2', created_by=self.request.user) |

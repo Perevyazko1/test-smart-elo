@@ -58,24 +58,26 @@ export const PostTarifficationWidget = (props: PostTarifficationWidgetProps) => 
         const dayOfWeek = today.getDay();
         const lastMonday = new Date(today);
 
-        // В JavaScript воскресенье = 0, понедельник = 1, и т.д.
-        // Если сегодня понедельник, берем предыдущий понедельник
-        if (dayOfWeek === 0) {
-            lastMonday.setDate(today.getDate() - 6);
-        } else {
-            lastMonday.setDate(today.getDate() - dayOfWeek - 6);
+        // Если сегодня понедельник, вернуть сегодняшний день
+        if (dayOfWeek === 1) {
+            return today;
         }
 
-        // Обнулить время для точного сравнения
+        // Иначе вычитаем нужное количество дней до последнего понедельника
+        const daysSinceMonday = (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+        lastMonday.setDate(today.getDate() - daysSinceMonday);
+
+        // Обнуляем время для точного сравнения
         lastMonday.setHours(0, 0, 0, 0);
 
         return lastMonday;
-    }
+    };
+
 
     const selectLastWeekItems = () => {
         if (data) {
             setSelectedIds(data.assignments
-                .filter(obj => new Date(obj.date_completion) >= getLastMonday())
+                .filter(obj => new Date(obj.inspect_date) >= getLastMonday())
                 .map(obj => obj.id)
             )
         }
@@ -219,7 +221,7 @@ export const PostTarifficationWidget = (props: PostTarifficationWidgetProps) => 
                         disabled={isLoading || isDisabled}
                         onClick={selectLastWeekItems}
                     >
-                        За последнюю неделю
+                        За эту неделю
                     </Button>
                 </div>
 

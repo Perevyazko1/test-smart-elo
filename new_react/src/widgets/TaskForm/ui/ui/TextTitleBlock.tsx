@@ -74,7 +74,7 @@ export const TextTitleBlock = (props: TextTitleBlockProps) => {
     };
 
     const cleanClb = () => {
-        setFormDataClb('description', null);
+        setFormDataClb('title', '');
     };
 
     return (

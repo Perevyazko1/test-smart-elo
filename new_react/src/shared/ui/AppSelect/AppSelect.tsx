@@ -3,7 +3,8 @@ import React, {
     HTMLAttributes,
     ReactNode,
     useCallback,
-    useEffect, useId,
+    useEffect,
+    useId,
     useMemo,
     useRef,
     useState
@@ -89,7 +90,13 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         }
     }, [getOptionLabel]);
 
-    const id = useId();
+    const id: string = useId();
+
+    const inputId = useMemo(() => {
+        const date: string = new Date().toISOString();
+        return id + date;
+    }, [id]);
+
 
     const stringValue = useMemo(() => {
         if (variant === 'multiple') {
@@ -99,7 +106,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         }
     }, [getStringOptionValue, value, variant]);
 
-    const [inputValue, setInputValue] = useState<string>(stringValue);
+    const [inputValue, setInputValue] = useState<string>(noInput ? stringValue : "");
     const [spanValue, setSpanValue] = useState<string>(stringValue);
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -112,6 +119,9 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
     const toggleOptions = (event: React.MouseEvent<HTMLElement>) => {
         if (!readOnly) {
             setAnchorEl(anchorEl ? null : event.currentTarget);
+            if (!noInput) {
+                setInputValue('');
+            }
         }
     };
 
@@ -128,28 +138,29 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                 ? value.filter(v => getStringOptionValue(v) !== getStringOptionValue(option))
                 : [...value, option];
             onSelect?.(newValue);
-            setInputValue('');
         } else if (onSelect && variant === 'dropdown' && option) {
             onSelect(option);
-            setInputValue(getStringOptionValue(option));
-            setSpanValue(getStringOptionValue(option));
+            setSpanValue(stringValue);
         } else if (onSelect && variant === 'select') {
             onSelect(option);
-            setInputValue("");
             setSpanValue(stringValue);
         }
+        setInputValue("");
         setAnchorEl(null);
     }, [getStringOptionValue, isSelected, onSelect, stringValue, value, variant]);
 
-    const handleClean = useCallback(() => {
+    const handleClean = useCallback((e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.preventDefault();
+        e.stopPropagation();
         if (variant === 'dropdown') {
-            setInputValue(getStringOptionValue(value));
+            setInputValue("");
             setSpanValue(getStringOptionValue(value));
         }
         if (variant === 'select') {
             handleSelect(null);
         }
         if (variant === 'multiple' && onSelect) {
+            setInputValue("");
             onSelect([]);
         }
     }, [getStringOptionValue, handleSelect, onSelect, value, variant]);
@@ -200,30 +211,30 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
             return true;
         }
         if (variant === 'select') {
-            return false;
-        }
-        if (variant === "dropdown") {
             return !inputNotEqualValue;
         }
+        if (variant === "dropdown") {
+            if (noInput) {
+                return true;
+            }
+            return !inputValue;
+        }
         if (variant === 'multiple') {
-            return value.length === 0;
+            return value.length === 0 && !inputValue;
         }
         return true;
-    }, [inputNotEqualValue, options, readOnly, value, variant]);
+    }, [noInput, inputNotEqualValue, inputValue, options, readOnly, value, variant]);
 
     useEffect(() => {
-        setInputValue(stringValue);
+        setInputValue(noInput ? stringValue : "");
         setSpanValue(stringValue);
-    }, [stringValue]);
+    }, [noInput, stringValue]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-
                 setAnchorEl(null);
-                if (inputNotEqualValue && variant !== "multiple") {
-                    handleClean();
-                } else if (variant === "multiple") {
+                if (!noInput) {
                     setInputValue("");
                 }
             }
@@ -237,7 +248,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [anchorEl, getOptionLabel, getStringOptionValue, handleClean, inputNotEqualValue, value, variant]);
+    }, [anchorEl, getOptionLabel, getStringOptionValue, handleClean, inputNotEqualValue, noInput, value, variant]);
 
     return (
         <div {...divProps} ref={containerRef} className={classNames(cls.MainContainer, className)}>
@@ -251,7 +262,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
             >
                 {label &&
                     <label
-                        htmlFor={id}
+                        htmlFor={inputId}
                         className={classNames(
                             cls.Label,
                             cls[colorScheme],
@@ -262,11 +273,12 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                     </label>
                 }
                 <input
-                    id={id}
+                    id={inputId}
                     value={inputValue}
                     required={required}
                     onChange={handleInputChange}
                     readOnly={inputDisabled || !options}
+                    autoComplete="new-password"
                     className={classNames(
                         cls.Input,
                         cls[colorScheme],

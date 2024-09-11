@@ -2,6 +2,7 @@ import React, {Fragment, ReactNode} from "react";
 import classNames from "classnames";
 
 import {Popper} from "@mui/material";
+import CheckIcon from '@mui/icons-material/Check';
 
 import {AppSkeleton} from "@shared/ui";
 
@@ -67,6 +68,13 @@ export const AppSelectMenu = <T, >(props: AppSelectMenuProps<T>) => {
                                     {[cls.Selected]: isSelected(option)}
                                 )}
                             >
+                                {isSelected(option) &&
+                                    <CheckIcon
+                                        sx={{m: 0, p: 0}}
+                                        fontSize={'small'}
+                                        color={'info'}
+                                    />
+                                }
                                 {getStringOptionValue(option)}
                             </div>
                         )

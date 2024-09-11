@@ -1,8 +1,8 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {Spinner} from "react-bootstrap";
-
-import '@shared/assets/fonts/fontawesome-all.min.css';
+//
+// import '@shared/assets/fonts/fontawesome-all.min.css';
 
 import {IsDesktopContext} from "@app";
 import {AutoLogout} from "@features";

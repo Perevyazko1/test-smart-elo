@@ -70,7 +70,6 @@ export const TaskForm = (props: TaskFormProps) => {
                 }
             }
 
-            console.log('TaskForm: ', newFormData)
             return newFormData;
         });
     };

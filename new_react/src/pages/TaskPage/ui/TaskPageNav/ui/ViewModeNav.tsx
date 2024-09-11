@@ -21,10 +21,14 @@ const ViewModes: ViewModeItem[] = [
     {key: '4', name: 'Я исполнитель'},
     {key: '5', name: 'Я соисполнитель'},
     {key: '6', name: 'Я назначил'},
-    {key: '7', name: 'В тарификации'},
 ]
 
-const TariffViewMode: ViewModeItem = {key: '8', name: 'Со сделкой'}
+const TariffViewModes: ViewModeItem[] = [
+    {key: '7', name: 'В тарификации'},
+    {key: '8', name: 'Со сделкой'},
+]
+
+const AdminMode: ViewModeItem ={key: '10', name: 'Админ'}
 
 
 export const ViewModeNav = () => {
@@ -32,13 +36,19 @@ export const ViewModeNav = () => {
     const dispatch = useAppDispatch();
 
     const confirmTariffPerm = usePermission(APP_PERM.TARIFFICATION_CONFIRM);
+    const adminPerm = usePermission(APP_PERM.ADMIN);
 
     const allViewModes: ViewModeItem[] = useMemo(() => {
+        let resultViewModes: ViewModeItem[] = [DefaultViewMode, ...ViewModes]
+        
         if (confirmTariffPerm) {
-            return [DefaultViewMode, ...ViewModes, TariffViewMode];
+            resultViewModes = [...resultViewModes, ...TariffViewModes];
         }
-        return [DefaultViewMode, ...ViewModes];
-    }, [confirmTariffPerm]);
+        if (adminPerm) {
+            resultViewModes = [...resultViewModes, AdminMode];
+        }
+        return resultViewModes;
+    }, [adminPerm, confirmTariffPerm]);
 
     const filtersInited = useAppSelector(getViewModeInited);
 
