@@ -101,9 +101,7 @@ class TaskModelFilter(django_filters.FilterSet):
             ).exclude(
                 status='4',
             )
-        return queryset.exclude(
-            status='4',
-        )
+        return queryset
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):
         if value == '1':
