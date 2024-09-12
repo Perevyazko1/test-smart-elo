@@ -163,6 +163,8 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 
+DJANGO_CELERY_BEAT_TZ_AWARE = False
+
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
