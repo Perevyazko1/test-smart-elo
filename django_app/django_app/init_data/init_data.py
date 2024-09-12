@@ -6,4 +6,4 @@ def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
     PeriodicTask.objects.update(last_run_at=None)
-    PeriodicTasks.objects.all().update_or_create(ident=1, defaults={'last_update': now()})
+    PeriodicTasks.objects.update_or_create(ident=1, defaults={'last_update': now()})
