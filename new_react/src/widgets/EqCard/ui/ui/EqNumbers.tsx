@@ -1,6 +1,6 @@
-import React from "react";
+import React, {useCallback} from "react";
 
-import {useEmployeeName} from "@shared/hooks";
+import {useCurrentUser, useEmployeeName} from "@shared/hooks";
 import {EqAssignment} from "@widgets/EqCardList";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
@@ -15,6 +15,11 @@ interface EqNumbersProps {
 export const EqNumbers = (props: EqNumbersProps) => {
     const {assignmentsLists, setNumber} = props;
     const {getNameById} = useEmployeeName();
+    const {currentUser} = useCurrentUser();
+
+    const getCoExecutorAmount = useCallback((item: EqAssignment) => {
+        return item.co_executors?.find(co_executor => co_executor.co_executor === currentUser.id)?.amount;
+    }, [currentUser.id]);
 
     return (
         <>
@@ -25,6 +30,18 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     userInitials={getNameById(item.executor, 'initials')}
                     onClick={() => setNumber(item)}
                     colorCls={'blueBtn'}
+                    amount={item.amount}
+                />
+            ))}
+
+            {assignmentsLists.coExecuted.map((item) => (
+                <EqNumberBtn
+                    key={item.id}
+                    item={item}
+                    userInitials={getNameById(item.executor, 'initials')}
+                    amount={getCoExecutorAmount(item)}
+                    colorCls={item.inspector ? 'greenBtn' : 'blueBtn'}
+                    diagonalBg
                 />
             ))}
 
@@ -33,6 +50,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     key={item.id}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
+                    amount={item.amount}
                     onClick={() => setNumber(item)}
                     colorCls={'blackBtn'}
                 />
@@ -43,6 +61,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     key={item.id}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
+                    amount={item.amount}
                     onClick={() => setNumber(item)}
                     colorCls={'greyBtn'}
                 />
@@ -53,6 +72,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     key={item.id}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
+                    amount={item.amount}
                     onClick={() => setNumber(item)}
                     colorCls={''}
                 />
@@ -63,6 +83,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     key={item.id}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
+                    amount={item.amount}
                     colorCls={'greenBtn'}
                 />
             ))}

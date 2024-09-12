@@ -16,8 +16,21 @@ class AssignmentTariffSerializer(serializers.ModelSerializer):
         ]
 
 
+class SimpleCoExecutorSerializer(serializers.ModelSerializer):
+    class Meta:
+        """Meta. """
+        model = AssignmentCoExecutor
+        fields = [
+            'id',
+            'co_executor',
+            'amount',
+            'assignment',
+        ]
+
+
 class SimpleAssignmentSerializer(serializers.ModelSerializer):
     new_tariff = AssignmentTariffSerializer()
+    co_executors = SimpleCoExecutorSerializer(many=True)
 
     class Meta:
         """Meta. """
@@ -33,6 +46,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'plane_date',
             'assembled',
             'appointed_by_boss',
+            'co_executors'
         ]
 
 

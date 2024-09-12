@@ -41,6 +41,13 @@ export interface EqTariff {
     amount: number;
 }
 
+export interface EqAssignmentCoExecutor {
+    id: number;
+    co_executor: number;
+    amount: number;
+    assignment: number;
+}
+
 export interface EqAssignment {
     id: number;
     new_tariff: EqTariff | null;
@@ -52,6 +59,7 @@ export interface EqAssignment {
     inspector: number | null;
     appointed_by_boss: boolean;
     assembled: boolean;
+    co_executors?: EqAssignmentCoExecutor[];
 }
 
 export interface EqDepartmentInfo {

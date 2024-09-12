@@ -1,7 +1,9 @@
 """Get filtered queryset for EQ request. """
-from django.db.models import Q
+from typing import Type
 
-from core.models import Assignment
+from django.db.models import Q, QuerySet
+
+from core.models import Assignment, OrderProduct
 from core.pages.eq.service.get_eq_req_params import get_eq_req_params
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
@@ -73,18 +75,26 @@ def get_filtered_await_queryset(queryset, eq_params):
     return queryset.order_by('urgency', 'order', 'id').distinct()
 
 
-def get_filtered_in_work_queryset(queryset, eq_params):
-    # Если получаем ключ - делаем подмену пин-кода для дальнейшей фильтрации
+def get_filtered_in_work_queryset(queryset: QuerySet[Type[OrderProduct]], eq_params):
+    # Если получаем ключ цифру - делаем подмену пользователя для дальнейшей фильтрации
     if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
     # Отфильтровываем персонально в случае режима просмотра в персональных режимах
     if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
         queryset = queryset.filter(
-            status="0",
-            assignments__executor=eq_params['user'],
-            assignments__department=eq_params['department'],
-            assignments__status='in_work',
+            Q(
+                assignments__executor=eq_params['user'],
+                status="0",
+                assignments__status='in_work',
+                assignments__department=eq_params['department'],
+            ) |
+            Q(
+                assignments__co_executors__co_executor=eq_params['user'],
+                status="0",
+                assignments__status='in_work',
+                assignments__department=eq_params['department'],
+            )
         ).distinct()
 
     # В режиме бригадира и недоделок получаем все изделия отдела в статусе в работе
@@ -123,15 +133,37 @@ def get_filtered_ready_queryset(queryset, eq_params):
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
                     assignments__inspector__isnull=True,
+                ) |
+                Q(
+                    assignments__co_executors__co_executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspect_date__gt=week_info.date_range[0],
+                    assignments__inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    assignments__co_executors__co_executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspector__isnull=True,
                 )
             ).distinct().order_by('-assignments__inspector')
         else:
             queryset = queryset.filter(
-                assignments__executor=eq_params['user'],
-                assignments__department=eq_params['department'],
-                assignments__status='ready',
-                assignments__inspect_date__gt=week_info.date_range[0],
-                assignments__inspect_date__lte=week_info.date_range[1],
+                Q(
+                    assignments__executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspect_date__gt=week_info.date_range[0],
+                    assignments__inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    assignments__co_executors__co_executor=eq_params['user'],
+                    assignments__department=eq_params['department'],
+                    assignments__status='ready',
+                    assignments__inspect_date__gt=week_info.date_range[0],
+                    assignments__inspect_date__lte=week_info.date_range[1],
+                )
             ).distinct().order_by('-assignments__inspector')
 
     # В режиме бригадира фильтрацию по пин-коду не делаем

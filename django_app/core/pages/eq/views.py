@@ -1,7 +1,7 @@
 """Views for EQ Page. """
 from dataclasses import asdict
 
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from django.http import JsonResponse, Http404
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
@@ -99,16 +99,20 @@ def get_week_data(request):
         transactions_sum = 0
     else:
         assignments_sum = 0
-        assignments = Assignment.objects.filter(
+        executor_assignments = Assignment.objects.filter(
             executor=eq_params['user'],
             inspect_date__gte=week_info.date_range[0],
             inspect_date__lt=week_info.date_range[1],
         )
-
-        assignments_sum += assignments.aggregate(Sum('amount')).get('amount__sum') or 0
+        co_executor_assignments = Assignment.objects.filter(
+            co_executors__co_executor=eq_params['user'],
+            inspect_date__gte=week_info.date_range[0],
+            inspect_date__lt=week_info.date_range[1],
+        )
+        assignments_sum += executor_assignments.aggregate(Sum('amount')).get('amount__sum') or 0
 
         assignments_sum += AssignmentCoExecutor.objects.filter(
-            assignment__in=assignments,
+            assignment__in=co_executor_assignments,
             co_executor=eq_params['user'],
         ).aggregate(Sum('amount')).get('amount__sum') or 0
 
@@ -122,7 +126,7 @@ def get_week_data(request):
 
     week_info.earned = f'{assignments_sum or 0}'
     if transactions_sum:
-        week_info.earned += f'/{int(transactions_sum)}(доп)'
+        week_info.earned += f'+{int(transactions_sum)}(доп)'
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 

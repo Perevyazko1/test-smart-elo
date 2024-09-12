@@ -100,6 +100,11 @@ $app-body-height: calc(100vh - $app-navbar-height);
     border: 1.5px solid #419b6b;
     color: #dbffe2;
 
+    &.diagonalBg {
+      background: linear-gradient(135deg, #347051 50%, white 50%);
+      color: #151715;
+    }
+
     &:active {
       background-color: #1f553a;
       border-color: #276e49;
@@ -128,6 +133,11 @@ $app-body-height: calc(100vh - $app-navbar-height);
       background-color: #1f6be1;;
       border-color: #0d2e5e;
       color: #2a2e36;
+    }
+
+    &.diagonalBg {
+      background: linear-gradient(135deg, #1f6be1 50%, white 50%);
+      color: #1e1f21;
     }
   }
 

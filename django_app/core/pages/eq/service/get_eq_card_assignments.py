@@ -77,15 +77,25 @@ def _handle_in_work(eq_params, order_product):
     if cached_data:
         return cached_data
 
-    qs_filter = {
-        "department": eq_params['department'],
-        "status": "in_work",
-    }
-
+    assignments = order_product.assignments
     if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
-        qs_filter['executor'] = eq_params['user']
-
-    assignments = order_product.assignments.filter(**qs_filter).distinct()
+        assignments = assignments.filter(
+            Q(
+                status="in_work",
+                department=eq_params['department'],
+                executor=eq_params['user'],
+            ) |
+            Q(
+                status="in_work",
+                department=eq_params['department'],
+                co_executors__co_executor=eq_params['user'],
+            )
+        ).distinct()
+    else:
+        assignments = assignments.filter(
+            status="in_work",
+            department=eq_params['department'],
+        ).distinct()
 
     result = SimpleAssignmentSerializer(assignments, many=True).data
     """Кешируем результат. """
@@ -135,15 +145,38 @@ def _handle_ready(eq_params, order_product):
                     department=eq_params['department'],
                     status='ready',
                     inspector__isnull=True,
+                ) |
+                Q(
+                    co_executors__co_executor=eq_params['user'],
+                    department=eq_params['department'],
+                    status='ready',
+                    inspect_date__gt=week_info.date_range[0],
+                    inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    co_executors__co_executor=eq_params['user'],
+                    department=eq_params['department'],
+                    status='ready',
+                    inspector__isnull=True,
                 )
             ).distinct().order_by('-inspector')
         else:
             assignments = order_product.assignments.filter(
-                executor=eq_params['user'],
-                department=eq_params['department'],
-                status='ready',
-                inspect_date__gt=week_info.date_range[0],
-                inspect_date__lte=week_info.date_range[1],
+                Q(
+                    executor=eq_params['user'],
+                    department=eq_params['department'],
+                    status='ready',
+                    inspect_date__gt=week_info.date_range[0],
+                    inspect_date__lte=week_info.date_range[1],
+                ) |
+                Q(
+                    co_executors__co_executor=eq_params['user'],
+                    department=eq_params['department'],
+                    status='ready',
+                    inspect_date__gt=week_info.date_range[0],
+                    inspect_date__lte=week_info.date_range[1],
+                )
+
             ).distinct().order_by('-inspector')
     elif eq_params['view_mode_key'] == "boss":
         if current_week.week == week_info.week and current_week.year == week_info.year:

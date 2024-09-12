@@ -9,7 +9,7 @@ def task_confirmation_instructions(task: Task):
             if co_executor.amount:
                 Transaction.objects.create(
                     transaction_type='accrual',
-                    details='wages',
+                    details='prize',
                     amount=co_executor.amount,
                     employee=co_executor.employee,
                     executor=task.created_by,
@@ -22,7 +22,7 @@ def task_confirmation_instructions(task: Task):
 
             Transaction.objects.create(
                 transaction_type='accrual',
-                details='wages',
+                details='prize',
                 amount=task.new_executor.amount,
                 employee=task.new_executor.employee,
                 executor=task.created_by,

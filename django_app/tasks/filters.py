@@ -33,11 +33,26 @@ class TaskModelFilter(django_filters.FilterSet):
             year = self.request.query_params.get("year")
             week = self.request.query_params.get("week")
             week_info = GetWeekInfo(week=week, year=year).execute()
-            return queryset.filter(
-                status=value,
-                ready_at__gt=week_info.date_range[0],
-                ready_at__lte=week_info.date_range[1],
-            )
+            current_week_info = GetWeekInfo().execute()
+            if week_info.week == current_week_info.week and current_week_info.year == current_week_info.year:
+                return queryset.filter(
+                    Q(
+                        status=value,
+                        verified_at__gt=week_info.date_range[0],
+                        verified_at__lte=week_info.date_range[1],
+                    ) |
+                    Q(
+                        status=value,
+                        verified_at__isnull=True,
+                    )
+                )
+            else:
+                return queryset.filter(
+                    status=value,
+                    verified_at__gt=week_info.date_range[0],
+                    verified_at__lte=week_info.date_range[1],
+                )
+
         if value == '4':
             return queryset.filter(
                 status=value,
@@ -118,9 +133,7 @@ class TaskModelFilter(django_filters.FilterSet):
                 if user_id.isdigit():
                     int_ids.append(int(user_id))
             return queryset.filter(
-                Q(new_executor__employee__id__in=int_ids) |
-                Q(new_co_executors__employee__in=int_ids) |
-                Q(created_by__id__in=int_ids)
+                new_executor__employee__id__in=int_ids
             )
 
         return queryset

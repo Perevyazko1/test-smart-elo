@@ -29,8 +29,8 @@ class TaskViewSet(viewsets.ModelViewSet):
             return queryset.filter(
                 Q(view_mode='1', created_by=self.request.user) |
                 Q(view_mode='2', created_by=self.request.user) |
+                Q(view_mode='2', created_by=self.request.user) |
                 Q(view_mode='2', for_department__in=self.request.user.departments.all()) |
-                Q(view_mode='2', for_department__isnull=True) |
                 Q(view_mode='3') |
                 Q(view_mode='4', created_by=self.request.user) |
                 Q(view_mode='4', new_executor__employee=self.request.user) |

@@ -51,18 +51,39 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         }
     }, [listType, expanded]);
 
+    const targetUserId = useMemo<number | undefined>(() => {
+        let userId = undefined;
+        if (listType !== 'await') {
+            if (queryParameters.view_mode) {
+                if (!['boss', 'unfinished', 'distribute'].includes(queryParameters.view_mode)) {
+                    userId = Number(queryParameters.view_mode);
+                }
+            } else {
+                userId = currentUser.id;
+            }
+        }
+        return userId;
+    }, [currentUser.id, listType, queryParameters.view_mode]);
+
     const [assignmentsLists, setAssignmentsLists] = useState<EqNumberListTipe>(
         createEqNumberLists(
             card.assignments,
-            Number(queryParameters.series_size) || 1
+            Number(queryParameters.series_size) || 1,
+            targetUserId,
         )
     );
 
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
     useEffect(() => {
-        setAssignmentsLists(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
-    }, [card.assignments, queryParameters.series_size]);
+        setAssignmentsLists(
+            createEqNumberLists(
+                card.assignments,
+                Number(queryParameters.series_size) || 1,
+                targetUserId,
+            ),
+        );
+    }, [card.assignments, queryParameters.series_size, targetUserId]);
 
     const getTargetNumbers = useCallback((first: boolean) => {
         if (listType === "await"
@@ -80,6 +101,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             if (isViewer) return true;
             if (listType === 'await' && card.assignments.length === 0) return true;
             if (listType === 'distribute') return true;
+            if (listType === 'in_work' && (assignmentsLists.primary.length === 0)) return true;
             if (listType === 'ready' && (!isBoss || assignmentsLists.primary.length === 0)) return true;
             if (listType === 'ready' && !card.product.technological_process) return true;
             return false;
@@ -96,9 +118,12 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const hideSecondBtn = useMemo(() => {
         if (isViewer) return true;
+        if (listType === 'in_work' && (
+            assignmentsLists.primary.length === 0 && assignmentsLists.lockedNums.length === 0)
+        ) return true;
         if (listType === 'ready' && assignmentsLists.primary.length === 0) return true;
         return false;
-    }, [assignmentsLists.primary.length, isViewer, listType]);
+    }, [assignmentsLists.lockedNums.length, assignmentsLists.primary.length, isViewer, listType]);
 
     const firstBtnIsLocked = useMemo(() => {
         if (listType === 'in_work' &&

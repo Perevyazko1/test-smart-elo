@@ -1,17 +1,16 @@
-import {useEffect} from "react";
 import {Button} from "react-bootstrap";
 
 import {useAppModal, useAppQuery, useCurrentUser} from "@shared/hooks";
 import {EqOrderProduct} from "@widgets/EqCardList";
+import {TarifficationWidget} from "@widgets/TarifficationWidget";
+import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 import cls from "./EqCard.module.scss";
 
-import {createEqNumberLists, EqNumberListTipe} from "../../model/lib/createEqNumberLists";
+import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
 import {setTargetNumber} from "../../model/lib/setTargetNumber";
 
 import {EqNumbers} from "./EqNumbers";
-import {TarifficationWidget} from "@widgets/TarifficationWidget";
-import {EqAssignment} from "@widgets/EqCardList/model/types";
 
 interface CardNameNumbersProps {
     card: EqOrderProduct;
@@ -23,7 +22,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     const {card, assignmentsLists, setAssignmentsLists} = props;
     const {handleOpen} = useAppModal();
 
-    const {queryParameters, setQueryParam} = useAppQuery();
+    const {setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
 
     const setNumber = (assignment: EqAssignment) => {
@@ -34,11 +33,6 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
         );
         setQueryParam('series_size', '');
     }
-
-    useEffect(() => {
-        setAssignmentsLists(createEqNumberLists(card.assignments, Number(queryParameters.series_size) || 1));
-        //eslint-disable-next-line
-    }, [card.assignments, queryParameters.series_size]);
 
     const openTarifficationWidget = () => {
         handleOpen(
