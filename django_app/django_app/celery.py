@@ -8,5 +8,3 @@ app = Celery('django_app', broker='redis://redis:6379/0')
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.autodiscover_tasks()
-
-app.conf.timezone = 'UTC'
