@@ -11,6 +11,7 @@ interface getTaskCardsProps {
     sort_mode: string | undefined;
     week?: string | undefined;
     year?: string | undefined;
+    user?: number | undefined;
 }
 
 

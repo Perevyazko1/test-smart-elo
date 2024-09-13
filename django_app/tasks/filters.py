@@ -16,6 +16,7 @@ class TaskModelFilter(django_filters.FilterSet):
     view_mode = django_filters.CharFilter(method="filter_view_mode")
     sort_mode = django_filters.CharFilter(method="filter_sort_mode")
     users = django_filters.CharFilter(method="filter_users")
+    user = django_filters.CharFilter(method="filter_user")
     departments = django_filters.CharFilter(method="filter_departments")
 
     class Meta:
@@ -135,6 +136,15 @@ class TaskModelFilter(django_filters.FilterSet):
             return queryset.filter(
                 new_executor__employee__id__in=int_ids
             )
+        return queryset
+
+    def filter_user(self, queryset: QuerySet, name: str, value: str):
+        if value:
+            if value.isdigit():
+                return queryset.filter(
+                    Q(new_executor__employee__id=value) |
+                    Q(new_co_executors__employee__id=value)
+                )
 
         return queryset
 

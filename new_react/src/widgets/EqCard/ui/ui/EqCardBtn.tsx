@@ -79,11 +79,7 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
             }
         }
         return "greenBtn"
-    }, [cardType, expanded, first, urgency])
-
-    if (cardType === 'await' && !first) {
-        return (<></>);
-    }
+    }, [cardType, expanded, first, urgency]);
 
     return (
         <button

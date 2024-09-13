@@ -2,7 +2,7 @@ import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "re
 
 import {useCardHeight} from "@pages/EqPage";
 import {EqCard} from "@widgets/EqCard";
-import {useFixedSizeList, useQueue} from "@shared/hooks";
+import {useCurrentUser, useFixedSizeList, useQueryParams, useQueue} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
@@ -24,6 +24,8 @@ export const EqCardList = memo((props: EqCardListProps) => {
     const {listType, inited, expanded = false, noRelevantIds = [], deps, extraParams} = props;
 
     const {addToQueue, processNext, queue} = useQueue();
+    const {currentUser} = useCurrentUser();
+    const {queryParameters} = useQueryParams();
 
     useEffect(() => {
         if (noRelevantIds.length > 0) {
@@ -102,17 +104,32 @@ export const EqCardList = memo((props: EqCardListProps) => {
         getScrollElement: useCallback(() => scrollElementRef.current, []),
     });
 
+    const targetUserId = useMemo<number | undefined>(() => {
+        let userId = undefined;
+        if (listType !== 'await') {
+            if (queryParameters.view_mode) {
+                if (!['boss', 'unfinished', 'distribute'].includes(queryParameters.view_mode)) {
+                    userId = Number(queryParameters.view_mode);
+                }
+            } else {
+                userId = currentUser.id;
+            }
+        }
+        return userId;
+    }, [currentUser.id, listType, queryParameters.view_mode]);
+
     const getEqCard = useCallback((index: number) => {
         const card = sortedList[index];
         return (
             <EqCard
+                targetUserId={targetUserId}
                 noRelevant={queue.includes(card.id)}
                 card={card}
                 expanded={expanded}
                 listType={listType}
             />
         )
-    }, [expanded, listType, queue, sortedList])
+    }, [expanded, listType, queue, sortedList, targetUserId])
 
     return (
         <>
@@ -159,7 +176,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                         <div className={'fw-bold ps-1'}>
                             Выполненные задачи:
                         </div>
-                        <ReadySection eqMode={true}/>
+                        <ReadySection eqMode={true} targetUserId={targetUserId}/>
                     </>
                 }
             </div>

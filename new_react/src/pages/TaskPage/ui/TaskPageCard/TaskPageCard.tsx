@@ -15,10 +15,11 @@ interface TaskPageCardProps extends HTMLAttributes<HTMLDivElement> {
     card: Task;
     cardType: TaskStatus;
     scaled?: boolean;
+    targetUserId?: number;
 }
 
 export const TaskPageCard = memo((props: TaskPageCardProps) => {
-    const {card, cardType, scaled, ...otherProps} = props;
+    const {card, cardType, scaled, targetUserId, ...otherProps} = props;
     const {currentUser} = useCurrentUser();
     const {getNameById} = useEmployeeName();
 
@@ -63,10 +64,11 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
     const userAmount = useMemo(() => {
         const allCardExecutors = [card.new_executor, ...card.new_co_executors];
 
-        const currentExecutor = allCardExecutors.find(item => item?.employee === currentUser.id);
+        const currentExecutor = targetUserId ? allCardExecutors.find(item => item?.employee === targetUserId)
+            : allCardExecutors.find(item => item?.employee === currentUser.id);
 
         return currentExecutor?.amount || undefined;
-    }, [card.new_co_executors, card.new_executor, currentUser.id]);
+    }, [card.new_co_executors, card.new_executor, currentUser.id, targetUserId]);
 
     const cardAmount = useMemo(() => {
         return card.confirmed_tariff?.amount || card.proposed_tariff?.amount || 0;
@@ -76,13 +78,13 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
         <div style={{padding: ".1rem", maxWidth: '1300px'}} {...otherProps}>
             <div
                 className={`d-flex justify-content-start rounded rounded-2 border border-1 bg-black ${scaled ? "scaled" : ""}`}
-                 style={{
-                     width: "100%",
-                     height: `${cardHeight}px`,
-                     padding: ".1rem",
-                     overflow: 'hidden',
-                     gap: '0.15rem',
-                 }}
+                style={{
+                    width: "100%",
+                    height: `${cardHeight}px`,
+                    padding: ".1rem",
+                    overflow: 'hidden',
+                    gap: '0.15rem',
+                }}
             >
 
                 {!hideFirstBtn &&

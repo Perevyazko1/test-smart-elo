@@ -54,6 +54,7 @@ class AssignmentGenerator:
         ws_group_updates(pin_code="", notification_data=notification_data)
         ws_update_notification(department.number)
 
+    @transaction.atomic
     def init_order_product_assignments(self, order_product: OrderProduct):
         """Инициализация первого уровня нарядов связанных со стартовым"""
 

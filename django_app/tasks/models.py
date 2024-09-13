@@ -258,6 +258,7 @@ class TaskImage(models.Model):
     class Meta:
         verbose_name = 'Изображение задачи'
         verbose_name_plural = 'Изображения задач'
+        ordering = ['-id']
 
     task = models.ForeignKey(
         Task,

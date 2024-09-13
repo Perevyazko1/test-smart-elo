@@ -1,7 +1,7 @@
 """Views for EQ Page. """
 from dataclasses import asdict
 
-from django.db.models import Sum, Q
+from django.db.models import Sum
 from django.http import JsonResponse, Http404
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view

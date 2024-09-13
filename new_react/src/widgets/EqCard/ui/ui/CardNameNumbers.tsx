@@ -13,13 +13,14 @@ import {setTargetNumber} from "../../model/lib/setTargetNumber";
 import {EqNumbers} from "./EqNumbers";
 
 interface CardNameNumbersProps {
+    targetUserId: number | undefined;
     card: EqOrderProduct;
     assignmentsLists: EqNumberListTipe;
     setAssignmentsLists: (props: EqNumberListTipe) => void;
 }
 
 export const CardNameNumbers = (props: CardNameNumbersProps) => {
-    const {card, assignmentsLists, setAssignmentsLists} = props;
+    const {card, targetUserId, assignmentsLists, setAssignmentsLists} = props;
     const {handleOpen} = useAppModal();
 
     const {setQueryParam} = useAppQuery();
@@ -75,6 +76,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                     </div>
                 }
                 <EqNumbers
+                    targetUserId={targetUserId}
                     assignmentsLists={assignmentsLists}
                     setNumber={setNumber}
                 />

@@ -1,15 +1,13 @@
 import React, {useMemo, useState} from "react";
 import {Button, Table} from "react-bootstrap";
 
-
-import {AppInput, AppSlider} from "@shared/ui";
-import {usePermission} from "@shared/hooks";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
-
-import {APP_PERM} from "@shared/consts";
-import {useSetConfirmedTariff, useSetProposedTariff} from "@widgets/TarifficationWidget/model/api";
 import {PageListItem} from "@pages/TarifficationPage";
-import {Link} from "react-router-dom";
+import {PostTarifficationWidget} from "@widgets/PostTarifficationWidget";
+import {useSetConfirmedTariff, useSetProposedTariff} from "@widgets/TarifficationWidget/model/api";
+import {AppInput, AppSlider} from "@shared/ui";
+import {useAppModal, usePermission} from "@shared/hooks";
+import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {APP_PERM} from "@shared/consts";
 
 interface TarifficationProductProps {
     tariffCard: PageListItem;
@@ -18,6 +16,8 @@ interface TarifficationProductProps {
 
 export const TarifficationProduct = (props: TarifficationProductProps) => {
     const {tariffCard} = props;
+
+    const {handleOpen, handleClose} = useAppModal();
 
     const [proposedInput, setProposedInput] = useState<string>(
         String(tariffCard.proposed_tariff?.amount) || ""
@@ -45,9 +45,6 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
         if (proposedIsLoading || confirmIsLoading) {
             return true;
         }
-        if (tariffCard.has_assignments) {
-            return true;
-        }
         if (!tariffCard.proposed_tariff) {
             return true;
         }
@@ -60,7 +57,13 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
             }
         }
         return false;
-    }, [confirmIsLoading, proposedInput, proposedIsLoading, tariffCard.confirmed_tariff, tariffCard.has_assignments, tariffCard.proposed_tariff])
+    }, [
+        confirmIsLoading,
+        proposedInput,
+        proposedIsLoading,
+        tariffCard.confirmed_tariff,
+        tariffCard.proposed_tariff
+    ]);
 
 
     const setProposedTariff = () => {
@@ -71,7 +74,16 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
     }
 
     const setConfirmedTariff = () => {
-        if (tariffCard.proposed_tariff) {
+        if (tariffCard.has_assignments) {
+            handleOpen(
+                <PostTarifficationWidget
+                    production_step__id={tariffCard.id}
+                    onSuccess={() => {
+                        handleClose();
+                    }}
+                />
+            )
+        } else if (tariffCard.proposed_tariff) {
             if (tariffCard.confirmed_tariff) {
                 const confirmText = 'Внимание❗ При установлении нового тарифа все установленные ставки ' +
                     'соисполнителей нарядов в рамках данного изделия БЕЗ ВИЗЫ будут обнулены. Продолжить?';
@@ -179,18 +191,7 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
                     <tr>
                         <td>Тариф утвердил:</td>
                         {tariffCard.has_assignments ?
-                            <td>
-                                ❗По изделию имеются завизированные наряды без тарифа. Закрыть такие наряды можно
-                                через страницу Cделка.
-                                {confirmPerm &&
-                                    <Link
-                                        className={'fw-bold text-info text-uppercase ms-1 rounded border border-1 border-secondary p-1'}
-                                        to={`/tariffication?product__name=${tariffCard.product_name}&department__name=${tariffCard.department.name}`}
-                                    >
-                                        Перейти.
-                                    </Link>
-                                }
-                            </td>
+                            <td> ❗По изделию имеются завизированные наряды без тарифа. </td>
                             :
                             <td>
                                 {tariffCard.confirmed_tariff?.add_date &&

@@ -4,10 +4,10 @@ import {ConnectDragSource} from "react-dnd";
 
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
+import {AppSkeleton} from "@shared/ui";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
-import {AppSkeleton} from "@shared/ui";
 
 interface EqWeeksProps {
     rightBlockWidth: number;
@@ -172,6 +172,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                          touchAction: 'none',
                          cursor: 'grab',
                          order: expanded ? "-1" : "1",
+                         userSelect: 'none',
                      }}
                      ref={drag}
                      onDoubleClick={resetSize}

@@ -1,4 +1,5 @@
 """Views for tariffication page. """
+from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
 from rest_framework import viewsets, status
@@ -63,6 +64,7 @@ class TarifficationPageListViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def set_proposed_tariff(request):
     """Set tariffication. """
     production_step__id = request.data.get('production_step__id')
@@ -122,6 +124,7 @@ def get_post_tariffication_list(request):
 
 
 @api_view(['POST'])
+@transaction.atomic
 def set_confirmed_tariff(request):
     """Set tariffication. """
     production_step__id = request.data.get('production_step__id')

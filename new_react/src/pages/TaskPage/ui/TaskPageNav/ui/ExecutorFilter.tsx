@@ -33,11 +33,11 @@ export const ExecutorFilter = () => {
             isLoading={usersIsLoading}
             colorScheme={'darkInput'}
             variant={'multiple'}
-            label={'Исполнители'}
+            label={'Исполнитель'}
             value={selectedUsers}
             options={sortedUserList}
             onSelect={selectUserFilterClb}
-            getOptionLabel={option => getEmployeeName(option.user, 'initials')}
+            getOptionLabel={option => getEmployeeName(option.user, 'listNameInitials')}
             getRenderOption={(props) => <UserOptionRender {...props}/>}
         />
     );

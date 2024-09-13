@@ -18,6 +18,7 @@ import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
+    targetUserId: number | undefined;
     noRelevant?: boolean;
     card: EqOrderProduct;
     expanded: boolean;
@@ -25,7 +26,7 @@ interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const EqCard = memo((props: EqInWorkCardProps) => {
-    const {card, expanded, listType, noRelevant, ...otherProps} = props;
+    const {card, expanded, targetUserId, listType, noRelevant, ...otherProps} = props;
     const dispatch = useAppDispatch();
 
     const {handleOpen} = useAppModal();
@@ -50,20 +51,6 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             return first ? Actions.CONFIRMED : Actions.READY_TO_IN_WORK;
         }
     }, [listType, expanded]);
-
-    const targetUserId = useMemo<number | undefined>(() => {
-        let userId = undefined;
-        if (listType !== 'await') {
-            if (queryParameters.view_mode) {
-                if (!['boss', 'unfinished', 'distribute'].includes(queryParameters.view_mode)) {
-                    userId = Number(queryParameters.view_mode);
-                }
-            } else {
-                userId = currentUser.id;
-            }
-        }
-        return userId;
-    }, [currentUser.id, listType, queryParameters.view_mode]);
 
     const [assignmentsLists, setAssignmentsLists] = useState<EqNumberListTipe>(
         createEqNumberLists(
@@ -99,16 +86,16 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const hideFirstBtn = useMemo(() => {
             if (isViewer) return true;
-            if (listType === 'await' && card.assignments.length === 0) return true;
+            if (listType === 'await' && getTargetNumbers(true).length === 0) return true;
             if (listType === 'distribute') return true;
-            if (listType === 'in_work' && (assignmentsLists.primary.length === 0)) return true;
+            if (listType === 'in_work' && getTargetNumbers(true).length === 0) return true;
             if (listType === 'ready' && (!isBoss || assignmentsLists.primary.length === 0)) return true;
             if (listType === 'ready' && !card.product.technological_process) return true;
             return false;
         },
         [
+            getTargetNumbers,
             assignmentsLists.primary.length,
-            card.assignments.length,
             card.product.technological_process,
             isBoss,
             isViewer,
@@ -118,12 +105,18 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     const hideSecondBtn = useMemo(() => {
         if (isViewer) return true;
+        if (listType === 'await') return true;
         if (listType === 'in_work' && (
-            assignmentsLists.primary.length === 0 && assignmentsLists.lockedNums.length === 0)
+            getTargetNumbers(false).length === 0)
         ) return true;
         if (listType === 'ready' && assignmentsLists.primary.length === 0) return true;
         return false;
-    }, [assignmentsLists.lockedNums.length, assignmentsLists.primary.length, isViewer, listType]);
+    }, [
+        assignmentsLists.primary.length,
+        getTargetNumbers,
+        isViewer,
+        listType
+    ]);
 
     const firstBtnIsLocked = useMemo(() => {
         if (listType === 'in_work' &&
@@ -237,6 +230,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             <CardSlider
                 card={card}
                 cardType={listType}
+                targetUserId={targetUserId}
             />
 
             <CardCounter card={card}/>
@@ -245,6 +239,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
                 card={card}
                 assignmentsLists={assignmentsLists}
                 setAssignmentsLists={setAssignmentsLists}
+                targetUserId={targetUserId}
             />
 
             <CardOrderProject card={card}/>

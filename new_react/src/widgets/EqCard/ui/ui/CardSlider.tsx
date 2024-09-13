@@ -10,20 +10,29 @@ import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
 
 
 interface CardSliderProps {
+    targetUserId: number | undefined;
     card: EqOrderProduct;
     cardType: ListTypes,
 }
 
 export const CardSlider = (props: CardSliderProps) => {
-    const {card, cardType} = props;
+    const {card, cardType, targetUserId} = props;
     const {currentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
 
     const totalCount = useMemo(() => {
         let total = 0;
-        card.assignments.forEach(item => item.amount ? total += item.amount : null)
+        card.assignments.forEach(item =>
+            item.executor === targetUserId ?
+                item.amount ?
+                    total += item.amount
+                    : null
+                : item.co_executors?.forEach(co_executor =>
+                    co_executor.co_executor === targetUserId ? total += co_executor.amount : null
+                )
+        )
         return total;
-    }, [card.assignments]);
+    }, [card.assignments, targetUserId]);
 
     const sliderImages = createEqImageUrls(card);
 

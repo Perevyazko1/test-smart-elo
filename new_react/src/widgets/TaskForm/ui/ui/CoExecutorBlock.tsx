@@ -47,7 +47,7 @@ export const CoExecutorBlock = (props: CoExecutorBlockProps) => {
     },[userList]);
 
     const getOptionLabelClb = useCallback((option: TaskExecutor) => {
-        const userName = getNameById(option.employee, 'initials');
+        const userName = getNameById(option.employee, 'listNameInitials');
 
         if (option.amount) {
             return `${userName} (${option.amount})`;

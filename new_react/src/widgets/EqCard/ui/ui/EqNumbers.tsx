@@ -1,6 +1,6 @@
 import React, {useCallback} from "react";
 
-import {useCurrentUser, useEmployeeName} from "@shared/hooks";
+import {useEmployeeName} from "@shared/hooks";
 import {EqAssignment} from "@widgets/EqCardList";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
@@ -8,18 +8,18 @@ import {EqNumberBtn} from "./EqNumberBtn";
 
 
 interface EqNumbersProps {
+    targetUserId: number | undefined;
     assignmentsLists: EqNumberListTipe,
     setNumber: (item: EqAssignment) => void;
 }
 
 export const EqNumbers = (props: EqNumbersProps) => {
-    const {assignmentsLists, setNumber} = props;
+    const {assignmentsLists, targetUserId, setNumber} = props;
     const {getNameById} = useEmployeeName();
-    const {currentUser} = useCurrentUser();
 
     const getCoExecutorAmount = useCallback((item: EqAssignment) => {
-        return item.co_executors?.find(co_executor => co_executor.co_executor === currentUser.id)?.amount;
-    }, [currentUser.id]);
+        return item.co_executors?.find(co_executor => co_executor.co_executor === targetUserId)?.amount;
+    }, [targetUserId]);
 
     return (
         <>

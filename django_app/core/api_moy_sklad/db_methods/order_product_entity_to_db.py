@@ -1,3 +1,5 @@
+from django.db import transaction
+
 from ..adapters.create_order_product_entities import OrderProductEntity
 from ...models import OrderProduct, Product, Order, Fabric
 from ...services.assignment_generator import AssignmentGenerator
@@ -5,6 +7,7 @@ from ...services.assignment_generator import AssignmentGenerator
 
 class OrderProductEntityToDB:
     @staticmethod
+    @transaction.atomic
     def execute(order_product_entity: OrderProductEntity):
         order_product = OrderProduct.objects.update_or_create(
             series_id=order_product_entity.series_id,

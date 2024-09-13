@@ -11,11 +11,12 @@ import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 
 interface ReadySectionProps {
     eqMode?: boolean;
+    targetUserId?: number;
 }
 
 
 export const ReadySection = (props: ReadySectionProps) => {
-    const {eqMode = false} = props;
+    const {eqMode = false, targetUserId} = props;
 
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
@@ -31,10 +32,11 @@ export const ReadySection = (props: ReadySectionProps) => {
                 week: queryParameters.week,
                 year: queryParameters.year,
                 users: undefined,
+                user: targetUserId,
                 departments: undefined,
             }))
         }
-    }, [dispatch, eqMode, queryParameters.week, queryParameters.year]);
+    }, [dispatch, eqMode, queryParameters.week, queryParameters.year, targetUserId]);
 
     useEffect(() => {
         if (!eqMode) {
@@ -106,6 +108,7 @@ export const ReadySection = (props: ReadySectionProps) => {
                     {readyData?.results?.map(card => (
                         <TaskPageCard
                             id={`ready-task-id-${card.id}`}
+                            targetUserId={targetUserId}
                             scaled={eqMode}
                             key={card.id}
                             card={card}

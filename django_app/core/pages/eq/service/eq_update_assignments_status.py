@@ -71,9 +71,7 @@ class EqUpdateAssignmentsStatus:
                     'executor': self.original_user,
                     'appointed_by_boss': False,
                 }
-
                 qs_filter["status"] = "in_work"
-                qs_filter["assembled"] = True
 
                 AssignmentCoExecutor.objects.filter(
                     assignment__id__in=self.assignment_ids,
