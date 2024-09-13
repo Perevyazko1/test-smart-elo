@@ -171,7 +171,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                     />
                     : null
                 }
-                {listType === 'ready' &&
+                {listType === 'ready' && targetUserId &&
                     <>
                         <div className={'fw-bold ps-1'}>
                             Выполненные задачи:
