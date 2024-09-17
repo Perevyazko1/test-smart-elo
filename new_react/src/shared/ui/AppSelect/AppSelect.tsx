@@ -117,7 +117,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
     }, [inputValue, stringValue]);
 
     const toggleOptions = (event: React.MouseEvent<HTMLElement>) => {
-        if (!readOnly) {
+        if ((variant === 'multiple' && value.length !== 0) || !readOnly) {
             setAnchorEl(anchorEl ? null : event.currentTarget);
             if (!noInput) {
                 setInputValue('');
@@ -170,6 +170,10 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
     };
 
     const filteredOptions = useMemo(() => {
+        if (variant === 'multiple' && readOnly) {
+            return value;
+        }
+
         if (options && inputNotEqualValue) {
             return options.filter(option => {
                 if (typeof option === 'string') {
@@ -185,7 +189,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
             });
         }
         return options || [];
-    }, [options, inputNotEqualValue, getOptionLabel, inputValue]);
+    }, [variant, readOnly, options, inputNotEqualValue, value, getOptionLabel, inputValue]);
 
     const sortedOptions = useMemo(() => {
         const selectedOptions = value instanceof Array
@@ -205,6 +209,16 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
         }
         return false;
     }, [noInput, readOnly]);
+
+    const hideDropdownBtn = useMemo(() => {
+        if (variant === 'multiple') {
+            if (readOnly) {
+                return value.length === 0;
+            }
+            return false;
+        }
+        return readOnly;
+    }, [readOnly, value, variant]);
 
     const hideCleanBtn = useMemo(() => {
         if (readOnly || !options) {
@@ -283,6 +297,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                         cls.Input,
                         cls[colorScheme],
                         {[cls.Active]: !!anchorEl},
+                        {[cls.Full]: hideCleanBtn}
                     )}
                 />
                 <span className={classNames(
@@ -330,7 +345,7 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
                             cls.IconBtn,
                             cls[colorScheme],
                             cls.DropdownBtn,
-                            {[cls.Hide]: readOnly},
+                            {[cls.Hide]: hideDropdownBtn},
                         )}
                     >
                         <ArrowDropDownIcon

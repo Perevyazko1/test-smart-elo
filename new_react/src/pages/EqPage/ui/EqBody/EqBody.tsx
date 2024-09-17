@@ -94,7 +94,7 @@ export const EqBody = (props: EqBodyProps) => {
         setInWorkUpdated(prevState => !prevState);
         setReadyUpdated(prevState => !prevState);
         // eslint-disable-next-line
-    }, [queryParameters.project, currentUser.current_department]);
+    }, [queryParameters.project, queryParameters.search, currentUser.current_department]);
 
     useEffect(() => {
         if (['unfinished', 'boss'].includes(prevViewMode) || ['unfinished', 'boss'].includes(queryParameters.view_mode)) {

@@ -1,15 +1,24 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit, Department
-from .consumers import ws_group_updates, ws_send_to_all, EqNotificationActions
-from .models import Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product
-from .serializers import TechProcessSerializer
+from .consumers import ws_send_to_all, EqNotificationActions
+from .models import (Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product,
+                     ProductionStepComment)
+from .serializers import TechProcessSerializer, ProductionStepCommentSerializer
 from .services.assignment_generator import AssignmentGenerator
 from .services.check_schema import check_schema
 from .services.create_custom_tech_process import create_and_set_tech_process
 from .services.update_production_steps import update_production_steps
+from .filters import ProductionStepCommentModelFilter
+
+
+class ProductionStepCommentViewSet(viewsets.ModelViewSet):
+    queryset = ProductionStepComment.objects.all()
+    filterset_class = ProductionStepCommentModelFilter
+    serializer_class = ProductionStepCommentSerializer
 
 
 def import_orders(request):

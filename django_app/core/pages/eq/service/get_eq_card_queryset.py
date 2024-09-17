@@ -210,16 +210,24 @@ def get_eq_card_queryset(queryset, request):
     eq_params = get_eq_req_params(request)
     target_list = request.query_params.get('target_list')
 
-    # Делаем общую фильтрацию по проекту
-    if eq_params['project_filter'] is not None:
-        queryset = queryset.filter(order__project=eq_params['project_filter']).distinct()
-
     # Предварительная загрузка связанных данных
     queryset = queryset.select_related(
         'product', 'order', 'main_fabric', 'second_fabric', 'third_fabric'
     ).prefetch_related(
         'assignments'
     )
+
+    # Делаем общую фильтрацию по проекту
+    if eq_params['project_filter'] is not None:
+        queryset = queryset.filter(order__project=eq_params['project_filter']).distinct()
+
+    # Если передан поиск - ищем по названию товара, внутреннему или внешнему номеру заказа
+    if eq_params['search'] is not None:
+        queryset = queryset.filter(
+            Q(product__name__icontains=eq_params['search']) |
+            Q(order__number__icontains=eq_params['search']) |
+            Q(order__inner_number__icontains=eq_params['search'])
+        ).distinct()
 
     # Индивидуально прогоняем каждый сценарий запроса
     match target_list:

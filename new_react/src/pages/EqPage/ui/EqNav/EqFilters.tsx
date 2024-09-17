@@ -102,6 +102,7 @@ export const EqFilters = () => {
         setQueryParam,
         viewModes?.filters
     ]);
+
     const viewModeClb = (item: string) => {
         const newState = viewModes?.filters.find(viewMode => viewMode.name === item)?.key;
         if (newState) {
@@ -129,7 +130,7 @@ export const EqFilters = () => {
                 <AppSelect
                     noInput
                     variant={'dropdown'}
-                    style={{width: 170}}
+                    style={{width: 155}}
                     label={'Режим просмотра'}
                     colorScheme={'darkInput'}
                     value={getSelectedViewMode}
@@ -140,7 +141,7 @@ export const EqFilters = () => {
             <AppSelect
                 label={'Проект'}
                 variant={'dropdown'}
-                style={{width: 170}}
+                style={{width: 155}}
                 isLoading={!inited}
                 value={getSelectedProject}
                 colorScheme={'darkInput'}

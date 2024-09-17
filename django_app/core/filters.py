@@ -1,6 +1,12 @@
 import django_filters
 
-from core.models import ProductionStep
+from core.models import ProductionStep, ProductionStepComment
+
+
+class ProductionStepCommentModelFilter(django_filters.FilterSet):
+    class Meta:
+        model = ProductionStepComment
+        fields = ['production_step']
 
 
 class ProductionStepModelFilter(django_filters.FilterSet):

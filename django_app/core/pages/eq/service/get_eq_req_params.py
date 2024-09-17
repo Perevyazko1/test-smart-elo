@@ -14,6 +14,7 @@ def get_eq_req_params(request):
         'view_mode_key': request.query_params.get("view_mode"),
         'selected_user': request.query_params.get("selected_user"),
         'project_filter': request.query_params.get("project"),
+        'search': request.query_params.get("search"),
         'department': department,
         'week': request.query_params.get("week"),
         'year': request.query_params.get("year"),

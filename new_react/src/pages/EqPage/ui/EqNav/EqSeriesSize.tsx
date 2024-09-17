@@ -37,7 +37,7 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
             label={'Размер серии'}
             colorScheme={'darkInput'}
             variant={'select'}
-            style={{width: 100}}
+            style={{width: 80}}
             value={`X${queryParameters.series_size || baseSeriesSize}`}
         >
             <div className={'p-2 d-flex justify-content-center flex-nowrap flex-column align-items-center'}>

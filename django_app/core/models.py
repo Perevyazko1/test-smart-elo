@@ -328,6 +328,36 @@ class ProductionStep(models.Model):
         return '{}'.format(f'{self.department} {self.product}')
 
 
+class ProductionStepComment(models.Model):
+    """Класс хранящий данные об этапе"""
+
+    class Meta:
+        verbose_name = 'Комментарий к сделке'
+        verbose_name_plural = 'Комментарии к сделкам'
+        ordering = ['-add_date']
+
+    author = models.ForeignKey(
+        Employee,
+        verbose_name="Автор",
+        related_name="production_step_comment_author",
+        on_delete=models.SET_NULL,
+        null=True,
+    )
+    production_step = models.ForeignKey(
+        ProductionStep,
+        verbose_name="Этап производства",
+        related_name="production_step_comments",
+        on_delete=models.CASCADE,
+        null=True,
+    )
+    comment = models.CharField("Комментарий", max_length=255)
+    add_date = models.DateTimeField('Дата добавления', auto_now_add=True, blank=True,
+                                    null=True)
+
+    def __str__(self):
+        return '{}'.format(f'{self.author}: {self.production_step.id} - {self.comment[:50]}')
+
+
 class Assignment(models.Model):
     """Класс хранящий данные о состоянии выполнения нарядов"""
 

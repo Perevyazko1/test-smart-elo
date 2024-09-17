@@ -4,6 +4,18 @@ from staff.serializers import DepartmentSerializer, EmployeeSerializer
 from .models import *
 
 
+class ProductionStepCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductionStepComment
+        fields = [
+            "id",
+            "production_step",
+            "author",
+            "add_date",
+            "comment",
+        ]
+
+
 class TechProcessSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 

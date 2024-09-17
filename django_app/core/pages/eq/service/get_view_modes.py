@@ -3,8 +3,8 @@ from staff.models import Employee, Department
 
 def get_view_modes(department: Department):
     result = [
-        {'name': 'Личные наряды', 'key': 'self'},
-        {'name': 'Распределить', 'key': 'distribute'},
+        {'name': 'Мои наряды', 'key': 'self'},
+        {'name': 'Распределение', 'key': 'distribute'},
         {'name': 'Режим бригадира', 'key': 'boss'},
         {'name': 'Режим недоделки', 'key': 'unfinished'},
     ]

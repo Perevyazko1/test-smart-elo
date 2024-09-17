@@ -152,7 +152,7 @@ export const AmountBlock = (props: AmountBlockProps) => {
                     type: 'number',
                     sx: {
                         padding: 0,
-                        width: 60,
+                        width: 80,
                     }
                 }}
             />

@@ -74,7 +74,9 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     <div
                         style={{
                             position: "absolute",
-                            fontSize: '11px',
+                            fontSize: '10px',
+                            maxWidth: "36px",
+                            overflow: "hidden",
                             bottom: "1px",
                             left: "0",
                             margin: "auto",
@@ -85,7 +87,11 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     >
                         <div
                             className={"fw-bold text-black border rounded me-1" + bgColor}
-                            style={{padding: "0 0.1rem"}}
+                            style={{
+                                padding: "0 0.1rem",
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                            }}
                         >
                             {price}
                         </div>
@@ -96,18 +102,24 @@ export const AppSlider = memo((props: AppSliderProps) => {
                     <div
                         style={{
                             position: "absolute",
+                            display: "block",
                             bottom: "1px",
+                            maxWidth: "36px",
                             right: "0",
                             margin: "auto",
                             zIndex: "999",
                             opacity: "0.7",
                             pointerEvents: "none",
-                            fontSize: '11px',
+                            fontSize: '10px',
                         }}
                     >
                         <div
                             className={"fw-bolder border rounded" + bgColor}
-                            style={{padding: "0 0.1rem"}}
+                            style={{
+                                padding: "0 0.1rem",
+                                textOverflow: "ellipsis",
+                                overflow: "hidden",
+                            }}
                         >
                             {totalPrice}
                         </div>

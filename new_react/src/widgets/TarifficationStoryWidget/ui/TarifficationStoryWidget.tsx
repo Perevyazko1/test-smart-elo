@@ -3,6 +3,7 @@ import {AppSkeleton} from "@shared/ui";
 import {useGetTarifficationStory} from "../model/api";
 import {Table} from "react-bootstrap";
 import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {TarifficationComments} from "@widgets/TarifficationWidget";
 
 interface TarifficationStoryWidgetProps {
     production_step__id: number;
@@ -90,7 +91,8 @@ export const TarifficationStoryWidget = (props: TarifficationStoryWidgetProps) =
                 </tbody>
 
             </Table>
+
+            <TarifficationComments productionStepId={props.production_step__id}/>
         </div>
-    )
-        ;
+    );
 };

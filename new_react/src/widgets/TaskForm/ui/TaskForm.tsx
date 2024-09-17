@@ -25,8 +25,7 @@ import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
 import {RatingBlock} from "./ui/RatingBlock";
 import {TextTitleBlock} from "./ui/TextTitleBlock";
 import {TextDescriptionBlock} from "./ui/TextDescriptionBlock";
-import {CommentInputBlock} from "./ui/CommentInputBlock";
-import {CommentList} from "./ui/CommentList";
+import {CommentBlock} from "@widgets/TaskForm/ui/ui/CommentBlock";
 
 
 interface TaskFormProps {
@@ -315,14 +314,11 @@ export const TaskForm = (props: TaskFormProps) => {
                         setFormDataClb={setFormDataClb}
                     />
 
-                    {task?.id &&
-                        <>
-                            <CommentInputBlock task={task}/>
-                            <CommentList
-                                taskId={task.id}
-                            />
-                        </>
+                    {task ?
+                        <CommentBlock task={task}/>
+                        : null
                     }
+
                 </div>
                 <hr className={'m-1'}/>
 

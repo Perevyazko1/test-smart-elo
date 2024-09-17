@@ -1,6 +1,7 @@
 """Core app urls. """
 
 from django.urls import path, include
+from rest_framework import routers
 
 from .views import (
     import_orders,
@@ -9,10 +10,16 @@ from .views import (
     get_op_prod_info,
     get_tech_processes,
     set_tech_process,
+    ProductionStepCommentViewSet,
 )
+
+router = routers.DefaultRouter()
+router.register(r'production_step_comments', ProductionStepCommentViewSet)
 
 
 urlpatterns = [
+    path('', include(router.urls)),
+
     path('import_orders/', import_orders),
 
     path('get_project_filters/', get_project_filters),

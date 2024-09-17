@@ -9,9 +9,11 @@ from rest_framework.response import Response
 from core.models import (
     Order,
     ProductionStep,
+    ProductionStepComment,
     OrderProduct,
     Tariff,
-    Assignment, AssignmentCoExecutor,
+    Assignment,
+    AssignmentCoExecutor,
 )
 from staff.models import (
     Audit, Transaction,
@@ -22,7 +24,7 @@ from .serializers import (
     PostTarifficationSerializer, TariffSerializer,
 )
 from ...consumers import EqNotificationActions, ws_group_updates
-from ...signals import clean_all_eq_card_info_cache, update_assignments_and_clean_cache
+from ...signals import clean_all_eq_card_info_cache
 
 
 @api_view(['GET'])
@@ -87,6 +89,12 @@ def set_proposed_tariff(request):
     Audit.objects.create(
         employee=request.user,
         details=detail,
+    )
+
+    ProductionStepComment.objects.create(
+        author=request.user,
+        comment=detail,
+        production_step=production_step
     )
 
     """Send update command for EQ page cards. """
@@ -164,6 +172,11 @@ def set_confirmed_tariff(request):
     Audit.objects.create(
         employee=request.user,
         details=detail,
+    )
+    ProductionStepComment.objects.create(
+        author=request.user,
+        comment=detail,
+        production_step=production_step
     )
 
     """Send update command for EQ page cards. """
@@ -256,6 +269,11 @@ def set_post_tariffication(request):
     Audit.objects.create(
         employee=request.user,
         details=detail,
+    )
+    ProductionStepComment.objects.create(
+        author=request.user,
+        comment=detail,
+        production_step=production_step
     )
 
     """Обновляем все оставшиеся активные наряды"""

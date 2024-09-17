@@ -31,11 +31,11 @@ export const InitialEqBodySchema: EqPageSchema = {
     viewModes: {
         filters: [],
         currentFilter: {
-            name: 'Личные наряды',
+            name: 'Мои наряды',
             key: 'self'
         },
         default: {
-            name: 'Личные наряды',
+            name: 'Мои наряды',
             key: 'self'
         },
         isLoading: false,

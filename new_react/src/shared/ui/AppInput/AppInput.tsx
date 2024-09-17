@@ -1,4 +1,4 @@
-import {InputHTMLAttributes, ReactNode} from 'react';
+import {InputHTMLAttributes, ReactNode, useId, useMemo} from 'react';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement>{
     className?: string;
@@ -13,10 +13,17 @@ export const AppInput = (props: InputProps) => {
         ...otherProps
     } = props;
 
+    const id: string = useId();
+
+    const inputId = useMemo(() => {
+        const date: string = new Date().toISOString();
+        return id + date;
+    }, [id]);
 
     return (
         <input
-            className={"form-control fw-bold form-control-sm my-auto"}
+            id={inputId}
+            className={"form-control fw-bold form-control-sm my-auto " + className}
             {...otherProps}
         >
             {children}

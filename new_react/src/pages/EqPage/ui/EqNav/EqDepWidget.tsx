@@ -61,7 +61,7 @@ export const EqDepWidget = () => {
             noInput
             variant={'dropdown'}
             isLoading={isLoading}
-            style={{width: 140}}
+            style={{width: 125}}
             label={'Отдел'}
             value={currentUser.current_department.name}
             options={departments}

@@ -73,6 +73,10 @@
     border: none;
   }
 
+  &.Full {
+    width: calc(100% - 25px);
+  }
+
   &.darkInput {
     &.Active {
       color: var(--bs-light);
