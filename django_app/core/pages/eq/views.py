@@ -306,6 +306,23 @@ def update_assignments(request):
                         inspector=request.user,
                         description=description,
                     )
+    elif mode == 'lock_await_assignments':
+        order_product = OrderProduct.objects.get(series_id=series_id)
+        target_assignments = Assignment.objects.filter(
+            order_product=order_product,
+            department=department,
+            status="await"
+        )
+        locked_status = target_assignments.filter(
+            appointed_by_boss=True
+        ).exists()
+        print(f'###PRINT update_assignments #l=>319:', locked_status, not locked_status)
+        update_assignments_and_clean_cache(
+            target_assignments,
+            order_product.id,
+            department.id,
+            appointed_by_boss=not locked_status,
+        )
 
     else:
         if date == '':
@@ -325,8 +342,11 @@ def update_assignments(request):
                         assignment.plane_date = date
                         assignment.save()
         else:
-            return JsonResponse({
-                "result": 'ok'}, json_dumps_params={"ensure_ascii": False})
+            return JsonResponse(
+                {"result": 'ok'},
+                json_dumps_params={"ensure_ascii": False}
+            )
+
     notification_data = {str(department.number): {
         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
         'data': OrderProduct.objects.get(series_id=series_id).id,

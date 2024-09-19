@@ -117,6 +117,7 @@ class TaskModelFilter(django_filters.FilterSet):
             ).exclude(
                 status='4',
             )
+        # По умолчанию просто не фильтруем
         return queryset
 
     def filter_sort_mode(self, queryset: QuerySet, name: str, value: str):

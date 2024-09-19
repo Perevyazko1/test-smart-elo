@@ -57,21 +57,27 @@ def get_filtered_await_queryset(queryset, eq_params):
             elif not order_product.quantity == assignments_count:
                 queryset = queryset.exclude(id=order_product.id)
     else:
-        if eq_params['assembled']:
+        filter_params = {
+            "status": "0",
+            "assignments__department": eq_params['department'],
+            "assignments__status__in": ['await', 'in_work'],
+        }
+
+        if not eq_params['assembled']:
+            filter_params['assignments__assembled'] = True
+
+        if eq_params['locked']:
+            del filter_params['assignments__status__in']
             queryset = queryset.filter(
-                status="0",
-                assignments__department=eq_params['department'],
-                assignments__status__in=['await', 'in_work'],
+                **filter_params,
+                assignments__status='await',
+                assignments__appointed_by_boss=False,
             ).distinct()
         else:
             queryset = queryset.filter(
-                status="0",
-                assignments__department=eq_params['department'],
-                assignments__assembled=True,
-                assignments__status__in=['await', 'in_work'],
+                **filter_params
             ).distinct()
 
-    # Аннотируем кверисет
     return queryset.order_by('urgency', 'order', 'id').distinct()
 
 

@@ -1,5 +1,5 @@
 .cardCounts {
-  padding: 0 0.35rem;
+  padding: 0 0.15rem;
   flex-grow: 0;
   flex-shrink: 0;
   background: white;
@@ -28,6 +28,7 @@
 .productName {
   height: 55%;
   overflow-y: auto;
+  overflow-x: hidden;
   font-size: 14px;
 }
 
@@ -68,6 +69,7 @@
 }
 
 .depInfoBlock {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-grow: 0;

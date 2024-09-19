@@ -118,7 +118,7 @@ export const EqBody = (props: EqBodyProps) => {
     useEffect(() => {
         setAwaitUpdated(prevState => !prevState);
         // eslint-disable-next-line
-    }, [queryParameters.assembled]);
+    }, [queryParameters.assembled, queryParameters.locked]);
 
     useEffect(() => {
         const timeoutId = setTimeout(() => {

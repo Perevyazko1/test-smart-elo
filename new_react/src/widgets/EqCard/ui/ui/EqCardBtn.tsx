@@ -37,10 +37,10 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
     }, [plane_date])
 
     const getButtonIcon = useMemo(() => {
-        if (cardType === 'await') {
-            return <i className="fas fa-angle-double-left fs-2"/>;
-        } else if (locked) {
+        if (locked) {
             return <i className="fas fa-lock fs-5"/>;
+        } else if (cardType === 'await') {
+            return <i className="fas fa-angle-double-left fs-2"/>;
         } else if (cardType === 'in_work' && first && expanded) {
             return <i className="fas fa-angle-double-left fs-2"/>;
         } else if (cardType === 'in_work' && first) {
@@ -63,8 +63,7 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
             (!first && cardType === 'distribute') ||
             (cardType === 'in_work' && expanded && first) ||
             (cardType === 'in_work' && !expanded && !first) ||
-            (cardType === 'ready' && !first))
-        {
+            (cardType === 'ready' && !first)) {
             switch (urgency) {
                 case 1:
                     return "redBtn"

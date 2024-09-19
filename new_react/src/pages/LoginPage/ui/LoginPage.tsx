@@ -76,27 +76,28 @@ export const LoginPage = () => {
                                                 <h6 className={'text-danger'}>{errorMsg}</h6>
                                             }
 
-                                            <input className={"password-field form-control text-center form-control-lg mb-2"}
-                                                   type="text"
-                                                   placeholder="ПИН-код (6 цифр)"
-                                                   title="Разрешено использовать только цифры"
-                                                   pattern="[0-9]+$"
-                                                   autoFocus
-                                                   inputMode="numeric"
-                                                   maxLength={6}
-                                                   minLength={6}
-                                                   required
-                                                   autoComplete="new-password"
-                                                   onChange={(e) => setPinCode(Number(e.target.value))}
+                                            <input
+                                                className={"password-field form-control text-center form-control-lg mb-2"}
+                                                type="text"
+                                                placeholder="ПИН-код (6 цифр)"
+                                                title="Разрешено использовать только цифры"
+                                                pattern="[0-9]+$"
+                                                autoFocus
+                                                inputMode="numeric"
+                                                maxLength={6}
+                                                minLength={6}
+                                                required
+                                                autoComplete="new-password"
+                                                onChange={(e) => setPinCode(Number(e.target.value))}
                                             />
 
                                             <div
                                                 className="w-100 d-xl-flex justify-content-start p-1 mb-1 mb-xl-2"
                                             >
-                                                <AppSwitch checked={rememberMe}
-                                                           onSwitch={(value) => setRememberMe(value)}
-                                                           label={'Оставаться в системе'}
-                                                           idSwitch={'login-page-remember-switch'}
+                                                <AppSwitch
+                                                    checked={rememberMe}
+                                                    onSwitch={(value) => setRememberMe(value)}
+                                                    label={'Оставаться в системе'}
                                                 />
                                             </div>
 

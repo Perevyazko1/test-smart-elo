@@ -19,4 +19,5 @@ def get_eq_req_params(request):
         'week': request.query_params.get("week"),
         'year': request.query_params.get("year"),
         'assembled': request.query_params.get("assembled"),
+        'locked': request.query_params.get("locked"),
     }

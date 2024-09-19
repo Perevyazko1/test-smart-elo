@@ -1,17 +1,47 @@
+import {useEffect, useState} from "react";
+import {Spinner} from "react-bootstrap";
+
 import {AssignmentInfo} from "@widgets/AssignmentInfo";
-import {useAppModal} from "@shared/hooks";
+import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
+import {useEditAssignmentInfo} from "@widgets/AssignmentInfo/model/api/api";
+
+import {useAppModal, useCurrentUser, usePermission} from "@shared/hooks";
+import {AppSwitch} from "@shared/ui";
+import {APP_PERM} from "@shared/consts";
 
 import cls from "./EqCard.module.scss";
-import {EqOrderProduct} from "@widgets/EqCardList";
 
 
 interface CardDepartmentInfoProps {
     card: EqOrderProduct;
+    cardType: ListTypes,
 }
 
 export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
-    const {card} = props;
+    const {card, cardType} = props;
     const {handleOpen} = useAppModal();
+    const {currentUser} = useCurrentUser();
+    const [locked, setLocked] = useState(card.assignments.some(item => item.appointed_by_boss));
+    const [editAssignments, {isLoading}] = useEditAssignmentInfo();
+
+    const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+
+    useEffect(() => {
+        setLocked(card.assignments.some(item => item.appointed_by_boss));
+    }, [card.assignments]);
+
+    const lockedHandle = () => {
+        if (currentUser.current_department) {
+            setLocked(!locked)
+            editAssignments({
+                department__id: currentUser.current_department.id,
+                series_id: card.series_id,
+                ids: [],
+                date: '',
+                mode: 'lock_await_assignments'
+            })
+        }
+    }
 
     return (
         <div
@@ -21,6 +51,30 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
                 true
             )}
         >
+            {isBoss && cardType === 'await' ?
+                <AppSwitch
+                    onClick={(e) => e.stopPropagation()}
+                    className={'my-1'}
+                    disabled={isLoading}
+                    style={{
+                        transform: 'scale(0.85)',
+                    }}
+                    checked={locked}
+                    onSwitch={lockedHandle}
+                    handleContent={isLoading ?
+                        <div style={{transform: 'scale(0.6)'}}>
+                            <Spinner
+                                animation={'grow'}
+                                size={'sm'}
+                            />
+                        </div>
+                        : '🔒'
+                    }
+                    labelPosition={'labelBottom'}
+                />
+                : null
+            }
+
             {card.card_info.employees_info.map((info, index) => (
                 <div key={index}>
                     {info.full_name} {info.count_in_work} ({info.count_all})

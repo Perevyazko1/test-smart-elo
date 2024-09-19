@@ -12,6 +12,7 @@ import {setTargetNumber} from "../../model/lib/setTargetNumber";
 
 import {EqNumbers} from "./EqNumbers";
 
+
 interface CardNameNumbersProps {
     targetUserId: number | undefined;
     card: EqOrderProduct;
@@ -25,6 +26,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
 
     const {setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
+
 
     const setNumber = (assignment: EqAssignment) => {
         setAssignmentsLists(setTargetNumber({
@@ -64,6 +66,8 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                         Сделка
                     </Button>
                 }
+                {card.product.name}
+                {card.product.name}
                 {card.product.name}
             </div>
 

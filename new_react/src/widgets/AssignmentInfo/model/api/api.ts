@@ -8,7 +8,7 @@ interface AssignmentInfoApiProps {
 
 interface EditAssignmentsInfoProps {
     ids: number[];
-    mode: 'in_work' | 'all' | 'selected' | 'await' | 'remove_visa';
+    mode: 'in_work' | 'all' | 'selected' | 'await' | 'remove_visa' | 'lock_await_assignments';
     department__id: number;
     date: string;
     series_id: string;

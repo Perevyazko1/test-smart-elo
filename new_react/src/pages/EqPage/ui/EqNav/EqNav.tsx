@@ -45,7 +45,15 @@ export const EqNav = (props: EqNavProps) => {
         } else {
             setQueryParam('assembled', 'all')
         }
-    }
+    };
+
+    const showNotLockedOnly = () => {
+        if (queryParameters.locked) {
+            setQueryParam('locked', '')
+        } else {
+            setQueryParam('locked', 'all')
+        }
+    };
 
     return (
         <AppNavbar showNav={showCanvas} closeClb={closeClb}>
@@ -57,18 +65,31 @@ export const EqNav = (props: EqNavProps) => {
                 <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
             }
 
-            <div style={{transform: "scale(0.7)"}}>
+            <div className={'d-flex align-items-end align-self-stretch'}>
                 <AppSwitch
-                    idSwitch={'eq-nav-assembled-switch'}
+                    style={{transform: "scale(0.7)", fontSize: '8px'}}
                     checked={!!queryParameters.assembled}
                     onSwitch={showAssembledOnly}
-                    label={queryParameters.assembled ? "Все" : "Дост."}
+                    labelPosition={'labelBottom'}
+                    handleContent={'⬛️'}
+                    label={queryParameters.assembled ? "Все" : "Уком"}
+                />
+            </div>
+
+            <div className={'d-flex align-items-end align-self-stretch'}>
+                <AppSwitch
+                    style={{transform: "scale(0.7)", fontSize: '10px'}}
+                    checked={!!queryParameters.locked}
+                    onSwitch={showNotLockedOnly}
+                    labelPosition={'labelBottom'}
+                    handleContent={'🔒'}
+                    label={queryParameters.locked ? "Дост" : "Все"}
                 />
             </div>
 
             <AppInput placeholder={'Поиск'}
-                      className={'fs-7'}
-                      style={{width: "165px"}}
+                      style={{width: "125px",fontSize: '10px'}}
+                      className={'mx-2'}
                       onChange={(event) => setSearchValue(event.target.value)}
                       value={searchValue}
             />

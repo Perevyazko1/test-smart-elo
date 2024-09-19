@@ -8,10 +8,19 @@
 .switchContainer {
   display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  &.labelRight {
+    flex-direction: row;
+  }
+
+  &.labelBottom {
+    flex-direction: column;
+  }
 }
 
 .switchText {
-  margin-left: 10px;
   font-size: 14px;
 }
 
@@ -31,6 +40,7 @@
 
 .switchLabel {
   position: absolute;
+  user-select: none;
   top: 0;
   left: 0;
   right: 0;
@@ -42,8 +52,11 @@
   transition: background-color 0.3s ease;
   border: 1px solid var(--bs-gray-800);
 
-  &::before {
-    content: "";
+  .switchHandle {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 20px;
     height: 20px;
     background-color: white;
@@ -53,10 +66,10 @@
   }
 }
 
-.switchInput:checked + .switchLabel::before {
+.switchInput:checked + .switchLabel .switchHandle {
   transform: translateX(2px);
 }
 
-.switchInput + .switchLabel::before {
+.switchInput + .switchLabel .switchHandle {
   transform: translateX(-2px);
 }

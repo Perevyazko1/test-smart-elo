@@ -119,6 +119,13 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     ]);
 
     const firstBtnIsLocked = useMemo(() => {
+        if (listType === 'await') {
+            if (card.assignments.some(assignment => assignment.appointed_by_boss)) {
+                return true;
+            }
+            return false;
+        }
+
         if (listType === 'in_work' &&
             !expanded &&
             assignmentsLists.primary.length === 0
@@ -126,7 +133,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             return true;
         }
         return false;
-    }, [assignmentsLists.primary.length, expanded, listType])
+    }, [assignmentsLists.primary.length, card.assignments, expanded, listType])
 
     const returnLocked = useMemo(() => {
         if (listType !== "in_work" || bossPerm) {
@@ -144,7 +151,16 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         if (!currentUser.current_department) {
             return;
         }
-        if (getAction(first) === 'in_work_to_await' && returnLocked) {
+        if (listType === 'await' && firstBtnIsLocked) {
+            handleOpen(
+                <h4 className={'mx-4'}>
+                    Наряды заблокированы для взятия в работу бригадиром. <br/>
+
+                    Для снятия блокировки бригадир должен отключить блокировку серии
+                    соответствующим ползунком в карточке.
+                </h4>
+            );
+        } else if (getAction(first) === 'in_work_to_await' && returnLocked) {
             handleOpen(
                 <h4 className={'mx-4'}>
                     Один или несколько выбранных нарядов назначены бригадиром. <br/>
@@ -181,9 +197,11 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         card.id,
         currentUser.current_department,
         dispatch,
+        firstBtnIsLocked,
         getAction,
         getTargetNumbers,
         handleOpen,
+        listType,
         queryParameters,
         returnLocked
     ]);
@@ -244,7 +262,10 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
             <CardOrderProject card={card}/>
 
-            <CardDepartmentInfo card={card}/>
+            <CardDepartmentInfo
+                card={card}
+                cardType={listType}
+            />
 
             {!hideSecondBtn &&
                 <EqCardBtn
