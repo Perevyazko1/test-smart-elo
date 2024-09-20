@@ -55,13 +55,14 @@ class PageListSerializer(serializers.ModelSerializer):
             'last_order_id',
         ]
 
-    def get_last_order_id(self, obj: ProductionStep) -> int:
+    def get_last_order_id(self, obj: ProductionStep) -> int | None:
         """Get first order id for specification detail. """
-        target_order_product: OrderProduct = OrderProduct.objects.filter(
+        target_order_product: OrderProduct | None = OrderProduct.objects.filter(
             product=obj.product
         ).first()
-
-        return target_order_product.order.id
+        if target_order_product:
+            return target_order_product.order.id
+        return None
 
     def get_has_assignments(self, obj: ProductionStep) -> bool:
         """Get has assignments without tariffication flag. """

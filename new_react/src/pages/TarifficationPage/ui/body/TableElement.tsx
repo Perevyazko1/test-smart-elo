@@ -92,7 +92,27 @@ export const TableElement = (props: TableElementProps) => {
         return !confirmPerm
             || !item.proposed_tariff?.amount
             || item.proposed_tariff?.amount === item.confirmed_tariff?.amount
-    }, [confirmPerm, item.confirmed_tariff?.amount, item.proposed_tariff?.amount])
+    }, [confirmPerm, item.confirmed_tariff?.amount, item.proposed_tariff?.amount]);
+
+    const orderLink = useMemo(() => {
+        if (item.last_order_id !== null) {
+            return (
+                <Button
+                    size={'sm'}
+                    className={'fs-7 p-0 px-1 m-1'}
+                    variant={'outline-dark'}
+                    onClick={() => handleOpen(
+                        <OrderDetailWidget
+                            order_id={item.last_order_id as number}
+                        />
+                    )}
+                >
+                    Последняя спецификация
+                </Button>
+            )
+        }
+        return ("");
+    }, [handleOpen, item.last_order_id])
 
 
     return (
@@ -111,18 +131,7 @@ export const TableElement = (props: TableElementProps) => {
 
                 <td rowSpan={2}>
                     {item.product_name}
-                    <Button
-                        size={'sm'}
-                        className={'fs-7 p-0 px-1 m-1'}
-                        variant={'outline-dark'}
-                        onClick={() => handleOpen(
-                            <OrderDetailWidget
-                                order_id={item.last_order_id}
-                            />
-                        )}
-                    >
-                        Последняя спецификация
-                    </Button>
+                    {orderLink}
                 </td>
 
                 <td>

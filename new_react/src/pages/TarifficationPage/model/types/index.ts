@@ -22,7 +22,7 @@ export interface PageListItem {
     has_assignments: boolean;
     product_name: string;
     product_id: number;
-    last_order_id: number;
+    last_order_id: number | null;
     product_images: ProductImages,
     confirmed_tariff: Tariff | null;
     proposed_tariff: Tariff | null;
