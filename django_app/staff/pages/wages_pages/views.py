@@ -1,6 +1,6 @@
 from dataclasses import asdict
 
-from django.db.models import Sum
+from django.db.models import Sum, Min, Max, Q
 from django.http import JsonResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 from rest_framework.filters import OrderingFilter
 from rest_framework.response import Response
 
-from core.models import Assignment, ProductPicture
+from core.models import Assignment, ProductPicture, AssignmentCoExecutor
 from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee, Transaction
 from staff.pages.wages_pages.filters import EmployeeModelFilter, TransactionModelFilter
@@ -125,10 +125,18 @@ def get_assignment_counts(request):
     except Employee.DoesNotExist:
         return JsonResponse({'error': 'Employee not found'}, status=404)
 
+    # Получаем все наряды, где пользователь был исполнителем или соисполнителем
     assignments = Assignment.objects.filter(
-        executor=employee,
-        date_completion__gt=date_from,
-        date_completion__lte=date_by
+        Q(
+            co_executors__co_executor=employee,
+            date_completion__gt=date_from,
+            date_completion__lte=date_by,
+        ) |
+        Q(
+            executor=employee,
+            date_completion__gt=date_from,
+            date_completion__lte=date_by,
+        )
     )
 
     data = []
@@ -144,14 +152,61 @@ def get_assignment_counts(request):
             thumbnail_urls.append(picture.thumbnail.url)
             picture_urls.append(picture.image.url)
 
+        executor_assignments = assignments.filter(
+            executor=employee,
+            order_product__product=assignment.order_product.product,
+            department=assignment.department,
+        )
+
+        co_executor_assignments = assignments.filter(
+            co_executors__co_executor=employee,
+            order_product__product=assignment.order_product.product,
+            department=assignment.department,
+        )
+        # Вычисляем минимальный и максимальный размер amount для данной группы
+        executor_amount_range = executor_assignments.aggregate(
+            min_amount=Min('amount'),
+            max_amount=Max('amount')
+        )
+
+        employee_co_executors = AssignmentCoExecutor.objects.filter(
+            assignment__in=co_executor_assignments,
+            co_executor=employee
+        )
+
+        co_executor_amount_range = employee_co_executors.aggregate(
+            min_amount=Min('amount'),
+            max_amount=Max('amount')
+        )
+        # Убираем нули из минимального значения
+        min_amounts = [amount for amount in [
+            executor_amount_range['min_amount'],
+            co_executor_amount_range['min_amount']
+        ] if amount and amount != 0]
+
+        # Если все минимальные значения — 0, используем минимальное ненулевое значение или None
+        min_amount = min(min_amounts, default=None)
+
+        max_amount = max(executor_amount_range['max_amount'] or 0, co_executor_amount_range['max_amount'] or 0)
+
+        # Если минимальное значение None (все amount были 0), то используем только максимальное
+        if min_amount is None:
+            amount_result = max_amount
+        else:
+            # Если минимум и максимум равны, выводим только одно значение, иначе диапазон
+            amount_result = max_amount if min_amount == max_amount else f"{min_amount} - {max_amount}"
+
+        total_amount = (executor_assignments.aggregate(Sum('amount'))['amount__sum'] or 0) + \
+                       (employee_co_executors.aggregate(Sum('amount'))['amount__sum'] or 0)
+
         data.append(
             {
                 'product_name': assignment.order_product.product.name,
                 'department_name': assignment.department.name,
-                'count': assignments.filter(
-                    order_product__product=assignment.order_product.product,
-                    department=assignment.department,
-                ).count(),
+                'count': executor_assignments.count(),
+                'co_executor_count': co_executor_assignments.count(),
+                'amount_range': amount_result,
+                'total_amount': total_amount,
                 'thumbnail_urls': thumbnail_urls,
                 'picture_urls': picture_urls,
             }

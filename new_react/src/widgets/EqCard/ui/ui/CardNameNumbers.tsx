@@ -67,8 +67,6 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                     </Button>
                 }
                 {card.product.name}
-                {card.product.name}
-                {card.product.name}
             </div>
 
             <hr className={'m-0 p-0'}/>

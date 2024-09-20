@@ -23,7 +23,7 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
     const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
 
-    const {windowWidth, windowHeight} = useWindowDimensions(isDesktop ? -45 : 0);
+    const {windowWidth, windowHeight} = useWindowDimensions();
     const {
         leftBlockWidth,
         rightBlockWidth,

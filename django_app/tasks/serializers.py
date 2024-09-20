@@ -103,6 +103,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'proposed_tariff',
             'confirmed_tariff',
             'task_images',
+            'appointed_by_boss',
 
             'new_comment_count',
             'last_comment',

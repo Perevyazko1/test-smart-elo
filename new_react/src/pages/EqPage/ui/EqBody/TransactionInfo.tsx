@@ -11,7 +11,6 @@ interface TransactionInfoProps {
 export const TransactionInfo = (props: TransactionInfoProps) => {
     const {transaction} = props;
 
-
     return (
         <div className={'d-flex flex-column'}>
             <h5>

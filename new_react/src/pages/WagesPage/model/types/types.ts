@@ -67,6 +67,9 @@ export interface AssignmentsCounter {
     product_name: string;
     department_name: string;
     count: number;
+    co_executor_count: number;
+    amount_range: string;
+    total_amount: number;
     thumbnail_urls: string[];
     picture_urls: string[];
 }

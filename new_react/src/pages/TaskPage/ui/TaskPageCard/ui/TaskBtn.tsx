@@ -30,7 +30,9 @@ export const TaskBtn = (props: TaskBtnProps) => {
 
     const locked = useMemo(() => {
         if (cardType === TaskStatus.InProgress) {
-            return card.appointed_by !== currentUser.id
+            if (card.appointed_by_boss) {
+                return card.appointed_by !== currentUser.id;
+            }
         }
         if (cardType === TaskStatus.Completed) {
             if (card.proposed_tariff?.amount !== card.confirmed_tariff?.amount) {
@@ -107,6 +109,10 @@ export const TaskBtn = (props: TaskBtnProps) => {
             };
             if (!card.new_executor) {
                 data.new_executor = getTaskExecutor(currentUser.id, card);
+            } else {
+                if (card.new_executor.employee !== currentUser.id) {
+                    data.appointed_by_boss = true;
+                }
             }
             if (!card.appointed_at) {
                 data.appointed_at = new Date().toISOString();
@@ -124,6 +130,9 @@ export const TaskBtn = (props: TaskBtnProps) => {
                 if (card.new_executor?.employee === currentUser.id) {
                     data.appointed_at = null;
                     data.new_executor = null;
+                }
+                if (card.appointed_by_boss) {
+                    data.appointed_by_boss = false;
                 }
             }
             return data;
@@ -145,7 +154,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
                 status: TaskStatus.InProgress,
             };
         }
-    }
+    };
 
     const updClb = () => {
         playSound()
@@ -179,7 +188,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
         } else {
             dispatch(updateTask(getActionData()));
         }
-    }
+    };
 
     return (
         <button

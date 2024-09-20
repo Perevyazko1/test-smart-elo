@@ -194,6 +194,7 @@ class Task(models.Model):
         related_name="task_proposed_tariff",
         on_delete=models.SET_NULL,
     )
+    appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
 
     def __str__(self):
         return '{}'.format(f'{self.created_at} => {self.title}')

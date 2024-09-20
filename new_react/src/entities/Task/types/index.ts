@@ -78,6 +78,7 @@ export interface Task {
     new_co_executors: TaskExecutor[];
     proposed_tariff: TaskTariff | null;
     confirmed_tariff: TaskTariff | null;
+    appointed_by_boss: boolean;
 
     task_images: TaskImage[];
 

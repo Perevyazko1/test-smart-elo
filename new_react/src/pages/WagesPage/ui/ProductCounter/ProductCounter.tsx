@@ -71,7 +71,9 @@ export const ProductCounter = (props: ProductCounterProps) => {
                     <th>#</th>
                     <th>Наименование изделия</th>
                     <th>Отдел</th>
+                    <th>Сделка</th>
                     <th>Колич.</th>
+                    <th>Итого</th>
                 </tr>
                 </thead>
 
@@ -79,13 +81,13 @@ export const ProductCounter = (props: ProductCounterProps) => {
                 {isLoading || isFetching ?
                     <>
                         <tr>
-                            <td colSpan={3}><AppSkeleton style={{width:'100%', height:'25px'}}/></td>
+                            <td colSpan={6}><AppSkeleton style={{width:'100%', height:'25px'}}/></td>
                         </tr>
                         <tr>
-                            <td colSpan={3}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
+                            <td colSpan={6}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
                         </tr>
                         <tr>
-                            <td colSpan={3}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
+                            <td colSpan={6}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
                         </tr>
                     </>
                     :
@@ -103,7 +105,9 @@ export const ProductCounter = (props: ProductCounterProps) => {
                                 </td>
                                 <td>{assignmentInfo.product_name}</td>
                                 <td>{assignmentInfo.department_name}</td>
-                                <td>{assignmentInfo.count} шт</td>
+                                <td>{assignmentInfo.amount_range}</td>
+                                <td>{assignmentInfo.count} ({assignmentInfo.co_executor_count}) шт</td>
+                                <td>{assignmentInfo.total_amount}</td>
                             </tr>
                         ))}
                     </>

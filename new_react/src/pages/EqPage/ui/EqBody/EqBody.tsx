@@ -33,7 +33,7 @@ export const EqBody = (props: EqBodyProps) => {
     const isDesktop = useContext(IsDesktopContext);
     const filtersReady = useAppSelector(eqFiltersReady);
 
-    const {windowWidth, windowHeight} = useWindowDimensions(isDesktop ? -45 : 0);
+    const {windowWidth, windowHeight} = useWindowDimensions();
 
     const {
         leftBlockWidth,

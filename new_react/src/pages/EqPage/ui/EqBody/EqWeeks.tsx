@@ -3,11 +3,14 @@ import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
 import {IsDesktopContext} from "@app";
-import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
+import {WagesInfo} from "@pages/EqPage/ui/EqBody/WagesInfo";
+import {TransactionInfo} from "@pages/EqPage/ui/EqBody/TransactionInfo";
+import {Transaction} from "@entities/Transaction";
 
 interface EqWeeksProps {
     rightBlockWidth: number;
@@ -27,6 +30,8 @@ export const EqWeeks = (props: EqWeeksProps) => {
         resetSize,
         expanded,
     } = props;
+
+    const {handleOpen} = useAppModal();
 
     const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
 
@@ -59,9 +64,31 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
     const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]);
 
-    useEffect(() => {
+    const targetUserId = useMemo<number>(() => {
+        if (queryParameters.view_mode) {
+            if (!['boss', 'unfinished', 'distribute'].includes(queryParameters.view_mode)) {
+                return Number(queryParameters.view_mode);
+            }
+        }
+        return currentUser.id;
+    }, [currentUser.id, queryParameters.view_mode]);
 
-    }, [queryParameters.view_mode])
+    const handleOpenWagesDetail = (transaction: Transaction) => {
+        handleOpen(
+            <TransactionInfo transaction={transaction}/>
+        );
+    }
+
+    const handleOpenWages = () => {
+        handleOpen(
+            <WagesInfo
+                employeeId={targetUserId}
+                onClick={handleOpenWagesDetail}
+                endDate={weekData?.dt_dates[6] || ''}
+                startDate={weekData?.dt_dates[0] || ''}
+            />
+        );
+    }
 
     const getWeekString = useMemo(() => {
         if (blockWidthPx > 650) {
@@ -69,7 +96,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                 <>
                     {`Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''}
                     по ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `}
-                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 550) {
@@ -79,7 +105,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         `Нед. ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} по 
                         ${weekData?.str_dates ? weekData.str_dates[6] : ''} | ЗП: `
                     }
-                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 400) {
@@ -88,7 +113,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     {
                         `Нед. ${weekData?.week} | ЗП: `
                     }
-                    {getEarnedSum}
                 </>
             );
         } else if (blockWidthPx > 300) {
@@ -98,7 +122,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
         } else {
             return '';
         }
-    }, [blockWidthPx, getEarnedSum, weekData?.str_dates, weekData?.week])
+    }, [blockWidthPx, weekData?.str_dates, weekData?.week])
 
     return (
         <div
@@ -139,10 +163,16 @@ export const EqWeeks = (props: EqWeeksProps) => {
                         <i className="fas fa-angle-double-left fs-3"/>
                     </Button>
 
-                    <div className={'d-flex flex-fill justify-content-center'}>
+                    <div className={'d-flex flex-fill justify-content-center align-items-center'}>
                         {!weekData?.isLoading ?
                             <>
                                 {getWeekString}
+                                <button
+                                    className={'appBtn px-1 rounded mx-1'}
+                                    onClick={handleOpenWages}
+                                >
+                                    {getEarnedSum}
+                                </button>
                             </> :
                             <AppSkeleton className={'h-100 flex-fill'}/>
                         }
