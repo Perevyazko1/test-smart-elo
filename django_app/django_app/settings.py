@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django_filters',
     "corsheaders",
     'rangefilter',
-    'django_telegram_logging',
+    # 'django_telegram_logging',
 ]
 
 MIDDLEWARE = [
@@ -177,29 +177,29 @@ CACHES = {
 }
 
 # TG LOGGING
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-TELEGRAM_LOGGING_TOKEN = TELEGRAM_BOT_TOKEN
-TELEGRAM_LOGGING_CHAT = TELEGRAM_CHAT_ID
-TELEGRAM_LOGGING_EMIT_ON_DEBUG = True
-
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'telegram': {
-            'level': 'ERROR',
-            'class': 'django_telegram_logging.handler.TelegramHandler',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'telegram'],
-            'level': 'INFO',
-        },
-    },
-}
+# TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+# TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+#
+# TELEGRAM_LOGGING_TOKEN = TELEGRAM_BOT_TOKEN
+# TELEGRAM_LOGGING_CHAT = TELEGRAM_CHAT_ID
+# TELEGRAM_LOGGING_EMIT_ON_DEBUG = True
+#
+# LOGGING = {
+#     'version': 1,
+#     'handlers': {
+#         'telegram': {
+#             'level': 'ERROR',
+#             'class': 'django_telegram_logging.handler.TelegramHandler',
+#         },
+#         'console': {
+#             'level': 'INFO',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console', 'telegram'],
+#             'level': 'INFO',
+#         },
+#     },
+# }
