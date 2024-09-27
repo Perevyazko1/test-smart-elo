@@ -37,6 +37,8 @@ class TaskViewInfoSerializer(serializers.ModelSerializer):
 
 
 class TaskCommentSerializer(serializers.ModelSerializer):
+    viewers = serializers.SerializerMethodField(read_only=True, required=False)
+
     class Meta:
         model = TaskComment
         fields = [
@@ -45,7 +47,17 @@ class TaskCommentSerializer(serializers.ModelSerializer):
             'author',
             'comment',
             'task',
+
+
+            'viewers',
         ]
+
+    def get_viewers(self, obj: TaskComment):
+        qs = TaskViewInfo.objects.filter(
+            task=obj.task,
+            last_date__gte=obj.add_date,
+        )
+        return TaskViewInfoSerializer(qs, many=True).data
 
 
 class TaskTariffSerializer(serializers.ModelSerializer):
@@ -71,6 +83,7 @@ class TaskExecutorSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     task_images = TaskImageSerializer(many=True, required=False, read_only=True)
+    task_view_info = TaskViewInfoSerializer(many=True, required=False, read_only=True)
     title = serializers.CharField(required=False)
 
     new_executor = TaskExecutorSerializer(required=False, allow_null=True)
@@ -104,6 +117,7 @@ class TaskSerializer(serializers.ModelSerializer):
             'confirmed_tariff',
             'task_images',
             'appointed_by_boss',
+            'task_view_info',
 
             'new_comment_count',
             'last_comment',

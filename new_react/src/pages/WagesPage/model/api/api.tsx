@@ -23,6 +23,7 @@ interface GetAssignmentsCount {
     employee__id: number,
     date_from: string,
     date_by: string,
+    select_by_visa: boolean;
 }
 
 const WagesApi = rtkAPI.injectEndpoints({

@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
 
 from core.consumers import ws_send_to_all, ws_send_to_department
-from core.services.get_week_info import GetWeekInfo
+from core.services.get_week_info import GetWeekInfo, GetDateRangeInfo
 from .filters import TaskModelFilter, TaskCommentModelFilter
 from .models import Task, TaskImage, TaskComment, TaskViewInfo
 from .serializers import TaskSerializer, TaskImageSerializer, TaskCommentSerializer, \
@@ -110,6 +110,15 @@ def get_week_data(request):
     week_info = GetWeekInfo(week=week, year=year).execute()
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_date_range_data(request):
+    start_date = request.query_params.get("start_date")
+    end_date = request.query_params.get("end_date")
+
+    date_range_data = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+    return JsonResponse(date_range_data, json_dumps_params={"ensure_ascii": False})
 
 
 class TaskImageViewSet(viewsets.ModelViewSet):

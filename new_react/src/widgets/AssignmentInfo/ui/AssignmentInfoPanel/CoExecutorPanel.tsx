@@ -14,10 +14,11 @@ interface CoExecutorPanelProps {
     userList: Employee[] | undefined;
     data: Assignment[] | undefined;
     selectedIds: number[];
+    disabled: boolean;
 }
 
 export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
-    const {data, selectedIds, userList} = props;
+    const {data, selectedIds, userList, disabled} = props;
 
     const {currentUser} = useCurrentUser();
 
@@ -74,7 +75,7 @@ export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
             <div className={'p-1 d-flex gap-2 align-items-center'}>
                 <button
                     className={'appBtn circleBtn greenBtn fs-7 p-1'}
-                    disabled={addCoExecutorDisabled || isLoading}
+                    disabled={addCoExecutorDisabled || isLoading || disabled}
                     onClick={addCoExecutorClb}
                 >
                     <PersonAddIcon fontSize={'small'}/>
@@ -94,7 +95,7 @@ export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
 
                         {currentUser.current_department?.piecework_wages &&
                             <AppRangeInput
-                                disabled={maxRangeValue === 0}
+                                disabled={maxRangeValue === 0 || disabled}
                                 maxValue={maxRangeValue}
                                 value={coExecutorTax}
                                 setValue={setCoExecutorTax}

@@ -37,8 +37,9 @@ class WagesViewSet(viewsets.ModelViewSet):
         }
 
         for week in week_info:
+            print(f'###PRINT list #l=>40:', week.date_range[0], week.date_range[1])
             transactions = Transaction.objects.filter(
-                add_date__gt=week.date_range[0],
+                add_date__gte=week.date_range[0],
                 add_date__lte=week.date_range[1],
             )
             total_wages = transactions.exclude(transaction_type='accrual').aggregate(Sum('amount'))['amount__sum']
@@ -119,6 +120,9 @@ def get_assignment_counts(request):
     employee__id = request.query_params.get('employee__id')
     date_from = request.query_params.get('date_from')
     date_by = request.query_params.get('date_by')
+    select_by_visa = request.query_params.get('select_by_visa')
+
+    print(f'###PRINT get_assignment_counts #l=>125:', select_by_visa)
 
     try:
         employee = Employee.objects.get(id=employee__id)
@@ -126,18 +130,32 @@ def get_assignment_counts(request):
         return JsonResponse({'error': 'Employee not found'}, status=404)
 
     # Получаем все наряды, где пользователь был исполнителем или соисполнителем
-    assignments = Assignment.objects.filter(
-        Q(
-            co_executors__co_executor=employee,
-            date_completion__gt=date_from,
-            date_completion__lte=date_by,
-        ) |
-        Q(
-            executor=employee,
-            date_completion__gt=date_from,
-            date_completion__lte=date_by,
+    if select_by_visa == "true":
+        assignments = Assignment.objects.filter(
+            Q(
+                co_executors__co_executor=employee,
+                inspect_date__gte=date_from,
+                inspect_date__lte=date_by,
+            ) |
+            Q(
+                executor=employee,
+                inspect_date__gte=date_from,
+                inspect_date__lte=date_by,
+            )
         )
-    )
+    else:
+        assignments = Assignment.objects.filter(
+            Q(
+                co_executors__co_executor=employee,
+                tariffication_date__gte=date_from,
+                tariffication_date__lte=date_by,
+            ) |
+            Q(
+                executor=employee,
+                tariffication_date__gte=date_from,
+                tariffication_date__lte=date_by,
+            )
+        )
 
     data = []
     while assignments.exists():

@@ -322,6 +322,9 @@ class EqUpdateAssignmentsStatus:
                 id=assignment_id,
             )
             if target_assignment.new_tariff:
+                target_assignment.tariffication_date = datetime.now()
+                target_assignment.save()
+
                 if target_assignment.new_tariff.amount:
                     tariff_created = True
 

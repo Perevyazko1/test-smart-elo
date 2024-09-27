@@ -1,4 +1,6 @@
 """Views for tariffication page. """
+import datetime
+
 from django.db import transaction
 from django.db.models import Q
 from django.http import JsonResponse
@@ -24,7 +26,7 @@ from .serializers import (
     PostTarifficationSerializer, TariffSerializer,
 )
 from ...consumers import EqNotificationActions, ws_group_updates
-from ...signals import clean_all_eq_card_info_cache
+from ...signals import clean_all_eq_card_info_cache, update_assignments_and_clean_cache
 
 
 @api_view(['GET'])
@@ -154,30 +156,6 @@ def set_confirmed_tariff(request):
     production_step.confirmed_tariff = new_tariff
     production_step.save()
 
-    assignments_for_update = Assignment.objects.filter(
-        order_product__product=production_step.product,
-        department=production_step.department,
-        inspector__isnull=True,
-    )
-
-    assignments_for_update.update(
-        new_tariff=new_tariff,
-        amount=new_tariff.amount,
-    )
-    AssignmentCoExecutor.objects.filter(
-        assignment__in=assignments_for_update
-    ).distinct().update(amount=0)
-
-    detail = f'Утвердил тариф в размере {new_tariff.amount} для этапа производства id: {production_step.id}'
-    Audit.objects.create(
-        employee=request.user,
-        details=detail,
-    )
-    ProductionStepComment.objects.create(
-        author=request.user,
-        comment=detail,
-        production_step=production_step
-    )
 
     """Send update command for EQ page cards. """
     active_order_products = OrderProduct.objects.filter(
@@ -185,8 +163,26 @@ def set_confirmed_tariff(request):
         status="0",
     )
 
+    # Циклы разнесены чтобы кеш успевал обновиться
     for order_product in active_order_products:
         clean_all_eq_card_info_cache(order_product.id, production_step.department.id)
+
+        assignments_for_update = Assignment.objects.filter(
+            order_product=order_product,
+            department=production_step.department,
+            inspector__isnull=True,
+        )
+        update_assignments_and_clean_cache(
+            assignments_for_update,
+            order_product.id,
+            production_step.department.id,
+            new_tariff=new_tariff,
+            amount=new_tariff.amount,
+        )
+
+        AssignmentCoExecutor.objects.filter(
+            assignment__in=assignments_for_update
+        ).distinct().update(amount=0)
 
         notification_data = {str(production_step.department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -198,10 +194,23 @@ def set_confirmed_tariff(request):
             notification_data=notification_data
         )
 
+    detail = f'Утвердил тариф в размере {new_tariff.amount} для этапа производства id: {production_step.id}'
+
+    Audit.objects.create(
+        employee=request.user,
+        details=detail,
+    )
+    ProductionStepComment.objects.create(
+        author=request.user,
+        comment=detail,
+        production_step=production_step
+    )
+
     return Response("ok", status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
+@transaction.atomic
 def set_post_tariffication(request):
     """Set tariff for post tariffication. """
     production_step__id: int = request.data.get('production_step__id')
@@ -224,7 +233,10 @@ def set_post_tariffication(request):
 
     Assignment.objects.filter(
         id__in=zero_tariff__ids
-    ).update(new_tariff=zero_tariff)
+    ).update(
+        tariffication_date=datetime.datetime.now(),
+        new_tariff=zero_tariff,
+    )
 
     # Обновление тарифа для этапа производства
     tariff = Tariff.objects.get(
@@ -244,6 +256,7 @@ def set_post_tariffication(request):
         id__in=target__ids,
     )
     assignments_qs.update(
+        tariffication_date=datetime.datetime.now(),
         new_tariff=new_tariff,
         amount=new_tariff.amount,
     )

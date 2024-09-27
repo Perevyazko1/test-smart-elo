@@ -24,8 +24,8 @@ export const getSortModeInited = (state: StateSchema) => {
     return state.taskPage?.sortModeInited;
 }
 
-export const getStateWeekData = (state: StateSchema) => {
-    return state.taskPage?.week_data;
+export const getStateDateRangeData = (state: StateSchema) => {
+    return state.taskPage?.date_range_data;
 }
 
 

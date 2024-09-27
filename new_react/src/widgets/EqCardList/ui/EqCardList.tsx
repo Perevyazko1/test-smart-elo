@@ -2,13 +2,15 @@ import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "re
 
 import {useCardHeight} from "@pages/EqPage";
 import {EqCard} from "@widgets/EqCard";
-import {useCurrentUser, useFixedSizeList, useQueryParams, useQueue} from "@shared/hooks";
+import {useAppSelector, useCurrentUser, useFixedSizeList, useQueryParams, useQueue} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
 import {BlockName} from "./ui/BlockName";
 import {ReadySection} from "@pages/TaskPage/ui/Sections/ReadySection";
+import {getWeekData} from "@pages/EqPage/model/selectors/filterSelectors";
+import {getHumansDatetime} from "@shared/lib";
 
 interface EqCardListProps {
     extraParams?: object;
@@ -22,6 +24,8 @@ interface EqCardListProps {
 
 export const EqCardList = memo((props: EqCardListProps) => {
     const {listType, inited, expanded = false, noRelevantIds = [], deps, extraParams} = props;
+
+    const weekData = useAppSelector(getWeekData);
 
     const {addToQueue, processNext, queue} = useQueue();
     const {currentUser} = useCurrentUser();
@@ -171,12 +175,17 @@ export const EqCardList = memo((props: EqCardListProps) => {
                     />
                     : null
                 }
-                {listType === 'ready' && targetUserId &&
+                {(listType === 'ready' && targetUserId && weekData?.dt_dates && weekData?.dt_dates.length > 6) &&
                     <>
                         <div className={'fw-bold ps-1'}>
                             Выполненные задачи:
                         </div>
-                        <ReadySection eqMode={true} targetUserId={targetUserId}/>
+                        <ReadySection
+                            eqMode={true}
+                            targetUserId={targetUserId}
+                            start_date={getHumansDatetime(weekData?.dt_dates[0], 'YYYY-MM-DD')}
+                            end_date={getHumansDatetime(weekData?.dt_dates[6], 'YYYY-MM-DD')}
+                        />
                     </>
                 }
             </div>

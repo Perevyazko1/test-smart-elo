@@ -225,6 +225,9 @@ export const AppSelect = <T, >(props: AppSelectProps<T>) => {
             return true;
         }
         if (variant === 'select') {
+            if (noInput) {
+                return !value;
+            }
             return !inputNotEqualValue;
         }
         if (variant === "dropdown") {

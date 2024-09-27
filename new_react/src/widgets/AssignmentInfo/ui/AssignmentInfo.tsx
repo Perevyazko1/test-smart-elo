@@ -11,6 +11,7 @@ import {SelectPanel} from "./AssignmentInfoPanel/SelectPanel";
 import {CoExecutorPanel} from "./AssignmentInfoPanel/CoExecutorPanel";
 import {EditPanel} from "./AssignmentInfoPanel/EditPanel";
 import {AssignmentInfoRow} from "./AssignmentInfoRow";
+import {Assignment} from "@entities/Assignment";
 
 interface AssignmentInfoProps {
     seriesId: string;
@@ -23,8 +24,10 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const {currentUser} = useCurrentUser();
 
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [selectedUser, setSelectedUser] = useState<number | null>(null);
+    const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
-    const {data, isLoading} = useGetAssignmentInfo({
+    const {data, isLoading, isFetching} = useGetAssignmentInfo({
         department__id: currentUser.current_department?.id || 100,
         order_product__series_id: seriesId,
     });
@@ -54,12 +57,27 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
         </tr>
     ), [currentUser.current_department?.piecework_wages]);
 
+    const filteredData = useMemo(() => {
+        let newData: Assignment[] = [];
+        
+        if (data) {
+            newData = [...data]
+            if (selectedUser) {
+                newData = newData.filter(item => item.executor?.id === selectedUser);
+            }
+            
+            if (selectedStatus) {
+                newData = newData.filter(item => item.status === selectedStatus);
+            }
+        }
 
+        return newData || [];
+    }, [data, selectedStatus, selectedUser]);
 
     return (
         <div data-bs-theme={'light'} className={'pb-2'}>
             <h5 className={'m-0 p-2'}>
-                {(isLoading) && <Spinner size={'sm'}/>}
+                {(isLoading || isFetching) && <Spinner size={'sm'}/>}
 
                 <b>Серия: {seriesId} || Информация по нарядам: {title}</b>
             </h5>
@@ -70,7 +88,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
                 <SelectPanel
                     selectedIds={selectedIds}
-                    data={data}
+                    data={filteredData}
                     setSelectedIds={setSelectedIds}
                 />
 
@@ -79,7 +97,8 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                 <div className={'d-flex flex-column gap-2 fs-7 p-1'}>
                     Редактировать выбранные:
                     <CoExecutorPanel
-                        data={data}
+                        disabled={isFetching || isLoading}
+                        data={filteredData}
                         selectedIds={selectedIds}
                         userList={userList}
                     />
@@ -87,6 +106,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                     <hr className={'m-0 p-0'}/>
 
                     <EditPanel
+                        disabled={isFetching || isLoading}
                         selectedIds={selectedIds}
                         seriesId={seriesId}
                         data={data}
@@ -129,17 +149,23 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                         {PageSkeleton}
                         {PageSkeleton}
                         {PageSkeleton}
-                    </>}
-
-                {data?.map(assignment => (
+                    </>
+                }
+                {filteredData.map(assignment => (
                     <AssignmentInfoRow
+                        selectedUser={selectedUser}
+                        setSelectedUser={setSelectedUser}
+                        selectedStatus={selectedStatus}
+                        setSelectedStatus={setSelectedStatus}
                         userList={userList || []}
                         assignment={assignment}
                         key={assignment.id}
+                        disabled={isFetching}
                         onSelect={onSelectClb}
                         selected={selectedIds.includes(assignment.id)}
                     />
                 ))}
+
                 </tbody>
             </Table>
         </div>

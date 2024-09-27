@@ -2,7 +2,8 @@ import {Col, Form, Row, Table} from "react-bootstrap";
 import React, {useEffect, useState} from "react";
 
 import {UseGetAssignmentCounts} from "../../model/api/api";
-import {AppSkeleton, AppSlider} from "@shared/ui";
+import {AppSkeleton, AppSlider, AppSwitch} from "@shared/ui";
+import {ReadySection} from "@pages/TaskPage/ui/Sections/ReadySection";
 
 interface ProductCounterProps {
     employee__id: number;
@@ -14,6 +15,8 @@ interface ProductCounterProps {
 export const ProductCounter = (props: ProductCounterProps) => {
     const [dateBy, setDateBy] = useState<string>(props.date_by.slice(0, 10));
     const [dateFrom, setDateFrom] = useState<string>(props.date_from.slice(0, 10));
+
+    const [getByVisaDate, setGetByVisaDate] = useState(false);
 
     useEffect(() => {
         setDateBy(props.date_by.slice(0, 10))
@@ -27,6 +30,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
         employee__id: props.employee__id,
         date_by: dateBy,
         date_from: dateFrom,
+        select_by_visa: getByVisaDate,
     })
 
     const isValidDate = (dateString: string) => {
@@ -44,7 +48,16 @@ export const ProductCounter = (props: ProductCounterProps) => {
 
     return (
         <div>
-            <Form>
+            <div className={'d-flex align-items-center fs-4'}>
+                Отработка сотрудника
+                <AppSwitch
+                    checked={getByVisaDate}
+                    style={{transform: "scale(0.8)", fontSize: '10px'}}
+                    onSwitch={() => setGetByVisaDate(!getByVisaDate)}
+                    label={getByVisaDate ? "(По дате визирования)" : '(По дате начисления)'}
+                />
+            </div>
+            <Form className={'mb-2'}>
                 <Row>
                     <Form.Group controlId="date_from" as={Col} md="6">
                         <Form.Label>Дата с:</Form.Label>
@@ -63,7 +76,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
                 </Row>
             </Form>
 
-            <hr className={'m-2'}/>
+            <h6><b>Изделия: </b></h6>
 
             <Table size={'sm'} bordered>
                 <thead>
@@ -81,7 +94,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
                 {isLoading || isFetching ?
                     <>
                         <tr>
-                            <td colSpan={6}><AppSkeleton style={{width:'100%', height:'25px'}}/></td>
+                            <td colSpan={6}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
                         </tr>
                         <tr>
                             <td colSpan={6}><AppSkeleton style={{width: '100%', height: '25px'}}/></td>
@@ -97,7 +110,7 @@ export const ProductCounter = (props: ProductCounterProps) => {
                                 <td>
                                     {assignmentInfo.thumbnail_urls.length > 0 ?
                                         <AppSlider width={'40px'} height={'40px'}
-                                                images={assignmentInfo.thumbnail_urls}
+                                                   images={assignmentInfo.thumbnail_urls}
                                         />
                                         :
                                         <>БИ</>
@@ -113,6 +126,24 @@ export const ProductCounter = (props: ProductCounterProps) => {
                     </>
                 }
                 </tbody>
+            </Table>
+
+            <h6><b>Задачи: </b></h6>
+
+            <Table size={'sm'} bordered>
+                <tbody>
+                <tr>
+                    <td>
+                        <ReadySection
+                            eqMode={true}
+                            targetUserId={props.employee__id}
+                            start_date={dateFrom}
+                            end_date={dateBy}
+                        />
+                    </td>
+                </tr>
+                </tbody>
+
             </Table>
         </div>
     )

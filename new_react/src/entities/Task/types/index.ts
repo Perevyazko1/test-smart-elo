@@ -25,11 +25,6 @@ export interface TaskImage {
     thumbnail: string;
 }
 
-export interface CreateTaskImage {
-    taskId: number,
-    image: FormData,
-}
-
 export interface TaskTariff {
     id: number;
     created_by: number;
@@ -53,10 +48,19 @@ export interface TaskComment {
     task: number;
     comment: string;
     add_date: string;
+
+    viewers: TaskViewInfo[];
 }
 
-export interface NewTaskComment extends Omit<TaskComment, 'id' | 'add_date'> {
+export interface NewTaskComment extends Omit<TaskComment, 'id' | 'add_date' | 'viewers'> {
 
+}
+
+export interface TaskViewInfo {
+    id: number;
+    employee: number;
+    task: number;
+    last_date: string;
 }
 
 export interface Task {
@@ -80,6 +84,7 @@ export interface Task {
     confirmed_tariff: TaskTariff | null;
     appointed_by_boss: boolean;
 
+    task_view_info: TaskViewInfo[];
     task_images: TaskImage[];
 
     new_comment_count: number;
@@ -92,7 +97,6 @@ type TaskReadonlyFields =
     'proposed_tariff' |
     'confirmed_tariff' |
     'last_comment';
-
 
 
 export interface UpdateTask extends Partial<Omit<Task, TaskReadonlyFields>> {

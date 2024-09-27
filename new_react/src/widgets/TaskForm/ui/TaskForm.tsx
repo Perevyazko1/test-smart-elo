@@ -25,7 +25,7 @@ import {ForDepartmentsBlock} from "./ui/ForDepartmentsBlock";
 import {RatingBlock} from "./ui/RatingBlock";
 import {TextTitleBlock} from "./ui/TextTitleBlock";
 import {TextDescriptionBlock} from "./ui/TextDescriptionBlock";
-import {CommentBlock} from "@widgets/TaskForm/ui/ui/CommentBlock";
+import {CommentBlock} from "./ui/CommentBlock";
 
 
 interface TaskFormProps {
@@ -194,7 +194,8 @@ export const TaskForm = (props: TaskFormProps) => {
             onSubmit={handleSubmit}
         >
             <TaskTitle task={task}/>
-            <hr className={'m-1'}/>
+
+            <hr className={'m-0 mb-1'}/>
 
             <div className={'d-flex justify-content-between gap-2'}>
                 <ImageUploadBlock

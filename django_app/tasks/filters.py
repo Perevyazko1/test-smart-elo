@@ -1,7 +1,7 @@
 import django_filters
 from django.db.models import QuerySet, Q
 
-from core.services.get_week_info import GetWeekInfo
+from core.services.get_week_info import GetDateRangeInfo
 from .models import Task, TaskComment
 
 
@@ -30,17 +30,21 @@ class TaskModelFilter(django_filters.FilterSet):
             )
         if value == '2':
             return queryset.filter(status=value)
+
         if value == '3':
-            year = self.request.query_params.get("year")
-            week = self.request.query_params.get("week")
-            week_info = GetWeekInfo(week=week, year=year).execute()
-            current_week_info = GetWeekInfo().execute()
-            if week_info.week == current_week_info.week and current_week_info.year == current_week_info.year:
+            start_date = self.request.query_params.get("start_date")
+            end_date = self.request.query_params.get("end_date")
+
+            date_info = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+            current_date_info = GetDateRangeInfo().get_range_info()
+
+            if date_info['date_range']['start_date'] == current_date_info['date_range']['start_date']\
+                    and date_info['date_range']['end_date'] == current_date_info['date_range']['end_date']:
                 return queryset.filter(
                     Q(
                         status=value,
-                        verified_at__gt=week_info.date_range[0],
-                        verified_at__lte=week_info.date_range[1],
+                        verified_at__gte=date_info['date_range']['start_date'],
+                        verified_at__lte=date_info['date_range']['end_date'],
                     ) |
                     Q(
                         status=value,
@@ -50,13 +54,20 @@ class TaskModelFilter(django_filters.FilterSet):
             else:
                 return queryset.filter(
                     status=value,
-                    verified_at__gt=week_info.date_range[0],
-                    verified_at__lte=week_info.date_range[1],
+                    verified_at__gte=date_info['date_range']['start_date'],
+                    verified_at__lte=date_info['date_range']['end_date'],
                 )
 
         if value == '4':
+            start_date = self.request.query_params.get("start_date")
+            end_date = self.request.query_params.get("end_date")
+
+            date_info = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+
             return queryset.filter(
                 status=value,
+                ready_at__gte=date_info['date_range']['start_date'],
+                ready_at__lte=date_info['date_range']['end_date'],
             )
         return queryset
 

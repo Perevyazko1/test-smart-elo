@@ -1,16 +1,17 @@
 import React, {useContext, useEffect} from "react";
 
+import {ConnectDragSource} from "react-dnd";
 import {Button} from "react-bootstrap";
 import {Fab} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 
-import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
-import {TaskForm} from "@widgets/TaskForm";
-
-import {getStateWeekData} from "../../model/selectors";
-import {getWeekData} from "../../model/api/getWeekData";
-import {ConnectDragSource} from "react-dnd";
 import {IsDesktopContext} from "@app";
+import {TaskForm} from "@widgets/TaskForm";
+import {getHumansDatetime} from "@shared/lib";
+import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
+
+import {getStateDateRangeData} from "../../model/selectors";
+import {getDateRangeData} from "../../model/api/getDateRangeData";
 
 
 interface WeeksProps {
@@ -30,7 +31,7 @@ export const Weeks = (props: WeeksProps) => {
     const dispatch = useAppDispatch();
     const {initialLoad, queryParameters, setQueryParam} = useAppQuery();
 
-    const weekData = useAppSelector(getStateWeekData);
+    const dateRangeData = useAppSelector(getStateDateRangeData);
 
     const addAction = () => handleOpen(
         <TaskForm
@@ -42,24 +43,36 @@ export const Weeks = (props: WeeksProps) => {
 
     useEffect(() => {
         if (!initialLoad) {
-            dispatch(getWeekData({
-                week: queryParameters.week,
-                year: queryParameters.year
+            dispatch(getDateRangeData({
+                start_date: queryParameters.start_date,
+                end_date: queryParameters.end_date,
             }))
         }
-    }, [dispatch, initialLoad, queryParameters.week, queryParameters.year]);
+    }, [dispatch, initialLoad, queryParameters.start_date, queryParameters.end_date]);
 
 
     const getWeekString = () => {
-        if (blockWidthPx > 550) {
-            return `Неделя ${weekData?.week} с ${weekData?.str_dates ? weekData.str_dates[0] : ''} 
-                        по ${weekData?.str_dates ? weekData.str_dates[6] : ''}`;
-        } else if (blockWidthPx > 400) {
-            return `Неделя ${weekData?.week}`;
-        } else if (blockWidthPx > 250) {
-            return `${weekData?.week}`;
+        if (dateRangeData) {
+            if (blockWidthPx > 550) {
+                return (
+                    `${dateRangeData.range_type} ${dateRangeData.range_value} 
+                    с ${getHumansDatetime(dateRangeData.date_range.start_date, 'DD-MM')} 
+                    по ${getHumansDatetime(dateRangeData.date_range.end_date, 'DD-MM')}`
+                );
+
+            } else if (blockWidthPx > 400) {
+                return (
+                    `${dateRangeData.range_type} ${dateRangeData.range_value}`
+                );
+            } else if (blockWidthPx > 250) {
+                return (
+                    `${dateRangeData.range_value}`
+                );
+            } else {
+                return ('');
+            }
         } else {
-            return '';
+            return ("");
         }
     }
 
@@ -93,15 +106,27 @@ export const Weeks = (props: WeeksProps) => {
                 </Fab>
             </div>
 
-            {blockWidthPx > 300 &&
+            {(dateRangeData && blockWidthPx > 300) &&
                 <div className={'d-flex gap-1 justify-content-between flex-fill align-items-center'}>
                     <Button className={"p-0 d-flex align-items-center justify-content-center"}
                             variant={'dark'}
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
                             onClick={() => {
-                                setQueryParam('week', `${weekData?.previous_week_data?.week}`)
-                                setQueryParam('year', `${weekData?.previous_week_data?.year}`)
+                                setQueryParam(
+                                    'start_date',
+                                    getHumansDatetime(
+                                        `${dateRangeData?.previous_range.start_date}`,
+                                        "YYYY-MM-DD"
+                                    )
+                                )
+                                setQueryParam(
+                                    'end_date',
+                                    getHumansDatetime(
+                                        `${dateRangeData?.previous_range.end_date}`,
+                                        "YYYY-MM-DD"
+                                    )
+                                )
                             }}
                     >
                         <i className="fas fa-angle-double-left fs-3"/>
@@ -111,15 +136,26 @@ export const Weeks = (props: WeeksProps) => {
                         {getWeekString()}
                     </div>
 
-
                     <Button className={"p-0 d-flex align-items-center justify-content-center"}
                             type={"button"}
                             variant={'dark'}
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
                             onClick={() => {
-                                setQueryParam('week', `${weekData?.next_week_data?.week}`)
-                                setQueryParam('year', `${weekData?.next_week_data?.year}`)
+                                setQueryParam(
+                                    'start_date',
+                                    getHumansDatetime(
+                                        `${dateRangeData?.next_range.start_date}`,
+                                        "YYYY-MM-DD"
+                                    )
+                                )
+                                setQueryParam(
+                                    'end_date',
+                                    getHumansDatetime(
+                                        `${dateRangeData?.next_range.end_date}`,
+                                        "YYYY-MM-DD"
+                                    )
+                                )
                             }}
                     >
                         <i className="fas fa-angle-double-right fs-3"/>

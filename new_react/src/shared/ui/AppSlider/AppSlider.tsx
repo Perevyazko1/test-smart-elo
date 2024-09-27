@@ -71,64 +71,65 @@ export const AppSlider = memo((props: AppSliderProps) => {
         >
             <>
                 {price !== undefined &&
-                    <div
-                        style={{
-                            position: "absolute",
-                            fontSize: '10px',
-                            maxWidth: "36px",
-                            overflow: "hidden",
-                            bottom: "1px",
-                            left: "0",
-                            margin: "auto",
-                            zIndex: "999",
-                            opacity: "0.7",
-                            pointerEvents: "none",
-                        }}
-                    >
+                    <>
                         <div
-                            className={"fw-bold text-black border rounded me-1" + bgColor}
                             style={{
-                                padding: "0 0.1rem",
-                                textOverflow: "ellipsis",
+                                position: "absolute",
+                                fontSize: '10px',
+                                maxWidth: "36px",
                                 overflow: "hidden",
+                                bottom: "1px",
+                                left: "0",
+                                margin: "auto",
+                                zIndex: "999",
+                                opacity: "0.7",
+                                pointerEvents: "none",
                             }}
                         >
-                            {price}
+                            <div
+                                className={"fw-bold text-black border rounded me-1" + bgColor}
+                                style={{
+                                    padding: "0 0.1rem",
+                                    textOverflow: "ellipsis",
+                                    overflow: "hidden",
+                                }}
+                            >
+                                {price}
+                            </div>
                         </div>
-                    </div>
-                }
 
-                {totalPrice ?
-                    <div
-                        style={{
-                            position: "absolute",
-                            display: "block",
-                            bottom: "1px",
-                            maxWidth: "36px",
-                            right: "0",
-                            margin: "auto",
-                            zIndex: "999",
-                            opacity: "0.7",
-                            pointerEvents: "none",
-                            fontSize: '10px',
-                        }}
-                    >
-                        <div
-                            className={"fw-bolder border rounded" + bgColor}
-                            style={{
-                                padding: "0 0.1rem",
-                                textOverflow: "ellipsis",
-                                overflow: "hidden",
-                            }}
-                        >
-                            {totalPrice}
-                        </div>
-                    </div>
-                    :
-                    null
+                        {totalPrice ?
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    display: "block",
+                                    bottom: "1px",
+                                    maxWidth: "36px",
+                                    right: "0",
+                                    margin: "auto",
+                                    zIndex: "999",
+                                    opacity: "0.7",
+                                    pointerEvents: "none",
+                                    fontSize: '10px',
+                                }}
+                            >
+                                <div
+                                    className={"fw-bolder border rounded" + bgColor}
+                                    style={{
+                                        padding: "0 0.1rem",
+                                        textOverflow: "ellipsis",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    {totalPrice}
+                                </div>
+                            </div>
+                            :
+                            null
+                        }
+                    </>
                 }
             </>
-
 
             {images && images?.length > 0 ?
                 Sliders

@@ -13,10 +13,10 @@
   overflow-y: auto;
 }
 
-
 .stickyWrapper {
   position: sticky;
   padding: 0 0.25rem;
   top: 0;
   background: var(--bs-light);
+  z-index: 1000;
 }

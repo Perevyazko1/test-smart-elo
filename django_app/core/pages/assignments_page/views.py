@@ -7,7 +7,7 @@ from core.models import Assignment, AssignmentCoExecutor
 from staff.models import Employee
 from .filters import AssignmentModelFilter
 from .serializers import AssignmentExtendedSerializer
-from ...consumers import EqNotificationActions, ws_group_updates, ws_send_to_department
+from ...consumers import EqNotificationActions, ws_group_updates
 from ...signals import clean_all_eq_card_info_cache
 
 

@@ -120,23 +120,6 @@ class ProductionStepSerializer(serializers.ModelSerializer):
         ]
 
 
-class AssignmentsSerializer(serializers.ModelSerializer):
-    executor = EmployeeSerializer()
-    inspector = EmployeeSerializer()
-
-    class Meta:
-        model = Assignment
-        fields = [
-            'id',
-            'number',
-            'notes',
-            'status',
-            'department',
-            'executor',
-            'inspector',
-        ]
-
-
 class OrderProductSerializer(serializers.ModelSerializer):
     product = ProductSerializer()
     main_fabric = FabricSerializer()

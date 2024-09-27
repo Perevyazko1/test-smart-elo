@@ -71,7 +71,7 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
     }, [card.new_co_executors, card.new_executor, currentUser.id, targetUserId]);
 
     const cardAmount = useMemo(() => {
-        return card.confirmed_tariff?.amount || card.proposed_tariff?.amount || 0;
+        return card.confirmed_tariff?.amount || card.proposed_tariff?.amount;
     }, [card.confirmed_tariff?.amount, card.proposed_tariff?.amount]);
 
     return (
@@ -115,8 +115,8 @@ export const TaskPageCard = memo((props: TaskPageCardProps) => {
                         width={'100%'}
                         height={'100%'}
                         images={card.task_images?.map(image => image.thumbnail)}
-                        price={userAmount}
-                        totalPrice={cardAmount}
+                        price={cardAmount}
+                        totalPrice={userAmount}
                         bgColor={card.confirmed_tariff ? " bg-light" : " bg-warning"}
                     />
                     {card.new_comment_count > 0 &&

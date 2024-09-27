@@ -10,13 +10,26 @@ import {APP_PERM} from "@shared/consts";
 
 interface AssignmentInfoRowProps {
     assignment: Assignment;
+    selectedUser: number | null;
+    setSelectedUser: (userId: number | null) => void;
+    selectedStatus: string | null;
+    setSelectedStatus: (status: string | null) => void;
     onSelect: (id: number) => void;
     selected: boolean;
     userList: Employee[];
+    disabled: boolean;
 }
 
 export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
-    const {assignment, selected, onSelect, userList} = props;
+    const {assignment,
+        selectedUser,
+        setSelectedUser,
+        selectedStatus,
+        setSelectedStatus,
+        disabled,
+        selected,
+        onSelect,
+        userList,} = props;
     const [coExecutorsList, setCoExecutorsList] = useState<AssignmentCoExecutor[]>(assignment.co_executors);
     const {currentUser} = useCurrentUser();
     const hasBehalfPermission = usePermission(APP_PERM.BEHALF_ACTIONS)
@@ -136,6 +149,38 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
         return false;
     }, [assignment.executor, assignment.inspector, currentUser.id, hasBehalfPermission]);
 
+    const setSelectedExecutor = () => {
+        if (selectedUser) {
+            setSelectedUser(null);
+        } else {
+            setSelectedUser(assignment.executor?.id || null);
+        }
+    };
+
+    const executorCellBg = useMemo(() => {
+        if (selectedUser) {
+            return 'bg-warning';
+        } else {
+            return '';
+        }
+    }, [selectedUser]);
+
+    const handleStatus = () => {
+        if (selectedStatus) {
+            setSelectedStatus(null);
+        } else {
+            setSelectedStatus(assignment.status);
+        }
+    };
+
+    const statusCellBg = useMemo(() => {
+        if (selectedStatus) {
+            return 'bg-warning';
+        } else {
+            return '';
+        }
+    }, [selectedStatus]);
+
     return (
         <>
             <tr className={'align-middle fs-7'}>
@@ -144,6 +189,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                         className="form-check-input"
                         type="checkbox"
                         checked={selected}
+                        disabled={disabled}
                         onChange={() => onSelect(assignment.id)}
                     />
                 </td>
@@ -153,7 +199,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                     {getHumansDatetime(assignment.plane_date || '')}
                 </td>
 
-                <td>
+                <td onClick={setSelectedExecutor} className={executorCellBg} style={{cursor: 'pointer'}}>
                     {getEmployeeName(assignment.executor)}
                 </td>
 
@@ -162,6 +208,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                         <button
                             className={'appBtn circleBtn fs-7'}
                             onClick={addNewCoexecutor}
+                            disabled={disabled}
                             style={{height: '25px', width: '25px'}}
                         >
                             <PersonAddIcon fontSize={'small'}/>
@@ -170,7 +217,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 </td>
 
 
-                <td className={'text-nowrap'}>
+                <td className={'text-nowrap ' + statusCellBg} onClick={handleStatus} style={{cursor: 'pointer'}}>
                     {getStatusProps.icon}
                     <b>{getStatusProps.name}</b>
                 </td>
@@ -213,7 +260,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
 
             {coExecutorsList.map(co_executor => (
                 <CoExecutorRow
-                    disabled={!showNewCoExecutor}
+                    disabled={!showNewCoExecutor || disabled}
                     maxValue={co_executor.amount + inputValue}
                     setValue={setValueClb}
                     setUser={setUserClb}

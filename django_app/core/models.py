@@ -1,4 +1,3 @@
-import datetime
 import uuid
 from io import BytesIO
 
@@ -376,9 +375,9 @@ class Assignment(models.Model):
     ]
 
     number = models.IntegerField('Порядковый номер наряда', default=1)
-    date_completion = models.DateTimeField('Дата готовности', null=True, blank=True)
 
     notes = models.CharField('Заметки', max_length=250, blank=True)
+
     status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="await")
 
     amount = models.IntegerField("Вознаграждение", default=0)
@@ -415,8 +414,6 @@ class Assignment(models.Model):
         blank=True,
     )
 
-    appointment_date = models.DateTimeField('Дата взятия в работу', null=True, blank=True)
-
     inspector = models.ForeignKey(
         Employee,
         related_name='assignments_inspector',
@@ -425,8 +422,18 @@ class Assignment(models.Model):
         null=True, blank=True,
         default=None
     )
+
+    date_completion = models.DateTimeField('Дата готовности', null=True, blank=True)
+    appointment_date = models.DateTimeField('Дата взятия в работу', null=True, blank=True)
     plane_date = models.DateTimeField('План дата готовности', null=True, blank=True)
     inspect_date = models.DateTimeField('Дата визирования', null=True, blank=True)
+    tariffication_date = models.DateTimeField(
+        'Дата тарифицирования',
+        null=True,
+        blank=True,
+
+    )
+
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
     assembled = models.BooleanField('Укомплектован', blank=True, default=True)
 

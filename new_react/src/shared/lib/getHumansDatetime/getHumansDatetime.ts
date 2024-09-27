@@ -1,4 +1,4 @@
-export const getHumansDatetime = (utc_datetime: string, variant: 'full' | 'short' = 'full') => {
+export const getHumansDatetime = (utc_datetime: string, variant: 'full' | 'short' | 'DD-MM' | 'YYYY-MM-DD' = 'full' ) => {
     if (utc_datetime === '') {
         return "";
     }
@@ -15,6 +15,18 @@ export const getHumansDatetime = (utc_datetime: string, variant: 'full' | 'short
         );
 
         return `${date} - ${time}`
+    } else if (variant === 'DD-MM') {
+        const dateTime = new Date(utc_datetime);
+
+       const date = dateTime.toLocaleDateString(
+            'ru-RU',
+            {day: '2-digit', month: 'short'}
+        );
+
+       return `${date}`;
+
+    } else if (variant === 'YYYY-MM-DD') {
+        return `${utc_datetime.slice(0, 10)}`;
     } else {
         const dateTime = new Date(utc_datetime);
         const date = dateTime.toLocaleDateString(

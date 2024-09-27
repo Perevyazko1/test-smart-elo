@@ -6,10 +6,10 @@ import {TaskPageSchema} from "../types";
 import {getTaskCards} from "../api/getTaskCards";
 import {updateTask} from "../api/updateTask";
 import {getTaskCard} from "../api/getTaskCard";
-import {getWeekData} from "../api/getWeekData";
+import {getDateRangeData} from "../api/getDateRangeData";
 
 export const initialState: TaskPageSchema = {
-    week_data: null,
+    date_range_data: null,
     viewModeInited: false,
     sortModeInited: false,
     await: {
@@ -130,12 +130,12 @@ const taskPageSlice = createSlice({
                 state.noRelevantIds = state.noRelevantIds.filter(item => item !== action.meta.arg.id);
             })
 
-            .addCase(getWeekData.pending, () => {
+            .addCase(getDateRangeData.pending, () => {
             })
-            .addCase(getWeekData.fulfilled, (state, action) => {
-                state.week_data = action.payload;
+            .addCase(getDateRangeData.fulfilled, (state, action) => {
+                state.date_range_data = action.payload;
             })
-            .addCase(getWeekData.rejected, () => {
+            .addCase(getDateRangeData.rejected, () => {
             })
     },
 });

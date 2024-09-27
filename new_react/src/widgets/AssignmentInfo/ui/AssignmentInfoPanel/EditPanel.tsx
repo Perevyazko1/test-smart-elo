@@ -15,10 +15,11 @@ interface EditPanelProps {
     seriesId: string;
     selectedIds: number[];
     data: Assignment[] | undefined;
+    disabled: boolean;
 }
 
 export const EditPanel = (props: EditPanelProps) => {
-    const {seriesId, selectedIds, data} = props;
+    const {seriesId, disabled: panelDisabled, selectedIds, data} = props;
 
     const {currentUser} = useCurrentUser();
     const dispatch = useAppDispatch();
@@ -73,7 +74,7 @@ export const EditPanel = (props: EditPanelProps) => {
             Наряды:
             <button
                 className={'appBtn fs-7 p-1'}
-                disabled={isEdited || !unconfirmedPerm || disabled || visaDisabled}
+                disabled={isEdited || !unconfirmedPerm || disabled || visaDisabled || panelDisabled}
                 onClick={() => updateClb('remove_visa')}
             >
                 Снять визу
@@ -90,7 +91,7 @@ export const EditPanel = (props: EditPanelProps) => {
 
                     <button
                         className={'appBtn fs-7 p-1'}
-                        disabled={isEdited || disabled || planDateDisabled}
+                        disabled={isEdited || disabled || planDateDisabled || panelDisabled}
                         onClick={() => updateClb('selected')}
                     >
                         Назначить

@@ -12,11 +12,13 @@ import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 interface ReadySectionProps {
     eqMode?: boolean;
     targetUserId?: number;
+    start_date?: string | undefined;
+    end_date?: string | undefined;
 }
 
 
 export const ReadySection = (props: ReadySectionProps) => {
-    const {eqMode = false, targetUserId} = props;
+    const {eqMode = false, targetUserId, end_date, start_date} = props;
 
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
@@ -29,14 +31,14 @@ export const ReadySection = (props: ReadySectionProps) => {
                 status: TaskStatus.Completed,
                 sort_mode: '1',
                 view_mode: '9',
-                week: queryParameters.week,
-                year: queryParameters.year,
+                end_date: end_date,
+                start_date: start_date,
                 users: undefined,
                 user: targetUserId,
                 departments: undefined,
             }))
         }
-    }, [dispatch, eqMode, queryParameters.week, queryParameters.year, targetUserId]);
+    }, [end_date, start_date, dispatch, eqMode, queryParameters.week, queryParameters.year, targetUserId]);
 
     useEffect(() => {
         if (!eqMode) {
@@ -46,8 +48,8 @@ export const ReadySection = (props: ReadySectionProps) => {
                         status: TaskStatus.Completed,
                         sort_mode: queryParameters.sort_mode,
                         view_mode: queryParameters.view_mode,
-                        week: queryParameters.week,
-                        year: queryParameters.year,
+                        start_date: queryParameters.start_date,
+                        end_date: queryParameters.end_date,
                         users: queryParameters.users,
                         departments: queryParameters.departments,
                     }))
@@ -56,8 +58,8 @@ export const ReadySection = (props: ReadySectionProps) => {
                         status: TaskStatus.Cancelled,
                         sort_mode: queryParameters.sort_mode,
                         view_mode: queryParameters.view_mode,
-                        week: queryParameters.week,
-                        year: queryParameters.year,
+                        start_date: queryParameters.start_date,
+                        end_date: queryParameters.end_date,
                         users: queryParameters.users,
                         departments: queryParameters.departments,
                     }))
@@ -70,10 +72,10 @@ export const ReadySection = (props: ReadySectionProps) => {
         queryParameters.sort_mode,
         queryParameters.users,
         queryParameters.view_mode,
-        queryParameters.week,
-        queryParameters.year,
         queryParameters.departments,
-        eqMode
+        eqMode,
+        queryParameters.start_date,
+        queryParameters.end_date
     ]);
 
 
@@ -109,7 +111,6 @@ export const ReadySection = (props: ReadySectionProps) => {
                         <TaskPageCard
                             id={`ready-task-id-${card.id}`}
                             targetUserId={targetUserId}
-                            scaled={eqMode}
                             key={card.id}
                             card={card}
                             cardType={TaskStatus.Completed}
