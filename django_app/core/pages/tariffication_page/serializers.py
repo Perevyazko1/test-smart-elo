@@ -99,8 +99,6 @@ class PageListSerializer(serializers.ModelSerializer):
 class AssignmentTariffSerializer(serializers.ModelSerializer):
     """Post tariffication assignments serializer. """
     department = DepartmentSerializer(read_only=True)
-    executor = EmployeeSerializer(read_only=True)
-    inspector = EmployeeSerializer(read_only=True)
     project = serializers.SerializerMethodField(read_only=True)
     order_number = serializers.SerializerMethodField(read_only=True)
 
@@ -117,6 +115,10 @@ class AssignmentTariffSerializer(serializers.ModelSerializer):
             'status',
             'project',
             'order_number',
+            'executor',
+            'inspector',
+        ]
+        read_only_fields = [
             'executor',
             'inspector',
         ]

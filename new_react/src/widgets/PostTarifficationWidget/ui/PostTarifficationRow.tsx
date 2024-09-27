@@ -1,5 +1,6 @@
 import {TarifficationAssignments} from "@widgets/PostTarifficationWidget/model/types";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {getHumansDatetime} from "@shared/lib";
+import {useEmployeeName} from "@shared/hooks";
 
 interface PostTarifficationRowProps {
     assignment: TarifficationAssignments;
@@ -12,7 +13,7 @@ interface PostTarifficationRowProps {
 
 export const PostTarifficationRow = (props: PostTarifficationRowProps) => {
     const {assignment, proposedTariff} = props;
-
+    const {getNameById} = useEmployeeName();
     return (
         <tr>
             <td>
@@ -34,11 +35,11 @@ export const PostTarifficationRow = (props: PostTarifficationRowProps) => {
             </td>
             <td className={'fs-7'}>{assignment.order_number}</td>
             <td className={'fs-7'}>{assignment.project}</td>
-            <td className={'fs-7'}>{getEmployeeName(assignment.executor)}</td>
+            <td className={'fs-7'}>{getNameById(assignment.executor, 'listNameInitials')}</td>
             <td className={'fs-7'}>{assignment.status}</td>
             <td className={'fs-7'}>{getHumansDatetime(assignment.appointment_date)}</td>
             <td className={'fs-7'}>{getHumansDatetime(assignment.date_completion)}</td>
-            <td className={'fs-7'}>{getEmployeeName(assignment.inspector)}</td>
+            <td className={'fs-7'}>{getNameById(assignment.inspector, 'listNameInitials')}</td>
             <td className={'fs-7'}>{getHumansDatetime(assignment.inspect_date)}</td>
         </tr>
     );

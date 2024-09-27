@@ -19,8 +19,8 @@ export interface TarifficationAssignments {
     status: string;
     project: string;
     order_number: string;
-    executor: Employee;
-    inspector: Employee;
+    executor: number;
+    inspector: number;
 }
 
 export interface PostTarifficationData {
