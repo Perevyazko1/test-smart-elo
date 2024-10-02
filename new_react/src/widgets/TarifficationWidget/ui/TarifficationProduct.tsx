@@ -4,8 +4,8 @@ import {Button, Table} from "react-bootstrap";
 import {PageListItem} from "@pages/TarifficationPage";
 import {PostTarifficationWidget} from "@widgets/PostTarifficationWidget";
 import {AppInput, AppSlider} from "@shared/ui";
-import {useAppModal, usePermission} from "@shared/hooks";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {useAppModal, useEmployeeName, usePermission} from "@shared/hooks";
+import {getHumansDatetime} from "@shared/lib";
 import {APP_PERM} from "@shared/consts";
 
 import {useSetConfirmedTariff, useSetProposedTariff} from "../model/api";
@@ -21,6 +21,8 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
     const {tariffCard} = props;
 
     const {handleOpen, handleClose} = useAppModal();
+
+    const {getNameById} = useEmployeeName();
 
     const [proposedInput, setProposedInput] = useState<string>(
         String(tariffCard.proposed_tariff?.amount) || ""
@@ -175,7 +177,7 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
                             <td>
                                 {tariffCard.proposed_tariff?.add_date &&
                                     getHumansDatetime(tariffCard.proposed_tariff?.add_date)
-                                } {getEmployeeName(tariffCard.proposed_tariff?.created_by)}
+                                } {getNameById(tariffCard.proposed_tariff?.created_by, 'nameLastName')}
                             </td>
                         </tr>
 
@@ -199,7 +201,7 @@ export const TarifficationProduct = (props: TarifficationProductProps) => {
                                 <td>
                                     {tariffCard.confirmed_tariff?.add_date &&
                                         getHumansDatetime(tariffCard.confirmed_tariff?.add_date)
-                                    } {getEmployeeName(tariffCard.confirmed_tariff?.created_by)}
+                                    } {getNameById(tariffCard.confirmed_tariff?.created_by, 'nameLastName')}
                                 </td>
                             }
                         </tr>

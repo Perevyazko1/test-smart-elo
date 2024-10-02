@@ -1,6 +1,8 @@
-import {TarifficationAssignments} from "@widgets/PostTarifficationWidget/model/types";
 import {getHumansDatetime} from "@shared/lib";
 import {useEmployeeName} from "@shared/hooks";
+
+import {TarifficationAssignments} from "../model/types";
+
 
 interface PostTarifficationRowProps {
     assignment: TarifficationAssignments;

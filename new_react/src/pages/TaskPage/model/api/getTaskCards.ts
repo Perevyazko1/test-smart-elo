@@ -7,6 +7,8 @@ interface getTaskCardsProps {
     status: TaskStatus;
     view_mode: string | undefined;
     users: string | undefined;
+    extended_search: string | undefined;
+    exclude_users: string | undefined;
     departments: string | undefined;
     sort_mode: string | undefined;
     start_date?: string | undefined;

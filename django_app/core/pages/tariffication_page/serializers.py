@@ -1,7 +1,6 @@
 """Serializers for tariffication page. """
 from rest_framework import serializers
 
-from staff.serializers import DepartmentSerializer, EmployeeSerializer
 from core.models import (
     ProductionStep,
     Assignment,
@@ -9,11 +8,10 @@ from core.models import (
     Tariff,
     OrderProduct,
 )
+from staff.serializers import DepartmentSerializer
 
 
 class TariffSerializer(serializers.ModelSerializer):
-    created_by = EmployeeSerializer(read_only=True)
-
     class Meta:
         """Metadata. """
         model = Tariff

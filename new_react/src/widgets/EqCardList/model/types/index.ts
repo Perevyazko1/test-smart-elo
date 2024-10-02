@@ -1,22 +1,6 @@
-import {TechProcess} from "@entities/TechProcess";
-import {Employee} from "@entities/Employee";
-import {Tariff} from "@pages/TarifficationPage";
+import {Product} from "@entities/Product";
 
 export type ListTypes = 'await' | 'in_work' | 'ready' | 'distribute';
-
-export interface EqProductPictures {
-    id: number;
-    image: string;
-    thumbnail: string;
-}
-
-export interface EqProduct {
-    id: number;
-    name: string;
-    product_pictures: EqProductPictures[];
-    technological_process: TechProcess | null;
-    technological_process_confirmed: Employee | null;
-}
 
 
 export interface EqOrder {
@@ -84,7 +68,7 @@ export interface EqOrderProduct {
     id: number;
     series_id: string;
     urgency: number;
-    product: EqProduct;
+    product: Product;
     order: EqOrder;
     main_fabric: EqFabric | null;
     second_fabric: EqFabric | null;

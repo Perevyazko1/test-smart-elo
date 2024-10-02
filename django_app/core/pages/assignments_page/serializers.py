@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from core.models import Assignment, Tariff, AssignmentCoExecutor
 from core.serializers import OrderProductSerializer
-from staff.serializers import EmployeeSerializer, DepartmentSerializer
+from staff.serializers import DepartmentSerializer
 
 
 class AssignmentTariffSerializer(serializers.ModelSerializer):
@@ -51,8 +51,6 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
 
 
 class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
-    co_executor = EmployeeSerializer(read_only=True)
-
     class Meta:
         """Meta. """
         model = AssignmentCoExecutor
@@ -65,9 +63,7 @@ class AssignmentCoExecutorSerializer(serializers.ModelSerializer):
 
 
 class AssignmentExtendedSerializer(serializers.ModelSerializer):
-    executor = EmployeeSerializer()
     co_executors = AssignmentCoExecutorSerializer(many=True)
-    inspector = EmployeeSerializer()
     department = DepartmentSerializer()
     order_product = OrderProductSerializer()
     new_tariff = AssignmentTariffSerializer()

@@ -13,24 +13,38 @@ def get_filtered_await_queryset(queryset, eq_params):
     # Фильтр при включенном режима бригадира
     if eq_params['view_mode_key'] == 'boss':
         if eq_params['department'].number == 1:
+            filter_params = {
+                "status": "0",
+                "product__technological_process_confirmed__isnull": True,
+            }
+            if eq_params['locked']:
+                filter_params['assignments__appointed_by_boss'] = False
+                filter_params['assignments__department'] = eq_params['department']
+
             queryset = queryset.filter(
-                status="0",
-                product__technological_process_confirmed__isnull=True
+                **filter_params
             ).distinct()
         else:
             # Извлекаем все не закрытые серии производства
-            if eq_params['assembled']:
+            filter_params = {
+                "status": "0",
+                "assignments__department": eq_params['department'],
+                "assignments__status__in": ['await', 'in_work'],
+            }
+
+            if not eq_params['assembled']:
+                filter_params['assignments__assembled'] = True
+
+            if eq_params['locked']:
+                del filter_params['assignments__status__in']
                 queryset = queryset.filter(
-                    status="0",
-                    assignments__department=eq_params['department'],
-                    assignments__status__in=['await', 'in_work'],
+                    **filter_params,
+                    assignments__status='await',
+                    assignments__appointed_by_boss=False,
                 ).distinct()
             else:
                 queryset = queryset.filter(
-                    status="0",
-                    assignments__department=eq_params['department'],
-                    assignments__assembled=True,
-                    assignments__status__in=['await', 'in_work'],
+                    **filter_params
                 ).distinct()
 
     # Фильтр при включенном режима недоделки

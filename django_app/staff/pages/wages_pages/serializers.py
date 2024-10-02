@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from staff.models import Employee, Transaction
 from staff.pages.wages_pages.services import get_weeks_list_info
-from staff.serializers import DepartmentSerializer, EmployeeSerializer
+from staff.serializers import DepartmentSerializer
 
 
 class WagesSerializer(serializers.ModelSerializer):
@@ -47,9 +47,6 @@ class WagesSerializer(serializers.ModelSerializer):
 
 
 class TransactionSerializer(serializers.ModelSerializer):
-    employee = EmployeeSerializer(read_only=True)
-    executor = EmployeeSerializer(read_only=True)
-    inspector = EmployeeSerializer(read_only=True)
     employee_id = serializers.IntegerField(write_only=True)
     executor_id = serializers.IntegerField(write_only=True)
     inspector_id = serializers.IntegerField(write_only=True, required=False)

@@ -10,7 +10,7 @@ import {TaskForm} from "@widgets/TaskForm";
 import {getHumansDatetime} from "@shared/lib";
 import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
 
-import {getStateDateRangeData} from "../../model/selectors";
+import {getReadyData, getStateDateRangeData} from "../../model/selectors";
 import {getDateRangeData} from "../../model/api/getDateRangeData";
 
 
@@ -29,6 +29,9 @@ export const Weeks = (props: WeeksProps) => {
     const handleDoubleTap = useDoubleTap(resetSize);
     const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
+
+    const readyData = useAppSelector(getReadyData);
+
     const {initialLoad, queryParameters, setQueryParam} = useAppQuery();
 
     const dateRangeData = useAppSelector(getStateDateRangeData);
@@ -57,7 +60,9 @@ export const Weeks = (props: WeeksProps) => {
                 return (
                     `${dateRangeData.range_type} ${dateRangeData.range_value} 
                     с ${getHumansDatetime(dateRangeData.date_range.start_date, 'DD-MM')} 
-                    по ${getHumansDatetime(dateRangeData.date_range.end_date, 'DD-MM')}`
+                    по ${getHumansDatetime(dateRangeData.date_range.end_date, 'DD-MM')}
+                    (${readyData?.results.length})
+                    `
                 );
 
             } else if (blockWidthPx > 400) {

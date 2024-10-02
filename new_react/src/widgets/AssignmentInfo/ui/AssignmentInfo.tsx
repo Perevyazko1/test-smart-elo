@@ -63,7 +63,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
         if (data) {
             newData = [...data]
             if (selectedUser) {
-                newData = newData.filter(item => item.executor?.id === selectedUser);
+                newData = newData.filter(item => item.executor === selectedUser);
             }
             
             if (selectedStatus) {

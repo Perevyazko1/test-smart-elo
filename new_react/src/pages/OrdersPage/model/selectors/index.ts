@@ -1,13 +1,20 @@
+import {createSelector} from 'reselect';
+
 import {StateSchema} from "@app";
+
+
 
 export const getOrdersList = (state: StateSchema) => state.orders?.results
 
-export const getOrdersProps = (state: StateSchema) => {
-    return {
-        count: state.orders?.count,
-        isLoading: state.orders?.isLoading,
-        next: state.orders?.next,
-        hasUpdated: state.orders?.hasUpdated,
-    }
-}
+export const getOrdersProps = createSelector(
+    (state: StateSchema) => state.orders,
+    (orders) => ({
+        next: orders?.next,
+        previous: orders?.previous,
+        count: orders?.count,
+        isLoading: orders?.isLoading,
+        hasUpdated: orders?.hasUpdated,
+    })
+);
+
 

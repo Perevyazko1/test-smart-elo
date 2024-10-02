@@ -1,18 +1,19 @@
-import {StateSchema} from "@app";
+import {createSelector} from 'reselect';
 
-import {AssignmentSchema} from "../types/types";
+import {StateSchema} from "@app";
 import {AssignmentAdapter} from "@entities/Assignment/adapter/adapter";
 
 export const getAssignmentList = AssignmentAdapter.getSelectors<StateSchema>(
     state => state.assignments?.results || AssignmentAdapter.getInitialState()
 );
 
-export const getAssignmentProps = (state: StateSchema): Omit<AssignmentSchema, 'results'> => {
-    return {
-        next: state.assignments?.next || null,
-        previous: state.assignments?.previous || null,
-        count: state.assignments?.count || 0,
-        isLoading: state.assignments?.isLoading !== undefined ? state.assignments?.isLoading : true,
-        hasUpdated: state.assignments?.hasUpdated,
-    };
-};
+export const getAssignmentProps = createSelector(
+  (state: StateSchema) => state.assignments,
+  (assignments) => ({
+    next: assignments?.next,
+    previous: assignments?.previous,
+    count: assignments?.count,
+    isLoading: assignments?.isLoading,
+    hasUpdated: assignments?.hasUpdated,
+  })
+);

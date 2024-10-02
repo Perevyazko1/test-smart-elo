@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from staff.serializers import DepartmentSerializer, EmployeeSerializer
+from staff.serializers import DepartmentSerializer
 from .models import *
 
 
@@ -89,7 +89,6 @@ class OrderSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     technological_process = TechProcessSerializer()
     product_pictures = ProductPicturesSerializer(many=True)
-    technological_process_confirmed = EmployeeSerializer()
 
     class Meta:
         model = Product

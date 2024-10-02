@@ -1,6 +1,6 @@
 import {OpComment} from "../model/types"
 import {getHumansDatetime} from "@shared/lib";
-import {useAppDispatch, useCurrentUser} from "@shared/hooks";
+import {useAppDispatch, useCurrentUser, useEmployeeName} from "@shared/hooks";
 import {useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {fetchEditComment} from "@widgets/OrderDetailWidget/model/api/fetchEditComment";
@@ -14,13 +14,15 @@ export const OpCommentRow = (props: OPCommentProps) => {
     const {currentUser} = useCurrentUser();
     const dispatch = useAppDispatch();
 
+    const {getNameById} = useEmployeeName();
+
     const getCommentFormatedText = (comment: OpComment) => {
-        return `${comment.author.last_name} ${comment.author.first_name?.slice(0, 1)}. 
+        return `${getNameById(comment.author, 'short')}. 
         ${getHumansDatetime(comment.add_date)}: ${comment.text}`
     }
 
-    const isOwner = useMemo(() => props.comment.author.id === currentUser.id,
-        [currentUser.id, props.comment.author.id]
+    const isOwner = useMemo(() => props.comment.author === currentUser.id,
+        [currentUser.id, props.comment.author]
     )
 
     const DeleteBtn = () => {

@@ -127,7 +127,7 @@ export const EqCardTable = (props: EqCardTableProps) => {
 
             </Table>
             <Link to={
-                `/assignment/?order_product__series_id=${card.series_id}&department__name=${currentUser.current_department?.name || ''}`
+                `/assignment/?order_product__series_id=${card.series_id}&department__id=${currentUser.current_department?.id || ''}`
             }>
                 <Button
                     className={'m-2'}

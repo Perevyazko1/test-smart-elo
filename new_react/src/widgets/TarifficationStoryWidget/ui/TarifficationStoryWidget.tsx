@@ -2,8 +2,9 @@ import {AppSkeleton} from "@shared/ui";
 
 import {useGetTarifficationStory} from "../model/api";
 import {Table} from "react-bootstrap";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {getHumansDatetime} from "@shared/lib";
 import {TarifficationComments} from "@widgets/TarifficationWidget";
+import {useEmployeeName} from "@shared/hooks";
 
 interface TarifficationStoryWidgetProps {
     production_step__id: number;
@@ -14,6 +15,8 @@ export const TarifficationStoryWidget = (props: TarifficationStoryWidgetProps) =
     const {data, isLoading} = useGetTarifficationStory({
         production_step__id: props.production_step__id
     });
+
+    const {getNameById} = useEmployeeName();
 
     const Skeleton = () => (
         <tr>
@@ -63,7 +66,7 @@ export const TarifficationStoryWidget = (props: TarifficationStoryWidgetProps) =
                                 {tariff.amount.toLocaleString('ry-RU')}
                             </td>
                             <td>
-                                {getEmployeeName(tariff.created_by)}
+                                {getNameById(tariff.created_by, 'nameLastName')}
                             </td>
                             <td>
                                 {getHumansDatetime(tariff.add_date)}

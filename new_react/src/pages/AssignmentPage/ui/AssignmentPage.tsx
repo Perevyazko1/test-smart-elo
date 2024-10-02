@@ -14,7 +14,7 @@ import {fetchAssignments} from "../model/service/fetchAssignments";
 import {assignmentPageActions, assignmentPageReducer} from "../model/slice/assignmentPageSlice";
 
 
-import {NavBar} from "./ui/NavBar";
+import {AssignmentNavBar} from "./ui/AssignmentNavBar";
 import {AssignmentPageTableRow} from "./ui/AssignmentPageTableRow";
 
 
@@ -82,13 +82,13 @@ export const AssignmentPage = () => {
     const PageSkeletons = useMemo(() => (
         <>
             <tr>
-                <td colSpan={9}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
+                <td colSpan={10}><AppSkeleton style={{height: '50px', width: '100%'}} className={'mb-1'}/></td>
             </tr>
             <tr>
-                <td colSpan={9}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
+                <td colSpan={10}><AppSkeleton style={{height: '50px', width: '100%'}} className={'mb-1'}/></td>
             </tr>
             <tr>
-                <td colSpan={9}><AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/></td>
+                <td colSpan={10}><AppSkeleton style={{height: '50px', width: '100%'}} className={'mb-1'}/></td>
             </tr>
         </>
     ), []);
@@ -98,7 +98,7 @@ export const AssignmentPage = () => {
             <QueryContext>
                 <ModalProvider>
                     <div className={cls.pageContainer}>
-                        <NavBar
+                        <AssignmentNavBar
                             showCanvas={showCanvas}
                             setShowCanvas={setShowCanvas}
                         />
@@ -121,14 +121,13 @@ export const AssignmentPage = () => {
                             </div>
 
                             <Container>
-                                <Table striped bordered hover size="sm">
+                                <Table striped bordered size="sm">
                                     <thead>
                                     <tr>
+                                        <th>Изобр.</th>
                                         <th>№</th>
-                                        <th>Серия</th>
-                                        <th>Отдел</th>
+                                        <th colSpan={2}>Серия / Отдел / Проект</th>
                                         <th>Статус</th>
-                                        <th>Тарификация</th>
                                         <th>Исполнитель</th>
                                         <th>Дата готовности</th>
                                         <th>Проверяющий</th>

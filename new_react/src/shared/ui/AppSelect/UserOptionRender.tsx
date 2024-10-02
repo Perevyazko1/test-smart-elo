@@ -1,3 +1,4 @@
+import React from "react";
 import {Spinner} from "react-bootstrap";
 import {Checkbox} from "@mui/material";
 
@@ -12,10 +13,12 @@ import classNames from "classnames";
 import cls from "@shared/ui/AppSelect/AppSelect.module.scss";
 import {GetRenderOptionProps} from "@shared/ui/AppSelect/AppSelectMenu";
 import CheckIcon from "@mui/icons-material/Check";
-import React from "react";
+
+interface UserOptionRenderProps extends GetRenderOptionProps<GroupedEmployeeItem> {
+}
 
 
-export const UserOptionRender = (listProps: GetRenderOptionProps<GroupedEmployeeItem>) => {
+export const UserOptionRender = (listProps: UserOptionRenderProps) => {
     const {option, handleSelect, isSelected, colorScheme} = listProps;
     const {currentUser, setCurrentUser} = useCurrentUser();
     const [addToFavorite, {isLoading}] = useAddToFavorite();
@@ -61,12 +64,13 @@ export const UserOptionRender = (listProps: GetRenderOptionProps<GroupedEmployee
                 onChange={addToFavoriteClb}
                 disabled={isLoading}
                 sx={{
-                    padding: '0 3px 0 0',
+                    padding: '0',
                     margin: 0,
                 }}
                 size={'small'}
                 checked={option ? currentUser.favorite_users.includes(option.user.id) : false}
             />
+
             {getEmployeeName(option?.user, 'listNameInitials')}
         </div>
     )

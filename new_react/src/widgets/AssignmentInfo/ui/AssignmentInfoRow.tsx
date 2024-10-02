@@ -1,11 +1,11 @@
 import {Assignment, AssignmentCoExecutor} from "@entities/Assignment";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {getHumansDatetime} from "@shared/lib";
 import React, {ReactNode, useEffect, useMemo, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {CoExecutorRow} from "@widgets/AssignmentInfo/ui/CoExecutorRow";
 import {Input} from "@mui/material";
 import {Employee} from "@entities/Employee";
-import {useCurrentUser, usePermission} from "@shared/hooks";
+import {useCurrentUser, useEmployeeName, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 
 interface AssignmentInfoRowProps {
@@ -29,9 +29,13 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
         disabled,
         selected,
         onSelect,
-        userList,} = props;
-    const [coExecutorsList, setCoExecutorsList] = useState<AssignmentCoExecutor[]>(assignment.co_executors);
+        userList,
+    } = props;
     const {currentUser} = useCurrentUser();
+    const {getNameById} = useEmployeeName();
+
+
+    const [coExecutorsList, setCoExecutorsList] = useState<AssignmentCoExecutor[]>(assignment.co_executors);
     const hasBehalfPermission = usePermission(APP_PERM.BEHALF_ACTIONS)
 
     const getStatusProps = useMemo((): { icon: ReactNode, name: string } => {
@@ -52,8 +56,8 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
     }, [assignment.inspector, assignment.status]);
 
     const usersInList = useMemo((): Employee[] => {
-        const oldUsers = coExecutorsList.map(co_executor => co_executor.co_executor.id);
-        const existIds = [...oldUsers, assignment.executor && assignment.executor.id];
+        const oldUsers = coExecutorsList.map(co_executor => co_executor.co_executor);
+        const existIds = [...oldUsers, assignment.executor];
 
         return userList.filter(user => !existIds.includes(user.id));
     }, [assignment.executor, coExecutorsList, userList]);
@@ -64,12 +68,12 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
 
             assignment.co_executors.forEach(co_executor => {
                 const existingItem = newState.find(
-                    item => item.co_executor.id === co_executor.co_executor.id
+                    item => item.co_executor === co_executor.co_executor
                 );
 
                 if (existingItem) {
                     newState = newState.map(item =>
-                        item.co_executor.id === co_executor.co_executor.id ? co_executor : item
+                        item.co_executor === co_executor.co_executor ? co_executor : item
                     );
                 } else {
                     newState.push(co_executor);
@@ -86,7 +90,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 return [...prevState, {
                     amount: 0,
                     assignment: assignment.id,
-                    co_executor: usersInList[0],
+                    co_executor: usersInList[0].id,
                 }]
             })
         }
@@ -109,7 +113,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
     const setValueClb = (executorId: number, newValue: number) => {
         setCoExecutorsList(prevState => {
             return prevState.map(item =>
-                item.co_executor.id === executorId ?
+                item.co_executor === executorId ?
                     {
                         ...item,
                         amount: newValue
@@ -124,22 +128,22 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
             const newUser = usersInList.find(user => user.id === newUserId)
             if (newUser && newUserId) {
                 return prevState.map(item =>
-                    item.co_executor.id === prevUserId ?
+                    item.co_executor === prevUserId ?
                         {
                             ...item,
-                            co_executor: newUser
+                            co_executor: newUser.id
                         } :
                         item
                 );
             } else {
-                return prevState.filter(item => item.co_executor.id !== prevUserId)
+                return prevState.filter(item => item.co_executor !== prevUserId)
             }
         });
     };
 
     const showNewCoExecutor = useMemo(() => {
         if (!!assignment.executor && !assignment.inspector) {
-            if (assignment.executor?.id === currentUser.id) {
+            if (assignment.executor === currentUser.id) {
                 return true;
             }
             if (hasBehalfPermission) {
@@ -153,7 +157,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
         if (selectedUser) {
             setSelectedUser(null);
         } else {
-            setSelectedUser(assignment.executor?.id || null);
+            setSelectedUser(assignment.executor || null);
         }
     };
 
@@ -200,7 +204,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 </td>
 
                 <td onClick={setSelectedExecutor} className={executorCellBg} style={{cursor: 'pointer'}}>
-                    {getEmployeeName(assignment.executor)}
+                    {getNameById(assignment.executor, 'listNameInitials')}
                 </td>
 
                 <td>
@@ -233,7 +237,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 </td>
 
                 <td>
-                    {getEmployeeName(assignment.inspector)}
+                    {getNameById(assignment.inspector, 'nameLastName')}
                 </td>
 
                 <td className={'fs-7'}>
@@ -266,7 +270,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                     setUser={setUserClb}
                     userList={co_executor.id ? [] : usersInList}
                     co_executor={co_executor}
-                    key={co_executor.co_executor.id}
+                    key={co_executor.co_executor}
                 />
             ))}
         </>

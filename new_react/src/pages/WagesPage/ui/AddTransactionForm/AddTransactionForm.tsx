@@ -5,7 +5,7 @@ import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import {WagesItem} from "../../model/types/types";
 import {UseCreateTransaction, UseDeleteTransaction, UseUpdateTransaction} from "../../model/api/api";
 import {Transaction, TRANSACTION_DETAILS, TRANSACTION_TYPES} from "@entities/Transaction";
-import {useCurrentUser, usePermission} from "@shared/hooks";
+import {useCurrentUser, useEmployeeName, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 
 
@@ -30,6 +30,8 @@ export const AddTransactionForm = (props: AddTransactionFormProps) => {
     } = props;
 
     const {currentUser} = useCurrentUser();
+    
+    const {getNameById} = useEmployeeName();
 
     const addPermission = usePermission(APP_PERM.WAGES_ADD_TRANSACTION);
     const confirmPermission = usePermission(APP_PERM.WAGES_CONFIRM_TRANSACTION);
@@ -52,28 +54,13 @@ export const AddTransactionForm = (props: AddTransactionFormProps) => {
     const [deleteTransaction, {isLoading: isDeleting}] = UseDeleteTransaction();
     const [createTransaction, {isLoading, isError, data}] = UseCreateTransaction();
 
-    const getInspectorName = () => {
-        if (formData?.inspector) {
-            return (`${formData.inspector?.first_name} ${formData.inspector?.last_name}`)
-        } else {
-            return ("")
-        }
-    }
-    const getExecutorName = () => {
-        if (formData.id) {
-            return (`${formData.executor?.first_name} ${formData.executor?.last_name}`)
-        } else {
-            return (`${currentUser?.first_name} ${currentUser?.last_name}`)
-        }
-    }
-
     const getEmployeeName = useMemo(() => {
         if (formData.id) {
-            return (`${formData.employee?.first_name} ${formData.employee?.last_name}`)
+            return getNameById(formData.employee, 'nameLastName')
         } else {
-            return (`${employee?.first_name} ${employee?.last_name}`)
+            return getNameById(employee.id, 'nameLastName')
         }
-    }, [employee, formData])
+    }, [employee.id, formData.employee, formData.id, getNameById])
 
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const {name, value} = e.target;
@@ -237,13 +224,13 @@ export const AddTransactionForm = (props: AddTransactionFormProps) => {
                     <Form.Group controlId="executor" as={Col} md="4">
                         <Form.Label>Транзакцию провел</Form.Label>
                         <Form.Control type="text" name="executor"
-                                      value={getExecutorName()} disabled
+                                      value={getNameById(formData.executor, "nameLastName")} disabled
                         />
                     </Form.Group>
 
                     <Form.Group controlId="inspector" as={Col} md="4">
                         <Form.Label>Транзакцию завизировал</Form.Label>
-                        <Form.Control type="text" name="inspector" value={getInspectorName()} disabled/>
+                        <Form.Control type="text" name="inspector" value={getNameById(formData.inspector, 'nameLastName')} disabled/>
                     </Form.Group>
                 </Row>
 

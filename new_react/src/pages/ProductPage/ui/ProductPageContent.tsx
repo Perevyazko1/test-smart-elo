@@ -1,18 +1,16 @@
-import React, {useCallback, useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 
 import cls from './ProductPage.module.scss';
-
-import {Product} from "@entities/Product";
-import {getEmployeeName, getPaginationSize} from "@shared/lib";
+import {getPaginationSize} from "@shared/lib";
 import {useAppDispatch, useAppQuery, useAppSelector} from "@shared/hooks";
 
 import {getProductsList, getProductsProps} from "../model/selectors/productsSelector";
 import {fetchProducts} from "../model/service/fetchProducts";
 import {productsPageActions} from "../model/slice/productsPageSlice";
 import {Container, Spinner, Table} from "react-bootstrap";
-import {AppSkeleton, AppSlider} from "@shared/ui";
+import {AppSkeleton} from "@shared/ui";
 import {PaginationContainer} from "@features";
-import {Link} from "react-router-dom";
+import {ProductPageRow} from "@pages/ProductPage/ui/ProductPageRow";
 
 export const ProductPageContent = () => {
     const dispatch = useAppDispatch();
@@ -64,15 +62,6 @@ export const ProductPageContent = () => {
         })
     };
 
-
-    const createImageUlsList = useCallback((product: Product) => {
-        const imageSet = new Set<string>()
-        product.product_pictures?.map((product_picture) => (
-            product_picture.image && imageSet.add(product_picture.image)
-        ))
-        return Array.from(imageSet)
-    }, [])
-
     const PageSkeletons = useMemo(() => (
         <>
             <tr>
@@ -103,7 +92,7 @@ export const ProductPageContent = () => {
                         {productProps.isLoading && <Spinner animation={'grow'} size={'sm'}/>}
                     </h4>
                 </div>
-                <hr className={'p-0 me-2 mx-2 mt-0 w-25'}/>
+                <hr className={'p-0 me-1 mx-2 mt-0 w-25'}/>
             </div>
 
             <Container>
@@ -111,50 +100,28 @@ export const ProductPageContent = () => {
                     <thead>
                     <tr>
                         <th className={'text-center'}>
-                            <strong>
-                                Изображение
-                            </strong>
+                            Изображение
                         </th>
                         <th className={'text-center'}>
-                            <strong>
-                                Наименование
-                            </strong>
+                            Наименование
                         </th>
                         <th className={'text-center'}>
-                            <strong>
-                                Тех-процесс
-                            </strong>
+                            Тех-процесс
                         </th>
                         <th className={'text-center'}>
-                            <strong>
-                                Схему подтвердил
-                            </strong>
+                            Схему подтвердил
                         </th>
                     </tr>
                     </thead>
 
-                    <tbody>
+                    <tbody style={{fontSize: '14px'}}>
 
                     {productProps.isLoading && productList.length === 0 ?
                         <>{PageSkeletons}</>
                         :
                         <>
                             {productList.map((product) => (
-                                <tr key={product.id}>
-                                    <th>
-                                        <AppSlider images={createImageUlsList(product)}/>
-                                    </th>
-                                    <th>
-                                        <Link to={`/product/${product.id}`}
-                                        >
-                                            {product.name}
-                                        </Link>
-                                    </th>
-                                    <th>{product.technological_process?.name || ''}</th>
-                                    <th>
-                                        {getEmployeeName(product.technological_process_confirmed)}
-                                    </th>
-                                </tr>
+                                <ProductPageRow key={product.id} product={product}/>
                             ))}
                             {!!productProps.next && PageSkeletons}
                         </>

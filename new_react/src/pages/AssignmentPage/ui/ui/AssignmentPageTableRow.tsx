@@ -1,8 +1,9 @@
-import React, {ReactNode, useMemo} from "react";
+import React, {useMemo} from "react";
 
-import {Assignment} from "@entities/Assignment";
+import {Assignment, getAssignmentStatusProps} from "@entities/Assignment";
 import {getHumansDatetime} from "@shared/lib";
-import {Input} from "@mui/material";
+import {useAppModal, useEmployeeName, useProductPictures, useQueryParams} from "@shared/hooks";
+import {AppSlider} from "@shared/ui";
 
 
 interface AssignmentPageTableRowProps {
@@ -11,68 +12,170 @@ interface AssignmentPageTableRowProps {
 
 export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
     const {assignment} = props;
+    const {handleOpen} = useAppModal();
+    const {getNameById} = useEmployeeName();
 
+    const {queryParameters, setQueryParam} = useQueryParams();
 
-    const getStatusProps = useMemo((): { icon: ReactNode, name: string } => {
-        switch (assignment.status) {
-            case 'await':
-                return {icon: '', name: 'В ожидании'}
-            case 'in_work':
-                return {icon: <i className="fas fa-tools text-warning me-2 fs-6"/>, name: 'В работе'}
-            case 'ready':
-                if (assignment.inspector) {
-                    return {icon: <i className="far fa-check-circle text-success me-2 fs-6"/>, name: 'Готов'}
-                } else {
-                    return {icon: <i className="far fa-check-circle text-danger me-2 fs-6"/>, name: 'Готов'}
-                }
-            case 'created':
-                return {icon: '', name: 'Создан'}
+    const {thumbnails, images} = useProductPictures(assignment.order_product.product);
+
+    const getStatusProps = getAssignmentStatusProps(assignment);
+
+    const setStatusHandle = () => {
+        if (queryParameters.status === assignment.status) {
+            setQueryParam('status', '')
+        } else {
+            setQueryParam('status', assignment.status)
         }
-    }, [assignment.inspector, assignment.status]);
+    };
+
+    const statusActive = useMemo(() => {
+        return queryParameters.status === assignment.status;
+    }, [assignment.status, queryParameters.status]);
+
+    const setExecutorHandle = () => {
+        if (queryParameters.executor === String(assignment.executor)) {
+            setQueryParam('executor', '');
+        } else {
+            setQueryParam('executor', String(assignment.executor));
+        }
+    };
+
+    const executorActive = useMemo(() => {
+        return queryParameters.executor === String(assignment.executor);
+    }, [assignment.executor, queryParameters.executor]);
+
+    const setInspectorHandle = () => {
+        if (queryParameters.inspector === String(assignment.inspector)) {
+            setQueryParam('inspector', '');
+        } else {
+            setQueryParam('inspector', String(assignment.inspector));
+        }
+    };
+
+    const inspectorActive = useMemo(() => {
+        return queryParameters.inspector === String(assignment.inspector);
+    }, [assignment.inspector, queryParameters.inspector]);
+
+    const departmentActive = useMemo(() => {
+        return queryParameters.department__id === String(assignment.department.id);
+    }, [assignment.department.id, queryParameters.department__id]);
+
+    const setDepartmentHandle = () => {
+        if (queryParameters.department__id === String(assignment.department.id)) {
+            setQueryParam('department__id', '');
+        } else {
+            setQueryParam('department__id', String(assignment.department.id));
+        }
+    };
+
+    const setSeriesIdHandle = () => {
+        if (queryParameters.order_product__series_id === assignment.order_product.series_id) {
+            setQueryParam('order_product__series_id', '');
+        } else {
+            setQueryParam('order_product__series_id', assignment.order_product.series_id);
+        }
+    };
+    const seriesIdActive = useMemo(() => {
+        return queryParameters.order_product__series_id === assignment.order_product.series_id;
+    }, [assignment.order_product.series_id, queryParameters.order_product__series_id]);
+
+    const productActive = useMemo(() => {
+        return queryParameters.order_product__product__id === String(assignment.order_product.product.id);
+    }, [assignment.order_product.product.id, queryParameters.order_product__product__id]);
+
+    const setProductHandle = () => {
+        if (queryParameters.order_product__product__id === String(assignment.order_product.product.id)) {
+            setQueryParam('order_product__product__id', '');
+        } else {
+            setQueryParam('order_product__product__id', String(assignment.order_product.product.id));
+        }
+    };
+
+    const projectActive = useMemo(() => {
+        return queryParameters.order_product__order__project === assignment.order_product.order.project;
+    }, [assignment.order_product.order.project, queryParameters.order_product__order__project]);
+
+    const setProjectHandle = () => {
+        if (queryParameters.order_product__order__project === assignment.order_product.order.project) {
+            setQueryParam('order_product__order__project', '');
+        } else {
+            setQueryParam('order_product__order__project', assignment.order_product.order.project);
+        }
+    };
 
     return (
-        <tr className={'align-middle fs-7'}>
-            <td>{assignment.number}</td>
-            <td>{assignment.order_product.series_id}</td>
-            <td>{assignment.department.name}</td>
+        <>
+            <tr className={'align-middle fs-7'}>
+                <td rowSpan={2}
+                    onClick={() => handleOpen(
+                        <AppSlider
+                            images={images}
+                            width={'90dvw'}
+                            height={'90dvh'}
+                        />)}
+                >
+                    <AppSlider
+                        price={assignment.new_tariff?.amount}
+                        images={thumbnails}
+                        width={'45px'}
+                        height={'45px'}
+                    />
+                </td>
+                <td rowSpan={2} className={'fw-bold fs-6 text-center'}>{assignment.number}</td>
+                <td className={'fs-6 ' + (seriesIdActive ? "bg-warning" : "bg-light")}
+                    onClick={setSeriesIdHandle}
+                >
+                    {assignment.order_product.series_id}
+                </td>
+                <td
+                    onClick={setDepartmentHandle}
+                    style={{backgroundColor: departmentActive ? "var(--bs-warning)" : assignment.department.color}}
+                >
+                    {assignment.department.name}
+                </td>
 
-            <td className={'text-nowrap'}>
-                {getStatusProps.icon}
-                <b>{getStatusProps.name}</b>
-            </td>
+                <td
+                    className={'text-nowrap ' + (statusActive ? "bg-warning" : "bg-light")}
+                    onClick={setStatusHandle}
+                >
+                    {getStatusProps.icon}
+                    <b>{getStatusProps.name}</b>
+                </td>
 
-            <td>
-                <Input
-                    value={assignment.new_tariff?.amount || ''}
-                    size="small"
-                    readOnly
-                    sx={{
-                        width: 100,
-                        fontSize: 12,
-                    }}
-                    className={'fw-bold'}
-                    inputProps={{
-                        type: 'number',
-                        sx: {
-                            padding: 0,
-                        }
-                    }}
-                />
-            </td>
-            <td>
-                {
-                    `${assignment.executor?.last_name || ""} 
-                                            ${assignment.executor?.first_name || ""}`
-                }
-            </td>
-            <td>{getHumansDatetime(assignment.date_completion || '')}</td>
-            <th>
-                {
-                    `${assignment.inspector?.last_name || ""} 
-                                            ${assignment.inspector?.first_name || ""}`
-                }
-            </th>
-            <td>{getHumansDatetime(assignment.inspect_date || '')}</td>
-        </tr>
+                <td
+                    onClick={setExecutorHandle}
+                    className={executorActive ? "bg-warning" : "bg-light"}
+                >
+                    {getNameById(assignment.executor, "nameLastName")}
+                </td>
+                <td>{getHumansDatetime(assignment.date_completion || '')}</td>
+                <th
+                    onClick={setInspectorHandle}
+                    className={inspectorActive ? "bg-warning" : "bg-light"}
+                >
+                    {getNameById(assignment.inspector, 'nameLastName')}
+                </th>
+                <td>{getHumansDatetime(assignment.inspect_date || '')}</td>
+            </tr>
+
+            <tr className={'align-middle fs-7'}>
+                <td colSpan={2}
+                    className={projectActive ? "bg-warning" : "bg-light"}
+                    onClick={setProjectHandle}
+                >
+                    {assignment.order_product.order.project}
+                </td>
+
+
+                <td
+                    colSpan={6}
+                    className={productActive ? "bg-warning" : "bg-light"}
+                    onClick={setProductHandle}
+                >
+                    {assignment.order_product.product.name}
+                </td>
+            </tr>
+        </>
     );
 };

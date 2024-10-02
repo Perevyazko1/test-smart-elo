@@ -1,7 +1,8 @@
 import {Transaction, TRANSACTION_DETAILS, TRANSACTION_TYPES} from "@entities/Transaction";
 import {Col, Form, InputGroup, Row} from "react-bootstrap";
 import React from "react";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {getHumansDatetime} from "@shared/lib";
+import {useEmployeeName} from "@shared/hooks";
 
 
 interface TransactionInfoProps {
@@ -10,6 +11,8 @@ interface TransactionInfoProps {
 
 export const TransactionInfo = (props: TransactionInfoProps) => {
     const {transaction} = props;
+
+    const {getNameById} = useEmployeeName();
 
     return (
         <div className={'d-flex flex-column'}>
@@ -111,20 +114,20 @@ export const TransactionInfo = (props: TransactionInfoProps) => {
                     <Form.Group controlId="employee" as={Col} md="4">
                         <Form.Label>Получатель</Form.Label>
                         <Form.Control type="text" name="employee"
-                                      value={getEmployeeName(transaction.employee)} disabled
+                                      value={getNameById(transaction.employee, "nameLastName")} disabled
                         />
                     </Form.Group>
 
                     <Form.Group controlId="executor" as={Col} md="4">
                         <Form.Label>Транзакцию провел</Form.Label>
                         <Form.Control type="text" name="executor"
-                                      value={getEmployeeName(transaction.executor)} disabled
+                                      value={getNameById(transaction.executor, 'nameLastName')} disabled
                         />
                     </Form.Group>
 
                     <Form.Group controlId="inspector" as={Col} md="4">
                         <Form.Label>Транзакцию завизировал</Form.Label>
-                        <Form.Control type="text" name="inspector" value={getEmployeeName(transaction.inspector)}
+                        <Form.Control type="text" name="inspector" value={getNameById(transaction.inspector, 'nameLastName')}
                                       disabled/>
                     </Form.Group>
                 </Row>

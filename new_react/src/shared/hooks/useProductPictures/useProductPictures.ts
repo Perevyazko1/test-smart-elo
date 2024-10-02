@@ -1,7 +1,7 @@
 import {useCallback} from "react";
 import {Product} from "@entities/Product";
 
-export const useProductPictures = (product: Product | null): { images: string[], thumbnails: string[] } => {
+export const useProductPictures = (product: Product | null | undefined): { images: string[], thumbnails: string[] } => {
     const urls = useCallback(() => {
         const imageSet = new Set<string>();
         const thumbnailSet = new Set<string>();

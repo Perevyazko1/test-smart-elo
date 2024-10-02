@@ -1,6 +1,3 @@
-import {Employee} from "@entities/Employee";
-
-
 interface OrderReadyInfo {
     in_work: number;
     all: number;
@@ -25,13 +22,14 @@ interface DepartmentInfo {
         created: number;
         in_work: number;
         ready: number;
+        department__id: number;
     }
 }
 
 
 export interface OpComment {
     id: string;
-    author: Employee;
+    author: number;
     order_product: number;
     important: boolean;
     add_date: string;
@@ -42,6 +40,7 @@ export interface OpComment {
 
 export interface OrderProduct {
     id: number;
+    product_id: number;
     series_id: string;
     product_name: string;
     product_image_url: string;

@@ -1,14 +1,15 @@
 import React, {useState} from "react";
+import {Spinner} from "react-bootstrap";
+
 import PersonRemoveIcon from "@mui/icons-material/PersonRemove";
 import CheckIcon from '@mui/icons-material/Check';
-
-import {AppAutocomplete} from "@pages/TestPage/ui/AppAutocomplete";
-import {getEmployeeName} from "@shared/lib";
 import {AssignmentCoExecutor} from "@entities/Assignment";
-import {AppRangeInput} from "@shared/ui/AppRangeInput/AppRangeInput";
 import {Employee} from "@entities/Employee";
+import {useEmployeeName} from "@shared/hooks";
+import {AppRangeInput, AppSelect} from "@shared/ui";
+
+
 import {useUpdateCoExecutor} from "../model/api/api";
-import {Spinner} from "react-bootstrap";
 
 
 interface CoExecutorRowProps {
@@ -23,11 +24,14 @@ interface CoExecutorRowProps {
 
 export const CoExecutorRow = (props: CoExecutorRowProps) => {
     const {co_executor, maxValue, setValue, setUser, userList, disabled} = props;
+
+    const {getNameById} = useEmployeeName();
+
     const [updateCoExecutor, {isLoading}] = useUpdateCoExecutor();
     const [isEdited, setIsEdited] = useState(!co_executor.id);
 
     const setAmount = (value: number) => {
-        setValue(co_executor.co_executor.id, value)
+        setValue(co_executor.co_executor, value)
         setIsEdited(true);
     }
 
@@ -37,7 +41,7 @@ export const CoExecutorRow = (props: CoExecutorRowProps) => {
             assignment_ids: [co_executor.assignment],
             co_executor_ids: [],
             data: {
-                co_executor__id: co_executor.co_executor.id,
+                co_executor__id: co_executor.co_executor,
                 amount: co_executor.amount,
             }
         }).then(() => setIsEdited(false));
@@ -49,10 +53,10 @@ export const CoExecutorRow = (props: CoExecutorRowProps) => {
                 action: 'delete',
                 co_executor_ids: [co_executor.id],
             }).then(() => {
-                setUser(co_executor.co_executor.id, null)
+                setUser(co_executor.co_executor, null)
             });
         } else {
-            setUser(co_executor.co_executor.id, null)
+            setUser(co_executor.co_executor, null)
         }
     }
 
@@ -82,15 +86,17 @@ export const CoExecutorRow = (props: CoExecutorRowProps) => {
                         </button>
                     }
 
-                    <AppAutocomplete
+
+                    <AppSelect
                         variant={'dropdown'}
+                        style={{width: 240}}
                         value={co_executor.co_executor}
-                        onChangeClb={(newValue) => setUser(co_executor.co_executor.id, newValue.id)}
-                        readOnly={!!co_executor.id}
-                        options={[...userList, co_executor.co_executor]}
                         label={'доп.исп'}
-                        width={240}
-                        getOptionLabel={option => getEmployeeName(option, 'listNameInitials')}
+                        colorScheme={'lightInput'}
+                        readOnly={!!co_executor.id}
+                        options={[...userList.map(item => item.id), co_executor.co_executor]}
+                        getOptionLabel={option => getNameById(option, 'listNameInitials')}
+                        onSelect={(newValue) => setUser(co_executor.co_executor, newValue)}
                     />
                 </div>
             </td>

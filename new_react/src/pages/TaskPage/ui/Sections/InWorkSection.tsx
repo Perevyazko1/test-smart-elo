@@ -22,6 +22,8 @@ export const InWorkSection = () => {
                 sort_mode: queryParameters.sort_mode,
                 view_mode: queryParameters.view_mode,
                 users: queryParameters.users,
+                extended_search: queryParameters.extended_search,
+                exclude_users: queryParameters.exclude_users,
                 departments: queryParameters.departments,
             }))
         }
@@ -30,6 +32,8 @@ export const InWorkSection = () => {
         queryParameters.view_mode,
         queryParameters.sort_mode,
         queryParameters.users,
+        queryParameters.extended_search,
+        queryParameters.exclude_users,
         queryParameters.departments,
     ]);
 

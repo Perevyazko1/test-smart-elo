@@ -122,8 +122,6 @@ def get_assignment_counts(request):
     date_by = request.query_params.get('date_by')
     select_by_visa = request.query_params.get('select_by_visa')
 
-    print(f'###PRINT get_assignment_counts #l=>125:', select_by_visa)
-
     try:
         employee = Employee.objects.get(id=employee__id)
     except Employee.DoesNotExist:

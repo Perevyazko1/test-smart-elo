@@ -1,5 +1,4 @@
 import {Department} from "@entities/Department";
-import {Employee} from "@entities/Employee";
 import {ApiList} from "@shared/types";
 
 
@@ -7,7 +6,7 @@ export interface Tariff {
     id: number;
     amount: number;
     add_date: string;
-    created_by: Employee;
+    created_by: number;
     comment: string;
 }
 

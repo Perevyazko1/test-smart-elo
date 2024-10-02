@@ -34,6 +34,8 @@ export const ReadySection = (props: ReadySectionProps) => {
                 end_date: end_date,
                 start_date: start_date,
                 users: undefined,
+                exclude_users: undefined,
+                extended_search: undefined,
                 user: targetUserId,
                 departments: undefined,
             }))
@@ -51,6 +53,8 @@ export const ReadySection = (props: ReadySectionProps) => {
                         start_date: queryParameters.start_date,
                         end_date: queryParameters.end_date,
                         users: queryParameters.users,
+                        extended_search: queryParameters.extended_search,
+                        exclude_users: queryParameters.exclude_users,
                         departments: queryParameters.departments,
                     }))
                 } else {
@@ -61,6 +65,8 @@ export const ReadySection = (props: ReadySectionProps) => {
                         start_date: queryParameters.start_date,
                         end_date: queryParameters.end_date,
                         users: queryParameters.users,
+                        extended_search: queryParameters.extended_search,
+                        exclude_users: queryParameters.exclude_users,
                         departments: queryParameters.departments,
                     }))
                 }
@@ -71,6 +77,8 @@ export const ReadySection = (props: ReadySectionProps) => {
         filtersInited,
         queryParameters.sort_mode,
         queryParameters.users,
+        queryParameters.extended_search,
+        queryParameters.exclude_users,
         queryParameters.view_mode,
         queryParameters.departments,
         eqMode,

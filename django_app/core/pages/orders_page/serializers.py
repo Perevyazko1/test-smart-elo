@@ -1,10 +1,8 @@
 """Orders page serializers. """
 from django.db.models import Sum, Q
-
 from rest_framework import serializers
 
 from staff.models import Department
-from staff.serializers import EmployeeSerializer
 from ...models import (Order,
                        OrderProduct,
                        ProductPicture,
@@ -31,8 +29,6 @@ class OrderPageListSerializer(serializers.ModelSerializer):
 
 
 class OrderProductCommentSerializer(serializers.ModelSerializer):
-    author = EmployeeSerializer(read_only=True)
-
     class Meta:
         """Metadata. """
         model = OrderProductComment
@@ -54,6 +50,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'series_id',
+            'product_id',
             'product_name',
             'product_image_url',
             'quantity',
@@ -78,6 +75,10 @@ class OrderProductSerializer(serializers.ModelSerializer):
     def get_product_name(self, obj: OrderProduct):
         """Get product name. """
         return obj.product.name
+
+    def get_product_id(self, obj: OrderProduct):
+        """Get product name. """
+        return obj.product.id
 
     def get_product_image_url(self, obj: OrderProduct):
         """Get first product image url or None. """
@@ -110,6 +111,7 @@ class OrderProductSerializer(serializers.ModelSerializer):
             )
             if assignments.exists():
                 result[production_step.department.name] = {
+                    "department__id": production_step.department.id,
                     "await": assignments.filter(status="await").count(),
                     "in_work": assignments.filter(status="in_work").count(),
                     "ready": assignments.filter(status="ready").count(),

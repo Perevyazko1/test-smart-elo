@@ -3,17 +3,12 @@ from rest_framework import serializers
 
 from core.models import (
     OrderProduct,
-    Product,
     ProductPicture,
     Order,
-    Fabric, ProductionStep,
-)
-from src.log_time import log_time
-from staff.serializers import EmployeeSerializer
-
+    Fabric, )
 from .service.get_eq_card_assignments import get_eq_card_assignments
 from .service.get_eq_card_info import get_eq_card_info
-from ...serializers import TechProcessSerializer
+from ...serializers import ProductSerializer
 
 
 class EqFabricSerializer(serializers.ModelSerializer):
@@ -84,25 +79,8 @@ class EqOrderSerializer(serializers.ModelSerializer):
         ]
 
 
-class EqProductSerializer(serializers.ModelSerializer):
-    product_pictures = EqProductPictureSerializer(many=True)
-    technological_process = TechProcessSerializer(read_only=True)
-    technological_process_confirmed = EmployeeSerializer()
-
-    class Meta:
-        """Metadata. """
-        model = Product
-        fields = [
-            'id',
-            'name',
-            'product_pictures',
-            'technological_process',
-            'technological_process_confirmed',
-        ]
-
-
 class EqOrderProductSerializer(serializers.ModelSerializer):
-    product = EqProductSerializer(read_only=True)
+    product = ProductSerializer(read_only=True)
     order = EqOrderSerializer(read_only=True)
     main_fabric = EqFabricSerializer(read_only=True)
     second_fabric = EqFabricSerializer(read_only=True)

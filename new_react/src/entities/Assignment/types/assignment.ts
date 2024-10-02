@@ -1,17 +1,20 @@
-import {Employee} from "@entities/Employee";
 import {Department} from "@entities/Department";
 import {EntityState} from "@reduxjs/toolkit";
 import {ApiList} from "@shared/types";
 import {OrderProduct} from "@entities/OrderProduct";
 
+export type AssignmentStatus = 'in_work' | 'await' | 'ready' | 'created';
+
+export const assignmentStatusOptions: AssignmentStatus[] = ['in_work', 'await', 'ready', 'created'];
+
 export interface BaseAssignment {
     id: number;
     number: number;
     notes: string;
-    status: 'in_work' | 'await' | 'ready' | 'created';
+    status: AssignmentStatus;
     department: number;
-    executor: number;
-    inspector: number;
+    executor: number | null;
+    inspector: number | null;
     new_tariff: number;
     order_product: number;
     appointment_date: string | null;
@@ -22,7 +25,7 @@ export interface BaseAssignment {
     assembled: boolean;
 }
 
-type ExtendedFields = 'department' | 'executor' | 'inspector' | 'new_tariff' | 'order_product';
+type ExtendedFields = 'department' | 'new_tariff' | 'order_product';
 
 interface AssignmentTariff {
     id: number;
@@ -33,7 +36,7 @@ export interface AssignmentCoExecutor {
     id?: number;
     amount: number;
     assignment: number;
-    co_executor: Employee;
+    co_executor: number;
 }
 
 export interface AssignmentCoExecutorWrite {
@@ -48,10 +51,8 @@ export interface AssignmentCoExecutorWrite {
 }
 
 export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {
-    executor: Employee | null;
     co_executors: AssignmentCoExecutor[];
     order_product: OrderProduct;
-    inspector: Employee | null;
     department: Department;
     new_tariff: AssignmentTariff | null;
 }

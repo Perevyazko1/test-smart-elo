@@ -67,7 +67,7 @@ export const EqNav = (props: EqNavProps) => {
 
             <div className={'d-flex align-items-end align-self-stretch'}>
                 <AppSwitch
-                    style={{transform: "scale(0.7)", fontSize: '8px'}}
+                    style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '8px'}}
                     checked={!!queryParameters.assembled}
                     onSwitch={showAssembledOnly}
                     labelPosition={'labelBottom'}
@@ -78,7 +78,7 @@ export const EqNav = (props: EqNavProps) => {
 
             <div className={'d-flex align-items-end align-self-stretch'}>
                 <AppSwitch
-                    style={{transform: "scale(0.7)", fontSize: '10px'}}
+                    style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '10px'}}
                     checked={!!queryParameters.locked}
                     onSwitch={showNotLockedOnly}
                     labelPosition={'labelBottom'}

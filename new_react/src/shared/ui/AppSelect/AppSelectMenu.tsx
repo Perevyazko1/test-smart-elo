@@ -45,7 +45,7 @@ export const AppSelectMenu = <T, >(props: AppSelectMenuProps<T>) => {
     if (!anchorEl) return null;
 
     return (
-        <Popper placement={'bottom-start'} open={!!anchorEl} disablePortal anchorEl={anchorEl} sx={{zIndex: 1200}}>
+        <Popper placement={'bottom-start'} open={!!anchorEl} disablePortal anchorEl={anchorEl} sx={{zIndex: 11200}}>
             <div className={classNames(cls.OptionsContainer, cls[colorScheme])}>
                 {children}
                 {sortedOptions.map((option, index) => (

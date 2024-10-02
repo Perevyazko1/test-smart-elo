@@ -4,6 +4,7 @@ import {ViewModeNav} from "./ui/ViewModeNav";
 import {SortModeNav} from "./ui/SortModeNav";
 import {ExecutorFilter} from "./ui/ExecutorFilter";
 import {DepartmentFilter} from "./ui/DepartmentFilter";
+import {ExtendedFilters} from "@pages/TaskPage/ui/TaskPageNav/ui/ExtendedFilters";
 
 
 interface TaskPageNavProps {
@@ -20,6 +21,8 @@ export const TaskPageNav = (props: TaskPageNavProps) => {
             <ViewModeNav/>
             <DepartmentFilter/>
             <ExecutorFilter/>
+
+            <ExtendedFilters/>
         </AppNavbar>
     );
 };

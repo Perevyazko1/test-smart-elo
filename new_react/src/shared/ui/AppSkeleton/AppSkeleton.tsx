@@ -11,7 +11,7 @@ export const AppSkeleton = (props: AppSkeletonProps) => {
     return (
         <div {...otherProps}>
             <div className={'w-100 h-100 rounded bg-secondary px-1'}>
-                {showSpinner && <Spinner size={'sm'} animation={'grow'}/>}
+                {showSpinner && <Spinner size={'sm'} animation={'grow'} className={'mt-1'}/>}
             </div>
 
         </div>

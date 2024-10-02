@@ -1,7 +1,7 @@
 import {PageListItem} from "../../model/types";
 import {AppInput, AppSlider} from "@shared/ui";
-import {useAppDispatch, useAppModal, useAppSelector, usePermission} from "@shared/hooks";
-import {getEmployeeName, getHumansDatetime} from "@shared/lib";
+import {useAppDispatch, useAppModal, useAppSelector, useEmployeeName, usePermission} from "@shared/hooks";
+import {getHumansDatetime} from "@shared/lib";
 import {Button, Spinner} from "react-bootstrap";
 import React, {useMemo, useState} from "react";
 import {fetchSetProposedTariff} from "@pages/TarifficationPage/model/service/fetchSetProposedTariff";
@@ -22,6 +22,9 @@ export const TableElement = (props: TableElementProps) => {
     const {item} = props;
     const dispatch = useAppDispatch();
     const noRelevantIds = useAppSelector(getNoRelevantIds);
+
+    const {getNameById} = useEmployeeName();
+
     const [isLoading, setIsLoading] = useState(false);
     const [tariffInput, setTariffInput] = useState<number | "">(item.proposed_tariff?.amount || "");
 
@@ -164,7 +167,7 @@ export const TableElement = (props: TableElementProps) => {
 
 
                 <td className={'fs-7'}>
-                    {getEmployeeName(item.proposed_tariff?.created_by)}
+                    {getNameById(item.proposed_tariff?.created_by, 'nameLastName')}
                 </td>
 
                 <td>
@@ -221,7 +224,7 @@ export const TableElement = (props: TableElementProps) => {
                 </td>
 
                 <td className={'fs-7'}>
-                    {getEmployeeName(item.confirmed_tariff?.created_by)}
+                    {getNameById(item.confirmed_tariff?.created_by, 'nameLastName')}
                 </td>
 
                 <td>

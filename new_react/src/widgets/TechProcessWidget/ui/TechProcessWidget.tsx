@@ -3,17 +3,20 @@ import {useState} from "react";
 import {TechProcessList} from "@widgets/TechProcessWidget/ui/TechProcessList";
 import {TechProcess, TechProcessSchema} from "@entities/TechProcess";
 import {TpSelected} from "@widgets/TechProcessWidget/ui/TPSelected";
-import {EqProduct} from "@widgets/EqCardList/model/types";
+import {Product} from "@entities/Product";
+import {useEmployeeName} from "@shared/hooks";
 
 
 interface TechProcessWidgetProps {
-    product: EqProduct;
+    product: Product;
     updCallback?: () => void;
 }
 
 
 export const TechProcessWidget = (props: TechProcessWidgetProps) => {
     const {product, updCallback} = props;
+
+    const {getNameById} = useEmployeeName();
 
     const [showNewTP, setShowNewTP] = useState<boolean>(false);
     const [edited, setEdited] = useState<boolean>(false);
@@ -99,7 +102,7 @@ export const TechProcessWidget = (props: TechProcessWidgetProps) => {
                     editClb={editClb}
                     closeEditClb={hideAll}
                     edited={edited}
-                    inspector={`${product.technological_process_confirmed?.first_name || ''} ${product.technological_process_confirmed?.last_name || ''}`}
+                    inspector={getNameById(product.technological_process_confirmed, 'nameLastName')}
                 />
             }
 

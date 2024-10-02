@@ -1,5 +1,3 @@
-import {Employee} from "@entities/Employee";
-
 export enum TRANSACTION_TYPES {
     cash = "Выдача НАЛ",
     card = "Выдача на карту",
@@ -18,7 +16,7 @@ export enum TRANSACTION_DETAILS {
 }
 
 
-export interface BaseTransaction {
+export interface Transaction {
     id?: number;
     add_date?: string;
     transaction_type: keyof typeof TRANSACTION_TYPES;
@@ -35,12 +33,4 @@ export interface BaseTransaction {
     employee_id?: number;
     executor_id?: number;
     inspector_id?: number;
-}
-
-type ExtendedFields = 'employee' | 'executor' | 'inspector';
-
-export interface Transaction extends Omit<BaseTransaction, ExtendedFields> {
-    employee?: Employee;
-    executor?: Employee;
-    inspector?: Employee;
 }

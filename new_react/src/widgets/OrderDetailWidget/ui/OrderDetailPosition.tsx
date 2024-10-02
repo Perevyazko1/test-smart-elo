@@ -1,4 +1,4 @@
-import {useMemo, useState} from "react";
+import React, {useMemo, useState} from "react";
 import {Table} from "react-bootstrap";
 
 import altLogo from "./products.png";
@@ -10,6 +10,7 @@ import {OrderProduct} from "../model/types";
 import {OpCommentWidget} from "./OPCommentWidget";
 import {ProgressItem} from "./ProgressItem";
 import {OpCommentRow} from "./OPComment";
+import {Link} from "react-router-dom";
 
 
 export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
@@ -26,7 +27,6 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
     }, [openDepInfo, orderProduct.departments_info]);
 
 
-
     return (
         <Table striped bordered hover size="sm" id={`order-product-id-${orderProduct.id}`}>
             <thead>
@@ -39,13 +39,28 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
                 >
                     {orderProduct.quantity} шт
                 </th>
-                <th colSpan={3}>{orderProduct.product_name}</th>
+                <th colSpan={3}>
+                    <div className={'d-flex align-items-center'}>
+                        {orderProduct.product_name}
+                        <Link
+                            to={`/product/${orderProduct.product_id}`}>
+                            <button className={'appBtn blueBtn px-1 mx-1 fs-7'}>
+                                К продукту
+                            </button>
+                        </Link>
+                    </div>
+                </th>
             </tr>
             </thead>
             <tbody>
             <tr>
                 <td rowSpan={departmentInfoLength}>
                     <b>№ {orderProduct.series_id}</b>
+                    <Link to={`/assignment?order_product__series_id=${orderProduct.series_id}`}>
+                        <button className={'appBtn blueBtn px-2 my-2'}>
+                            Наряды
+                        </button>
+                    </Link>
                 </td>
                 <td rowSpan={departmentInfoLength}>
                     {orderProduct.product_image_url ?
@@ -84,7 +99,14 @@ export const OrderDetailPosition = (props: { orderProduct: OrderProduct }) => {
                 <>
                     {(Object.entries(orderProduct.departments_info)).map(([name, info]) => (
                         <tr key={name}>
-                            <td><b>{name}</b></td>
+                            <td>
+                                <Link
+                                    to={`/assignment?order_product__series_id=${orderProduct.series_id}&department__id=${info.department__id}`}>
+                                    <button className={'appBtn blueBtn px-1 mx-1'}>
+                                        {name}
+                                    </button>
+                                </Link>
+                            </td>
                             <td>
                                 <ProgressItem
                                     dangerCount={info.in_work}
