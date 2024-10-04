@@ -20,14 +20,14 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         cache_timeout = 60 * 60 * 4  # 2 часа
 
         # Проверяем кеш
-        cached_data = cache.get(CACHE_KEY_EMPLOYEE_LIST)
-        if cached_data:
-            print(f'###PRINT list #l=>33: CACHED!!!!')
-            return JsonResponse(cached_data, safe=False)
+        # cached_data = cache.get(CACHE_KEY_EMPLOYEE_LIST)
+        # if cached_data:
+        #     print(f'###PRINT list #l=>33: CACHED!!!!')
+        #     return JsonResponse(cached_data, safe=False)
 
         # Если кеш пустой, делаем запрос и сохраняем в кеш
         response = super().list(request, *args, **kwargs)
-        cache.set(CACHE_KEY_EMPLOYEE_LIST, response.data, cache_timeout)
+        # cache.set(CACHE_KEY_EMPLOYEE_LIST, response.data, cache_timeout)
 
         return response
 
