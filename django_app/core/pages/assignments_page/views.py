@@ -45,6 +45,7 @@ def update_co_executor(request):
             department = target_assignment.department
             order_product = target_assignment.order_product
             new_amount = 0
+
             if target_assignment.new_tariff:
                 current_amount = AssignmentCoExecutor.objects.filter(
                     assignment=assignment_id,
@@ -56,13 +57,24 @@ def update_co_executor(request):
 
                 if current_difference <= new_amount:
                     new_amount = current_difference
-            AssignmentCoExecutor.objects.update_or_create(
-                co_executor=Employee.objects.get(id=data.get('co_executor__id')),
-                assignment=target_assignment,
-                defaults={
-                    'amount': new_amount,
-                }
-            )
+
+            co_executor = Employee.objects.get(id=data.get('co_executor__id'))
+            if co_executor.piecework_wages:
+                AssignmentCoExecutor.objects.update_or_create(
+                    co_executor=co_executor,
+                    assignment=target_assignment,
+                    defaults={
+                        'amount': new_amount,
+                    }
+                )
+            else:
+                AssignmentCoExecutor.objects.update_or_create(
+                    co_executor=co_executor,
+                    assignment=target_assignment,
+                    defaults={
+                        'amount': 0,
+                    }
+                )
 
         clean_all_eq_card_info_cache(order_product.id, department.id)
 

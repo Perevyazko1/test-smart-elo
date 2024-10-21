@@ -19,6 +19,7 @@ export enum TRANSACTION_DETAILS {
 export interface Transaction {
     id?: number;
     add_date?: string;
+    target_date?: string;
     transaction_type: keyof typeof TRANSACTION_TYPES;
     details: keyof typeof TRANSACTION_DETAILS;
     amount: string;
@@ -27,10 +28,8 @@ export interface Transaction {
     inspect_date?: string;
     description: string;
     is_locked?: boolean;
+    created_automatically?: boolean;
     employee?: number | null;
     executor?: number | null;
     inspector?: number | null;
-    employee_id?: number;
-    executor_id?: number;
-    inspector_id?: number;
 }

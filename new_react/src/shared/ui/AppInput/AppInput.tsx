@@ -1,6 +1,6 @@
 import {InputHTMLAttributes, ReactNode, useId, useMemo} from 'react';
 
-interface InputProps extends InputHTMLAttributes<HTMLInputElement>{
+interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     className?: string;
     children?: ReactNode;
 }
@@ -9,7 +9,6 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement>{
 export const AppInput = (props: InputProps) => {
     const {
         className,
-        children,
         ...otherProps
     } = props;
 
@@ -25,8 +24,6 @@ export const AppInput = (props: InputProps) => {
             id={inputId}
             className={"form-control fw-bold form-control-sm my-auto " + className}
             {...otherProps}
-        >
-            {children}
-        </input>
+        />
     );
 };

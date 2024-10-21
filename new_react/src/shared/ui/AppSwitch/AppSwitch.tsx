@@ -41,7 +41,7 @@ export const AppSwitch = (props: AppSwitchProps) => {
                         className={cls.switchLabel}
                     >
                         <span className={cls.switchHandle}>
-                            {handleContent}
+                            {handleContent || ""}
                         </span>
                     </label>
                 </div>

@@ -1,10 +1,16 @@
 import {rtkAPI} from "@shared/api";
+
 import {Employee} from "../types/employee";
 
 
 interface GetUserListProps {
     departments?: number[];
+    piecework_wages?: boolean;
+    ordering?: 'permanent_department';
     is_staff?: boolean;
+    is_active?: boolean;
+    user_departments_only?: boolean;
+    find?: string;
 }
 
 
@@ -15,6 +21,13 @@ const TaskFormApi = rtkAPI.injectEndpoints({
                     url: '/staff/employees/',
                     params: props,
                 }),
+                providesTags: (result, error, arg) =>
+                    result
+                        ? [
+                            ...result.map(({id}) => ({type: 'UserList' as const, id})),
+                            {type: 'UserList', id: 'LIST'},
+                        ]
+                        : [{ type: 'UserList', id: 'LIST' }],
                 keepUnusedDataFor: 6000,
             }),
             addToFavorite: build.mutation<Employee, { data: number }>({

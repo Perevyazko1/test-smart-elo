@@ -19,15 +19,15 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
         if production_step.proposed_tariff:
             proposed_tariff = production_step.proposed_tariff.amount or 0
         else:
-            proposed_tariff = 0
+            proposed_tariff = None
 
         if production_step.confirmed_tariff:
             tariff = production_step.confirmed_tariff.amount or 0
         else:
-            tariff = 0
+            tariff = None
     else:
-        proposed_tariff = 0
-        tariff = 0
+        proposed_tariff = None
+        tariff = None
 
     assignments = Assignment.objects.filter(
         order_product=order_product,

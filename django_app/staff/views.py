@@ -1,19 +1,27 @@
-from django.core.cache import cache
 from django.http import JsonResponse
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .filters import EmployeeModelFilter
 from .models import Employee, Department, Audit
-from .serializers import EmployeeSerializer, DepartmentSerializer, AuditSerializer
+from .serializers import EmployeeSerializer, DepartmentSerializer, AuditSerializer, CreateUserSerializer
+
+
+class CreateUserViewSet(viewsets.ModelViewSet):
+    queryset = Employee.objects.all()
+    serializer_class = CreateUserSerializer
 
 
 class EmployeeViewSet(viewsets.ModelViewSet):
     queryset = Employee.objects.all()
     filterset_class = EmployeeModelFilter
     serializer_class = EmployeeSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['permanent_department']
 
     def list(self, request, *args, **kwargs):
         CACHE_KEY_EMPLOYEE_LIST = 'employee_list_cache_key'

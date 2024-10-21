@@ -1,9 +1,8 @@
 import {Assignment, AssignmentCoExecutor} from "@entities/Assignment";
 import {getHumansDatetime} from "@shared/lib";
-import React, {ReactNode, useEffect, useMemo, useState} from "react";
+import React, {ReactNode, useCallback, useEffect, useMemo, useState} from "react";
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import {CoExecutorRow} from "@widgets/AssignmentInfo/ui/CoExecutorRow";
-import {Input} from "@mui/material";
 import {Employee} from "@entities/Employee";
 import {useCurrentUser, useEmployeeName, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
@@ -21,7 +20,8 @@ interface AssignmentInfoRowProps {
 }
 
 export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
-    const {assignment,
+    const {
+        assignment,
         selectedUser,
         setSelectedUser,
         selectedStatus,
@@ -106,9 +106,17 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
     const inputValue = useMemo(() => {
         if (assignment.new_tariff) {
             return assignment.new_tariff.amount - maxAddAmount;
+        } else {
+            return 0;
+        }
+    }, [assignment.new_tariff, maxAddAmount]);
+
+    const getMaxValue = useCallback((co_executor: AssignmentCoExecutor) => {
+        if (assignment.new_tariff) {
+            return co_executor.amount + inputValue;
         }
         return 0;
-    }, [assignment.new_tariff, maxAddAmount]);
+    }, [assignment.new_tariff, inputValue]);
 
     const setValueClb = (executorId: number, newValue: number) => {
         setCoExecutorsList(prevState => {
@@ -245,19 +253,10 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 </td>
 
                 {!!assignment.new_tariff &&
-                    <td className={'align-middle pb-0'}>
-                        <Input
-                            value={inputValue}
-                            size="small"
-                            readOnly
-                            className={'fw-bold'}
-                            inputProps={{
-                                type: 'number',
-                                sx: {
-                                    padding: 0,
-                                }
-                            }}
-                        />
+                    <td className={'align-middle pb-0 fw-bold'} style={{fontSize: 14}}>
+                        {inputValue} {inputValue !== assignment.new_tariff.amount && (
+                        `(${assignment.new_tariff.amount})`
+                    )}
                     </td>
                 }
             </tr>
@@ -265,7 +264,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
             {coExecutorsList.map(co_executor => (
                 <CoExecutorRow
                     disabled={!showNewCoExecutor || disabled}
-                    maxValue={co_executor.amount + inputValue}
+                    maxValue={getMaxValue(co_executor)}
                     setValue={setValueClb}
                     setUser={setUserClb}
                     userList={co_executor.id ? [] : usersInList}

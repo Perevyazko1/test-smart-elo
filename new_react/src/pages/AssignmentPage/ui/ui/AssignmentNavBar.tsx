@@ -2,7 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import CleaningServicesOutlinedIcon from '@mui/icons-material/CleaningServicesOutlined';
 
 import {AppNavbar} from "@widgets/AppNavbar";
-import {AppInput, AppSelect} from "@shared/ui";
+import {AppInput, AppSelect, AppTooltip} from "@shared/ui";
 import {useCurrentUser, useDebounce, useQueryParams} from "@shared/hooks";
 import {Department} from "@entities/Department";
 import {AssignmentStatus, assignmentStatusOptions, getAssignmentStatusName} from "@entities/Assignment";
@@ -79,19 +79,23 @@ export const AssignmentNavBar = (props: NavBarProps) => {
                 colorScheme={'darkInput'}
             />
 
-            <AppInput placeholder={'Номер серии'}
-                      style={{maxWidth: "200px", fontSize: '10px'}}
-                      className={'mx-2'}
-                      onChange={(event) => setSeriesIdInput(event.target.value)}
-                      value={seriesIdInput}
-            />
+            <AppTooltip title={'Отфильтровать по номеру серии или номеру заказа'}>
+                <AppInput placeholder={'Номер серии'}
+                          style={{maxWidth: "200px", fontSize: '10px'}}
+                          className={'mx-2'}
+                          onChange={(event) => setSeriesIdInput(event.target.value)}
+                          value={seriesIdInput}
+                />
+            </AppTooltip>
 
-            <button
-                onClick={clearFiltersHandle}
-                className={'appBtn rounded blackBtn px-2 py-1'}
-            >
-                <CleaningServicesOutlinedIcon fontSize={'small'}/>
-            </button>
+            <AppTooltip title={'Очистить фильтра'}>
+                <button
+                    onClick={clearFiltersHandle}
+                    className={'appBtn rounded blackBtn px-2 py-1'}
+                >
+                    <CleaningServicesOutlinedIcon fontSize={'small'}/>
+                </button>
+            </AppTooltip>
 
         </AppNavbar>
     );

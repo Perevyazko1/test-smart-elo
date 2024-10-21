@@ -30,9 +30,10 @@ def clear_assignment_cache(sender, instance: Assignment, **kwargs):
 @receiver([post_save, post_delete], sender=AssignmentCoExecutor)
 def clear_assignment_cache(sender, instance: AssignmentCoExecutor, **kwargs):
     if instance.assignment.department.piecework_wages and instance.assignment.new_tariff:
-        all_co_executors_sum = AssignmentCoExecutor.objects.filter(
-            assignment=instance.assignment
-        ).aggregate(Sum('amount')).get('amount__sum') or 0
+        if instance.assignment.executor.piecework_wages:
+            all_co_executors_sum = AssignmentCoExecutor.objects.filter(
+                assignment=instance.assignment
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
 
-        instance.assignment.amount = instance.assignment.new_tariff.amount - all_co_executors_sum
-        instance.assignment.save()
+            instance.assignment.amount = instance.assignment.new_tariff.amount - all_co_executors_sum
+            instance.assignment.save()

@@ -1,4 +1,4 @@
-export { taskPageActions } from "./model/slice";
 export {TaskPage} from "./ui/TaskPage";
-export type {TaskPageSchema} from "./model/types";
-
+export {ReadySection} from "./ui/Sections/ReadySection";
+export {taskPageActions} from "./model/slice";
+export type {TaskPageSchema, DateRangeData, DateRange} from "./model/types";

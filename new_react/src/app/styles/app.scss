@@ -127,7 +127,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
   &.blueBtn {
     background-color: #1955b2;
     border: 1.5px solid #122d5b;
-    color: #e4dfdc;
+    color: #ffffff;
 
     &:active {
       background-color: #1f6be1;;
@@ -242,7 +242,7 @@ input[type="datetime-local"]:disabled {
 }
 
 .pageContent {
-  height: calc(100dvh - 50px);
+  height: calc(100dvh - 53px);
   width: 100dvw;
   position: relative;
   overflow-x: hidden;

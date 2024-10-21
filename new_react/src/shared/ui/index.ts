@@ -8,3 +8,4 @@ export {AppSkeleton} from "./AppSkeleton/AppSkeleton";
 export {AppSwitch} from "./AppSwitch/AppSwitch";
 export {AppDropdown} from "./AppDropdown/AppDropdown";
 export {AppVoiceInput} from './AppVoiceInput/AppVoiceInput';
+export {AppTooltip} from './AppTooltip/AppTooltip';

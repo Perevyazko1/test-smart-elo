@@ -22,6 +22,6 @@ export interface ProductApiList extends ApiList<Product> {
 }
 
 export interface NorProductList extends Omit<ProductApiList, 'results'> {
-    results: EntityState<Product>
+    results: EntityState<Product, number>
 }
 

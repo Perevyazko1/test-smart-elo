@@ -5,9 +5,10 @@ import {Task} from "@entities/Task";
 interface SectionType extends ApiList<Task> {
     isLoading: boolean;
     hasUpdated: boolean;
+    reqId: number | null;
 }
 
-interface DateRange {
+export interface DateRange {
     start_date: string;
     end_date: string;
 }

@@ -3,7 +3,7 @@ import React, {useEffect, useMemo} from 'react';
 import {eqPageActions} from "@pages/EqPage";
 
 import {APP_PERM} from '@shared/consts';
-import {AppSelect} from '@shared/ui';
+import {AppSelect, AppTooltip} from '@shared/ui';
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser, usePermission} from '@shared/hooks';
 
 import {fetchEqFilters} from '../../model/api/fetchEqFilters';
@@ -127,35 +127,39 @@ export const EqFilters = () => {
     return (
         <>
             {bossPerm &&
+                <AppTooltip title="Выбор шаблона режима просмотра нарядов">
+                    <AppSelect
+                        noInput
+                        variant={'dropdown'}
+                        style={{width: 155}}
+                        label={'Режим просмотра'}
+                        colorScheme={'darkInput'}
+                        value={getSelectedViewMode}
+                        options={viewModesList}
+                        onSelect={viewModeClb}
+                    />
+                </AppTooltip>
+            }
+            <AppTooltip title="Отфильтровать наряды по принадлежности к проекту заказа">
                 <AppSelect
-                    noInput
+                    label={'Проект'}
                     variant={'dropdown'}
                     style={{width: 155}}
-                    label={'Режим просмотра'}
+                    isLoading={!inited}
+                    value={getSelectedProject}
                     colorScheme={'darkInput'}
-                    value={getSelectedViewMode}
-                    options={viewModesList}
-                    onSelect={viewModeClb}
-                />
-            }
-            <AppSelect
-                label={'Проект'}
-                variant={'dropdown'}
-                style={{width: 155}}
-                isLoading={!inited}
-                value={getSelectedProject}
-                colorScheme={'darkInput'}
-                options={projects?.filters}
-                onSelect={projectClb}
-            >
-                <button
-                    className={'appBtn blackBtn w-100 p-0 mt-1 mb-3'}
-                    style={{height: '25px'}}
-                    onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
+                    options={projects?.filters}
+                    onSelect={projectClb}
                 >
-                    {queryParameters.project_mode ? 'Актуальные' : 'Показать все'}
-                </button>
-            </AppSelect>
+                    <button
+                        className={'appBtn blackBtn w-100 p-0 mt-1 mb-3'}
+                        style={{height: '25px'}}
+                        onClick={() => setQueryParam('project_mode', queryParameters.project_mode ? '' : 'all')}
+                    >
+                        {queryParameters.project_mode ? 'Актуальные' : 'Показать все'}
+                    </button>
+                </AppSelect>
+            </AppTooltip>
         </>
     );
 };

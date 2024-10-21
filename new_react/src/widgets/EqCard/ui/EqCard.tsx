@@ -17,6 +17,7 @@ import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
 
+
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
     targetUserId: number | undefined;
     noRelevant?: boolean;

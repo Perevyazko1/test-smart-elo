@@ -2,11 +2,12 @@ import React, {useMemo} from "react";
 
 import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {AppSlider} from "@shared/ui";
-import {useAppModal, useCurrentUser} from "@shared/hooks";
+import {useAppModal, useCurrentUser, usePermission} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
 
 import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
+import {APP_PERM} from "@shared/consts";
 
 
 interface CardSliderProps {
@@ -19,6 +20,14 @@ export const CardSlider = (props: CardSliderProps) => {
     const {card, cardType, targetUserId} = props;
     const {currentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
+
+    const bossBerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+
+    const showPrice = useMemo(() => {
+        return currentUser.current_department?.piecework_wages && (
+            currentUser.piecework_wages || bossBerm
+        )
+    }, [bossBerm, currentUser.current_department?.piecework_wages, currentUser.piecework_wages])
 
     const totalCount = useMemo(() => {
         let total = 0;
@@ -54,13 +63,13 @@ export const CardSlider = (props: CardSliderProps) => {
                 images={sliderImages.thumbnails}
                 width={'100%'}
                 height={'100%'}
-                bgColor={card.card_info.tariff
+                bgColor={card.card_info.tariff !== null
                     ? " bg-light"
-                    : card.card_info.proposed_tariff
+                    : card.card_info.proposed_tariff !== null
                         ? " bg-warning"
                         : " bg-danger"
                 }
-                price={currentUser.current_department?.piecework_wages
+                price={showPrice
                     ?
                     card.card_info.tariff
                         ? card.card_info.tariff
@@ -68,7 +77,7 @@ export const CardSlider = (props: CardSliderProps) => {
                             ? card.card_info.proposed_tariff
                             : 0
                     : undefined}
-                totalPrice={cardType !== 'await' ? totalCount : 0}
+                totalPrice={showPrice ? cardType !== 'await' ? totalCount : 0 : 0}
             />
         </div>
     );

@@ -117,7 +117,7 @@ def get_date_range_data(request):
     start_date = request.query_params.get("start_date")
     end_date = request.query_params.get("end_date")
 
-    date_range_data = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+    date_range_data = GetDateRangeInfo(start_date=start_date, end_date=end_date).get_range_info()
     return JsonResponse(date_range_data, json_dumps_params={"ensure_ascii": False})
 
 

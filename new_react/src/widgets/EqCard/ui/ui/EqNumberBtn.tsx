@@ -1,6 +1,8 @@
 import React, {HTMLAttributes, memo, useMemo} from "react";
 import {useCardHeight} from "@pages/EqPage";
 import {EqAssignment} from "@widgets/EqCardList/model/types";
+import {useCurrentUser, usePermission} from "@shared/hooks";
+import {APP_PERM} from "@shared/consts";
 
 
 interface EqNumberBtnProps extends HTMLAttributes<HTMLButtonElement> {
@@ -14,6 +16,9 @@ interface EqNumberBtnProps extends HTMLAttributes<HTMLButtonElement> {
 export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
     const {userInitials, item, colorCls, amount, diagonalBg = false, ...buttonProps} = props;
     const cardHeight = useCardHeight();
+
+    const bossBerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+    const {currentUser} = useCurrentUser();
 
     const fontSize = useMemo(() => {
         return cardHeight / 6.5;
@@ -46,7 +51,7 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
                 {userInitials}
             </div>
 
-            {amount ?
+            {(currentUser.piecework_wages || bossBerm) ?
                 <div
                     className={'position-absolute'}
                     style={{
@@ -63,3 +68,54 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
         </button>
     );
 });
+
+
+// Альтернативный макет с датой/временем в нарядах
+//
+// <button
+//     className={buttonClasses}
+//     style={{minWidth: '55px', fontSize: fontSize}}
+//     {...buttonProps}
+// >
+//     <div className={'d-flex w-100 justify-content-evenly'}>
+//         <div className={'position-relative'}>
+//             {item.number}
+//             <div
+//                 className={'position-absolute'}
+//                 style={{
+//                     top: -8.5,
+//                     fontSize: cardHeight / 12,
+//                     left: '50%',
+//                     transform: "translate(-50%)",
+//                 }}
+//             >
+//                 {userInitials}
+//             </div>
+//
+//             {amount ?
+//                 <div
+//                     className={'position-absolute'}
+//                     style={{
+//                         bottom: -8.5,
+//                         fontSize: cardHeight / 11,
+//                         left: '50%',
+//                         transform: "translate(-50%)",
+//                     }}
+//                 >
+//                     {amount}
+//                 </div>
+//                 : null
+//             }
+//         </div>
+//
+//         <div style={{width: 2, borderLeft: '2px solid black'}}>
+//
+//         </div>
+//         <div style={{fontSize: 10, lineHeight: 1}}>
+//             04.10
+//             <br/>
+//             10:32
+//         </div>
+//     </div>
+// </button>
+

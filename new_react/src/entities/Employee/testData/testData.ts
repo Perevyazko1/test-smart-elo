@@ -7,8 +7,11 @@ export const anonEmployee: Employee = {
         {name: APP_PERM.ANON},
     ],
     username: 'anon_user',
+    attention: false,
+    is_active: false,
     first_name: 'Anon',
     last_name: 'User',
+    description: 'anon_user',
     pin_code: 123456,
     current_department: {
         id: 0,
@@ -39,4 +42,5 @@ export const anonEmployee: Employee = {
     patronymic: null,
     boss: null,
     favorite_users: [],
+    piecework_wages: false,
 }

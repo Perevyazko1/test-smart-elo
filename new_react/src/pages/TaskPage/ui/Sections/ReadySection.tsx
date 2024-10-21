@@ -27,6 +27,8 @@ export const ReadySection = (props: ReadySectionProps) => {
 
     useEffect(() => {
         if (eqMode) {
+            const reqId = Date.now();
+
             dispatch(getTaskCards({
                 status: TaskStatus.Completed,
                 sort_mode: '1',
@@ -38,6 +40,7 @@ export const ReadySection = (props: ReadySectionProps) => {
                 extended_search: undefined,
                 user: targetUserId,
                 departments: undefined,
+                reqId: reqId,
             }))
         }
     }, [end_date, start_date, dispatch, eqMode, queryParameters.week, queryParameters.year, targetUserId]);
@@ -45,6 +48,8 @@ export const ReadySection = (props: ReadySectionProps) => {
     useEffect(() => {
         if (!eqMode) {
             if (filtersInited) {
+                const reqId = Date.now();
+
                 if (queryParameters.view_mode !== '3') {
                     dispatch(getTaskCards({
                         status: TaskStatus.Completed,
@@ -56,6 +61,7 @@ export const ReadySection = (props: ReadySectionProps) => {
                         extended_search: queryParameters.extended_search,
                         exclude_users: queryParameters.exclude_users,
                         departments: queryParameters.departments,
+                        reqId: reqId,
                     }))
                 } else {
                     dispatch(getTaskCards({
@@ -68,6 +74,7 @@ export const ReadySection = (props: ReadySectionProps) => {
                         extended_search: queryParameters.extended_search,
                         exclude_users: queryParameters.exclude_users,
                         departments: queryParameters.departments,
+                        reqId: reqId,
                     }))
                 }
             }

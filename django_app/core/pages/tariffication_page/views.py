@@ -266,6 +266,7 @@ def set_post_tariffication(request):
         description = f'Производство полуфабриката {assignment} {assignment.department.name}'
         Transaction.objects.create(
             transaction_type='accrual',
+            target_date=datetime.datetime.now(),
             details='wages',
             amount=assignment.new_tariff.amount,
             employee=assignment.executor,

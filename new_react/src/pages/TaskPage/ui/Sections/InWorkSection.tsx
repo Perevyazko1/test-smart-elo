@@ -1,5 +1,6 @@
 import React, {useEffect} from "react";
 
+import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
@@ -7,7 +8,7 @@ import {allFiltersInited, getInWorkData} from "../../model/selectors";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
 import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
-import {TaskStatus} from "@entities/Task";
+
 
 export const InWorkSection = () => {
     const dispatch = useAppDispatch();
@@ -17,6 +18,8 @@ export const InWorkSection = () => {
 
     useEffect(() => {
         if (filtersInited) {
+            const reqId = Date.now();
+
             dispatch(getTaskCards({
                 status: TaskStatus.InProgress,
                 sort_mode: queryParameters.sort_mode,
@@ -25,6 +28,7 @@ export const InWorkSection = () => {
                 extended_search: queryParameters.extended_search,
                 exclude_users: queryParameters.exclude_users,
                 departments: queryParameters.departments,
+                reqId: reqId,
             }))
         }
     }, [dispatch,

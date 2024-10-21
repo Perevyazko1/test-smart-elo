@@ -7,12 +7,12 @@ import {APP_PERM} from "@shared/consts";
 import {LoginPage} from "@pages/LoginPage";
 import {AssignmentPage} from "@pages/AssignmentPage";
 import {ProductPage} from "@pages/ProductPage";
-import {WagesPage} from "@pages/WagesPage";
 import { ProductDetailsPage } from "@pages/ProductDetailsPage";
 import {OrdersPage} from "@pages/OrdersPage";
 import {OrderDetailPage} from "@pages/OrderDetailPage";
 import {TarifficationPage} from "@pages/TarifficationPage";
 import {TaskPage} from "@pages/TaskPage";
+import {StaffPage} from "@pages/StaffPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -31,7 +31,7 @@ enum AppRoutes {
     PRODUCT = 'product',
     PRODUCT_DETAILS = 'product_detail',
     TARIFFICATION = 'tariffication',
-    WAGES = 'wages',
+    STAFF = 'staff',
     SPECIFICATIONS = 'specifications',
     ORDER_DETAILS = 'order_details',
     TASK = 'task',
@@ -73,9 +73,9 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         navigate: true,
         permissions: [APP_PERM.TARIFFICATION_PAGE]
     },
-    [AppRoutes.WAGES]: {
-        route: {path: '/wages', element: <WagesPage/>, errorElement: <ErrorPage/>},
-        name: 'Зарплата',
+    [AppRoutes.STAFF]: {
+        route: {path: '/staff', element: <StaffPage/>, errorElement: <ErrorPage/>},
+        name: 'Персонал',
         mobile: false,
         navigate: true,
         permissions: [APP_PERM.WAGES_PAGE]

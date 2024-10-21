@@ -44,12 +44,14 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
         } else if (cardType === 'in_work' && first && expanded) {
             return <i className="fas fa-angle-double-left fs-2"/>;
         } else if (cardType === 'in_work' && first) {
+            // return <i className="far fa-play-circle fs-3"/>
             return <i className="fas fa-check fs-3"/>;
         } else if (cardType === 'distribute' && !first) {
             return <i className="fas fa-angle-double-right fs-2"/>;
         } else if (cardType === 'in_work' && !first && expanded) {
             return <i className="fas fa-angle-double-down fs-2"/>
         } else if (cardType === 'in_work' && !first) {
+            // return <i className="far fa-pause-circle fs-3"/>;
             return <i className="fas fa-angle-double-right fs-2"/>;
         } else if (cardType === 'ready' && first) {
             return <i className="fas fa-check-double fs-3"/>;

@@ -70,6 +70,10 @@ class Employee(AbstractUser):
     current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     description = models.CharField('Описание', max_length=250, blank=True, null=True)
 
+    piecework_wages = models.BooleanField('Сдельная форма оплаты труда', default=True)
+
+    attention = models.BooleanField(default=False)
+
     def __str__(self):
         if self.first_name:
             return '{}'.format(f'{self.first_name} {self.last_name}')
@@ -106,6 +110,11 @@ class Transaction(models.Model):
     add_date = models.DateTimeField(
         'Дата / Время создания',
         auto_now_add=True,
+    )
+    target_date = models.DateTimeField(
+        'Дата / Время прикрепления',
+        null=True,
+        blank=True,
     )
 
     transaction_type = models.CharField('Тип', max_length=50, choices=TYPE_CHOICES, default="cash")
@@ -150,9 +159,12 @@ class Transaction(models.Model):
 
     is_locked = models.BooleanField(default=False)
 
+    created_automatically = models.BooleanField(default=True)
+
     def save(self, *args, **kwargs):
-        if self.is_locked:
-            raise ValidationError("This transaction is locked and cannot be edited.")
+        # TODO вернуть блокировку
+        # if self.is_locked:
+        #     raise ValidationError("This transaction is locked and cannot be edited.")
 
         if self.amount and self.inspector:
             self.starting_balance = self.employee.current_balance

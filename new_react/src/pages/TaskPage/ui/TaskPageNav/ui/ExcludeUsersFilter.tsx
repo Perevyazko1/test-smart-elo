@@ -30,7 +30,7 @@ export const ExcludeUsersFilter = () => {
 
     return (
         <AppSelect
-            style={{width: 240}}
+            style={{maxWidth: 240}}
             isLoading={usersIsLoading}
             colorScheme={'darkInput'}
             variant={'multiple'}

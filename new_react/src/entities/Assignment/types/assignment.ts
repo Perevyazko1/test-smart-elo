@@ -15,6 +15,7 @@ export interface BaseAssignment {
     department: number;
     executor: number | null;
     inspector: number | null;
+    amount: number;
     new_tariff: number;
     order_product: number;
     appointment_date: string | null;
@@ -61,5 +62,5 @@ export interface AssignmentApiList extends ApiList<Assignment> {
 }
 
 export interface NorAssignmentList extends Omit<AssignmentApiList, 'results'> {
-    results: EntityState<Assignment>
+    results: EntityState<Assignment, number>
 }

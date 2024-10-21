@@ -36,7 +36,7 @@ class TaskModelFilter(django_filters.FilterSet):
             start_date = self.request.query_params.get("start_date")
             end_date = self.request.query_params.get("end_date")
 
-            date_info = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+            date_info = GetDateRangeInfo(start_date=start_date, end_date=end_date).get_range_info()
             current_date_info = GetDateRangeInfo().get_range_info()
 
             if date_info['date_range']['start_date'] == current_date_info['date_range']['start_date']\
@@ -63,7 +63,7 @@ class TaskModelFilter(django_filters.FilterSet):
             start_date = self.request.query_params.get("start_date")
             end_date = self.request.query_params.get("end_date")
 
-            date_info = GetDateRangeInfo(start_date_str=start_date, end_date_str=end_date).get_range_info()
+            date_info = GetDateRangeInfo(start_date=start_date, end_date=end_date).get_range_info()
 
             return queryset.filter(
                 status=value,

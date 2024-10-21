@@ -17,6 +17,8 @@ export const AwaitSection = () => {
 
     useEffect(() => {
         if (filtersInited) {
+            const reqId = Date.now();
+
             dispatch(getTaskCards({
                 status: TaskStatus.Pending,
                 sort_mode: queryParameters.sort_mode,
@@ -25,6 +27,7 @@ export const AwaitSection = () => {
                 extended_search: queryParameters.extended_search,
                 exclude_users: queryParameters.exclude_users,
                 departments: queryParameters.departments,
+                reqId: reqId,
             }))
         }
     }, [dispatch,

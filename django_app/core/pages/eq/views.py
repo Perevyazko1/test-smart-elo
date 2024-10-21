@@ -1,5 +1,6 @@
 """Views for EQ Page. """
 from dataclasses import asdict
+from datetime import datetime
 
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
@@ -89,44 +90,104 @@ def get_week_data(request):
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
+    print(f'###PRINT get_week_data #l=>93:', week_info.date_range[0], week_info.date_range[1])
+
     if eq_params['view_mode_key'] == 'boss':
         assignments_sum = Assignment.objects.filter(
             department=eq_params['department'],
             inspect_date__gte=week_info.date_range[0],
-            inspect_date__lt=week_info.date_range[1],
+            inspect_date__lte=week_info.date_range[1],
         ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
         transactions_sum = 0
     else:
-        assignments_sum = 0
-        executor_assignments = Assignment.objects.filter(
-            executor=eq_params['user'],
-            inspect_date__gte=week_info.date_range[0],
-            inspect_date__lt=week_info.date_range[1],
-        )
-        co_executor_assignments = Assignment.objects.filter(
-            co_executors__co_executor=eq_params['user'],
-            inspect_date__gte=week_info.date_range[0],
-            inspect_date__lt=week_info.date_range[1],
-        )
-        assignments_sum += executor_assignments.aggregate(Sum('amount')).get('amount__sum') or 0
+        if eq_params['user'].piecework_wages:
+            auto_accrual = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="accrual",
+                inspector__isnull=False,
+                created_automatically=True,
+                details__in=['prize', 'other', 'wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
 
-        assignments_sum += AssignmentCoExecutor.objects.filter(
-            assignment__in=co_executor_assignments,
-            co_executor=eq_params['user'],
-        ).aggregate(Sum('amount')).get('amount__sum') or 0
+            auto_debit = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="debiting",
+                inspector__isnull=False,
+                created_automatically=True,
+                details__in=['prize', 'other', 'wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
 
-        transactions_sum = Transaction.objects.filter(
-            employee=eq_params['user'],
-            inspect_date__gte=week_info.date_range[0],
-            inspect_date__lt=week_info.date_range[1],
-            transaction_type="accrual",
-            details__in=['prize', 'other'],
-        ).aggregate(Sum('amount')).get('amount__sum')
+            accrual = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="accrual",
+                inspector__isnull=False,
+                created_automatically=False,
+                details__in=['prize', 'other', 'wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
 
-    week_info.earned = f'{assignments_sum or 0}'
+            debit = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="debiting",
+                inspector__isnull=False,
+                created_automatically=False,
+                details__in=['prize', 'other', 'wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+            assignments_sum = auto_accrual - auto_debit
+            transactions_sum = accrual - debit
+        else:
+            wages_accrual = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="accrual",
+                inspector__isnull=False,
+                details__in=['wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+            wages_debit = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="debiting",
+                inspector__isnull=False,
+                details__in=['wages'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+            additional_accrual = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="accrual",
+                inspector__isnull=False,
+                details__in=['prize', 'other'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+            additional_debit = Transaction.objects.filter(
+                employee=eq_params['user'],
+                target_date__gte=week_info.date_range[0],
+                target_date__lte=week_info.date_range[1],
+                transaction_type="debiting",
+                inspector__isnull=False,
+                created_automatically=False,
+                details__in=['prize', 'other'],
+            ).aggregate(Sum('amount')).get('amount__sum') or 0
+
+            assignments_sum = wages_accrual - wages_debit
+            transactions_sum = additional_accrual - additional_debit
+
+    week_info.earned = f'{int(assignments_sum or 0)}'
     if transactions_sum:
-        week_info.earned += f'+{int(transactions_sum)}(доп)'
+        week_info.earned += f'+{int(transactions_sum or 0)}(доп)'
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
@@ -288,24 +349,28 @@ def update_assignments(request):
                         assignment=assignment
                     )
                     for co_executor in co_executors:
+                        if co_executor.co_executor.piecework_wages:
+                            Transaction.objects.create(
+                                target_date=datetime.now(),
+                                transaction_type='debiting',
+                                details='wages',
+                                amount=co_executor.amount,
+                                employee=co_executor.co_executor,
+                                executor=user,
+                                inspector=user,
+                                description=description,
+                            )
+                    if assignment.executor.piecework_wages:
                         Transaction.objects.create(
+                            target_date=datetime.now(),
                             transaction_type='debiting',
                             details='wages',
-                            amount=co_executor.amount,
-                            employee=co_executor.co_executor,
-                            executor=user,
-                            inspector=user,
+                            amount=assignment.amount,
+                            employee=assignment.executor,
+                            executor=request.user,
+                            inspector=request.user,
                             description=description,
                         )
-                    Transaction.objects.create(
-                        transaction_type='debiting',
-                        details='wages',
-                        amount=assignment.amount,
-                        employee=assignment.executor,
-                        executor=request.user,
-                        inspector=request.user,
-                        description=description,
-                    )
     elif mode == 'lock_await_assignments':
         order_product = OrderProduct.objects.get(series_id=series_id)
         target_assignments = Assignment.objects.filter(

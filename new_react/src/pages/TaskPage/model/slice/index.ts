@@ -19,6 +19,7 @@ export const initialState: TaskPageSchema = {
         next: null,
         previous: null,
         results: [],
+        reqId: null,
     },
     inWork: {
         isLoading: true,
@@ -27,6 +28,7 @@ export const initialState: TaskPageSchema = {
         next: null,
         previous: null,
         results: [],
+        reqId: null,
     },
     ready: {
         isLoading: true,
@@ -35,6 +37,7 @@ export const initialState: TaskPageSchema = {
         next: null,
         previous: null,
         results: [],
+        reqId: null,
     },
     noRelevantIds: [],
 }
@@ -66,15 +69,26 @@ const taskPageSlice = createSlice({
                 }
             })
             .addCase(getTaskCards.fulfilled, (state, action) => {
-                if (action.meta.arg.status === TaskStatus.Pending) {
-                    state.await.results = action.payload;
-                    state.await.isLoading = false;
-                } else if (action.meta.arg.status === TaskStatus.InProgress) {
-                    state.inWork.results = action.payload;
-                    state.inWork.isLoading = false;
+                const { reqId, status } = action.meta.arg;
+
+                if (status === TaskStatus.Pending) {
+                    if (!state.await.reqId || reqId >= state.await.reqId) {
+                        state.await.results = action.payload;
+                        state.await.isLoading = false;
+                        state.await.reqId = reqId; // Обновляем reqId на новый
+                    }
+                } else if (status === TaskStatus.InProgress) {
+                    if (!state.inWork.reqId || reqId >= state.inWork.reqId) {
+                        state.inWork.results = action.payload;
+                        state.inWork.isLoading = false;
+                        state.inWork.reqId = reqId; // Обновляем reqId на новый
+                    }
                 } else {
-                    state.ready.results = action.payload;
-                    state.ready.isLoading = false;
+                    if (!state.ready.reqId || reqId >= state.ready.reqId) {
+                        state.ready.results = action.payload;
+                        state.ready.isLoading = false;
+                        state.ready.reqId = reqId; // Обновляем reqId на новый
+                    }
                 }
             })
             .addCase(getTaskCards.rejected, (state, action) => {

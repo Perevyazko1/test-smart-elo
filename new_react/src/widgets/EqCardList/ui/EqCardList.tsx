@@ -1,16 +1,18 @@
 import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
 
 import {useCardHeight} from "@pages/EqPage";
+
+import {ReadySection} from "@pages/TaskPage";
+import {getWeekData} from "@pages/EqPage";
 import {EqCard} from "@widgets/EqCard";
+
 import {useAppSelector, useCurrentUser, useFixedSizeList, useQueryParams, useQueue} from "@shared/hooks";
+import {getHumansDatetime} from "@shared/lib";
 import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
 import {BlockName} from "./ui/BlockName";
-import {ReadySection} from "@pages/TaskPage/ui/Sections/ReadySection";
-import {getWeekData} from "@pages/EqPage/model/selectors/filterSelectors";
-import {getHumansDatetime} from "@shared/lib";
 
 interface EqCardListProps {
     extraParams?: object;
@@ -66,7 +68,19 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 return assignmentsDiff;
             }
 
+            // Условие для блока готовых
+            if (listType === 'ready') {
+                const inspectorNullA = a.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
+                const inspectorNullB = b.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
+                const inspectorDiff = inspectorNullB - inspectorNullA;
+
+                if (inspectorDiff !== 0) {
+                    return inspectorDiff;
+                }
+            }
+
             const urgencyDiff = a.urgency - b.urgency;
+
             if (urgencyDiff !== 0) {
                 return urgencyDiff;
             }
@@ -78,7 +92,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
 
             return a.id - b.id;
         }) || [])
-    }, [data]);
+    }, [data, listType]);
 
     const blockName = useMemo(() => {
         return (listType !== "distribute" &&

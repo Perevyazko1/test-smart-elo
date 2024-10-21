@@ -88,4 +88,5 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'plane_date',
             'appointed_by_boss',
             'new_tariff',
+            'amount',
         ]

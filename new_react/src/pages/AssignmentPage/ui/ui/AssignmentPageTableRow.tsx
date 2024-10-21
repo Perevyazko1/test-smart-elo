@@ -3,7 +3,7 @@ import React, {useMemo} from "react";
 import {Assignment, getAssignmentStatusProps} from "@entities/Assignment";
 import {getHumansDatetime} from "@shared/lib";
 import {useAppModal, useEmployeeName, useProductPictures, useQueryParams} from "@shared/hooks";
-import {AppSlider} from "@shared/ui";
+import {AppSlider, AppTooltip} from "@shared/ui";
 
 
 interface AssignmentPageTableRowProps {
@@ -125,36 +125,61 @@ export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
                 <td rowSpan={2} className={'fw-bold fs-6 text-center'}>{assignment.number}</td>
                 <td className={'fs-6 ' + (seriesIdActive ? "bg-warning" : "bg-light")}
                     onClick={setSeriesIdHandle}
+                    style={{cursor: 'pointer'}}
                 >
-                    {assignment.order_product.series_id}
+                    <AppTooltip title={'Отфильтровать по номеру серии'}>
+                        <>{assignment.order_product.series_id}</>
+                    </AppTooltip>
                 </td>
                 <td
                     onClick={setDepartmentHandle}
-                    style={{backgroundColor: departmentActive ? "var(--bs-warning)" : assignment.department.color}}
+                    style={{
+                        backgroundColor: departmentActive ? "var(--bs-warning)" : assignment.department.color,
+                        cursor: 'pointer',
+                    }}
                 >
-                    {assignment.department.name}
+                    <AppTooltip title={'Отфильтровать по отделу'}>
+                        <>{assignment.department.name}</>
+                    </AppTooltip>
                 </td>
 
                 <td
                     className={'text-nowrap ' + (statusActive ? "bg-warning" : "bg-light")}
                     onClick={setStatusHandle}
+                    style={{cursor: 'pointer'}}
                 >
-                    {getStatusProps.icon}
-                    <b>{getStatusProps.name}</b>
+                    <AppTooltip title={'Отфильтровать по статусу'}>
+                        <>
+                            {getStatusProps.icon}
+                            <b>{getStatusProps.name}</b>
+                        </>
+                    </AppTooltip>
                 </td>
 
                 <td
                     onClick={setExecutorHandle}
                     className={executorActive ? "bg-warning" : "bg-light"}
+                    style={{cursor: 'pointer'}}
                 >
-                    {getNameById(assignment.executor, "nameLastName")}
+                    <AppTooltip title={'Отфильтровать по исполнителю'}>
+                        <>
+                            {getNameById(assignment.executor, "nameLastName")}
+                        </>
+                    </AppTooltip>
                 </td>
+
                 <td>{getHumansDatetime(assignment.date_completion || '')}</td>
+
                 <th
                     onClick={setInspectorHandle}
                     className={inspectorActive ? "bg-warning" : "bg-light"}
+                    style={{cursor: 'pointer'}}
                 >
-                    {getNameById(assignment.inspector, 'nameLastName')}
+                    <AppTooltip title={'Отфильтровать по проверяющему'}>
+                        <>
+                            {getNameById(assignment.inspector, 'nameLastName')}
+                        </>
+                    </AppTooltip>
                 </th>
                 <td>{getHumansDatetime(assignment.inspect_date || '')}</td>
             </tr>
@@ -163,8 +188,14 @@ export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
                 <td colSpan={2}
                     className={projectActive ? "bg-warning" : "bg-light"}
                     onClick={setProjectHandle}
+                    style={{cursor: 'pointer'}}
                 >
-                    {assignment.order_product.order.project}
+
+                    <AppTooltip title={'Отфильтровать по проекту'}>
+                        <>
+                            {assignment.order_product.order.project}
+                        </>
+                    </AppTooltip>
                 </td>
 
 
@@ -172,8 +203,13 @@ export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
                     colSpan={6}
                     className={productActive ? "bg-warning" : "bg-light"}
                     onClick={setProductHandle}
+                    style={{cursor: 'pointer'}}
                 >
-                    {assignment.order_product.product.name}
+                    <AppTooltip title={'Отфильтровать по изделию'}>
+                        <>
+                            {assignment.order_product.product.name}
+                        </>
+                    </AppTooltip>
                 </td>
             </tr>
         </>

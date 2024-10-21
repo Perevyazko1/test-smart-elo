@@ -1,7 +1,7 @@
 import {AppNavbar} from "@widgets/AppNavbar";
 import {useCurrentUser, useDebounce, usePermission, useQueryParams} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
-import {AppInput, AppSwitch} from "@shared/ui";
+import {AppInput, AppSwitch, AppTooltip} from "@shared/ui";
 
 import {EqSeriesSize} from "./EqSeriesSize";
 import {EqDepWidget} from "./EqDepWidget";
@@ -57,42 +57,53 @@ export const EqNav = (props: EqNavProps) => {
 
     return (
         <AppNavbar showNav={showCanvas} closeClb={closeClb}>
-            <EqDepWidget/>
+            <AppTooltip title={'Выбор отдела, наряды которого будут отображены в блоках'}>
+                <EqDepWidget/>
+            </AppTooltip>
 
             <EqFilters/>
 
             {!currentUser.current_department?.single && !isViewer &&
-                <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
+
+                <AppTooltip title={'Количество нарядов для одновременного изменения'}>
+                    <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
+                </AppTooltip>
             }
 
             <div className={'d-flex align-items-end align-self-stretch'}>
-                <AppSwitch
-                    style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '8px'}}
-                    checked={!!queryParameters.assembled}
-                    onSwitch={showAssembledOnly}
-                    labelPosition={'labelBottom'}
-                    handleContent={'⬛️'}
-                    label={queryParameters.assembled ? "Все" : "Уком"}
-                />
+                <AppTooltip title="Отобразить наряды не укомплектованные полуфабрикатами">
+                    <AppSwitch
+                        style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '8px'}}
+                        checked={!!queryParameters.assembled}
+                        onSwitch={showAssembledOnly}
+                        labelPosition={'labelBottom'}
+                        handleContent={'⬛️'}
+                        label={queryParameters.assembled ? "Все" : "Уком"}
+                    />
+                </AppTooltip>
             </div>
 
             <div className={'d-flex align-items-end align-self-stretch'}>
-                <AppSwitch
-                    style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '10px'}}
-                    checked={!!queryParameters.locked}
-                    onSwitch={showNotLockedOnly}
-                    labelPosition={'labelBottom'}
-                    handleContent={'🔒'}
-                    label={queryParameters.locked ? "Дост" : "Все"}
-                />
+                <AppTooltip title="Отобразить наряды в ожидании только без блокировки">
+                    <AppSwitch
+                        style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '10px'}}
+                        checked={!!queryParameters.locked}
+                        onSwitch={showNotLockedOnly}
+                        labelPosition={'labelBottom'}
+                        handleContent={'🔒'}
+                        label={queryParameters.locked ? "Дост" : "Все"}
+                    />
+                </AppTooltip>
             </div>
 
-            <AppInput placeholder={'Поиск'}
-                      style={{width: "125px",fontSize: '10px'}}
-                      className={'mx-2'}
-                      onChange={(event) => setSearchValue(event.target.value)}
-                      value={searchValue}
-            />
+            <AppTooltip title="Отфильтровать карточки по названию изделия или номеру заказа">
+                <AppInput placeholder={'Поиск'}
+                          style={{width: "125px", fontSize: '10px'}}
+                          className={'mx-2'}
+                          onChange={(event) => setSearchValue(event.target.value)}
+                          value={searchValue}
+                />
+            </AppTooltip>
 
         </AppNavbar>
     );

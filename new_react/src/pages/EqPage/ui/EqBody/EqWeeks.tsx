@@ -8,9 +8,9 @@ import {AppSkeleton} from "@shared/ui";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
 import {fetchWeekData} from "../../model/api/fetchWeekData";
-import {WagesInfo} from "@pages/EqPage/ui/EqBody/WagesInfo";
-import {TransactionInfo} from "@pages/EqPage/ui/EqBody/TransactionInfo";
-import {Transaction} from "@entities/Transaction";
+
+import {WagesInfo} from "./WagesInfo";
+
 
 interface EqWeeksProps {
     rightBlockWidth: number;
@@ -20,6 +20,7 @@ interface EqWeeksProps {
     resetSize: () => void;
     expanded: boolean;
 }
+
 
 export const EqWeeks = (props: EqWeeksProps) => {
     const {
@@ -73,17 +74,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
         return currentUser.id;
     }, [currentUser.id, queryParameters.view_mode]);
 
-    const handleOpenWagesDetail = (transaction: Transaction) => {
-        handleOpen(
-            <TransactionInfo transaction={transaction}/>
-        );
-    }
-
     const handleOpenWages = () => {
         handleOpen(
             <WagesInfo
                 employeeId={targetUserId}
-                onClick={handleOpenWagesDetail}
                 endDate={weekData?.dt_dates[6] || ''}
                 startDate={weekData?.dt_dates[0] || ''}
             />
@@ -168,7 +162,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                             <>
                                 {getWeekString}
                                 <button
-                                    className={'appBtn px-1 rounded mx-1'}
+                                    className={'appBtn px-1 rounded mx-1 fs-7'}
                                     onClick={handleOpenWages}
                                 >
                                     {getEarnedSum}

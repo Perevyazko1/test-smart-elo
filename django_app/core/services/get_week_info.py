@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timedelta, date
 import locale
 import calendar
 from dataclasses import dataclass
@@ -23,31 +23,31 @@ class GetWeekInfo:
 
     def _get_initial_values(self):
         if not self.week or not self.week.isdigit():
-            self.week = str(datetime.datetime.today().isocalendar()[1])
+            self.week = str(datetime.today().isocalendar()[1])
 
         if not self.year or not self.year.isdigit():
-            self.year = str(datetime.datetime.now().year)
+            self.year = str(datetime.now().year)
 
     def execute(self) -> WeekInfo:
         self._get_initial_values()
 
         str_week = f'{self.year}-{self.week}-1'
-        first_day = datetime.datetime.strptime(str_week, "%G-%V-%u")
+        first_day = datetime.strptime(str_week, "%G-%V-%u")
 
         str_dates = []
         dt_dates = []
         for day in range(7):
-            str_dates.append((first_day + datetime.timedelta(days=day)).strftime('%d.%m'))
-            dt_dates.append(first_day + datetime.timedelta(days=day))
+            str_dates.append((first_day + timedelta(days=day)).strftime('%d.%m'))
+            dt_dates.append(first_day + timedelta(days=day))
 
         range_first = dt_dates[0]
         range_last = dt_dates[-1]
         date_range = [range_first, range_last]
 
-        prev_week = (first_day - datetime.timedelta(days=7)).isocalendar()[1]
-        prev_week_year = (first_day - datetime.timedelta(days=7)).isocalendar()[0]
-        next_week = (first_day + datetime.timedelta(days=7)).isocalendar()[1]
-        next_week_year = (first_day + datetime.timedelta(days=7)).isocalendar()[0]
+        prev_week = (first_day - timedelta(days=7)).isocalendar()[1]
+        prev_week_year = (first_day - timedelta(days=7)).isocalendar()[0]
+        next_week = (first_day + timedelta(days=7)).isocalendar()[1]
+        next_week_year = (first_day + timedelta(days=7)).isocalendar()[0]
 
         previous_week_data = {"week": prev_week, "year": prev_week_year}
         next_week_data = {"week": next_week, "year": next_week_year}
@@ -64,12 +64,12 @@ class GetWeekInfo:
 
 
 class GetDateRangeInfo:
-    def __init__(self, start_date_str: str = None, end_date_str: str = None):
-        self.start_date_str = start_date_str
-        self.end_date_str = end_date_str
+    def __init__(self, start_date: str | date = None, end_date: str | date = None):
+        self.start_date_str = start_date if isinstance(start_date, str) else None
+        self.end_date_str = end_date if isinstance(end_date, str) else None
 
-        self.end_date_dt: datetime
-        self.start_date_dt: datetime
+        self.start_date_dt = start_date if isinstance(start_date, date) else None
+        self.end_date_dt = end_date if isinstance(end_date, date) else None
         self.delta_days = 7
         self.range_type = ""
         self.range_value = ""
@@ -77,14 +77,15 @@ class GetDateRangeInfo:
         self._init_range_type()
         self._init_range_value()
 
-    def _parse_date(self, date_str) -> datetime:
-        return datetime.datetime.strptime(date_str, '%Y-%m-%d')
+    def _parse_date(self, date_str) -> date:
+        return datetime.strptime(date_str, '%Y-%m-%d').date()
 
     def _init_procedure(self):
-        today = datetime.datetime.today()
-        start_of_week = today - datetime.timedelta(days=today.weekday())
-        self.start_date_dt = start_of_week
-        self.end_date_dt = start_of_week + datetime.timedelta(days=6)
+        if not self.start_date_dt or not self.end_date_dt:
+            today = datetime.today().date()
+            start_of_week = today - timedelta(days=today.weekday())
+            self.start_date_dt = start_of_week
+            self.end_date_dt = start_of_week + timedelta(days=6)
 
     def _get_initial_values(self):
         # Если не переданы даты - то устанавливаем начало и конец текущей недели
@@ -136,12 +137,12 @@ class GetDateRangeInfo:
                 if month == 13:
                     month = 1
                     year += 1
-                start_of_month = datetime.datetime(year, month, 1)
+                start_of_month = datetime(year, month, 1)
 
                 # Количество дней в предыдущем месяце
                 _, last_day = calendar.monthrange(year, month)
 
-                end_of_month = datetime.datetime(year, month, last_day)
+                end_of_month = datetime(year, month, last_day)
 
             else:
                 year = self.start_date_dt.year
@@ -149,12 +150,12 @@ class GetDateRangeInfo:
                 if month == 0:
                     month = 12
                     year -= 1
-                start_of_month = datetime.datetime(year, month, 1)
+                start_of_month = datetime(year, month, 1)
 
                 # Количество дней в предыдущем месяце
                 _, last_day = calendar.monthrange(year, month)
 
-                end_of_month = datetime.datetime(year, month, last_day)
+                end_of_month = datetime(year, month, last_day)
 
             return {
                 "start_date": start_of_month.date(),
@@ -162,22 +163,22 @@ class GetDateRangeInfo:
             }
         else:
             if is_next:
-                first_day = self.end_date_dt + datetime.timedelta(days=1)
-                last_day = self.end_date_dt + datetime.timedelta(days=self.delta_days)
+                first_day = self.end_date_dt + timedelta(days=1)
+                last_day = self.end_date_dt + timedelta(days=self.delta_days)
             else:
-                first_day = self.start_date_dt - datetime.timedelta(days=self.delta_days)
-                last_day = self.start_date_dt - datetime.timedelta(days=1)
+                first_day = self.start_date_dt - timedelta(days=self.delta_days)
+                last_day = self.start_date_dt - timedelta(days=1)
 
             return {
-                "start_date": first_day.date(),
-                "end_date": last_day.date(),
+                "start_date": first_day,
+                "end_date": last_day,
             }
 
     def get_range_info(self):
         return {
             "date_range": {
-                "start_date": self.start_date_dt.date(),
-                "end_date": self.end_date_dt.date(),
+                "start_date": self.start_date_dt,
+                "end_date": self.end_date_dt,
             },
             "previous_range": self._get_next_range(False),
             "next_range": self._get_next_range(True),

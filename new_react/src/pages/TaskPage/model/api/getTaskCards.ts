@@ -11,6 +11,7 @@ interface getTaskCardsProps {
     exclude_users: string | undefined;
     departments: string | undefined;
     sort_mode: string | undefined;
+    reqId: number;
     start_date?: string | undefined;
     end_date?: string | undefined;
     user?: number | undefined;

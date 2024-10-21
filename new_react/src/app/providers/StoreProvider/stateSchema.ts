@@ -1,4 +1,4 @@
-import {AnyAction, CombinedState, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
+import {Action, EnhancedStore, Reducer, ReducersMapObject} from "@reduxjs/toolkit";
 import {AxiosInstance} from "axios";
 
 import {EqPageSchema} from "@pages/EqPage";
@@ -14,22 +14,24 @@ import {AppNavbarSchema} from "@widgets/AppNavbar";
 import {TarifficationPageSchema} from "@pages/TarifficationPage";
 import {PostTarifficationSchema} from "@widgets/PostTarifficationWidget";
 import {TaskPageSchema} from "@pages/TaskPage";
+import {CombinedState} from "redux";
 
 export interface StateSchema {
     [rtkAPI.reducerPath]: ReturnType<typeof rtkAPI.reducer>;
+
     taskPage: TaskPageSchema;
 
     // Асинхронные редюсеры
-    tarifficationPage?: TarifficationPageSchema;
-    eqPage?: EqPageSchema;
-    appNavbar?: AppNavbarSchema;
-    orderDetail?: OrderDetailsSchema;
-    orders?: OrdersPageSchema;
-    assignments?: AssignmentSchema;
-    products?: ProductsSchema;
-    auditWidget?: AuditWidgetSchema;
-    productDetails?: ProductDetailsSchema;
-    postTariffication?: PostTarifficationSchema;
+    tarifficationPage: TarifficationPageSchema;
+    eqPage: EqPageSchema;
+    appNavbar: AppNavbarSchema;
+    orderDetail: OrderDetailsSchema;
+    orders: OrdersPageSchema;
+    assignments: AssignmentSchema;
+    products: ProductsSchema;
+    auditWidget: AuditWidgetSchema;
+    productDetails: ProductDetailsSchema;
+    postTariffication: PostTarifficationSchema;
 }
 
 export type StateSchemaKey = keyof StateSchema;
@@ -38,7 +40,7 @@ export interface ReducerManager {
     getReducerMap: () => ReducersMapObject<StateSchema>;
     // true - вмонтирован, false - демонтирован
     getMountedReducers: () => MountedReducers;
-    reduce: (state: StateSchema, action: AnyAction) => CombinedState<StateSchema>;
+    reduce: (state: StateSchema, action: Action) => CombinedState<StateSchema>;
     add: (key: StateSchemaKey, reducer: Reducer) => void;
     remove: (key: StateSchemaKey) => void;
 }

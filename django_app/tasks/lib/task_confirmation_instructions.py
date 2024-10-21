@@ -1,5 +1,7 @@
+from datetime import datetime
+
 from staff.models import Transaction
-from ..models import Task, TaskExecutor
+from ..models import Task
 
 
 def task_confirmation_instructions(task: Task):
@@ -8,6 +10,7 @@ def task_confirmation_instructions(task: Task):
         for co_executor in task.new_co_executors.all():
             if co_executor.amount:
                 Transaction.objects.create(
+                    target_date=datetime.now(),
                     transaction_type='accrual',
                     details='prize',
                     amount=co_executor.amount,
@@ -21,6 +24,7 @@ def task_confirmation_instructions(task: Task):
             description = f'Исполнитель в задаче № {task.id} {task.title[:50]}'
 
             Transaction.objects.create(
+                target_date=datetime.now(),
                 transaction_type='accrual',
                 details='prize',
                 amount=task.new_executor.amount,

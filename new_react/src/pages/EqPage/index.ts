@@ -1,6 +1,6 @@
-export { EqInfo } from "./ui/EqInfo/EqInfo";
-
-export { useCardHeight } from "./model/lib/useCardHeight";
+export {EqInfo} from "./ui/EqInfo/EqInfo";
+export {getWeekData} from "./model/selectors/filterSelectors";
+export {useCardHeight} from "./model/lib/useCardHeight";
 export {eqPageReducer, eqPageActions} from "./model/slice/eqPageSlice";
 export {EqPage} from './ui/EqPage';
 export type {EqPageSchema} from "./model/types/eqPageSchema";

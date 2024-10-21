@@ -7,7 +7,10 @@ export interface BaseEmployee {
     first_name: string | null,
     last_name: string | null,
     patronymic: string | null,
+    description: string | null,
     boss: number | null,
+    attention: boolean,
+    is_active: boolean,
     pin_code: number,
     current_department: number | null,
     permanent_department: number | null,
@@ -15,6 +18,7 @@ export interface BaseEmployee {
     favorite_users: number[],
     groups: number[],
     current_balance: string,
+    piecework_wages: boolean,
     token: string,
 }
 

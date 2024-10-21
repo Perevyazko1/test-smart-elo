@@ -1,5 +1,6 @@
 import {Box, Drawer} from "@mui/material";
 import {ExcludeUsersFilter} from "@pages/TaskPage/ui/TaskPageNav/ui/ExcludeUsersFilter";
+import {AppTooltip} from "@shared/ui";
 
 
 interface ExtendedFilterPanelProps {
@@ -29,12 +30,17 @@ export const ExtendedFilterPanel = (props: ExtendedFilterPanelProps) => {
             }}
         >
             <Box style={{
-                padding: '1rem 1rem',
+                padding: '1rem',
                 position: 'relative',
-                minWidth: 300,
-                overflow: 'visible'
+                overflow: 'visible',
+                display: "block",
             }}>
-                <ExcludeUsersFilter/>
+                <AppTooltip
+                    classNames={'d-block w-25'}
+                    title="Фильтр исключающий задачи где указаны соответсвующие пользователи"
+                >
+                    <ExcludeUsersFilter/>
+                </AppTooltip>
             </Box>
         </Drawer>
     );

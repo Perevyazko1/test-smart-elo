@@ -45,6 +45,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
         card.appointed_by,
         card.confirmed_tariff?.amount,
         card.created_by,
+        card.appointed_by_boss,
         card.proposed_tariff?.amount,
         cardType,
         currentUser.id

@@ -7,7 +7,6 @@ from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import EqNotificationActions, ws_update_notification, ws_send_to_department, ws_group_updates
 from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep
 from core.signals import update_assignments_and_clean_cache
-from src.log_time import log_time
 from staff.models import Department, Employee, Transaction, Audit
 
 
@@ -25,7 +24,6 @@ class EqUpdateAssignmentsStatus:
         self.action_name: str = ''
         self.original_user: Employee | None = None
 
-    @log_time
     def _check_view_mode_by_id(self):
         self.original_user = self.employee
         if str(self.view_mode).isdigit() or self.view_mode == "distribute":
@@ -46,6 +44,10 @@ class EqUpdateAssignmentsStatus:
                     'executor': self.employee,
                     'appointment_date': datetime.now(),
                 }
+
+                if not self.employee.piecework_wages:
+                    update_data["amount"] = 0
+
                 qs_filter["status"] = "await"
 
                 """Проверка режима назначения"""
@@ -64,6 +66,16 @@ class EqUpdateAssignmentsStatus:
                 }
                 qs_filter["status"] = "in_work"
 
+                if self.department.piecework_wages:
+                    if not self.employee.piecework_wages:
+                        update_data["amount"] = 0
+
+                    else:
+                        if len(self.assignment_ids) > 0:
+                            assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                            if assignment_example.new_tariff:
+                                update_data["amount"] = assignment_example.new_tariff.amount
+
             case 'in_work_to_await_distribute':
                 self.action_name = 'Вернул в распределение'
                 update_data = {
@@ -71,6 +83,10 @@ class EqUpdateAssignmentsStatus:
                     'executor': self.original_user,
                     'appointed_by_boss': False,
                 }
+
+                if not self.original_user.piecework_wages:
+                    update_data["amount"] = 0
+
                 qs_filter["status"] = "in_work"
 
                 AssignmentCoExecutor.objects.filter(
@@ -105,6 +121,13 @@ class EqUpdateAssignmentsStatus:
                     'appointment_date': None,
                     'appointed_by_boss': False,
                 }
+
+                if self.department.piecework_wages:
+                    if len(self.assignment_ids) > 0:
+                        assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                        if assignment_example.new_tariff:
+                            update_data["amount"] = assignment_example.new_tariff.amount
+
                 qs_filter["status"] = "in_work"
 
                 AssignmentCoExecutor.objects.filter(
@@ -117,6 +140,7 @@ class EqUpdateAssignmentsStatus:
                     inspector = self.original_user
                 else:
                     inspector = self.employee
+
                 update_data = {
                     'inspector': inspector,
                     'inspect_date': datetime.now(),
@@ -334,28 +358,32 @@ class EqUpdateAssignmentsStatus:
                     description = (f'Соисполнитель в производстве полуфабриката {target_assignment} '
                                    f'{target_assignment.department.name}')
                     for co_executor in co_executors:
-                        Transaction.objects.create(
-                            transaction_type='accrual',
-                            details='wages',
-                            amount=co_executor.amount,
-                            employee=co_executor.co_executor,
-                            executor=target_assignment.inspector,
-                            inspector=target_assignment.inspector,
-                            description=description,
-                        )
+                        if co_executor.co_executor.piecework_wages:
+                            Transaction.objects.create(
+                                target_date=datetime.now(),
+                                transaction_type='accrual',
+                                details='wages',
+                                amount=co_executor.amount,
+                                employee=co_executor.co_executor,
+                                executor=target_assignment.inspector,
+                                inspector=target_assignment.inspector,
+                                description=description,
+                            )
 
                     description = (f'Производство полуфабриката {target_assignment} '
                                    f'{target_assignment.department.name}')
 
-                    Transaction.objects.create(
-                        transaction_type='accrual',
-                        details='wages',
-                        amount=target_assignment.amount,
-                        employee=target_assignment.executor,
-                        executor=target_assignment.inspector,
-                        inspector=target_assignment.inspector,
-                        description=description,
-                    )
+                    if target_assignment.executor.piecework_wages:
+                        Transaction.objects.create(
+                            target_date=datetime.now(),
+                            transaction_type='accrual',
+                            details='wages',
+                            amount=target_assignment.amount,
+                            employee=target_assignment.executor,
+                            executor=target_assignment.inspector,
+                            inspector=target_assignment.inspector,
+                            description=description,
+                        )
 
         if tariff_created:
             ws_send_to_department(
@@ -383,14 +411,12 @@ class EqUpdateAssignmentsStatus:
         result += f'Номер серии: {self.order_product.series_id}. Изделие: {self.order_product.product.name}'
         return result
 
-    @log_time
     def _create_audit(self):
         Audit.objects.create(
             employee=self.original_user or self.employee,
             details=self._get_audit_details()
         )
 
-    @log_time
     @transaction.atomic
     def execute(self):
         """Произвести обновление переданных нарядов и создать последующие"""

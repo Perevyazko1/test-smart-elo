@@ -1,24 +1,25 @@
 """Initial methods and scripts. """
-from core.models import Assignment, OrderProduct
-from staff.models import Department
-from core.signals import update_assignments_and_clean_cache
+from django.utils import timezone
+import datetime
+
+from staff.models import Transaction
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
+    # Получаем текущую дату
+    today = timezone.now()
 
-    department = Department.objects.get(name="Обивка")
-    order_product = OrderProduct.objects.get(series_id="{8}24322")
+    # Вычисляем дату 30 дней назад
+    date_30_days_ago = today - datetime.timedelta(days=45)
 
-    target_assignments = Assignment.objects.filter(
-        order_product=order_product,
-        department=department
-    )
+    # Получаем транзакции, у которых add_date в пределах последних 30 дней и target_date не установлена
+    transactions = Transaction.objects.filter(add_date__gte=date_30_days_ago, target_date__isnull=True)
 
-    update_assignments_and_clean_cache(
-        target_assignments,
-        order_product.id,
-        department.id,
-        assembled=True,
-    )
+    # Обновляем target_date
+    for transaction in transactions:
+        transaction.target_date = transaction.add_date
+        transaction.save()
+
+    print(f"Обновлено {transactions.count()} транзакций")

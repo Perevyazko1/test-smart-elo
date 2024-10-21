@@ -60,7 +60,7 @@ export const PostTarifficationWidget = (props: PostTarifficationWidgetProps) => 
 
         // Если сегодня понедельник, вернуть сегодняшний день
         if (dayOfWeek === 1) {
-            return today;
+            return new Date(today.getFullYear(), today.getMonth(), today.getDate()) ;
         }
 
         // Иначе вычитаем нужное количество дней до последнего понедельника
