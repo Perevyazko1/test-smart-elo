@@ -14,7 +14,6 @@ export interface StaffInfoRange {
     I: RangeData;
     II: RangeData;
     III: RangeData;
-    VI: RangeData;
 }
 
 

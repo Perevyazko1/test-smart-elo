@@ -3,7 +3,14 @@ import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
 import {IsDesktopContext} from "@app";
-import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap} from "@shared/hooks";
+import {
+    useAppDispatch,
+    useAppModal,
+    useAppQuery,
+    useAppSelector,
+    useCurrentUser,
+    useDoubleTap,
+} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
@@ -116,7 +123,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
         } else {
             return '';
         }
-    }, [blockWidthPx, weekData?.str_dates, weekData?.week])
+    }, [blockWidthPx, weekData?.str_dates, weekData?.week]);
 
     return (
         <div

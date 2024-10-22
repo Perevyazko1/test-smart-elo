@@ -75,10 +75,10 @@ export const StaffTableHead = (props: StaffTableHeadProps) => {
 
             {!selectedEmployee &&
                 <>
-                    <th className={'align-top'}>
+                    <th className={'align-top'} style={{maxWidth: '130px', width: '130px'}}>
                         Отдел
                     </th>
-                    <th className={'align-top text-end'}>
+                    <th className={'align-top text-end'}  style={{maxWidth: '150px', width: '150px'}}>
                         <span>Деб./Кред. </span>
                         <hr className={'m-1 p-0'}/>
                         <span className={'px-2'} style={{fontSize: 14}}>{formatValue(totalDebitCredit).strValue}</span>

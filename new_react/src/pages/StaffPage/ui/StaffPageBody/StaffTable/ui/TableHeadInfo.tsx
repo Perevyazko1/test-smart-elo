@@ -1,10 +1,13 @@
 import {useFormattedValue, usePermission, useQueryParams} from "@shared/hooks";
 
 import {DateRange} from "@pages/TaskPage";
+import {APP_PERM} from "@shared/consts";
 
 import {RangeData} from "../../../../model/types";
 import {ConfirmTransactions} from "../../../../model/api/api";
-import {APP_PERM} from "@shared/consts";
+import {AppTooltip} from "@shared/ui";
+import {useMemo} from "react";
+import {getHumansDatetime} from "@shared/lib";
 
 
 interface TableHeadInfoProps {
@@ -37,16 +40,26 @@ export const TableHeadInfo = (props: TableHeadInfoProps) => {
         }
     };
 
+    const dateRangeInfo = useMemo(() => {
+        return `${getHumansDatetime(
+            headInfo.date_range.start_date, 'DD-MM'
+        )}-${getHumansDatetime(
+                headInfo.date_range.end_date, 'DD-MM')}`
+    }, [headInfo.date_range.end_date, headInfo.date_range.start_date])
+
     return (
         <th>
-            <div
-                className={'d-flex align-items-center'}
-                onClick={() => onClick(headInfo.date_range)}
-                style={{cursor: "pointer"}}
-            >
-                <span>{headInfo.range_type} {headInfo.range_value}</span>
-                <span className={'fs-7 ps-1'}>{headInfo.no_confirmed ? "❌" : "✔️"}</span>
-            </div>
+            <AppTooltip title={'Выбрать'}>
+                <div
+                    className={'d-flex align-items-center'}
+                    onClick={() => onClick(headInfo.date_range)}
+                    style={{cursor: "pointer"}}
+                >
+                    <span>{headInfo.range_type} {headInfo.range_value}</span>
+                    <span className={'fs-7 ps-1'}>{headInfo.no_confirmed ? "❌" : "✔️"}</span>
+                    <span className={'fs-7 ps-1'}>{dateRangeInfo}</span>
+                </div>
+            </AppTooltip>
 
             <hr className={'m-1 p-0'}/>
 

@@ -60,7 +60,7 @@ export const StaffTableWeeks = (props: StaffTableWeeksProps) => {
 
             {
                 userInfo ? (
-                    Object.entries(userInfo).map(([key, headInfo]) => (
+                    Object.entries(userInfo).map(([key, headInfo], index) => (
                         <TableHeadInfo
                             ids={ids}
                             onClick={setTargetRange}
@@ -70,8 +70,6 @@ export const StaffTableWeeks = (props: StaffTableWeeksProps) => {
                     ))
                 ) : (
                     <>
-                        <TableHeadSkeleton/>
-                        <TableHeadSkeleton/>
                         <TableHeadSkeleton/>
                         <TableHeadSkeleton/>
                         <TableHeadSkeleton/>

@@ -57,7 +57,8 @@ export const StaffTableRow = (props: StaffTableRowProps) => {
             style={{cursor: 'pointer'}}
             onClick={() => setSelectedEmployee((selectedEmployee?.id === user.id) ? (null) : (user))}
         >
-            <td style={{minHeight: 55, height: 55}} className={selectedEmployee?.id === user.id ? 'bg-info-subtle fw-bold border border-2 border-black border-end-0' : ''}>
+            <td style={{minHeight: 55, height: 55}}
+                className={selectedEmployee?.id === user.id ? 'bg-info-subtle fw-bold border border-2 border-black border-end-0' : ''}>
                 <div className={'d-flex'}>
                     {getNameById(user.id, 'listNameInitials')}
                     <AppSwitch
@@ -79,14 +80,14 @@ export const StaffTableRow = (props: StaffTableRowProps) => {
 
             {!selectedEmployee && (
                 <>
-                    <td>
+                    <td style={{maxWidth: '130px', width: '130px'}}>
                         <button
                             className={'appBtn px-1 fs-7'}
                             style={{
                                 backgroundColor:
                                     user.permanent_department ?
                                         user.permanent_department.color :
-                                        "#FFFFFF"
+                                        "#FFFFFF",
                             }}
                             onClick={setDepartmentHandle}
                         >
@@ -103,7 +104,9 @@ export const StaffTableRow = (props: StaffTableRowProps) => {
                     {userInfo && Object.entries(userInfo.user_total_info).map(([key, value]) => (
                         <td className={'fs-7'} key={key}>
                             <div className={'d-flex gap-1 align-items-top'}>
-                                <span>{formatValue(value.accrual).strValue}</span>
+                                <span  className={value.accrual === 0 ? "text-muted" : "fw-bold"}>
+                                    {formatValue(value.accrual).strValue}
+                                </span>
                                 <span style={{fontSize: 6, paddingTop: 2}}>
                                     {value.pre_accrual > 0 && "🔴"}
                                 </span>
@@ -111,7 +114,7 @@ export const StaffTableRow = (props: StaffTableRowProps) => {
                             <hr className={'m-0 mt-1 p-0'}/>
 
                             <div className={'d-flex gap-1 align-items-top'}>
-                                <span className={value.debit === 0 ? "text-muted" : ""}>
+                                <span className={value.debit === 0 ? "text-muted" : "fw-bold"}>
                                     {formatValue(-value.debit).strValue}
                                 </span>
                                 <span style={{fontSize: 6, paddingTop: 2}}>

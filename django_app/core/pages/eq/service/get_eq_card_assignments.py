@@ -134,78 +134,78 @@ def _handle_ready(eq_params, order_product):
         if current_week.week == week_info.week and current_week.year == week_info.year:
             assignments = order_product.assignments.filter(
                 Q(
+                    tariffication_date__gt=week_info.date_range[0],
+                    tariffication_date__lte=week_info.date_range[1],
+                    status='ready',
+                    executor=eq_params['user'],
+                    department=eq_params['department'],
+                ) |
+                Q(
+                    tariffication_date__isnull=True,
                     executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
-                    inspect_date__gt=week_info.date_range[0],
-                    inspect_date__lte=week_info.date_range[1],
                 ) |
                 Q(
-                    executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                    inspector__isnull=True,
-                ) |
-                Q(
+                    tariffication_date__gt=week_info.date_range[0],
+                    tariffication_date__lte=week_info.date_range[1],
                     co_executors__co_executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
-                    inspect_date__gt=week_info.date_range[0],
-                    inspect_date__lte=week_info.date_range[1],
                 ) |
                 Q(
+                    tariffication_date__isnull=True,
                     co_executors__co_executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
-                    inspector__isnull=True,
                 )
-            ).distinct().order_by('-inspector')
+            ).distinct()
         else:
             assignments = order_product.assignments.filter(
                 Q(
+                    tariffication_date__gt=week_info.date_range[0],
+                    tariffication_date__lte=week_info.date_range[1],
                     executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
-                    inspect_date__gt=week_info.date_range[0],
-                    inspect_date__lte=week_info.date_range[1],
                 ) |
                 Q(
+                    tariffication_date__gt=week_info.date_range[0],
+                    tariffication_date__lte=week_info.date_range[1],
                     co_executors__co_executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
-                    inspect_date__gt=week_info.date_range[0],
-                    inspect_date__lte=week_info.date_range[1],
                 )
 
-            ).distinct().order_by('-inspector')
+            ).distinct()
     elif eq_params['view_mode_key'] == "boss":
         if current_week.week == week_info.week and current_week.year == week_info.year:
             assignments = order_product.assignments.filter(
                 Q(
+                    tariffication_date__gt=week_info.date_range[0],
+                    tariffication_date__lte=week_info.date_range[1],
                     department=eq_params['department'],
                     status='ready',
-                    inspect_date__gt=week_info.date_range[0],
-                    inspect_date__lte=week_info.date_range[1],
                 ) |
                 Q(
                     department=eq_params['department'],
                     status='ready',
-                    inspector__isnull=True,
+                    tariffication_date__isnull=True,
                 )
-            ).distinct().order_by('-inspector')
+            ).distinct()
         else:
             assignments = order_product.assignments.filter(
+                tariffication_date__gt=week_info.date_range[0],
+                tariffication_date__lte=week_info.date_range[1],
                 department=eq_params['department'],
                 status='ready',
-                inspect_date__gt=week_info.date_range[0],
-                inspect_date__lte=week_info.date_range[1],
-            ).distinct().order_by('-inspector')
+            ).distinct()
     else:
         assignments = order_product.assignments.filter(
             department=eq_params['department'],
             status="ready",
-            inspector__isnull=True,
-        ).distinct().order_by('-inspector')[:30]
+            tariffication_date__isnull=True,
+        ).distinct()
 
     result = SimpleAssignmentSerializer(assignments, many=True).data
     """Кешируем результат. """

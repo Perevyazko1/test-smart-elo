@@ -70,9 +70,9 @@ export const StaffPageBody = () => {
     return (
         <div
             data-bs-theme={'light'}
-            className={'mt-2 p-1 d-flex w-100 pageContent'}
+            className={'mt-2 p-1 d-flex w-100 pageContent  justify-content-center'}
         >
-            <div className={'d-flex flex-fill'} style={{overflow: 'hidden'}}>
+            <div className={'d-flex flex-fill justify-content-center'} style={{overflow: 'hidden', maxWidth: '1600px'}}>
                 <div className={!selectedEmployee ? 'flex-fill' : ""} style={{overflow: 'auto'}}>
                     <StaffTable
                         ids={iDs || []}

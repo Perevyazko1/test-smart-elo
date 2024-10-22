@@ -19,7 +19,6 @@ class StaffInfoModelFilter(django_filters.FilterSet):
 
         user_ids = value.split(',')
         int_ids = [int(user_id) for user_id in user_ids if user_id.isdigit()]
-        print(f'###PRINT filter_ids #l=>21:', int_ids)
 
         if not int_ids:
             return queryset.none()  # Возвращаем пустой queryset

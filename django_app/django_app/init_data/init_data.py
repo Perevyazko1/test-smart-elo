@@ -2,7 +2,7 @@
 from django.utils import timezone
 import datetime
 
-from staff.models import Transaction
+from core.models import Assignment
 
 
 def init_data():
@@ -15,11 +15,19 @@ def init_data():
     date_30_days_ago = today - datetime.timedelta(days=45)
 
     # Получаем транзакции, у которых add_date в пределах последних 30 дней и target_date не установлена
-    transactions = Transaction.objects.filter(add_date__gte=date_30_days_ago, target_date__isnull=True)
+    assignments = Assignment.objects.filter(
+        inspect_date__lte=date_30_days_ago,
+        inspector__isnull=False,
+        tariffication_date__isnull=True
+    )
 
     # Обновляем target_date
-    for transaction in transactions:
-        transaction.target_date = transaction.add_date
-        transaction.save()
+    for assignment in assignments:
+        if not assignment.inspect_date:
+            assignment.inspect_date = assignment.date_completion
+            assignment.tariffication_date = assignment.date_completion
+        else:
+            assignment.tariffication_date = assignment.inspect_date
+        assignment.save()
 
-    print(f"Обновлено {transactions.count()} транзакций")
+    print(f"Обновлено {assignments.count()} наряда")

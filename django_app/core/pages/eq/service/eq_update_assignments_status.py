@@ -145,6 +145,10 @@ class EqUpdateAssignmentsStatus:
                     'inspector': inspector,
                     'inspect_date': datetime.now(),
                 }
+
+                if not self.department.piecework_wages:
+                    update_data["tariffication_date"] = datetime.now(),
+
                 qs_filter["inspector__isnull"] = True
 
             case _:

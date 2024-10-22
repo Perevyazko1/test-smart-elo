@@ -73,7 +73,7 @@ export const CardSlider = (props: CardSliderProps) => {
                     ?
                     card.card_info.tariff
                         ? card.card_info.tariff
-                        : card.card_info.proposed_tariff
+                        : (card.card_info.proposed_tariff && bossBerm)
                             ? card.card_info.proposed_tariff
                             : 0
                     : undefined}

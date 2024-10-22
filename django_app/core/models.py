@@ -431,7 +431,6 @@ class Assignment(models.Model):
         'Дата тарифицирования',
         null=True,
         blank=True,
-
     )
 
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
