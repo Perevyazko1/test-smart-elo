@@ -16,7 +16,7 @@ def init_data():
 
     # Получаем транзакции, у которых add_date в пределах последних 30 дней и target_date не установлена
     assignments = Assignment.objects.filter(
-        inspect_date__lte=date_30_days_ago,
+        date_completion__lte=date_30_days_ago,
         inspector__isnull=False,
         tariffication_date__isnull=True
     )
