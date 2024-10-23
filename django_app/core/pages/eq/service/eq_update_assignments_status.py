@@ -141,13 +141,17 @@ class EqUpdateAssignmentsStatus:
                 else:
                     inspector = self.employee
 
-                update_data = {
-                    'inspector': inspector,
-                    'inspect_date': datetime.now(),
-                }
-
-                if not self.department.piecework_wages:
-                    update_data["tariffication_date"] = datetime.now(),
+                if self.department.piecework_wages:
+                    update_data = {
+                        'inspector': inspector,
+                        'inspect_date': datetime.now(),
+                    }
+                else:
+                    update_data = {
+                        'inspector': inspector,
+                        'inspect_date': datetime.now(),
+                        "tariffication_date": datetime.now(),
+                    }
 
                 qs_filter["inspector__isnull"] = True
 
