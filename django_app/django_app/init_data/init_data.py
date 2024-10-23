@@ -1,8 +1,10 @@
 """Initial methods and scripts. """
 from django.utils import timezone
 import datetime
+from django.db.models import Count
 
-from core.models import Assignment
+
+from staff.models import Transaction
 
 
 def init_data():
@@ -12,22 +14,28 @@ def init_data():
     today = timezone.now()
 
     # Вычисляем дату 30 дней назад
-    date_30_days_ago = today - datetime.timedelta(days=45)
+    date_20_days_ago = today - datetime.timedelta(days=10)
 
-    # Получаем транзакции, у которых add_date в пределах последних 30 дней и target_date не установлена
-    assignments = Assignment.objects.filter(
-        date_completion__lte=date_30_days_ago,
-        inspector__isnull=False,
-        tariffication_date__isnull=True
+    transactions = Transaction.objects.filter(
+        add_date__gte=date_20_days_ago,
+        description__startswith="Производство полуфабриката",
     )
 
-    # Обновляем target_date
-    for assignment in assignments:
-        if not assignment.inspect_date:
-            assignment.inspect_date = assignment.date_completion
-            assignment.tariffication_date = assignment.date_completion
-        else:
-            assignment.tariffication_date = assignment.inspect_date
-        assignment.save()
+    # Шаг 2: Группировка по описанию и подсчет количества дубликатов
+    duplicate_transactions = (
+        transactions
+        .values('description')
+        .annotate(count=Count('id'))
+        .filter(count__gt=1)
+    )
 
-    print(f"Обновлено {assignments.count()} наряда")
+    # Шаг 3: Удаление всех дубликатов, кроме одной записи для каждого уникального описания
+    for duplicate in duplicate_transactions:
+        description = duplicate['description']
+        transactions_to_delete = Transaction.objects.filter(description=description).order_by('id')[1:]
+
+        # Удаляем дубликаты через их ID
+        Transaction.objects.filter(id__in=transactions_to_delete.values_list('id', flat=True)).delete()
+
+    print("Удаление дубликатов завершено.")
+
