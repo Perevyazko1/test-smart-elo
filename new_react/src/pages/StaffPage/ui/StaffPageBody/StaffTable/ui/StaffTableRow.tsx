@@ -55,7 +55,7 @@ export const StaffTableRow = (props: StaffTableRowProps) => {
     return (
         <tr
             style={{cursor: 'pointer'}}
-            onClick={() => setSelectedEmployee((selectedEmployee?.id === user.id) ? (null) : (user))}
+            onClick={() => setSelectedEmployee((selectedEmployee?.id === user.id) ? null : user)}
         >
             <td style={{minHeight: 55, height: 55}}
                 className={selectedEmployee?.id === user.id ? 'bg-info-subtle fw-bold border border-2 border-black border-end-0' : ''}>

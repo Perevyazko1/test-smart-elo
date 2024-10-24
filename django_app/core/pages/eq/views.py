@@ -13,12 +13,14 @@ from core.models import (
 )
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
+
 from .serializers import EqOrderProductSerializer
 from .service.eq_update_assignments_status import EqUpdateAssignmentsStatus
 from .service.get_eq_card_queryset import get_eq_card_queryset
 from .service.get_eq_req_params import get_eq_req_params
 from .service.get_project_filter import get_project_filters
 from .service.get_view_modes import get_view_modes
+
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
 from ...signals import update_assignments_and_clean_cache
@@ -340,6 +342,7 @@ def update_assignments(request):
 
             assignment.inspector = None
             assignment.inspect_date = None
+            assignment.tariffication_date = None
             assignment.save()
 
             if assignment.new_tariff:
@@ -360,6 +363,7 @@ def update_assignments(request):
                                 inspector=user,
                                 description=description,
                             )
+
                     if assignment.executor.piecework_wages:
                         Transaction.objects.create(
                             target_date=datetime.now(),

@@ -353,7 +353,7 @@ class EqUpdateAssignmentsStatus:
             target_assignment = Assignment.objects.get(
                 id=assignment_id,
             )
-            if target_assignment.new_tariff:
+            if target_assignment.new_tariff and not target_assignment.tariffication_date:
                 target_assignment.tariffication_date = datetime.now()
                 target_assignment.save()
 
