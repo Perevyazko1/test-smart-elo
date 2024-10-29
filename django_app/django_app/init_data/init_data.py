@@ -1,41 +1,29 @@
 """Initial methods and scripts. """
-from django.utils import timezone
-import datetime
-from django.db.models import Count
-
-
-from staff.models import Transaction
+from core.models import OrderProduct, ProductionStep, Assignment
+from core.services.assignment_generator import AssignmentGenerator
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    # Получаем текущую дату
-    today = timezone.now()
 
-    # Вычисляем дату 30 дней назад
-    date_20_days_ago = today - datetime.timedelta(days=10)
-
-    transactions = Transaction.objects.filter(
-        add_date__gte=date_20_days_ago,
-        description__startswith="Производство полуфабриката",
+    current_op = OrderProduct.objects.filter(
+        status="0"
     )
 
-    # Шаг 2: Группировка по описанию и подсчет количества дубликатов
-    duplicate_transactions = (
-        transactions
-        .values('description')
-        .annotate(count=Count('id'))
-        .filter(count__gt=1)
-    )
+    for op in current_op:
+        target_ps = ProductionStep.objects.filter(
+            product=op.product,
+            is_active=True,
+        ).exclude(
+            department__number__in=[0, 1, 50]
+        )
+        for ps in target_ps:
+            has_assignments = Assignment.objects.filter(
+                department=ps.department,
+                order_product=op
+            ).exists()
 
-    # Шаг 3: Удаление всех дубликатов, кроме одной записи для каждого уникального описания
-    for duplicate in duplicate_transactions:
-        description = duplicate['description']
-        transactions_to_delete = Transaction.objects.filter(description=description).order_by('id')[1:]
-
-        # Удаляем дубликаты через их ID
-        Transaction.objects.filter(id__in=transactions_to_delete.values_list('id', flat=True)).delete()
-
-    print("Удаление дубликатов завершено.")
-
+            if not has_assignments:
+                print(f"Отдел {ps.department.name} серии {op.series_id} без нарядов!")
+                AssignmentGenerator().init_order_product_assignments(op)

@@ -1,3 +1,5 @@
+from venv import logger
+
 from django.db import transaction
 
 from ..adapters.create_order_product_entities import OrderProductEntity
@@ -9,6 +11,17 @@ class OrderProductEntityToDB:
     @staticmethod
     @transaction.atomic
     def execute(order_product_entity: OrderProductEntity):
+        op = OrderProduct.objects.filter(
+            series_id=order_product_entity.series_id,
+        )
+        if op.exists():
+            if not op[0].product.product_id == order_product_entity.product_id:
+                logger.error(
+                    f"Attempt to overwrite product with series_id {order_product_entity.series_id} "
+                    f"and product_id {order_product_entity.product_id}"
+                )
+                raise ValueError('Существующее изделие не может быть перезаписано другим изделием.')
+
         order_product = OrderProduct.objects.update_or_create(
             series_id=order_product_entity.series_id,
             defaults={
