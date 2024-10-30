@@ -16,8 +16,11 @@ class OrderProductEntityToDB:
         )
         if op.exists():
             if not op[0].product.product_id == order_product_entity.product_id:
-                error = (f"Attempt to overwrite product with series_id {order_product_entity.series_id} "
-                         f"and product_id {order_product_entity.product_id}")
+                error = (
+                    f"Attempt to overwrite product with series_id {order_product_entity.series_id} \n"
+                    f"old product_id: {op[0].product.product_id} \n"
+                    f"new product_id: {order_product_entity.product_id}"
+                )
                 logger.error(error)
                 raise ValueError(error)
 
