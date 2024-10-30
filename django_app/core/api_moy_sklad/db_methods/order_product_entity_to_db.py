@@ -1,5 +1,3 @@
-from venv import logger
-
 from django.db import transaction
 
 from ..adapters.create_order_product_entities import OrderProductEntity
@@ -21,7 +19,6 @@ class OrderProductEntityToDB:
                     f"old product_id: {op[0].product.product_id} "
                     f"new product_id: {order_product_entity.product_id}"
                 )
-                logger.error(error)
                 raise ValueError(error)
 
         order_product = OrderProduct.objects.update_or_create(
