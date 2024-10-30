@@ -92,8 +92,6 @@ def get_week_data(request):
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
-    print(f'###PRINT get_week_data #l=>93:', week_info.date_range[0], week_info.date_range[1])
-
     if eq_params['view_mode_key'] == 'boss':
         assignments_sum = Assignment.objects.filter(
             department=eq_params['department'],
@@ -385,7 +383,7 @@ def update_assignments(request):
         locked_status = target_assignments.filter(
             appointed_by_boss=True
         ).exists()
-        print(f'###PRINT update_assignments #l=>319:', locked_status, not locked_status)
+
         update_assignments_and_clean_cache(
             target_assignments,
             order_product.id,
