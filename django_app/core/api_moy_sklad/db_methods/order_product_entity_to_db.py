@@ -16,11 +16,10 @@ class OrderProductEntityToDB:
         )
         if op.exists():
             if not op[0].product.product_id == order_product_entity.product_id:
-                logger.error(
-                    f"Attempt to overwrite product with series_id {order_product_entity.series_id} "
-                    f"and product_id {order_product_entity.product_id}"
-                )
-                raise ValueError('Существующее изделие не может быть перезаписано другим изделием.')
+                error = (f"Attempt to overwrite product with series_id {order_product_entity.series_id} "
+                         f"and product_id {order_product_entity.product_id}")
+                logger.error(error)
+                raise ValueError(error)
 
         order_product = OrderProduct.objects.update_or_create(
             series_id=order_product_entity.series_id,
