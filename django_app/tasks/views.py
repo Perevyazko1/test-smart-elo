@@ -97,7 +97,14 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     def retrieve(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        obj = get_object_or_404(queryset, pk=kwargs.get('pk'))
+        obj = queryset.filter(pk=kwargs.get('pk')).first()
+
+        if obj is None:
+            return Response(
+                {"detail": "Задача не найдена."},
+                status=status.HTTP_200_OK
+            )
+
         serializer = self.get_serializer(obj)
         return Response(serializer.data)
 

@@ -77,12 +77,30 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 if (inspectorDiff !== 0) {
                     return inspectorDiff;
                 }
+
+                if (currentUser.current_department?.piecework_wages) {
+                    const hasTariffA = a.assignments.length > 0 ? a.assignments[0].new_tariff?.id ? 0 : 1 : 1;
+                    const hasTariffB = b.assignments.length > 0 ? b.assignments[0].new_tariff?.id ? 0 : 1 : 1;
+
+                    const tariffDiff = hasTariffB - hasTariffA;
+
+                    if (tariffDiff !== 0) {
+                        return tariffDiff;
+                    }
+                }
             }
 
             const urgencyDiff = a.urgency - b.urgency;
 
             if (urgencyDiff !== 0) {
                 return urgencyDiff;
+            }
+
+            const plannedDateA = a.order.planned_date ? new Date(a.order.planned_date) : new Date(0);
+            const plannedDateB = b.order.planned_date ? new Date(b.order.planned_date) : new Date(0);
+            const plannedDateDiff = plannedDateA.getTime() - plannedDateB.getTime();
+            if (plannedDateDiff !== 0) {
+                return plannedDateDiff;
             }
 
             const orderNumberDiff = a.order.id - b.order.id;
@@ -92,7 +110,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
 
             return a.id - b.id;
         }) || [])
-    }, [data, listType]);
+    }, [currentUser.current_department?.piecework_wages, data, listType]);
 
     const blockName = useMemo(() => {
         return (listType !== "distribute" &&

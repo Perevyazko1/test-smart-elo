@@ -35,10 +35,11 @@ export const AudioContext = createContext<HTMLAudioElement | null>(null);
 
 export const ContextProvider = (props: ContextProviderProps) => {
     const isDesktop = useMediaQuery({minWidth: 1279});
-    const {data: usersList, isLoading} = useEmployeeList({});
 
     const [clickSound, setClickSound] = useState<HTMLAudioElement | null>(null);
     const [currentUser, setCurrentUser] = useState<Employee>(anonEmployee);
+
+    const {data: usersList, isLoading} = useEmployeeList({}, {skip: currentUser.id === 0});
     const [isCompactMode, setIsCompactMode] = useState<boolean>(
         !!localStorage.getItem(APP_COMPACT_MODE)
     );

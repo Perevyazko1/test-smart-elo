@@ -12,7 +12,7 @@ def set_executors(
     current_executors = TaskExecutor.objects.filter(task=task)
 
     # Изначально определяем исполнителя
-    if clear_executor:
+    if clear_executor and task.new_executor:
         task.new_executor.delete()
     elif executor_data:
         executor_employee = executor_data.get('employee', None)
