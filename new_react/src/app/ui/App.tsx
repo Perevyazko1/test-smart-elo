@@ -1,8 +1,6 @@
 import React, {useCallback, useContext, useEffect, useState} from 'react';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {Spinner} from "react-bootstrap";
-//
-// import '@shared/assets/fonts/fontawesome-all.min.css';
 
 import {IsDesktopContext} from "@app";
 import {AutoLogout} from "@features";
@@ -10,7 +8,7 @@ import {anonEmployee, Employee} from "@entities/Employee";
 import {useCurrentUser} from "@shared/hooks";
 import {getUserRoutes} from "@shared/lib";
 import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
-import {useWebSocket} from "@shared/api";
+import {setRtkHeaders, useWebSocket} from "@shared/api";
 import {$axiosAPI} from "@shared/api";
 
 export const App = () => {
@@ -35,6 +33,7 @@ export const App = () => {
                     if (response.data.token) {
                         const token = response.data.token;
                         $axiosAPI.defaults.headers.common['Authorization'] = `Token ${token}`;
+                        setRtkHeaders({'Authorization': `Token ${token}`});
                         localStorage.setItem(USER_LOCALSTORAGE_TOKEN, response.data.token);
                     }
 

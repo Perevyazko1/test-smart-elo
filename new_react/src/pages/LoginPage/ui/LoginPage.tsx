@@ -6,7 +6,7 @@ import logo from '@shared/assets/images/SZMK Logo Dark Horizontal 900x350.png';
 import {AppSwitch} from "@shared/ui";
 import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {Employee} from "@entities/Employee";
-import {$axiosAPI} from "@shared/api";
+import {$axiosAPI, setRtkHeaders} from "@shared/api";
 import {useCurrentUser} from "@shared/hooks";
 import {QueryContext} from "@features";
 import {ModalProvider} from "@app";
@@ -30,6 +30,8 @@ export const LoginPage = () => {
                 if (response.data.token) {
                     const token = response.data.token;
                     $axiosAPI.defaults.headers.common['Authorization'] = `Token ${token}`;
+                    setRtkHeaders({'Authorization': `Token ${token}`});
+
                     if (rememberMe) {
                         localStorage.setItem(USER_LOCALSTORAGE_TOKEN, response.data.token);
                     }

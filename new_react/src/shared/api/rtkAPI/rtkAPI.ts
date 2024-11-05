@@ -1,23 +1,33 @@
 import {BaseQueryFn, createApi, FetchArgs, fetchBaseQuery, FetchBaseQueryError} from "@reduxjs/toolkit/query/react";
 import {errorApiHandler} from "@shared/api";
 
-import {SERVER_HTTP_ADDRESS, USER_LOCALSTORAGE_TOKEN} from "../../consts";
+import {SERVER_HTTP_ADDRESS} from "../../consts";
 
-// Получение токена из localStorage
-const getToken = () => {
-    return localStorage.getItem(USER_LOCALSTORAGE_TOKEN);
-}
+
+// Переменная для хранения заголовков
+let customHeaders: Record<string, string> = {};
+
+// Функция для обновления заголовков
+export const setRtkHeaders = (headers: Record<string, string>) => {
+  customHeaders = headers;
+};
 
 // Функция для создания пользовательского baseQuery
 const customFetchBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (args, api, extraOptions) => {
-    const token = getToken();
     const baseQuery = fetchBaseQuery(
         {
             baseUrl: SERVER_HTTP_ADDRESS + '/api/v1',
-            headers: {
-                'Authorization': `Token ${token}`,
-                // 'Content-Type': 'application/json',
-            }
+            prepareHeaders: (headers) => {
+                // Добавляем заголовки из customHeaders
+                Object.entries(customHeaders).forEach(([key, value]) => {
+                  headers.set(key, value);
+                });
+                return headers;
+            },
+            // headers: {
+            //     'Authorization': `Token ${token}`,
+            //     // 'Content-Type': 'application/json',
+            // }
         });
 
     try {

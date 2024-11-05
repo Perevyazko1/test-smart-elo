@@ -27,6 +27,7 @@ interface UserListContextType {
 }
 
 export const CurrentUserContext = createContext<CurrentUserContextType | undefined>(undefined);
+
 export const UserListContext = createContext<UserListContextType | undefined>(undefined);
 
 
@@ -54,9 +55,9 @@ export const ContextProvider = (props: ContextProviderProps) => {
             <CurrentUserContext.Provider value={{currentUser, setCurrentUser: setCurrentUser}}>
                 <UserListContext.Provider value={{isLoading, usersList}}>
                     <AppInCompactMode.Provider value={{isCompactMode, setCompactMode: setIsCompactMode}}>
-                        <AudioContext.Provider value={clickSound}>
-                            {props.children}
-                        </AudioContext.Provider>
+                            <AudioContext.Provider value={clickSound}>
+                                {props.children}
+                            </AudioContext.Provider>
                     </AppInCompactMode.Provider>
                 </UserListContext.Provider>
             </CurrentUserContext.Provider>

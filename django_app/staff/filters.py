@@ -23,7 +23,7 @@ class EmployeeModelFilter(django_filters.FilterSet):
         user: Employee | None = self.request.user
         if user:
             return queryset.filter(
-                departments__in=user.departments.all()
+                permanent_department__in=user.departments.all()
             ).distinct()
         return queryset
 
