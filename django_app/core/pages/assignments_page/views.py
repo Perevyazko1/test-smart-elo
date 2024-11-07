@@ -59,22 +59,13 @@ def update_co_executor(request):
                     new_amount = current_difference
 
             co_executor = Employee.objects.get(id=data.get('co_executor__id'))
-            if co_executor.piecework_wages:
-                AssignmentCoExecutor.objects.update_or_create(
-                    co_executor=co_executor,
-                    assignment=target_assignment,
-                    defaults={
-                        'amount': new_amount,
-                    }
-                )
-            else:
-                AssignmentCoExecutor.objects.update_or_create(
-                    co_executor=co_executor,
-                    assignment=target_assignment,
-                    defaults={
-                        'amount': 0,
-                    }
-                )
+            AssignmentCoExecutor.objects.update_or_create(
+                co_executor=co_executor,
+                assignment=target_assignment,
+                defaults={
+                    'amount': new_amount,
+                }
+            )
 
         clean_all_eq_card_info_cache(order_product.id, department.id)
 

@@ -65,16 +65,16 @@ class EqUpdateAssignmentsStatus:
                     'appointed_by_boss': True,
                 }
                 qs_filter["status"] = "in_work"
-
-                if self.department.piecework_wages:
-                    if not self.employee.piecework_wages:
-                        update_data["amount"] = 0
-
-                    else:
-                        if len(self.assignment_ids) > 0:
-                            assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
-                            if assignment_example.new_tariff:
-                                update_data["amount"] = assignment_example.new_tariff.amount
+                #
+                # if self.department.piecework_wages:
+                #     if not self.employee.piecework_wages:
+                #         update_data["amount"] = 0
+                #
+                #     else:
+                #         if len(self.assignment_ids) > 0:
+                #             assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                #             if assignment_example.new_tariff:
+                #                 update_data["amount"] = assignment_example.new_tariff.amount
 
             case 'in_work_to_await_distribute':
                 self.action_name = 'Вернул в распределение'
@@ -84,8 +84,8 @@ class EqUpdateAssignmentsStatus:
                     'appointed_by_boss': False,
                 }
 
-                if not self.original_user.piecework_wages:
-                    update_data["amount"] = 0
+                # if not self.original_user.piecework_wages:
+                #     update_data["amount"] = 0
 
                 qs_filter["status"] = "in_work"
 
@@ -122,11 +122,11 @@ class EqUpdateAssignmentsStatus:
                     'appointed_by_boss': False,
                 }
 
-                if self.department.piecework_wages:
-                    if len(self.assignment_ids) > 0:
-                        assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
-                        if assignment_example.new_tariff:
-                            update_data["amount"] = assignment_example.new_tariff.amount
+                # if self.department.piecework_wages:
+                #     if len(self.assignment_ids) > 0:
+                #         assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                #         if assignment_example.new_tariff:
+                #             update_data["amount"] = assignment_example.new_tariff.amount
 
                 qs_filter["status"] = "in_work"
 
@@ -428,7 +428,6 @@ class EqUpdateAssignmentsStatus:
     @transaction.atomic
     def execute(self):
         """Произвести обновление переданных нарядов и создать последующие"""
-        result = ''
         """Установка конфигурации пользователей на основании заданного режима просмотра. """
         self._check_view_mode_by_id()
 

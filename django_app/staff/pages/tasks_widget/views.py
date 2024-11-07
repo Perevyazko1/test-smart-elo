@@ -26,8 +26,9 @@ def check_tasks_exists(request):
             return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
 
     if user.groups.filter(name="Изменение техпроцессов"):
-        if Product.objects.filter(
-                technological_process__isnull=True
+        if Assignment.objects.filter(
+                inspector__isnull=True,
+                order_product__product__technological_process__isnull=True,
         ).exists():
             return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
 
@@ -77,11 +78,12 @@ def get_tasks_count(request):
             result['await_visa'] = assignments.count()
 
     if user.groups.filter(name="Изменение техпроцессов"):
-        products = Product.objects.filter(
-            technological_process__isnull=True
+        assignments = Assignment.objects.filter(
+            inspector__isnull=True,
+            order_product__product__technological_process__isnull=True,
         )
-        if products.exists():
-            result['await_tech_process'] = products.count()
+        if assignments.exists():
+            result['await_tech_process'] = assignments.count()
 
     if user.current_department.piecework_wages:
         if user.groups.filter(name="Первичная тарификация").exists():
