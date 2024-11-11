@@ -18,3 +18,4 @@ def init_data():
                 continue
             else:
                 assignment.amount = assignment.new_tariff.amount
+                assignment.save()
