@@ -35,6 +35,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const {data: userList} = useEmployeeList({
         departments: [currentUser.current_department?.id],
         is_staff: false,
+        is_active: true,
     });
 
     const onSelectClb = (selectedId: number) => {
