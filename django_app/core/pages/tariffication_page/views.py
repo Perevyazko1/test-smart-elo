@@ -156,7 +156,6 @@ def set_confirmed_tariff(request):
     production_step.confirmed_tariff = new_tariff
     production_step.save()
 
-
     """Send update command for EQ page cards. """
     active_order_products = OrderProduct.objects.filter(
         product=production_step.product,
@@ -231,12 +230,14 @@ def set_post_tariffication(request):
         comment=f'#PS-{production_step.id}# Утвержден тариф 0 для {len(zero_tariff__ids)} нарядов.'
     )
 
-    Assignment.objects.filter(
+    zero_tariff_assignments = Assignment.objects.filter(
         id__in=zero_tariff__ids
-    ).update(
-        tariffication_date=datetime.datetime.now(),
-        new_tariff=zero_tariff,
     )
+
+    for assignment in zero_tariff_assignments:
+        assignment.tariffication_date = assignment.inspect_date
+        assignment.new_tariff = zero_tariff
+        assignment.save()
 
     # Обновление тарифа для этапа производства
     tariff = Tariff.objects.get(
