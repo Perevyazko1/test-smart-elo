@@ -252,6 +252,11 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                     {getHumansDatetime(assignment.inspect_date || "")}
                 </td>
 
+                <td className={'fs-7'}>
+                    {getHumansDatetime(assignment.tariffication_date || "")}
+                </td>
+
+
                 {!!assignment.new_tariff &&
                     <td className={'align-middle pb-0 fw-bold'} style={{fontSize: 14}}>
                         {inputValue} {inputValue !== assignment.new_tariff.amount && (

@@ -22,6 +22,7 @@ export interface BaseAssignment {
     date_completion: string | null;
     inspect_date: string | null;
     plane_date: string | null;
+    tariffication_date: string | null;
     appointed_by_boss: boolean;
     assembled: boolean;
 }

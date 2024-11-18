@@ -14,12 +14,13 @@ export const BlockName = (props: {name: string}) => {
             alignItems: "center",
             justifyContent: "center",
             pointerEvents: "none",
+            userSelect: "none",
         }}>
             <div
                 style={{
                     transform: "rotate(-45deg)",
-                    fontSize: "10px", /* Размер текста */
-                    color: "rgba(0, 0, 0, 0.3)", /* Цвет текста и прозрачность */
+                    fontSize: "10px",
+                    color: "rgba(0, 0, 0, 0.3)",
                     whiteSpace: "nowrap",
                     pointerEvents: "none",
                     zIndex: 100,

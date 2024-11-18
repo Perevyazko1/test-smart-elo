@@ -182,6 +182,7 @@ export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
                     </AppTooltip>
                 </th>
                 <td>{getHumansDatetime(assignment.inspect_date || '')}</td>
+                <td>{getHumansDatetime(assignment.tariffication_date || '')}</td>
             </tr>
 
             <tr className={'align-middle fs-7'}>
@@ -200,7 +201,7 @@ export const AssignmentPageTableRow = (props: AssignmentPageTableRowProps) => {
 
 
                 <td
-                    colSpan={6}
+                    colSpan={7}
                     className={productActive ? "bg-warning" : "bg-light"}
                     onClick={setProductHandle}
                     style={{cursor: 'pointer'}}

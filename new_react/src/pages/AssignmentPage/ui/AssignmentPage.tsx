@@ -132,6 +132,7 @@ export const AssignmentPage = () => {
                                         <th>Дата готовности</th>
                                         <th>Проверяющий</th>
                                         <th>Дата визы</th>
+                                        <th>Дата закреп.</th>
                                     </tr>
                                     </thead>
 

@@ -52,7 +52,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
     const PageSkeleton = useMemo(() => (
         <tr>
-            <td colSpan={currentUser.current_department?.piecework_wages ? 12 : 11}>
+            <td colSpan={currentUser.current_department?.piecework_wages ? 13 : 12}>
                 <AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/>
             </td>
         </tr>
@@ -138,7 +138,8 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                     <th>Взят в работу</th>
                     <th>Дата готовности</th>
                     <th>Проверяющий</th>
-                    <th>Дата визирования</th>
+                    <th>Дата визы</th>
+                    <th>Дата закреп.</th>
                     {currentUser.current_department?.piecework_wages && <th>Тариф</th>}
 
                 </tr>

@@ -21,7 +21,8 @@ interface DepartmentInfo {
         await: number;
         created: number;
         in_work: number;
-        ready: number;
+        ready_visa: number;
+        ready_no_visa: number;
         department__id: number;
     }
 }

@@ -100,7 +100,7 @@ export const CoExecutorRow = (props: CoExecutorRowProps) => {
                     />
                 </div>
             </td>
-            <td colSpan={7} className={'align-middle fs-7'}>
+            <td colSpan={8} className={'align-middle fs-7'}>
                 {maxValue === 0 ?
                     <> - Без тарифа</>
                     :

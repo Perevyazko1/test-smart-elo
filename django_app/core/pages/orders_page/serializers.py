@@ -114,7 +114,8 @@ class OrderProductSerializer(serializers.ModelSerializer):
                     "department__id": production_step.department.id,
                     "await": assignments.filter(status="await").count(),
                     "in_work": assignments.filter(status="in_work").count(),
-                    "ready": assignments.filter(status="ready").count(),
+                    "ready_visa": assignments.filter(status="ready", inspector__isnull=False).count(),
+                    "ready_no_visa": assignments.filter(status="ready", inspector__isnull=True).count(),
                 }
         return result
 
