@@ -7,7 +7,6 @@ from core.services.get_week_info import GetWeekInfo
 from staff.models import Employee
 
 
-# @log_time
 def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: OrderProduct):
     if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])

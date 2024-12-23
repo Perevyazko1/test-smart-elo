@@ -38,7 +38,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
             if (card.proposed_tariff?.amount !== card.confirmed_tariff?.amount) {
                 return true;
             }
-            return card.created_by !== currentUser.id
+            return card.created_by !== currentUser.id;
         }
         return false
     }, [

@@ -12,9 +12,9 @@ from django_app.init_data.init_data import init_data
 @api_view(['GET'])
 def init_app_data(request):
     """Init app data func. """
-    init_data()
+    result = init_data()
 
-    return JsonResponse({"result": 'inited'})
+    return JsonResponse({"result": result})
 
 
 urlpatterns = [
