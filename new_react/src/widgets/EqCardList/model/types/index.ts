@@ -29,6 +29,7 @@ export interface EqAssignmentCoExecutor {
     id: number;
     co_executor: number;
     amount: number;
+    wages_amount: number;
     assignment: number;
 }
 

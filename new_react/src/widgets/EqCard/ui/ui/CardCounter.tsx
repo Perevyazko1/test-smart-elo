@@ -46,23 +46,37 @@ export const CardCounter = (props: CardCounterProps) => {
                     color={' bg-danger'}
                     top={`${!!card.order.comment_base || !!card.order.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
                 >
-                    <div className={card.card_info.count_all === 0 ? 'text-muted' : ''}>
-                        Всего:{card.card_info.count_all}
+                    <div className={
+                        (card.card_info.count_all === 0 ? 'text-muted ' : '' ) + cls.infoItem
+                    }
+                    >
+                        <span>Всего:</span>
+                        <span>{card.card_info.count_all}</span>
+
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={card.card_info.count_in_work === 0 ? 'text-muted' : ''}>
-                        В_раб:{card.card_info.count_in_work}
+                    <div className={
+                        (card.card_info.count_in_work === 0 ? 'text-muted ' : '') + cls.infoItem
+                    }>
+                        <span>В раб:</span>
+                        <span>{card.card_info.count_in_work}</span>
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={card.card_info.count_await === 0 ? 'text-muted' : ''}>
-                        Своб:{card.card_info.count_await}
+                    <div className={
+                        (card.card_info.count_await === 0 ? 'text-muted ' : '') + cls.infoItem
+                    }>
+                        <span>Своб:</span>
+                        <span>{card.card_info.count_await}</span>
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={card.card_info.count_ready === 0 ? 'text-muted' : ''}>
-                        Готов:{card.card_info.count_ready}
+                    <div className={
+                        (card.card_info.count_ready === 0 ? 'text-muted ' : '') + cls.infoItem
+                    }>
+                        <span>Готов:</span>
+                        <span>{card.card_info.count_ready}</span>
                     </div>
                 </IndicatorWrapper>
             </IndicatorWrapper>

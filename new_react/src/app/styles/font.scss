@@ -1,9 +1,29 @@
 @import "fonts/fontawesome-all.min.css";
 
 @font-face {
-  font-family: 'Montserrat', Arial, sans-serif;
-  src: url('./Montserrat-Regular.ttf') format('ttf');
-  font-weight: normal;
+  font-family: 'Montserrat';
+  src: url('./fonts/Montserrat-Regular.woff2') format('woff2');
+  font-weight: 400 !important;
   font-style: normal;
   font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat-Medium';
+  src: url('./fonts/Montserrat-Medium.woff2') format('woff2');
+  font-weight: 500 !important;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat-Thin';
+  src: url('./fonts/Montserrat-Thin.woff2') format('woff2');
+  font-weight: 200 !important;
+  font-style: normal;
+  font-display: swap;
+}
+
+.fw-bold {
+  font-family: 'Montserrat-Medium', sans-serif;
 }

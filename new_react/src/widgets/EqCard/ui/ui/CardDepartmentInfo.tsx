@@ -77,7 +77,10 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
 
             {card.card_info.employees_info.map((info, index) => (
                 <div key={index}>
-                    {info.full_name} {info.count_in_work} ({info.count_all})
+                    <div className={'d-flex justify-content-between gap-1'}>
+                        <span>{info.full_name}</span>
+                        <span>{info.count_all} ({info.count_in_work})</span>
+                    </div>
                     <hr className={'m-0 p-0'}/>
                 </div>
             ))}

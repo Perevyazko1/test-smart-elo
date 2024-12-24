@@ -18,7 +18,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
     const {getNameById} = useEmployeeName();
 
     const getCoExecutorAmount = useCallback((item: EqAssignment) => {
-        return item.co_executors?.find(co_executor => co_executor.co_executor === targetUserId)?.amount;
+        return item.co_executors?.find(co_executor => co_executor.co_executor === targetUserId)?.wages_amount;
     }, [targetUserId]);
 
     return (

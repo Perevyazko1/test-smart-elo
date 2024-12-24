@@ -31,7 +31,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
     const showPrice = useMemo(() => {
-        return currentUser.current_department?.piecework_wages &&  bossPerm;
+        return currentUser.current_department?.piecework_wages && bossPerm;
     }, [bossPerm, currentUser.current_department?.piecework_wages])
 
 

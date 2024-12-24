@@ -64,6 +64,7 @@ def update_co_executor(request):
                 assignment=target_assignment,
                 defaults={
                     'amount': new_amount,
+                    'wages_amount': new_amount if co_executor.piecework_wages else 0,
                 }
             )
 

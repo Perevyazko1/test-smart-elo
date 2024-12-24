@@ -66,6 +66,14 @@ class EqUpdateAssignmentsStatus:
                 }
                 qs_filter["status"] = "in_work"
 
+                if self.department.piecework_wages:
+                    if self.employee.piecework_wages:
+                        assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                        if assignment_example.new_tariff:
+                            update_data["amount"] = assignment_example.new_tariff.amount
+                    else:
+                        update_data["amount"] = 0
+
             case 'in_work_to_await_distribute':
                 self.action_name = 'Вернул в распределение'
                 update_data = {
@@ -73,6 +81,11 @@ class EqUpdateAssignmentsStatus:
                     'executor': self.original_user,
                     'appointed_by_boss': False,
                 }
+
+                if self.department.piecework_wages:
+                    assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                    if assignment_example.new_tariff:
+                        update_data["amount"] = assignment_example.new_tariff.amount
 
                 qs_filter["status"] = "in_work"
 
@@ -110,6 +123,11 @@ class EqUpdateAssignmentsStatus:
                 }
 
                 qs_filter["status"] = "in_work"
+
+                if self.department.piecework_wages:
+                    assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
+                    if assignment_example.new_tariff:
+                        update_data["amount"] = assignment_example.new_tariff.amount
 
                 AssignmentCoExecutor.objects.filter(
                     assignment__id__in=self.assignment_ids,
@@ -328,6 +346,7 @@ class EqUpdateAssignmentsStatus:
         self.order_product.product.save()
 
     def _tariffication_instruction(self):
+        # Флаг для отправки уведомления на обновление ЗП
         tariff_created = False
 
         for assignment_id in self.assignment_ids:
@@ -347,12 +366,12 @@ class EqUpdateAssignmentsStatus:
                     description = (f'Соисполнитель в производстве полуфабриката {target_assignment} '
                                    f'{target_assignment.department.name}')
                     for co_executor in co_executors:
-                        if co_executor.co_executor.piecework_wages:
+                        if co_executor.wages_amount:
                             Transaction.objects.create(
                                 target_date=datetime.now(),
                                 transaction_type='accrual',
                                 details='wages',
-                                amount=co_executor.amount,
+                                amount=co_executor.wages_amount,
                                 employee=co_executor.co_executor,
                                 executor=target_assignment.inspector,
                                 inspector=target_assignment.inspector,
@@ -362,7 +381,7 @@ class EqUpdateAssignmentsStatus:
                     description = (f'Производство полуфабриката {target_assignment} '
                                    f'{target_assignment.department.name}')
 
-                    if target_assignment.executor.piecework_wages:
+                    if target_assignment.amount:
                         Transaction.objects.create(
                             target_date=datetime.now(),
                             transaction_type='accrual',

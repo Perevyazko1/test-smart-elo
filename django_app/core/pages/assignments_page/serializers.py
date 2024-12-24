@@ -24,6 +24,7 @@ class SimpleCoExecutorSerializer(serializers.ModelSerializer):
             'id',
             'co_executor',
             'amount',
+            'wages_amount',
             'assignment',
         ]
 

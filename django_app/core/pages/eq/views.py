@@ -350,19 +350,19 @@ def update_assignments(request):
                         assignment=assignment
                     )
                     for co_executor in co_executors:
-                        if co_executor.co_executor.piecework_wages:
+                        if co_executor.wages_amount:
                             Transaction.objects.create(
                                 target_date=datetime.now(),
                                 transaction_type='debiting',
                                 details='wages',
-                                amount=co_executor.amount,
+                                amount=co_executor.wages_amount,
                                 employee=co_executor.co_executor,
                                 executor=user,
                                 inspector=user,
                                 description=description,
                             )
 
-                    if assignment.executor.piecework_wages:
+                    if assignment.amount:
                         Transaction.objects.create(
                             target_date=datetime.now(),
                             transaction_type='debiting',
@@ -373,6 +373,7 @@ def update_assignments(request):
                             inspector=request.user,
                             description=description,
                         )
+
     elif mode == 'lock_await_assignments':
         order_product = OrderProduct.objects.get(series_id=series_id)
         target_assignments = Assignment.objects.filter(

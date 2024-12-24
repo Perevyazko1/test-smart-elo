@@ -448,6 +448,7 @@ class AssignmentCoExecutor(models.Model):
                                     related_name='co_executed_assignments',
                                     on_delete=models.CASCADE)
     amount = models.IntegerField("Сумма", default=0)
+    wages_amount = models.IntegerField("Сумма", default=0)
 
     class Meta:
         unique_together = ['assignment', 'co_executor']
