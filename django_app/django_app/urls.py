@@ -14,7 +14,7 @@ def init_app_data(request):
     """Init app data func. """
     result = init_data()
 
-    return JsonResponse({"result": result})
+    return JsonResponse({"result": result}, json_dumps_params={"ensure_ascii": False})
 
 
 urlpatterns = [

@@ -1,40 +1,79 @@
 """Initial methods and scripts. """
 from datetime import datetime, timedelta
+import re
+
+from django.core.exceptions import ObjectDoesNotExist
 
 from core.models import AssignmentCoExecutor, Assignment
-from staff.models import Department
+from staff.models import Department, Transaction
+
+
+def find_assignment_by_string(input_string):
+    # Регулярное выражение для извлечения данных
+    pattern = r'№(\d+) - \{(\d+)\}(\d+)\s+(\w+)'
+    match = re.search(pattern, input_string)
+
+    if not match:
+        return None  # Если строка не соответствует формату
+
+    # Извлечение данных из строки
+    assignment_number = int(match.group(1))
+    series_prefix = match.group(2)
+    series_id = match.group(3)
+    department_name = match.group(4)
+
+    # Полный series_id (можно уточнить формат, если есть префиксы)
+    full_series_id = f"{{{series_prefix}}}{series_id}"
+
+    try:
+        # Поиск отдела
+        department = Department.objects.get(name=department_name)
+
+        # Поиск наряда
+        assignment = Assignment.objects.get(
+            number=assignment_number,
+            order_product__series_id=full_series_id,
+            department=department
+        )
+
+        return assignment  # Возвращаем найденный объект Assignment
+
+    except ObjectDoesNotExist:
+        return None
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    # TODO скрипт задать wages_amount для всех соисполнителей за последний месяц
-    target_co_executors = AssignmentCoExecutor.objects.all()
-    for co_executor in target_co_executors:
-        co_executor.wages_amount = co_executor.amount
-        co_executor.save()
-
     # TODO скрипт за последний месяц пересчитать наряды по сдельщикам которые были на окладе
+    result = {}
     today = datetime.now()
     target_month = today - timedelta(days=30)
-    target_departments = Department.objects.filter(piecework_wages=True)
 
-    target_assignments = Assignment.objects.filter(
-        date_completion__gt=target_month,
-        department__in=target_departments,
-        amount=0,
-        new_tariff__isnull=False,
+    target_transactions = Transaction.objects.filter(
+        add_date__gte=target_month,
+        inspect_date__isnull=True,
+        inspector__isnull=False
     )
 
-    for assignment in target_assignments:
-        if assignment.executor.piecework_wages:
-            co_executors = AssignmentCoExecutor.objects.filter(
-                assignment=assignment
-            )
-            difference = 0
-            for co_executor in co_executors:
-                difference += co_executor.amount
-            assignment.amount = assignment.new_tariff.amount - difference
-            assignment.save()
+    for transaction in target_transactions:
+        assignment = find_assignment_by_string(transaction.description)
 
-    return 'pass'
+        if assignment:
+            result[f'id{transaction.id}'] = f"Наряд найден: {assignment}"
+
+            if assignment.executor.piecework_wages:
+                co_executors = AssignmentCoExecutor.objects.filter(
+                    assignment=assignment
+                )
+                difference = 0
+                for co_executor in co_executors:
+                    difference += co_executor.amount
+
+                transaction.amount = assignment.new_tariff.amount - difference
+                transaction.inspect_date = transaction.add_date
+                transaction.save()
+        else:
+            result[f'id{transaction.id}'] = f"Наряд не найден {transaction.description}"
+
+    return result
