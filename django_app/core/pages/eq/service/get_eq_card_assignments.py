@@ -133,8 +133,8 @@ def _handle_ready(eq_params, order_product):
         if current_week.week == week_info.week and current_week.year == week_info.year:
             assignments = order_product.assignments.filter(
                 Q(
-                    tariffication_date__gt=week_info.date_range[0],
-                    tariffication_date__lte=week_info.date_range[1],
+                    tariffication_date__date__gte=week_info.date_range[0].date(),
+                    tariffication_date__date__lte=week_info.date_range[1].date(),
                     status='ready',
                     executor=eq_params['user'],
                     department=eq_params['department'],
@@ -146,8 +146,8 @@ def _handle_ready(eq_params, order_product):
                     status='ready',
                 ) |
                 Q(
-                    tariffication_date__gt=week_info.date_range[0],
-                    tariffication_date__lte=week_info.date_range[1],
+                    tariffication_date__date__gte=week_info.date_range[0].date(),
+                    tariffication_date__date__lte=week_info.date_range[1].date(),
                     co_executors__co_executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
@@ -162,15 +162,15 @@ def _handle_ready(eq_params, order_product):
         else:
             assignments = order_product.assignments.filter(
                 Q(
-                    tariffication_date__gt=week_info.date_range[0],
-                    tariffication_date__lte=week_info.date_range[1],
+                    tariffication_date__date__gte=week_info.date_range[0].date(),
+                    tariffication_date__date__lte=week_info.date_range[1].date(),
                     executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
                 ) |
                 Q(
-                    tariffication_date__gt=week_info.date_range[0],
-                    tariffication_date__lte=week_info.date_range[1],
+                    tariffication_date__date__gte=week_info.date_range[0].date(),
+                    tariffication_date__date__lte=week_info.date_range[1].date(),
                     co_executors__co_executor=eq_params['user'],
                     department=eq_params['department'],
                     status='ready',
@@ -181,8 +181,8 @@ def _handle_ready(eq_params, order_product):
         if current_week.week == week_info.week and current_week.year == week_info.year:
             assignments = order_product.assignments.filter(
                 Q(
-                    tariffication_date__gt=week_info.date_range[0],
-                    tariffication_date__lte=week_info.date_range[1],
+                    tariffication_date__date__gte=week_info.date_range[0].date(),
+                    tariffication_date__date__lte=week_info.date_range[1].date(),
                     department=eq_params['department'],
                     status='ready',
                 ) |
@@ -194,8 +194,8 @@ def _handle_ready(eq_params, order_product):
             ).distinct()
         else:
             assignments = order_product.assignments.filter(
-                tariffication_date__gt=week_info.date_range[0],
-                tariffication_date__lte=week_info.date_range[1],
+                tariffication_date__date__gte=week_info.date_range[0].date(),
+                tariffication_date__date__lte=week_info.date_range[1].date(),
                 department=eq_params['department'],
                 status='ready',
             ).distinct()

@@ -142,8 +142,8 @@ def get_filtered_ready_queryset(queryset, eq_params):
         if current_week.week == week_info.week and current_week.year == week_info.year:
             queryset = queryset.filter(
                 Q(
-                    assignments__tariffication_date__gt=week_info.date_range[0],
-                    assignments__tariffication_date__lte=week_info.date_range[1],
+                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                    assignments__tariffication_date__lte=week_info.date_range[1].date(),
                     assignments__executor=eq_params['user'],
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
@@ -155,8 +155,8 @@ def get_filtered_ready_queryset(queryset, eq_params):
                     assignments__department=eq_params['department'],
                 ) |
                 Q(
-                    assignments__tariffication_date__gt=week_info.date_range[0],
-                    assignments__tariffication_date__lte=week_info.date_range[1],
+                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                    assignments__tariffication_date__lte=week_info.date_range[1].date(),
                     assignments__status='ready',
                     assignments__co_executors__co_executor=eq_params['user'],
                     assignments__department=eq_params['department'],
@@ -171,15 +171,15 @@ def get_filtered_ready_queryset(queryset, eq_params):
         else:
             queryset = queryset.filter(
                 Q(
-                    assignments__tariffication_date__gt=week_info.date_range[0],
-                    assignments__tariffication_date__lte=week_info.date_range[1],
+                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                     assignments__executor=eq_params['user'],
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
                 ) |
                 Q(
-                    assignments__tariffication_date__gt=week_info.date_range[0],
-                    assignments__tariffication_date__lte=week_info.date_range[1],
+                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                     assignments__co_executors__co_executor=eq_params['user'],
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
@@ -194,8 +194,8 @@ def get_filtered_ready_queryset(queryset, eq_params):
         if current_week.week == week_info.week and current_week.year == week_info.year:
             queryset = queryset.filter(
                 Q(
-                    assignments__tariffication_date__gt=week_info.date_range[0],
-                    assignments__tariffication_date__lte=week_info.date_range[1],
+                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                     assignments__status='ready',
                     assignments__department=eq_params['department'],
                 ) |
@@ -207,8 +207,8 @@ def get_filtered_ready_queryset(queryset, eq_params):
             ).distinct()
         else:
             queryset = queryset.filter(
-                assignments__tariffication_date__gt=week_info.date_range[0],
-                assignments__tariffication_date__lte=week_info.date_range[1],
+                assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
+                assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                 assignments__status='ready',
                 assignments__department=eq_params['department'],
             ).distinct()
