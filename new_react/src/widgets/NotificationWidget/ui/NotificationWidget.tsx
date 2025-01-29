@@ -13,6 +13,7 @@ interface NotificationType {
     await_tech_process?: number;
     await_tariff?: number;
     await_tariff_visa?: number;
+    await_tasks_visa?: number;
 }
 
 
@@ -35,17 +36,22 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
     }, [])
 
     const awaitVisaClb = () => {
-        navigate("/?view_mode=unfinished");
+        navigate("/eq?view_mode=boss");
         props.closeClb();
     }
 
     const awaitTariffClb = () => {
-        navigate("/?view_mode=boss");
+        navigate("/eq?view_mode=boss");
         props.closeClb();
     }
 
     const awaitTariffVisaClb = () => {
         navigate("/tariffication/?tariff_status=proposed");
+        props.closeClb();
+    }
+
+    const awaitTasksVisaClb = () => {
+        navigate("/task?view_mode=7&sort_mode=1");
         props.closeClb();
     }
 
@@ -103,7 +109,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
                             {data.await_visa &&
                                 <tr>
                                     <td>
-                                        Проставить визу на нарядах
+                                        ЭЛО: Проставить визу на нарядах
                                     </td>
                                     <td>
                                         <b>{data.await_visa}</b>
@@ -123,7 +129,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
                             {data.await_tariff &&
                                 <tr>
                                     <td>
-                                        Проставить сделку
+                                        ЭЛО: Проставить сделку
                                     </td>
                                     <td>
                                         <b>{data.await_tariff}</b>
@@ -143,7 +149,7 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
                             {data.await_tariff_visa &&
                                 <tr>
                                     <td>
-                                        Утвердить предложенную сделку
+                                        ЭЛО: Утвердить предложенную сделку
                                     </td>
                                     <td>
                                         <b>{data.await_tariff_visa}</b>
@@ -160,10 +166,30 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
                                 </tr>
                             }
 
+                            {data.await_tasks_visa &&
+                                <tr>
+                                    <td>
+                                        ЗАДАЧНИК: Утвердить предложенную сделку
+                                    </td>
+                                    <td>
+                                        <b>{data.await_tasks_visa}</b>
+                                    </td>
+                                    <td>
+                                        <Button
+                                            size={'sm'}
+                                            variant={'outline-primary'}
+                                            onClick={awaitTasksVisaClb}
+                                        >
+                                            Перейти
+                                        </Button>
+                                    </td>
+                                </tr>
+                            }
+
                             {data.await_tech_process &&
                                 <tr>
                                     <td>
-                                        Установить техпроцесс
+                                        КОНСТРУКТОРСКИЙ: Установить техпроцесс
                                     </td>
 
                                     <td>

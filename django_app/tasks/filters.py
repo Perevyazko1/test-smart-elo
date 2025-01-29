@@ -1,4 +1,5 @@
 import django_filters
+from django.db import models
 from django.db.models import QuerySet, Q
 
 from core.services.get_week_info import GetDateRangeInfo
@@ -113,7 +114,10 @@ class TaskModelFilter(django_filters.FilterSet):
         if value == '7':
             return queryset.filter(
                 proposed_tariff__isnull=False,
-                confirmed_tariff__isnull=True,
+            ).exclude(
+                confirmed_tariff__amount=models.F('proposed_tariff__amount')
+            ).exclude(
+                status='4',
             )
         # Режим с утвержденной сделкой
         if value == '8':
