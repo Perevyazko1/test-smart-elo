@@ -172,6 +172,7 @@ class TaskSerializer(serializers.ModelSerializer):
 
         proposed_tariff_data = validated_data.pop('proposed_tariff', None)
         confirmed_tariff_data = validated_data.pop('confirmed_tariff', None)
+        verified_at = validated_data.pop('verified_at', None)
 
         task = super().update(instance, validated_data)
 
@@ -186,8 +187,8 @@ class TaskSerializer(serializers.ModelSerializer):
 
         set_executors(**executors_params)
 
-        if validated_data.get('verified_at', None):
-            task_confirmation_instructions(task)
+        if verified_at:
+            task_confirmation_instructions(task, verified_at)
 
         task.refresh_from_db()
 
