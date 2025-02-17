@@ -95,8 +95,8 @@ def get_week_data(request):
     if eq_params['view_mode_key'] == 'boss':
         assignments_sum = Assignment.objects.filter(
             department=eq_params['department'],
-            inspect_date__gte=week_info.date_range[0],
-            inspect_date__lte=week_info.date_range[1],
+            tariffication_date__date__gte=week_info.date_range[0],
+            tariffication_date__date__lte=week_info.date_range[1],
         ).aggregate(Sum('new_tariff__amount')).get('new_tariff__amount__sum')
 
         transactions_sum = 0
