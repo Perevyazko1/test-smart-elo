@@ -104,8 +104,8 @@ def get_week_data(request):
         if eq_params['user'].piecework_wages:
             auto_accrual = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="accrual",
                 inspector__isnull=False,
                 created_automatically=True,
@@ -114,8 +114,8 @@ def get_week_data(request):
 
             auto_debit = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="debiting",
                 inspector__isnull=False,
                 created_automatically=True,
@@ -124,8 +124,8 @@ def get_week_data(request):
 
             accrual = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="accrual",
                 inspector__isnull=False,
                 created_automatically=False,
@@ -134,8 +134,8 @@ def get_week_data(request):
 
             debit = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="debiting",
                 inspector__isnull=False,
                 created_automatically=False,
@@ -147,8 +147,8 @@ def get_week_data(request):
         else:
             wages_accrual = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="accrual",
                 inspector__isnull=False,
                 details__in=['wages'],
@@ -156,8 +156,8 @@ def get_week_data(request):
 
             wages_debit = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="debiting",
                 inspector__isnull=False,
                 details__in=['wages'],
@@ -165,8 +165,8 @@ def get_week_data(request):
 
             additional_accrual = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="accrual",
                 inspector__isnull=False,
                 details__in=['prize', 'other'],
@@ -174,8 +174,8 @@ def get_week_data(request):
 
             additional_debit = Transaction.objects.filter(
                 employee=eq_params['user'],
-                target_date__gte=week_info.date_range[0],
-                target_date__lte=week_info.date_range[1],
+                target_date__date__gte=week_info.date_range[0],
+                target_date__date__lte=week_info.date_range[1],
                 transaction_type="debiting",
                 inspector__isnull=False,
                 created_automatically=False,
