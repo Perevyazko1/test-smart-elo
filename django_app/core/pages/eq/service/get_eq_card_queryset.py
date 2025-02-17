@@ -143,7 +143,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
             queryset = queryset.filter(
                 Q(
                     assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__lte=week_info.date_range[1].date(),
+                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                     assignments__executor=eq_params['user'],
                     assignments__department=eq_params['department'],
                     assignments__status='ready',
@@ -156,7 +156,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
                 ) |
                 Q(
                     assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__lte=week_info.date_range[1].date(),
+                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
                     assignments__status='ready',
                     assignments__co_executors__co_executor=eq_params['user'],
                     assignments__department=eq_params['department'],
