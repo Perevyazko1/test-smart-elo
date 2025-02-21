@@ -117,7 +117,7 @@ export const AssignmentPage = () => {
                                         {assignmentProps.isLoading ?
                                             <Spinner animation={'grow'} size={'sm'}/>
                                             :
-                                            <>{assignmentProps.count}</>
+                                            <>{" "}{assignmentProps.count}</>
                                         }
                                     </h4>
                                 </div>
