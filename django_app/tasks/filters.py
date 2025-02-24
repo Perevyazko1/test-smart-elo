@@ -45,8 +45,8 @@ class TaskModelFilter(django_filters.FilterSet):
                 return queryset.filter(
                     Q(
                         status=value,
-                        verified_at__gte=date_info['date_range']['start_date'],
-                        verified_at__lte=date_info['date_range']['end_date'],
+                        verified_at__date__gte=date_info['date_range']['start_date'],
+                        verified_at__date__lte=date_info['date_range']['end_date'],
                     ) |
                     Q(
                         status=value,
@@ -56,8 +56,8 @@ class TaskModelFilter(django_filters.FilterSet):
             else:
                 return queryset.filter(
                     status=value,
-                    verified_at__gte=date_info['date_range']['start_date'],
-                    verified_at__lte=date_info['date_range']['end_date'],
+                    verified_at__date__gte=date_info['date_range']['start_date'],
+                    verified_at__date__lte=date_info['date_range']['end_date'],
                 )
 
         if value == '4':
@@ -68,8 +68,8 @@ class TaskModelFilter(django_filters.FilterSet):
 
             return queryset.filter(
                 status=value,
-                ready_at__gte=date_info['date_range']['start_date'],
-                ready_at__lte=date_info['date_range']['end_date'],
+                ready_at__date__gte=date_info['date_range']['start_date'],
+                ready_at__date__lte=date_info['date_range']['end_date'],
             )
         return queryset
 
