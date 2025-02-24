@@ -64,26 +64,26 @@ def get_assignment_counts(request):
         assignments = Assignment.objects.filter(
             Q(
                 co_executors__co_executor=employee,
-                inspect_date__gte=date_from,
-                inspect_date__lte=date_by,
+                inspect_date__date__gte=date_from,
+                inspect_date__date__lte=date_by,
             ) |
             Q(
                 executor=employee,
-                inspect_date__gte=date_from,
-                inspect_date__lte=date_by,
+                inspect_date__date__gte=date_from,
+                inspect_date__date__lte=date_by,
             )
         )
     else:
         assignments = Assignment.objects.filter(
             Q(
                 co_executors__co_executor=employee,
-                tariffication_date__gte=date_from,
-                tariffication_date__lte=date_by,
+                tariffication_date__date__gte=date_from,
+                tariffication_date__date__lte=date_by,
             ) |
             Q(
                 executor=employee,
-                tariffication_date__gte=date_from,
-                tariffication_date__lte=date_by,
+                tariffication_date__date__gte=date_from,
+                tariffication_date__date__lte=date_by,
             )
         )
 
@@ -194,8 +194,8 @@ def confirm_transactions(request):
 
     filter_params = {
         "inspector__isnull": True,
-        f"{'target_date' if by_target_date else 'add_date'}__gte": start_date,
-        f"{'target_date' if by_target_date else 'add_date'}__lte": end_date,
+        f"{'target_date' if by_target_date else 'add_date'}__date__gte": start_date,
+        f"{'target_date' if by_target_date else 'add_date'}__date__lte": end_date,
         "employee__id__in": target_ids,
         "transaction_type__in": ['accrual', 'debiting'] if target_list == 'wages' else ['cash', 'card', 'tax']
     }
