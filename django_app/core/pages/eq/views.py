@@ -187,7 +187,7 @@ def get_week_data(request):
 
     week_info.earned = f'{int(assignments_sum or 0)}'
     if transactions_sum:
-        week_info.earned += f'+{int(transactions_sum or 0)}(доп)'
+        week_info.earned += f'{"+" if (transactions_sum or 0) >= 0 else ""}{int(transactions_sum or 0)}(доп)'
 
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
