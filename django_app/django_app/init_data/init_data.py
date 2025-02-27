@@ -7,5 +7,6 @@ def init_data():
     target_op = OrderProduct.objects.get(
         series_id="{3}24856"
     )
+    target_op.assignments.all().delete()
     target_op.delete()
     return "OK"
