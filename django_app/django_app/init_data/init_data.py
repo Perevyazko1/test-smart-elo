@@ -1,14 +1,17 @@
 """Initial methods and scripts."""
+from core.models import Assignment, OrderProduct
+
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    # target_op = OrderProduct.objects.get(
-    #     series_id="{3}24856"
-    # )
-    # target_assignments = Assignment.objects.filter(
-    #     order_product=target_op
-    # )
-    # target_assignments.delete()
-    # target_op.delete()
-    return "OK"
+    t_order_product = OrderProduct.objects.get(
+        series_id="{4}24856"
+    )
+
+    Assignment.objects.filter(
+        order_product=t_order_product,
+        number__gte=301
+    ).delete()
+
+    return "Ok"
