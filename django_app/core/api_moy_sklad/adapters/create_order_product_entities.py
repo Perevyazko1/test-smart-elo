@@ -32,7 +32,7 @@ class CreateOrderProductEntities:
     @staticmethod
     def _index_number_generator(order_entity: OrderEntity, start_index: int = 1):
         while True:
-            yield '{' + str(start_index) + '}' + order_entity.number
+            yield str(start_index) + '-' + order_entity.number
             start_index += 1
 
     def execute(self, order_entity: OrderEntity) -> list[OrderProductEntity]:
