@@ -13,6 +13,8 @@ import {AppSkeleton} from "@shared/ui";
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
 import {BlockName} from "./ui/BlockName";
+import {EqControlPanel} from "@pages/EqPage/ui/EqBody/EqControlPanel";
+import {groupByPlanDate} from "@pages/EqPage/model/lib/groupByPlanDate";
 
 interface EqCardListProps {
     extraParams?: object;
@@ -59,57 +61,61 @@ export const EqCardList = memo((props: EqCardListProps) => {
     const [sortedList, setSortedList] = useState<EqOrderProduct[]>([]);
 
     useEffect(() => {
-        setSortedList(data?.results.sort((a, b) => {
-            const hasAssignmentsA = a.assignments.length !== 0 ? 1 : 0;
-            const hasAssignmentsB = b.assignments.length !== 0 ? 1 : 0;
-            const assignmentsDiff = hasAssignmentsB - hasAssignmentsA;
+        if (listType === 'in_work' && data?.results) {
+            setSortedList(groupByPlanDate(data.results))
+        } else {
+            setSortedList(data?.results.sort((a, b) => {
+                const hasAssignmentsA = a.assignments.length !== 0 ? 1 : 0;
+                const hasAssignmentsB = b.assignments.length !== 0 ? 1 : 0;
+                const assignmentsDiff = hasAssignmentsB - hasAssignmentsA;
 
-            if (assignmentsDiff !== 0) {
-                return assignmentsDiff;
-            }
-
-            // Условие для блока готовых
-            if (listType === 'ready') {
-                const inspectorNullA = a.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
-                const inspectorNullB = b.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
-                const inspectorDiff = inspectorNullB - inspectorNullA;
-
-                if (inspectorDiff !== 0) {
-                    return inspectorDiff;
+                if (assignmentsDiff !== 0) {
+                    return assignmentsDiff;
                 }
 
-                if (currentUser.current_department?.piecework_wages) {
-                    const hasTariffA = a.assignments.length > 0 ? a.assignments[0].new_tariff?.id ? 0 : 1 : 1;
-                    const hasTariffB = b.assignments.length > 0 ? b.assignments[0].new_tariff?.id ? 0 : 1 : 1;
+                // Условие для блока готовых
+                if (listType === 'ready') {
+                    const inspectorNullA = a.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
+                    const inspectorNullB = b.assignments.some(assignment => assignment.inspector === null) ? 1 : 0;
+                    const inspectorDiff = inspectorNullB - inspectorNullA;
 
-                    const tariffDiff = hasTariffB - hasTariffA;
+                    if (inspectorDiff !== 0) {
+                        return inspectorDiff;
+                    }
 
-                    if (tariffDiff !== 0) {
-                        return tariffDiff;
+                    if (currentUser.current_department?.piecework_wages) {
+                        const hasTariffA = a.assignments.length > 0 ? a.assignments[0].new_tariff?.id ? 0 : 1 : 1;
+                        const hasTariffB = b.assignments.length > 0 ? b.assignments[0].new_tariff?.id ? 0 : 1 : 1;
+
+                        const tariffDiff = hasTariffB - hasTariffA;
+
+                        if (tariffDiff !== 0) {
+                            return tariffDiff;
+                        }
                     }
                 }
-            }
 
-            const urgencyDiff = a.urgency - b.urgency;
+                const urgencyDiff = a.urgency - b.urgency;
 
-            if (urgencyDiff !== 0) {
-                return urgencyDiff;
-            }
+                if (urgencyDiff !== 0) {
+                    return urgencyDiff;
+                }
 
-            const plannedDateA = a.order.planned_date ? new Date(a.order.planned_date) : new Date(0);
-            const plannedDateB = b.order.planned_date ? new Date(b.order.planned_date) : new Date(0);
-            const plannedDateDiff = plannedDateA.getTime() - plannedDateB.getTime();
-            if (plannedDateDiff !== 0) {
-                return plannedDateDiff;
-            }
+                const plannedDateA = a.order.planned_date ? new Date(a.order.planned_date) : new Date(0);
+                const plannedDateB = b.order.planned_date ? new Date(b.order.planned_date) : new Date(0);
+                const plannedDateDiff = plannedDateA.getTime() - plannedDateB.getTime();
+                if (plannedDateDiff !== 0) {
+                    return plannedDateDiff;
+                }
 
-            const orderNumberDiff = a.order.id - b.order.id;
-            if (orderNumberDiff !== 0) {
-                return orderNumberDiff;
-            }
+                const orderNumberDiff = a.order.id - b.order.id;
+                if (orderNumberDiff !== 0) {
+                    return orderNumberDiff;
+                }
 
-            return a.id - b.id;
-        }) || [])
+                return a.id - b.id;
+            }) || [])
+        }
     }, [currentUser.current_department?.piecework_wages, data, listType]);
 
     const blockName = useMemo(() => {
@@ -135,6 +141,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
     }, [sortedList]);
 
     const {virtualItems, totalHeight} = useFixedSizeList({
+        offsetTop: !!queryParameters.pro ? 28 : 0,
         itemHeight: cardHeight + 3,
         itemsCount: getItemsCount,
         getScrollElement: useCallback(() => scrollElementRef.current, []),
@@ -181,6 +188,10 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 ref={scrollElementRef}
             >
                 <div style={{height: totalHeight}}>
+                    <EqControlPanel
+                        listType={listType}
+                    />
+
                     {virtualItems.map(card => (
                         <div
                             key={card.index}

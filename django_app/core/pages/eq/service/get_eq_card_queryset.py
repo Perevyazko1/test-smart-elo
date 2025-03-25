@@ -245,7 +245,7 @@ def get_eq_card_queryset(queryset, request):
     if eq_params['search'] is not None:
         queryset = queryset.filter(
             Q(product__name__icontains=eq_params['search']) |
-            Q(order__number__icontains=eq_params['search']) |
+            Q(series_id__icontains=eq_params['search']) |
             Q(order__inner_number__icontains=eq_params['search'])
         ).distinct()
 

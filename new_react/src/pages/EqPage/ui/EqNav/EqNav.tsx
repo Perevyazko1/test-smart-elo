@@ -39,19 +39,15 @@ export const EqNav = (props: EqNavProps) => {
         //eslint-disable-next-line
     }, [searchValue]);
 
-    const showAssembledOnly = () => {
-        if (queryParameters.assembled) {
-            setQueryParam('assembled', '')
-        } else {
-            setQueryParam('assembled', 'all')
-        }
-    };
 
-    const showNotLockedOnly = () => {
-        if (queryParameters.locked) {
-            setQueryParam('locked', '')
+
+
+
+    const proModeSwitch = () => {
+        if (queryParameters.pro) {
+            setQueryParam('pro', '')
         } else {
-            setQueryParam('locked', 'all')
+            setQueryParam('pro', 'true')
         }
     };
 
@@ -70,28 +66,19 @@ export const EqNav = (props: EqNavProps) => {
                 </AppTooltip>
             }
 
-            <div className={'d-flex align-items-end align-self-stretch'}>
-                <AppTooltip title="Отобразить наряды не укомплектованные полуфабрикатами">
-                    <AppSwitch
-                        style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '8px'}}
-                        checked={!!queryParameters.assembled}
-                        onSwitch={showAssembledOnly}
-                        labelPosition={'labelBottom'}
-                        handleContent={'⬛️'}
-                        label={queryParameters.assembled ? "Все" : "Уком"}
-                    />
-                </AppTooltip>
-            </div>
+
+
+
 
             <div className={'d-flex align-items-end align-self-stretch'}>
-                <AppTooltip title="Отобразить наряды в ожидании только без блокировки">
+                <AppTooltip title="Расширенный режим">
                     <AppSwitch
-                        style={{transform: "scale(0.7) translate(0, 5px)", fontSize: '10px'}}
-                        checked={!!queryParameters.locked}
-                        onSwitch={showNotLockedOnly}
+                        style={{transform: "scale(0.8) translate(0, 3px)", fontSize: '10px'}}
+                        checked={!!queryParameters.pro}
+                        onSwitch={proModeSwitch}
                         labelPosition={'labelBottom'}
-                        handleContent={'🔒'}
-                        label={queryParameters.locked ? "Дост" : "Все"}
+                        handleContent={'🚀'}
+                        label={"PRO"}
                     />
                 </AppTooltip>
             </div>

@@ -16,6 +16,7 @@ import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
+import {CardPlanDate} from "@widgets/EqCard/ui/ui/CardPlanDate";
 
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -232,8 +233,14 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     return (
         <EqCardBody card={card} {...otherProps}>
+            {listType === 'in_work' && (
+                <CardPlanDate card={card} assignmentsLists={assignmentsLists}/>
+            )}
+
             {!hideFirstBtn &&
                 <EqCardBtn
+                    card={card}
+                    assignmentsLists={assignmentsLists}
                     plane_date={getPlaneDate(true)}
                     expanded={expanded}
                     style={{minWidth: '39px', maxWidth: '39px'}}
@@ -270,8 +277,10 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
             {!hideSecondBtn &&
                 <EqCardBtn
+                    card={card}
+                    assignmentsLists={assignmentsLists}
                     style={{minWidth: '39px', maxWidth: '39px'}}
-                    plane_date={getPlaneDate(false)}
+                    plane_date={null}
                     cardType={listType}
                     expanded={expanded}
                     first={false}

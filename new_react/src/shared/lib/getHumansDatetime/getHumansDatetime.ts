@@ -1,4 +1,9 @@
-export const getHumansDatetime = (utc_datetime: string, variant: 'full' | 'short' | 'DD-MM' | 'YYYY-MM-DD' = 'full' ) => {
+import {appDays} from "@pages/EqPage/model/lib/getNextDays";
+
+export const getHumansDatetime = (
+    utc_datetime: string,
+    variant: 'full' | 'short' | 'DD-MM' | 'DAY' | 'YYYY-MM-DD' = 'full'
+) => {
     if (utc_datetime === '') {
         return "";
     }
@@ -27,6 +32,9 @@ export const getHumansDatetime = (utc_datetime: string, variant: 'full' | 'short
 
     } else if (variant === 'YYYY-MM-DD') {
         return `${utc_datetime.slice(0, 10)}`;
+    } else if (variant === 'DAY') {
+        const dateTime = new Date(utc_datetime);
+        return appDays[dateTime.getDay()];
     } else {
         const dateTime = new Date(utc_datetime);
         const date = dateTime.toLocaleDateString(

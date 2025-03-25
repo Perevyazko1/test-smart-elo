@@ -13,6 +13,7 @@ import {DistributeBlock} from "../DistributeBlock/DistributeBlock";
 
 import {EqWeeks} from "./EqWeeks";
 import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
+import {PlanGhost} from "@pages/EqPage/ui/EqBody/PlanGhost";
 
 interface EqBodyProps {
     showClb: () => void;
@@ -144,6 +145,8 @@ export const EqBody = (props: EqBodyProps) => {
             height: `${windowHeight}px`,
             width: `${windowWidth}px`,
         }}>
+            {/*<PlanGhost leftBlockWidth={leftBlockWidth}/>*/}
+
             <div style={{
                 width: '100%',
                 height: '100%',

@@ -1,6 +1,7 @@
 import {useLayoutEffect, useMemo, useState} from "react";
 
 interface useFixedSizeListProps {
+    offsetTop?: number;
     itemsCount: number;
     itemHeight: number;
     overScan?: number;
@@ -11,6 +12,7 @@ const DEFAULT_OVERSCAN = 5;
 
 export const useFixedSizeList = (props: useFixedSizeListProps) => {
     const {
+        offsetTop,
         itemsCount,
         itemHeight,
         overScan = DEFAULT_OVERSCAN,
@@ -78,14 +80,14 @@ export const useFixedSizeList = (props: useFixedSizeListProps) => {
         for (let index = startIndex; index <= endIndex; index++) {
             virtualItems.push({
                 index,
-                offsetTop: index * itemHeight,
+                offsetTop: index * itemHeight + (offsetTop ? offsetTop : 0),
             })
         }
 
         return {virtualItems, startIndex, endIndex};
-    }, [itemHeight, itemsCount, listHeight, overScan, scrollTop]);
+    }, [itemHeight, itemsCount, listHeight, overScan, scrollTop, offsetTop]);
 
-    const totalHeight = itemHeight * itemsCount;
+    const totalHeight = itemHeight * itemsCount + (offsetTop ? offsetTop : 0);
 
     return {virtualItems, startIndex, endIndex, totalHeight}
 }

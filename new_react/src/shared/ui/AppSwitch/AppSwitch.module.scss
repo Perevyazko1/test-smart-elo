@@ -1,5 +1,5 @@
 .switchWrapper {
-  width: 35px;
+  width: 30px;
   height: 10px;
   display: inline-block;
   position: relative;
@@ -21,7 +21,7 @@
 }
 
 .switchText {
-  font-size: 14px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -58,8 +58,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     background-color: white;
     border-radius: 4px;
     transition: transform 0.3s ease;
