@@ -1,16 +1,16 @@
 version: "3.8"
 
 services:
-  postgres:
-    build: ./services/postgres_db
-    container_name: postgres_db_eq
-    expose:
-      - "5432"
-    volumes:
-      - db_data:/var/lib/postgresql/data
-    restart: always
-    env_file:
-      - .env.docker.prod
+#  postgres:
+#    build: ./services/postgres_db
+#    container_name: postgres_db_eq
+#    expose:
+#      - "5432"
+#    volumes:
+#      - db_data:/var/lib/postgresql/data
+#    restart: always
+#    env_file:
+#      - .env.docker.prod
 
   django_app:
     build:
@@ -20,7 +20,7 @@ services:
     restart: always
     depends_on:
       - redis
-      - postgres
+#      - postgres
     ports:
       - "8000:8000"
     env_file:
@@ -30,20 +30,20 @@ services:
     command: >
       sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
 
-  pgadmin:
-    build:
-      context: ./services/pgadmin
-      dockerfile: Dockerfile
-    container_name: pgadmin_eq
-    restart: always
-    depends_on:
-      - postgres
-    ports:
-      - "5050:80"
-    env_file:
-      - .env.docker.prod
-    volumes:
-      - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
+#  pgadmin:
+#    build:
+#      context: ./services/pgadmin
+#      dockerfile: Dockerfile
+#    container_name: pgadmin_eq
+#    restart: always
+#    depends_on:
+#      - postgres
+#    ports:
+#      - "5050:80"
+#    env_file:
+#      - .env.docker.prod
+#    volumes:
+#      - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
 
 #  db-admin:
 #    image: adminer:4.8.1
@@ -108,8 +108,8 @@ services:
     command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file:
       - .env.docker.prod
-
-
-volumes:
-  db_data:
-    driver: local
+#
+#
+#volumes:
+#  db_data:
+#    driver: local
