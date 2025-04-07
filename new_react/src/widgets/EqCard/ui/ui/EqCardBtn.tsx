@@ -1,6 +1,6 @@
 import React, {ButtonHTMLAttributes, useMemo} from "react";
 import {Spinner} from "react-bootstrap";
-import {useDrag} from 'react-dnd';
+// import {useDrag} from 'react-dnd';
 
 import {useClickSound} from "@shared/hooks";
 import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
@@ -22,17 +22,17 @@ interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export const EqCardBtn = (props: EqCardBtnProps) => {
     const {card, cardType, urgency, first, locked, plane_date, onClick, expanded, assignmentsLists, ...otherProps} = props;
     const playSound = useClickSound();
-
-    const [{isDragging}, dragRef] = useDrag({
-        type: 'eq_card',
-        item: {
-            card,
-            assignmentsLists
-        },
-        collect: (monitor) => ({
-            isDragging: monitor.isDragging(),
-        }),
-    });
+    //
+    // const [{isDragging}, dragRef] = useDrag({
+    //     type: 'eq_card',
+    //     item: {
+    //         card,
+    //         assignmentsLists
+    //     },
+    //     collect: (monitor) => ({
+    //         isDragging: monitor.isDragging(),
+    //     }),
+    // });
 
 
     const planeDateTime: { date: string, time: string } = useMemo(() => {
@@ -101,19 +101,19 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
 
     return (
         <div className={'d-flex flex-column'} style={{gap: '.1rem'}}>
-            {cardType === 'in_work' && first && (
-                <button
-                    className={'appBtn p-1 rounded rounded-2 flex-fill'}
-                    ref={dragRef}
-                    style={{
-                        touchAction: 'none',
-                        cursor: 'grab',
-                        backgroundColor: isDragging ? "green" : "",
-                    }}
-                >
-                    <i className="far fa-hand-paper fs-5"/>
-                </button>
-            )}
+            {/*{cardType === 'in_work' && first && (*/}
+            {/*    <button*/}
+            {/*        className={'appBtn p-1 rounded rounded-2 flex-fill'}*/}
+            {/*        ref={dragRef}*/}
+            {/*        style={{*/}
+            {/*            touchAction: 'none',*/}
+            {/*            cursor: 'grab',*/}
+            {/*            backgroundColor: isDragging ? "green" : "",*/}
+            {/*        }}*/}
+            {/*    >*/}
+            {/*        <i className="far fa-hand-paper fs-5"/>*/}
+            {/*    </button>*/}
+            {/*)}*/}
             <button
                 onClick={(e) => {
                     playSound()

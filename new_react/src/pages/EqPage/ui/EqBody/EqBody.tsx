@@ -2,7 +2,6 @@ import React, {useContext, useEffect, useMemo, useState} from "react";
 
 import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
-import {EqCardList} from "@widgets/EqCardList";
 
 import {useResizableBlocks} from '../../model/lib/useResizableBlocks';
 import {useWindowDimensions} from "../../model/lib/useWindowDimensions";
@@ -13,7 +12,11 @@ import {DistributeBlock} from "../DistributeBlock/DistributeBlock";
 
 import {EqWeeks} from "./EqWeeks";
 import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
-import {PlanGhost} from "@pages/EqPage/ui/EqBody/PlanGhost";
+import {InWorkBlock} from "./InWorkBlock";
+import {ReadyBlock} from "@pages/EqPage/ui/EqBody/ReadyBlock";
+import {AwaitBlock} from "@pages/EqPage/ui/EqBody/AwaitBlock";
+
+// import {PlanGhost} from "@pages/EqPage/ui/EqBody/PlanGhost";
 
 interface EqBodyProps {
     showClb: () => void;
@@ -137,6 +140,7 @@ export const EqBody = (props: EqBodyProps) => {
         return isDragging ? 'block' : 'none';
     }, [isDragging])
 
+
     return (
         <div className={'d-flex justify-content-center position-relative'} style={{
             background: "var(--bs-gray-300)",
@@ -206,96 +210,53 @@ export const EqBody = (props: EqBodyProps) => {
             />
 
             {/*IN WORK BLOCK*/}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    ...(expanded ? {left: blockSizes.leftBlockWidth} : {right: blockSizes.rightBlockWidth}),
-                    width: expanded ? blockSizes.rightBlockWidth : blockSizes.leftBlockWidth,
-                    maxWidth: '1200px',
-                    height: blockSizes.inWorkHeight,
-                    overflowX: 'hidden',
-                    overflowY: 'auto',
-                }}
-            >
-                <EqCardList
-                    listType={'in_work'}
-                    expanded={expanded}
-                    inited={filtersReady || false}
-                    deps={depsInWork}
-                    noRelevantIds={noRelevantIds}
-                />
-            </div>
+            <InWorkBlock
+                expanded={expanded}
+                leftBlockWidth={blockSizes.leftBlockWidth}
+                rightBlockWidth={blockSizes.rightBlockWidth}
+                inWorkHeight={blockSizes.inWorkHeight}
+                filtersReady={filtersReady || false}
+                depsInWork={depsInWork}
+                noRelevantIds={noRelevantIds}
+            />
 
             {/*WEEK BLOCK*/}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: `${blockSizes.inWorkHeight}px`,
-                    ...(expanded ? {left: blockSizes.leftBlockWidth} : {right: blockSizes.rightBlockWidth}),
-                    width: expanded ? blockSizes.rightBlockWidth : blockSizes.leftBlockWidth,
-                    maxWidth: '1200px',
-                    overflowX: 'hidden',
-                    overflowY: 'auto',
-                    height: '36px',
-                }}
-            >
-                <EqWeeks
-                    rightBlockWidth={blockSizes.rightBlockWidth}
-                    leftBlockWidth={blockSizes.leftBlockWidth}
-                    expanded={expanded}
-                    showClb={showClb}
-                    drag={drag}
-                    resetSize={resetSize}
-                />
-            </div>
+            <EqWeeks
+                inWorkHeight={blockSizes.inWorkHeight}
+                rightBlockWidth={blockSizes.rightBlockWidth}
+                leftBlockWidth={blockSizes.leftBlockWidth}
+                expanded={expanded}
+                showClb={showClb}
+                drag={drag}
+                resetSize={resetSize}
+            />
 
             {/*READY BLOCK*/}
             {!expanded && (
-                <div
-                    style={{
-                        position: 'absolute',
-                        top: blockSizes.inWorkHeight + 36,
-                        right: blockSizes.rightBlockWidth,
-                        width: blockSizes.leftBlockWidth,
-                        maxWidth: "1200px",
-                        height: blockSizes.readyHeight,
-                        overflowX: 'hidden',
-                        overflowY: 'auto',
-                    }}
-                >
-                    <EqCardList
-                        listType={'ready'}
-                        expanded={expanded}
-                        inited={filtersReady || false}
-                        deps={depsReady}
-                        noRelevantIds={noRelevantIds}
-                    />
-                </div>
+                <ReadyBlock
+                    expanded={expanded}
+                    filtersReady={filtersReady || false}
+                    deps={depsReady}
+                    noRelevantIds={noRelevantIds}
+                    inWorkHeight={blockSizes.inWorkHeight}
+                    rightBlockWidth={blockSizes.rightBlockWidth}
+                    leftBlockWidth={blockSizes.leftBlockWidth}
+                    readyHeight={blockSizes.readyHeight}
+                />
             )}
 
             {/*AWAIT BLOCK*/}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: expanded ? blockSizes.inWorkHeight + 36 : 0,
-                    height: expanded ? blockSizes.readyHeight : windowHeight,
-                    left: blockSizes.leftBlockWidth,
-                    width: blockSizes.rightBlockWidth,
-                    maxWidth: "1200px",
-                    overflowX: 'hidden',
-                    overflowY: 'auto',
-                }}
-            >
-                <EqCardList
-                    listType={'await'}
-                    expanded={expanded}
-                    inited={filtersReady || false}
-                    deps={depsAwait}
-                    noRelevantIds={noRelevantIds}
-                />
-
-            </div>
+            <AwaitBlock
+                expanded={expanded}
+                inWorkHeight={blockSizes.inWorkHeight}
+                readyHeight={blockSizes.readyHeight}
+                windowHeight={windowHeight}
+                leftBlockWidth={blockSizes.leftBlockWidth}
+                rightBlockWidth={blockSizes.rightBlockWidth}
+                filtersReady={filtersReady || false}
+                depsAwait={depsAwait}
+                noRelevantIds={noRelevantIds}
+            />
         </div>
     );
 };

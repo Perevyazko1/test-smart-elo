@@ -15,10 +15,24 @@ export const setTargetNumber = (props: setTargetNumberProps): EqNumberListTipe =
 
     if (lockedNums.includes(value) || selectedLocked.includes(value)) {
         newSelectedLocked = [value];
-        newLockedNums = [...lockedNums.filter(num => num !== value), ...selectedLocked.filter(num => num !== value)];
+        newLockedNums = [
+            ...lockedNums.filter(num => num !== value),
+            ...selectedLocked.filter(num => num !== value)]
+            .sort((a, b) => a.number - b.number);
+        newSecondary = [
+            ...primary,
+            ...secondary]
+            .sort((a, b) => a.number - b.number)
     } else if (primary.includes(value) || secondary.includes(value)) {
         newPrimary = [value];
-        newSecondary = [...primary.filter(num => num !== value), ...secondary.filter(num => num !== value)];
+        newSecondary = [
+            ...primary.filter(num => num !== value),
+            ...secondary.filter(num => num !== value)]
+            .sort((a, b) => a.number - b.number);
+        newLockedNums = [
+            ...lockedNums,
+            ...selectedLocked]
+            .sort((a, b) => a.number - b.number);
     }
 
     // Возвращаем оба массива

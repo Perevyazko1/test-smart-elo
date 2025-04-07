@@ -1,6 +1,4 @@
-from typing import Type
-
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet,Sum
 from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.core.cache import cache
@@ -9,7 +7,7 @@ from core.models import Assignment, AssignmentCoExecutor
 
 
 def update_assignments_and_clean_cache(
-        assignments_qs: QuerySet[Type[Assignment]],
+        assignments_qs: QuerySet[Assignment],
         order_product__id: int,
         department__id: int | None,
         **kwargs) -> int:

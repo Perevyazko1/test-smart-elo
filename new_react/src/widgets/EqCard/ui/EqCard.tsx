@@ -16,7 +16,8 @@ import {CardCounter} from "./ui/CardCounter";
 import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
-import {CardPlanDate} from "@widgets/EqCard/ui/ui/CardPlanDate";
+
+// import {CardPlanDate} from "@widgets/EqCard/ui/ui/CardPlanDate";
 
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -74,30 +75,23 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         );
     }, [card.assignments, queryParameters.series_size, targetUserId]);
 
-    const getTargetNumbers = useCallback((first: boolean) => {
-        if (listType === "await"
-            || (listType === "in_work" && !expanded && !first)
-            || (listType === "in_work" && expanded)
-            || (listType === "distribute")
-        ) {
-            return [...assignmentsLists.primary, ...assignmentsLists.selectedLocked];
-        } else {
-            return assignmentsLists.primary;
-        }
-    }, [assignmentsLists.primary, assignmentsLists.selectedLocked, expanded, listType]);
+    const targetNumbers = useMemo(() => {
+        return [...assignmentsLists.primary, ...assignmentsLists.selectedLocked];
+    }, [
+        assignmentsLists.primary,
+        assignmentsLists.selectedLocked,
+    ]);
 
     const hideFirstBtn = useMemo(() => {
             if (isViewer) return true;
-            if (listType === 'await' && getTargetNumbers(true).length === 0) return true;
+            if (listType === 'await' && targetNumbers.length === 0) return true;
             if (listType === 'distribute') return true;
-            if (listType === 'in_work' && getTargetNumbers(true).length === 0) return true;
-            if (listType === 'ready' && (!isBoss || assignmentsLists.primary.length === 0)) return true;
-            if (listType === 'ready' && !card.product.technological_process) return true;
-            return false;
+            if (listType === 'in_work' && targetNumbers.length === 0) return true;
+            if (listType === 'ready' && (!isBoss || targetNumbers.length === 0)) return true;
+            return listType === 'ready' && !card.product.technological_process;
         },
         [
-            getTargetNumbers,
-            assignmentsLists.primary.length,
+            targetNumbers,
             card.product.technological_process,
             isBoss,
             isViewer,
@@ -108,34 +102,23 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     const hideSecondBtn = useMemo(() => {
         if (isViewer) return true;
         if (listType === 'await') return true;
-        if (listType === 'in_work' && (
-            getTargetNumbers(false).length === 0)
-        ) return true;
-        if (listType === 'ready' && assignmentsLists.primary.length === 0) return true;
-        return false;
+        return listType === 'ready' && targetNumbers.length === 0;
     }, [
-        assignmentsLists.primary.length,
-        getTargetNumbers,
+        targetNumbers,
         isViewer,
         listType
     ]);
 
     const firstBtnIsLocked = useMemo(() => {
         if (listType === 'await') {
-            if (card.assignments.some(assignment => assignment.appointed_by_boss)) {
-                return true;
+            if (bossPerm) {
+                return card.assignments.some(assignment => assignment.appointed_by_boss);
             }
-            return false;
-        }
-
-        if (listType === 'in_work' &&
-            !expanded &&
-            assignmentsLists.primary.length === 0
-        ) {
-            return true;
+            return card.assignments.some(assignment => assignment.appointed_by_boss) ||
+            targetNumbers.some(assignment => !assignment.assembled);
         }
         return false;
-    }, [assignmentsLists.primary.length, card.assignments, expanded, listType])
+    }, [bossPerm, card.assignments, listType, targetNumbers])
 
     const returnLocked = useMemo(() => {
         if (listType !== "in_work" || bossPerm) {
@@ -156,10 +139,9 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         if (listType === 'await' && firstBtnIsLocked) {
             handleOpen(
                 <h4 className={'mx-4'}>
-                    Наряды заблокированы для взятия в работу бригадиром. <br/>
+                    Наряды заблокированы для взятия в работу. <br/>
 
-                    Для снятия блокировки бригадир должен отключить блокировку серии
-                    соответствующим ползунком в карточке.
+                    Проверьте наличие комплектации у выбранных нарядов или статус блокировки карточки.
                 </h4>
             );
         } else if (getAction(first) === 'in_work_to_await' && returnLocked) {
@@ -169,23 +151,12 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
                     Вернуть в ожидание такие наряды может только бригадир.
                 </h4>
             );
-        } else if (getAction(first) === 'in_work_to_ready' && assignmentsLists.primary.length === 0) {
-            handleOpen(
-                <h4 className={'mx-4'}>
-                    Выбранный наряд не может быть отмечен готовым по причине:
-                    <br/>
-                    <br/>
-                    Наряды не укомплектованы полуфабрикатами из предыдущих отделов.
-                    <br/>
-                    Дождитесь готовности изделия в предыдущих отделах.
-                </h4>
-            )
         } else {
             setCardDisabled(true);
             dispatch(fetchEqUpdCard({
                 op_id: card.id,
                 department_id: currentUser.current_department.id,
-                assignment_ids: getTargetNumbers(first).map(item => item.id),
+                assignment_ids: targetNumbers.map(item => item.id),
                 action: getAction(first),
                 ...queryParameters,
             })).then(() => {
@@ -194,19 +165,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             });
         }
 
-    }, [
-        assignmentsLists.primary.length,
-        card.id,
-        currentUser.current_department,
-        dispatch,
-        firstBtnIsLocked,
-        getAction,
-        getTargetNumbers,
-        handleOpen,
-        listType,
-        queryParameters,
-        returnLocked
-    ]);
+    }, [currentUser.current_department, listType, firstBtnIsLocked, getAction, returnLocked, handleOpen, dispatch, card.id, targetNumbers, queryParameters]);
 
     const getPlaneDate = useCallback((first: boolean) => {
         const targetDate = () => {
@@ -233,10 +192,6 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
     return (
         <EqCardBody card={card} {...otherProps}>
-            {listType === 'in_work' && (
-                <CardPlanDate card={card} assignmentsLists={assignmentsLists}/>
-            )}
-
             {!hideFirstBtn &&
                 <EqCardBtn
                     card={card}

@@ -20,6 +20,7 @@ import {WagesInfo} from "./WagesInfo";
 
 
 interface EqWeeksProps {
+    inWorkHeight: number;
     rightBlockWidth: number;
     leftBlockWidth: number;
     showClb: () => void;
@@ -31,6 +32,7 @@ interface EqWeeksProps {
 
 export const EqWeeks = (props: EqWeeksProps) => {
     const {
+        inWorkHeight,
         leftBlockWidth,
         rightBlockWidth,
         showClb,
@@ -126,92 +128,106 @@ export const EqWeeks = (props: EqWeeksProps) => {
     }, [blockWidthPx, weekData?.str_dates, weekData?.week]);
 
     return (
+
         <div
-            className={`d-flex justify-content-${expanded ? "start" : "end"} align-items-center px-1 gap-1 rounded border border-1 `}
             style={{
-                height: '36px',
-                backgroundColor: currentUser.current_department?.color || '#ffffff',
-                width: blockWidthPx,
-                maxWidth: '1200px',
                 position: 'absolute',
+                top: inWorkHeight,
+                ...(expanded ? {left: leftBlockWidth} : {right: rightBlockWidth}),
+                width: expanded ? rightBlockWidth : leftBlockWidth,
+                maxWidth: '1200px',
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                height: '36px',
             }}
         >
-            {!isDesktop &&
-                <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
-                     style={{
-                         width: "40px",
-                         height: "90%",
-                         cursor: 'pointer',
-                     }}
-                     onClick={showClb}
-                >
-                    <i className="fas fa-filter text-light fs-6"/>
-                </div>
-            }
-
-            {blockWidthPx > 300 &&
-                <div className={'d-flex justify-content-between flex-fill align-items-center gap-1'}>
-                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
-                            variant={'dark'}
-                            size={'sm'}
-                            style={{width: "50px", height: "29px"}}
-                            disabled={expanded}
-                            onClick={() => {
-                                setQueryParam('week', `${weekData?.previous_week_data?.week}`)
-                                setQueryParam('year', `${weekData?.previous_week_data?.year}`)
-                            }}
+            <div
+                className={`d-flex justify-content-${expanded ? "start" : "end"} align-items-center px-1 gap-1 rounded border border-1 `}
+                style={{
+                    height: '36px',
+                    backgroundColor: currentUser.current_department?.color || '#ffffff',
+                    width: blockWidthPx,
+                    maxWidth: '1200px',
+                    position: 'absolute',
+                }}
+            >
+                {!isDesktop &&
+                    <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
+                         style={{
+                             width: "40px",
+                             height: "90%",
+                             cursor: 'pointer',
+                         }}
+                         onClick={showClb}
                     >
-                        <i className="fas fa-angle-double-left fs-3"/>
-                    </Button>
-
-                    <div className={'d-flex flex-fill justify-content-center align-items-center'}>
-                        {!weekData?.isLoading ?
-                            <>
-                                {getWeekString}
-                                <button
-                                    className={'appBtn px-1 rounded mx-1 fs-7'}
-                                    onClick={handleOpenWages}
-                                >
-                                    {getEarnedSum}
-                                </button>
-                            </> :
-                            <AppSkeleton className={'h-100 flex-fill'}/>
-                        }
+                        <i className="fas fa-filter text-light fs-6"/>
                     </div>
+                }
+
+                {blockWidthPx > 300 &&
+                    <div className={'d-flex justify-content-between flex-fill align-items-center gap-1'}>
+                        <Button className={"p-0 d-flex align-items-center justify-content-center"}
+                                variant={'dark'}
+                                size={'sm'}
+                                style={{width: "50px", height: "29px"}}
+                                disabled={expanded}
+                                onClick={() => {
+                                    setQueryParam('week', `${weekData?.previous_week_data?.week}`)
+                                    setQueryParam('year', `${weekData?.previous_week_data?.year}`)
+                                }}
+                        >
+                            <i className="fas fa-angle-double-left fs-3"/>
+                        </Button>
+
+                        <div className={'d-flex flex-fill justify-content-center align-items-center'}>
+                            {!weekData?.isLoading ?
+                                <>
+                                    {getWeekString}
+                                    <button
+                                        className={'appBtn px-1 rounded mx-1 fs-7'}
+                                        onClick={handleOpenWages}
+                                    >
+                                        {getEarnedSum}
+                                    </button>
+                                </> :
+                                <AppSkeleton className={'h-100 flex-fill'}/>
+                            }
+                        </div>
 
 
-                    <Button className={"p-0 d-flex align-items-center justify-content-center"}
-                            type={"button"}
-                            variant={'dark'}
-                            size={'sm'}
-                            disabled={expanded}
-                            style={{width: "50px", height: "29px"}}
-                            onClick={() => {
-                                setQueryParam('week', `${weekData?.next_week_data?.week}`)
-                                setQueryParam('year', `${weekData?.next_week_data?.year}`)
-                            }}
+                        <Button className={"p-0 d-flex align-items-center justify-content-center"}
+                                type={"button"}
+                                variant={'dark'}
+                                size={'sm'}
+                                disabled={expanded}
+                                style={{width: "50px", height: "29px"}}
+                                onClick={() => {
+                                    setQueryParam('week', `${weekData?.next_week_data?.week}`)
+                                    setQueryParam('year', `${weekData?.next_week_data?.year}`)
+                                }}
+                        >
+                            <i className="fas fa-angle-double-right fs-3"/>
+                        </Button>
+                    </div>
+                }
+                {!!drag &&
+                    <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center'}
+                         style={{
+                             width: "40px",
+                             height: "29px",
+                             touchAction: 'none',
+                             cursor: 'grab',
+                             order: expanded ? "-1" : "1",
+                             userSelect: 'none',
+                         }}
+                         ref={drag}
+                         onDoubleClick={resetSize}
+                         onTouchEnd={handleDoubleTap}
                     >
-                        <i className="fas fa-angle-double-right fs-3"/>
-                    </Button>
-                </div>
-            }
-            {!!drag &&
-                <div className={'bg-dark rounded rounded-1 d-flex align-items-center justify-content-center'}
-                     style={{
-                         width: "40px",
-                         height: "29px",
-                         touchAction: 'none',
-                         cursor: 'grab',
-                         order: expanded ? "-1" : "1",
-                         userSelect: 'none',
-                     }}
-                     ref={drag}
-                     onDoubleClick={resetSize}
-                     onTouchEnd={handleDoubleTap}
-                >
-                    <i className="far fa-hand-paper fs-5 text-light"/>
-                </div>
-            }
+                        <i className="far fa-hand-paper fs-5 text-light"/>
+                    </div>
+                }
+            </div>
         </div>
     )
 }

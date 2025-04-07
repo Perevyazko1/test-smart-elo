@@ -101,7 +101,7 @@ class EqUpdateAssignmentsStatus:
                 }
 
                 qs_filter["status"] = "in_work"
-                qs_filter["assembled"] = True
+                # qs_filter["assembled"] = True
 
             case 'ready_to_in_work':
                 self.action_name = 'Вернул в работу'

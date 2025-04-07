@@ -1,4 +1,4 @@
-import React, {useMemo} from "react";
+import React, {memo, useMemo} from "react";
 
 import {useQueryParams} from "@shared/hooks";
 import {ListTypes} from "@widgets/EqCardList";
@@ -10,7 +10,7 @@ interface EqControlPanelProps {
     listType: ListTypes;
 }
 
-export const EqControlPanel = (props: EqControlPanelProps) => {
+export const EqControlPanel = memo((props: EqControlPanelProps) => {
     const {listType} = props;
 
     const {queryParameters} = useQueryParams();
@@ -37,7 +37,7 @@ export const EqControlPanel = (props: EqControlPanelProps) => {
             <div
                 className={'d-flex justify-content-start align-items-center text-white rounded h-100 bg-black bg-gradient gap-3'}
                 style={{
-                    padding: '0.15rem',
+                    padding: '0.15rem 0.35rem',
                 }}
             >
                 {listType === "await" && (
@@ -50,4 +50,4 @@ export const EqControlPanel = (props: EqControlPanelProps) => {
             </div>
         </div>
     );
-};
+});

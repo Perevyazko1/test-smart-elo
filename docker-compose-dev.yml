@@ -1,6 +1,21 @@
 version: "3.8"
 
 services:
+  server:
+    build:
+      context: ./django_app/
+      dockerfile: DockerfileDev
+    volumes:
+      - ./django_app:/app
+    depends_on:
+      - postgres_db
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c "python3 manage.py runserver 0.0.0.0:8000"
+
   postgres_db:
     build: services/postgres_db
     container_name: dev_postgres_db_eq

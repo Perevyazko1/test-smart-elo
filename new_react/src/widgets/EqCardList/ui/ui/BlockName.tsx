@@ -1,4 +1,18 @@
-export const BlockName = (props: {name: string}) => {
+import {ListTypes} from "@widgets/EqCardList";
+import {memo} from "react";
+
+interface BlockNameProps {
+    listType?: ListTypes;
+    name?: string;
+}
+
+
+export const BlockName = memo((props: BlockNameProps) => {
+    const {listType, name} = props;
+
+    if (listType === 'distribute') {
+        return null;
+    }
 
     return (
         <div style={{
@@ -27,8 +41,11 @@ export const BlockName = (props: {name: string}) => {
                     fontWeight: "bold"
                 }}
             >
-                {props.name}
+                {name ? name :
+                    listType === "in_work" ? 'В РАБОТЕ' :
+                        listType === 'await' ? "В ОЖИДАНИИ" :
+                            "ГОТОВЫЕ"}
             </div>
         </div>
     );
-};
+});

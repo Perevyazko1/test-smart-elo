@@ -84,7 +84,8 @@ export const EqNumbers = (props: EqNumbersProps) => {
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={item.amount}
-                    colorCls={'greenBtn'}
+                    colorCls={item.assembled ? 'greenBtn' : 'blackBtn'}
+                    diagonalBg={!item.assembled}
                 />
             ))}
         </>

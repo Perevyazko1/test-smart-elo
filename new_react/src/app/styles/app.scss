@@ -82,6 +82,10 @@ $app-body-height: calc(100vh - $app-navbar-height);
       border-color: #000000;
       color: #e7e7e7;
     }
+    &.diagonalBg {
+      background: linear-gradient(135deg, #347051 50%, #000000 50%);
+      color: #ffffff;
+    }
   }
 
   &.greyBtn {

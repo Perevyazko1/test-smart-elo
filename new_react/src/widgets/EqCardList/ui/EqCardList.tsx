@@ -1,9 +1,8 @@
 import React, {memo, useCallback, useEffect, useMemo, useRef, useState} from "react";
 
-import {useCardHeight} from "@pages/EqPage";
+import {getWeekData, useCardHeight} from "@pages/EqPage";
 
 import {ReadySection} from "@pages/TaskPage";
-import {getWeekData} from "@pages/EqPage";
 import {EqCard} from "@widgets/EqCard";
 
 import {useAppSelector, useCurrentUser, useFixedSizeList, useQueryParams, useQueue} from "@shared/hooks";
@@ -12,7 +11,6 @@ import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
-import {BlockName} from "./ui/BlockName";
 import {EqControlPanel} from "@pages/EqPage/ui/EqBody/EqControlPanel";
 import {groupByPlanDate} from "@pages/EqPage/model/lib/groupByPlanDate";
 
@@ -118,17 +116,6 @@ export const EqCardList = memo((props: EqCardListProps) => {
         }
     }, [currentUser.current_department?.piecework_wages, data, listType]);
 
-    const blockName = useMemo(() => {
-        return (listType !== "distribute" &&
-            <BlockName
-                name={
-                    listType === "in_work" ? 'В РАБОТЕ' :
-                        listType === 'await' ? "В ОЖИДАНИИ" :
-                            "ГОТОВЫЕ"
-                }
-            />
-        )
-    }, [listType]);
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла
     const scrollElementRef = useRef<HTMLDivElement>(null);
@@ -175,65 +162,61 @@ export const EqCardList = memo((props: EqCardListProps) => {
     }, [expanded, listType, queue, sortedList, targetUserId])
 
     return (
-        <>
-            <div
-                style={{
-                    width: '100%',
-                    maxWidth: '1200px',
-                    height: '100%',
-                    overflowX: 'hidden',
-                    overflowY: 'auto',
-                    position: "relative",
-                }}
-                ref={scrollElementRef}
-            >
-                <div style={{height: totalHeight}}>
-                    <EqControlPanel
-                        listType={listType}
-                    />
+        <div
+            style={{
+                width: '100%',
+                maxWidth: '1200px',
+                height: '100%',
+                overflowX: 'hidden',
+                overflowY: 'auto',
+                position: "relative",
+            }}
+            ref={scrollElementRef}
+        >
+            <div style={{height: totalHeight}}>
+                <EqControlPanel
+                    listType={listType}
+                />
 
-                    {virtualItems.map(card => (
-                        <div
-                            key={card.index}
-                            style={{
-                                position: 'absolute',
-                                top: '0',
-                                transform: `translateY(${card.offsetTop}px)`,
-                                width: '100%',
-                                height: `${cardHeight}px`,
-                            }}
-                        >
-                            {getEqCard(card.index)}
-                        </div>
-                    ))}
-                </div>
-
-                {isLoading ?
-                    <AppSkeleton
-                        className={'rounded'}
+                {virtualItems.map(card => (
+                    <div
+                        key={card.index}
                         style={{
-                            margin: '0.15rem 0.25rem',
+                            position: 'absolute',
+                            top: '0',
+                            transform: `translateY(${card.offsetTop}px)`,
+                            width: '100%',
                             height: `${cardHeight}px`,
                         }}
-                    />
-                    : null
-                }
-                {(listType === 'ready' && targetUserId && weekData?.dt_dates && weekData?.dt_dates.length > 6) &&
-                    <>
-                        <div className={'fw-bold ps-1'}>
-                            Выполненные задачи:
-                        </div>
-                        <ReadySection
-                            eqMode={true}
-                            targetUserId={targetUserId}
-                            start_date={getHumansDatetime(weekData?.dt_dates[0], 'YYYY-MM-DD')}
-                            end_date={getHumansDatetime(weekData?.dt_dates[6], 'YYYY-MM-DD')}
-                        />
-                    </>
-                }
+                    >
+                        {getEqCard(card.index)}
+                    </div>
+                ))}
             </div>
 
-            {blockName}
-        </>
+            {isLoading ?
+                <AppSkeleton
+                    className={'rounded'}
+                    style={{
+                        margin: '0.15rem 0.25rem',
+                        height: `${cardHeight}px`,
+                    }}
+                />
+                : null
+            }
+            {(listType === 'ready' && targetUserId && weekData?.dt_dates && weekData?.dt_dates.length > 6) &&
+                <>
+                    <div className={'fw-bold ps-1'}>
+                        Выполненные задачи:
+                    </div>
+                    <ReadySection
+                        eqMode={true}
+                        targetUserId={targetUserId}
+                        start_date={getHumansDatetime(weekData?.dt_dates[0], 'YYYY-MM-DD')}
+                        end_date={getHumansDatetime(weekData?.dt_dates[6], 'YYYY-MM-DD')}
+                    />
+                </>
+            }
+        </div>
     );
 });

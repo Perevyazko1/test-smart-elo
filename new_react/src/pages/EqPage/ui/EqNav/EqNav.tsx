@@ -77,8 +77,8 @@ export const EqNav = (props: EqNavProps) => {
                         checked={!!queryParameters.pro}
                         onSwitch={proModeSwitch}
                         labelPosition={'labelBottom'}
-                        handleContent={'🚀'}
-                        label={"PRO"}
+                        handleContent={'⚙️'}
+                        label={"НАСТР"}
                     />
                 </AppTooltip>
             </div>
