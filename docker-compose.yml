@@ -85,7 +85,7 @@ services:
       - ./django_app/media/:/app/media
     depends_on:
       - django_app
-      - postgres
+#      - postgres
     ports:
       - "58231"
     command: celery -A django_app worker -l info
@@ -100,7 +100,7 @@ services:
     restart: always
     depends_on:
       - django_app
-      - postgres
+#      - postgres
     volumes:
       - ./django_app/media/:/app/media
     ports:
