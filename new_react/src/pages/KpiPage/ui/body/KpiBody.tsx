@@ -7,12 +7,13 @@ import {KpiTopUsers} from "./KpiTopUsers";
 import {KpiData} from "./KpiData";
 import {useKpiData} from "@pages/KpiPage/model/api/rtk";
 import {useQueryParams} from "@shared/hooks";
+import {Spinner} from "react-bootstrap";
 
 
 export const KpiBody = () => {
     const {queryParameters} = useQueryParams();
 
-    const [trigger, {data}] = useKpiData({});
+    const [trigger, {data, isLoading, isFetching}] = useKpiData({});
 
     const getDataHandle = () => {
         if (queryParameters.date_from && queryParameters.date_to) {
@@ -34,9 +35,12 @@ export const KpiBody = () => {
                         <button
                             className={'appBtn px-3 py-1 greenBtn'}
                             onClick={getDataHandle}
+                            disabled={(isFetching || isLoading) }
                         >
                             Вывести отчет
                         </button>
+
+                        {(isFetching || isLoading) && <Spinner animation="grow" size="sm" />}
                     </div>
                     <hr/>
                     <div className={"px-3 p-2"}>
