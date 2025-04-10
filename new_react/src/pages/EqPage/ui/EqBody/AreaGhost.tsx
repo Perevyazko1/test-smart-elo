@@ -2,9 +2,9 @@ import React from "react";
 import {useDrop} from "react-dnd";
 import {DayInfo} from "@pages/EqPage/model/lib/getNextDays";
 import {useEditAssignmentInfo} from "@widgets/AssignmentInfo/model/api/api";
-import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
 import {EqOrderProduct} from "@widgets/EqCardList";
 import {useAppQuery, useCurrentUser} from "@shared/hooks";
+import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
 
 interface AreaGhostProps {
     dayInfo: DayInfo,
@@ -21,8 +21,9 @@ export const AreaGhost = (props: AreaGhostProps) => {
         accept: 'eq_card',
         drop: (item: { assignmentsLists: EqNumberListTipe, card: EqOrderProduct }) => {
             if (item && currentUser.current_department?.id) {
+                const assignments = [...item.assignmentsLists.primary, ...item.assignmentsLists.selectedLocked];
                 editAssignments({
-                    ids: item.assignmentsLists.primary.map(assignment => assignment.id),
+                    ids: assignments.map(assignment => assignment.id),
                     date: dayInfo.dtDay || '',
                     department__id: currentUser.current_department.id,
                     series_id: item.card.series_id,
