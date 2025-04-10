@@ -58,7 +58,7 @@ export const KpiBody = () => {
 
             <hr/>
             <div className={'px-5'}>
-                <KpiTopUsers/>
+                <KpiTopUsers data={data?.user_report}/>
             </div>
         </div>
     );
