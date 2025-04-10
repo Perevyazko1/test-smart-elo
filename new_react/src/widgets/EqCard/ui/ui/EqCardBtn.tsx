@@ -1,6 +1,6 @@
 import React, {ButtonHTMLAttributes, useMemo} from "react";
 import {Spinner} from "react-bootstrap";
-// import {useDrag} from 'react-dnd';
+import {useDrag} from 'react-dnd';
 
 import {useClickSound} from "@shared/hooks";
 import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
@@ -14,44 +14,38 @@ interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
     first: boolean;
     urgency: number;
     locked?: boolean;
-    plane_date?: string | null;
+    showDrug?: boolean;
     expanded?: boolean;
+    planDate?: string | null;
 }
 
 
 export const EqCardBtn = (props: EqCardBtnProps) => {
-    const {card, cardType, urgency, first, locked, plane_date, onClick, expanded, assignmentsLists, ...otherProps} = props;
+    const {
+        card,
+        showDrug,
+        planDate,
+        cardType,
+        urgency,
+        first,
+        locked,
+        onClick,
+        expanded,
+        assignmentsLists,
+        ...otherProps
+    } = props;
     const playSound = useClickSound();
-    //
-    // const [{isDragging}, dragRef] = useDrag({
-    //     type: 'eq_card',
-    //     item: {
-    //         card,
-    //         assignmentsLists
-    //     },
-    //     collect: (monitor) => ({
-    //         isDragging: monitor.isDragging(),
-    //     }),
-    // });
 
-
-    const planeDateTime: { date: string, time: string } = useMemo(() => {
-        if (!plane_date) {
-            return {date: '', time: ''};
-        }
-
-        const dateTime = new Date(plane_date);
-        const date = dateTime.toLocaleDateString(
-            'ru-RU',
-            {day: '2-digit', month: '2-digit'}
-        );
-        const time = dateTime.toLocaleTimeString(
-            'ru-RU',
-            {hour: '2-digit', minute: '2-digit'}
-        );
-
-        return {date: date, time: time};
-    }, [plane_date])
+    const [{isDragging}, dragRef] = useDrag({
+        type: 'eq_card',
+        item: {
+            card,
+            assignmentsLists
+        },
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
 
     const getButtonIcon = useMemo(() => {
         if (locked) {
@@ -99,21 +93,40 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
         return "greenBtn"
     }, [cardType, expanded, first, urgency]);
 
+    const planeDateTime: { date: string, time: string } = useMemo(() => {
+        if (!planDate) {
+            return {date: '', time: ''};
+        }
+
+        const dateTime = new Date(planDate);
+        const date = dateTime.toLocaleDateString(
+            'ru-RU',
+            {day: '2-digit', month: '2-digit'}
+        );
+        const time = dateTime.toLocaleTimeString(
+            'ru-RU',
+            {hour: '2-digit', minute: '2-digit'}
+        );
+
+        return {date: date, time: time};
+    }, [planDate]);
+
+
     return (
         <div className={'d-flex flex-column'} style={{gap: '.1rem'}}>
-            {/*{cardType === 'in_work' && first && (*/}
-            {/*    <button*/}
-            {/*        className={'appBtn p-1 rounded rounded-2 flex-fill'}*/}
-            {/*        ref={dragRef}*/}
-            {/*        style={{*/}
-            {/*            touchAction: 'none',*/}
-            {/*            cursor: 'grab',*/}
-            {/*            backgroundColor: isDragging ? "green" : "",*/}
-            {/*        }}*/}
-            {/*    >*/}
-            {/*        <i className="far fa-hand-paper fs-5"/>*/}
-            {/*    </button>*/}
-            {/*)}*/}
+            {showDrug && (
+                <button
+                    className={'appBtn p-1 rounded rounded-2 flex-fill'}
+                    ref={dragRef}
+                    style={{
+                        touchAction: 'none',
+                        cursor: 'grab',
+                        backgroundColor: isDragging ? "green" : "",
+                    }}
+                >
+                    <i className="far fa-hand-paper fs-5"/>
+                </button>
+            )}
             <button
                 onClick={(e) => {
                     playSound()
@@ -123,12 +136,16 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
                 style={{padding: '.15rem'}}
                 {...otherProps}
             >
-                <div className={'fs-7'}>
-                    <b>{planeDateTime.date}</b>
-                    <br/>
-                    {planeDateTime.time}
-                </div>
-                <br/>
+                {(planDate && !showDrug) && (
+                    <>
+                        <div className={'fs-7'}>
+                            <b>{planeDateTime.date}</b>
+                            <br/>
+                            {planeDateTime.time}
+                        </div>
+                        <br/>
+                    </>
+                )}
                 {otherProps.disabled ? <Spinner animation={'grow'} size={'sm'}/> : getButtonIcon}
             </button>
         </div>

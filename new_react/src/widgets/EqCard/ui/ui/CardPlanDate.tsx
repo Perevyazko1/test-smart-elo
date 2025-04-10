@@ -1,13 +1,12 @@
 import {getHumansDatetime} from "@shared/lib";
-import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
-import {EqOrderProduct} from "@widgets/EqCardList";
+import {EqAssignment, EqOrderProduct} from "@widgets/EqCardList";
 import {useMemo} from "react";
 import {appDays} from "@pages/EqPage/model/lib/getNextDays";
 
 
 interface CardPlanDateProps {
     card: EqOrderProduct;
-    assignmentsLists: EqNumberListTipe;
+    assignmentsLists: EqAssignment[];
 }
 
 interface CardInfo {
@@ -29,7 +28,8 @@ export const CardPlanDate = (props: CardPlanDateProps) => {
             '#F06292'  // Воскресенье — деликатный розовый
         ];
 
-        const planDate = assignmentsLists.primary[0].plane_date;
+        const planDate = assignmentsLists[0]?.plane_date;
+
         if (!planDate) {
             return {
                 backgroundColor: '#becdd2',
@@ -58,9 +58,9 @@ export const CardPlanDate = (props: CardPlanDateProps) => {
 
         return {
             backgroundColor: backgroundColors[dateTime.getDay()],
-            text: `${appDays[dateTime.getDay()]}`,
+            text: `${appDays[dateTime.getDay()]} ${getHumansDatetime(planDate, 'DD-MM')}`,
         };
-    }, [assignmentsLists.primary]);
+    }, [assignmentsLists]);
 
 
     return (

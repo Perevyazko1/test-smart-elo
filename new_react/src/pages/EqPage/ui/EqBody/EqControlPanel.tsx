@@ -4,6 +4,7 @@ import {useQueryParams} from "@shared/hooks";
 import {ListTypes} from "@widgets/EqCardList";
 import {AssembledSwitch} from "@pages/EqPage/ui/EqBody/AssembledSwitch";
 import {LockedSwitch} from "@pages/EqPage/ui/EqBody/LockedSwitch";
+import {SwitchGroupByPlanDate} from "@pages/EqPage/ui/EqBody/SwitchGroupByPlanDate";
 
 
 interface EqControlPanelProps {
@@ -47,6 +48,7 @@ export const EqControlPanel = memo((props: EqControlPanelProps) => {
                         <LockedSwitch/>
                     </>
                 )}
+                <SwitchGroupByPlanDate listType={listType}/>
             </div>
         </div>
     );

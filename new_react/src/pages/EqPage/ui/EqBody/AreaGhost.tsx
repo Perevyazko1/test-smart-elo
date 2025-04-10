@@ -4,19 +4,18 @@ import {DayInfo} from "@pages/EqPage/model/lib/getNextDays";
 import {useEditAssignmentInfo} from "@widgets/AssignmentInfo/model/api/api";
 import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
 import {EqOrderProduct} from "@widgets/EqCardList";
-import {useCurrentUser} from "@shared/hooks";
+import {useAppQuery, useCurrentUser} from "@shared/hooks";
 
 interface AreaGhostProps {
-    cardHeight: number,
-    offsetTop: string,
     dayInfo: DayInfo,
 }
 
 export const AreaGhost = (props: AreaGhostProps) => {
-    const {offsetTop, dayInfo, cardHeight} = props;
+    const {dayInfo} = props;
 
     const [editAssignments] = useEditAssignmentInfo();
     const {currentUser} = useCurrentUser();
+    const {queryParameters, setQueryParam} = useAppQuery();
 
     const [{isOver}, drop] = useDrop({
         accept: 'eq_card',
@@ -28,6 +27,8 @@ export const AreaGhost = (props: AreaGhostProps) => {
                     department__id: currentUser.current_department.id,
                     series_id: item.card.series_id,
                     mode: 'selected'
+                }).then(() => {
+                    setQueryParam("sortUpdated", queryParameters.sortUpdated ? "" : "updated");
                 })
             }
         },
@@ -38,15 +39,13 @@ export const AreaGhost = (props: AreaGhostProps) => {
 
     return (
         <div
-            className={'border border-2 border-danger p-2 text-white'}
+            className={'border border-2 border-danger p-2 text-white flex-fill'}
             ref={drop}
             style={{
-                position: 'absolute',
                 fontSize: 32,
                 zIndex: 1002,
-                top: offsetTop,
                 left: "2px",
-                height: cardHeight,
+                // height: cardHeight,
                 width: 'calc(50% - 4px)',
                 backgroundColor: isOver ? "green" : "blue",
             }}

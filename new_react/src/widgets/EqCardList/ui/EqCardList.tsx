@@ -58,8 +58,16 @@ export const EqCardList = memo((props: EqCardListProps) => {
     const cardHeight = useCardHeight();
     const [sortedList, setSortedList] = useState<EqOrderProduct[]>([]);
 
+    const getGroupMode = useCallback(() => {
+        return !!localStorage.getItem(`${listType}`)
+    }, [listType]);
+
+    const listUpdated = useMemo(() => {
+        return queryParameters.sortUpdated;
+    }, [queryParameters.sortUpdated])
+
     useEffect(() => {
-        if (listType === 'in_work' && data?.results) {
+        if (getGroupMode() && data?.results) {
             setSortedList(groupByPlanDate(data.results))
         } else {
             setSortedList(data?.results.sort((a, b) => {
@@ -114,7 +122,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 return a.id - b.id;
             }) || [])
         }
-    }, [currentUser.current_department?.piecework_wages, data, listType]);
+    }, [currentUser.current_department?.piecework_wages, data, getGroupMode, listType, listUpdated]);
 
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла

@@ -31,9 +31,6 @@ export const PlanGhost = (props: PlanGhostProps) => {
         ...days,
     ]
 
-    const CARD_HEIGHT = 80;
-
-
     return (
         <div style={{
             width: '100%',
@@ -41,8 +38,8 @@ export const PlanGhost = (props: PlanGhostProps) => {
             zIndex: 1000,
             position: 'relative',
             right: 0,
-            display: itemType === 'eq_card' ? 'block' : 'none',
-        }}>
+            display: itemType === 'eq_card' ? 'flex' : 'none',
+        }} className={'flex-wrap gap-1 flex-column'}>
             {item && itemType === 'eq_card' && (
                 <div
                     className={'bg-info p-3'}
@@ -59,26 +56,12 @@ export const PlanGhost = (props: PlanGhostProps) => {
             )}
 
 
-            {rows.map((day, index) => (
+            {rows.map((day) => (
                 <AreaGhost
                     key={day.day}
-                    cardHeight={CARD_HEIGHT}
-                    offsetTop={`${index * (CARD_HEIGHT + 3)}px`}
                     dayInfo={day}
                 />
             ))}
-
-            <div
-                className={'bg-danger'}
-                style={{
-                    position: 'absolute',
-                    bottom: '40px',
-                    height: '2px',
-                    width: '50%',
-                    zIndex: 1002,
-                }}
-            >
-            </div>
 
             <div
                 className={'h-100 bg-danger'}
@@ -97,6 +80,7 @@ export const PlanGhost = (props: PlanGhostProps) => {
                 width: '100%',
                 height: '100%',
                 zIndex: 1001,
+                position: 'absolute',
             }}/>
 
         </div>

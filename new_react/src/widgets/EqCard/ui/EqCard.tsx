@@ -17,7 +17,7 @@ import {CardNameNumbers} from "./ui/CardNameNumbers";
 import {CardOrderProject} from "./ui/CardOrderProject";
 import {CardDepartmentInfo} from "./ui/CardDepartmentInfo";
 
-// import {CardPlanDate} from "@widgets/EqCard/ui/ui/CardPlanDate";
+import {CardPlanDate} from "@widgets/EqCard/ui/ui/CardPlanDate";
 
 
 interface EqInWorkCardProps extends HTMLAttributes<HTMLDivElement> {
@@ -115,7 +115,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
                 return card.assignments.some(assignment => assignment.appointed_by_boss);
             }
             return card.assignments.some(assignment => assignment.appointed_by_boss) ||
-            targetNumbers.some(assignment => !assignment.assembled);
+                targetNumbers.some(assignment => !assignment.assembled);
         }
         return false;
     }, [bossPerm, card.assignments, listType, targetNumbers])
@@ -190,13 +190,23 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         }
     }, [card.assignments, card.order.planned_date, expanded, listType]);
 
+    const showPlanDate = useMemo(() => {
+        return !!localStorage.getItem(listType);
+        //eslint-disable-next-line
+    }, [queryParameters.sortUpdated, listType])
+
     return (
         <EqCardBody card={card} {...otherProps}>
+            {showPlanDate && (
+                <CardPlanDate card={card} assignmentsLists={card.assignments}/>
+            )}
+
             {!hideFirstBtn &&
                 <EqCardBtn
                     card={card}
+                    planDate={getPlaneDate(true)}
                     assignmentsLists={assignmentsLists}
-                    plane_date={getPlaneDate(true)}
+                    showDrug={showPlanDate}
                     expanded={expanded}
                     style={{minWidth: '39px', maxWidth: '39px'}}
                     cardType={listType}
@@ -233,9 +243,10 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             {!hideSecondBtn &&
                 <EqCardBtn
                     card={card}
+                    planDate={getPlaneDate(false)}
                     assignmentsLists={assignmentsLists}
                     style={{minWidth: '39px', maxWidth: '39px'}}
-                    plane_date={null}
+                    showDrug={false}
                     cardType={listType}
                     expanded={expanded}
                     first={false}
