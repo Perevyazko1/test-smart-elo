@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 
 import cls from './ProductPage.module.scss';
 
@@ -17,14 +17,13 @@ const initialReducers: ReducersList = {
 }
 
 export const ProductPage = () => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
 
     return (
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
             <QueryContext>
                 <ModalProvider>
                     <div className={cls.pageContainer}>
-                        <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
+                        <AppNavbar>
                             <ProductNavContent/>
                         </AppNavbar>
 

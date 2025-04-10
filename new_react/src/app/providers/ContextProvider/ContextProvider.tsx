@@ -1,13 +1,11 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
 import {anonEmployee, Employee, useEmployeeList} from "@entities/Employee";
-import {useMediaQuery} from "react-responsive";
 import {APP_COMPACT_MODE} from "@shared/consts";
 
 interface ContextProviderProps {
     children: ReactNode;
 }
 
-export const IsDesktopContext = createContext<boolean>(false);
 
 interface CompactModeContextType {
     isCompactMode: boolean;
@@ -35,8 +33,6 @@ export const AudioContext = createContext<HTMLAudioElement | null>(null);
 
 
 export const ContextProvider = (props: ContextProviderProps) => {
-    const isDesktop = useMediaQuery({minWidth: 1279});
-
     const [clickSound, setClickSound] = useState<HTMLAudioElement | null>(null);
     const [currentUser, setCurrentUser] = useState<Employee>(anonEmployee);
 
@@ -51,16 +47,14 @@ export const ContextProvider = (props: ContextProviderProps) => {
     }, []);
 
     return (
-        <IsDesktopContext.Provider value={isDesktop}>
-            <CurrentUserContext.Provider value={{currentUser, setCurrentUser: setCurrentUser}}>
-                <UserListContext.Provider value={{isLoading, usersList}}>
-                    <AppInCompactMode.Provider value={{isCompactMode, setCompactMode: setIsCompactMode}}>
-                            <AudioContext.Provider value={clickSound}>
-                                {props.children}
-                            </AudioContext.Provider>
-                    </AppInCompactMode.Provider>
-                </UserListContext.Provider>
-            </CurrentUserContext.Provider>
-        </IsDesktopContext.Provider>
+        <CurrentUserContext.Provider value={{currentUser, setCurrentUser: setCurrentUser}}>
+            <UserListContext.Provider value={{isLoading, usersList}}>
+                <AppInCompactMode.Provider value={{isCompactMode, setCompactMode: setIsCompactMode}}>
+                    <AudioContext.Provider value={clickSound}>
+                        {props.children}
+                    </AudioContext.Provider>
+                </AppInCompactMode.Provider>
+            </UserListContext.Provider>
+        </CurrentUserContext.Provider>
     );
 };

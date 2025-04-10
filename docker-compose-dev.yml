@@ -1,10 +1,9 @@
-version: "3.8"
-
 services:
   server:
     build:
       context: ./django_app/
       dockerfile: DockerfileDev
+    restart: always
     volumes:
       - ./django_app:/app
     depends_on:
@@ -26,12 +25,6 @@ services:
       - "5432:5432"
     env_file:
       - .env
-
-  db-admin:
-    image: adminer:4.8.1
-    ports:
-      - "8080:8080"
-    restart: always
 
   pgadmin:
     build:

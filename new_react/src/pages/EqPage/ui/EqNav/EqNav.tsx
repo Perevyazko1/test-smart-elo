@@ -8,18 +8,8 @@ import {EqDepWidget} from "./EqDepWidget";
 import {EqFilters} from "./EqFilters";
 import React, {useEffect, useState} from "react";
 
-interface EqNavProps {
-    showCanvas: boolean;
-    closeClb: () => void;
-}
 
-
-export const EqNav = (props: EqNavProps) => {
-    const {
-        showCanvas,
-        closeClb,
-    } = props;
-
+export const EqNav = () => {
     const {queryParameters, setQueryParam} = useQueryParams();
     const {currentUser} = useCurrentUser();
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
@@ -52,7 +42,7 @@ export const EqNav = (props: EqNavProps) => {
     };
 
     return (
-        <AppNavbar showNav={showCanvas} closeClb={closeClb}>
+        <AppNavbar>
             <AppTooltip title={'Выбор отдела, наряды которого будут отображены в блоках'}>
                 <EqDepWidget/>
             </AppTooltip>

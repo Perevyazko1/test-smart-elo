@@ -1,6 +1,5 @@
-import React, {useContext, useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 
-import {IsDesktopContext} from "@app";
 import {useAppDispatch, useAppQuery, useAppSelector, useCurrentUser} from "@shared/hooks";
 
 import {useResizableBlocks} from '../../model/lib/useResizableBlocks';
@@ -18,12 +17,8 @@ import {AwaitBlock} from "@pages/EqPage/ui/EqBody/AwaitBlock";
 
 // import {PlanGhost} from "@pages/EqPage/ui/EqBody/PlanGhost";
 
-interface EqBodyProps {
-    showClb: () => void;
-}
 
-export const EqBody = (props: EqBodyProps) => {
-    const {showClb} = props;
+export const EqBody = () => {
     const dispatch = useAppDispatch();
     const {queryParameters} = useAppQuery();
     const {currentUser} = useCurrentUser();
@@ -34,7 +29,6 @@ export const EqBody = (props: EqBodyProps) => {
         setExpanded(queryParameters.view_mode === "distribute");
     }, [queryParameters.view_mode]);
 
-    const isDesktop = useContext(IsDesktopContext);
     const filtersReady = useAppSelector(eqFiltersReady);
 
     const {windowWidth, windowHeight} = useWindowDimensions();
@@ -49,7 +43,7 @@ export const EqBody = (props: EqBodyProps) => {
         drag
     } = useResizableBlocks(windowWidth, windowHeight, {
         x: queryParameters.expanded ? -27 : 27,
-        y: isDesktop ? -62 : -20,
+        y: -62,
     });
 
     const [blockSizes, setBlockSizes] = useState({
@@ -226,7 +220,6 @@ export const EqBody = (props: EqBodyProps) => {
                 rightBlockWidth={blockSizes.rightBlockWidth}
                 leftBlockWidth={blockSizes.leftBlockWidth}
                 expanded={expanded}
-                showClb={showClb}
                 drag={drag}
                 resetSize={resetSize}
             />

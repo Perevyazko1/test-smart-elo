@@ -14,6 +14,7 @@ urlpatterns = [
 
     path('info/', include('staff.pages.staff_page.urls')),
     path('tasks/', include('staff.pages.tasks_widget.urls')),
+    path('kpi/', include('staff.pages.kpi_page.urls')),
 
     path('pin_code_authentication/', pin_code_authentication),
     path('base_authentication/', base_authentication),

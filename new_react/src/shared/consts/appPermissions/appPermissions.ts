@@ -21,6 +21,7 @@ export enum APP_PERM {
     ASSIGNMENT_UNCONFIRMED = 'Снятие визы',
 
     PRODUCT_PAGE = 'Страница товаров',
+    KPI_PAGE = 'Страница KPI',
 
     SPECIFICATIONS_PAGE = 'Страница спецификаций',
 

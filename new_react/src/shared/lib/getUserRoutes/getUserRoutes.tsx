@@ -21,8 +21,8 @@ export const getUserRouteConfig = (user: Employee | undefined, navOnly: boolean 
 }
 
 
-export const getUserRoutes = (user: Employee | undefined, isDesktop: boolean): RouteObject[] => {
-    const permittedRouteConfig = getUserRouteConfig(user, false, isDesktop);
+export const getUserRoutes = (user: Employee | undefined): RouteObject[] => {
+    const permittedRouteConfig = getUserRouteConfig(user, false);
 
     const appRoutes = Object.values(permittedRouteConfig);
 

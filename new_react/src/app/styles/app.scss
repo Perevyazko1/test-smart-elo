@@ -58,11 +58,13 @@ $app-body-height: calc(100vh - $app-navbar-height);
   background-color: #ffffff;
   border: 1.5px solid #000000;
   color: #1e1e1e;
+  transition: all 0.1s ease;
 
   &:active {
     background-color: #c0c0c0;
     border: 1.5px solid #1e1e1e;
     color: #111;
+    transform: translate(.5px, .5px);
   }
 
 
@@ -70,6 +72,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
     opacity: 0.7;
     pointer-events: none;
     border: 1.5px solid #919191;
+    transform: translate(0, 0);
   }
 
   &.blackBtn {
@@ -82,6 +85,7 @@ $app-body-height: calc(100vh - $app-navbar-height);
       border-color: #000000;
       color: #e7e7e7;
     }
+
     &.diagonalBg {
       background: linear-gradient(135deg, #347051 50%, #000000 50%);
       color: #ffffff;
@@ -101,9 +105,12 @@ $app-body-height: calc(100vh - $app-navbar-height);
   }
 
   &.greenBtn {
-    background-color: #347051;
-    border: 1.5px solid #419b6b;
-    color: #dbffe2;
+    //background-color: #347051;
+    background-color: #a8dc84;
+    //border: 1.5px solid #419b6b;
+    border: 1.5px solid #151715;
+    //color: #dbffe2;
+    color: #151715;
 
     &.diagonalBg {
       background: linear-gradient(135deg, #347051 50%, white 50%);
@@ -111,21 +118,22 @@ $app-body-height: calc(100vh - $app-navbar-height);
     }
 
     &:active {
-      background-color: #1f553a;
-      border-color: #276e49;
-      color: #1b231c;
+      //background-color: #1f553a;
+      background-color: #1d5136;
+      border-color: #1d5136;
+      color: #baf8c2;
     }
   }
 
   &.yellowBtn {
-    background-color: #ffe480;
-    border: 1.5px solid #ffd83f;
-    color: #282214;
+    background-color: #fbe79a;
+    border: 1.5px solid #373723;
+    color: #1e180b;
 
     &:active {
-      background-color: #e6b800;
-      border-color: #ffb300;
-      color: #343027;
+      background-color: #534005;
+      border-color: #715d1f;
+      color: #f3e3b6;
     }
   }
 
@@ -147,14 +155,14 @@ $app-body-height: calc(100vh - $app-navbar-height);
   }
 
   &.redBtn {
-    background-color: #e15555;
-    border: 1.5px solid #d9534f;
+    background-color: #e66d6d;
+    border: 1.5px solid #883432;
     color: #211515;
 
     &:active {
-      background-color: #b52b27;
-      border-color: #891f1c;
-      color: #312424;
+      background-color: #883432;
+      border-color: #321f1f;
+      color: #ffd8d8;
     }
   }
 }
@@ -344,4 +352,8 @@ input[type="time"]:disabled {
   95% {
     transform: translateX(10px);
   }
+}
+
+.outlineBox {
+  outline: 1px solid #000;
 }

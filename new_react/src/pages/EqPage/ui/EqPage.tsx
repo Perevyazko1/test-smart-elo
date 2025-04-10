@@ -1,5 +1,3 @@
-import {useCallback, useState} from "react";
-
 import {ModalProvider} from "@app";
 
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
@@ -15,12 +13,6 @@ const initialReducers: ReducersList = {
 }
 
 export const EqPage = () => {
-    // Устанавливаем состояние отображения мобильной панели
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
-    // Устанавливаем коллбек для закрытия шторки меню для мобилок
-    const closeClb = useCallback(() => {
-        setShowCanvas(false)
-    }, []);
 
     return (
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
@@ -30,10 +22,10 @@ export const EqPage = () => {
             <QueryContext>
                 <ModalProvider>
                         {/*Компонент навбара*/}
-                        <EqNav closeClb={closeClb} showCanvas={showCanvas}/>
+                        <EqNav/>
 
                         {/*Контент страницы*/}
-                        <EqBody showClb={() => setShowCanvas(true)}/>
+                        <EqBody/>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

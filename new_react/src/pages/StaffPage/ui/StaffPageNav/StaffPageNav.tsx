@@ -1,5 +1,3 @@
-import {useState} from "react";
-
 import {AppNavbar} from "@widgets/AppNavbar";
 
 import {StaffSelectDepartment} from "./ui/StaffSelectDepartment";
@@ -12,10 +10,8 @@ import {StaffAddNewUser} from "./ui/StaffAddNewUser";
 
 
 export const StaffPageNav = () => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
-
     return (
-        <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
+        <AppNavbar>
             <StaffSelectDepartment/>
             <StaffWagesTypeFilter/>
             <StaffIsActiveFilter/>

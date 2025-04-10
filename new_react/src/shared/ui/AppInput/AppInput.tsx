@@ -22,7 +22,7 @@ export const AppInput = (props: InputProps) => {
     return (
         <input
             id={inputId}
-            className={"form-control fw-bold form-control-sm my-auto " + className}
+            className={"form-control form-control-sm my-auto rounded-0 " + className}
             {...otherProps}
         />
     );

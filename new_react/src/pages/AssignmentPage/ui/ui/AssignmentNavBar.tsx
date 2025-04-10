@@ -7,14 +7,8 @@ import {useCurrentUser, useDebounce, useQueryParams} from "@shared/hooks";
 import {Department} from "@entities/Department";
 import {AssignmentStatus, assignmentStatusOptions, getAssignmentStatusName} from "@entities/Assignment";
 
-interface NavBarProps {
-    showCanvas: boolean,
-    setShowCanvas: (value: boolean) => void;
-}
 
-export const AssignmentNavBar = (props: NavBarProps) => {
-    const {showCanvas, setShowCanvas} = props;
-
+export const AssignmentNavBar = () => {
     const {queryParameters, setQueryParam} = useQueryParams();
     const {currentUser} = useCurrentUser();
 
@@ -56,7 +50,7 @@ export const AssignmentNavBar = (props: NavBarProps) => {
     }
 
     return (
-        <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
+        <AppNavbar>
             <AppSelect
                 variant={'select'}
                 noInput

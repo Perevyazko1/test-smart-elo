@@ -1,16 +1,8 @@
-import React, {useContext, useEffect, useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
-import {IsDesktopContext} from "@app";
-import {
-    useAppDispatch,
-    useAppModal,
-    useAppQuery,
-    useAppSelector,
-    useCurrentUser,
-    useDoubleTap,
-} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useCurrentUser, useDoubleTap,} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 import {eqFiltersReady, getWeekData} from "../../model/selectors/filterSelectors";
@@ -23,7 +15,6 @@ interface EqWeeksProps {
     inWorkHeight: number;
     rightBlockWidth: number;
     leftBlockWidth: number;
-    showClb: () => void;
     drag: ConnectDragSource;
     resetSize: () => void;
     expanded: boolean;
@@ -35,7 +26,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
         inWorkHeight,
         leftBlockWidth,
         rightBlockWidth,
-        showClb,
         drag,
         resetSize,
         expanded,
@@ -50,7 +40,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const {queryParameters, setQueryParam} = useAppQuery();
     const filtersReady = useAppSelector(eqFiltersReady);
 
-    const isDesktop = useContext(IsDesktopContext);
     const handleDoubleTap = useDoubleTap(resetSize);
     const weekData = useAppSelector(getWeekData);
 
@@ -151,18 +140,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
                     position: 'absolute',
                 }}
             >
-                {!isDesktop &&
-                    <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
-                         style={{
-                             width: "40px",
-                             height: "90%",
-                             cursor: 'pointer',
-                         }}
-                         onClick={showClb}
-                    >
-                        <i className="fas fa-filter text-light fs-6"/>
-                    </div>
-                }
 
                 {blockWidthPx > 300 &&
                     <div className={'d-flex justify-content-between flex-fill align-items-center gap-1'}>

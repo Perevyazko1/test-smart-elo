@@ -8,7 +8,7 @@ import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
 import {useAppModal, useCurrentUser} from "@shared/hooks";
 import {UserActions} from "@widgets/UserActions";
 
-export const AppNavigation = (props: { isDesktop: boolean }) => {
+export const AppNavigation = () => {
     const {currentUser, setCurrentUser} = useCurrentUser();
     const {handleOpen} = useAppModal();
 
@@ -23,8 +23,8 @@ export const AppNavigation = (props: { isDesktop: boolean }) => {
     const location = useLocation();
 
     const getRoutesConfig = useCallback(() => {
-        return getUserRouteConfig(currentUser, true, props.isDesktop);
-    }, [currentUser, props.isDesktop]);
+        return getUserRouteConfig(currentUser, true);
+    }, [currentUser]);
 
     const renderOptions = getRoutesConfig().map((routeConfig) => {
         return (

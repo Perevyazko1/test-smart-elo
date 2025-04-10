@@ -8,16 +8,10 @@ import {ExtendedFilters} from "@pages/TaskPage/ui/TaskPageNav/ui/ExtendedFilters
 import {AppTooltip} from "@shared/ui";
 
 
-interface TaskPageNavProps {
-    showNav?: boolean;
-    closeClb?: () => void;
-}
-
-
-export const TaskPageNav = (props: TaskPageNavProps) => {
+export const TaskPageNav = () => {
 
     return (
-        <AppNavbar showNav={props.showNav} closeClb={props.closeClb}>
+        <AppNavbar>
             <AppTooltip title="Переключение режимов сотрировки">
                 <SortModeNav/>
             </AppTooltip>

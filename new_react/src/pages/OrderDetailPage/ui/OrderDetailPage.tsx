@@ -3,19 +3,18 @@ import {useParams} from "react-router-dom";
 import cls from "./OrderDetailPage.module.scss";
 
 import {ModalProvider} from "@app";
-import React, {useState} from "react";
+import React from "react";
 import {AppNavbar} from "@widgets/AppNavbar";
 import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
 import {Container} from "react-bootstrap";
 
 export const OrderDetailPage = () => {
     const {order_id} = useParams();
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
 
     return (
         <ModalProvider>
             <div className={cls.pageContainer}>
-                <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}/>
+                <AppNavbar/>
 
                 <Container>
                     <OrderDetailWidget order_id={Number(order_id)}/>

@@ -1,6 +1,4 @@
-import React, {useContext, useEffect} from "react";
-
-import {IsDesktopContext} from "@app";
+import React, {useEffect} from "react";
 import {BlockName} from "@widgets/EqCardList";
 import {useResizableBlocks, useWindowDimensions} from "@pages/EqPage";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
@@ -17,10 +15,9 @@ import {ReadySection} from "../Sections/ReadySection";
 import {taskPageActions} from "@pages/TaskPage";
 
 
-export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
+export const TaskPageBody = () => {
     const {queryParameters} = useQueryParams();
     const noRelevantId = useAppSelector(getNoRelevantId);
-    const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
 
     const {windowWidth, windowHeight} = useWindowDimensions();
@@ -36,7 +33,7 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
         // Устанавливаем смещение относительно кнопки которая будет drag элементом (подобрано в ручную)
         x: 27,
         // Для мобилок смещение устанавливается с учетом того, что не будет навбара сверху
-        y: isDesktop ? -62 : -20,
+        y: -62,
     });
 
     useEffect(() => {
@@ -89,7 +86,6 @@ export const TaskPageBody = (props: { setShowNavbar: () => void }) => {
 
                     <div className={'d-flex justify-content-end'} style={{width: `${leftBlockWidth}px`}}>
                         <Weeks
-                            setShowNavbar={props.setShowNavbar}
                             blockWidthPx={leftBlockWidth}
                             drag={drag}
                             isDragging={isDragging}

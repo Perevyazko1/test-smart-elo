@@ -13,6 +13,7 @@ import {OrderDetailPage} from "@pages/OrderDetailPage";
 import {TarifficationPage} from "@pages/TarifficationPage";
 import {TaskPage} from "@pages/TaskPage";
 import {StaffPage} from "@pages/StaffPage";
+import {KpiPage} from "@pages/KpiPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -26,6 +27,7 @@ enum AppRoutes {
     LOGIN = 'login',
     EQ = 'eq',
     TEST = 'test',
+    KPI = 'kpi',
     ERROR = 'error',
     ASSIGNMENT = 'assignment',
     PRODUCT = 'product',
@@ -114,6 +116,13 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         mobile: false,
         navigate: true,
         permissions: [APP_PERM.ADMIN]
+    },
+    [AppRoutes.KPI]: {
+        route: {path: '/kpi', element: <KpiPage/>, errorElement: <ErrorPage/>},
+        name: 'Страница KPI',
+        mobile: false,
+        navigate: true,
+        permissions: [APP_PERM.KPI_PAGE]
     },
     [AppRoutes.ERROR]: {
         route: {path: '/error', element: <ErrorPage/>},

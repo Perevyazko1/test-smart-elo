@@ -1,11 +1,10 @@
-import React, {useContext, useEffect} from "react";
+import React, {useEffect} from "react";
 
 import {ConnectDragSource} from "react-dnd";
 import {Button} from "react-bootstrap";
 import {Fab} from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 
-import {IsDesktopContext} from "@app";
 import {TaskForm} from "@widgets/TaskForm";
 import {getHumansDatetime} from "@shared/lib";
 import {useAppDispatch, useAppModal, useAppQuery, useAppSelector, useDoubleTap} from "@shared/hooks";
@@ -19,15 +18,13 @@ interface WeeksProps {
     drag: ConnectDragSource;
     isDragging: boolean;
     resetSize: () => void;
-    setShowNavbar: () => void;
 }
 
 
 export const Weeks = (props: WeeksProps) => {
-    const {drag, isDragging, resetSize, setShowNavbar, blockWidthPx} = props;
+    const {drag, isDragging, resetSize, blockWidthPx} = props;
     const {handleOpen, closeNoConfirm} = useAppModal();
     const handleDoubleTap = useDoubleTap(resetSize);
-    const isDesktop = useContext(IsDesktopContext);
     const dispatch = useAppDispatch();
 
     const readyData = useAppSelector(getReadyData);
@@ -93,19 +90,6 @@ export const Weeks = (props: WeeksProps) => {
         >
 
             <div className={'d-flex align-items-center h-100 gap-1'}>
-                {!isDesktop &&
-                    <div className={'bg-dark rounded d-flex align-items-center justify-content-center'}
-                         style={{
-                             width: "40px",
-                             height: "90%",
-                             cursor: 'pointer',
-                         }}
-                         onClick={setShowNavbar}
-                    >
-                        <i className="fas fa-filter text-light fs-6"/>
-                    </div>
-                }
-
                 <Fab size="small" color="inherit" aria-label="add" onClick={addAction}>
                     <AddIcon/>
                 </Fab>

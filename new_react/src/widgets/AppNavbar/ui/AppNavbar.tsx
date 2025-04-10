@@ -1,12 +1,10 @@
-import {memo, ReactNode, useContext, useEffect, useMemo} from "react";
+import {memo, ReactNode, useEffect, useMemo} from "react";
 import {Button} from "react-bootstrap";
 import {Link, useLocation, useNavigate} from "react-router-dom";
 
-import {Box, Drawer} from "@mui/material";
 import KeyboardArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardArrowLeftOutlined';
 import CachedOutlinedIcon from '@mui/icons-material/CachedOutlined';
 
-import {IsDesktopContext} from "@app";
 import {AppNavigation} from "@widgets/AppNavigation";
 import {NotificationWidget} from "@widgets/NotificationWidget";
 
@@ -22,8 +20,6 @@ import {fetchHasNotifications} from "../model/api/fetchHasNotifications";
 
 
 interface AppNavbarProps {
-    showNav?: boolean;
-    closeClb?: () => void;
     children?: ReactNode;
 }
 
@@ -33,15 +29,13 @@ const initialReducers: ReducersList = {
 }
 
 export const AppNavbar = memo((props: AppNavbarProps) => {
-    const {showNav, closeClb, children} = props;
+    const {children} = props;
     const isLoading = useAppSelector(getNavIsLoading);
     const hasUpdated = useAppSelector(getNavHasUpdated);
     const navHasNotifications = useAppSelector(getNavHasNotifications);
     const dispatch = useAppDispatch();
 
     const location = useLocation();
-
-    const isDesktop = useContext(IsDesktopContext);
 
     const {handleOpen, handleClose} = useAppModal();
     const {currentUser} = useCurrentUser();
@@ -53,7 +47,6 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
             dispatch(fetchHasNotifications({}))
         }
     }, [isBoss, currentUser.current_department, hasUpdated, dispatch])
-
 
     let navigate = useNavigate();
 
@@ -69,154 +62,109 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
         return window.history.length > 1;
     }, [])
 
-    if (isDesktop) {
-        return (
-            <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-                <div
-                    className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}
-                >
-                    <div className={'d-flex align-items-stretch'}
-                         style={{minWidth: '1150px', maxWidth: '1600px'}}
-                    >
-                        <div className={'d-flex justify-content-between align-items-stretch gap-3'}
-                             style={{minWidth: '1220px', maxWidth: '100%'}}
-                        >
-                            <div className={'d-flex align-self-center flex-nowrap gap-2'} style={{width: '185px'}}>
-                                <AppTooltip title="Назад">
-                                    <button type={'button'}
-                                            className={'appBtn blackBtn rounded my-1'}
-                                            onClick={backHandler}
-                                            disabled={!backBtnActive}
-                                            style={{
-                                                width: '40px',
-                                            }}
-                                    >
-                                        <KeyboardArrowLeftOutlinedIcon
-                                            className={`${backBtnActive && 'text-white'}`}
-                                        />
-                                    </button>
-                                </AppTooltip>
-
-                                <AppTooltip title="Обновить страницу">
-                                    <button
-                                        type={'button'}
-                                        className={'appBtn blackBtn rounded my-1'}
-                                        onClick={() => window.location.reload()}
-                                        style={{
-                                            width: '35px',
-                                        }}
-                                    >
-                                        <CachedOutlinedIcon fontSize={'small'}/>
-                                    </button>
-                                </AppTooltip>
-
-                                <AppTooltip title={location.pathname === '/task' ? "Перейти в ЭЛО" : "Перейти в Задачи"}>
-                                    <div className={'align-self-center ms-1'}>
-                                        <Link to={location.pathname !== '/task'
-                                            ? '/task'
-                                            : '/elo'
-                                        }>
-                                            <img
-                                                src={Logo}
-                                                alt={'SZMK logo'}
-                                                style={{
-                                                    maxHeight: '38px',
-                                                }}
-                                            />
-                                        </Link>
-                                    </div>
-                                </AppTooltip>
-                            </div>
-
-                            <div
-                                className={'d-flex gap-2 flex-fill justify-content-start align-items-center'}
-                                style={{
-                                    maxWidth: 'calc(100wv - 400px)',
-                                    minHeight: '45px'
-                                }}
-                            >
-                                {children}
-                            </div>
-
-                            <div className={'d-flex align-items-center gap-2'}>
-                                {isBoss &&
-                                    <AppTooltip title="Просмотреть важные действия">
-                                        <Button variant={'black'}
-                                                onClick={notificationHandler}
-                                        >
-                                            {isLoading ?
-                                                <i className="far fa-bell text-muted fs-7"/>
-                                                :
-                                                <>
-                                                    {navHasNotifications ?
-
-                                                        <IndicatorWrapper
-                                                            indicator={"comment"}
-                                                            color={" bg-danger"}
-                                                        >
-                                                            <i className="far fa-bell fs-7"/>
-                                                        </IndicatorWrapper>
-                                                        :
-                                                        <i className="far fa-bell fs-7"/>
-                                                    }
-                                                </>
-                                            }
-                                        </Button>
-                                    </AppTooltip>
-                                }
-
-                                <AppTooltip title="Панель навигации">
-                                    <AppNavigation isDesktop={isDesktop}/>
-                                </AppTooltip>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </DynamicComponent>
-        )
-    }
-
     return (
         <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
-            <Drawer
-                open={showNav}
-                onClose={closeClb}
-                ModalProps={{
-                    keepMounted: true,
-                }}
-                sx={{
-                    '& .MuiDrawer-paper': {
-                        backgroundColor: 'black',
-                        color: 'white',
-                    },
-                }}
+            <div
+                className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}
             >
-                <Box data-bs-theme={'dark'}>
-                    <div className={'d-flex flex-column gap-3 p-2'}>
-                        <div className={'px-3 pt-2'}>
-                            <Link to={location.pathname !== '/task'
-                                ? '/task'
-                                : '/'
-                            }>
-                                <img
-                                    src={Logo}
-                                    alt={'SZMK logo'}
+                <div className={'d-flex align-items-stretch'}
+                     style={{minWidth: '1150px', maxWidth: '1600px'}}
+                >
+                    <div className={'d-flex justify-content-between align-items-stretch gap-3'}
+                         style={{minWidth: '1220px', maxWidth: '100%'}}
+                    >
+                        <div className={'d-flex align-self-center flex-nowrap gap-2'} style={{width: '185px'}}>
+                            <AppTooltip title="Назад">
+                                <button type={'button'}
+                                        className={'appBtn blackBtn rounded my-1'}
+                                        onClick={backHandler}
+                                        disabled={!backBtnActive}
+                                        style={{
+                                            width: '40px',
+                                        }}
+                                >
+                                    <KeyboardArrowLeftOutlinedIcon
+                                        className={`${backBtnActive && 'text-white'}`}
+                                    />
+                                </button>
+                            </AppTooltip>
+
+                            <AppTooltip title="Обновить страницу">
+                                <button
+                                    type={'button'}
+                                    className={'appBtn blackBtn rounded my-1'}
+                                    onClick={() => window.location.reload()}
                                     style={{
-                                        maxHeight: '38px',
+                                        width: '35px',
                                     }}
-                                />
-                            </Link>
+                                >
+                                    <CachedOutlinedIcon fontSize={'small'}/>
+                                </button>
+                            </AppTooltip>
+
+                            <AppTooltip title={location.pathname === '/task' ? "Перейти в ЭЛО" : "Перейти в Задачи"}>
+                                <div className={'align-self-center ms-1'}>
+                                    <Link to={location.pathname !== '/task'
+                                        ? '/task'
+                                        : '/elo'
+                                    }>
+                                        <img
+                                            src={Logo}
+                                            alt={'SZMK logo'}
+                                            style={{
+                                                maxHeight: '38px',
+                                            }}
+                                        />
+                                    </Link>
+                                </div>
+                            </AppTooltip>
                         </div>
-                        <div className={'d-flex flex-column gap-3 p-2 justify-content-start align-items-start'} style={{
-                            minWidth: '320px',
-                        }}>
+
+                        <div
+                            className={'d-flex gap-2 flex-fill justify-content-start align-items-center'}
+                            style={{
+                                maxWidth: 'calc(100wv - 400px)',
+                                minHeight: '45px'
+                            }}
+                        >
                             {children}
-                            <AppNavigation isDesktop={isDesktop}/>
+                        </div>
+
+                        <div className={'d-flex align-items-center gap-2'}>
+                            {isBoss &&
+                                <AppTooltip title="Просмотреть важные действия">
+                                    <Button variant={'black'}
+                                            onClick={notificationHandler}
+                                    >
+                                        {isLoading ?
+                                            <i className="far fa-bell text-muted fs-7"/>
+                                            :
+                                            <>
+                                                {navHasNotifications ?
+
+                                                    <IndicatorWrapper
+                                                        indicator={"comment"}
+                                                        color={" bg-danger"}
+                                                    >
+                                                        <i className="far fa-bell fs-7"/>
+                                                    </IndicatorWrapper>
+                                                    :
+                                                    <i className="far fa-bell fs-7"/>
+                                                }
+                                            </>
+                                        }
+                                    </Button>
+                                </AppTooltip>
+                            }
+
+                            <AppTooltip title="Панель навигации">
+                                <AppNavigation/>
+                            </AppTooltip>
                         </div>
                     </div>
-                </Box>
-            </Drawer>
+
+                </div>
+            </div>
         </DynamicComponent>
     )
 })

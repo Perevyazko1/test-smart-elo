@@ -1,23 +1,20 @@
-import React, {useCallback, useContext, useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import {Spinner} from "react-bootstrap";
 
-import {IsDesktopContext} from "@app";
 import {AutoLogout} from "@features";
 import {anonEmployee, Employee} from "@entities/Employee";
 import {useCurrentUser} from "@shared/hooks";
 import {getUserRoutes} from "@shared/lib";
 import {USER_LOCALSTORAGE_TOKEN} from "@shared/consts";
-import {setRtkHeaders, useWebSocket} from "@shared/api";
-import {$axiosAPI} from "@shared/api";
+import {$axiosAPI, setRtkHeaders, useWebSocket} from "@shared/api";
 
 export const App = () => {
     const [initialAuth, setInitialAuth] = useState(true);
     const {currentUser, setCurrentUser} = useCurrentUser();
-    const isDesktop = useContext(IsDesktopContext);
     const getRoutes = useCallback(() => {
-        return getUserRoutes(currentUser, isDesktop)
-    }, [currentUser, isDesktop]);
+        return getUserRoutes(currentUser)
+    }, [currentUser]);
     const token = localStorage.getItem(USER_LOCALSTORAGE_TOKEN);
 
     const router = createBrowserRouter(getRoutes());

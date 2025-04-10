@@ -23,7 +23,6 @@ const initialReducers: ReducersList = {
 }
 
 export const AssignmentPage = () => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
     const dispatch = useAppDispatch();
     const {queryParameters, initialLoad} = useQueryParams();
 
@@ -98,10 +97,7 @@ export const AssignmentPage = () => {
             <QueryContext>
                 <ModalProvider>
                     <div className={cls.pageContainer}>
-                        <AssignmentNavBar
-                            showCanvas={showCanvas}
-                            setShowCanvas={setShowCanvas}
-                        />
+                        <AssignmentNavBar/>
 
                         <PaginationContainer
                             hasMore={!!assignmentProps.next}

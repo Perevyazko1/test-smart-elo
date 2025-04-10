@@ -1,5 +1,3 @@
-import {useState} from "react";
-
 import {ModalProvider} from "@app";
 
 import {QueryContext} from "@features";
@@ -9,14 +7,13 @@ import {TaskPageNav} from "./TaskPageNav/TaskPageNav";
 
 
 export const TaskPage = () => {
-    const [showNavbar, setShowNavbar] = useState(false);
 
     return (
         <ModalProvider>
             <QueryContext>
-                <TaskPageNav closeClb={() => setShowNavbar(false)} showNav={showNavbar}/>
+                <TaskPageNav/>
 
-                <TaskPageBody setShowNavbar={() => setShowNavbar(true)}/>
+                <TaskPageBody/>
             </QueryContext>
         </ModalProvider>
     );

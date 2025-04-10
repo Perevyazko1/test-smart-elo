@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 
 import {Link, useParams} from "react-router-dom";
 import {Container, Table} from "react-bootstrap";
@@ -31,8 +31,6 @@ export const ProductDetailsPage = () => {
 
     const {getNameById} = useEmployeeName();
 
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
-
     const product = useAppSelector(getCurrentProduct);
     const isLoading = useAppSelector(getPageIsLoading);
     const hasUpdated = useAppSelector(getPageHasUpdated);
@@ -51,7 +49,7 @@ export const ProductDetailsPage = () => {
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
             <ModalProvider>
                 <div className={cls.pageContainer}>
-                    <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}/>
+                    <AppNavbar/>
 
                     {isLoading
                         ?

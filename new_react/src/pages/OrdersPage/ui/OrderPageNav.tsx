@@ -7,7 +7,6 @@ import {useProjectsList} from "../model/api/rtk";
 import {Button} from "react-bootstrap";
 
 export const OrderPageNav = () => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
     const {data} = useProjectsList({mode: 'active'});
     const {setQueryParam, queryParameters} = useAppQuery();
 
@@ -69,7 +68,7 @@ export const OrderPageNav = () => {
     }, [queryParameters.status])
 
     return (
-        <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
+        <AppNavbar>
             <AppInput placeholder={'Номер заказа'}
                       className={'my-auto ms-3'}
                       onChange={(event) => setOrderNumberInput(event.target.value)}

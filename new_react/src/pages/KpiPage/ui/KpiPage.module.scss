@@ -1,0 +1,18 @@
+.pageContainer {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  background: var(--bs-light);
+}
+
+.pageContent {
+  height: calc(100dvh - 50px);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.calcValue {
+  font-size: 1.5rem;
+}

@@ -1,18 +1,16 @@
 import {AppNavbar} from "@widgets/AppNavbar";
-import {useState} from "react";
 import {QueryContext} from "@features";
 import {ModalProvider} from "@app";
 import {useRouteError} from "react-router-dom";
 
 export const ErrorPage = () => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
     const error = useRouteError();
     console.error(error);
 
     return (
         <QueryContext>
             <ModalProvider>
-                <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}/>
+                <AppNavbar/>
                 <div className={'appBody'}>
                     <p>
                         Возникла ошибка. Обратитесь к администратору.

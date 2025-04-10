@@ -14,7 +14,6 @@ interface Option {
 
 
 export const TestPage = memo(() => {
-    const [showCanvas, setShowCanvas] = useState<boolean>(false);
 
     const options: Option[] = [
         {id: 2, value: 'value'},
@@ -31,7 +30,7 @@ export const TestPage = memo(() => {
     return (
         <QueryContext>
             <ModalProvider>
-                <AppNavbar showNav={showCanvas} closeClb={() => setShowCanvas(false)}>
+                <AppNavbar>
                     <AppSelect
                         label={'Dropdown'}
                         isLoading
