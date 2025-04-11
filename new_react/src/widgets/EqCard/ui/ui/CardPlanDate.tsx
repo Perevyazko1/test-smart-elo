@@ -19,13 +19,13 @@ export const CardPlanDate = (props: CardPlanDateProps) => {
 
     const getCardInfo = useMemo((): CardInfo => {
         const backgroundColors = [
-            '#81C784', // Понедельник — мягкий зеленый
-            '#FFB74D', // Вторник — теплый оранжевый
-            '#FFF176', // Среда — светлая желтая
-            '#4FC3F7', // Четверг — спокойный голубой
-            '#7986CB', // Пятница — нежный индиго
-            '#BA68C8', // Суббота — мягкий фиолетовый
-            '#F06292'  // Воскресенье — деликатный розовый
+            '#b771c3', // Воскресенье
+            '#baf8c2', // Понедельник
+            '#78bddc', // Вторник
+            '#e8ce86', // Среда
+            '#e4905b', // Четверг
+            '#ff909b', // Пятница
+            '#7b88cf', // Суббота
         ];
 
         const planDate = assignmentsLists[0]?.plane_date;
@@ -42,7 +42,7 @@ export const CardPlanDate = (props: CardPlanDateProps) => {
 
         if (now.getDate() > dateTime.getDate()) {
             return {
-                backgroundColor: '#e10000',
+                backgroundColor: '#d82929',
                 text: "ПРОСРОЧЕН",
             };
         }

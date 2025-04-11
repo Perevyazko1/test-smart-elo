@@ -29,6 +29,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     const {setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+    const kpiPlan = usePermission(APP_PERM.KPI_PAGE);
 
     const showPrice = useMemo(() => {
         return currentUser.current_department?.piecework_wages && bossPerm;
@@ -79,9 +80,26 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <hr className={'m-0 p-0'}/>
 
             <div className={cls.numbersBlock}>
+                <div className={'fs-7 fw-bold h-100'}>
+                    <div>
+                        {card.assignments.length > 1 ?
+                            <div>{card.assignments.length}:</div> :
+                            <div>_</div>
+                        }
+                    </div>
+                    <div>{
+                        kpiPlan && <div style={{fontSize: 8}}>{
+                            Math.round(card.price).toLocaleString("ru-RU")
+                        }:</div>
+                    }</div>
+                </div>
+
                 {card.assignments.length > 1 &&
                     <div className={'d-flex h-100 align-items-center fw-bold fs-7'}>
-                        {card.assignments.length}:
+
+                        {kpiPlan && (
+                            <div></div>
+                        )}
                     </div>
                 }
                 <EqNumbers

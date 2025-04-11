@@ -129,7 +129,6 @@ export const EqFilters = () => {
             {bossPerm &&
                 <AppTooltip title="Выбор шаблона режима просмотра нарядов">
                     <AppSelect
-                        noInput
                         variant={'dropdown'}
                         style={{width: 155}}
                         label={'Режим просмотра'}

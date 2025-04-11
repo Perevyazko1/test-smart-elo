@@ -94,6 +94,7 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'series_id',
+            'price',
             'urgency',
             'product',
             'order',

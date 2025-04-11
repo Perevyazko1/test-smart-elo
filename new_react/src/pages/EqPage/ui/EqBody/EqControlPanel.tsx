@@ -9,10 +9,11 @@ import {SwitchGroupByPlanDate} from "@pages/EqPage/ui/EqBody/SwitchGroupByPlanDa
 
 interface EqControlPanelProps {
     listType: ListTypes;
+    totalPlan: number;
 }
 
 export const EqControlPanel = memo((props: EqControlPanelProps) => {
-    const {listType} = props;
+    const {listType, totalPlan} = props;
 
     const {queryParameters} = useQueryParams();
 
@@ -48,7 +49,8 @@ export const EqControlPanel = memo((props: EqControlPanelProps) => {
                         <LockedSwitch/>
                     </>
                 )}
-                <SwitchGroupByPlanDate listType={listType}/>
+                <SwitchGroupByPlanDate listType={listType} totalPlan={totalPlan}/>
+
             </div>
         </div>
     );

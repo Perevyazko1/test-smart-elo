@@ -69,6 +69,7 @@ export interface EqOrderProduct {
     id: number;
     series_id: string;
     urgency: number;
+    price: number;
     product: Product;
     order: EqOrder;
     main_fabric: EqFabric | null;

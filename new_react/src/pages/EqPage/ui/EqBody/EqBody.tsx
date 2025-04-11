@@ -14,9 +14,7 @@ import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
 import {InWorkBlock} from "./InWorkBlock";
 import {ReadyBlock} from "@pages/EqPage/ui/EqBody/ReadyBlock";
 import {AwaitBlock} from "@pages/EqPage/ui/EqBody/AwaitBlock";
-import { PlanGhost } from "./PlanGhost";
-
-// import {PlanGhost} from "@pages/EqPage/ui/EqBody/PlanGhost";
+import {PlanGhost} from "./PlanGhost";
 
 
 export const EqBody = () => {

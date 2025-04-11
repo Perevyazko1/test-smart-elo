@@ -75,7 +75,7 @@ def get_eq_filters(request):
     project_mode = request.query_params.get('project_mode')
 
     project_filters = get_project_filters(project_mode)
-    view_modes = get_view_modes(eq_params['department'])
+    view_modes = get_view_modes(eq_params['department'], request.user)
 
     return JsonResponse({
         "view_modes": view_modes,

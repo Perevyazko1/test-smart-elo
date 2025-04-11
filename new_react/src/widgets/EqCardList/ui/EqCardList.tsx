@@ -68,7 +68,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
 
     useEffect(() => {
         if (getGroupMode() && data?.results) {
-            setSortedList(groupByPlanDate(data.results))
+            setSortedList(groupByPlanDate(data.results, listType, currentUser))
         } else {
             setSortedList(data?.results.sort((a, b) => {
                 const hasAssignmentsA = a.assignments.length !== 0 ? 1 : 0;
@@ -122,7 +122,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 return a.id - b.id;
             }) || [])
         }
-    }, [currentUser.current_department?.piecework_wages, data, getGroupMode, listType, listUpdated]);
+    }, [currentUser, currentUser.current_department?.piecework_wages, data, getGroupMode, listType, listUpdated]);
 
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла
@@ -169,6 +169,18 @@ export const EqCardList = memo((props: EqCardListProps) => {
         )
     }, [expanded, listType, queue, sortedList, targetUserId])
 
+    const planSum = data?.results.reduce(
+        (acc, item) => {
+            const withPlan = item.assignments.reduce((acc, assignment) => {
+                if (assignment.plane_date) {
+                    return acc + 1;
+                }
+                return acc;
+            }, 0)
+            return acc + (item.price * withPlan)
+        }, 0
+    )
+
     return (
         <div
             style={{
@@ -184,6 +196,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
             <div style={{height: totalHeight}}>
                 <EqControlPanel
                     listType={listType}
+                    totalPlan={planSum ? Math.round(planSum) : 0}
                 />
 
                 {virtualItems.map(card => (
