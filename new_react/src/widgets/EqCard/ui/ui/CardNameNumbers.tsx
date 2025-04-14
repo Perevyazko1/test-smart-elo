@@ -1,7 +1,7 @@
 import {Button} from "react-bootstrap";
 
 import {useAppModal, useAppQuery, useCurrentUser, usePermission} from "@shared/hooks";
-import {EqOrderProduct} from "@widgets/EqCardList";
+import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {TarifficationWidget} from "@widgets/TarifficationWidget";
 import {EqAssignment} from "@widgets/EqCardList/model/types";
 
@@ -20,20 +20,27 @@ interface CardNameNumbersProps {
     card: EqOrderProduct;
     assignmentsLists: EqNumberListTipe;
     setAssignmentsLists: (props: EqNumberListTipe) => void;
+    listType: ListTypes;
 }
 
 export const CardNameNumbers = (props: CardNameNumbersProps) => {
-    const {card, targetUserId, assignmentsLists, setAssignmentsLists} = props;
+    const {card, targetUserId, listType, assignmentsLists, setAssignmentsLists} = props;
     const {handleOpen} = useAppModal();
 
-    const {setQueryParam} = useAppQuery();
+    const {queryParameters, setQueryParam} = useAppQuery();
     const {currentUser} = useCurrentUser();
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
     const kpiPlan = usePermission(APP_PERM.KPI_PAGE);
 
-    const showPrice = useMemo(() => {
+    const showAmount = useMemo(() => {
         return currentUser.current_department?.piecework_wages && bossPerm;
-    }, [bossPerm, currentUser.current_department?.piecework_wages])
+    }, [bossPerm, currentUser.current_department?.piecework_wages]);
+
+    const showPrice = useMemo(() => {
+        const localValue = localStorage.getItem(`${listType}ShowSum`)
+        return kpiPlan && !!localValue;
+        //eslint-disable-next-line
+    }, [kpiPlan, listType, queryParameters.sortUpdated]);
 
 
     const setNumber = (assignment: EqAssignment) => {
@@ -57,7 +64,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
         <div className={cls.nameNumberBlock + ' bg-light rounded'}>
             <div className={cls.productName}>
                 {card.card_info.further_packaging && "📦"}
-                {showPrice &&
+                {showAmount &&
                     <Button
                         size={"sm"}
                         className={'p-0 px-1 me-1 fs-7'}
@@ -88,20 +95,12 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                         }
                     </div>
                     <div>{
-                        kpiPlan && <div style={{fontSize: 8}}>{
+                        showPrice && <div style={{fontSize: 8}}>{
                             Math.round(card.price).toLocaleString("ru-RU")
                         }:</div>
                     }</div>
                 </div>
 
-                {card.assignments.length > 1 &&
-                    <div className={'d-flex h-100 align-items-center fw-bold fs-7'}>
-
-                        {kpiPlan && (
-                            <div></div>
-                        )}
-                    </div>
-                }
                 <EqNumbers
                     targetUserId={targetUserId}
                     assignmentsLists={assignmentsLists}

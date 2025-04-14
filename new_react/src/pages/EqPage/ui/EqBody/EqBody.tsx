@@ -9,12 +9,12 @@ import {eqFiltersReady} from "../../model/selectors/filterSelectors";
 import {eqPageActions} from "../../model/slice/eqPageSlice";
 import {DistributeBlock} from "../DistributeBlock/DistributeBlock";
 
-import {EqWeeks} from "./EqWeeks";
+import {EqWeeks} from "./blocks/EqWeeks";
 import {BlockName} from "@widgets/EqCardList/ui/ui/BlockName";
-import {InWorkBlock} from "./InWorkBlock";
-import {ReadyBlock} from "@pages/EqPage/ui/EqBody/ReadyBlock";
-import {AwaitBlock} from "@pages/EqPage/ui/EqBody/AwaitBlock";
-import {PlanGhost} from "./PlanGhost";
+import {InWorkBlock} from "./blocks/InWorkBlock";
+import {ReadyBlock} from "@pages/EqPage/ui/EqBody/blocks/ReadyBlock";
+import {AwaitBlock} from "@pages/EqPage/ui/EqBody/blocks/AwaitBlock";
+import {PlanGhost} from "./widgets/PlanGhost";
 
 
 export const EqBody = () => {
@@ -142,7 +142,7 @@ export const EqBody = () => {
             height: `${windowHeight}px`,
             width: `${windowWidth}px`,
         }}>
-            <PlanGhost leftBlockWidth={leftBlockWidth}/>
+            <PlanGhost/>
 
             <div style={{
                 width: '100%',

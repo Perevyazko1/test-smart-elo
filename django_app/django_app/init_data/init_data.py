@@ -1,9 +1,9 @@
 """Initial methods and scripts."""
-from .upholstery_report import upholstery_report
+from .fix_status import fix_status
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    upholstery_report()
+    fix_status()
     return "Oki"

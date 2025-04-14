@@ -13,7 +13,7 @@ def get_view_modes(department: Department, user: Employee):
         departments=department,
         is_staff=False,
         is_active=True,
-    ).exclude(id=user.id)
+    ).exclude(id=user.id).order_by('last_name')
 
     for user in users:
         result.append(

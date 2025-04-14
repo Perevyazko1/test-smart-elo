@@ -11,7 +11,7 @@ import {AppSkeleton} from "@shared/ui";
 
 import {useFetchListData} from "../model/api";
 import {EqOrderProduct, ListTypes} from "../model/types";
-import {EqControlPanel} from "@pages/EqPage/ui/EqBody/EqControlPanel";
+import {EqControlPanel} from "@pages/EqPage/ui/EqBody/panel/EqControlPanel";
 import {groupByPlanDate} from "@pages/EqPage/model/lib/groupByPlanDate";
 
 interface EqCardListProps {

@@ -228,6 +228,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
             <CardNameNumbers
                 card={card}
+                listType={listType}
                 assignmentsLists={assignmentsLists}
                 setAssignmentsLists={setAssignmentsLists}
                 targetUserId={targetUserId}
