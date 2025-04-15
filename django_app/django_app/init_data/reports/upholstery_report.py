@@ -16,10 +16,6 @@ def upholstery_report():
     obivka: Department = Department.objects.get(
         number=2
     )
-    target_users = Employee.objects.filter(
-        departments=obivka,
-        is_active=True
-    )
 
     sheet.append([
         "Проект",

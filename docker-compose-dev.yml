@@ -3,11 +3,13 @@ services:
     build:
       context: ./django_app/
       dockerfile: DockerfileDev
+    container_name: server
     restart: always
     volumes:
       - ./django_app:/app
     depends_on:
-      - postgres_db
+      - pg
+      - redis
     env_file:
       - .env
     ports:
@@ -15,9 +17,9 @@ services:
     command: >
       sh -c "python3 manage.py runserver 0.0.0.0:8000"
 
-  postgres_db:
+  pg:
     build: services/postgres_db
-    container_name: dev_postgres_db_eq
+    container_name: pg
     restart: always
     volumes:
       - ./services/postgres_db/PGDATA:/var/lib/postgresql/data
@@ -30,10 +32,10 @@ services:
     build:
       context: ./services/pgadmin
       dockerfile: Dockerfile
-    container_name: dev_pgadmin_eq
+    container_name: pgadmin
     restart: always
     depends_on:
-      - postgres_db
+      - pg
     ports:
       - "5050:80"
     env_file:
@@ -42,16 +44,18 @@ services:
       - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
 
   redis:
-    container_name: dev_redis_eq
+    container_name: redis
     build: services/redis
     restart: always
     ports:
       - "6379:6379"
 
   nginx:
-    container_name: nginx_eq
+    container_name: nginx
     build: ./services/nginx
     restart: always
+    depends_on:
+      - server
     volumes:
       - ./django_app/media/:/usr/share/nginx/html/media
       - ./services/nginx/nginx.dev.conf:/etc/nginx/nginx.conf

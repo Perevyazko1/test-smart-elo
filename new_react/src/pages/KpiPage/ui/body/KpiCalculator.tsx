@@ -194,7 +194,8 @@ export const KpiCalculator = (props: KpiCalculatorProps) => {
                     </div>
                 </div>
                 <div>
-                    <div>ФОТ <sup>{fotResultPercent}% {fotDelta.toLocaleString('ru-ru')}т.₽</sup></div>
+                    <div>ФОТ <sup>{fotResultPercent}% {fotDelta.toLocaleString('ru-ru')}т.₽</sup>
+                    </div>
                     <div className={'d-flex align-items-center gap-1'}>
                         <AppInput
                             style={{width: '10rem'}}

@@ -3,8 +3,8 @@ import cls from "../KpiPage.module.scss"
 import {KpiDatesBlock} from "./KpiDatesBlock";
 import {KpiCalculator} from "./KpiCalculator";
 import {KpiTotal} from "./KpiTotal";
-import {KpiTopUsers} from "./KpiTopUsers";
-import {KpiData} from "./KpiData";
+import {KpiTopUsers} from "./TopUsers/KpiTopUsers";
+import {KpiData} from "./Data/KpiData";
 import {useKpiData} from "@pages/KpiPage/model/api/rtk";
 import {useQueryParams} from "@shared/hooks";
 import {Spinner} from "react-bootstrap";
@@ -20,6 +20,7 @@ export const KpiBody = () => {
             trigger({
                 date_from: queryParameters.date_from,
                 date_to: queryParameters.date_to,
+                department__id: queryParameters.department__id,
             })
         }
     }
@@ -35,28 +36,38 @@ export const KpiBody = () => {
                         <button
                             className={'appBtn px-3 py-1 greenBtn'}
                             onClick={getDataHandle}
-                            disabled={(isFetching || isLoading) }
+                            disabled={(isFetching || isLoading)}
                         >
                             Вывести отчет
                         </button>
 
-                        {(isFetching || isLoading) && <Spinner animation="grow" size="sm" />}
+                        {(isFetching || isLoading) && <Spinner animation="grow" size="sm"/>}
                     </div>
                     <hr/>
                     <div className={"px-3 p-2"}>
-                        <KpiTotal total_count={data?.total_count || 0} total_sum={data?.total_sum || 0}/>
+                        <KpiTotal
+                            total_count={data?.total_count || 0}
+                            total_sum={data?.total_sum || 0}
+                            total_fot={data?.total_amount || 0}
+                        />
                     </div>
 
                     <hr/>
+                    {!queryParameters.showSum && (
+                        <div className={"px-3 p-2"}>
+                            <KpiCalculator
+                                total_count={data?.total_count || 0}
+                                total_sum={data?.total_sum || 0}
+                            />
+                        </div>
+                    )}
+                </div>
 
-                    <div className={"px-3 p-2"}>
-                        <KpiCalculator total_count={data?.total_count || 0} total_sum={data?.total_sum || 0}/>
+                {!queryParameters.showSum && (
+                    <div style={{width: '25%'}} className={'border border-black p-2'}>
+                        <KpiData/>
                     </div>
-                </div>
-
-                <div style={{width: '25%'}} className={'border border-black p-2'}>
-                    <KpiData/>
-                </div>
+                )}
 
             </div>
 

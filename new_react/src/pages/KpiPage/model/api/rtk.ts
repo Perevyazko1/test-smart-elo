@@ -6,6 +6,9 @@ export interface IUserReport {
     count: number;
     co_executor_count: number;
     assignments_price: number;
+    assignments_amount: number;
+    co_executors_amount: number;
+    task_amount: number;
 }
 
 interface IKpiData {
@@ -13,12 +16,14 @@ interface IKpiData {
     date_to: string;
     total_count: number;
     total_sum: number;
+    total_amount: number;
     user_report: IUserReport[];
 }
 
 interface IKpiProps {
     date_from: string;
     date_to: string;
+    department__id: string;
 }
 
 
