@@ -40,6 +40,7 @@ export const KpiTopUser = (props: KpiTopUserProps) => {
         ).toFixed(2)
     );
 
+
     return (
         <div className={'w-100 d-flex outlineBox'}>
             <div style={{width: "18rem"}}
@@ -100,6 +101,7 @@ export const KpiTopUser = (props: KpiTopUserProps) => {
                             bg={getGradientColor(percent)}
                             value={percent}
                             unit={'%'}
+                            formatValue={false}
                             title={'Отношение сделки к сумме произведенной продукции. Наибольшее красный наименьшее зеленый'}
                         />
                     </div>

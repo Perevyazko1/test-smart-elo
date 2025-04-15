@@ -6,10 +6,11 @@ interface ProgresBarProps {
     value: number;
     unit: "₽" | " изд." | "%" | " пом.";
     title: string;
+    formatValue?: boolean;
 }
 
 export const ProgresBar = (props: ProgresBarProps) => {
-    const {width, bg, value, unit, title} = props;
+    const {width, bg, value, unit, title, formatValue = true} = props;
 
     const fValue = Math.floor(value).toLocaleString('ru-RU');
 
@@ -22,7 +23,7 @@ export const ProgresBar = (props: ProgresBarProps) => {
              }}
         >
             <AppTooltip title={title} classNames={'w-100'}>
-                <>{fValue}{unit}</>
+                <>{formatValue ? fValue : value}{unit}</>
             </AppTooltip>
         </div>
     );
