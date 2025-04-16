@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from core.models import Assignment, OrderProduct, AssignmentCoExecutor
-from ...models import Department
+from ...models import Department, Employee
 from tasks.models import TaskExecutor, Task
 
 
@@ -16,7 +16,7 @@ def get_kpi_data(request):
     if department__id:
         department = Department.objects.get(id=department__id)
     else:
-        department = Department.objects.get(number=2)
+        department = request.user.current_department
 
     target_assignments = Assignment.objects.filter(
         department=department,
