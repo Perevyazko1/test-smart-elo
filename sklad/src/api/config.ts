@@ -1,4 +1,8 @@
-export const API_TOKEN = 'Bearer 462749a3798091fcbf9840aade46dfeef628b5df';
+// Тест токен
+// export const API_TOKEN = 'Bearer 462749a3798091fcbf9840aade46dfeef628b5df';
+
+// Основной токен
+export const API_TOKEN = 'Bearer b6cbd1444a9cf14ee0c03efa27933a6c9cbbed14';
 export const URL_MS = '/api/ms';
 
 export const GET_AUTH = {
