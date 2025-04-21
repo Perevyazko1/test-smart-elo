@@ -1,4 +1,4 @@
-FROM node:23-alpine
+FROM node:23-slim
 
 WORKDIR /app
 
@@ -8,8 +8,8 @@ RUN npm install
 
 COPY . .
 
-# RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
 
-RUN npm run build
+CMD ["/app/entrypoint.sh"]
