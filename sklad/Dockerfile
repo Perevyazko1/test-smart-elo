@@ -8,8 +8,8 @@ RUN npm install
 
 COPY . .
 
-RUN chmod +x /app/entrypoint.sh
+# RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["/app/entrypoint.sh"]
+#CMD ["/app/entrypoint.sh"]
