@@ -106,7 +106,6 @@ services:
     networks:
       - app-network
     command: >
-      sh -c "npm run build"
       sh -c "npm run start"
 
 networks:
