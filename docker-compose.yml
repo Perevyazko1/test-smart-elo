@@ -10,9 +10,9 @@ services:
       - "80:80"
       - "443:443"
     volumes:
+      - ./django_app/media/:/usr/share/nginx/html/media
       - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf
       - ./services/nginx/certs:/etc/nginx/certs
-      - ./django_app/media/:/usr/share/nginx/html/media
       - react_build:/usr/share/nginx/html/elo
     depends_on:
       - elo_server
