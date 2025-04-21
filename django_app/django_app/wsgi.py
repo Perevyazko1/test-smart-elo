@@ -1,5 +1,5 @@
 """
-WSGI config for django_app project.
+WSGI api for django_app project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

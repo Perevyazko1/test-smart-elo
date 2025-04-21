@@ -1,71 +1,79 @@
 version: "3.8"
 
 services:
-  django_app:
-    build:
-      context: ./django_app
-      dockerfile: Dockerfile
-    container_name: django_app_eq
-    restart: always
-    depends_on:
-      - redis
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env.docker.prod
-    volumes:
-      - ./django_app/media/:/app/media
-    command: >
-      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
-
-  redis:
-    container_name: redis_eq
-    build: ./services/redis
-    ports:
-      - "6379:6379"
-    restart: always
-
   nginx:
-    container_name: nginx_eq
-    build: ./services/nginx
-    restart: always
-    depends_on:
-      - django_app
-    volumes:
-      - ./services/nginx/certs/:/etc/nginx/ssl
-      - ./new_react/build/:/usr/share/nginx/html
-      - ./django_app/media/:/usr/share/nginx/html/media
-      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf
+    image: nginx:latest
+    container_name: nginx
     ports:
       - "80:80"
       - "443:443"
-    env_file:
-      - .env.docker.prod
+    volumes:
+      - ./services/nginx/conf.d:/etc/nginx/conf.d
+      - ./services/nginx/certs:/etc/nginx/certs
+      - ./django_app/media/:/usr/share/nginx/html/media
+      - ./new_react/build/:/usr/share/nginx/html/elo
+    depends_on:
+      - elo_server
+      - sklad
+      - elo_client_build
+    networks:
+      - app-network
 
-  celery_worker:
+  elo_server:
     build:
       context: ./django_app
       dockerfile: Dockerfile
-    container_name: celery_worker_eq
+    container_name: elo_server
+    volumes:
+      - ./django_app/media/:/app/media
+    env_file:
+      - .env.docker.prod
+    restart: always
+    expose:
+      - "8000"
+    networks:
+      - app-network
+    depends_on:
+      - elo_redis
+    command: >
+      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
+
+
+  elo_redis:
+    container_name: elo_redis
+    build: ./services/redis
+    ports:
+      - "6379"
+    restart: always
+    networks:
+      - app-network
+
+  elo_celery_worker:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: elo_celery_worker
     restart: always
     volumes:
       - ./django_app/media/:/app/media
     depends_on:
-      - django_app
+      - elo_server
     ports:
       - "58231"
     command: celery -A django_app worker -l info
     env_file:
       - .env.docker.prod
+    networks:
+      - app-network
 
-  celery_beat:
+  elo_celery_beat:
     build:
       context: ./django_app
       dockerfile: Dockerfile
-    container_name: celery_beat_eq
+    container_name: elo_celery_beat
     restart: always
     depends_on:
-      - django_app
+      - elo_server
     volumes:
       - ./django_app/media/:/app/media
     ports:
@@ -73,3 +81,29 @@ services:
     command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
     env_file:
       - .env.docker.prod
+    networks:
+      - app-network
+
+  elo_client_build:
+    build:
+      context: ./new_react
+      dockerfile: Dockerfile
+    container_name: elo_client_build
+    volumes:
+      - ./new_react/build:/app/build
+    networks:
+      - app-network
+
+  sklad:
+    build:
+      context: ./sklad
+      dockerfile: Dockerfile
+    container_name: sklad
+    expose:
+      - "3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

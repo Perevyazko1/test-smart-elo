@@ -169,7 +169,7 @@ DJANGO_CELERY_BEAT_TZ_AWARE = False
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv('REDIS_URL', "redis://redis:6379/1"),
+        "LOCATION": os.getenv('REDIS_URL', "redis://elo_redis:6379/1"),
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }

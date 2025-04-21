@@ -1,0 +1,85 @@
+version: "3.8"
+
+services:
+  django_app:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: django_app_eq
+    restart: always
+    depends_on:
+      - redis
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.docker.prod
+    volumes:
+      - ./django_app/media/:/app/media
+    command: >
+      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
+
+  redis:
+    container_name: redis_eq
+    build: ./services/redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  nginx:
+    container_name: nginx_eq
+    build: ./services/nginx
+    restart: always
+    depends_on:
+      - django_app
+    volumes:
+      - ./services/nginx/certs/:/etc/nginx/ssl
+      - ./new_react/build/:/usr/share/nginx/html
+      - ./django_app/media/:/usr/share/nginx/html/media
+      - ./services/nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    env_file:
+      - .env.docker.prod
+
+  celery_worker:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_worker_eq
+    restart: always
+    volumes:
+      - ./django_app/media/:/app/media
+    depends_on:
+      - django_app
+    ports:
+      - "58231"
+    command: celery -A django_app worker -l info
+    env_file:
+      - .env.docker.prod
+
+  celery_beat:
+    build:
+      context: ./django_app
+      dockerfile: Dockerfile
+    container_name: celery_beat_eq
+    restart: always
+    depends_on:
+      - django_app
+    volumes:
+      - ./django_app/media/:/app/media
+    ports:
+      - "58232"
+    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env.docker.prod
+
+  sklad:
+    build: ./sklad
+    restart: always
+    ports:
+      - "3000:3000"
+    networks:
+      - internal
+    depends_on:
+      - backend
