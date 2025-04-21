@@ -13,7 +13,7 @@ services:
       - ./services/nginx/conf.d:/etc/nginx/conf.d
       - ./services/nginx/certs:/etc/nginx/certs
       - ./django_app/media/:/usr/share/nginx/html/media
-      - ./new_react/build/:/usr/share/nginx/html/elo
+      - react_build:/usr/share/nginx/html/elo
     depends_on:
       - elo_server
       - sklad
@@ -92,9 +92,7 @@ services:
       dockerfile: Dockerfile
     container_name: elo_client_build
     volumes:
-      - ./new_react/build:/app/build
-    networks:
-      - app-network
+      - react_build:/app/build
 
   sklad:
     build:
@@ -111,3 +109,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  react_build:
