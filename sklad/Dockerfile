@@ -12,4 +12,6 @@ RUN chmod +x /app/entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["/app/entrypoint.sh"]
+RUN npm run build
+
+CMD ["npm", "run", "start"]
