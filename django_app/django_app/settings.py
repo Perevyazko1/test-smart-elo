@@ -188,7 +188,7 @@ LOGGING = {
     'version': 1,
     'handlers': {
         'telegram': {
-            'level': 'WARNING',
+            'level': 'ERROR',
             'class': 'django_telegram_logging.handler.TelegramHandler',
         },
         'console': {

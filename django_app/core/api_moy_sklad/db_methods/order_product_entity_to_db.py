@@ -5,6 +5,11 @@ from ...models import OrderProduct, Product, Order, Fabric
 from ...services.assignment_generator import AssignmentGenerator
 
 
+import logging
+
+logger = logging.getLogger(__name__)
+
+
 class OrderProductEntityToDB:
     @staticmethod
     @transaction.atomic
@@ -19,6 +24,7 @@ class OrderProductEntityToDB:
                     f"old product_id: {op[0].product.product_id} "
                     f"new product_id: {order_product_entity.product_id}"
                 )
+                logger.error(error)
                 raise ValueError(error)
 
         order_product = OrderProduct.objects.update_or_create(

@@ -18,7 +18,6 @@ from ..network.set_eq_link_in_order import set_eq_link_in_order
 def nice_json(data):
     print(json.dumps(data, indent=4, ensure_ascii=False))
 
-
 class ImportOrders:
     @staticmethod
     def get_product_entity_from_product_info(product_info: ProductInfo) -> ProductEntity:
