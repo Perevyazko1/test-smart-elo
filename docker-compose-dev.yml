@@ -16,6 +16,8 @@ services:
       - "8000:8000"
     command: >
       sh -c "python3 manage.py runserver 0.0.0.0:8000"
+    networks:
+      - dev-network
 
   pg:
     build: services/postgres_db
@@ -27,6 +29,8 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    networks:
+      - dev-network
 
   pgadmin:
     build:
@@ -42,6 +46,8 @@ services:
       - .env
     volumes:
       - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
+    networks:
+      - dev-network
 
   redis:
     container_name: redis
@@ -49,6 +55,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    networks:
+      - dev-network
 
   nginx:
     container_name: nginx
@@ -63,3 +71,10 @@ services:
       - "80:80"
     env_file:
       - .env
+    networks:
+      - dev-network
+
+
+networks:
+  dev-network:
+    driver: bridge
