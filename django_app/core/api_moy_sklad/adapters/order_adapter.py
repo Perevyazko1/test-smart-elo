@@ -26,6 +26,8 @@ class OrderEntity:
     urgency: int
     comment_base: str
     comment_case: str
+    commission: int
+    sum: int
     products_info: list[ProductInfo]
     link: str
     inner_number: str
@@ -100,6 +102,8 @@ class OrderAdapter:
             urgency=self._get_urgency("Срочность", order),
             comment_base=self._get_target_attribute_value("Коммент. (каркас):", order),
             comment_case=self._get_target_attribute_value("Коммент. (чехол):", order),
+            commission=self._get_target_attribute_value("Комиссионные", order),
+            sum=order['sum'],
             products_info=self._get_products_info(order),
             link=self._get_target_attribute_value("Ссылка на спец-ю:", order),
             inner_number=self._get_target_attribute_value("Вх. заказ (№)", order),

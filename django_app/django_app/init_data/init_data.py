@@ -1,9 +1,10 @@
 """Initial methods and scripts."""
-from .fix_status import fix_status
+from .reports.constructing import constructing_report
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    fix_status()
+    constructing_report()
+
     return "Oki"

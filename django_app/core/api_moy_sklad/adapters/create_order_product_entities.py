@@ -45,6 +45,11 @@ class CreateOrderProductEntities:
 
         generator = self._index_number_generator(order_entity)
 
+        commission_percent = 1
+
+        if order_entity.commission:
+            commission_percent = Decimal(commission_percent - (order_entity.commission / (order_entity.sum / 100)))
+
         for product_info in order_entity.products_info:
             if product_info.group in PRODUCT_GROUPS:
                 """Если группа продукта содержится в целевом списке групп товаров, фиксируем ее как основной продукт"""
@@ -59,7 +64,7 @@ class CreateOrderProductEntities:
                 order_product_entity = self._get_base_order_product(order_entity)
                 order_product_entity.series_id = next(generator)
                 order_product_entity.product_id = product_info.id
-                order_product_entity.price = product_info.price
+                order_product_entity.price = Decimal(product_info.price * commission_percent)
                 order_product_entity.quantity = product_info.quantity
                 order_product_entity.group = product_info.group
                 current_products.append(order_product_entity)
