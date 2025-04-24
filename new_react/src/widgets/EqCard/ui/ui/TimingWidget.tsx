@@ -28,8 +28,8 @@ export const TimingWidget = (props: TimingWidgetProps) => {
     );
     
     const getBg = useMemo(() => {
-        return card.card_info.timing ? "bgGreen" : "bg-white";
-    }, [card.card_info.timing])
+        return timing !== "0" ? "bgGreen" : "bg-white";
+    }, [timing])
 
     const setInputHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         let value = event.target.value;
