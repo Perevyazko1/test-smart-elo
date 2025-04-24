@@ -23,7 +23,7 @@ from .service.get_view_modes import get_view_modes
 
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
-from ...signals import update_assignments_and_clean_cache
+from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
 
 
 class EqCardsViewSet(viewsets.ModelViewSet):
@@ -427,3 +427,28 @@ def update_assignments(request):
 
     return JsonResponse({
         "result": 'ok'}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_timing_info(request):
+    ps_id = request.data.get('ps_id')
+    timing = request.data.get('timing')
+
+    ps = ProductionStep.objects.get(
+        id=ps_id
+    )
+    ps.scheduled_time=timing
+    ps.save()
+
+    order_products = OrderProduct.objects.filter(
+        product=ps.product,
+        status="0"
+    )
+
+    for op in order_products:
+        clean_all_eq_card_info_cache(
+            order_product__id=op.id,
+            department__id=ps.department.id,
+        )
+
+    return JsonResponse({'result': 'ok'})

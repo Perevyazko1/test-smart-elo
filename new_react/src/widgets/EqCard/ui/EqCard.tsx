@@ -238,7 +238,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
 
             <CardDepartmentInfo
                 card={card}
-                cardType={listType}
+                listType={listType}
             />
 
             {!hideSecondBtn &&

@@ -103,7 +103,8 @@ class OrderProductSerializer(serializers.ModelSerializer):
             )
         ).exclude(
             department__name__in=["Старт", "Готово"]
-        )
+        ).order_by('department__ordering')
+
         for production_step in production_steps:
             assignments = Assignment.objects.filter(
                 order_product=obj,

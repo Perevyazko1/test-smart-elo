@@ -22,7 +22,7 @@ export const LockedSwitch = () => {
                 onSwitch={showNotLockedOnly}
                 labelPosition={'labelRight'}
                 handleContent={'🔒'}
-                label={queryParameters.locked ? "Блок(без блок.)" : "Блок(все изд.)"}
+                label={"Блокировка"}
             />
         </AppTooltip>
     );

@@ -4,22 +4,22 @@ import {ListTypes} from "@widgets/EqCardList";
 import {AppSwitch, AppTooltip} from "@shared/ui";
 import {useQueryParams} from "@shared/hooks";
 
-interface SwitchGroupByPlanDateProps {
+interface SwitchTimingInfoProps {
     listType: ListTypes;
 }
 
-export const SwitchGroupByPlanDate = (props: SwitchGroupByPlanDateProps) => {
+export const SwitchTimingInfo = (props: SwitchTimingInfoProps) => {
     const {listType} = props;
 
-    const [checked, setChecked] = useState(!localStorage.getItem(`${listType}`));
+    const [checked, setChecked] = useState(!localStorage.getItem(`${listType}timing`));
     const {queryParameters, setQueryParam} = useQueryParams();
 
     const switchHandle = () => {
         setChecked(prevState => {
             if (prevState) {
-                localStorage.setItem(`${listType}`, 'by_date');
+                localStorage.setItem(`${listType}timing`, 'timing');
             } else {
-                localStorage.removeItem(`${listType}`);
+                localStorage.removeItem(`${listType}timing`);
             }
             return !prevState;
         });
@@ -28,14 +28,14 @@ export const SwitchGroupByPlanDate = (props: SwitchGroupByPlanDateProps) => {
 
     return (
         <>
-            <AppTooltip title="Группировка нарядов">
+            <AppTooltip title="Отображать тайминг производства">
                 <AppSwitch
                     style={{fontSize: '10px'}}
                     checked={!checked}
                     onSwitch={switchHandle}
                     labelPosition={'labelRight'}
-                    handleContent={'📆'}
-                    label={"Планирование"}
+                    handleContent={'🕐'}
+                    label={"Тайминги"}
                 />
             </AppTooltip>
         </>

@@ -22,7 +22,7 @@ export const AssembledSwitch = () => {
                 onSwitch={showAssembledOnly}
                 labelPosition={'labelRight'}
                 handleContent={'⬛️'}
-                label={queryParameters.assembled ? "Компл(все изд.)" : "Компл(только укомпл.)"}
+                label={"Комплектация"}
             />
         </AppTooltip>
     );

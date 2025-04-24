@@ -60,6 +60,8 @@ export interface EqCardInfo {
     count_ready: number;
     count_await: number;
     tariff: number;
+    timing: number;
+    ps_id: number;
     proposed_tariff: number;
     production_step__id: number;
     employees_info: EqDepartmentInfo[];

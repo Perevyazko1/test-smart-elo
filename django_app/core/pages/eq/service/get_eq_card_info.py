@@ -11,10 +11,13 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
     if cached_data:
         return cached_data
 
+    scheduled_time = 0
+
     production_step = ProductionStep.objects.filter(
         product=order_product.product,
         department=department
     ).first()
+
     if production_step:
         if production_step.proposed_tariff:
             proposed_tariff = production_step.proposed_tariff.amount or 0
@@ -25,9 +28,12 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
             tariff = production_step.confirmed_tariff.amount or 0
         else:
             tariff = None
+        scheduled_time = production_step.scheduled_time or 0
+        ps_id = production_step.id
     else:
         proposed_tariff = None
         tariff = None
+        ps_id = None
 
     assignments = Assignment.objects.filter(
         order_product=order_product,
@@ -69,6 +75,7 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
             })
 
     further_packaging = False
+
     if production_step:
         further_packaging = production_step.next_step.all().filter(
             department__name="Упаковка"
@@ -78,6 +85,8 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
         "further_packaging": further_packaging,
         "tariff": tariff,
         "proposed_tariff": proposed_tariff,
+        "timing": scheduled_time,
+        "ps_id": ps_id,
         "production_step__id": production_step.id if production_step else 0,
         "count_all": count_all,
         "count_in_work": count_in_work,

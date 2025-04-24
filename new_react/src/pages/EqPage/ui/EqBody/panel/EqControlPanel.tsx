@@ -7,6 +7,7 @@ import {AssembledSwitch} from "./AssembledSwitch";
 import {LockedSwitch} from "./LockedSwitch";
 import {SwitchGroupByPlanDate} from "./SwitchGroupByPlanDate";
 import {SwitchShowSum} from "./SwitchShowSum";
+import {SwitchTimingInfo} from "@pages/EqPage/ui/EqBody/panel/SwitchTimingInfo";
 
 
 interface EqControlPanelProps {
@@ -47,12 +48,12 @@ export const EqControlPanel = memo((props: EqControlPanelProps) => {
                 {listType === "await" && (
                     <>
                         <AssembledSwitch/>
-
                         <LockedSwitch/>
                     </>
                 )}
                 <SwitchGroupByPlanDate listType={listType}/>
                 <SwitchShowSum listType={listType} totalPlan={totalPlan}/>
+                <SwitchTimingInfo listType={listType}/>
             </div>
         </div>
     );

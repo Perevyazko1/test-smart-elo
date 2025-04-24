@@ -15,6 +15,7 @@ class Department(models.Model):
 
     name = models.CharField('Наименование отдела', max_length=150, unique=True)
     number = models.PositiveSmallIntegerField('Номер отдела', default=0, unique=True)
+    ordering = models.PositiveSmallIntegerField('Сортировка', default=0)
 
     single = models.BooleanField('Отдел разово участвует в производстве', blank=True)
     piecework_wages = models.BooleanField('В отделе установлена сдельная оплата труда', default=False)

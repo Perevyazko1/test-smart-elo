@@ -31,7 +31,7 @@ export const SwitchShowSum = (props: SwitchShowSumProps) => {
 
     return (
         <>
-            <AppTooltip title="Группировка нарядов">
+            <AppTooltip title="Показать цены">
                 <AppSwitch
                     style={{fontSize: '12px', color: 'black'}}
                     checked={!checked}
