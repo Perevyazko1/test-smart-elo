@@ -9,3 +9,6 @@ RUN npm install
 COPY . .
 
 RUN npm run build
+
+# Выводим содержимое папки build для отладки
+RUN ls -la /app/build

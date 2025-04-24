@@ -92,8 +92,11 @@ services:
       context: ./new_react
       dockerfile: Dockerfile
     container_name: elo_client_build
+
     volumes:
       - react_build:/app/build
+    command: >
+      sh -c "npm run build && cp -r /app/build/* /app/build/"
 
   sklad:
     build:
