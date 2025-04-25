@@ -14,7 +14,6 @@ export const EqDepWidget = () => {
     const [error, setError] = useState<string | null>(null);
 
     const fetchData = async (depName: string) => {
-
         try {
             const targetDepartment = currentUser.departments.find(dep => dep.name === depName)
             if (!targetDepartment) {
@@ -48,7 +47,12 @@ export const EqDepWidget = () => {
     }
 
     const departments = useMemo(
-        () => currentUser.departments.map(department => department.name),
+        () => {
+            const sortDeps = currentUser.departments.sort(
+                (a, b) => a.ordering - b.ordering
+            )
+            return sortDeps.map(department => department.name)
+        },
         [currentUser.departments]
     );
 

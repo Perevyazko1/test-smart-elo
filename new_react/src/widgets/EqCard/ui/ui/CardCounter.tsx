@@ -3,7 +3,7 @@ import {useAppDispatch, useAppModal} from "@shared/hooks";
 
 import cls from "./EqCard.module.scss";
 
-import {EqInfo, eqPageActions, useCardHeight} from "@pages/EqPage";
+import {EqInfo, eqPageActions} from "@pages/EqPage";
 import {EqOrderProduct} from "@widgets/EqCardList";
 
 
@@ -26,9 +26,6 @@ export const CardCounter = (props: CardCounterProps) => {
         )
     };
 
-    // Получаем высоту карточки
-    const cardHeight = useCardHeight();
-
     return (
         <div
             className={cls.cardCounts + ' fs-7 fw-bold rounded'}
@@ -38,13 +35,13 @@ export const CardCounter = (props: CardCounterProps) => {
                 indicator={'comment'}
                 show={!!card.order.comment_base || !!card.order.comment_case}
                 color={' bg-warning'}
-                top={`${cardHeight - 17}px`}
+                top={`${-3}px`}
             >
                 <IndicatorWrapper
                     indicator={'tech-process'}
                     show={!card.product.technological_process}
                     color={' bg-danger'}
-                    top={`${!!card.order.comment_base || !!card.order.comment_case ? cardHeight - 25 : cardHeight - 17}px`}
+                    top={`${!!card.order.comment_base || !!card.order.comment_case ?  3 : -3}px`}
                 >
                     <div className={
                         (card.card_info.count_all === 0 ? 'text-muted ' : '' ) + cls.infoItem

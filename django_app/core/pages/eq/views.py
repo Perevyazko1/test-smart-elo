@@ -221,6 +221,7 @@ def update_assignments(request):
     mode = request.data.get('mode')
     date = request.data.get('date')
     series_id = request.data.get('series_id')
+    op = OrderProduct.objects.get(series_id=series_id)
     user = request.user
     department = Department.objects.get(id=request.data.get('department__id'))
 
@@ -230,7 +231,6 @@ def update_assignments(request):
                 f'error': f'Ошибка доступа. У пользователя нет прав на снятие визы с нарядов.'
             }, status=401, json_dumps_params={"ensure_ascii": False})
 
-        order_product = OrderProduct.objects.get(series_id=series_id)
         for assignment_id in ids:
             assignment = Assignment.objects.get(id=assignment_id)
 
@@ -245,7 +245,7 @@ def update_assignments(request):
             assignments_with_visa_in_original_dep_count = Assignment.objects.filter(
                 department=assignment.department,
                 inspector__isnull=False,
-                order_product=order_product,
+                order_product=op,
             ).count()
 
             # Получаем исходный этап производства (условно Пошив)
@@ -269,12 +269,12 @@ def update_assignments(request):
                 else:
                     update_assignments_and_clean_cache(
                         other_assignments,
-                        order_product.id,
+                        op.id,
                         None,
                         assembled=False,
                     )
-                    order_product.product.technological_process_confirmed = None
-                    order_product.product.save()
+                    op.product.technological_process_confirmed = None
+                    op.product.save()
 
             # Для остальных нарядов вычисляем количество нарядов к отмене и отменяем
             else:
@@ -294,13 +294,13 @@ def update_assignments(request):
                             next_step__exact=original_next_ps.id,
                         )
 
-                        min_assign_with_visa_in_dependents_departments = order_product.quantity
+                        min_assign_with_visa_in_dependents_departments = op.quantity
                         for dependent_ps in previous_ps:
                             if dependent_ps.department.single:
                                 continue
                             # Получаем количество нарядов с визой в этом отделе
                             assignments_with_visa = Assignment.objects.filter(
-                                order_product=order_product,
+                                order_product=op,
                                 inspector__isnull=False,
                                 department=dependent_ps.department,
                             ).count()
@@ -375,9 +375,8 @@ def update_assignments(request):
                         )
 
     elif mode == 'lock_await_assignments':
-        order_product = OrderProduct.objects.get(series_id=series_id)
         target_assignments = Assignment.objects.filter(
-            order_product=order_product,
+            order_product=op,
             department=department,
             status="await"
         )
@@ -387,7 +386,7 @@ def update_assignments(request):
 
         update_assignments_and_clean_cache(
             target_assignments,
-            order_product.id,
+            op.id,
             department.id,
             appointed_by_boss=not locked_status,
         )
@@ -398,7 +397,7 @@ def update_assignments(request):
 
         qs = Assignment.objects.filter(
             department=department,
-            order_product__series_id=series_id,
+            order_product=op,
             status__in=['in_work', 'await']
         )
 
@@ -414,6 +413,11 @@ def update_assignments(request):
                 {"result": 'ok'},
                 json_dumps_params={"ensure_ascii": False}
             )
+
+    clean_all_eq_card_info_cache(
+        order_product__id=op.id,
+        department__id=department.id,
+    )
 
     notification_data = {str(department.number): {
         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,

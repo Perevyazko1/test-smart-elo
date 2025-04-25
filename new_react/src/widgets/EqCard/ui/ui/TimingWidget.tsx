@@ -1,6 +1,5 @@
-import {AppInput} from "@shared/ui";
 import {EqOrderProduct} from "@widgets/EqCardList";
-import {useMemo, useState} from "react";
+import {useId, useMemo, useState} from "react";
 import {useSetTiming} from "@widgets/EqCard/model/api/updateTiming";
 import {useDebounce, usePermission} from "@shared/hooks";
 import {Spinner} from "react-bootstrap";
@@ -26,7 +25,7 @@ export const TimingWidget = (props: TimingWidgetProps) => {
         }),
         500
     );
-    
+
     const getBg = useMemo(() => {
         return timing !== "0" ? "bgGreen" : "bg-white";
     }, [timing])
@@ -46,19 +45,30 @@ export const TimingWidget = (props: TimingWidgetProps) => {
         debouncedUpdateTiming(value)
     }
 
+
+    const id: string = useId();
+
+    const inputId = useMemo(() => {
+        const date: string = new Date().toISOString();
+        return id + date;
+    }, [id]);
+
     return (
         <div>
             {
                 isLoading ? (
-                    <Spinner size={'sm'} animation={'grow'}/>
+                    <div>
+                        <Spinner size={'sm'} animation={'grow'}/>
+                    </div>
                 ) : (
-                    <>🕐мин</>
+                    <div>🕐мин</div>
                 )
             }
 
-            <AppInput
-                className={'text-black p-0 text-center ' + getBg}
+            <input
+                className={'m-1 text-black p-0 text-center border py-1 fw-bold ' + getBg}
                 style={{width: 45}}
+                id={inputId}
                 disabled={!isBoss}
                 value={timing}
                 type={'text'}

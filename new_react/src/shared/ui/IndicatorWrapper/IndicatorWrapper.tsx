@@ -17,7 +17,7 @@ export const IndicatorWrapper = (props: IndicatorWrapperProps) => {
         children,
         indicator,
         top="-1px",
-        right="-12px",
+        right="-10px",
         show = true,
         color,
     } = props;
