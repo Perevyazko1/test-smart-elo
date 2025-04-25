@@ -69,6 +69,7 @@ class Employee(AbstractUser):
         on_delete=models.SET_NULL,
     )
     current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    kpd = models.DecimalField('КПД Сотрудника', max_digits=4, decimal_places=2, default=1.00)
     description = models.CharField('Описание', max_length=250, blank=True, null=True)
 
     piecework_wages = models.BooleanField('Сдельная форма оплаты труда', default=True)

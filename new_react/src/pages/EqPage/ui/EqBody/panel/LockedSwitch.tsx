@@ -22,7 +22,7 @@ export const LockedSwitch = () => {
                 onSwitch={showNotLockedOnly}
                 labelPosition={'labelRight'}
                 handleContent={'🔒'}
-                label={"Блокировка"}
+                label={"Без блока"}
             />
         </AppTooltip>
     );

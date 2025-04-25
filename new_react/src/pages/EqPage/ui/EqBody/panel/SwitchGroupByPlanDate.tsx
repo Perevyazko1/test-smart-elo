@@ -35,7 +35,7 @@ export const SwitchGroupByPlanDate = (props: SwitchGroupByPlanDateProps) => {
                     onSwitch={switchHandle}
                     labelPosition={'labelRight'}
                     handleContent={'📆'}
-                    label={"Планирование"}
+                    label={"План"}
                 />
             </AppTooltip>
         </>

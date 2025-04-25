@@ -18,7 +18,7 @@ class CustomUserAdmin(UserAdmin):
         "last_name",
         'pin_code',
         'permanent_department',
-        'boss',
+        'kpd',
     ]
     list_display_links = ['username']
     readonly_fields = ['current_balance']
@@ -34,6 +34,7 @@ class CustomUserAdmin(UserAdmin):
             'pin_code',
             'current_balance',
             'boss',
+            'kpd',
             'departments',
             'current_department',
             'permanent_department')

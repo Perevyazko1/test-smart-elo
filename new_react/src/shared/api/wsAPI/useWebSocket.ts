@@ -46,6 +46,7 @@ export const useWebSocket = () => {
     }, [currentUser.pin_code, currentUser.current_department]);
 
     const handleSocketMessage = (data: any) => {
+        console.log("WS COMMAND: ", data);
         if (data.data?.action === 'update_target_item' && data.initiator !== currentUser.pin_code) {
             dispatch(eqPageActions.addNotRelevantId(data.data.data));
         }

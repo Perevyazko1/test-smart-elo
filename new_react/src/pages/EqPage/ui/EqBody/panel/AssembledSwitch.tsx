@@ -22,7 +22,7 @@ export const AssembledSwitch = () => {
                 onSwitch={showAssembledOnly}
                 labelPosition={'labelRight'}
                 handleContent={'⬛️'}
-                label={"Комплектация"}
+                label={"Без компл."}
             />
         </AppTooltip>
     );

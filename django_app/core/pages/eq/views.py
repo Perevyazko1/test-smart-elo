@@ -1,6 +1,6 @@
 """Views for EQ Page. """
 from dataclasses import asdict
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
@@ -9,7 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import (
-    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor,
+    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, Product,
 )
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
@@ -421,7 +421,7 @@ def update_assignments(request):
 
     notification_data = {str(department.number): {
         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-        'data': OrderProduct.objects.get(series_id=series_id).id,
+        'data': op.id,
     }}
 
     ws_group_updates(
@@ -454,5 +454,60 @@ def update_timing_info(request):
             order_product__id=op.id,
             department__id=ps.department.id,
         )
+        notification_data = {str(ps.department.number): {
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': op.id,
+        }}
+        ws_group_updates(
+            pin_code='',
+            notification_data=notification_data
+        )
 
     return JsonResponse({'result': 'ok'})
+
+
+@api_view(['get'])
+def get_plan_info(request):
+    days_count = request.query_params.get('days_count', '7')
+
+    print(days_count)
+
+    try:
+        days_count = int(days_count)
+    except ValueError:
+        return JsonResponse({'error': 'days_count must be an integer'}, status=400)
+
+    start_date = datetime.now().date()
+    end_date = start_date + timedelta(days=days_count)
+
+    days_load = {}
+
+    assignments = Assignment.objects.filter(
+        plane_date__date__gte=start_date,
+        plane_date__date__lte=end_date,
+        department=request.user.current_department,
+    )
+    print(assignments.count(), start_date, end_date)
+
+    for assignment in assignments:
+        day = assignment.plane_date.date().strftime('%Y-%m-%d')
+        product = assignment.order_product.product
+        production_step = ProductionStep.objects.get(
+            product=product,
+            department=assignment.department,
+        )
+        if day in days_load.keys():
+            days_load[day] += production_step.scheduled_time
+        else:
+            days_load[day] = production_step.scheduled_time
+
+    total_units_day = Employee.objects.filter(
+        permanent_department=request.user.current_department,
+        is_active=True,
+    ).count() * 8 * 60
+
+    result = {
+        "total_units_day": total_units_day,
+        "days_load": days_load
+    }
+    return JsonResponse({'data': result})

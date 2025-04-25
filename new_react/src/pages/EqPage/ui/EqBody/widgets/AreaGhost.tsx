@@ -1,18 +1,23 @@
-import React, { HTMLAttributes } from "react";
+import React, {HTMLAttributes, useMemo} from "react";
 import {useDrop} from "react-dnd";
 import {DayInfo} from "@pages/EqPage/model/lib/getNextDays";
 import {useEditAssignmentInfo} from "@widgets/AssignmentInfo/model/api/api";
 import {EqOrderProduct} from "@widgets/EqCardList";
 import {useAppQuery, useCurrentUser} from "@shared/hooks";
 import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
+import {IDragItemCard} from "@pages/EqPage/model/types";
+
 
 interface AreaGhostProps extends HTMLAttributes<HTMLDivElement> {
-    dayInfo: DayInfo,
-    bg?: string,
+    dayInfo: DayInfo;
+    item: IDragItemCard;
+    bg?: string;
+    current_load: number | null;
+    total_units_day: number | null;
 }
 
 export const AreaGhost = (props: AreaGhostProps) => {
-    const {dayInfo, style, bg='#3f87b8', ...otherProps} = props;
+    const {dayInfo, style, bg = '#3f87b8', current_load = 0, total_units_day, item, ...otherProps} = props;
 
     const [editAssignments] = useEditAssignmentInfo();
     const {currentUser} = useCurrentUser();
@@ -38,12 +43,34 @@ export const AreaGhost = (props: AreaGhostProps) => {
             isOver: monitor.isOver(),
         }),
     });
+    
+    const loadPercent = useMemo(() => {
+        if (!total_units_day || current_load === null) {
+            return null;
+        }
+        if (!isOver) {
+            return Math.ceil(current_load / total_units_day * 100);
+        }
+        const newLoad = item.card.card_info.timing * (
+            item.assignmentsLists.primary.length + item.assignmentsLists.selectedLocked.length
+        );
+        return Math.ceil((current_load + newLoad) / total_units_day * 100);
+    }, [
+        current_load,
+        isOver,
+        item.assignmentsLists.primary.length,
+        item.assignmentsLists.selectedLocked.length,
+        item.card.card_info.timing,
+        total_units_day
+    ])
+    
+    
 
     return (
         <div
             ref={drop}
             style={{
-                fontSize: 32,
+                fontSize: 24,
                 zIndex: 1002,
                 left: "2px",
                 backgroundColor: isOver ? "green" : bg,
@@ -53,6 +80,9 @@ export const AreaGhost = (props: AreaGhostProps) => {
         >
             <div className={'bg-danger-subtle p-2'}>
                 {dayInfo.day}
+            </div>
+            <div className={'bg-info-subtle p-1'} style={{width: `${loadPercent}%`, minWidth: "fit-content"}}>
+                {loadPercent ? `${loadPercent}%` : ""}
             </div>
         </div>
     );

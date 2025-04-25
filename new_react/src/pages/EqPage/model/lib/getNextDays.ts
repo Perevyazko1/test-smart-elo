@@ -24,7 +24,7 @@ export const getNextDays = (count: number): DayInfo[] => {
         const dtDay = isoString.replace('T', ' ').substring(0, 10);
 
         result.push({
-            day: `${dayName} ${date} ${month}`,
+            day: `${dayName} ${date}${month}`,
             dtDay,
         });
     }

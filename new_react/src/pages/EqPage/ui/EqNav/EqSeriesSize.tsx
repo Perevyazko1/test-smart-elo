@@ -1,6 +1,5 @@
-import {Button} from "react-bootstrap";
-import {AppSelect} from "@shared/ui";
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
+import {useDebounce} from "@shared/hooks";
 
 interface EqSeriesSizeProps {
     queryParameters: Record<string, string>;
@@ -14,7 +13,7 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
     const baseSeriesSize = '1';
     const seriesSizeConfig = {
         minValue: 1,
-        maxValue: 30,
+        maxValue: 10,
     }
 
     const [seriesSize, setSeriesSize] = useState(queryParameters.series_size || baseSeriesSize);
@@ -30,49 +29,98 @@ export const EqSeriesSize = (props: EqSeriesSizeProps) => {
             }
         }
     }
+    const debouncedClb = useDebounce(
+        () => clb(seriesSize === baseSeriesSize ? '' : seriesSize),
+        300
+    );
+
+    useEffect(() => {
+        debouncedClb();
+        //eslint-disable-next-line
+    }, [seriesSize]);
+
+    useEffect(() => {
+        if (queryParameters.series_size!== seriesSize) {
+            setSeriesSize(queryParameters.series_size || baseSeriesSize);
+             if (seriesSizeRef.current) {
+                seriesSizeRef.current.value = queryParameters.series_size || baseSeriesSize;
+            }
+        }
+        //eslint-disable-next-line
+    }, [queryParameters.series_size]);
 
     return (
-        <AppSelect
-            noInput
-            label={'Размер серии'}
-            colorScheme={'darkInput'}
-            variant={'select'}
-            style={{width: 80}}
-            value={`X${queryParameters.series_size || baseSeriesSize}`}
-        >
-            <div className={'p-2 d-flex justify-content-center flex-nowrap flex-column align-items-center'}>
-                <div className={'d-flex gap-3 fs-3 text-nowrap'}>
-                    <Button
-                        onClick={() => incrementSeriesSize(-1)}
-                    >
-                        <i className="fas fa-minus fs-4"/>
-                    </Button>
-
-                    X {seriesSize || baseSeriesSize}
-
-                    <Button
-                        onClick={() => incrementSeriesSize(1)}
-                    >
-                        <i className="fas fa-plus fs-4"/>
-                    </Button>
-                </div>
-                <input
-                    className={"mt-3 w-100"}
-                    type="range"
-                    defaultValue={queryParameters.series_size || baseSeriesSize}
-                    min={1}
-                    max={30}
-                    step={1}
-                    ref={seriesSizeRef}
-                    onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}
-                />
-
-                <button className={'appBtn greenBtn px-3 py-1 mt-3'}
-                        onClick={() => clb(seriesSize === baseSeriesSize ? '' : seriesSize)}
+        <div>
+            <div className={'fs-7 d-flex justify-content-between gap-1 mt-2'}>
+                <button
+                    className={'flex-fill'}
+                    onClick={() => incrementSeriesSize(-1)}
                 >
-                    Подтвердить
+                    <i className="fas fa-minus fs-7"/>
+                </button>
+
+                <span>X {seriesSize || baseSeriesSize}</span>
+
+                <button
+                    className={'flex-fill'}
+                    onClick={() => incrementSeriesSize(1)}
+                >
+                    <i className="fas fa-plus fs-7"/>
                 </button>
             </div>
-        </AppSelect>
+            <input
+                className={"w-100"}
+                type="range"
+                defaultValue={queryParameters.series_size || baseSeriesSize}
+                min={1}
+                max={10}
+                step={1}
+                ref={seriesSizeRef}
+                onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}
+            />
+        </div>
+
+        // <AppSelect
+        //     noInput
+        //     label={'Размер серии'}
+        //     colorScheme={'darkInput'}
+        //     variant={'select'}
+        //     style={{width: 80}}
+        //     value={`X${queryParameters.series_size || baseSeriesSize}`}
+        // >
+        //     <div className={'p-2 d-flex justify-content-center flex-nowrap flex-column align-items-center'}>
+        //         <div className={'d-flex gap-3 fs-3 text-nowrap'}>
+        //             <Button
+        //                 onClick={() => incrementSeriesSize(-1)}
+        //             >
+        //                 <i className="fas fa-minus fs-4"/>
+        //             </Button>
+        //
+        //             X {seriesSize || baseSeriesSize}
+        //
+        //             <Button
+        //                 onClick={() => incrementSeriesSize(1)}
+        //             >
+        //                 <i className="fas fa-plus fs-4"/>
+        //             </Button>
+        //         </div>
+        //         <input
+        //             className={"mt-3 w-100"}
+        //             type="range"
+        //             defaultValue={queryParameters.series_size || baseSeriesSize}
+        //             min={1}
+        //             max={30}
+        //             step={1}
+        //             ref={seriesSizeRef}
+        //             onChange={() => setSeriesSize(seriesSizeRef.current?.value || baseSeriesSize)}
+        //         />
+        //
+        //         <button className={'appBtn greenBtn px-3 py-1 mt-3'}
+        //                 onClick={() => clb(seriesSize === baseSeriesSize ? '' : seriesSize)}
+        //         >
+        //             Подтвердить
+        //         </button>
+        //     </div>
+        // </AppSelect>
     );
 }

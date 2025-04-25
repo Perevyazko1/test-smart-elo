@@ -1,21 +1,28 @@
-import React, {useMemo} from "react";
+import React, {useCallback, useMemo} from "react";
 import {useDragLayer} from 'react-dnd';
 
 import {DayInfo, getNextDays} from "@pages/EqPage/model/lib/getNextDays";
 import {AreaGhost} from "@pages/EqPage/ui/EqBody/widgets/AreaGhost";
 import {EqOrderProduct} from "@widgets/EqCardList";
-import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
+import {usePlanInfo} from "@pages/EqPage/model/api/planInfoApi";
+import {IDragItemCard} from "@pages/EqPage/model/types";
 
 
 export const PlanGhost = () => {
     const {itemType, currentOffset, item} = useDragLayer((monitor) => ({
         itemType: monitor.getItemType(),
-        item: monitor.getItem(),
+        item: monitor.getItem() as IDragItemCard,
         currentOffset: monitor.getSourceClientOffset(),
     }));
 
+    const DAYS_COUNT = 31;
+
+    const {data} = usePlanInfo({
+        days_count: DAYS_COUNT,
+    })
+
     const {days, emptyCells} = useMemo(() => {
-        const days = getNextDays(31);
+        const days = getNextDays(DAYS_COUNT);
         const firstDay = new Date(days[0].dtDay!).getDay() - 1;
         const emptyCells = Array(Math.max(0, firstDay)).fill(null); // Защита от отрицательного firstDay
         return {days, emptyCells};
@@ -26,6 +33,16 @@ export const PlanGhost = () => {
         const dayOfWeek = date.getDay();
         return dayOfWeek === 0 || dayOfWeek === 6; // Воскресенье (0) или суббота (6)
     };
+
+    const getCurrentLoad = useCallback((day: string | null) => {
+        if (!day) return null;
+        if (!data) return null;
+
+        const targetDay = data.data.days_load[day];
+        if (!targetDay) return null;
+
+        return targetDay;
+    }, [data]);
 
     if (itemType !== "eq_card") return null;
 
@@ -47,9 +64,9 @@ export const PlanGhost = () => {
                         top: currentOffset?.y,
                         zIndex: 1005,
                     }}>
-                    <span>{(item.assignmentsLists as EqNumberListTipe).primary.length} шт. - {(item.card as EqOrderProduct).product.name}</span>
+                    <span>{item.assignmentsLists.primary.length} шт. - {(item.card as EqOrderProduct).product.name}</span>
                     <br/>
-                    <span>{(item.card as EqOrderProduct).order.project} {(item.card as EqOrderProduct).order.inner_number}</span>
+                    <span>{item.card.order.project} {item.card.order.inner_number}</span>
                 </div>
             )}
 
@@ -59,8 +76,11 @@ export const PlanGhost = () => {
                         day: "Убрать плановую дату",
                         dtDay: null,
                     }}
+                    item={item}
+                    current_load={null}
                     bg={'#ae714c'}
-                    className={'border border-2 border-danger p-2 text-white'}
+                    total_units_day={null}
+                    className={'border border-2 border-danger p-1 text-white'}
                 />
                 <div className={'h-50 flex-fill calendarBox gap-1'} style={{zIndex: 1003}}>
                     {emptyCells.map((_, index) => (
@@ -71,10 +91,13 @@ export const PlanGhost = () => {
                     {days.map((dayInfo) => (
                         <AreaGhost
                             key={dayInfo.day}
+                            item={item}
                             dayInfo={dayInfo}
+                            current_load={getCurrentLoad(dayInfo.dtDay)}
                             style={{
                                 fontSize: 16,
                             }}
+                            total_units_day={data?.data.total_units_day || null}
                             bg={isWeekend(dayInfo) ? '#ae714c' : undefined}
                             className={'border border-2 p-2 text-white border-danger'}
                         />

@@ -160,6 +160,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
         const card = sortedList[index];
         return (
             <EqCard
+                key={card.series_id}
                 targetUserId={targetUserId}
                 noRelevant={queue.includes(card.id)}
                 card={card}
@@ -181,6 +182,14 @@ export const EqCardList = memo((props: EqCardListProps) => {
         }, 0
     )
 
+    const planTiming = useMemo(() => {
+        return data?.results.reduce(
+            (acc, item) => {
+                return acc + (item.card_info.timing * item.assignments.length)
+            }, 0
+        )
+    }, [data])
+
     return (
         <div
             style={{
@@ -197,6 +206,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 <EqControlPanel
                     listType={listType}
                     totalPlan={planSum ? Math.round(planSum) : 0}
+                    totalTiming={planTiming ? Math.round(planTiming / 60) : 0}
                 />
 
                 {virtualItems.map(card => (

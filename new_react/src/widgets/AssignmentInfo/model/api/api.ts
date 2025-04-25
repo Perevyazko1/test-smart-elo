@@ -34,6 +34,7 @@ const AssignmentInfoApi = rtkAPI.injectEndpoints({
             }),
             invalidatesTags: [
                 {type: 'AssignmentInfo', id: 'AssignmentInfo'},
+                {type: 'PlanInfo'},
             ],
         }),
         updateCoExecutor: build.mutation<any, AssignmentCoExecutorWrite>({

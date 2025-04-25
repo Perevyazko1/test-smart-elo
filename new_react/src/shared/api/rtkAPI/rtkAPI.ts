@@ -48,6 +48,7 @@ export const rtkAPI = createApi({
     tagTypes: [
         'RetarifficationCard',
         'WagesList',
+        'PlanInfo',
         'UserList',
         'StaffInfo',
         'WagesWeekInfo',

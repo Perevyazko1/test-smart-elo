@@ -6,10 +6,11 @@ import {useQueryParams} from "@shared/hooks";
 
 interface SwitchTimingInfoProps {
     listType: ListTypes;
+    totalTiming: number;
 }
 
 export const SwitchTimingInfo = (props: SwitchTimingInfoProps) => {
-    const {listType} = props;
+    const {listType, totalTiming} = props;
 
     const [checked, setChecked] = useState(!localStorage.getItem(`${listType}timing`));
     const {queryParameters, setQueryParam} = useQueryParams();
@@ -35,7 +36,7 @@ export const SwitchTimingInfo = (props: SwitchTimingInfoProps) => {
                     onSwitch={switchHandle}
                     labelPosition={'labelRight'}
                     handleContent={'🕐'}
-                    label={"Тайминги"}
+                    label={`Тайм.(${totalTiming}ч)`}
                 />
             </AppTooltip>
         </>

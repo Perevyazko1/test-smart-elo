@@ -1,5 +1,5 @@
 import {EqOrderProduct} from "@widgets/EqCardList";
-import {useId, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import {useSetTiming} from "@widgets/EqCard/model/api/updateTiming";
 import {useDebounce, usePermission} from "@shared/hooks";
 import {Spinner} from "react-bootstrap";
@@ -38,20 +38,12 @@ export const TimingWidget = (props: TimingWidgetProps) => {
         // Проверяем, что строка соответствует формату числа (включая дробные)
         const isValidNumber = /^-?\d*\.?\d*$/.test(value);
 
-        if (isValidNumber) {
-            setTiming(value);
+        if (!isValidNumber || value === "") {
+            value = "0"
         }
-
-        debouncedUpdateTiming(value)
+        setTiming(value);
+        debouncedUpdateTiming(value);
     }
-
-
-    const id: string = useId();
-
-    const inputId = useMemo(() => {
-        const date: string = new Date().toISOString();
-        return id + date;
-    }, [id]);
 
     return (
         <div>
@@ -68,7 +60,6 @@ export const TimingWidget = (props: TimingWidgetProps) => {
             <input
                 className={'m-1 text-black p-0 text-center border py-1 fw-bold ' + getBg}
                 style={{width: 45}}
-                id={inputId}
                 disabled={!isBoss}
                 value={timing}
                 type={'text'}

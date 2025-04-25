@@ -13,10 +13,11 @@ import {SwitchTimingInfo} from "@pages/EqPage/ui/EqBody/panel/SwitchTimingInfo";
 interface EqControlPanelProps {
     listType: ListTypes;
     totalPlan: number;
+    totalTiming: number;
 }
 
 export const EqControlPanel = memo((props: EqControlPanelProps) => {
-    const {listType, totalPlan} = props;
+    const {listType, totalPlan, totalTiming} = props;
 
     const {queryParameters} = useQueryParams();
 
@@ -53,7 +54,7 @@ export const EqControlPanel = memo((props: EqControlPanelProps) => {
                 )}
                 <SwitchGroupByPlanDate listType={listType}/>
                 <SwitchShowSum listType={listType} totalPlan={totalPlan}/>
-                <SwitchTimingInfo listType={listType}/>
+                <SwitchTimingInfo listType={listType} totalTiming={totalTiming}/>
             </div>
         </div>
     );

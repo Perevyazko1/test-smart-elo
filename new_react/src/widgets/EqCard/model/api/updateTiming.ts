@@ -14,6 +14,9 @@ const EqCardApi = rtkAPI.injectEndpoints({
                 method: 'POST',
                 body: props,
             }),
+            invalidatesTags: [
+                {type: 'PlanInfo'},
+            ],
         }),
     }),
 });

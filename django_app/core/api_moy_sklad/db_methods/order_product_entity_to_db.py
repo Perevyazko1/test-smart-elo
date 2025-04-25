@@ -7,7 +7,7 @@ from ...services.assignment_generator import AssignmentGenerator
 
 import logging
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
 
 
 class OrderProductEntityToDB:
