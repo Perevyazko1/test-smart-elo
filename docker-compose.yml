@@ -92,6 +92,8 @@ services:
         context: ./new_react
         dockerfile: Dockerfile
       container_name: elo_client_build
+      stdin_open: true
+      tty: true
       volumes:
         - react_build:/output
       command: sh -c "cp -r /runtime/build/* /output/ && ls -la /output"
