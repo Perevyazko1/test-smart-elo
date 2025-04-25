@@ -94,7 +94,8 @@ services:
       container_name: elo_client_build
       volumes:
         - react_build:/output
-      command: sh -c "ls -la /output"
+      command: sh -c "cp -r /runtime/build/* /output/ && ls -la /output"
+
 
   sklad:
     build:

@@ -10,10 +10,10 @@ COPY . .
 RUN npm run build
 
 
-# Финальный контейнер — просто для копирования результата в volume
+# Финальный контейнер — пустой, только для запуска команды
 FROM alpine:3.20
 
-WORKDIR /output
+WORKDIR /runtime
 
-# Копируем build из предыдущего этапа
-COPY --from=builder /app/build ./
+# Копируем build как артефакт в другую папку, чтобы можно было достать его через builder
+COPY --from=builder /app/build /runtime/build
