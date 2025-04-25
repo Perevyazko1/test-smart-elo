@@ -88,15 +88,13 @@ services:
       - app-network
 
   elo_client_build:
-    build:
-      context: ./new_react
-      dockerfile: Dockerfile
-    container_name: elo_client_build
-
-    volumes:
-      - react_build:/app/build
-    command: >
-      sh -c "npm run build && cp -r /app/build/* /app/build/"
+      build:
+        context: ./new_react
+        dockerfile: Dockerfile
+      container_name: elo_client_build
+      volumes:
+        - react_build:/output
+      command: sh -c "ls -la /output"
 
   sklad:
     build:
