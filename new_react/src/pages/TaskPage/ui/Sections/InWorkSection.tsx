@@ -4,7 +4,7 @@ import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
-import {allFiltersInited, getInWorkData} from "../../model/selectors";
+import {getInWorkData} from "../../model/selectors";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
 import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
@@ -13,11 +13,10 @@ import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 export const InWorkSection = () => {
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
-    const filtersInited = useAppSelector(allFiltersInited);
     const inWorkData = useAppSelector(getInWorkData);
 
     useEffect(() => {
-        if (filtersInited) {
+        if (queryParameters.sort_mode && queryParameters.view_mode) {
             const reqId = Date.now();
 
             dispatch(getTaskCards({
@@ -32,7 +31,6 @@ export const InWorkSection = () => {
             }))
         }
     }, [dispatch,
-        filtersInited,
         queryParameters.view_mode,
         queryParameters.sort_mode,
         queryParameters.users,

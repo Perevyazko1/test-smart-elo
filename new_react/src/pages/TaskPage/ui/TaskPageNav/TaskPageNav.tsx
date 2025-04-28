@@ -9,7 +9,6 @@ import {AppTooltip} from "@shared/ui";
 
 
 export const TaskPageNav = () => {
-
     return (
         <AppNavbar>
             <AppTooltip title="Переключение режимов сотрировки">

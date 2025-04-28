@@ -4,7 +4,7 @@ import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
-import {allFiltersInited, getReadyData} from "../../model/selectors";
+import {getReadyData} from "../../model/selectors";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
 import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
@@ -22,7 +22,6 @@ export const ReadySection = (props: ReadySectionProps) => {
 
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
-    const filtersInited = useAppSelector(allFiltersInited);
     const readyData = useAppSelector(getReadyData);
 
     useEffect(() => {
@@ -47,7 +46,7 @@ export const ReadySection = (props: ReadySectionProps) => {
 
     useEffect(() => {
         if (!eqMode) {
-            if (filtersInited) {
+            if (queryParameters.view_mode && queryParameters.sort_mode) {
                 const reqId = Date.now();
 
                 if (queryParameters.view_mode !== '3') {
@@ -81,7 +80,6 @@ export const ReadySection = (props: ReadySectionProps) => {
         }
     }, [
         dispatch,
-        filtersInited,
         queryParameters.sort_mode,
         queryParameters.users,
         queryParameters.extended_search,

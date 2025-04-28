@@ -1,8 +1,8 @@
-import React, {useEffect, useMemo} from "react";
-import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
-import {taskPageActions} from "@pages/TaskPage/model/slice";
-import {getSortModeInited} from "@pages/TaskPage/model/selectors";
+import React from "react";
+
+import {useQueryParams, useStorageInit} from "@shared/hooks";
 import {AppSelect} from "@shared/ui";
+
 
 const SortModes: { [key: string]: string } = {
     '0': 'По сроку',
@@ -11,42 +11,31 @@ const SortModes: { [key: string]: string } = {
 }
 
 export const SortModeNav = () => {
-    const {initialLoad, queryParameters, setQueryParam} = useQueryParams();
-    const dispatch = useAppDispatch();
-    const filtersInited = useAppSelector(getSortModeInited);
-
     const sortVariants = Object.keys(SortModes);
 
-    const setSortModeClb = (sortValue: string) => {
-        setQueryParam('sort_mode', sortValue)
-    };
+    const {queryParameters, setQueryParam} = useQueryParams();
 
-    useEffect(() => {
-        if (!initialLoad && !filtersInited) {
-            if (!queryParameters.sort_mode) {
-                setQueryParam('sort_mode', sortVariants[1])
-            } else {
-                dispatch(taskPageActions.sortModeInited(true));
-            }
-        }
-    }, [dispatch, filtersInited, initialLoad, queryParameters.sort_mode, setQueryParam, sortVariants]);
-
-    const sortModeValue = useMemo(() => {
-        return queryParameters.sort_mode || '1';
-    }, [queryParameters.sort_mode]);
+    const {inited, storedValue, setStoredValue} = useStorageInit({
+        storageKey: "last_sort_mode",
+        paramKey: "sort_mode",
+        paramValue: queryParameters.sort_mode,
+        defaultValue: sortVariants[1],
+        setParamClb: setQueryParam,
+        storageType: "session",
+    })
 
     return (
         <AppSelect
             noInput
             style={{width: 150}}
             variant={'dropdown'}
-            isLoading={initialLoad}
+            isLoading={!inited}
             label={'Сортировка'}
-            value={sortModeValue}
+            value={storedValue}
             colorScheme={'darkInput'}
             options={sortVariants}
             getOptionLabel={option => SortModes[option]}
-            onSelect={setSortModeClb}
+            onSelect={setStoredValue}
         />
     );
 };

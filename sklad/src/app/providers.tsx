@@ -1,5 +1,5 @@
 "use client"
-import {createContext, ReactNode, useEffect, useState} from "react";
+import {createContext, ReactNode, useEffect, useMemo, useState} from "react";
 import {createPortal} from "react-dom";
 import cn from 'clsx'
 
@@ -14,6 +14,7 @@ export interface ModalContextProps {
     handleOpen: (props: ModalState) => void;
     handleClose: () => void;
     closeNoConfirm: () => void;
+    isActive: boolean;
 }
 
 export const ModalContext = createContext<ModalContextProps | undefined>(undefined);
@@ -82,8 +83,12 @@ export const ModalProvider = (props: { children: ReactNode }) => {
         }, 300)
         setShowContent(false);
     };
+    
+    const isActive = useMemo(() => {
+        return modals.length !== 0;
+    }, [modals.length]) 
 
-    const value = {handleOpen, handleClose, closeNoConfirm};
+    const value = {handleOpen, handleClose, closeNoConfirm, isActive};
 
     return (
         <ModalContext.Provider value={value}>

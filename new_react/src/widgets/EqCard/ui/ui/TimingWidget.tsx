@@ -45,6 +45,11 @@ export const TimingWidget = (props: TimingWidgetProps) => {
         debouncedUpdateTiming(value);
     }
 
+    const selectAll = (event: React.FocusEvent<HTMLInputElement>) => {
+        // выделяем всё содержимое
+        event.target.select();
+    };
+
     return (
         <div>
             {
@@ -65,6 +70,7 @@ export const TimingWidget = (props: TimingWidgetProps) => {
                 type={'text'}
                 pattern="[0-9]*\.?[0-9]*"
                 onChange={setInputHandler}
+                onFocus={selectAll}
             />
         </div>
     );

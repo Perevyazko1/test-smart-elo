@@ -1,42 +1,47 @@
-import React, {useEffect, useState} from "react";
+import React, {useMemo} from "react";
 
-import {Department, useDepartmentList} from "@entities/Department";
-import {useQueryParams} from "@shared/hooks";
+import {useDepartmentList} from "@entities/Department";
+import {useQueryParams, useStorageInit} from "@shared/hooks";
 import {AppSelect} from "@shared/ui";
 
 export const DepartmentFilter = () => {
     const {data, isLoading} = useDepartmentList({});
     const {queryParameters, setQueryParam} = useQueryParams();
 
-    const [selectedDepartments, setSelectedDepartments] = useState<Department[]>([]);
+    const {inited, storedValue, setStoredValue} = useStorageInit({
+        storageKey: "last_departments",
+        paramKey: "departments",
+        paramValue: queryParameters.departments || '',
+        defaultValue: "",
+        setParamClb: setQueryParam,
+        storageType: "session",
+        skip: isLoading,
+    })
 
-    const selectClb = (departments: Department[] | null) => {
-        const queryValue = departments?.map(department => department.id).join();
-        setQueryParam('departments', queryValue || '');
+    const selectClb = (dep_ids: number[] | null) => {
+        const queryValue = dep_ids?.filter(item => item !== 0)?.join(",");
+        setStoredValue(queryValue || '');
     };
 
-    useEffect(() => {
-        if (data) {
-            if (queryParameters.departments) {
-                const queryIds = queryParameters.departments.split(',').map(item => Number(item));
-                setSelectedDepartments(data.filter(item => queryIds.includes(item.id)));
-            } else {
-                setSelectedDepartments([]);
-            }
-        }
-    }, [queryParameters.departments, data]);
+    const selectedValue = useMemo(() => {
+        return storedValue.split(",").map(item => Number(item));
+    }, [storedValue])
+
+    const options = useMemo(() => {
+        return data?.map(item => item.id) || [];
+    }, [data]);
 
     return (
         <AppSelect
             style={{width: 160}}
-            isLoading={isLoading}
+            isLoading={!inited || isLoading}
             variant={'multiple'}
             colorScheme={'darkInput'}
             label={'Отделы'}
-            value={selectedDepartments}
+            value={selectedValue}
             onSelect={selectClb}
-            getOptionLabel={option => option.name}
-            options={data}
+            getOptionLabel={option => data?.find(item => item.id === option)?.name || ""}
+            options={options}
         />
     );
 };

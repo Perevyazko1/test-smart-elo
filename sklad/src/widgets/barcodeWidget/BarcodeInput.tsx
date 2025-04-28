@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from "react";
+import {useModal} from "@/lib/hooks/use-modal";
 
 interface BarcodeInputProps {
     setBarcodes: (barcodes: string[]) => void;
@@ -6,60 +7,79 @@ interface BarcodeInputProps {
     readyToScan: boolean;
 }
 
-export const BarcodeInput = (props: BarcodeInputProps) => {
-    const {setBarcodes, barcodes, readyToScan} = props;
-    const useFocus = () => {
-        const inputRef = useRef<HTMLInputElement>(null)
-        const setFocus = () => {
-            if (inputRef.current) {
-                inputRef.current.focus()
-            }
-        }
-
-        return {inputRef, setFocus}
-    }
+export const BarcodeInput = ({setBarcodes, barcodes, readyToScan}: BarcodeInputProps) => {
+    const inputRef = useRef<HTMLInputElement>(null);
     const [barcode, setBarcode] = useState<string>('');
-    const {inputRef, setFocus} = useFocus();
+    const [isManualMode, setIsManualMode] = useState<boolean>(false);
+    const {isActive} = useModal();
 
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const addBarcode = (code: string) => {
+        if (barcodes.includes(code)) {
+            const barcodeItem = document.getElementById(code);
+            if (barcodeItem) {
+                barcodeItem.scrollIntoView({behavior: "smooth"});
+                barcodeItem.classList.add('animate-bounce');
+                setTimeout(() => {
+                    barcodeItem.classList.remove('animate-bounce');
+                }, 1500);
+            }
+        } else {
+            setBarcodes([code, ...barcodes]);
+        }
+    };
+
+    // Глобальный обработчик сканирования
+    useEffect(() => {
+        if (!readyToScan || isManualMode || isActive) return;
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Enter') {
+                if (barcode.trim()) {
+                    addBarcode(barcode.trim());
+                    setBarcode('');
+                }
+            } else {
+                // Добавляем символ к строке
+                if (/^[a-zA-Z0-9]$/.test(event.key)) {
+                    setBarcode(prev => prev + event.key);
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [barcode, readyToScan, isManualMode]);
+
+    const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setBarcode(event.target.value);
     };
 
-    useEffect(() => {
-        setTimeout(() => {
-            setFocus()
-        }, 500);
-    }, [readyToScan, setFocus]);
-
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && barcode) {
-            if (barcodes.includes(barcode)) {
-                const barcodeItem = document.getElementById(barcode);
-                if (barcodeItem) {
-                    barcodeItem.scrollIntoView({behavior: "smooth"});
-                    barcodeItem.classList.add('animate-bounce')
-                    setTimeout(() => {
-                        barcodeItem.classList.remove('animate-bounce')
-                    }, 1500)
-                }
-                setBarcode("")
-            } else {
-                setBarcodes([barcode, ...barcodes]);
-                setBarcode('');
-            }
-            inputRef.current?.blur()
+    const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter' && barcode.trim()) {
+            addBarcode(barcode.trim());
+            setBarcode('');
+            setIsManualMode(false); // Вернуть глобальный режим после ручного ввода
+            inputRef.current?.blur();
         }
     };
 
-    return (
+    const handleInputFocus = () => {
+        setIsManualMode(true); // Вошли в ручной режим
+    };
 
+    return (
         <input
             type="text"
             ref={inputRef}
             value={barcode}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-            className="p-2 w-[100%] border-gray-500 border-2 active:border-green-700 outline-0 focus:border-green-700"
+            disabled={!readyToScan}
+            onChange={handleInputChange}
+            onKeyDown={handleInputKeyDown}
+            onFocus={handleInputFocus}
+            className="p-2 w-full disabled:border-gray-500 border-2 border-green-700 outline-0"
+            placeholder={isManualMode ? "[РУЧНОЙ ВВОД]" : "[СКАНЕР]"}
         />
     );
 };

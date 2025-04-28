@@ -1,4 +1,4 @@
-import {useMemo, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 
 export interface UseQueryParamsResult {
@@ -10,33 +10,35 @@ export interface UseQueryParamsResult {
 export const useQueryParams = (): UseQueryParamsResult => {
     const location = useLocation();
     const navigate = useNavigate();
-    const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
+    const [queryParameters, setQueryParameters] = useState({});
 
     const [initialLoad, setInitialLoad] = useState(true);
 
-    const queryParameters = useMemo(() => {
-        const entries = params.entries();
+    useEffect(() => {
+        const updatedParams = new URLSearchParams(location.search);
         const initialParams: Record<string, string> = {};
 
-        for (let entry of entries) {
-            initialParams[entry[0]] = entry[1];
-        }
+        updatedParams.forEach((value, key) => {
+            initialParams[key] = value;
+        });
 
-        // После инициализации переключить initialLoad на false
+        setQueryParameters(initialParams);
         setInitialLoad(false);
-
-        return initialParams;
-    }, [params]);
+    }, [location.search]);
 
     const setQueryParam = (param: string, value: string) => {
         if (!initialLoad) {
+            const updatedParams = new URLSearchParams(location.search);
             if (value) {
-                params.set(param, value);
+                updatedParams.set(param, value);
             } else {
-                params.delete(param);
+                updatedParams.delete(param);
             }
 
-            navigate({...location, search: params.toString()});
+            navigate({
+                ...location,
+                search: updatedParams.toString(),
+            }, { replace: true });
         }
     };
 

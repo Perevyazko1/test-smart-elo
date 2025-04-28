@@ -4,21 +4,25 @@ import {TaskStatus} from "@entities/Task";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 
 import {getTaskCards} from "../../model/api/getTaskCards";
-import {allFiltersInited, getAwaitData} from "../../model/selectors";
+import {getAwaitData} from "../../model/selectors";
 
 import {TaskPageCard} from "../TaskPageCard/TaskPageCard";
 import {TaskCardSkeleton} from "../TaskPageCard/TaskCardSkeleton";
 
+
 export const AwaitSection = () => {
     const dispatch = useAppDispatch();
     const {queryParameters, setQueryParam} = useQueryParams();
-    const filtersInited = useAppSelector(allFiltersInited);
     const awaitData = useAppSelector(getAwaitData);
 
     useEffect(() => {
-        if (filtersInited) {
+        if (queryParameters.sort_mode && queryParameters.view_mode) {
             const reqId = Date.now();
-
+            console.log({
+                "state": "Пошел запрос",
+                "queryParameters.sort_mode": queryParameters.sort_mode,
+                "queryParameters.view_mode": queryParameters.view_mode,
+            })
             dispatch(getTaskCards({
                 status: TaskStatus.Pending,
                 sort_mode: queryParameters.sort_mode,
@@ -31,7 +35,6 @@ export const AwaitSection = () => {
             }))
         }
     }, [dispatch,
-        filtersInited,
         queryParameters.sort_mode,
         queryParameters.view_mode,
         queryParameters.users,

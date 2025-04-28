@@ -1,11 +1,8 @@
-import React, {useEffect, useMemo} from "react";
+import React, {useMemo} from "react";
 
-import {useAppDispatch, useAppSelector, usePermission, useQueryParams} from "@shared/hooks";
+import {usePermission, useQueryParams, useStorageInit} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 import {AppSelect} from "@shared/ui";
-
-import {getViewModeInited} from "../../../model/selectors";
-import {taskPageActions} from "../../../model/slice";
 
 interface ViewModeItem {
     key: string,
@@ -32,15 +29,12 @@ const AdminMode: ViewModeItem ={key: '10', name: 'Админ'}
 
 
 export const ViewModeNav = () => {
-    const {initialLoad, queryParameters, setQueryParam} = useQueryParams();
-    const dispatch = useAppDispatch();
-
     const confirmTariffPerm = usePermission(APP_PERM.TARIFFICATION_CONFIRM);
     const adminPerm = usePermission(APP_PERM.ADMIN);
 
     const allViewModes: ViewModeItem[] = useMemo(() => {
         let resultViewModes: ViewModeItem[] = [DefaultViewMode, ...ViewModes]
-        
+
         if (confirmTariffPerm) {
             resultViewModes = [...resultViewModes, ...TariffViewModes];
         }
@@ -50,43 +44,28 @@ export const ViewModeNav = () => {
         return resultViewModes;
     }, [adminPerm, confirmTariffPerm]);
 
-    const filtersInited = useAppSelector(getViewModeInited);
+    const {queryParameters, setQueryParam} = useQueryParams();
 
-    const setViewModeClb = (viewValue: ViewModeItem) => {
-        setQueryParam('view_mode', viewValue.key);
-    };
-
-    useEffect(() => {
-        if (!initialLoad && !filtersInited) {
-            if (!queryParameters.view_mode) {
-                setQueryParam('view_mode', DefaultViewMode.key);
-            } else {
-                const allowedViewMode: boolean = allViewModes.some(item => item.key === queryParameters.view_mode);
-                if (allowedViewMode) {
-                    dispatch(taskPageActions.viewModeInited(true));
-                } else {
-                    setQueryParam('view_mode', DefaultViewMode.key);
-                }
-            }
-        }
-    }, [allViewModes, dispatch, filtersInited, initialLoad, queryParameters.view_mode, setQueryParam]);
-
-    const viewModeValue: ViewModeItem = useMemo(() => {
-        const targetViewMode = allViewModes.find(item => item.key === queryParameters.view_mode)
-        return targetViewMode || DefaultViewMode;
-    }, [allViewModes, queryParameters.view_mode])
+    const {inited, storedValue, setStoredValue} = useStorageInit({
+        storageKey: "last_view_mode",
+        paramKey: "view_mode",
+        paramValue: queryParameters.view_mode,
+        defaultValue: allViewModes[0].key,
+        setParamClb: setQueryParam,
+        storageType: "session",
+    })
 
     return (
         <AppSelect
             noInput
             style={{width: 150}}
-            isLoading={initialLoad}
+            isLoading={!inited}
             variant={'dropdown'}
             label={'Режим просмотра'}
-            value={viewModeValue || ''}
-            options={allViewModes}
-            getOptionLabel={option => option.name}
-            onSelect={setViewModeClb}
+            value={storedValue}
+            options={allViewModes.map(item => item.key)}
+            getOptionLabel={option => allViewModes.find(mode => mode.key === option)?.name || ""}
+            onSelect={setStoredValue}
             colorScheme={'darkInput'}
         />
     );

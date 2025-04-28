@@ -16,19 +16,6 @@ export const getNoRelevantId = (state: StateSchema) => {
     return state.taskPage?.noRelevantIds;
 }
 
-export const getViewModeInited = (state: StateSchema) => {
-    return state.taskPage?.viewModeInited;
-}
-
-export const getSortModeInited = (state: StateSchema) => {
-    return state.taskPage?.sortModeInited;
-}
-
 export const getStateDateRangeData = (state: StateSchema) => {
     return state.taskPage?.date_range_data;
-}
-
-
-export const allFiltersInited = (state: StateSchema) => {
-    return state.taskPage?.sortModeInited && state.taskPage.viewModeInited;
 }

@@ -124,6 +124,11 @@ export const LossWidget = (props: LossWidgetProps) => {
 
     const positionImage = getPositionImage();
 
+    const selectAll = (event: React.FocusEvent<HTMLInputElement>) => {
+        // выделяем всё содержимое
+        event.target.select();
+    };
+
     return (
         <form className={'flex flex-col gap-3'} onSubmit={submitHandle}>
             <div>
@@ -151,6 +156,7 @@ export const LossWidget = (props: LossWidgetProps) => {
                     className={`p-2 w-[25%] border-gray-500 border-2 outline-0 focus:border-${color}-800 active:border-${color}-800`}
                     value={inputValue}
                     onChange={handleInputChange}
+                    onFocus={selectAll}
                 />
                 {position.uom.name}
             </div>
