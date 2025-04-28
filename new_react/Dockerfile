@@ -11,7 +11,7 @@ RUN npm run build
 
 
 # Финальный контейнер — пустой, только для запуска команды
-FROM alpine:3.20
+FROM node:23-alpine3.20
 
 WORKDIR /runtime
 
