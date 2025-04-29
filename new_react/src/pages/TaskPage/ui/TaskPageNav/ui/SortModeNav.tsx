@@ -1,6 +1,6 @@
 import React from "react";
 
-import {useQueryParams, useStorageInit} from "@shared/hooks";
+import {useQueryParams, useStorageString} from "@shared/hooks";
 import {AppSelect} from "@shared/ui";
 
 
@@ -15,14 +15,14 @@ export const SortModeNav = () => {
 
     const {queryParameters, setQueryParam} = useQueryParams();
 
-    const {inited, storedValue, setStoredValue} = useStorageInit({
-        storageKey: "last_sort_mode",
-        paramKey: "sort_mode",
-        paramValue: queryParameters.sort_mode,
+    const QUERY_KEY = "sort_mode"
+
+    const {inited, setValue} = useStorageString({
+        key: QUERY_KEY,
+        onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
         defaultValue: sortVariants[1],
-        setParamClb: setQueryParam,
-        storageType: "session",
-    })
+        storageType: "sessionStorage",
+    });
 
     return (
         <AppSelect
@@ -31,11 +31,11 @@ export const SortModeNav = () => {
             variant={'dropdown'}
             isLoading={!inited}
             label={'Сортировка'}
-            value={storedValue}
+            value={queryParameters[QUERY_KEY] || ""}
             colorScheme={'darkInput'}
             options={sortVariants}
             getOptionLabel={option => SortModes[option]}
-            onSelect={setStoredValue}
+            onSelect={setValue}
         />
     );
 };

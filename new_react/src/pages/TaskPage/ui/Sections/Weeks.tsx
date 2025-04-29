@@ -29,7 +29,7 @@ export const Weeks = (props: WeeksProps) => {
 
     const readyData = useAppSelector(getReadyData);
 
-    const {initialLoad, queryParameters, setQueryParam} = useAppQuery();
+    const {initialLoad, queryParameters, setQueryParams} = useAppQuery();
 
     const dateRangeData = useAppSelector(getStateDateRangeData);
 
@@ -102,20 +102,16 @@ export const Weeks = (props: WeeksProps) => {
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
                             onClick={() => {
-                                setQueryParam(
-                                    'start_date',
-                                    getHumansDatetime(
+                                setQueryParams({
+                                    start_date: getHumansDatetime(
                                         `${dateRangeData?.previous_range.start_date}`,
                                         "YYYY-MM-DD"
-                                    )
-                                )
-                                setQueryParam(
-                                    'end_date',
-                                    getHumansDatetime(
+                                    ),
+                                    end_date: getHumansDatetime(
                                         `${dateRangeData?.previous_range.end_date}`,
                                         "YYYY-MM-DD"
                                     )
-                                )
+                                })
                             }}
                     >
                         <i className="fas fa-angle-double-left fs-3"/>
@@ -131,20 +127,16 @@ export const Weeks = (props: WeeksProps) => {
                             size={'sm'}
                             style={{width: "50px", height: "29px"}}
                             onClick={() => {
-                                setQueryParam(
-                                    'start_date',
-                                    getHumansDatetime(
+                                setQueryParams({
+                                    start_date: getHumansDatetime(
                                         `${dateRangeData?.next_range.start_date}`,
                                         "YYYY-MM-DD"
-                                    )
-                                )
-                                setQueryParam(
-                                    'end_date',
-                                    getHumansDatetime(
+                                    ),
+                                    end_date: getHumansDatetime(
                                         `${dateRangeData?.next_range.end_date}`,
                                         "YYYY-MM-DD"
                                     )
-                                )
+                                })
                             }}
                     >
                         <i className="fas fa-angle-double-right fs-3"/>

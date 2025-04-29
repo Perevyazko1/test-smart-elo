@@ -1,6 +1,6 @@
 import React, {useMemo} from "react";
 
-import {usePermission, useQueryParams, useStorageInit} from "@shared/hooks";
+import {usePermission, useQueryParams, useStorageString} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 import {AppSelect} from "@shared/ui";
 
@@ -46,14 +46,14 @@ export const ViewModeNav = () => {
 
     const {queryParameters, setQueryParam} = useQueryParams();
 
-    const {inited, storedValue, setStoredValue} = useStorageInit({
-        storageKey: "last_view_mode",
-        paramKey: "view_mode",
-        paramValue: queryParameters.view_mode,
+    const QUERY_KEY = "view_mode"
+
+    const {inited, setValue} = useStorageString({
+        key: QUERY_KEY,
+        onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
         defaultValue: allViewModes[0].key,
-        setParamClb: setQueryParam,
-        storageType: "session",
-    })
+        storageType: "sessionStorage",
+    });
 
     return (
         <AppSelect
@@ -62,10 +62,10 @@ export const ViewModeNav = () => {
             isLoading={!inited}
             variant={'dropdown'}
             label={'Режим просмотра'}
-            value={storedValue}
+            value={queryParameters[QUERY_KEY] || ""}
             options={allViewModes.map(item => item.key)}
             getOptionLabel={option => allViewModes.find(mode => mode.key === option)?.name || ""}
-            onSelect={setStoredValue}
+            onSelect={setValue}
             colorScheme={'darkInput'}
         />
     );

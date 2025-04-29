@@ -1,4 +1,4 @@
-export {useStorageInit} from "./useStorageInit/useStorageInit";
+export {useStorageString} from "./useStorageString/useStorageString";
 export {useEmployeeName} from "./useEmployeeName";
 export {useFormattedValue} from "./useFormattedValue/useFormattedValue";
 export {useSpeechRecognition} from "./useSpeechRecognition";

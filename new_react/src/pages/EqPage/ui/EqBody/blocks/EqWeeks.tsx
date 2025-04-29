@@ -37,7 +37,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
     const dispatch = useAppDispatch();
     const {currentUser} = useCurrentUser();
-    const {queryParameters, setQueryParam} = useAppQuery();
+    const {queryParameters, setQueryParams} = useAppQuery();
     const filtersReady = useAppSelector(eqFiltersReady);
 
     const handleDoubleTap = useDoubleTap(resetSize);
@@ -149,8 +149,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
                                 style={{width: "50px", height: "29px"}}
                                 disabled={expanded}
                                 onClick={() => {
-                                    setQueryParam('week', `${weekData?.previous_week_data?.week}`)
-                                    setQueryParam('year', `${weekData?.previous_week_data?.year}`)
+                                    setQueryParams({
+                                        week: `${weekData?.previous_week_data?.week ?? ''}`,
+                                        year: `${weekData?.previous_week_data?.year ?? ''}`
+                                    })
                                 }}
                         >
                             <i className="fas fa-angle-double-left fs-3"/>
@@ -179,8 +181,10 @@ export const EqWeeks = (props: EqWeeksProps) => {
                                 disabled={expanded}
                                 style={{width: "50px", height: "29px"}}
                                 onClick={() => {
-                                    setQueryParam('week', `${weekData?.next_week_data?.week}`)
-                                    setQueryParam('year', `${weekData?.next_week_data?.year}`)
+                                    setQueryParams({
+                                        week: `${weekData?.next_week_data?.week ?? ''}`,
+                                        year: `${weekData?.next_week_data?.year ?? ''}`
+                                    })
                                 }}
                         >
                             <i className="fas fa-angle-double-right fs-3"/>

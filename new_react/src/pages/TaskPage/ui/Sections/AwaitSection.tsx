@@ -18,11 +18,6 @@ export const AwaitSection = () => {
     useEffect(() => {
         if (queryParameters.sort_mode && queryParameters.view_mode) {
             const reqId = Date.now();
-            console.log({
-                "state": "Пошел запрос",
-                "queryParameters.sort_mode": queryParameters.sort_mode,
-                "queryParameters.view_mode": queryParameters.view_mode,
-            })
             dispatch(getTaskCards({
                 status: TaskStatus.Pending,
                 sort_mode: queryParameters.sort_mode,

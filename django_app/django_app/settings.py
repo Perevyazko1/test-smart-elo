@@ -192,14 +192,14 @@ LOGGING = {
             'class': 'django_telegram_logging.handler.TelegramHandler',
         },
         'console': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['console', 'telegram'],
-            'level': 'WARNING',
+            'level': 'INFO',
         },
     },
 }
