@@ -59,16 +59,19 @@ class AssignmentGenerator:
         """Инициализация первого уровня нарядов связанных со стартовым"""
 
         """ Проверяем наличие техпроцесса. """
-        if not order_product.product.technological_process:
+        if not order_product.product.technological_process_confirmed:
+            print("1")
             if Assignment.objects.filter(
                     order_product__product=order_product.product,
                     department__number=1
-            ).exclude(status='ready', inspector__isnull=False):
+            ).exclude(status='ready', inspector__isnull=False).exists():
+                print("2")
                 """
                 Если нет техпроцесса и есть наряд в разработке на данное изделие - игнорируем дальнейшие действия. 
                 """
                 return
             else:
+                print("3")
                 """ Если нет техпроцесса и нет наряда на разработку - создаем наряд на разработку. """
                 self.create_new_assignments(
                     order_product=order_product,
