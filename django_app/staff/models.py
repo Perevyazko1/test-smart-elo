@@ -81,6 +81,12 @@ class Employee(AbstractUser):
             return '{}'.format(f'{self.first_name} {self.last_name}')
         return self.username
 
+    def get_initials(self):
+        f = self.first_name[0] if self.first_name else '_'
+        l = self.last_name[0] if self.last_name else '_'
+        p = self.patronymic[0] if self.patronymic else '_'
+        return f'{l}{f}{p}'
+
 
 class Transaction(models.Model):
 

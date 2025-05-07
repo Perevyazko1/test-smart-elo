@@ -5,6 +5,10 @@ interface ISetTiming {
     timing: number;
 }
 
+interface IPrintLabels {
+    assignment_ids: number[];
+}
+
 
 const EqCardApi = rtkAPI.injectEndpoints({
     endpoints: (build) => ({
@@ -18,7 +22,16 @@ const EqCardApi = rtkAPI.injectEndpoints({
                 {type: 'PlanInfo'},
             ],
         }),
+        printLabels: build.query<any, IPrintLabels>({
+            query: (props: IPrintLabels) => ({
+                url: '/core/print_labels/',
+                method: 'GET',
+                params: props,
+            }),
+        }),
     }),
+
 });
 
 export const useSetTiming = EqCardApi.useEditTimingMutation;
+export const useLazyPrintLabels = EqCardApi.useLazyPrintLabelsQuery;

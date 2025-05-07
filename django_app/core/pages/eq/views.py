@@ -1,6 +1,7 @@
 """Views for EQ Page. """
 from dataclasses import asdict
 from datetime import datetime, timedelta
+import re
 
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
@@ -9,18 +10,17 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import (
-    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, Product,
-)
+    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment)
+from src.label_printer.main_label_template import main_label_template
+from src.label_printer.printer import Printer
 from staff.models import Employee, Transaction, Department
 from staff.service import is_user_in_group
-
 from .serializers import EqOrderProductSerializer
 from .service.eq_update_assignments_status import EqUpdateAssignmentsStatus
 from .service.get_eq_card_queryset import get_eq_card_queryset
 from .service.get_eq_req_params import get_eq_req_params
 from .service.get_project_filter import get_project_filters
 from .service.get_view_modes import get_view_modes
-
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
 from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
@@ -463,7 +463,7 @@ def update_timing_info(request):
             notification_data=notification_data
         )
 
-    return JsonResponse({'result': 'ok'})
+    return JsonResponse({'result': 'ok'}, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['get'])
@@ -510,4 +510,84 @@ def get_plan_info(request):
         "total_units_day": total_units_day,
         "days_load": days_load
     }
-    return JsonResponse({'data': result})
+    return JsonResponse({'data': result}, json_dumps_params={"ensure_ascii": False})
+
+
+
+@api_view(['get'])
+def print_labels(request):
+    assignment_ids = request.query_params.get('assignment_ids').split(',')
+    if not assignment_ids:
+        return JsonResponse({'error': 'assignment_ids must be a list of integers'}, status=400)
+    user = request.user.get_initials()
+
+    for assignment_id in assignment_ids:
+        target_assignment = Assignment.objects.get(id=assignment_id)
+        project = target_assignment.order_product.order.project
+        order_number = target_assignment.order_product.order.number
+        position_number = target_assignment.order_product.series_id.split('-')[0]
+        product_name = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '', target_assignment.order_product.product.name)
+        t1 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
+                    target_assignment.order_product.main_fabric.name) if target_assignment.order_product.main_fabric else ""
+        t2 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
+                    target_assignment.order_product.second_fabric.name) if target_assignment.order_product.second_fabric else ""
+        t3 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
+                    target_assignment.order_product.third_fabric.name) if target_assignment.order_product.third_fabric else ""
+
+        op_comments = OrderProductComment.objects.filter(
+            order_product=target_assignment.order_product
+        ).exclude(
+            deleted=True
+        ).order_by('-important', '-add_date')
+
+        comments = []
+        for comment in op_comments:
+            comments.append(re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '', comment.text))
+
+        department_name = target_assignment.department.name
+        inner_number = target_assignment.order_product.order.inner_number
+
+        print_date = datetime.now().strftime('%d.%m %H:%M:%S')
+
+        main_text = [
+            (project, 14 if len(project) < 15 else 11),
+            ("---------", 8),
+            (product_name, 9),
+        ]
+
+        if t1:
+            main_text.append((f'Т1: {t1}', 7))
+        if t2:
+            main_text.append((f'Т2: {t2}', 7))
+        if t3:
+            main_text.append((f'Т3: {t3}', 7))
+
+        main_text.extend([
+            *(("К: " + comment, 8) for comment in comments),
+            ("---------", 8),
+        ])
+
+        printer = Printer()
+        qr_text = f"elo.szmk.pro/assignments/{target_assignment.id}"
+        order_text = [
+            (order_number, 14),
+            ('---------', 8),
+            (f'{position_number} ПОЗ', 11),
+            ('---------', 8),
+            (f'№ {target_assignment.number}', 11),
+            (f'{print_date}{user}', 5),
+        ]
+        department_text = [
+            (f"{department_name}: {inner_number}", 10),
+        ]
+
+        label = main_label_template(
+            main_text,
+            qr_text,
+            order_text,
+            department_text
+        )
+        printer.print_label(label)
+    
+    
+    return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})
