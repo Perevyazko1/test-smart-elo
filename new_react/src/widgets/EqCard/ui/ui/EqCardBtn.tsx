@@ -2,9 +2,10 @@ import React, {ButtonHTMLAttributes, useMemo} from "react";
 import {Spinner} from "react-bootstrap";
 import {useDrag} from 'react-dnd';
 
-import {useClickSound} from "@shared/hooks";
+import {useClickSound, usePermission} from "@shared/hooks";
 import {EqOrderProduct, ListTypes} from "@widgets/EqCardList";
 import {EqNumberListTipe} from "@widgets/EqCard/model/lib/createEqNumberLists";
+import {APP_PERM} from "@shared/consts";
 
 
 interface EqCardBtnProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -35,6 +36,8 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
         ...otherProps
     } = props;
     const playSound = useClickSound();
+
+    const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
     const [{isDragging}, dragRef] = useDrag({
         type: 'eq_card',
@@ -114,7 +117,7 @@ export const EqCardBtn = (props: EqCardBtnProps) => {
 
     return (
         <div className={'d-flex flex-column'} style={{gap: '.1rem'}}>
-            {showDrug && (
+            {(showDrug && isBoss) && (
                 <button
                     className={'appBtn p-1 rounded rounded-2 flex-fill'}
                     ref={dragRef}

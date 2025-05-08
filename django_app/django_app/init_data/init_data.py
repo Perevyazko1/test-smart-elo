@@ -13,5 +13,5 @@ def init_data():
         for department in next_departments:
             ps.next_steps.add(department.id)
         ps.save()
-
+    print('PASS')
     return "Oki"

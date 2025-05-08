@@ -57,7 +57,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
                 <button
                     className={"appBtn p-1 rounded h-100 fw-bold position-relative"}
                     style={{minWidth: '35px', fontSize: 12}}
-                    disabled={printLoading || targetAssignments.length === 0}
+                    disabled={printLoading || targetAssignments.length === 0 || true}
                     onClick={printLabels}
                 >
                     🖨️
