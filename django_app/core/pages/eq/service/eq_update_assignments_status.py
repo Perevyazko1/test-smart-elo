@@ -140,17 +140,10 @@ class EqUpdateAssignmentsStatus:
                 else:
                     inspector = self.employee
 
-                if self.department.piecework_wages:
-                    update_data = {
-                        'inspector': inspector,
-                        'inspect_date': datetime.now(),
-                    }
-                else:
-                    update_data = {
-                        'inspector': inspector,
-                        'inspect_date': datetime.now(),
-                        "tariffication_date": datetime.now(),
-                    }
+                update_data = {
+                    'inspector': inspector,
+                    'inspect_date': datetime.now(),
+                }
 
                 qs_filter["inspector__isnull"] = True
 
@@ -339,13 +332,33 @@ class EqUpdateAssignmentsStatus:
     def _tariffication_instruction(self):
         # Флаг для отправки уведомления на обновление ЗП
         tariff_created = False
+        now = datetime.now()
 
         for assignment_id in self.assignment_ids:
             target_assignment = Assignment.objects.get(
                 id=assignment_id,
             )
+            if target_assignment.date_completion:
+                days_diff = (now - target_assignment.date_completion).days
+                # Если разница больше 3 дней - используем текущую дату
+                if days_diff > 3:
+                    tariffication_date = now
+                # Если разница меньше или равна 3 дням - используем дату готовности
+                else:
+                    tariffication_date = target_assignment.date_completion
+            else:
+                # Если дата готовности не установлена - используем текущую дату
+                tariffication_date = now
+
+            if not self.department.piecework_wages:
+                target_assignment.tariffication_date = tariffication_date
+                target_assignment.save()
+                continue
+
             if target_assignment.new_tariff and not target_assignment.tariffication_date:
-                target_assignment.tariffication_date = datetime.now()
+                # Проверяем разницу между датой готовности и текущей датой
+
+                target_assignment.tariffication_date = tariffication_date
                 target_assignment.save()
 
                 if target_assignment.new_tariff.amount:
@@ -359,7 +372,7 @@ class EqUpdateAssignmentsStatus:
                     for co_executor in co_executors:
                         if co_executor.wages_amount:
                             Transaction.objects.create(
-                                target_date=datetime.now(),
+                                target_date=tariffication_date,  # Используем вычисленную дату
                                 transaction_type='accrual',
                                 details='wages',
                                 amount=co_executor.wages_amount,
@@ -374,7 +387,7 @@ class EqUpdateAssignmentsStatus:
 
                     if target_assignment.amount:
                         Transaction.objects.create(
-                            target_date=datetime.now(),
+                            target_date=tariffication_date,  # Используем вычисленную дату
                             transaction_type='accrual',
                             details='wages',
                             amount=target_assignment.amount,
@@ -428,8 +441,7 @@ class EqUpdateAssignmentsStatus:
         """В случае если происходит подтверждение наряда создаем связанные наряды"""
         if self.action == "confirmed":
             self._confirmation_instructions()
-            if self.department.piecework_wages:
-                self._tariffication_instruction()
+            self._tariffication_instruction()
 
         """Делаем рассылку на обновление данных в WS"""
         ws_group_updates(pin_code=self.original_user.pin_code, notification_data=self.notification_data)

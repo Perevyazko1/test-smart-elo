@@ -77,8 +77,8 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
     further_packaging = False
 
     if production_step:
-        further_packaging = production_step.next_step.all().filter(
-            department__name="Упаковка"
+        further_packaging = production_step.next_steps.all().filter(
+            name="Упаковка"
         ).exists()
 
     result = {
