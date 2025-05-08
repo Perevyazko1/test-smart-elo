@@ -20,19 +20,20 @@ def update_production_steps(product):
                 "is_active": True
             }
         )[0]
+
         # Чистим все связи этапа
-        production_step.next_step.clear()
+        production_step.next_steps.clear()
 
         for department_name in related_department_names:
-            production_step.next_step.add(
-                ProductionStep.objects.update_or_create(
-                    department=Department.objects.get(name=department_name),
-                    product=product,
-                    defaults={
-                        "is_active": True,
-                    }
-                )[0].id
+            department = Department.objects.get(name=department_name)
+            ProductionStep.objects.update_or_create(
+                department=department,
+                product=product,
+                defaults={
+                    "is_active": True
+                }
             )
+            production_step.next_steps.add(department.id)
 
         # Отключаем этапы которые не актуальны
         for step in existing_steps:

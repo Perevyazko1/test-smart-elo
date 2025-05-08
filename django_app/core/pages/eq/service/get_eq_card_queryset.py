@@ -129,100 +129,74 @@ def get_filtered_in_work_queryset(queryset: QuerySet[Type[OrderProduct]], eq_par
 
 
 def get_filtered_ready_queryset(queryset, eq_params):
-    # Делаем проверку на режим просмотра под пользователем
-    # Если таков задан - переопределяем пользователя
     if str(eq_params['view_mode_key']).isdigit():
         eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
 
-    # Отфильтровываем персонально в случае режима просмотра в персональных режимах
+    show_all = eq_params.get('show_all') and eq_params.get('project_filter')
+
+    def get_base_filter(department, status='ready'):
+        return {
+            'assignments__department': department,
+            'assignments__status': status
+        }
+
+    def get_date_filter(week_info):
+        return {
+            'assignments__tariffication_date__date__gte': week_info.date_range[0].date(),
+            'assignments__tariffication_date__date__lte': week_info.date_range[1].date()
+        }
+
     if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
         current_week = GetWeekInfo(week=None, year=None).execute()
         week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
+        base_filters = get_base_filter(eq_params['department'])
 
-        if current_week.week == week_info.week and current_week.year == week_info.year:
+        if current_week.week == week_info.week and current_week.year == week_info.year and not show_all:
+            date_filters = get_date_filter(week_info)
             queryset = queryset.filter(
-                Q(
-                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                    assignments__executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                    assignments__status='ready',
-                ) |
-                Q(
-                    assignments__tariffication_date__isnull=True,
-                    assignments__status='ready',
-                    assignments__executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                ) |
-                Q(
-                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                    assignments__status='ready',
-                    assignments__co_executors__co_executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                ) |
-                Q(
-                    assignments__co_executors__co_executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                    assignments__status='ready',
-                    assignments__tariffication_date__isnull=True,
-                )
-            ).distinct().order_by('-assignments__inspector')
+                Q(**date_filters, **base_filters, assignments__executor=eq_params['user']) |
+                Q(**base_filters, assignments__executor=eq_params['user'],
+                  assignments__tariffication_date__isnull=True) |
+                Q(**date_filters, **base_filters, assignments__co_executors__co_executor=eq_params['user']) |
+                Q(**base_filters, assignments__co_executors__co_executor=eq_params['user'],
+                  assignments__tariffication_date__isnull=True)
+            )
+        elif not show_all:
+            date_filters = get_date_filter(week_info)
+            queryset = queryset.filter(
+                Q(**date_filters, **base_filters, assignments__executor=eq_params['user']) |
+                Q(**date_filters, **base_filters, assignments__co_executors__co_executor=eq_params['user'])
+            )
         else:
             queryset = queryset.filter(
-                Q(
-                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                    assignments__executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                    assignments__status='ready',
-                ) |
-                Q(
-                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                    assignments__co_executors__co_executor=eq_params['user'],
-                    assignments__department=eq_params['department'],
-                    assignments__status='ready',
-                )
-            ).distinct().order_by('-assignments__inspector')
+                Q(**base_filters, assignments__executor=eq_params['user']) |
+                Q(**base_filters, assignments__co_executors__co_executor=eq_params['user'])
+            )
+        queryset = queryset.order_by('-assignments__inspector')
 
-    # В режиме бригадира фильтрацию по пин-коду не делаем
-    if eq_params['view_mode_key'] == 'boss':
+    elif eq_params['view_mode_key'] == 'boss':
         current_week = GetWeekInfo(week=None, year=None).execute()
         week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
+        base_filters = get_base_filter(eq_params['department'])
 
-        if current_week.week == week_info.week and current_week.year == week_info.year:
+        if current_week.week == week_info.week and current_week.year == week_info.year and not show_all:
+            date_filters = get_date_filter(week_info)
             queryset = queryset.filter(
-                Q(
-                    assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                    assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                    assignments__status='ready',
-                    assignments__department=eq_params['department'],
-                ) |
-                Q(
-                    assignments__department=eq_params['department'],
-                    assignments__status='ready',
-                    assignments__tariffication_date__isnull=True,
-                )
-            ).distinct()
+                Q(**date_filters, **base_filters) |
+                Q(**base_filters, assignments__tariffication_date__isnull=True)
+            )
+        elif not show_all:
+            queryset = queryset.filter(**get_date_filter(week_info), **base_filters)
         else:
-            queryset = queryset.filter(
-                assignments__tariffication_date__date__gte=week_info.date_range[0].date(),
-                assignments__tariffication_date__date__lte=week_info.date_range[1].date(),
-                assignments__status='ready',
-                assignments__department=eq_params['department'],
-            ).distinct()
+            queryset = queryset.filter(**base_filters)
 
-    # В режиме недоделок не фильтруем по пин-коду и по дате
-    if eq_params['view_mode_key'] == 'unfinished':
+    elif eq_params['view_mode_key'] == 'unfinished':
         queryset = queryset.filter(
-            assignments__department=eq_params['department'],
-            assignments__status='ready',
+            **get_base_filter(eq_params['department']),
             assignments__tariffication_date__isnull=True
-        ).distinct()
+        )
 
-    return queryset.order_by('urgency', 'order', 'id')
-
+    return queryset.distinct().order_by('urgency', 'order', 'id')
 
 def get_eq_card_queryset(queryset, request):
     """Фильтр кверисета для запроса карточек"""

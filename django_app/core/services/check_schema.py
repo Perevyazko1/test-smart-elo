@@ -17,7 +17,7 @@ def check_schema(data):
                     return False
         return True
 
-    # Проверка связей между отделами
+    # Проверка связей между отделами 
     if not dfs(start_department):
         return False
 
@@ -27,6 +27,36 @@ def check_schema(data):
             return False
 
     return True
+
+
+def compare_schemas(old_schema, new_schema):
+    added_branches = {}
+    removed_branches = {}
+
+    # Проверяем добавленные ветки
+    for dept, next_depts in new_schema.items():
+        if dept not in old_schema:
+            added_branches[dept] = next_depts
+        else:
+            # Проверяем новые связи для существующих отделов
+            added = [d for d in next_depts if d not in old_schema.get(dept, [])]
+            if added:
+                added_branches[dept] = added
+
+    # Проверяем удаленные ветки
+    for dept, next_depts in old_schema.items():
+        if dept not in new_schema:
+            removed_branches[dept] = next_depts
+        else:
+            # Проверяем удаленные связи для существующих отделов
+            removed = [d for d in next_depts if d not in new_schema.get(dept, [])]
+            if removed:
+                removed_branches[dept] = removed
+
+    return {
+        'added': added_branches,
+        'removed': removed_branches
+    }
 
 
 valid_data = {

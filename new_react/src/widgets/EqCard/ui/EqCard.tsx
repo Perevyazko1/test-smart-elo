@@ -191,6 +191,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     }, [card.assignments, card.order.planned_date, expanded, listType]);
 
     const showPlanDate = useMemo(() => {
+        if (listType === "ready") return false;
         return !!localStorage.getItem(listType);
         //eslint-disable-next-line
     }, [queryParameters.sortUpdated, listType])

@@ -24,6 +24,7 @@ from .service.get_view_modes import get_view_modes
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
 from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
+from ...views import actualized_assembled
 
 
 class EqCardsViewSet(viewsets.ModelViewSet):
@@ -229,114 +230,22 @@ def update_assignments(request):
         if not is_user_in_group(user, 'Снятие визы'):
             return JsonResponse({
                 f'error': f'Ошибка доступа. У пользователя нет прав на снятие визы с нарядов.'
-            }, status=401, json_dumps_params={"ensure_ascii": False})
+            }, status=403, json_dumps_params={"ensure_ascii": False})
 
         for assignment_id in ids:
             assignment = Assignment.objects.get(id=assignment_id)
 
-            # Проверка действительно ли есть виза бригадира на переданном наряде
+            # Проверка, действительно ли есть виза бригадира на переданном наряде
             if assignment.inspector is None:
                 return JsonResponse({
                     f'error': f'Ошибка. Наряд №{assignment.number} '
                               f'серии {assignment.order_product.series_id} не содержит визы бригадира. '
                 }, status=400, json_dumps_params={"ensure_ascii": False})
 
-            # Условно в Пошиве 10 нарядов с визой
-            assignments_with_visa_in_original_dep_count = Assignment.objects.filter(
-                department=assignment.department,
-                inspector__isnull=False,
-                order_product=op,
-            ).count()
-
-            # Получаем исходный этап производства (условно Пошив)
-            base_ps = ProductionStep.objects.get(
-                department=assignment.department,
-                product=assignment.order_product.product,
-            )
-
-            # В случае если отменяемый наряд конструкторского отдела - отменяем комплектацию всех нарядов
-            if base_ps.department.number == 1:
-                other_assignments = Assignment.objects.filter(
-                    order_product__series_id=series_id,
-                ).exclude(id=assignment_id)
-
-                # Если есть наряды не в ожидании - возвращаем ошибку
-                if other_assignments.filter(executor__isnull=False).exists():
-                    return JsonResponse({
-                        f'error': f'Ошибка. В других отделах есть наряды в статусах "В работе" или "Готов". '
-                                  f'Устраните несоответствие или обратитесь к администратору.'
-                    }, status=400, json_dumps_params={"ensure_ascii": False})
-                else:
-                    update_assignments_and_clean_cache(
-                        other_assignments,
-                        op.id,
-                        None,
-                        assembled=False,
-                    )
-                    op.product.technological_process_confirmed = None
-                    op.product.save()
-
-            # Для остальных нарядов вычисляем количество нарядов к отмене и отменяем
-            else:
-                # Храним ID этапов которые уже были обработаны
-                # вычисляем по каждому последующему отделу относительно исходного наряда
-                # от каких отделов зависел данный отдел и сколько в них минимальное количество готовых нарядов
-                processed_ps = []
-                for original_next_ps in base_ps.next_step.all():
-                    # Тут условно получили original_next_ps = [Обивка]
-                    if original_next_ps.department.single:
-                        continue
-                    if original_next_ps.id not in processed_ps:
-                        processed_ps.append(original_next_ps.id)
-
-                        # Тут условно получили previous_ps = [Пошив, Малярка, Сборка]
-                        previous_ps = ProductionStep.objects.filter(
-                            next_step__exact=original_next_ps.id,
-                        )
-
-                        min_assign_with_visa_in_dependents_departments = op.quantity
-                        for dependent_ps in previous_ps:
-                            if dependent_ps.department.single:
-                                continue
-                            # Получаем количество нарядов с визой в этом отделе
-                            assignments_with_visa = Assignment.objects.filter(
-                                order_product=op,
-                                inspector__isnull=False,
-                                department=dependent_ps.department,
-                            ).count()
-                            if min_assign_with_visa_in_dependents_departments > assignments_with_visa:
-                                min_assign_with_visa_in_dependents_departments = assignments_with_visa
-
-                        """
-                        Если количество нарядов с визой в отделах от которых зависит исходный отдел меньше
-                        то мы просто снимаем проверяющего и дату проверки с наряда. Иначе нам нужно взять последний
-                        номер наряда в исходном отделе и отметить его не укомплектованным. 
-                        условно [Пошив 10, Сборка 20, Малярка 30]
-                        """
-                        # Если бы в пошиве было больше завизированных нарядов чем в других отделах -
-                        # то просто сняли бы визу
-                        if not (min_assign_with_visa_in_dependents_departments <
-                                assignments_with_visa_in_original_dep_count):
-                            # Иначе получаем количество нарядов с визой в Обивке в ожидании или в работе
-                            target_assignments = Assignment.objects.filter(
-                                order_product=assignment.order_product,
-                                department=original_next_ps.department,
-                                status__in=['await', 'in_work'],
-                                assembled=True,
-                            )
-                            # Если таковы имеются - переводим их в статус неукомплектованных начиная с последнего
-                            if target_assignments.exists():
-                                target_assignment = target_assignments.latest('number')
-                                target_assignment.assembled = False
-                                target_assignment.save()
-
-                            else:
-                                # Иначе бросаем ошибку, что нужно наряды возвращать
-                                return JsonResponse({
-                                    f'error': f'Ошибка. \n'
-                                              f'Для снятия визы наряды последующего отдела должны быть в статусе '
-                                              f'Ожидает.'
-                                }, status=400, json_dumps_params={"ensure_ascii": False})
+            # В случае если отменяемый наряд конструкторского отдела дополнительно снимаем техпроцесс
+            if assignment.department.number == 1:
+                op.product.technological_process_confirmed = None
+                op.product.save()
 
             assignment.inspector = None
             assignment.inspect_date = None
@@ -373,6 +282,8 @@ def update_assignments(request):
                             inspector=request.user,
                             description=description,
                         )
+
+        actualized_assembled(op)
 
     elif mode == 'lock_await_assignments':
         target_assignments = Assignment.objects.filter(

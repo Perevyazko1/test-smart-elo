@@ -113,6 +113,11 @@ export const EqBody = () => {
     }, [queryParameters.week]);
 
     useEffect(() => {
+        setReadyUpdated(prevState => !prevState);
+        // eslint-disable-next-line
+    }, [queryParameters.show_all]);
+
+    useEffect(() => {
         setAwaitUpdated(prevState => !prevState);
         // eslint-disable-next-line
     }, [queryParameters.assembled, queryParameters.locked]);

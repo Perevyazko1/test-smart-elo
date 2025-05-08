@@ -205,11 +205,11 @@ class EqUpdateAssignmentsStatus:
             if self._get_order_all_ready():
                 self._api_change_order_status_to_ready()
 
-    def _get_related_assignments_confirmed_minimum_count(self, next_step: ProductionStep) -> int:
+    def _get_related_assignments_confirmed_minimum_count(self, next_step: Department) -> int:
         """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""
         related_steps = ProductionStep.objects.filter(
             product=self.order_product.product,
-            next_step=next_step,
+            next_steps=next_step,
             is_active=True,
         )
 
@@ -233,17 +233,17 @@ class EqUpdateAssignmentsStatus:
 
         return result
 
-    def _get_next_step_assembled_assignments_count(self, next_step: ProductionStep):
+    def _get_next_step_assembled_assignments_count(self, next_step: Department):
         return Assignment.objects.filter(
             order_product=self.order_product,
-            department=next_step.department,
+            department=next_step,
             assembled=True,
         ).count()
 
-    def _get_target_size_for_activate_assignments(self, next_step: ProductionStep) -> int:
+    def _get_target_size_for_activate_assignments(self, next_step: Department) -> int:
         related_assignments_confirmed_minimum_count = self._get_related_assignments_confirmed_minimum_count(next_step)
         next_step_assignments_count = self._get_next_step_assembled_assignments_count(next_step)
-        if next_step.department.single and \
+        if next_step.single and \
                 related_assignments_confirmed_minimum_count and \
                 not next_step_assignments_count:
             return 1
@@ -256,64 +256,55 @@ class EqUpdateAssignmentsStatus:
                 product=self.order_product.product,
                 status="0"
             )
-            next_steps = ProductionStep.objects.get(
+            next_departments = ProductionStep.objects.get(
                 product=self.order_product.product,
                 department=Department.objects.get(number=0)
-            ).next_step.all()
+            ).next_steps.all()
 
             for order_product in active_order_products:
-                for next_step in next_steps:
-                    """
-                    Итерируемся по всем последующим отделам. Игнорируем не активные этапы
-                    """
-                    if not next_step.is_active:
-                        continue
-
+                for department in next_departments:
                     assignments = Assignment.objects.filter(
                         order_product=order_product,
-                        department=next_step.department,
+                        department=department,
                         assembled=False,
                     )
                     update_assignments_and_clean_cache(
                         assignments_qs=assignments,
                         order_product__id=order_product,
-                        department__id=next_step.department.id,
+                        department__id=department.id,
                         assembled=True
                     )
 
-                    self.notification_data[next_step.department.number] = {
+                    self.notification_data[department.number] = {
                         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                         'data': self.order_product.id,
                     }
 
         else:
-            next_steps = ProductionStep.objects.get(
+            next_departments = ProductionStep.objects.get(
                 product=self.order_product.product,
-                department=self.department
-            ).next_step.all()
+                department=self.department,
+                is_active=True,
+            ).next_steps.all()
 
-            for next_step in next_steps:
+            for department in next_departments:
                 """
                 Итерируемся по всем последующим отделам. 
                 Если отдел Готово - выполняем инструкцию по готовности и выходим.
                 """
 
-                if next_step.department.name == "Готово":
+                if department.name == "Готово":
                     self._ready_department_instruction()
                     break
 
-                """Игнорируем не активные этапы"""
-                if not next_step.is_active:
-                    continue
-
                 """Вычисляем количество нарядов к обновлению"""
-                target_size = self._get_target_size_for_activate_assignments(next_step)
+                target_size = self._get_target_size_for_activate_assignments(department)
 
                 if target_size:
                     """Если количество отлично от нуля переводим наряды в статус ожидает"""
                     start_position = Assignment.objects.filter(
                         order_product=self.order_product,
-                        department=next_step.department,
+                        department=department,
                         assembled=True,
                     ).count()
 
@@ -324,7 +315,7 @@ class EqUpdateAssignmentsStatus:
 
                     assignments = Assignment.objects.filter(
                         order_product=self.order_product,
-                        department=next_step.department,
+                        department=department,
                         number__in=numbers,
                         assembled=False,
                     )
@@ -332,11 +323,11 @@ class EqUpdateAssignmentsStatus:
                     update_assignments_and_clean_cache(
                         assignments_qs=assignments,
                         order_product__id=self.order_product.id,
-                        department__id=next_step.department.id,
+                        department__id=department.id,
                         assembled=True
                     )
 
-                    self.notification_data[next_step.department.number] = {
+                    self.notification_data[department.number] = {
                         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
                         'data': self.order_product.id,
                     }

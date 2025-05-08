@@ -110,104 +110,89 @@ def _handle_distribute(eq_params, order_product):
 def _handle_ready(eq_params, order_product):
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
     current_week = GetWeekInfo(week=None, year=None).execute()
+    show_all = eq_params.get('show_all') and eq_params.get('project_filter')
 
+    cache_key = _build_cache_key(eq_params, order_product, week_info, current_week)
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        return cached_data
+
+    assignments = _get_ready_assignments(eq_params, order_product, week_info, current_week, show_all)
+    result = SimpleAssignmentSerializer(assignments, many=True).data
+    cache.set(cache_key, result, timeout=60 * 60 * 8)
+
+    return result
+
+
+def _build_cache_key(eq_params, order_product, week_info, current_week):
     cache_key = (
         f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_ready_'
         f'{week_info.week}_{week_info.year}'
     )
-    if current_week.week == week_info.week and current_week.year == week_info.year:
-        cache_key += '_current'
-    else:
-        cache_key += '_not_current'
+
+    is_current = current_week.week == week_info.week and current_week.year == week_info.year
+    cache_key += '_current' if is_current else '_not_current'
 
     if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
         cache_key += f"_{eq_params['user'].id}"
     else:
         cache_key += f"_{eq_params['view_mode_key']}"
 
-    cached_data = cache.get(cache_key)
-    if cached_data:
-        return cached_data
+    return cache_key
+
+
+def _get_ready_assignments(eq_params, order_product, week_info, current_week, show_all):
+    base_filter = Q(department=eq_params['department'], status='ready')
+    date_filter = Q(
+        tariffication_date__date__gte=week_info.date_range[0].date(),
+        tariffication_date__date__lte=week_info.date_range[1].date()
+    )
 
     if eq_params['view_mode_key'] not in ["boss", "unfinished"]:
-        if current_week.week == week_info.week and current_week.year == week_info.year:
-            assignments = order_product.assignments.filter(
-                Q(
-                    tariffication_date__date__gte=week_info.date_range[0].date(),
-                    tariffication_date__date__lte=week_info.date_range[1].date(),
-                    status='ready',
-                    executor=eq_params['user'],
-                    department=eq_params['department'],
-                ) |
-                Q(
-                    tariffication_date__isnull=True,
-                    executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                ) |
-                Q(
-                    tariffication_date__date__gte=week_info.date_range[0].date(),
-                    tariffication_date__date__lte=week_info.date_range[1].date(),
-                    co_executors__co_executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                ) |
-                Q(
-                    tariffication_date__isnull=True,
-                    co_executors__co_executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                )
-            ).distinct()
-        else:
-            assignments = order_product.assignments.filter(
-                Q(
-                    tariffication_date__date__gte=week_info.date_range[0].date(),
-                    tariffication_date__date__lte=week_info.date_range[1].date(),
-                    executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                ) |
-                Q(
-                    tariffication_date__date__gte=week_info.date_range[0].date(),
-                    tariffication_date__date__lte=week_info.date_range[1].date(),
-                    co_executors__co_executor=eq_params['user'],
-                    department=eq_params['department'],
-                    status='ready',
-                )
-
-            ).distinct()
+        return _get_user_assignments(eq_params, order_product, base_filter, date_filter, current_week, week_info,
+                                     show_all)
     elif eq_params['view_mode_key'] == "boss":
-        if current_week.week == week_info.week and current_week.year == week_info.year:
-            assignments = order_product.assignments.filter(
-                Q(
-                    tariffication_date__date__gte=week_info.date_range[0].date(),
-                    tariffication_date__date__lte=week_info.date_range[1].date(),
-                    department=eq_params['department'],
-                    status='ready',
-                ) |
-                Q(
-                    department=eq_params['department'],
-                    status='ready',
-                    tariffication_date__isnull=True,
-                )
-            ).distinct()
-        else:
-            assignments = order_product.assignments.filter(
-                tariffication_date__date__gte=week_info.date_range[0].date(),
-                tariffication_date__date__lte=week_info.date_range[1].date(),
-                department=eq_params['department'],
-                status='ready',
-            ).distinct()
+        return _get_boss_assignments(order_product, base_filter, date_filter, current_week, week_info,
+                                     show_all)
     else:
-        assignments = order_product.assignments.filter(
-            department=eq_params['department'],
-            status="ready",
-            tariffication_date__isnull=True,
+        return order_product.assignments.filter(
+            base_filter,
+            tariffication_date__isnull=True
         ).distinct()
 
-    result = SimpleAssignmentSerializer(assignments, many=True).data
-    """Кешируем результат. """
-    cache.set(cache_key, result, timeout=60 * 60 * 8)
 
-    return result
+def _get_user_assignments(eq_params, order_product, base_filter, date_filter, current_week, week_info, show_all):
+    user_filter = (
+            Q(executor=eq_params['user']) |
+            Q(co_executors__co_executor=eq_params['user'])
+    )
+
+    if show_all:
+        return order_product.assignments.filter(base_filter & user_filter).distinct()
+
+    is_current = current_week.week == week_info.week and current_week.year == week_info.year
+    if is_current:
+        return order_product.assignments.filter(
+            (date_filter & base_filter & user_filter) |
+            (base_filter & user_filter & Q(tariffication_date__isnull=True))
+        ).distinct()
+    else:
+        return order_product.assignments.filter(
+            date_filter & base_filter & user_filter
+        ).distinct()
+
+
+def _get_boss_assignments(order_product, base_filter, date_filter, current_week, week_info, show_all):
+    if show_all:
+        return order_product.assignments.filter(base_filter).distinct()
+
+    is_current = current_week.week == week_info.week and current_week.year == week_info.year
+    if is_current:
+        return order_product.assignments.filter(
+            (date_filter & base_filter) |
+            (base_filter & Q(tariffication_date__isnull=True))
+        ).distinct()
+    else:
+        return order_product.assignments.filter(
+            date_filter & base_filter
+        ).distinct()

@@ -28,17 +28,15 @@ export const SwitchTimingInfo = (props: SwitchTimingInfoProps) => {
     }
 
     return (
-        <>
-            <AppTooltip title="Отображать тайминг производства">
-                <AppSwitch
-                    style={{fontSize: '10px'}}
-                    checked={!checked}
-                    onSwitch={switchHandle}
-                    labelPosition={'labelRight'}
-                    handleContent={'🕐'}
-                    label={`Тайм.(${totalTiming}ч)`}
-                />
-            </AppTooltip>
-        </>
+        <AppTooltip title="Отображать тайминг производства">
+            <AppSwitch
+                style={{fontSize: '10px'}}
+                checked={!checked}
+                onSwitch={switchHandle}
+                labelPosition={'labelRight'}
+                handleContent={'🕐'}
+                label={`Тайм.(${totalTiming}ч)`}
+            />
+        </AppTooltip>
     );
 };

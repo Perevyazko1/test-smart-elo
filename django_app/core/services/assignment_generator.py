@@ -57,21 +57,19 @@ class AssignmentGenerator:
     @transaction.atomic
     def init_order_product_assignments(self, order_product: OrderProduct):
         """Инициализация первого уровня нарядов связанных со стартовым"""
+        product = order_product.product
 
         """ Проверяем наличие техпроцесса. """
-        if not order_product.product.technological_process_confirmed:
-            print("1")
+        if not product.technological_process:
             if Assignment.objects.filter(
-                    order_product__product=order_product.product,
+                    order_product__product=product,
                     department__number=1
             ).exclude(status='ready', inspector__isnull=False).exists():
-                print("2")
                 """
                 Если нет техпроцесса и есть наряд в разработке на данное изделие - игнорируем дальнейшие действия. 
                 """
                 return
             else:
-                print("3")
                 """ Если нет техпроцесса и нет наряда на разработку - создаем наряд на разработку. """
                 self.create_new_assignments(
                     order_product=order_product,
@@ -84,25 +82,28 @@ class AssignmentGenerator:
                     {
                         'action': 'NEW_NOTIFICATION',
                         'title': "ЭЛО - Новое изделие в разработке",
-                        'body': order_product.product.name,
+                        'body': product.name,
                         'tag': f'product{order_product.id}',
                         'url': f'/eq'
                     }
                 )
-
                 return
         else:
             """Делаем выборку этапов производства исключая Конструкторов, Старт и Готово"""
-            production_steps = order_product.product.production_steps.filter(
+            production_steps = ProductionStep.objects.filter(
+                product=product,
                 is_active=True,
             ).exclude(department__number__in=[0, 50, 1])
 
-            if order_product.product.technological_process_confirmed:
+            if product.technological_process_confirmed:
                 """Если технологический процесс уже утвержден - то создаем и активируем наряды по схеме. """
-                start_production_steps = order_product.product.production_steps.get(department__number=0)
+                start_ps = ProductionStep.objects.get(
+                    product=product,
+                    department__number=0,
+                )
                 for production_step in production_steps:
                     """Если отдел находится в списке стартовых - генерируем наряд в статусе ожидает"""
-                    if production_step in start_production_steps.next_step.all():
+                    if production_step.department in start_ps.next_steps.all():
                         self.create_new_assignments(
                             order_product=order_product,
                             department=production_step.department,

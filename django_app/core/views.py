@@ -5,14 +5,15 @@ from rest_framework.decorators import api_view
 
 from staff.models import Employee, Audit, Department
 from .consumers import ws_send_to_all, EqNotificationActions
+from .filters import ProductionStepCommentModelFilter
 from .models import (Order, OrderProduct, ProductionStep, Assignment, TechnologicalProcess, Product,
                      ProductionStepComment)
 from .serializers import TechProcessSerializer, ProductionStepCommentSerializer
 from .services.assignment_generator import AssignmentGenerator
-from .services.check_schema import check_schema
+from .services.check_schema import check_schema, compare_schemas
 from .services.create_custom_tech_process import create_and_set_tech_process
 from .services.update_production_steps import update_production_steps
-from .filters import ProductionStepCommentModelFilter
+from .signals import update_assignments_and_clean_cache
 
 
 class ProductionStepCommentViewSet(viewsets.ModelViewSet):
@@ -134,108 +135,184 @@ def get_tech_processes(request):
     return JsonResponse({"tech_processes": data}, json_dumps_params={"ensure_ascii": False})
 
 
+def app_error_response(text, code=400):
+    return JsonResponse(
+        {"error": text},
+        status=code,
+        json_dumps_params={"ensure_ascii": False}
+    )
+
+
 @api_view(['POST'])
 def set_tech_process(request):
     schema = request.data.get('schema')
     product_id = request.data.get('product_id')
 
-    active_order_products = OrderProduct.objects.filter(
-        status="0",
-        product_id=product_id,
+    if not product_id:
+        return app_error_response('Ошибка. Не указан ID изделия.')
+
+    target_product = Product.objects.filter(pk=product_id)
+
+    if not target_product.exists():
+        return app_error_response('Ошибка. Изделие не найдено.')
+    else:
+        target_product = target_product.first()
+
+    if not check_schema(schema):
+        return app_error_response('Ошибка. Передана не корректная схема.')
+
+    active_ops = OrderProduct.objects.filter(
+        product=target_product,
+        status="0"
     )
 
-    assignments_with_executor = Assignment.objects.filter(
-        order_product__in=active_order_products,
-        status="ready",
-    ).exclude(department__number=1)
+    process_edited = False
 
-    if assignments_with_executor.exists():
-        order_product_ids = []
-        result_numbers = ''
-        for assignment in assignments_with_executor:
-            if assignment.order_product.id not in order_product_ids:
-                result_numbers += f"{assignment.order_product.series_id}, "
-                order_product_ids.append(assignment.order_product.id)
-
-        return JsonResponse(
-            {
-                "error": f'Ошибка изменения технологического процесса. \n'
-                         f'Для изменения технологического процесса устраните следующие замечания: \n'
-                         f'Заказ(ы): {result_numbers}. \n'
-                         f'Имеются отмеченные готовые наряды в кол-ве {assignments_with_executor.count()} шт.'
-            },
-            status=400,
-            json_dumps_params={"ensure_ascii": False}
+    if target_product.technological_process:
+        process_edited = True
+        difference = compare_schemas(
+            target_product.technological_process.schema,
+            schema,
         )
 
-    if check_schema(schema):
-        product = Product.objects.get(pk=product_id)
-        if product.technological_process:
-            """Если происходит изменение технологического процесса, проверяем какие отделы были исключены. """
-            excluded_departments = []
-            for new_department_name in schema:
-                if new_department_name not in product.technological_process.schema:
-                    excluded_departments.append(new_department_name)
-
-            if excluded_departments:
-                """Если таковы имеются проверяем, есть ли в них назначенные наряды. """
-                assignments_cant_delete_by_policy = Assignment.objects.filter(
-                    order_product__in=active_order_products,
-                    department__name__in=excluded_departments,
-                    executor__isnull=False
+        """Если имеются удаленные наряды - то проверяем есть ли там в работе или готовое. """
+        if difference['removed']:
+            for key in difference['removed'].keys():
+                department = Department.objects.get(name=key)
+                assignments = Assignment.objects.filter(
+                    order_product__in=active_ops,
+                    department=department,
                 )
-                if assignments_cant_delete_by_policy.exists():
-                    """Если таковы имеются - отправляем 400 статус. """
-                    order_product_ids = []
-                    result_numbers = ''
-                    for assignment in assignments_cant_delete_by_policy:
-                        if assignment.order_product.id not in order_product_ids:
-                            result_numbers += f"{assignment.order_product.series_id}, "
-                            order_product_ids.append(assignment.order_product.id)
+                active_assignments = assignments.exclude(status="await")
 
-                    return JsonResponse(
-                        {
-                            "error": f'Ошибка изменения технологического процесса. \n'
-                                     f'Для изменения технологического процесса устраните следующие замечания: \n'
-                                     f'Заказ(ы): {result_numbers}. \n'
-                                     f'В исключенных отделах: {excluded_departments} имеются наряды в работе. \n'
-                                     f'Данные наряды должны быть возвращены в блок ожидания. \n'
-                        },
-                        status=400,
-                        json_dumps_params={"ensure_ascii": False}
-                    )
-                else:
-                    """Если таковых нет - удаляем такие наряды и приступаем к инициализации нового техпроцесса. """
-                    Assignment.objects.filter(
-                        order_product__in=active_order_products,
-                        department__name__in=excluded_departments,
-                    ).delete()
+                if active_assignments.exists():
+                    report = {}
+                    for assignment in assignments:
+                        dept_name = assignment.department.name
+                        if dept_name not in report:
+                            report[dept_name] = 0
+                        report[dept_name] += 1
 
-        """Получаем или создаем технологический процесс. Присваиваем его изделию. """
-        technological_process = create_and_set_tech_process(schema=schema, product=product)
-        """Обновляем этапы производства создавая новые и изменяя текущие согласно схеме. """
-        product.refresh_from_db()
-        update_production_steps(product)
+                    error_msg = "Ошибка. Для изменения тех процесса устраните замечание:\n"
+                    error_msg += "Имеются наряды в работе/готовые в отделах:\n"
 
-        Audit.objects.create(
-            employee=request.user,
-            audit_type="edit",
-            details=f"Назначил технологический процесс: {technological_process.name}, "
-                    f"для изделия: {technological_process.product_set.first().name}"
+                    for dept, count in report.items():
+                        error_msg += f"{dept}: {count}шт\n"
+
+                    return app_error_response(error_msg)
+
+                """В случае если нарушений не найдено - удаляем наряды с этими отделами. """
+                assignments.delete()
+        else:
+            pass
+
+    """Создаем или находим техпроцесс, задаем его товару"""
+    technological_process = create_and_set_tech_process(
+        schema=schema,
+        product=target_product
+    )
+    """Обновляем этапы производства создавая новые и изменяя текущие согласно схеме. """
+    target_product.refresh_from_db()
+    update_production_steps(target_product)
+
+    Audit.objects.create(
+        employee=request.user,
+        audit_type="edit",
+        details=f"Назначил технологический процесс: {technological_process.name}, "
+                f"для изделия: {target_product.name}"
+    )
+
+    for order_product in active_ops:
+        AssignmentGenerator().init_order_product_assignments(order_product=order_product)
+        if process_edited:
+            actualized_assembled(order_product)
+        ws_send_to_all({
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': order_product.id,
+        })
+
+    serializer = TechProcessSerializer
+    data = serializer(technological_process, context={'request': request}).data
+
+    return JsonResponse({
+        "data": data
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+def actualized_assembled(order_product: OrderProduct):
+    product = order_product.product
+
+    constructor_assignment = Assignment.objects.filter(
+        order_product__product=product,
+        department__number=1,
+        inspector__isnull=True,
+    )
+
+    if constructor_assignment.exists():
+        active_ops = OrderProduct.objects.filter(
+            product=product,
+            status="0"
         )
+        other_assignments = Assignment.objects.filter(
+            order_product__in=active_ops,
+        ).exclude(id=constructor_assignment.first().id)
 
-        for order_product in active_order_products:
-            AssignmentGenerator().init_order_product_assignments(order_product=order_product)
-            ws_send_to_all({
-                'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                'data': order_product.id,
-            })
-        serializer = TechProcessSerializer
-        data = serializer(technological_process, context={'request': request}).data
+        update_assignments_and_clean_cache(
+            other_assignments,
+            order_product.id,
+            None,
+            assembled=False,
+        )
+        return False
 
-        return JsonResponse({
-            "data": data
-        }, json_dumps_params={"ensure_ascii": False})
+    production_steps = ProductionStep.objects.filter(
+        product=product,
+        is_active=True,
+    ).exclude(department__number__in=[0, 1, 50])
 
-    else:
-        return JsonResponse({"error": 'Не корректная схема'}, json_dumps_params={"ensure_ascii": False})
+    for ps in production_steps:
+        current_count = Assignment.objects.filter(
+            assembled=True,
+            order_product=order_product,
+            department=ps.department,
+        ).count()
+
+        previous_pss = ProductionStep.objects.filter(
+            product=product,
+            next_steps=ps.department,
+            is_active=True,
+        )
+        min_count = order_product.quantity
+
+        for previous_ps in previous_pss:
+            if previous_ps.department.number == 0:
+                continue
+            ready_count = Assignment.objects.filter(
+                inspector__isnull=False,
+                order_product=order_product,
+                department=previous_ps.department,
+            ).count()
+            print(previous_ps.department.name, ready_count)
+            min_count = min(min_count, ready_count)
+
+        print(ps.department.name, current_count, min_count)
+        if not current_count == min_count:
+            assembled = current_count < min_count
+
+            number_from = min(current_count, min_count)
+
+            assignments = Assignment.objects.filter(
+                order_product=order_product,
+                department=ps.department,
+                number__gt=number_from,
+            ).order_by('number')
+
+            update_assignments_and_clean_cache(
+                assignments_qs=assignments,
+                order_product__id=order_product.id,
+                department__id=ps.department.id,
+                assembled=assembled
+            )
+
+    return True
+

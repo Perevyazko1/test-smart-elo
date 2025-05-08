@@ -296,9 +296,17 @@ class ProductionStep(models.Model):
     # Добавляем плановое время выполнения этапа
     scheduled_time = models.PositiveIntegerField("План время этапа (минут)", default=0)
 
-    # Добавляем ссылку на последующие этапы
+    # Удалить потом
     next_step = models.ManyToManyField(
         "ProductionStep",
+        verbose_name="Последующие этапы",
+        related_name="prod_steps",
+        blank=True
+    )
+
+    # Добавляем ссылку на последующие этапы
+    next_steps = models.ManyToManyField(
+        Department,
         verbose_name="Последующие этапы",
         related_name="production_steps",
         blank=True

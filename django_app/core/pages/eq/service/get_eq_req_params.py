@@ -20,4 +20,5 @@ def get_eq_req_params(request):
         'year': request.query_params.get("year"),
         'assembled': request.query_params.get("assembled"),
         'locked': request.query_params.get("locked"),
+        'show_all': request.query_params.get("show_all"),
     }
