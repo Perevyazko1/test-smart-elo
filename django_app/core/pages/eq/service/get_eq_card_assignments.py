@@ -114,7 +114,7 @@ def _handle_ready(eq_params, order_product):
 
     cache_key = _build_cache_key(eq_params, order_product, week_info, current_week)
     cached_data = cache.get(cache_key)
-    if cached_data:
+    if cached_data and not show_all:
         return cached_data
 
     assignments = _get_ready_assignments(eq_params, order_product, week_info, current_week, show_all)
