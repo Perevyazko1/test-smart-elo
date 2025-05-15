@@ -137,6 +137,8 @@ services:
       - .env.docker.prod
     volumes:
       - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
+    networks:
+      - app-network
 
 networks:
   app-network:
