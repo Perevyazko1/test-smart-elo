@@ -41,7 +41,6 @@ services:
     command: >
       sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
 
-
   elo_redis:
     container_name: elo_redis
     build: ./services/redis
@@ -109,9 +108,24 @@ services:
     networks:
       - app-network
 
+  postgres:
+    build: ./services/postgres_db
+    container_name: pg
+    expose:
+      - "5433:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - app-network
+    env_file:
+      - .env
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   react_build:
+  db_data:
+    driver: local
