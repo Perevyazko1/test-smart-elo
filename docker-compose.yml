@@ -21,6 +21,7 @@ services:
       - elo_client_build
     networks:
       - app-network
+    restart: always
 
   elo_server:
     build:
@@ -98,12 +99,12 @@ services:
         - react_build:/output
       command: sh -c "cp -r /runtime/build/* /output/ && ls -la /output"
 
-
   sklad:
     build:
       context: ./sklad
       dockerfile: Dockerfile
     container_name: sklad
+    restart: always
     expose:
       - "3000"
     networks:
