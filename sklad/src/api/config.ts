@@ -10,6 +10,10 @@ export const GET_AUTH = {
     // 'Accept-Encoding': 'gzip',
 }
 
+export const INVENT_ATTRIBUTE_NAME = "Инвентаризирован"
+export const STORE_NAME = "К.Тракт фабрика"
+export const ORGANISATION_NAME = 'ООО "СЗМК"'
+
 export const CONT_TYPE = {'Content-Type': 'application/json'}
 
 export const POST_AUTH = {...GET_AUTH, ...CONT_TYPE}

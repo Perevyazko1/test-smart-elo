@@ -6,6 +6,7 @@ import {HTMLAttributes} from "react";
 import {useModal} from "@/lib/hooks/use-modal";
 import {LossWidget} from "@/widgets/lossWidget/LossWidget";
 import {TListTypes} from "@/api/types";
+import {INVENT_ATTRIBUTE_NAME} from "@/api/config";
 
 interface BarcodeCardProps extends HTMLAttributes<HTMLDivElement> {
     barcode: string;
@@ -59,6 +60,11 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
 
     const positionImage = getPositionImage();
 
+    const inventState = position?.attributes?.find(
+        attr => attr.name === INVENT_ATTRIBUTE_NAME
+    );
+     console.log(position)
+
     return (
         <div {...otherProps}>
             <div className={'flex gap-1'}>
@@ -70,7 +76,10 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
                 <div>
                     <span>ШК: {barcode}</span>
                     <br/>
-                    <span>ОСТ: {position.quantity} {position.uom.name}</span>
+                    <span>
+                        ОСТ: {position.quantity} {position.uom.name}
+                        {!inventState?.value ? "🔴" : "🟢"}
+                    </span>
                     <br/>
                     <span>{position.name}</span>
                 </div>

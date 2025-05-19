@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import {getLossList} from "@/api/lossApi";
+import {getOrganization, getStore} from "@/api/lossApi";
 import {useEffect, useState} from "react";
 
 interface Props {
@@ -13,23 +13,24 @@ export const InitData = (props: Props) => {
     const [hasStoredData, setHasStoredData] = useState<boolean>(false);
 
     useEffect(() => {
-        if (!!localStorage.getItem('organization') && !!localStorage.getItem('store')) {
-            setHasStoredData(true);
-        }
+        // if (!!localStorage.getItem('organization') && !!localStorage.getItem('store')) {
+        //     setHasStoredData(true);
+        // }
         setInited(true)
     }, [setInited]);
 
-    const {data, isLoading, error} = useQuery({
-        queryKey: ['lossList', {param: "all"}],
-        queryFn: getLossList,
+    const {data: store, isLoading: storeIsLoading, error: storeError} = useQuery({
+        queryKey: ['store', {param: "all"}],
+        queryFn: getStore,
         enabled: inited && !hasStoredData,
     });
 
-    const getPosition = () => {
-        if (data && data.rows.length > 0) {
-            return data.rows[0];
-        }
-    };
+    const {data: organization, isLoading: organizationIsLoading, error: organizationError} = useQuery({
+        queryKey: ['organization', {param: "all"}],
+        queryFn: getOrganization,
+        enabled: inited && !hasStoredData,
+    });
+
     const clearHandle = () => {
         localStorage.removeItem('organization');
         localStorage.removeItem('store');
@@ -44,14 +45,17 @@ export const InitData = (props: Props) => {
         )
     }
 
-    const position = getPosition();
-    if (isLoading || !inited) return <span>Loading...</span>;
-    if (error) return <span>Error!</span>;
-    if (!position) return <span>Неудачный запрос</span>;
+    if (storeIsLoading || !inited) return <span>Loading...</span>;
+    if (storeError) return <span>Error!</span>;
+    if (!store) return <span>Неудачный запрос</span>;
 
-    if (position) {
-        localStorage.setItem('organization', JSON.stringify(position.organization));
-        localStorage.setItem('store', JSON.stringify(position.store));
+    if (organizationIsLoading || !inited) return <span>Loading...</span>;
+    if (organizationError) return <span>Error!</span>;
+    if (!organization) return <span>Неудачный запрос</span>;
+
+    if (store) {
+        localStorage.setItem('organization', JSON.stringify(organization));
+        localStorage.setItem('store', JSON.stringify(store));
         setHasStoredData(true);
     }
 

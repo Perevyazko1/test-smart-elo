@@ -1,7 +1,7 @@
 export interface IMeta {
     href: string;
     metadataHref: string;
-    type: "store" | "product" | "variant" | "loss" | "organization";
+    type: "store" | "product" | "variant" | "loss" | "organization" | "attributemetadata";
     mediaType: "application/json";
 }
 
@@ -33,6 +33,7 @@ export interface IAssortment {
     quantity: number;
     stock: number;
     barcodes: IBarcodes[];
+    attributes?: IAttribute[];
     uom: IUom;
     images: IDataList<IImage>;
 }
@@ -48,12 +49,14 @@ interface IDocPosition {
     assortment: { meta: IMeta };
 }
 
-interface IStore {
+export interface IStore {
     meta: IMeta;
+    name: string;
 }
 
-interface IOrganization {
+export interface IOrganization {
     meta: IMeta;
+    name: string;
 }
 
 export interface ILossDoc {
@@ -63,3 +66,14 @@ export interface ILossDoc {
 }
 
 export type TListTypes = 'loss' | 'enter' | 'inventory';
+
+
+export interface IAttribute {
+    meta: IMeta;
+    id: string;
+    name: string;
+    value: boolean;
+    type: string;
+    required: boolean;
+    description?: string;
+}

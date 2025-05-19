@@ -3,6 +3,7 @@ import {createLoss} from "@/api/lossApi";
 import {IAssortment, TListTypes} from "@/api/types";
 import {useRef, useState} from "react";
 import Image from "next/image";
+import {editProduct} from "@/api/attributeApi";
 
 
 interface LossWidgetProps {
@@ -32,6 +33,15 @@ export const LossWidget = (props: LossWidgetProps) => {
             onSuccess()
         },
     });
+
+    const {mutate: setInv, isPending: isInv, error: invError} = useMutation({
+        mutationFn: editProduct,
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ['assortment', {param: barcode}]});
+        },
+    });
+
+
     const getListType = (): Omit<TListTypes, "inventory"> => {
         if (type !== "inventory") {
             return type;
@@ -79,6 +89,9 @@ export const LossWidget = (props: LossWidgetProps) => {
             alert("Введите количество!");
             return;
         } else {
+            if (type === "inventory") {
+                setInv({product: position})
+            }
             mutate({
                 type: getListType(),
                 data: {
@@ -146,6 +159,11 @@ export const LossWidget = (props: LossWidgetProps) => {
             {error && (
                 <span>Ошибка: {error.name} {error.message}</span>
             )}
+
+            {invError && (
+                <span>Ошибка: {invError.name} {invError.message}</span>
+            )}
+
             <div className={'flex p-1 items-center gap-2'}>
                 КОЛ-ВО:
                 <input
@@ -162,7 +180,7 @@ export const LossWidget = (props: LossWidgetProps) => {
             </div>
 
             <button
-                disabled={isPending}
+                disabled={isPending || isInv}
                 type={'submit'}
                 className={`p-2 border-2 w-75 border-${color}-800 bg-${color}-100 disabled:bg-gray-500 disabled:animate-pulse`}
             >

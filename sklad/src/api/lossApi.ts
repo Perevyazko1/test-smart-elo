@@ -1,6 +1,6 @@
 import {$API} from "@/api/api";
-import {POST_AUTH} from "@/api/config";
-import {IDataList, ILossDoc, TListTypes} from "@/api/types";
+import {ORGANISATION_NAME, POST_AUTH, STORE_NAME} from "@/api/config";
+import {IDataList, ILossDoc, TListTypes, IStore, IOrganization} from "@/api/types";
 
 
 export const createLoss = async (
@@ -16,8 +16,24 @@ export const createLoss = async (
     return response.data;
 };
 
-export const getLossList = async (): Promise<IDataList<ILossDoc>> => {
-    const url = `/entity/loss`;
-    const response = await $API.get(url);
+export const getStores = async (): Promise<IDataList<IStore>> => {
+    const url = `/entity/store`;
+    const response = await $API.get(`${url}`);
     return response.data;
 };
+
+export const getStore = async (): Promise<IStore | undefined> => {
+    const stores = await getStores();
+    return stores.rows.find(store => store.name === STORE_NAME);
+}
+
+export const getOrganizations = async (): Promise<IDataList<IOrganization>> => {
+    const url = `/entity/organization`;
+    const response = await $API.get(`${url}`);
+    return response.data;
+};
+
+export const getOrganization = async (): Promise<IOrganization | undefined> => {
+    const organizations = await getOrganizations();
+    return organizations.rows.find(organization => organization.name === ORGANISATION_NAME);
+}
