@@ -63,7 +63,6 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
     const inventState = position?.attributes?.find(
         attr => attr.name === INVENT_ATTRIBUTE_NAME
     );
-    console.log(position)
 
     return (
         <div {...otherProps}>
@@ -81,7 +80,7 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
                         {!inventState?.value ? "🔴" : "🟢"}
                     </span>
                     <br/>
-                    <span>{position.name}</span>
+                    <span><b>{position.code} • </b> {position.name}</span>
                 </div>
             </div>
             <div className={'flex gap-1 flex-nowrap justify-between'}>

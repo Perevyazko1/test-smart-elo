@@ -30,6 +30,7 @@ export interface IAssortment {
     meta: IMeta;
     id: string;
     name: string;
+    code: string;
     quantity: number;
     stock: number;
     barcodes: IBarcodes[];

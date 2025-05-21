@@ -145,11 +145,19 @@ export const LossWidget = (props: LossWidgetProps) => {
     return (
         <form className={'flex flex-col gap-3'} onSubmit={submitHandle}>
             <div>
-                {position.name}
+                <span><b>{position.code} • </b> {position.name}</span>
             </div>
             <div className={'flex gap-1'}>
                 {positionImage && (
-                    <Image alt={'Ткань'} src={positionImage} width={150} height={150}/>
+                    <Image
+                        style={{
+                            maxHeight: "50%",
+                        }}
+                        alt={'Ткань'}
+                        src={positionImage}
+                        width={150}
+                        height={150}
+                    />
                 )}
                 <div>
                     Остаток: {position.quantity} {position.uom.name}
