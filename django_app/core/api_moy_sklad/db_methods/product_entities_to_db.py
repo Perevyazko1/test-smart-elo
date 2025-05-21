@@ -27,9 +27,9 @@ class ProductEntityToDB:
     @staticmethod
     def _save_product(product_entity: ProductEntity):
         product = Product.objects.update_or_create(
-            product_id=product_entity.id,
+            name=product_entity.name,
             defaults={
-                'name': product_entity.name,
+                'product_id': product_entity.id,
                 'type': product_entity.type,
                 'group': product_entity.group,
             }

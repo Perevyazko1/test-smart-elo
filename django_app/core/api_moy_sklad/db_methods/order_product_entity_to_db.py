@@ -18,11 +18,12 @@ class OrderProductEntityToDB:
             series_id=order_product_entity.series_id,
         )
         if op.exists():
-            if not str(op[0].product.product_id).strip() == str(order_product_entity.product_id).strip():
+            product = Product.objects.get(product_id=order_product_entity.product_id)
+            if not str(op[0].product.name).strip() == str(product.name).strip():
                 error = (
                     f"Attempt to overwrite product with series_id {order_product_entity.series_id} "
-                    f"old product_id: {op[0].product.product_id} "
-                    f"new product_id: {order_product_entity.product_id}"
+                    f"old product: {op[0].product.name} "
+                    f"new product: {product.name}"
                 )
                 logger.error(error)
                 raise ValueError(error)

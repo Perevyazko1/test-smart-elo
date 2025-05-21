@@ -63,7 +63,7 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
     const inventState = position?.attributes?.find(
         attr => attr.name === INVENT_ATTRIBUTE_NAME
     );
-     console.log(position)
+    console.log(position)
 
     return (
         <div {...otherProps}>
