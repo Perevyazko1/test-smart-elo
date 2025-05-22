@@ -12,6 +12,7 @@ import {getNoRelevantIds} from "@pages/TarifficationPage/model/selectors";
 import {TarifficationStoryWidget} from "@widgets/TarifficationStoryWidget";
 import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
 import {APP_PERM} from "@shared/consts";
+import {TimingWidget} from "@pages/TarifficationPage/ui/nav/TimingWidget";
 
 
 interface TableElementProps {
@@ -158,6 +159,13 @@ export const TableElement = (props: TableElementProps) => {
                         style={{width: "100px"}}
                         value={tariffInput}
                         onChange={(e) => setTariffClb(e.target.value)}
+                    />
+                </td>
+
+                <td rowSpan={2}>
+                    <TimingWidget
+                        ps_id={item.id}
+                        scheduled_time={item.scheduled_time}
                     />
                 </td>
 

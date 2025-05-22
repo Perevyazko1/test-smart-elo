@@ -20,6 +20,7 @@ export interface PageListItem {
     department: Department;
     has_assignments: boolean;
     product_name: string;
+    scheduled_time: number;
     product_id: number;
     last_order_id: number | null;
     product_images: ProductImages,

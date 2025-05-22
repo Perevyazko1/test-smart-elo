@@ -28,9 +28,8 @@ export const BodyTable = () => {
                 <th>Наименование изделия</th>
                 <th>Отдел</th>
                 <th>#</th>
-                <th>
-                    Тариф
-                </th>
+                <th>Тариф</th>
+                <th>Тайминг</th>
                 <th>
                     Дата
                 </th>

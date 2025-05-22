@@ -10,7 +10,7 @@ import {AppSwitch} from "@shared/ui";
 import {APP_PERM} from "@shared/consts";
 
 import cls from "./EqCard.module.scss";
-import {TimingWidget} from "@widgets/EqCard/ui/ui/TimingWidget";
+import {TimingWidget} from "@pages/TarifficationPage/ui/nav/TimingWidget";
 
 
 interface CardDepartmentInfoProps {
@@ -90,7 +90,10 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
             }
 
             {showTiming ? (
-                <TimingWidget card={card}/>
+                <TimingWidget
+                    ps_id={card.card_info.ps_id}
+                    scheduled_time={card.card_info.timing}
+                />
             ) : (
                 <>
                     {

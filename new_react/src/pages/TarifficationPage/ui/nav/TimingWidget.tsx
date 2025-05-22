@@ -1,4 +1,3 @@
-import {EqOrderProduct} from "@widgets/EqCardList";
 import {useMemo, useState} from "react";
 import {useSetTiming} from "@widgets/EqCard/model/api/updateTiming";
 import {useDebounce, usePermission} from "@shared/hooks";
@@ -6,13 +5,14 @@ import {Spinner} from "react-bootstrap";
 import {APP_PERM} from "@shared/consts";
 
 interface TimingWidgetProps {
-    card: EqOrderProduct;
+    ps_id: number;
+    scheduled_time: number;
 }
 
 export const TimingWidget = (props: TimingWidgetProps) => {
-    const {card} = props;
+    const {ps_id, scheduled_time} = props;
 
-    const [timing, setTiming] = useState<string>(card.card_info.timing.toLocaleString("ru-RU"));
+    const [timing, setTiming] = useState<string>(scheduled_time.toLocaleString("ru-RU"));
     const [updateTiming, {isLoading}] = useSetTiming();
 
     const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
@@ -20,7 +20,7 @@ export const TimingWidget = (props: TimingWidgetProps) => {
 
     const debouncedUpdateTiming = useDebounce(
         (timing: number) => updateTiming({
-            ps_id: card.card_info.ps_id,
+            ps_id: ps_id,
             timing: Number(timing),
         }),
         500

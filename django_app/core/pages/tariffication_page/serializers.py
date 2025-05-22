@@ -47,6 +47,7 @@ class PageListSerializer(serializers.ModelSerializer):
             'product_name',
             'product_id',
             'product_images',
+            'scheduled_time',
 
             'confirmed_tariff',
             'proposed_tariff',
