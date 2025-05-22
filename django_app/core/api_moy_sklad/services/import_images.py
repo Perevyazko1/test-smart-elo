@@ -27,6 +27,22 @@ class ImportImages:
         return GetImageData.execute(image_info)
 
     def execute(self, product_entity: ProductEntity):
+        # Get existing images from DB
+        existing_product_images = set()
+        existing_fabric_images = set()
+        if product_entity.group in PRODUCT_GROUPS:
+            existing_product_images = set(ProductPicture.objects.filter(
+                product__product_id=product_entity.id
+            ).values_list('image_filename', flat=True))
+        elif product_entity.group in FABRIC_GROUPS:
+            existing_fabric_images = set(Fabric.objects.filter(
+                fabric_id=product_entity.id
+            ).values_list('image_filename', flat=True))
+
+        # Get new image filenames
+        new_image_filenames = {self._get_image_filename(product_entity, img) for img in product_entity.images_info}
+
+        # Process new images
         for image_info in product_entity.images_info:
             image_filename = self._get_image_filename(product_entity, image_info)
 
@@ -48,3 +64,13 @@ class ImportImages:
                     fabric.save()
                     fabric.image.save(image_filename, ContentFile(image_data))
                 break
+
+        # Delete removed images
+        if product_entity.group in PRODUCT_GROUPS:
+            images_to_delete = existing_product_images - new_image_filenames
+            ProductPicture.objects.filter(image_filename__in=images_to_delete).delete()
+        elif product_entity.group in FABRIC_GROUPS:
+            images_to_delete = existing_fabric_images - new_image_filenames
+            Fabric.objects.filter(fabric_id=product_entity.id, image_filename__in=images_to_delete).update(
+                image_filename='', image=None, thumbnail=None
+            )
