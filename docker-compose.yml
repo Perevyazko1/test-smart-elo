@@ -50,41 +50,41 @@ services:
     networks:
       - app-network
 
-  elo_celery_worker:
-    build:
-      context: ./django_app
-      dockerfile: Dockerfile
-    container_name: elo_celery_worker
-    restart: always
-    volumes:
-      - ./django_app/media/:/app/media
-    depends_on:
-      - elo_server
-    ports:
-      - "58231"
-    command: celery -A django_app worker -l info
-    env_file:
-      - .env.docker.prod
-    networks:
-      - app-network
+#  elo_celery_worker:
+#    build:
+#      context: ./django_app
+#      dockerfile: Dockerfile
+#    container_name: elo_celery_worker
+#    restart: always
+#    volumes:
+#      - ./django_app/media/:/app/media
+#    depends_on:
+#      - elo_server
+#    ports:
+#      - "58231"
+#    command: celery -A django_app worker -l info
+#    env_file:
+#      - .env.docker.prod
+#    networks:
+#      - app-network
 
-  elo_celery_beat:
-    build:
-      context: ./django_app
-      dockerfile: Dockerfile
-    container_name: elo_celery_beat
-    restart: always
-    depends_on:
-      - elo_server
-    volumes:
-      - ./django_app/media/:/app/media
-    ports:
-      - "58232"
-    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    env_file:
-      - .env.docker.prod
-    networks:
-      - app-network
+#  elo_celery_beat:
+#    build:
+#      context: ./django_app
+#      dockerfile: Dockerfile
+#    container_name: elo_celery_beat
+#    restart: always
+#    depends_on:
+#      - elo_server
+#    volumes:
+#      - ./django_app/media/:/app/media
+#    ports:
+#      - "58232"
+#    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+#    env_file:
+#      - .env.docker.prod
+#    networks:
+#      - app-network
 
   elo_client_build:
       build:
@@ -152,6 +152,9 @@ services:
       - /site-server/media:/app/media
     depends_on:
       - site-db
+    command: >
+      sh -c "alembic -n db upgrade head &&
+      uvicorn app.main:app --host 0.0.0.0 --port 8000 --forwarded-allow-ips='*' --proxy-headers"
 
   site-client:
     build: ./site-client
@@ -163,6 +166,9 @@ services:
       - app-network
     depends_on:
       - site-backend
+    command: >
+      sh -c "npm run build && npm start"
+
 
   site-db:
     build: ./services/postgres_db
