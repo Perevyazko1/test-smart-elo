@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   nginx:
     build:
@@ -123,7 +121,6 @@ services:
     env_file:
       - .env.docker.prod
 
-
   pgadmin:
     build:
       context: ./services/pgadmin
@@ -141,6 +138,45 @@ services:
     networks:
       - app-network
 
+  site-backend:
+    build: ./site-server
+    container_name: site-backend
+    env_file:
+      - .site.env
+    restart: always
+    networks:
+      - app-network
+    ports:
+      - "8001:8000"
+    volumes:
+      - /site-server/media:/app/media
+    depends_on:
+      - site-db
+
+  site-client:
+    build: ./site-client
+    container_name: site-client
+    restart: always
+    ports:
+      - "3001:3000"
+    networks:
+      - app-network
+    depends_on:
+      - site-backend
+
+  site-db:
+    build: ./services/postgres_db
+    container_name: site-db
+    restart: always
+    env_file:
+      - .site.env
+    expose:
+      - "5433:5432"
+    volumes:
+      - site_db_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
@@ -148,4 +184,6 @@ networks:
 volumes:
   react_build:
   db_data:
+    driver: local
+  site_db_data:
     driver: local
