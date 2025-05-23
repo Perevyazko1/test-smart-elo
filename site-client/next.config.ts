@@ -36,7 +36,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
-        hostname: "backend",
+        hostname: "site-backend",
         port: "8000",
         pathname: "/**",
         search: "",
