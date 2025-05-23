@@ -149,7 +149,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - /site-server/media:/app/media
+      - /site-server/media/:/app/media
     depends_on:
       - site-db
     command: >
