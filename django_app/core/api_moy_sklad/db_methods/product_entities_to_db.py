@@ -26,6 +26,16 @@ class ProductEntityToDB:
 
     @staticmethod
     def _save_product(product_entity: ProductEntity):
+        # Костыль из-за переноса модификаций в изделиях. В будущем убрать
+        same_product = Product.objects.filter(
+            name=product_entity.name
+        )
+        if same_product.exists():
+            product = same_product.first()
+            if not product.product_id == product_entity.id:
+                product.product_id = product_entity.id
+                product.save()
+
         product = Product.objects.update_or_create(
             product_id=product_entity.id,
             defaults={
