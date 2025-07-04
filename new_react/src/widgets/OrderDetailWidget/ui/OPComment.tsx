@@ -18,7 +18,7 @@ export const OpCommentRow = (props: OPCommentProps) => {
 
     const getCommentFormatedText = (comment: OpComment) => {
         return `${getNameById(comment.author, 'short')}. 
-        ${getHumansDatetime(comment.add_date)}: ${comment.text}`
+        ${getHumansDatetime(comment.add_date)}: ${comment.deleted ? "Комментарий удален 🗑️" : comment.text}`
     }
 
     const isOwner = useMemo(() => props.comment.author === currentUser.id,
@@ -75,7 +75,7 @@ export const OpCommentRow = (props: OPCommentProps) => {
     return (
         <div>
             <p className={
-                `m-1 p-0 ${props.comment.important ? "fw-bold" : ""} ${props.comment.deleted ? " text-decoration-line-through" : ""}`
+                `m-1 p-0 ${props.comment.important ? "fw-bold" : ""}`
             }>
                 {isOwner &&
                     <>

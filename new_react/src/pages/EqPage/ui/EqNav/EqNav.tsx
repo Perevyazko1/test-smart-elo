@@ -30,9 +30,6 @@ export const EqNav = () => {
     }, [searchValue]);
 
 
-
-
-
     const proModeSwitch = () => {
         if (queryParameters.pro) {
             setQueryParam('pro', '')
@@ -55,10 +52,6 @@ export const EqNav = () => {
                     <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>
                 </AppTooltip>
             }
-
-
-
-
 
             <div className={'d-flex align-items-end align-self-stretch'}>
                 <AppTooltip title="Расширенный режим">

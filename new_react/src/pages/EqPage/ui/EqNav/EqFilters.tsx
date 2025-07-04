@@ -123,7 +123,6 @@ export const EqFilters = () => {
         setQueryParam('project', item === projects?.default ? '' : item);
     };
 
-
     return (
         <>
             {bossPerm &&

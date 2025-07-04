@@ -172,15 +172,9 @@ export const EqCardList = memo((props: EqCardListProps) => {
 
     const planSum = data?.results.reduce(
         (acc, item) => {
-            const withPlan = item.assignments.reduce((acc, assignment) => {
-                if (assignment.plane_date) {
-                    return acc + 1;
-                }
-                return acc;
-            }, 0)
-            return acc + (item.price * withPlan)
+            return acc + (item.price * item.assignments.length);
         }, 0
-    )
+    );
 
     const planTiming = useMemo(() => {
         return data?.results.reduce(

@@ -1,5 +1,4 @@
 import socket
-from time import sleep
 
 from src.label_printer.config import PRINTER_IP, PRINTER_PORT, WIDTH_MM, HEIGHT_MM, GAP_MM
 
@@ -30,8 +29,9 @@ class Printer:
 
             # Настройка страницы
             self.send_command(f"SIZE {WIDTH_MM} mm,{HEIGHT_MM} mm")
-            # self.send_command(f"GAP {GAP_MM} mm,0 mm")
             self.send_command("CODEPAGE UTF-8")
+            self.send_command("OFFSET 0")
+            self.send_command("REFERENCE 0,0")
             self.send_command("DIRECTION 1")
 
             # Очистка буфера

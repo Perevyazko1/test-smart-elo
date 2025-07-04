@@ -13,10 +13,12 @@ def main_label_template(
     # Формируем плавающий отступ для уменьшения износа печатающей головки
     LINE_OFFSET_MM = random.randint(-3, 3) / DOTS_MM
 
+    # Габарит левого блока
     LEFT_BLOCK = {
         "width_mm": WIDTH_MM * 0.7 + LINE_OFFSET_MM,
         "height_mm": HEIGHT_MM,
     }
+    # Габарит правого блока
     RIGHT_BLOCK = {
         "width_mm": WIDTH_MM - LEFT_BLOCK["width_mm"] - GAP_MM,
         "height_mm": HEIGHT_MM,

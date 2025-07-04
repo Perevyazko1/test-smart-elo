@@ -81,7 +81,7 @@ def production_debt():
                 last_ps = ProductionStep.objects.get(
                     product=order_product.product,
                     is_active=True,
-                    next_step__department=ready_dep,
+                    next_steps=ready_dep,
                 )
 
         final_assignments = target_assignments.filter(
