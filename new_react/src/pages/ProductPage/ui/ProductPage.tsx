@@ -1,10 +1,9 @@
 import React from "react";
 
-import cls from './ProductPage.module.scss';
-
 import {ModalProvider} from "@app";
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
 import {AppNavbar} from "@widgets/AppNavbar";
+import {AppContent} from "@shared/ui";
 
 import {productsPageReducer} from "../model/slice/productsPageSlice";
 
@@ -22,13 +21,13 @@ export const ProductPage = () => {
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
             <QueryContext>
                 <ModalProvider>
-                    <div className={cls.pageContainer}>
-                        <AppNavbar>
-                            <ProductNavContent/>
-                        </AppNavbar>
+                    <AppNavbar>
+                        <ProductNavContent/>
+                    </AppNavbar>
 
+                    <AppContent>
                         <ProductPageContent/>
-                    </div>
+                    </AppContent>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

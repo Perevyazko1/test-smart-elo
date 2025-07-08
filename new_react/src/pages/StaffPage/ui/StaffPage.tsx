@@ -10,11 +10,9 @@ export const StaffPage = () => {
     return (
         <QueryContext>
             <ModalProvider>
-                <div className={'pageContainer'}>
-                    <StaffPageNav/>
+                <StaffPageNav/>
 
-                    <StaffPageBody/>
-                </div>
+                <StaffPageBody/>
             </ModalProvider>
         </QueryContext>
     );

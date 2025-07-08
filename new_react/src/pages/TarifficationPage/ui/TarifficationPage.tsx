@@ -1,12 +1,11 @@
 import {ModalProvider} from "@app";
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
 
-import cls from "./TarifficationPage.module.scss";
-
 import {tarifficationPageReducer} from "../model/slice";
 
 import {TarifficationNav} from "./nav/TarifficationNav";
 import {TarifficationBody} from "./body/TarifficationBody";
+import {AppContent} from "@shared/ui";
 
 
 const initialReducers: ReducersList = {
@@ -19,10 +18,10 @@ export const TarifficationPage = () => {
         <DynamicComponent reducers={initialReducers}>
             <QueryContext>
                 <ModalProvider>
-                    <div className={cls.pageContainer}>
-                        <TarifficationNav/>
+                    <TarifficationNav/>
+                    <AppContent>
                         <TarifficationBody/>
-                    </div>
+                    </AppContent>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

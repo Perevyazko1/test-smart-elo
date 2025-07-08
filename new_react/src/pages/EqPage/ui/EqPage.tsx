@@ -6,6 +6,7 @@ import {eqPageReducer} from "../model/slice/eqPageSlice";
 
 import {EqNav} from "./EqNav/EqNav";
 import {EqBody} from "./EqBody/EqBody";
+import {Container} from "react-bootstrap";
 
 // Список редьюсеров для инициализации
 const initialReducers: ReducersList = {
@@ -21,11 +22,9 @@ export const EqPage = () => {
             {/*Оборачиваем контент в контекст для использования query параметров*/}
             <QueryContext>
                 <ModalProvider>
-                        {/*Компонент навбара*/}
-                        <EqNav/>
+                    <EqNav/>
 
-                        {/*Контент страницы*/}
-                        <EqBody/>
+                    <EqBody/>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

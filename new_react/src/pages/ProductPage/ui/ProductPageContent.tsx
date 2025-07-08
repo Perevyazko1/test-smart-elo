@@ -7,7 +7,7 @@ import {useAppDispatch, useAppQuery, useAppSelector} from "@shared/hooks";
 import {getProductsList, getProductsProps} from "../model/selectors/productsSelector";
 import {fetchProducts} from "../model/service/fetchProducts";
 import {productsPageActions} from "../model/slice/productsPageSlice";
-import {Container, Spinner, Table} from "react-bootstrap";
+import {Spinner, Table} from "react-bootstrap";
 import {AppSkeleton} from "@shared/ui";
 import {PaginationContainer} from "@features";
 import {ProductPageRow} from "@pages/ProductPage/ui/ProductPageRow";
@@ -95,40 +95,38 @@ export const ProductPageContent = () => {
                 <hr className={'p-0 me-1 mx-2 mt-0 w-25'}/>
             </div>
 
-            <Container>
-                <Table striped bordered hover size="sm">
-                    <thead>
-                    <tr>
-                        <th className={'text-center'}>
-                            Изображение
-                        </th>
-                        <th className={'text-center'}>
-                            Наименование
-                        </th>
-                        <th className={'text-center'}>
-                            Тех-процесс
-                        </th>
-                        <th className={'text-center'}>
-                            Схему подтвердил
-                        </th>
-                    </tr>
-                    </thead>
+            <Table striped bordered hover size="sm">
+                <thead>
+                <tr>
+                    <th className={'text-center'}>
+                        Изображение
+                    </th>
+                    <th className={'text-center'}>
+                        Наименование
+                    </th>
+                    <th className={'text-center'}>
+                        Тех-процесс
+                    </th>
+                    <th className={'text-center'}>
+                        Схему подтвердил
+                    </th>
+                </tr>
+                </thead>
 
-                    <tbody style={{fontSize: '14px'}}>
+                <tbody style={{fontSize: '14px'}}>
 
-                    {productProps.isLoading && productList.length === 0 ?
-                        <>{PageSkeletons}</>
-                        :
-                        <>
-                            {productList.map((product) => (
-                                <ProductPageRow key={product.id} product={product}/>
-                            ))}
-                            {!!productProps.next && PageSkeletons}
-                        </>
-                    }
-                    </tbody>
-                </Table>
-            </Container>
+                {productProps.isLoading && productList.length === 0 ?
+                    <>{PageSkeletons}</>
+                    :
+                    <>
+                        {productList.map((product) => (
+                            <ProductPageRow key={product.id} product={product}/>
+                        ))}
+                        {!!productProps.next && PageSkeletons}
+                    </>
+                }
+                </tbody>
+            </Table>
         </PaginationContainer>
     );
 };

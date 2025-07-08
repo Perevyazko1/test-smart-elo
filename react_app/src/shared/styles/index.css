@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Montserrat'; /* Одно и то же имя для всех */
+  src: url('./fonts/Montserrat-Thin.woff2') format('woff2');
+  font-weight: 100; /* Тонкое начертание */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat'; /* Одно и то же имя */
+  src: url('./fonts/Montserrat-Regular.woff2') format('woff2');
+  font-weight: 400; /* Обычное начертание (normal) */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Montserrat'; /* Одно и то же имя */
+  src: url('./fonts/Montserrat-Medium.woff2') format('woff2');
+  font-weight: 500; /* Среднее начертание (medium) */
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+}
+
+body {
+  min-width: 320px;
+  font-family: 'Montserrat', sans-serif;
+}

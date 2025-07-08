@@ -1,7 +1,5 @@
 import React from "react";
 
-import cls from "./OrderPage.module.scss";
-
 import {ModalProvider} from "@app";
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
 
@@ -9,6 +7,7 @@ import {ordersPageReducer} from "../model/slice";
 
 import {OrderPageNav} from "./OrderPageNav";
 import {OrderPageBody} from "./OrderPageBody";
+import {AppContent} from "@shared/ui";
 
 
 const initialReducers: ReducersList = {
@@ -22,11 +21,11 @@ export const OrdersPage = () => {
         <DynamicComponent reducers={initialReducers}>
             <ModalProvider>
                 <QueryContext>
-                    <div className={cls.pageContainer}>
-                        <OrderPageNav/>
+                    <OrderPageNav/>
 
+                    <AppContent>
                         <OrderPageBody/>
-                    </div>
+                    </AppContent>
                 </QueryContext>
             </ModalProvider>
         </DynamicComponent>

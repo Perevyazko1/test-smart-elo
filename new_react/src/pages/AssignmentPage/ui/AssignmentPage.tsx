@@ -5,7 +5,7 @@ import cls from './AssignmentPage.module.scss';
 
 import {ModalProvider} from "@app";
 import {DynamicComponent, PaginationContainer, QueryContext, ReducersList} from "@features";
-import {AppSkeleton} from "@shared/ui";
+import {AppContent, AppSkeleton} from "@shared/ui";
 import {useAppDispatch, useAppSelector, useQueryParams} from "@shared/hooks";
 import {getPaginationSize} from "@shared/lib";
 
@@ -96,9 +96,9 @@ export const AssignmentPage = () => {
         <DynamicComponent removeAfterUnmount={false} reducers={initialReducers}>
             <QueryContext>
                 <ModalProvider>
-                    <div className={cls.pageContainer}>
-                        <AssignmentNavBar/>
+                    <AssignmentNavBar/>
 
+                    <AppContent>
                         <PaginationContainer
                             hasMore={!!assignmentProps.next}
                             scroll_callback={setNextPage}
@@ -120,46 +120,43 @@ export const AssignmentPage = () => {
                                 <hr className={'p-0 me-2 mx-2 mt-0 w-25'}/>
                             </div>
 
-                            <Container>
-                                <Table striped bordered size="sm">
-                                    <thead>
-                                    <tr>
-                                        <th>Изобр.</th>
-                                        <th>№</th>
-                                        <th colSpan={2}>Серия / Отдел / Проект</th>
-                                        <th>Статус</th>
-                                        <th>Исполнитель</th>
-                                        <th>Дата готовности</th>
-                                        <th>Проверяющий</th>
-                                        <th>Дата визы</th>
-                                        <th>Дата закреп.</th>
-                                    </tr>
-                                    </thead>
+                            <Table striped bordered size="sm">
+                                <thead>
+                                <tr>
+                                    <th>Изобр.</th>
+                                    <th>№</th>
+                                    <th colSpan={2}>Серия / Отдел / Проект</th>
+                                    <th>Статус</th>
+                                    <th>Исполнитель</th>
+                                    <th>Дата готовности</th>
+                                    <th>Проверяющий</th>
+                                    <th>Дата визы</th>
+                                    <th>Дата закреп.</th>
+                                </tr>
+                                </thead>
 
-                                    <tbody>
-                                    {assignmentProps.isLoading && assignmentList.length === 0 ?
-                                        <>{PageSkeletons}</>
-                                        :
-                                        <>
-                                            {
-                                                assignmentList.map((assignment) => (
-                                                    <AssignmentPageTableRow
-                                                        key={assignment.id}
-                                                        assignment={assignment}
-                                                    />
-                                                ))
-                                            }
-                                            {!!assignmentProps.next && PageSkeletons}
-                                        </>
+                                <tbody>
+                                {assignmentProps.isLoading && assignmentList.length === 0 ?
+                                    <>{PageSkeletons}</>
+                                    :
+                                    <>
+                                        {
+                                            assignmentList.map((assignment) => (
+                                                <AssignmentPageTableRow
+                                                    key={assignment.id}
+                                                    assignment={assignment}
+                                                />
+                                            ))
+                                        }
+                                        {!!assignmentProps.next && PageSkeletons}
+                                    </>
 
-                                    }
-                                    </tbody>
-                                </Table>
-
-                            </Container>
+                                }
+                                </tbody>
+                            </Table>
 
                         </PaginationContainer>
-                    </div>
+                    </AppContent>
                 </ModalProvider>
             </QueryContext>
         </DynamicComponent>

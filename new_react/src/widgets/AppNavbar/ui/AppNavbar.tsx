@@ -65,7 +65,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
     return (
         <DynamicComponent reducers={initialReducers} removeAfterUnmount={false}>
             <div
-                className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar'}
+                className={'bg-black text-white d-flex justify-content-center align-items-stretch appNavbar w-full'}
             >
                 <div className={'d-flex align-items-stretch'}
                      style={{minWidth: '1150px', maxWidth: '1600px'}}

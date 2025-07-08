@@ -1,3 +1,4 @@
+export {AppContent} from "./AppContent/AppContent";
 export {AppRangeInput} from "./AppRangeInput/AppRangeInput";
 export {UserOptionRender} from "./AppSelect/UserOptionRender";
 export {AppSelect} from "./AppSelect/AppSelect";
@@ -9,3 +10,4 @@ export {AppSwitch} from "./AppSwitch/AppSwitch";
 export {AppDropdown} from "./AppDropdown/AppDropdown";
 export {AppVoiceInput} from './AppVoiceInput/AppVoiceInput';
 export {AppTooltip} from './AppTooltip/AppTooltip';
+
