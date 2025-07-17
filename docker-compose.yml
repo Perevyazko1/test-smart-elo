@@ -18,6 +18,7 @@ services:
       - elo_server
       - sklad
       - elo_client_build
+      - salary
     networks:
       - app-network
     restart: always
