@@ -19,7 +19,6 @@ ALLOWED_HOSTS = ["*"]
 AUTH_USER_MODEL = 'staff.Employee'
 
 # Application definition
-
 INSTALLED_APPS = [
     "daphne",
 
@@ -33,6 +32,7 @@ INSTALLED_APPS = [
     'staff',
     'core',
     'tasks',
+    'salary',
 
     'django_celery_beat',
     'django_celery_results',

@@ -45,6 +45,7 @@ class DepartmentViewSet(viewsets.ModelViewSet):
 @permission_classes([AllowAny])
 def pin_code_authentication(request):
     pin_code = request.data.get('pin_code')
+    print("🎫🎫🎫🎫🎫🎫", pin_code)
 
     try:
         user = Employee.objects.get(pin_code=pin_code)

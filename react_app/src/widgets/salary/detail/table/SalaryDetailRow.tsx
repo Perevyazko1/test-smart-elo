@@ -1,28 +1,32 @@
 import {TD} from "@/shared/ui/table/TD.tsx";
 
 interface SalaryDetailRowProps {
-
+    name: string;
+    sum: number;
+    comment: string;
+    date: string;
+    earning_type: string;
 }
 
 export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
-    const {} = props;
+    const {name, sum, date, comment, earning_type} = props;
 
     return (
         <tr>
             <TD>
-                Евродиван Монреаль 1.9
+                {date}
             </TD>
             <TD>
-                2100
+                {earning_type}
+            </TD>
+            <TD className={'text-[.8em]'}>
+                {name}
             </TD>
             <TD>
-                3
+                {sum.toLocaleString("ru-RU")}
             </TD>
             <TD>
-                6300
-            </TD>
-            <TD>
-                Помогал
+                {comment}
             </TD>
         </tr>
     );

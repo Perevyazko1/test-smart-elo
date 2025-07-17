@@ -1,13 +1,17 @@
-import {Btn} from "@/shared/ui/Buttons/Btn.tsx";
+import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {twMerge} from "tailwind-merge";
+import type {IWeek} from "@/shared/utils/date.ts";
 
 interface SalaryPanelProps {
     setSelectedUserId: (arg: null) => void;
     selectedUserId: number | null;
+    weeks: IWeek[];
+    currentWeek: IWeek | null;
+    setCurrentWeek: (arg: IWeek) => void;
 }
 
 export const SalaryPanel = (props: SalaryPanelProps) => {
-    const {setSelectedUserId, selectedUserId} = props;
+    const {setSelectedUserId, selectedUserId, weeks, currentWeek, setCurrentWeek} = props;
 
 
     return (
@@ -32,46 +36,26 @@ export const SalaryPanel = (props: SalaryPanelProps) => {
                     'flex text-sm',
                     'overflow-x-auto'
                 ])}>
-                    <Btn className={'text-sm text-black py-0 bg-yellow-200 px-2 border border-gray-400'}>
-                        Неделя 27
-                        <br/>
-                        07.07-13.07
-                    </Btn>
-                    <div className={'text-sm bg-yellow-100 px-2 border border-gray-400'}>
-                        Неделя 26
-                        <br/>
-                        30.06-06.07
-                    </div>
-                    <div className={'text-sm bg-green-200 px-2 border border-gray-400'}>
-                        Неделя 25
-                        <br/>
-                        23.06-29.06
-                    </div>
-                    <div className={'text-sm bg-green-200 px-2 border border-gray-400'}>
-                        Неделя 24
-                        <br/>
-                        23.06-29.06
-                    </div>
-                    <div className={'text-sm bg-green-200 px-2 border border-gray-400'}>
-                        Неделя 23
-                        <br/>
-                        23.06-29.06
-                    </div>
-                    <div className={'text-sm bg-green-200 px-2 border border-gray-400'}>
-                        Неделя 22
-                        <br/>
-                        23.06-29.06
-                    </div>
-                    <div className={'text-sm bg-green-200 px-2 border border-gray-400'}>
-                        Неделя 21
-                        <br/>
-                        23.06-29.06
-                    </div>
+                    {weeks.map((week) => (
+                        <Btn
+                            key={week.weekNumber}
+                            onClick={() => setCurrentWeek(week)}
+                            className={
+                                twMerge([
+                                    'text-sm text-black py-0 px-2 border border-gray-400',
+                                    currentWeek?.weekNumber === week.weekNumber ? 'bg-yellow-200' : 'bg-blue-200'
+                                ])}
+                        >
+                            Неделя {week.weekNumber}
+                            <br/>
+                            {week.dateRangeStr}
+                        </Btn>
+                    ))}
 
-                    <div className={'flex flex-col items-center bg-blue-200 px-2'}>
-                        <span>Далее</span>
-                        <span>{"=>"}</span>
-                    </div>
+                    {/*<div className={'flex flex-col items-center bg-blue-200 px-2'}>*/}
+                    {/*    <span>Далее</span>*/}
+                    {/*    <span>{"=>"}</span>*/}
+                    {/*</div>*/}
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
-import type {TableHTMLAttributes} from "react";
+import type {ThHTMLAttributes} from "react";
 import {twMerge} from "tailwind-merge";
 
-interface PayrollThProps extends TableHTMLAttributes<HTMLTableCellElement>{
+interface PayrollThProps extends ThHTMLAttributes<HTMLTableCellElement>{
 
 }
 

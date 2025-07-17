@@ -31,6 +31,7 @@ export const TextArea = (props: TextAreaProps) => {
         <textarea
             ref={internalRef}
             onInput={handleInput}
+            value={value}
             rows={1}
             className={twMerge([
                 'outline-0 border-0',

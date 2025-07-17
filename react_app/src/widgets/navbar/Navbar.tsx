@@ -2,7 +2,6 @@ import type {HTMLAttributes} from "react";
 import {twMerge} from "tailwind-merge";
 
 interface NavbarProps extends HTMLAttributes<HTMLDivElement> {
-
 }
 
 export const Navbar = (props: NavbarProps) => {

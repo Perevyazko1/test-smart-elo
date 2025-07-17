@@ -1,22 +1,27 @@
 import {TD} from "@/shared/ui/table/TD.tsx";
+import type {IEarning} from "@/entities/salary";
+import {twMerge} from "tailwind-merge";
 
 interface SalaryWeekInfoRowProps {
-
+    earning: IEarning;
 }
 
 export const SalaryWeekInfoRow = (props: SalaryWeekInfoRowProps) => {
-    const {} = props;
+    const {earning} = props;
 
     return (
         <tr>
             <TD>
-                07 июля
+                {earning.target_date}
             </TD>
             <TD>
-                Выплатили на карту
+                {earning.earning_type}
             </TD>
-            <TD className={'text-nowrap bg-red-100'}>
-                - 8 350
+            <TD className={twMerge([
+                'text-nowrap',
+                earning.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+            ])}>
+                {earning.amount.toLocaleString('ru-RU')}
             </TD>
         </tr>
     );

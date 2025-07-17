@@ -24,6 +24,16 @@ docker compose -f docker-compose-dev.yml up --build -d
 docker-compose -f docker-compose-preprod.yml up -d --build
 ```
 
+#### run command
+```bash 
+  docker exec -it server 
+```
+
+#### example command
+```
+docker exec -it server python3 manage.py startapp salary
+```
+
 Создание виртуального окружения: 
 
 `python -m venv venv`

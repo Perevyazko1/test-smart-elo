@@ -1,0 +1,122 @@
+from rest_framework import serializers
+from salary.models import Earning, PayrollRow, Payroll
+
+
+class EarningSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Earning
+        fields = [
+            'id',
+            'user',
+            'amount',
+            'earning_type',
+            'target_date',
+            'comment',
+            'earning_comment',
+            'approval_by',
+        ]
+
+
+class PayrollRowSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
+    week = serializers.SerializerMethodField()
+    tax_sum = serializers.SerializerMethodField()
+    issued_sum = serializers.SerializerMethodField()
+    card_sum = serializers.SerializerMethodField()
+    earned_sum = serializers.SerializerMethodField()
+    bonus_sum = serializers.SerializerMethodField()
+    department_name = serializers.SerializerMethodField()
+
+    has_unconfirmed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PayrollRow
+        fields = [
+            'id',
+            'name',
+            'payroll',
+            'user_id',
+            'week',
+            'is_locked',
+            'is_closed',
+            'comment',
+            'issued_sum',
+            'tax_sum',
+            'card_sum',
+            'start_balance',
+            'cash_payout',
+            'earned_sum',
+            'bonus_sum',
+            'department_name',
+            'has_unconfirmed',
+        ]
+
+    def get_name(self, obj):
+        return str(obj.user)
+
+    def get_user_id(self, obj):
+        return str(obj.user.id)
+
+    def get_week(self, obj):
+        return obj.payroll.name
+
+    def get_department_name(self, obj):
+        return obj.user.permanent_department.name if obj.user.permanent_department else None
+
+    def get_tax_sum(self, obj):
+        # Фильтруем уже загруженные данные в Python, а не в БД
+        all_earnings = obj.user.earnings.all()  # .all() здесь не делает нового запроса
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.approval_by is not None and
+                   e.earning_type == 'Налог')
+
+    def get_card_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.approval_by is not None and
+                   e.earning_type == 'На карту')
+
+    def get_earned_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.approval_by is not None and
+                   e.earning_type == 'ЭЛО')
+
+    def get_bonus_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.earning_type == 'ДОП')
+
+    def get_issued_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.approval_by is not None and
+                   e.earning_type == 'Выдача НАЛ')
+
+    def get_has_unconfirmed(self, obj: PayrollRow):
+        return obj.user.earnings.filter(
+            target_date__gte=obj.payroll.date_from,
+            target_date__lte=obj.payroll.date_to,
+            approval_by__isnull=True,
+        ).exists()
+
+
+
+class PayrollSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payroll
+        fields = [
+            'id',
+            'state',
+            'date_from',
+            'date_to',
+            'cash_payout',
+            'is_closed',
+            'name',
+        ]

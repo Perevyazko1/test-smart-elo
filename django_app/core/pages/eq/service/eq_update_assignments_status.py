@@ -7,6 +7,7 @@ from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import EqNotificationActions, ws_update_notification, ws_send_to_department, ws_group_updates
 from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep
 from core.signals import update_assignments_and_clean_cache
+from salary.service.make_earning import make_earning
 from staff.models import Department, Employee, Transaction, Audit
 
 
@@ -367,10 +368,23 @@ class EqUpdateAssignmentsStatus:
                     co_executors = AssignmentCoExecutor.objects.filter(
                         assignment=target_assignment
                     )
-                    description = (f'Соисполнитель в производстве полуфабриката {target_assignment} '
-                                   f'{target_assignment.department.name}')
+                    description = (
+                        f'{target_assignment.department.name}'
+                        f'Соисполнитель ЭЛО - {self.order_product.product.name} '
+                        f'- {target_assignment}'
+                    )
                     for co_executor in co_executors:
                         if co_executor.wages_amount:
+                            make_earning(
+                                earning_type="ЭЛО",
+                                amount=co_executor.wages_amount,
+                                user=co_executor.co_executor,
+                                created_by=target_assignment.inspector,
+                                approval_by=target_assignment.inspector,
+                                target_date=tariffication_date,
+                                comment=description,
+                            )
+
                             Transaction.objects.create(
                                 target_date=tariffication_date,  # Используем вычисленную дату
                                 transaction_type='accrual',
@@ -382,12 +396,25 @@ class EqUpdateAssignmentsStatus:
                                 description=description,
                             )
 
-                    description = (f'Производство полуфабриката {target_assignment} '
-                                   f'{target_assignment.department.name}')
+                    description = (
+                        f'{target_assignment.department.name} - '
+                        f'Производство ЭЛО - '
+                        f'{self.order_product.product.name} - '
+                        f'{target_assignment}'
+                    )
 
                     if target_assignment.amount:
+                        make_earning(
+                            user=target_assignment.executor,
+                            amount=target_assignment.amount,
+                            target_date=tariffication_date,
+                            created_by=target_assignment.inspector,
+                            approval_by=target_assignment.inspector,
+                            comment=description,
+                            earning_type="ЭЛО",
+                        )
                         Transaction.objects.create(
-                            target_date=tariffication_date,  # Используем вычисленную дату
+                            target_date=tariffication_date,
                             transaction_type='accrual',
                             details='wages',
                             amount=target_assignment.amount,
