@@ -147,6 +147,8 @@ services:
       args:
         - VITE_API_URL=${VITE_API_URL}
     container_name: salary
+    networks:
+      - app-network
     expose:
       - "80"
     env_file:
