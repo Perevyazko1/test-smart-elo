@@ -1,7 +1,7 @@
 # --- Этап сборки (Build Stage) ---
 FROM node:23-alpine3.20 as builder
 WORKDIR /app
-ARG VITE_API_URL="http://localhost:8000"
+ARG VITE_API_URL="https://elo.szmk.pro"
 ENV VITE_API_URL=${VITE_API_URL}
 COPY package*.json ./
 RUN npm install

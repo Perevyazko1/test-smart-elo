@@ -1,4 +1,4 @@
-export const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
+export const API_URL = import.meta.env.VITE_API_URL || "https://elo.szmk.pro";
 export const USER_LOCALSTORAGE_TOKEN = 'USER_LOCALSTORAGE_TOKEN';
 
 export const SALARY_STATUSES = {
