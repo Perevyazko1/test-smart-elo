@@ -8,7 +8,7 @@ import type {IWeek} from "@/shared/utils/date.ts";
 
 import { payrollService } from "../../model/api.ts";
 
-import {PayrollDepartmentInfo} from "../PayrollDepartmentInfo";
+import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
 
 

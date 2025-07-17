@@ -15,6 +15,7 @@ def make_earning(
         created_by: Employee,
         approval_by: Optional[Employee] = None,
         comment: Optional[str] = None,
+        earning_comment: Optional[str] = None,
 ) -> Earning:
     payroll_list = Payroll.objects.filter(
         date_to__lte=target_date,
@@ -35,6 +36,7 @@ def make_earning(
             comment=comment,
             created_by=created_by,
             approval_by=approval_by,
+            earning_comment=earning_comment,
         )
 
         return earning

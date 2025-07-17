@@ -11,6 +11,7 @@ from rest_framework.response import Response
 
 from core.models import (
     OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment)
+from salary.service.make_earning import make_earning
 from src.label_printer.main_label_template import main_label_template
 from src.label_printer.printer import Printer
 from staff.models import Employee, Transaction, Department
@@ -254,7 +255,10 @@ def update_assignments(request):
 
             if assignment.new_tariff:
                 if assignment.new_tariff.amount:
-                    description = f'Отмена производства полуфабриката {assignment} {assignment.department.name}'
+                    description = (
+                        f'{assignment.department.name} - '
+                        f'Отмена производства {assignment.order_product.product.name} '
+                    )
                     co_executors = AssignmentCoExecutor.objects.filter(
                         assignment=assignment
                     )
@@ -270,6 +274,16 @@ def update_assignments(request):
                                 inspector=user,
                                 description=description,
                             )
+                            make_earning(
+                                earning_type="ЭЛО",
+                                amount=-co_executor.wages_amount,
+                                user=co_executor.co_executor,
+                                created_by=user,
+                                approval_by=user,
+                                target_date=datetime.now().date(),
+                                comment=description,
+                                earning_comment=str(assignment),
+                            )
 
                     if assignment.amount:
                         Transaction.objects.create(
@@ -278,9 +292,19 @@ def update_assignments(request):
                             details='wages',
                             amount=assignment.amount,
                             employee=assignment.executor,
-                            executor=request.user,
-                            inspector=request.user,
+                            executor=user,
+                            inspector=user,
                             description=description,
+                        )
+                        make_earning(
+                            earning_type="ЭЛО",
+                            amount=-assignment.amount,
+                            user=assignment.executor,
+                            created_by=user,
+                            approval_by=user,
+                            target_date=datetime.now().date(),
+                            comment=description,
+                            earning_comment=str(assignment),
                         )
 
         actualized_assembled(op)
@@ -352,7 +376,7 @@ def update_timing_info(request):
     ps = ProductionStep.objects.get(
         id=ps_id
     )
-    ps.scheduled_time=timing
+    ps.scheduled_time = timing
     ps.save()
 
     order_products = OrderProduct.objects.filter(
@@ -422,7 +446,6 @@ def get_plan_info(request):
         "days_load": days_load
     }
     return JsonResponse({'data': result}, json_dumps_params={"ensure_ascii": False})
-
 
 
 @api_view(['get'])
@@ -499,6 +522,5 @@ def print_labels(request):
             department_text
         )
         printer.print_label(label)
-    
-    
+
     return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})

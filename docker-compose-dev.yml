@@ -4,7 +4,7 @@ services:
       context: ./django_app/
       dockerfile: DockerfileDev
     container_name: server
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./django_app:/app
     depends_on:
@@ -22,7 +22,7 @@ services:
   pg:
     build: services/postgres_db
     container_name: pg
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./services/postgres_db/PGDATA:/var/lib/postgresql/data
     ports:
@@ -37,7 +37,7 @@ services:
       context: ./services/pgadmin
       dockerfile: Dockerfile
     container_name: pgadmin
-    restart: always
+    restart: unless-stopped
     depends_on:
       - pg
     ports:
@@ -52,7 +52,7 @@ services:
   redis:
     container_name: redis
     build: services/redis
-    restart: always
+    restart: unless-stopped
     ports:
       - "6379:6379"
     networks:
@@ -61,7 +61,7 @@ services:
   nginx:
     container_name: nginx
     build: ./services/nginx
-    restart: always
+    restart: unless-stopped
     depends_on:
       - server
     volumes:
@@ -74,6 +74,18 @@ services:
     networks:
       - dev-network
 
+  salary:
+    build:
+      context: ./react_app
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL}
+    container_name: salary
+    ports:
+      - "3001:80"
+    env_file:
+      - .env
+    restart: unless-stopped
 
 networks:
   dev-network:

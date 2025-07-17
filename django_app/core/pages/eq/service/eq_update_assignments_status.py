@@ -369,9 +369,8 @@ class EqUpdateAssignmentsStatus:
                         assignment=target_assignment
                     )
                     description = (
-                        f'{target_assignment.department.name}'
-                        f'Соисполнитель ЭЛО - {self.order_product.product.name} '
-                        f'- {target_assignment}'
+                        f'{target_assignment.department.name} - '
+                        f'Соисполнитель ЭЛО - {self.order_product.product.name}'
                     )
                     for co_executor in co_executors:
                         if co_executor.wages_amount:
@@ -383,6 +382,7 @@ class EqUpdateAssignmentsStatus:
                                 approval_by=target_assignment.inspector,
                                 target_date=tariffication_date,
                                 comment=description,
+                                earning_comment=str(target_assignment),
                             )
 
                             Transaction.objects.create(
@@ -399,8 +399,7 @@ class EqUpdateAssignmentsStatus:
                     description = (
                         f'{target_assignment.department.name} - '
                         f'Производство ЭЛО - '
-                        f'{self.order_product.product.name} - '
-                        f'{target_assignment}'
+                        f'{self.order_product.product.name}'
                     )
 
                     if target_assignment.amount:
@@ -412,6 +411,7 @@ class EqUpdateAssignmentsStatus:
                             approval_by=target_assignment.inspector,
                             comment=description,
                             earning_type="ЭЛО",
+                            earning_comment=str(target_assignment),
                         )
                         Transaction.objects.create(
                             target_date=tariffication_date,

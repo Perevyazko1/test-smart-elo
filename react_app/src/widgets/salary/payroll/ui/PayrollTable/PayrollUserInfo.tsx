@@ -91,11 +91,14 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
         debouncedUpdateRow({cash_payout: value});
     }
 
-    const formatNumber = (value: number | null) => {
+    const formatNumber = (value: number | null, abs: boolean = true) => {
         if (!value) {
             return "";
         }
-        return Math.abs(value).toLocaleString('ru-RU');
+        if (abs) {
+            return Math.abs(value).toLocaleString('ru-RU');
+        }
+        return value.toLocaleString('ru-RU');
     }
 
     const cashPercent =
@@ -106,6 +109,12 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
     const statusLessThen = (status: keyof typeof SALARY_STATUSES) => {
         return Number(state) < Number(status);
+    }
+
+    const closeWeekRowHandle = () => {
+        if (window.confirm("Закрыть расчеты по текущей неделе с сотрудником для расчета баланса?")) {
+            closeRow.mutate({payroll_row_id: userInfo.id})
+        }
     }
 
     return (
@@ -140,7 +149,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                         disabled={userInfo.is_closed}
                         className={'text-16 bg-transparent px-2'}
                         name={'Payroll'}
-                        onClick={() => closeRow.mutate({payroll_row_id: userInfo.id})}
+                        onClick={closeWeekRowHandle}
                     >
                         <ExitIcon/>
                     </Btn>
@@ -148,7 +157,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             </td>
 
             <td className="py-2 px-4 border border-gray-300">
-                {formatNumber(userInfo.start_balance)}
+                {formatNumber(userInfo.start_balance, false)}
             </td>
 
             <td className="p-1 border border-gray-300 max-w-[7em]">

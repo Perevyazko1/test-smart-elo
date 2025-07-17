@@ -1,5 +1,6 @@
 """Views for tariffication page. """
 import datetime
+from typing import List
 
 from django.db import transaction
 from django.db.models import Q
@@ -17,6 +18,7 @@ from core.models import (
     Assignment,
     AssignmentCoExecutor,
 )
+from salary.service.make_earning import make_earning
 from staff.models import (
     Audit, Transaction,
 )
@@ -214,8 +216,8 @@ def set_post_tariffication(request):
     """Set tariff for post tariffication. """
     production_step__id: int = request.data.get('production_step__id')
     tariff__id: int = request.data.get('tariff__id')
-    target__ids: [int] = request.data.get('target__ids')
-    zero_tariff__ids: [int] = request.data.get('zero_tariff__ids')
+    target__ids: List[int] = request.data.get('target__ids')
+    zero_tariff__ids: List[int] = request.data.get('zero_tariff__ids')
 
     serializer = PostTarifficationSerializer
 
@@ -264,7 +266,10 @@ def set_post_tariffication(request):
 
     # Начисление ЗП по тарифицированным нарядам
     for assignment in assignments_qs:
-        description = f'Производство полуфабриката {assignment} {assignment.department.name}'
+        description = (
+            f'{assignment.department.name}'
+            f'Производство ЭЛО - {assignment.order_product.product.name}'
+        )
         Transaction.objects.create(
             transaction_type='accrual',
             target_date=datetime.datetime.now(),
@@ -274,6 +279,16 @@ def set_post_tariffication(request):
             executor=request.user,
             inspector=request.user,
             description=description,
+        )
+        make_earning(
+            earning_type="ЭЛО",
+            amount=assignment.new_tariff.amount,
+            user=assignment.executor,
+            created_by=request.user,
+            approval_by=request.user,
+            target_date=datetime.datetime.now().date(),
+            comment=description,
+            earning_comment=str(assignment),
         )
 
     # Создаем аудит

@@ -53,9 +53,9 @@ export const App = () => {
     }, [setCurrentUser, token, initialAuth]);
 
     return (
-        <div>
+        <div className={'bg-gray-500 min-h-screen'}>
             <Toaster position="top-center" toastOptions={{duration: 1400}}/>
-            <div className={'bg-gray-500 h-screen'}>
+            <div>
                 {initialAuth ? (<div>Загрузка...</div>) : (
                     <div>
                         <Navbar>
