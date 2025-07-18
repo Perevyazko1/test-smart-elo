@@ -1,27 +1,28 @@
 import {TD} from "@/shared/ui/table/TD.tsx";
-import type {IEarning} from "@/entities/salary";
 import {twMerge} from "tailwind-merge";
 
 interface SalaryWeekInfoRowProps {
-    earning: IEarning;
+    date: string;
+    sum: number;
+    name: string;
 }
 
 export const SalaryWeekInfoRow = (props: SalaryWeekInfoRowProps) => {
-    const {earning} = props;
+    const {date, sum, name} = props;
 
     return (
         <tr>
             <TD>
-                {earning.target_date}
+                {new Date(date).toLocaleString("ru", {day: 'numeric', month: 'long'})}
             </TD>
             <TD>
-                {earning.earning_type}
+                {name}
             </TD>
             <TD className={twMerge([
                 'text-nowrap',
-                earning.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+                sum > 0 ? 'bg-green-100' : 'bg-red-100'
             ])}>
-                {earning.amount.toLocaleString('ru-RU')}
+                {sum.toLocaleString('ru-RU')}
             </TD>
         </tr>
     );

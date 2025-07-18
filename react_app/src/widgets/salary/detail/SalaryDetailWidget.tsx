@@ -5,6 +5,11 @@ import {THead} from "@/shared/ui/table/THead.tsx";
 import {useQuery} from "@tanstack/react-query";
 import {salaryDetailService} from "@/widgets/salary/detail/model/api";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {DetailTable} from "@/widgets/salary/detail/table/DetailTable.tsx";
+import {useState} from "react";
+import {DetailGroupedTable} from "@/widgets/salary/detail/table/DetailGroupedTable.tsx";
+import {Btn} from "@/shared/ui/buttons/Btn.tsx";
+import {WeekDetailsTable} from "@/widgets/salary/detail/table/WeekDetailsTable.tsx";
 
 interface SalaryDetailWidgetProps {
     selectedUserId: number;
@@ -13,6 +18,8 @@ interface SalaryDetailWidgetProps {
 
 export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
     const {selectedUserId, currentWeek} = props;
+
+    const [showDetail, setShowDetail] = useState(false);
 
     const {data, isFetching} = useQuery({
         queryKey: ['salaryDetail', currentWeek.weekNumber, selectedUserId],
@@ -35,13 +42,8 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
 
     const details = data.data;
 
-    const detailTotalSum = details.detail_report?.reduce(
-        (acc, item) => acc + item.amount, 0
-    ) || 0;
-
     return (
         <div className={'p-3'}>
-
             <h1 className={"text-xl mb-4"}>
                 <b>Детализация по сотруднику {details.user_info.id}</b>
             </h1>
@@ -61,87 +63,28 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
 
                 <div className={'flex gap-10 justify-between min-w-0 overflow-auto max-w-full'}>
                     <div className={'flex flex-col flex-1'}>
-                        <div
-                            className={'p-1 px-4 border border-gray-300 bg-white w-fit'}
+                        <Btn
+                            className={'p-1 px-4 border border-gray-300 bg-white w-fit text-black'}
+                            onClick={() => setShowDetail(!showDetail)}
                         >
                             Отработка за {currentWeek.weekNumber} Нед.
-                        </div>
+                        </Btn>
 
-                        <Table>
-                            <THead>
-                                <tr>
-                                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                                        Дата
-                                    </th>
-                                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                                        Тип начисления
-                                    </th>
-                                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                                        Изделие / Описание
-                                    </th>
-                                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                                        Сумма
-                                    </th>
-                                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                                        Примечание
-                                    </th>
-                                </tr>
-                            </THead>
+                        {showDetail ?
+                            <DetailTable
+                                earnings={details.detail_report}
+                            /> :
+                            <DetailGroupedTable
+                                earnings={details.detail_report}
+                            />
+                        }
 
-
-                            <tbody>
-                            {details.detail_report?.map((row) => (
-                                <SalaryDetailRow
-                                    key={row.id}
-                                    name={row.comment}
-                                    earning_type={row.earning_type}
-                                    sum={row.amount}
-                                    date={row.target_date}
-                                    comment={row.earning_comment}
-                                />
-                            ))}
-
-                            <tr className={'bg-gray-200 text-nowrap'}>
-                                <th
-                                    colSpan={3}
-                                    className="py-2 px-4 border border-gray-300 text-right"
-                                >
-                                    <b>Итого:</b>
-                                </th>
-                                <th
-                                    colSpan={2}
-                                    className="py-2 px-4 border border-gray-300 text-left"
-                                >
-                                    <b>{detailTotalSum.toLocaleString("ru-RU")} Р.</b>
-                                </th>
-                            </tr>
-                            </tbody>
-                        </Table>
                     </div>
 
                     <div>
-                        <Table>
-                            <THead>
-                                <tr>
-                                    <th
-                                        colSpan={3}
-                                        className={'py-1 px-2 border-b border-gray-300 text-left'}
-                                    >
-                                        Сводное инфо по неделям
-                                    </th>
-                                </tr>
-                            </THead>
-
-                            <tbody>
-                            {details.week_report?.map(item => (
-                                <SalaryWeekInfoRow
-                                    key={item.id}
-                                    earning={item}
-                                />
-
-                            ))}
-                            </tbody>
-                        </Table>
+                        <WeekDetailsTable
+                            earnings={details.week_report}
+                        />
                     </div>
                 </div>
             </div>
