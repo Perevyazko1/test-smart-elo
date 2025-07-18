@@ -177,7 +177,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                                 `ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`
                             }
                         >
-                            {formatNumber(userInfo.earned_sum + userInfo.bonus_sum)}
+                            {formatNumber(userInfo.earned_sum + userInfo.bonus_sum, false)}
                         </TT>
                     </div>
 
