@@ -117,7 +117,6 @@ services:
       - app-network
     env_file:
       - .env.docker.prod
-
   pgadmin:
     build:
       context: ./services/pgadmin
@@ -134,7 +133,6 @@ services:
       - ./services/pgadmin/PGADMINDATA:/var/lib/pgadmin
     networks:
       - app-network
-
   salary:
     build:
       context: ./react_app
