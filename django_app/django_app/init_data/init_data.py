@@ -9,7 +9,7 @@ def init_data():
 
     target_transactions = Transaction.objects.filter(
         target_date__gte="2025-07-07",
-        target_date__lte="2025-07-20",
+        target_date__lte="2025-07-21",
     )
 
     for transaction in target_transactions:
