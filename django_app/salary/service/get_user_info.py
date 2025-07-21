@@ -15,7 +15,6 @@ def get_user_info(user_id: int, date_from: date, date_to: date):
     current_earnings = earnings.filter(
         target_date__gte=date_from,
         target_date__lte=date_to,
-        earning_type__in=["ЭЛО", "ДОП"],
     )
 
     last_week_earnings = Earning.objects.filter(

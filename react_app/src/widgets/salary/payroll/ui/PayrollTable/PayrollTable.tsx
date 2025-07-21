@@ -14,7 +14,7 @@ import {PayrollTh} from "./PayrollTh.tsx";
 
 interface PayrollTableProps {
     currentWeek: IWeek;
-    payroll: IPayroll;
+    payroll?: IPayroll | null;
     setSelectedUserId: (arg: number) => void;
 }
 
@@ -25,7 +25,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
         queryKey: ['payrollRows', currentWeek.weekNumber],
         queryFn: () => {
             return payrollService.getPayrollRows({
-                payroll_id: payroll.id,
+                payroll_id: payroll!.id,
             });
         },
     });
@@ -56,6 +56,12 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalBonus = data?.data?.reduce((sum, row) => sum + row.bonus_sum, 0) || 0;
     const totalTax = data?.data?.reduce((sum, row) => sum + row.tax_sum, 0) || 0;
     const totalCash = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
+
+    if (!payroll) {
+        return (
+            <div>----</div>
+        )
+    }
 
     return (
         <Table>

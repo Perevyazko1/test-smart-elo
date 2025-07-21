@@ -5,7 +5,7 @@ import {SalaryGroupedRow} from "@/widgets/salary/detail/table/SalaryGroupedRow.t
 import {groupEarnings} from "@/shared/utils/groupEarning.ts";
 
 interface DetailGroupedTableProps {
-    earnings: IEarning[] | null;
+    earnings?: IEarning[] | null;
 }
 
 export const DetailGroupedTable = (props: DetailGroupedTableProps) => {

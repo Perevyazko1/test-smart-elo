@@ -3,18 +3,39 @@ from salary.models import Earning, PayrollRow, Payroll
 
 
 class EarningSerializer(serializers.ModelSerializer):
+    approval_by_name = serializers.SerializerMethodField()
+    user_name = serializers.SerializerMethodField()
+    created_by_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Earning
         fields = [
             'id',
             'user',
+            'user_name',
             'amount',
             'earning_type',
             'target_date',
+            'crated_at',
+            'created_by',
+            'created_by_name',
             'comment',
             'earning_comment',
             'approval_by',
+            'approval_by_name',
         ]
+
+    def get_approval_by_name(self, obj):
+        return str(obj.approval_by)
+
+    def get_user_name(self, obj):
+        return str(obj.approval_by)
+
+    def get_created_by_name(self, obj):
+        return str(obj.created_by)
+
+
+
 
 
 class PayrollRowSerializer(serializers.ModelSerializer):

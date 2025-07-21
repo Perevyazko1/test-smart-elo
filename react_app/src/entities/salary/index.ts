@@ -42,4 +42,7 @@ export interface IEarning {
     approval_by: number;
     comment: string;
     earning_comment: string;
+    user_name: string;
+    created_by_name: string;
+    approval_by_name: string;
 }

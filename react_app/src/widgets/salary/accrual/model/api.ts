@@ -22,6 +22,12 @@ class EarningService {
             props,
         )
     }
+
+    deleteEarning(props: {earning_id: number}) {
+        return $axios.delete(
+            `/salary/earnings/${props.earning_id}/`,
+        )
+    }
 }
 
 export const earningService = new EarningService();

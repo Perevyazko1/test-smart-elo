@@ -143,7 +143,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                 </div>
             </div>
 
-            {(!data?.data) ? (
+            {(!data?.data) && (
                 <Btn
                     onClick={() => {
                         createPayrollMutation.mutate({
@@ -154,13 +154,12 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                 >
                     {createPayrollMutation.isPending ? 'Формирование...' : 'Сформировать ведомость'}
                 </Btn>
-            ) : (
-                <PayrollTable
-                    currentWeek={currentWeek}
-                    setSelectedUserId={setSelectedUserId}
-                    payroll={data.data}
-                />
             )}
+            <PayrollTable
+                currentWeek={currentWeek}
+                setSelectedUserId={setSelectedUserId}
+                payroll={data?.data}
+            />
         </div>
     );
 };

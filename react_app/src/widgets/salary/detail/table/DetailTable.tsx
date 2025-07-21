@@ -6,10 +6,12 @@ import {SalaryDetailRow} from "./SalaryDetailRow";
 
 interface DetailTableProps {
     earnings: IEarning[] | null;
+    weekNumber: number;
+    selectedUserId: number;
 }
 
 export const DetailTable = (props: DetailTableProps) => {
-    const {earnings} = props;
+    const {earnings, weekNumber, selectedUserId} = props;
 
     const detailTotalSum = earnings?.reduce(
         (acc, item) => acc + item.amount, 0
@@ -41,12 +43,10 @@ export const DetailTable = (props: DetailTableProps) => {
             <tbody>
             {earnings?.map((row) => (
                 <SalaryDetailRow
+                    earning={row}
+                    selectedUserId={selectedUserId}
+                    weekNumber={weekNumber}
                     key={row.id}
-                    name={row.comment}
-                    earning_type={row.earning_type}
-                    sum={row.amount}
-                    date={row.target_date}
-                    comment={row.earning_comment}
                 />
             ))}
 

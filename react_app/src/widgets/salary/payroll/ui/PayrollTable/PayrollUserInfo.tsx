@@ -118,7 +118,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
     }
 
     return (
-        <tr>
+        <tr id={`payrollRow${userInfo.user_id}`}>
             <td className="py-2 px-4 border border-gray-300 flex justify-between flex-nowrap">
                 <div className="flex items-center">
                     <Toggle

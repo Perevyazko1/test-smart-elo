@@ -270,26 +270,27 @@ def set_post_tariffication(request):
             f'{assignment.department.name}'
             f'Производство ЭЛО - {assignment.order_product.product.name}'
         )
-        Transaction.objects.create(
-            transaction_type='accrual',
-            target_date=datetime.datetime.now(),
-            details='wages',
-            amount=assignment.new_tariff.amount,
-            employee=assignment.executor,
-            executor=request.user,
-            inspector=request.user,
-            description=description,
-        )
-        make_earning(
-            earning_type="ЭЛО",
-            amount=assignment.new_tariff.amount,
-            user=assignment.executor,
-            created_by=request.user,
-            approval_by=request.user,
-            target_date=datetime.datetime.now().date(),
-            comment=description,
-            earning_comment=str(assignment),
-        )
+        if assignment.executor.piecework_wages:
+            Transaction.objects.create(
+                transaction_type='accrual',
+                target_date=datetime.datetime.now(),
+                details='wages',
+                amount=assignment.new_tariff.amount,
+                employee=assignment.executor,
+                executor=request.user,
+                inspector=request.user,
+                description=description,
+            )
+            make_earning(
+                earning_type="ЭЛО",
+                amount=assignment.new_tariff.amount,
+                user=assignment.executor,
+                created_by=request.user,
+                approval_by=request.user,
+                target_date=datetime.datetime.now().date(),
+                comment=description,
+                earning_comment=str(assignment),
+            )
 
     # Создаем аудит
     detail = (

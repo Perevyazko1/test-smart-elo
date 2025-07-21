@@ -62,6 +62,12 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             queryClient.invalidateQueries({
                 queryKey: ['payrollRows', week.weekNumber]
             });
+            setTimeout(() => {
+                document.getElementById(`payrollRow${userId}`)?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 1000)
         }
     });
 

@@ -1,7 +1,3 @@
-import {SalaryDetailRow} from "@/widgets/salary/detail/table/SalaryDetailRow.tsx";
-import {SalaryWeekInfoRow} from "@/widgets/salary/detail/table/SalaryWeekInfoRow.tsx";
-import {Table} from "@/shared/ui/table/Table.tsx";
-import {THead} from "@/shared/ui/table/THead.tsx";
 import {useQuery} from "@tanstack/react-query";
 import {salaryDetailService} from "@/widgets/salary/detail/model/api";
 import type {IWeek} from "@/shared/utils/date.ts";
@@ -10,6 +6,7 @@ import {useState} from "react";
 import {DetailGroupedTable} from "@/widgets/salary/detail/table/DetailGroupedTable.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {WeekDetailsTable} from "@/widgets/salary/detail/table/WeekDetailsTable.tsx";
+import {Switch} from "@/components/ui/switch";
 
 interface SalaryDetailWidgetProps {
     selectedUserId: number;
@@ -63,19 +60,34 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
 
                 <div className={'flex gap-10 justify-between min-w-0 overflow-auto max-w-full'}>
                     <div className={'flex flex-col flex-1'}>
-                        <Btn
-                            className={'p-1 px-4 border border-gray-300 bg-white w-fit text-black'}
-                            onClick={() => setShowDetail(!showDetail)}
-                        >
-                            Отработка за {currentWeek.weekNumber} Нед.
-                        </Btn>
+                        <div className={'flex gap-3 items-center bg-amber-100'}>
+                            <Btn
+                                className={'p-1 px-4 border border-gray-300 bg-white w-fit text-black'}
+                                onClick={() => setShowDetail(!showDetail)}
+                            >
+                                Отработка за {currentWeek.weekNumber} Нед.
+                            </Btn>
+                            <div className={'flex items-center gap-2'}>
+                                <label htmlFor="showDetail">Показать детализацию</label>
+                                <Switch
+                                    id={"showDetail"}
+                                    checked={showDetail}
+                                    onCheckedChange={() => setShowDetail(!showDetail)}
+                                />
+                            </div>
+
+                        </div>
 
                         {showDetail ?
                             <DetailTable
                                 earnings={details.detail_report}
+                                weekNumber={currentWeek.weekNumber}
+                                selectedUserId={selectedUserId}
                             /> :
                             <DetailGroupedTable
-                                earnings={details.detail_report}
+                                earnings={details.detail_report?.filter(item =>
+                                    ["ЭЛО", "ДОП"].includes(item.earning_type)
+                                )}
                             />
                         }
 
