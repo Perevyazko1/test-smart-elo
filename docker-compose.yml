@@ -51,7 +51,6 @@ services:
     restart: unless-stopped
     networks:
       - app-network
-
   elo_celery_worker:
     build:
       context: ./django_app
@@ -69,7 +68,6 @@ services:
       - .env.docker.prod
     networks:
       - app-network
-
   elo_celery_beat:
     build:
       context: ./django_app
@@ -87,7 +85,6 @@ services:
       - .env.docker.prod
     networks:
       - app-network
-
   elo_client_build:
     build:
       context: ./new_react
@@ -98,7 +95,6 @@ services:
     volumes:
       - react_build:/output
     command: sh -c "cp -r /runtime/build/* /output/ && ls -la /output"
-
   sklad:
     build:
       context: ./sklad
@@ -109,11 +105,10 @@ services:
       - "3000"
     networks:
       - app-network
-
   postgres:
     build: ./services/postgres_db
     container_name: pg
-    expose:
+    ports:
       - "5433:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
