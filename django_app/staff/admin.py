@@ -73,18 +73,13 @@ class TransactionAdmin(admin.ModelAdmin):
 
     list_filter = [
         ('add_date', DateRangeFilter),
-        ('inspect_date', DateRangeFilter),
+        ('target_date', DateRangeFilter),
         'employee',
         'executor',
         'inspector'
     ]
 
     search_fields = ['description']
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj and obj.is_locked:  # если объект заблокирован для редактирования
-            return [f.name for f in self.model._meta.fields]  # все поля становятся только для чтения
-        return super(TransactionAdmin, self).get_readonly_fields(request, obj)
 
 
 @admin.register(Audit)
