@@ -170,12 +170,14 @@ class Task(models.Model):
         TaskExecutor,
         verbose_name="Соисполнители",
         related_name="task_new_co_executors",
+        blank=True,
     )
 
     co_executors = models.ManyToManyField(
         Employee,
         verbose_name="Соисполнители",
         related_name="co_executors_tasks",
+        blank=True,
     )
 
     confirmed_tariff = models.OneToOneField(
