@@ -6,6 +6,7 @@ interface EqFilters<T> {
     filters: T[],
     default: T,
     isLoading: boolean,
+    inited: boolean,
 }
 
 export interface EqPageSchema {
@@ -26,7 +27,8 @@ export const InitialEqBodySchema: EqPageSchema = {
         filters: ['Все проекты'],
         currentFilter: 'Все проекты',
         default: 'Все проекты',
-        isLoading: false,
+        isLoading: true,
+        inited: false,
     },
     viewModes: {
         filters: [],
@@ -38,7 +40,8 @@ export const InitialEqBodySchema: EqPageSchema = {
             name: 'Мои наряды',
             key: 'self'
         },
-        isLoading: false,
+        isLoading: true,
+        inited: false,
     },
 
     weekData: {

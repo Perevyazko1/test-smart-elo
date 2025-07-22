@@ -1,22 +1,32 @@
 import {AppSwitch, AppTooltip} from "@shared/ui";
 import React from "react";
-import {useQueryParams} from "@shared/hooks";
+import {useQueryParams, useStorageString} from "@shared/hooks";
 
 
 export const AssembledSwitch = () => {
     const {queryParameters, setQueryParam} = useQueryParams();
 
+    const QUERY_KEY = "assembled";
+
+    const {inited, setValue} = useStorageString({
+        key: QUERY_KEY,
+        onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
+        defaultValue: "",
+        storageType: "sessionStorage",
+    });
+
     const showAssembledOnly = () => {
         if (queryParameters.assembled) {
-            setQueryParam('assembled', '')
+            setValue('');
         } else {
-            setQueryParam('assembled', 'all')
+            setValue('all');
         }
     };
 
     return (
         <AppTooltip title="Отобразить наряды не укомплектованные полуфабрикатами">
             <AppSwitch
+                disabled={!inited}
                 style={{fontSize: '8px'}}
                 checked={!!queryParameters.assembled}
                 onSwitch={showAssembledOnly}

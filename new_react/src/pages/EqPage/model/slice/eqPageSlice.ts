@@ -11,19 +11,20 @@ const eqPageSlice = createSlice({
     name: 'eqPageSlice',
     initialState,
     reducers: {
+        viewModeInited: (state) => {
+            state.viewModes.inited = true;
+        },
+        projectsInited: (state) => {
+            state.projects.inited = true;
+        },
         filtersInited: (state, action: PayloadAction<boolean>) => {
             state.filtersInited = action.payload;
         },
         filtersReady: (state, action: PayloadAction<boolean>) => {
             state.filtersReady = action.payload;
         },
-
         addNotRelevantId: (state, action: PayloadAction<number>) => {
             state.notRelevantIds = [...state.notRelevantIds, action.payload];
-        },
-        excludeNotRelevantId: (state, action: PayloadAction<number>) => {
-            state.notRelevantIds = state.notRelevantIds.filter(
-                (orderProductId) => orderProductId !== action.payload)
         },
         clearNotRelevantId: (state) => {
             state.notRelevantIds = []
@@ -31,7 +32,6 @@ const eqPageSlice = createSlice({
         weekDataHasUpdated: (state) => {
             state.weekData.hasUpdated = !state.weekData.hasUpdated;
         },
-
     },
     extraReducers: (builder) => {
         builder

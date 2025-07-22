@@ -1,5 +1,5 @@
 import {AppNavbar} from "@widgets/AppNavbar";
-import {useCurrentUser, useDebounce, usePermission, useQueryParams} from "@shared/hooks";
+import {useCurrentUser, useDebounce, usePermission, useQueryParams, useStorageString} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 import {AppInput, AppSwitch, AppTooltip} from "@shared/ui";
 
@@ -15,6 +15,14 @@ export const EqNav = () => {
     const isViewer = usePermission(APP_PERM.ELO_VIEW_ONLY);
     const [searchValue, setSearchValue] = useState(queryParameters.search);
 
+    const QUERY_INPUT_KEY = "search";
+    const {inited: inputInited, setValue: setInputValue} = useStorageString({
+        key: QUERY_INPUT_KEY,
+        onChangeCallback: (value) => setSearchValue(value || ""),
+        defaultValue: "",
+        storageType: "sessionStorage",
+    });
+
     const seriesSizeClb = (item: string) => {
         setQueryParam('series_size', item)
     }
@@ -29,12 +37,20 @@ export const EqNav = () => {
         //eslint-disable-next-line
     }, [searchValue]);
 
+    const QUERY_KEY = "pro";
+
+    const {inited, setValue} = useStorageString({
+        key: QUERY_KEY,
+        onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
+        defaultValue: "",
+        storageType: "sessionStorage",
+    });
 
     const proModeSwitch = () => {
         if (queryParameters.pro) {
-            setQueryParam('pro', '')
+            setValue('');
         } else {
-            setQueryParam('pro', 'true')
+            setValue('true');
         }
     };
 
@@ -59,6 +75,7 @@ export const EqNav = () => {
                         style={{transform: "scale(0.8) translate(0, 3px)", fontSize: '10px'}}
                         checked={!!queryParameters.pro}
                         onSwitch={proModeSwitch}
+                        disabled={!inited}
                         labelPosition={'labelBottom'}
                         handleContent={'⚙️'}
                         label={"НАСТР"}
@@ -70,8 +87,9 @@ export const EqNav = () => {
                 <AppInput placeholder={'Поиск'}
                           style={{width: "125px", fontSize: '10px'}}
                           className={'mx-2'}
-                          onChange={(event) => setSearchValue(event.target.value)}
-                          value={searchValue}
+                          disabled={!inputInited}
+                          onChange={(event) => setInputValue(event.target.value)}
+                          value={searchValue || ""}
                 />
             </AppTooltip>
 
