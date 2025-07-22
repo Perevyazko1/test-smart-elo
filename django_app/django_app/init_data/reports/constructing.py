@@ -4,7 +4,8 @@ from django.db.models import Sum
 from core.models import Assignment, OrderProduct, AssignmentCoExecutor
 from staff.models import Department, Employee
 
-DATE_FROM = "2025-01-01"
+DATE_FROM = "2025-04-01"
+DATE_TO = "2025-06-30"
 
 
 def constructing_report():
@@ -28,6 +29,7 @@ def constructing_report():
 
     target_assignments = Assignment.objects.filter(
         date_completion__date__gte=DATE_FROM,
+        date_completion__date__lte=DATE_TO,
         department=constr,
     ).select_related(
         'order_product__product', 'order_product__order', 'department'

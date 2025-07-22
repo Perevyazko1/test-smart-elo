@@ -12,6 +12,8 @@ export const AppContent = (props: AppContentProps) => {
             <div style={{
                 maxWidth: 2400,
                 minWidth: 1280,
+                maxHeight: "calc(100dvh - 50px)",
+                overflowY: "auto",
             }}
                  {...otherProps}
             >

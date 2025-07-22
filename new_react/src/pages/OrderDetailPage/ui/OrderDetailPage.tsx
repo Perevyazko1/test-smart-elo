@@ -6,7 +6,7 @@ import {ModalProvider} from "@app";
 import React from "react";
 import {AppNavbar} from "@widgets/AppNavbar";
 import {OrderDetailWidget} from "@widgets/OrderDetailWidget";
-import {Container} from "react-bootstrap";
+import {AppContent} from "@shared/ui";
 
 export const OrderDetailPage = () => {
     const {order_id} = useParams();
@@ -16,9 +16,9 @@ export const OrderDetailPage = () => {
             <div className={cls.pageContainer}>
                 <AppNavbar/>
 
-                <Container>
+                <AppContent>
                     <OrderDetailWidget order_id={Number(order_id)}/>
-                </Container>
+                </AppContent>
             </div>
         </ModalProvider>
     );
