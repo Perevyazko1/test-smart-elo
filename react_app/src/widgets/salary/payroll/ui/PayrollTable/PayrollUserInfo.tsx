@@ -119,7 +119,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
     return (
         <tr id={`payrollRow${userInfo.user_id}`}>
-            <td className="py-2 px-4 border border-gray-300 flex justify-between flex-nowrap">
+            <td className="py-0 px-4 border border-gray-300 flex justify-between flex-nowrap">
                 <div className="flex items-center">
                     <Toggle
                         disabled={updatePayrollRowMutation.isPending}
@@ -138,6 +138,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </Toggle>
                     <Btn
                         bg={'white'}
+                        className={"text-nowrap"}
                         onClick={() => setSelectedUserId(userInfo.user_id)}
                     >
                         {userInfo.name}
@@ -156,11 +157,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 </TT>
             </td>
 
-            <td className="py-2 px-4 border border-gray-300">
+            <td className="py-0 px-4 border border-gray-300">
                 {formatNumber(userInfo.start_balance, false)}
             </td>
 
-            <td className="p-1 border border-gray-300 max-w-[7em]">
+            <td className="border border-gray-300 max-w-[7em]">
                 <div className={'flex items-center justify-between gap-1'}>
                     <TT description={"Подтвердить сумму начислений"}>
                         <ConfirmEarningsBtn
@@ -235,7 +236,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </>
                 )}
             </td>
-            <td className="py-2 px-4 border border-gray-300">
+            <td className="py-0 px-4 border border-gray-300">
                 <div className={'flex items-center justify-between gap-2'}>
                     <div className={'flex-1 text-center border-r-2'}>
                         {formatNumber(userInfo.card_sum)}
@@ -250,7 +251,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </TT>
                 </div>
             </td>
-            <td className="p-2 border border-gray-300">
+            <td className="p-0 border border-gray-300">
                 <div className={'flex items-center justify-between gap-2'}>
                     <div className={'flex-1 text-center border-r-2'}>
                         {formatNumber(userInfo.tax_sum)}

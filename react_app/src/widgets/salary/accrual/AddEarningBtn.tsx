@@ -89,7 +89,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                     onClick={() => setModalOpen(true)}
                     bg={"white"}
                     className={twMerge([
-                        'text-sm p-2',
+                        'text-sm p-2 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
                         ["ДОП", "ЭЛО"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
                     ])}
                 >
