@@ -7,15 +7,16 @@ import type {FormEvent} from "react";
 
 interface CreateEarningFormProps {
     onSubmit?: (data: IEarning) => void;
-    userId: number;
+    userId: number | null;
     createdById: number;
     earning_type: IEarningType;
     disabled?: boolean;
     week: IWeek;
+    about?: string;
 }
 
 export const CreateEarningForm = (props: CreateEarningFormProps) => {
-    const {onSubmit, week, disabled = true, earning_type, userId, createdById} = props;
+    const {onSubmit, week, about, disabled = true, earning_type, userId, createdById} = props;
 
     const {
         register,
@@ -27,6 +28,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
             created_by: createdById,
             target_date: week.date_from,
             earning_type: earning_type,
+            comment: about
         }
     });
 
@@ -91,7 +93,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
             </div>
 
             <Btn
-                className={'px-8 py-2'}
+                className={'px-8 py-2 bg-black text-white'}
                 disabled={disabled}
                 type="submit"
             >

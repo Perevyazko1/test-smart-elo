@@ -1,21 +1,18 @@
-import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
 import {type FormEvent, useState} from "react";
-import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {toast} from "sonner";
+import {useNavigate} from "react-router-dom";
+
+import {InputOTP, InputOTPGroup, InputOTPSlot} from "@/components/ui/input-otp";
+import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {authService} from "@/pages/login/model/api.ts";
-import type {IUser} from "@/pages/login/model/types.ts";
 import {USER_LOCALSTORAGE_TOKEN} from "@/shared/consts";
+import {useCurrentUser} from "@/shared/utils/useCurrentUser.ts";
 
-interface LoginPageProps {
-    onLogin: (user: IUser) => void;
-}
 
-export const LoginPage = (props: LoginPageProps) => {
-    const {onLogin} = props;
-
+export const LoginPage = () => {
+    const {setCurrentUser} = useCurrentUser();
+    let navigate = useNavigate();
     const [value, setValue] = useState<string>();
-
-    console.log(value);
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
@@ -25,13 +22,12 @@ export const LoginPage = (props: LoginPageProps) => {
                 success: (data) => {
                     if (data.data) {
                         localStorage.setItem(USER_LOCALSTORAGE_TOKEN, data.data.token);
-                        onLogin(data.data);
-                        console.log(data.data);
+                        setCurrentUser(data.data);
+                        navigate('/')
                         return `${data.data.first_name}, успешный вход в систему!`;
                     } else {
                         return `Ошибка входа, попробуйте еще раз или обратитесь к администратору`
                     }
-
                 },
                 error: 'Error',
             });
@@ -39,7 +35,7 @@ export const LoginPage = (props: LoginPageProps) => {
     }
 
     return (
-        <div className={'flex flex-col gap-3 items-center justify-center pt-15'}>
+        <div className={'flex flex-col gap-3 items-center justify-start pt-15 bg-gray-500 min-h-screen'}>
             <form
                 className={'flex flex-col gap-4 justify-center items-center'}
                 onSubmit={handleSubmit}

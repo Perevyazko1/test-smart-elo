@@ -137,7 +137,6 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                         )}
                     </Toggle>
                     <Btn
-                        bg={'white'}
                         className={"text-nowrap"}
                         onClick={() => setSelectedUserId(userInfo.user_id)}
                     >
@@ -145,7 +144,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </Btn>
                 </div>
 
-                <TT description={"Закрыть неделю по сотруднику"}>
+                <TT asChild description={"Закрыть неделю по сотруднику"}>
                     <Btn
                         disabled={userInfo.is_closed}
                         className={'text-16 bg-transparent px-2'}
@@ -163,7 +162,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
             <td className="border border-gray-300 max-w-[7em]">
                 <div className={'flex items-center justify-between gap-1'}>
-                    <TT description={"Подтвердить сумму начислений"}>
+                    <TT asChild description={"Подтвердить сумму начислений"}>
                         <ConfirmEarningsBtn
                             userId={userInfo.user_id}
                             week={week}
@@ -182,7 +181,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                         </TT>
                     </div>
 
-                    <TT description={'Добавить ДОП начисление сотруднику'}>
+                    <TT asChild description={'Добавить ДОП начисление сотруднику'}>
                         <AddEarningBtn
                             disabled={!statusLessThen("3") || userInfo.is_closed}
                             week={week}
@@ -203,17 +202,18 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     <input
                         disabled={!statusLessThen("5") || userInfo.is_closed}
                         type="text"
-                        className={'p-2 w-full outline-none border-none text-center h-full bg-yellow-100 disabled:bg-transparent'}
+                        className={'p-2 w-full outline-none border-none text-center h-full bg-yellow-50 disabled:bg-transparent'}
                         value={issuedInputValue?.toLocaleString('ru-RU')}
                         onChange={issuedChangeHandle}
                     />
 
-                    <TT description={'Выдать сотруднику наличные ДС'}>
+                    <TT asChild description={'Выдать сотруднику наличные ДС'}>
                         <AddEarningBtn
                             disabled={!statusLessThen("6") || userInfo.is_closed}
                             week={week}
                             userId={userInfo.user_id}
                             earning_type={"Выдача НАЛ"}
+                            about={`ЗП нед ${week.weekNumber}`}
                         />
                     </TT>
                 </div>
@@ -230,7 +230,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                                     'h-full'
                                 ])}/>
                         </div>
-                        <div className={'absolute bottom-1 left-1 text-[0.7em] font-bold'}>
+                        <div className={'absolute bottom-[0.2em] left-1 text-[0.7em] font-bold'}>
                             {Math.abs(userInfo.issued_sum).toLocaleString('ru-RU')}
                         </div>
                     </>
@@ -241,7 +241,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     <div className={'flex-1 text-center border-r-2'}>
                         {formatNumber(userInfo.card_sum)}
                     </div>
-                    <TT description={'Внести выдачу на карту или БН'}>
+                    <TT asChild description={'Внести выдачу на карту или БН'}>
                         <AddEarningBtn
                             disabled={!statusLessThen("6") || userInfo.is_closed}
                             week={week}
@@ -256,7 +256,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     <div className={'flex-1 text-center border-r-2'}>
                         {formatNumber(userInfo.tax_sum)}
                     </div>
-                    <TT description={'Добавить удержание налога и сборов'}>
+                    <TT asChild description={'Добавить удержание налога и сборов'}>
                         <AddEarningBtn
                             disabled={!statusLessThen("6") || userInfo.is_closed}
                             week={week}
@@ -270,7 +270,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <div className={'flex items-center h-full text-[0.8em]'}>
                     <TextArea
                         disabled={!statusLessThen("6") || userInfo.is_closed}
-                        className={'p-2 resize-none w-full bg-yellow-100 disabled:bg-transparent'}
+                        className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
                         value={commentInputValue}
                         onChange={commentChangeHandle}
                     />

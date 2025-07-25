@@ -29,11 +29,11 @@ export interface IPayroll {
     name: string;
 }
 
-export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ";
+export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ";
 
 export interface IEarning {
     id?: number;
-    user: number;
+    user: number | null;
     crated_at: string;
     target_date: string;
     amount: number;

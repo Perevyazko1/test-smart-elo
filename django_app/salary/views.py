@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from .models import Earning, PayrollRow, Payroll
 from .serializers import EarningSerializer, PayrollRowSerializer, PayrollSerializer
 from .service.create_payroll import create_payroll
+from .service.get_cash_info import get_cash_info
 from .service.get_user_info import get_user_info
 
 
@@ -154,6 +155,25 @@ def user_info(request):
 
     info = get_user_info(
         user_id=user_id,
+        date_from=date_from,
+        date_to=date_to
+    )
+
+    return Response(info)
+
+
+@api_view(['GET'])
+def cash_info(request):
+    try:
+        date_from = datetime.strptime(request.query_params.get('date_from'), '%Y-%m-%d').date()
+        date_to = datetime.strptime(request.query_params.get('date_to'), '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        return Response(
+            {'error': 'Invalid date format. Use YYYY-MM-DD'},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    info = get_cash_info(
         date_from=date_from,
         date_to=date_to
     )

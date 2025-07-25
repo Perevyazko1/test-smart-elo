@@ -45,9 +45,7 @@ export const AppModal = (props: AppModalProps) => {
 
                 <DialogFooter>
                     <DialogClose asChild>
-                        <Btn
-                            bg={"white"}
-                        >
+                        <Btn>
                             Закрыть окно
                         </Btn>
                     </DialogClose>

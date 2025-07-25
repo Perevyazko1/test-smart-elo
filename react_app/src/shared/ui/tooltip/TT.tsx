@@ -1,20 +1,19 @@
 import type {ReactNode} from "react";
-import {ExitIcon} from "@radix-ui/react-icons";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
-import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 
 
 interface TTProps {
     children: ReactNode;
     description: string;
+    asChild?: boolean;
 }
 
 export const TT = (props: TTProps) => {
-    const {children, description} = props;
+    const {children, description, asChild=false} = props;
 
     return (
         <Tooltip>
-            <TooltipTrigger>
+            <TooltipTrigger asChild={asChild}>
                 {children}
             </TooltipTrigger>
             <TooltipContent>

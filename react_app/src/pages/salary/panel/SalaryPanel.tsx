@@ -13,7 +13,6 @@ interface SalaryPanelProps {
 export const SalaryPanel = (props: SalaryPanelProps) => {
     const {setSelectedUserId, selectedUserId, weeks, currentWeek, setCurrentWeek} = props;
 
-
     return (
         <div className={twMerge([
             'flex items-center gap-2 p-1 px-2 bg-blue-100 min-w-full',

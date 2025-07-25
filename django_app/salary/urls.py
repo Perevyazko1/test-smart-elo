@@ -9,6 +9,7 @@ from .views import (
     user_info,
     confirm_earnings,
     close_payroll_row,
+    cash_info,
 )
 
 router = routers.DefaultRouter()
@@ -22,5 +23,6 @@ urlpatterns = [
     path('confirm_earnings/', confirm_earnings),
     path('close_payroll_row/', close_payroll_row),
     path('user_info/', user_info),
+    path('cash_info/', cash_info),
 
 ]

@@ -37,7 +37,6 @@ export const ConfirmEarningsBtn = (props: ConfirmEarningsBtnProps) => {
     return (
         <Btn
             onClick={clickHandle}
-            bg={'white'}
             className={twMerge([
                 'text-green-800 p-2',
                 active
