@@ -1,9 +1,10 @@
+import type {FormEvent} from "react";
 import {useForm} from "react-hook-form";
 import type {IEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
-import type {FormEvent} from "react";
+
 
 interface CreateEarningFormProps {
     onSubmit?: (data: IEarning) => void;
@@ -13,10 +14,12 @@ interface CreateEarningFormProps {
     disabled?: boolean;
     week: IWeek;
     about?: string;
+    amount?: number;
 }
 
+
 export const CreateEarningForm = (props: CreateEarningFormProps) => {
-    const {onSubmit, week, about, disabled = true, earning_type, userId, createdById} = props;
+    const {onSubmit,amount, week, about, disabled = true, earning_type, userId, createdById} = props;
 
     const {
         register,
@@ -24,6 +27,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
         formState: {errors},
     } = useForm<IEarning>({
         defaultValues: {
+            amount: amount || undefined,
             user: userId,
             created_by: createdById,
             target_date: week.date_from,
@@ -97,7 +101,11 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                 disabled={disabled}
                 type="submit"
             >
-                Создать
+                {amount ?
+                    "Изменить"
+                :
+                    "Создать"
+                }
             </Btn>
         </form>
     );

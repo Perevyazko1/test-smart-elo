@@ -1,7 +1,7 @@
 import type {IPayrollRow} from "@/entities/salary";
 import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import {AddEarningBtn} from "@/widgets/salary/accrual/AddEarningBtn.tsx";
+import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {type ChangeEvent, useState} from "react";
@@ -230,7 +230,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                                     'h-full'
                                 ])}/>
                         </div>
-                        <div className={'absolute bottom-[0.2em] left-1 text-[0.7em] font-bold'}>
+                        <div className={'absolute bottom-[0.1em] left-1 text-[0.7em] font-bold'}>
                             {Math.abs(userInfo.issued_sum).toLocaleString('ru-RU')}
                         </div>
                     </>

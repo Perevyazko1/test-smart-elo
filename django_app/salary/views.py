@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db import models
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from .models import Earning, PayrollRow, Payroll
 from .serializers import EarningSerializer, PayrollRowSerializer, PayrollSerializer
+from .service.close_payroll_row import payroll_row_close
 from .service.create_payroll import create_payroll
 from .service.get_cash_info import get_cash_info
 from .service.get_user_info import get_user_info
@@ -73,36 +73,7 @@ def close_payroll_row(request):
             {'error': 'Invalid payroll_row_id format. Must be integer'},
         )
 
-    payroll_row = PayrollRow.objects.get(id=payroll_row_id)
-
-    if payroll_row.start_balance is None:
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    next_payroll = Payroll.objects.filter(
-        date_from=payroll_row.payroll.date_to + timedelta(days=1),
-    )
-
-    if next_payroll.exists():
-        next_payroll_row = PayrollRow.objects.filter(
-            user=payroll_row.user,
-            payroll=next_payroll.first(),
-        )
-
-        if next_payroll_row.exists():
-            next_payroll_row = next_payroll_row.first()
-            new_sum = Earning.objects.filter(
-                user=payroll_row.user,
-                target_date__gte=payroll_row.payroll.date_from,
-                target_date__lte=payroll_row.payroll.date_to,
-                approval_by__isnull=False,
-            ).aggregate(total=models.Sum('amount'))['total'] or 0
-
-            next_payroll_row.start_balance = new_sum + payroll_row.start_balance
-            next_payroll_row.save()
-
-    payroll_row.is_closed = True
-    payroll_row.save()
-    payroll_row.refresh_from_db()
+    payroll_row = payroll_row_close(payroll_row_id)
 
     return Response(status=status.HTTP_200_OK, data=PayrollRowSerializer(payroll_row).data)
 

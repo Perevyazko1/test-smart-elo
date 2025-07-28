@@ -34,6 +34,7 @@ export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог
 export interface IEarning {
     id?: number;
     user: number | null;
+    is_locked: boolean;
     crated_at: string;
     target_date: string;
     amount: number;

@@ -133,6 +133,8 @@ class Earning(models.Model):
     comment = models.TextField('Комментарий', blank=True, null=True)
     earning_comment = models.TextField('Комментарий зарплатный', blank=True, null=True)
 
+    is_locked = models.BooleanField('Не редактируемый', default=False)
+
     def __str__(self):
         return '{}'.format(
             f'{self.earning_type} - '

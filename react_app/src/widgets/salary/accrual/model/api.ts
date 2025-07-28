@@ -16,6 +16,15 @@ class EarningService {
         );
     }
 
+    updateEarning(props: IEarning) {
+        const {id, ...otherProps} = props;
+
+        return $axios.patch(
+            `/salary/earnings/${id}/`,
+            {...otherProps},
+        );
+    }
+
     confirmEarnings(props: IConfirmEarningProps) {
         return $axios.post(
             `/salary/confirm_earnings/`,

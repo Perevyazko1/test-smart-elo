@@ -12,6 +12,7 @@ class EarningSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'user',
+            'is_locked',
             'user_name',
             'amount',
             'earning_type',
@@ -25,13 +26,13 @@ class EarningSerializer(serializers.ModelSerializer):
             'approval_by_name',
         ]
 
-    def get_approval_by_name(self, obj):
+    def get_approval_by_name(self, obj: Earning):
         return str(obj.approval_by)
 
-    def get_user_name(self, obj):
-        return str(obj.approval_by)
+    def get_user_name(self, obj: Earning):
+        return str(obj.user)
 
-    def get_created_by_name(self, obj):
+    def get_created_by_name(self, obj: Earning):
         return str(obj.created_by)
 
 

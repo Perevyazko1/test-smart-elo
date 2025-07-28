@@ -8,14 +8,14 @@ from salary.serializers import EarningSerializer
 
 def get_cash_info(date_from: date, date_to: date):
     target_earnings = Earning.objects.filter(
-        crated_at__gte=date_from,
-        crated_at__lte=date_to,
+        target_date__gte=date_from,
+        target_date__lte=date_to,
         earning_type__in=["Выдача НАЛ", "Внесение НАЛ"],
     )
 
     start_balance = Earning.objects.filter(
         earning_type__in=["Выдача НАЛ", "Внесение НАЛ"],
-        crated_at__lt=date_from,
+        target_date__lt=date_from,
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
     balance = Earning.objects.filter(
