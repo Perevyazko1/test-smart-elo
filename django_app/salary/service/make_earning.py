@@ -37,6 +37,7 @@ def make_earning(
             created_by=created_by,
             approval_by=approval_by,
             earning_comment=earning_comment,
+            is_locked=earning_type == "ЭЛО",
         )
 
         return earning

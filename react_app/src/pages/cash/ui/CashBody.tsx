@@ -23,6 +23,7 @@ export const CashBody = (props: CashBodyProps) => {
                 date_to: currentWeek.date_to,
             });
         },
+        staleTime: Infinity
     });
 
     if (isFetching) {
