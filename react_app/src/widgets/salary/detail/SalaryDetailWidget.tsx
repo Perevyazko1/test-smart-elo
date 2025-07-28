@@ -81,7 +81,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                         {showDetail ?
                             <DetailTable
                                 earnings={details.detail_report}
-                                weekNumber={currentWeek.weekNumber}
+                                week={currentWeek}
                                 selectedUserId={selectedUserId}
                             /> :
                             <DetailGroupedTable

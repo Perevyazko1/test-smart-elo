@@ -8,15 +8,17 @@ import {earningService} from "@/widgets/salary/accrual/model/api.ts";
 import type {IEarning} from "@/entities/salary";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 import {EarningDetail} from "@/widgets/salary/detail/table/EarningDetail.tsx";
+import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
+import type {IWeek} from "@/shared/utils/date.ts";
 
 interface SalaryDetailRowProps {
     earning: IEarning;
-    weekNumber: number;
+    week: IWeek;
     selectedUserId: number;
 }
 
 export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
-    const {earning, weekNumber, selectedUserId} = props;
+    const {earning, week, selectedUserId} = props;
 
     const qClient = useQueryClient();
 
@@ -25,7 +27,7 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
             return earningService.deleteEarning({earning_id: earning.id!});
         },
         onSuccess: () => {
-            qClient.invalidateQueries({queryKey: ['salaryDetail', weekNumber, selectedUserId]});
+            qClient.invalidateQueries({queryKey: ['salaryDetail', week.weekNumber, selectedUserId]});
             toast.success("Начисление успешно удалено!")
         }
     });
@@ -71,7 +73,14 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
             <TD className={'relative'}>
                 {earning.earning_comment}
 
-                <div className={'absolute top-1 -right-4'}>
+                <div className={'absolute top-1 -right-6 flex flex-nowrap gap-1 items-center'}>
+                    {!earning.is_locked && (
+                        <EditEarningBtn
+                            earning={earning}
+                            week={week}
+                        />
+                    )}
+
                     {!!earning.approval_by ? (
                         <CheckIcon color={'green'} className={'opacity-50'}/>
                     ) : (
@@ -83,6 +92,7 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
                             <TrashIcon color={'red'}/>
                         </Btn>
                     )}
+
                 </div>
             </TD>
         </tr>

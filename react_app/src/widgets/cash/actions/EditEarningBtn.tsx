@@ -72,6 +72,11 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
             client.invalidateQueries({
                 queryKey: ['cashDetail']
             });
+            client.invalidateQueries({
+                queryKey: ['salaryDetail']
+            });
+
+            setModalOpen(false);
 
             setTimeout(() => {
                 document.getElementById(`payrollRow${earning.user}`)?.scrollIntoView({
