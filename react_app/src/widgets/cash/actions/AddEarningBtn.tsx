@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {PlusCircle} from "lucide-react";
+import {MinusCircle, PlusCircle} from "lucide-react";
 
 import type {IEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
@@ -30,6 +30,8 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
     const [modalOpen, setModalOpen] = useState(false);
 
     const titleMap: Record<IEarningType, string> = {
+        "ЗАЙМ": "Выдать займ сотруднику",
+        "ПОГ.ЗАЙМА": "Внести погашение займа сотрудником",
         "ДОП": "Начислить ДОП сотруднику",
         "На карту": "Внести выдачу на карту сотруднику",
         "Налог": "Внести удержание налога сотруднику",
@@ -44,6 +46,8 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
     const title = titleMap[earning_type]
 
     const descriptionMap: Record<IEarningType, string> = {
+        "ЗАЙМ": "Данное начисление будет добавлено в раздел займов. Не относится к балансу заработной платы",
+        "ПОГ.ЗАЙМА": "Погашение займа будет учтено в столбце займов. Не относится к балансу заработной платы",
         "ДОП": "Данное начисление будет добавлено в ведомость к сумме ДОП заработанных средств",
         "На карту": "Данный расчет будет добавлен в ведомость к сумме выданных средств на карту",
         "Налог": "Данный расчет будет добавлен в ведомость к сумме удержанных налогов и сборов",
@@ -62,8 +66,8 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             return earningService.createEarning({
                 ...data,
                 created_by: currentUser?.id!,
-                amount: ["ЭЛО", "ДОП", "Внесение НАЛ"].includes(earning_type) ? data.amount : -data.amount,
-                ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ"].includes(earning_type) ?
+                amount: ["ЭЛО", "ДОП", "Внесение НАЛ", "ЗАЙМ"].includes(earning_type) ? data.amount : -data.amount,
+                ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ", "ПОГ.ЗАЙМА", "ЗАЙМ"].includes(earning_type) ?
                         {approval_by: currentUser?.id!} : {}
                 ),
             });
@@ -103,11 +107,15 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                         disabled={disabled}
                         onClick={() => setModalOpen(true)}
                         className={twMerge([
-                            'text-sm p-2 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
-                            ["ДОП", "ЭЛО"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
+                            'text-sm p-2 pe-1 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
+                            ["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
                         ])}
                     >
-                        <PlusCircle size={16}/>
+                        {["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ?
+                            <PlusCircle size={16}/>
+                            :
+                            <MinusCircle size={16}/>
+                        }
                     </Btn>
             }
             content={

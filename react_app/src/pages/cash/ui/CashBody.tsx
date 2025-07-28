@@ -127,7 +127,7 @@ export const CashBody = (props: CashBodyProps) => {
                         </Btn>
                     ))}
                 </div>
-                <div className={'flex-1 border-black border-b-2 border-r-2'}>
+                <div className={'flex-1 border-black border-b-2 border-r-2 overflow-auto'}>
                     <DetailsTable
                         week={currentWeek}
                         earnings={data.data.earnings}

@@ -51,6 +51,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                 date_from: currentWeek.date_from,
             });
         },
+        staleTime: Infinity,
     });
 
     const debouncedUpdatePayroll = useDebounce(

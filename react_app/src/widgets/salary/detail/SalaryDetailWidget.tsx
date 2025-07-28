@@ -7,6 +7,8 @@ import {DetailGroupedTable} from "@/widgets/salary/detail/table/DetailGroupedTab
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {WeekDetailsTable} from "@/widgets/salary/detail/table/WeekDetailsTable.tsx";
 import {Switch} from "@/components/ui/switch";
+import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
+import {TT} from "@/shared/ui/tooltip/TT.tsx";
 
 interface SalaryDetailWidgetProps {
     selectedUserId: number;
@@ -56,6 +58,14 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                     <div className={'text-lg'}>
                         <b>{details.user_info.balance.toLocaleString("ru-RU")} Р.</b>
                     </div>
+                    <TT asChild description={'Внести займ сотрудника'}>
+                        <AddEarningBtn
+                            disabled={isFetching}
+                            week={currentWeek}
+                            userId={details.user_info.id}
+                            earning_type={"ЗАЙМ"}
+                        />
+                    </TT>
                 </div>
 
                 <div className={'flex gap-10 justify-between min-w-0 overflow-auto max-w-full'}>

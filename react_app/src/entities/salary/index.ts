@@ -17,6 +17,9 @@ export interface IPayrollRow {
     department_name: string;
     has_unconfirmed: boolean;
     is_closed: boolean;
+    full_loan_sum: number;
+    end_loan_sum: number;
+    loan_sum: number;
 }
 
 export interface IPayroll {
@@ -29,7 +32,7 @@ export interface IPayroll {
     name: string;
 }
 
-export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ";
+export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ" | "ЗАЙМ" | "ПОГ.ЗАЙМА";
 
 export interface IEarning {
     id?: number;

@@ -11,7 +11,7 @@ export const PayrollTh = (props: PayrollThProps) => {
     return (
         <th
             className={twMerge([
-                "py-1 px-2 border-b border-gray-300 text-left",
+                "py-1 px-2 text-right",
                 className
             ])}
             {...otherProps}

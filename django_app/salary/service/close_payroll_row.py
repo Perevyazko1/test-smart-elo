@@ -34,7 +34,9 @@ def payroll_row_close(payroll_row_id: int):
                 approval_by__isnull=False,
             )
 
-            new_sum = earnings.aggregate(total=models.Sum('amount'))['total'] or 0
+            new_sum = earnings.exclude(
+                earning_type="ЗАЙМ",
+            ).aggregate(total=models.Sum('amount'))['total'] or 0
 
             next_payroll_row.start_balance = new_sum + payroll_row.start_balance
             next_payroll_row.save()

@@ -31,7 +31,7 @@ export const DetailsTable = (props: DetailsTableProps) => {
                 <th>Приход</th>
                 <th>Расход</th>
                 <th>Начальный баланс</th>
-                <th>
+                <th rowSpan={2}>
                     <div className={'flex justify-center'}>
                         <ReaderIcon/>
                     </div>

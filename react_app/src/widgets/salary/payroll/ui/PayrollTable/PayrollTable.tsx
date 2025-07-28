@@ -6,7 +6,7 @@ import {THead} from "@/shared/ui/table/THead.tsx";
 import {useQuery} from "@tanstack/react-query";
 import type {IWeek} from "@/shared/utils/date.ts";
 
-import { payrollService } from "../../model/api.ts";
+import {payrollService} from "../../model/api.ts";
 
 import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
@@ -28,6 +28,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                 payroll_id: payroll!.id,
             });
         },
+        staleTime: Infinity,
     });
 
     const groupedData = useMemo(() => {
@@ -56,6 +57,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalBonus = data?.data?.reduce((sum, row) => sum + row.bonus_sum, 0) || 0;
     const totalTax = data?.data?.reduce((sum, row) => sum + row.tax_sum, 0) || 0;
     const totalCash = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
+    const totalLoan = data?.data?.reduce((sum, row) => sum + row.loan_sum, 0) || 0;
 
     if (!payroll) {
         return (
@@ -69,17 +71,19 @@ export const PayrollTable = (props: PayrollTableProps) => {
                 <tr>
                     <PayrollTh
                         rowSpan={2}
-                        className={'w-1/4'}
+                        className={'w-1/4 text-center'}
                     >
                         Отдел / ФИО
                     </PayrollTh>
-                    <PayrollTh>Долг</PayrollTh>
+                    <PayrollTh>Хвост</PayrollTh>
                     <PayrollTh>Заработано</PayrollTh>
                     <PayrollTh>К выплате</PayrollTh>
                     <PayrollTh>На карту</PayrollTh>
                     <PayrollTh>Налог</PayrollTh>
+                    <PayrollTh>Займы</PayrollTh>
                     <PayrollTh
                         rowSpan={2}
+                        className={'text-center'}
                     >
                         Комментарий
                     </PayrollTh>
@@ -90,6 +94,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh>{totalCash.toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{Math.abs(totalCard).toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{Math.abs(totalTax).toLocaleString('ru-RU')}</PayrollTh>
+                    <PayrollTh>{Math.abs(totalLoan).toLocaleString('ru-RU')}</PayrollTh>
                 </tr>
                 <tr>
                     <th colSpan={7}><br/></th>

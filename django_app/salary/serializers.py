@@ -44,6 +44,9 @@ class PayrollRowSerializer(serializers.ModelSerializer):
     user_id = serializers.SerializerMethodField()
     week = serializers.SerializerMethodField()
     tax_sum = serializers.SerializerMethodField()
+    full_loan_sum = serializers.SerializerMethodField()
+    end_loan_sum = serializers.SerializerMethodField()
+    loan_sum = serializers.SerializerMethodField()
     issued_sum = serializers.SerializerMethodField()
     card_sum = serializers.SerializerMethodField()
     earned_sum = serializers.SerializerMethodField()
@@ -72,6 +75,9 @@ class PayrollRowSerializer(serializers.ModelSerializer):
             'bonus_sum',
             'department_name',
             'has_unconfirmed',
+            'full_loan_sum',
+            'end_loan_sum',
+            'loan_sum',
         ]
 
     def get_name(self, obj):
@@ -120,6 +126,22 @@ class PayrollRowSerializer(serializers.ModelSerializer):
                    obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
                    e.approval_by is not None and
                    e.earning_type == 'Выдача НАЛ')
+
+    def get_full_loan_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   e.earning_type == 'ЗАЙМ')
+
+    def get_end_loan_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   e.earning_type == 'ПОГ.ЗАЙМА')
+
+    def get_loan_sum(self, obj):
+        all_earnings = obj.user.earnings.all()
+        return sum(e.amount for e in all_earnings if
+                   obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
+                   e.earning_type == 'ПОГ.ЗАЙМА')
 
     def get_has_unconfirmed(self, obj: PayrollRow):
         return obj.user.earnings.filter(
