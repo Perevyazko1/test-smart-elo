@@ -147,3 +147,13 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+table, th, td {
+  border: 1px solid #b6b6b6;
+  border-collapse: collapse;
+}
+
+td {
+  padding-left: .3em;
+  padding-right: .3em;
+}

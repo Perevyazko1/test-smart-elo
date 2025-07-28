@@ -131,7 +131,7 @@ export const CashBody = (props: CashBodyProps) => {
                     <DetailsTable
                         week={currentWeek}
                         earnings={data.data.earnings}
-                        start_balance={data.data.cash_balance}
+                        start_balance={data.data.start_balance}
                     />
                 </div>
             </div>

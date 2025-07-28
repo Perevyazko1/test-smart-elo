@@ -22,14 +22,19 @@ export const DetailsTable = (props: DetailsTableProps) => {
 
     return (
         <table className={'w-full text-sm'}>
-            <thead className={'border-gray-400 border-1'}>
+            <thead className={'border-gray-400'}>
             <tr>
-                <th rowSpan={2} colSpan={3}>Касса:</th>
-                <th>Приход:</th>
-                <th>Расход:</th>
-                <th>НАЧ БАЛАНС:</th>
-                <th className={'text-center'}>
-                    <ReaderIcon/>
+                <th rowSpan={2}>Дата</th>
+                <th rowSpan={2}>Счет</th>
+                <th rowSpan={2}>Получатель</th>
+                <th rowSpan={2}>Комментарий</th>
+                <th>Приход</th>
+                <th>Расход</th>
+                <th>Начальный баланс</th>
+                <th>
+                    <div className={'flex justify-center'}>
+                        <ReaderIcon/>
+                    </div>
                 </th>
             </tr>
             <tr>
@@ -39,7 +44,7 @@ export const DetailsTable = (props: DetailsTableProps) => {
             </tr>
             </thead>
 
-            <tbody className={'text-center border-gray-400 border-1'}>
+            <tbody className={'text-start'}>
             {earnings.map((item, index) => (
                 <DetailRow
                     earning={item}
@@ -49,8 +54,8 @@ export const DetailsTable = (props: DetailsTableProps) => {
                 />
             ))}
 
-            <tr className={'border-gray-400 border-1'}>
-                <th colSpan={4}></th>
+            <tr className={'border-gray-400'}>
+                <th colSpan={5}></th>
                 <th>КОН БАЛАНС:</th>
                 <th>
                     {(start_balance + positiveSum - negativeSum

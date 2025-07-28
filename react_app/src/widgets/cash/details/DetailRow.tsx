@@ -1,5 +1,5 @@
 import type {IEarning} from "@/entities/salary";
-import type {IWeek} from "@/shared/utils/date";
+import {type IWeek, toRuDate} from "@/shared/utils/date";
 
 
 import {DeleteEarningBtn} from "@/widgets/cash/actions/DeleteEarningBtn.tsx";
@@ -16,28 +16,36 @@ interface DetailRowProps {
 export const DetailRow = (props: DetailRowProps) => {
     const {earning, balance, week} = props;
 
-    return (
-        <tr>
-            <td>Касса</td>
-            <td>{earning.user_name}</td>
-            <td>{earning.comment}</td>
-            <td>{Math.abs(earning.amount > 0 ? earning.amount : 0).toLocaleString('ru-RU')}</td>
-            <td>{Math.abs(earning.amount < 0 ? earning.amount : 0).toLocaleString('ru-RU')}</td>
-            <td>{balance.toLocaleString('ru-RU')}</td>
-            <td className={'flex items-center gap-1'}>
-                {!earning.is_locked && (
-                    <>
-                        <DeleteEarningBtn
-                            amount={earning.amount}
-                            earningId={earning.id!}
-                        />
+    const isPositive = earning.amount > 0;
 
-                        <EditEarningBtn
-                            earning={earning}
-                            week={week}
-                        />
-                    </>
-                )}
+    return (
+        <tr className={'text-[.8em]'}>
+            <td>{toRuDate(earning.target_date)}</td>
+            <td className={'text-[.9em]'}>Касса</td>
+            <td className={'text-[.9em]'}>{earning.user ? earning.user_name : "-"}</td>
+            <td className={'text-[.9em]'}>{earning.comment}</td>
+            <td className={'text-end'}>
+                {isPositive && (Math.abs(earning.amount).toLocaleString('ru-RU'))}</td>
+            <td className={'text-end'}>
+                {!isPositive && (Math.abs(earning.amount).toLocaleString('ru-RU'))}</td>
+            <td className={'text-end'}>
+                {balance.toLocaleString('ru-RU')}</td>
+            <td>
+                <div className={'flex items-center gap-1 scale-90'}>
+                    {!earning.is_locked && (
+                        <>
+                            <DeleteEarningBtn
+                                amount={earning.amount}
+                                earningId={earning.id!}
+                            />
+
+                            <EditEarningBtn
+                                earning={earning}
+                                week={week}
+                            />
+                        </>
+                    )}
+                </div>
             </td>
         </tr>
     );

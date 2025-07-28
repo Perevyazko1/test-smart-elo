@@ -1,4 +1,5 @@
 import {getISOWeek, startOfISOWeek, endOfISOWeek, format, subWeeks} from 'date-fns';
+import {ru} from 'date-fns/locale';
 
 export interface IWeek {
     weekNumber: number;
@@ -6,6 +7,11 @@ export interface IWeek {
     date_from: string;
     date_to: string;
 }
+
+export const toRuDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    return format(date, 'd MMM yyyy', {locale: ru});
+};
 
 export const generateWeeks = (count: number = 7): IWeek[] => {
     const weeks: IWeek[] = [];
@@ -29,3 +35,5 @@ export const generateWeeks = (count: number = 7): IWeek[] => {
 
     return weeks;
 };
+
+
