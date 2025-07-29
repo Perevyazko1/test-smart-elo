@@ -8,8 +8,7 @@ services:
     volumes:
       - ./django_app:/app
     depends_on:
-      - pg
-      - redis
+      - pgadmin
     env_file:
       - .env
     ports:

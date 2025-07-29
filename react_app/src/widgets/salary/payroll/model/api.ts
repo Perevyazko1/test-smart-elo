@@ -10,7 +10,7 @@ interface IGetPayrollRowsProps {
     payroll_id: number;
 }
 
-interface IUpdatePayrollRow {
+export interface IUpdatePayrollRow {
     id: number;
     cash_payout?: number;
     comment?: string;

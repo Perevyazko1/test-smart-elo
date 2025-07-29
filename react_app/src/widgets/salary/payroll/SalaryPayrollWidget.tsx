@@ -99,7 +99,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                         Ведомость за {currentWeek.weekNumber} нед.
                     </h1>
                     <div className={'flex gap-2 items-center'}>
-                        К ВЫДАЧЕ:
+                        К выплате:
                         <input
                             disabled={!statusLessThen("4")}
                             type="text"

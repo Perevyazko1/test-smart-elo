@@ -56,7 +56,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalEarned = data?.data?.reduce((sum, row) => sum + row.earned_sum, 0) || 0;
     const totalBonus = data?.data?.reduce((sum, row) => sum + row.bonus_sum, 0) || 0;
     const totalTax = data?.data?.reduce((sum, row) => sum + row.tax_sum, 0) || 0;
-    const totalCash = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
+    const totalPayout = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
+    const totalIssued = data?.data?.reduce((sum, row) => sum + row.issued_sum, 0) || 0;
     const totalLoan = data?.data?.reduce((sum, row) => sum + row.loan_sum, 0) || 0;
 
     if (!payroll) {
@@ -78,7 +79,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh>Хвост</PayrollTh>
                     <PayrollTh>Заработано</PayrollTh>
                     <PayrollTh>К выплате</PayrollTh>
-                    <PayrollTh>На карту</PayrollTh>
+                    <PayrollTh>НАЛ</PayrollTh>
+                    <PayrollTh>БН</PayrollTh>
                     <PayrollTh>Налог</PayrollTh>
                     <PayrollTh>Займы</PayrollTh>
                     <PayrollTh
@@ -91,7 +93,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
                 <tr>
                     <PayrollTh>{totalBalance.toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{(totalEarned + totalBonus).toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{totalCash.toLocaleString('ru-RU')}</PayrollTh>
+                    <PayrollTh>{totalPayout.toLocaleString('ru-RU')}</PayrollTh>
+                    <PayrollTh>{Math.abs(totalIssued).toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{Math.abs(totalCard).toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{Math.abs(totalTax).toLocaleString('ru-RU')}</PayrollTh>
                     <PayrollTh>{Math.abs(totalLoan).toLocaleString('ru-RU')}</PayrollTh>
