@@ -76,7 +76,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             className={
                 twMerge(
                     'transition-all duration-300 ease-in-out',
-                    userInfo.is_closed ? 'bg-green-100' : '',
+                    userInfo.is_closed ? 'bg-green-50' : '',
                 )
             }
         >
@@ -103,7 +103,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
             <UserEarnCell
                 week={week}
-                disabled={!statusLessThen("5")}
+                disabled={!statusLessThen("6")}
                 userInfo={userInfo}
                 onChange={(value) => {
                     debouncedUpdateRow({cash_payout: value})
@@ -111,7 +111,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             />
 
             <UserAddCell
-                value={-userInfo.cash_payout}
+                value={userInfo.issued_sum}
                 info={"Выдать сотруднику наличные ДС"}
                 valueInfo={'Выдано наличными'}
                 disabled={!statusLessThen("5") || userInfo.is_closed}

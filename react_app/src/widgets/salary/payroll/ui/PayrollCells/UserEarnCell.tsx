@@ -42,7 +42,7 @@ export const UserEarnCell = (props: UserEarnCellProps) => {
 
             <TT description={'Сумма к дальнейшей выдаче наличкой и БН'}>
                 <input
-                    disabled={disabled || userInfo.is_closed}
+                    disabled={disabled}
                     type="text"
                     className={'p-2 w-full outline-none border-none text-end h-full bg-yellow-50 disabled:bg-transparent'}
                     value={issuedInputValue?.toLocaleString('ru-RU')}

@@ -8,13 +8,14 @@ services:
     volumes:
       - ./django_app:/app
     depends_on:
-      - pgadmin
+      - pg
+      - redis
     env_file:
       - .env
     ports:
       - "8000:8000"
     command: >
-      sh -c "python3 manage.py runserver 0.0.0.0:8000"
+      sh -c "uvicorn django_app.asgi:application --reload --host 0.0.0.0 --port 8000"
     networks:
       - dev-network
 
