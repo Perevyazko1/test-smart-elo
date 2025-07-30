@@ -1,7 +1,7 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {MinusCircle, PlusCircle} from "lucide-react";
 
-import type {IEarning, IEarningType} from "@/entities/salary";
+import type {ICreateEarning, IEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 
@@ -12,11 +12,12 @@ import {type ReactNode, useState} from "react";
 import {twMerge} from "tailwind-merge";
 import {useCurrentUser} from "@/shared/utils/useCurrentUser.ts";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
+import type {IUser} from "@/entities/user";
 
 
 interface AddEarningBtnProps {
     earning_type: IEarningType;
-    userId: number | null;
+    user: IUser | null;
     week: IWeek;
     disabled: boolean;
     about?: string;
@@ -25,7 +26,7 @@ interface AddEarningBtnProps {
 }
 
 export const AddEarningBtn = (props: AddEarningBtnProps) => {
-    const {earning_type, info, userId, week, disabled, about, children} = props;
+    const {earning_type, info, user, week, disabled, about, children} = props;
     const queryClient = useQueryClient();
     const {currentUser} = useCurrentUser();
 
@@ -38,7 +39,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
         "На карту": "Внести выдачу на карту сотруднику",
         "Налог": "Внести удержание налога сотруднику",
         "Выдача НАЛ":
-            !userId
+            !user
                 ? "Выдать ДС под закупки"
                 : "Внести выдачу наличных ДС сотруднику",
         "Внесение НАЛ": "Внести поступление ДС в кассу",
@@ -54,7 +55,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
         "На карту": "Данный расчет будет добавлен в ведомость к сумме выданных средств на карту",
         "Налог": "Данный расчет будет добавлен в ведомость к сумме удержанных налогов и сборов",
         "Выдача НАЛ":
-            !userId
+            !user
                 ? "Внести выдачу ДС из кассы под закупки. ВНИМАНИЕ - выдача ДС под зарплату производится на странице ведомостей."
                 : "Данный расчет будет добавлен в ведомость к сумме выданных ДС наличного расчета",
         "Внесение НАЛ": "Внести поступление ДС на баланс в кассу",
@@ -64,7 +65,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
     const description = descriptionMap[earning_type]
 
     const createEarningMutation = useMutation({
-        mutationFn: (data: Omit<IEarning, 'id'>) => {
+        mutationFn: (data: ICreateEarning) => {
             return earningService.createEarning({
                 ...data,
                 created_by: currentUser?.id!,
@@ -83,7 +84,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             });
 
             setTimeout(() => {
-                document.getElementById(`payrollRow${userId}`)?.scrollIntoView({
+                document.getElementById(`payrollRow${user?.id}`)?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'center'
                 });
@@ -91,7 +92,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
         }
     });
 
-    const submitHandle = (data: IEarning) => {
+    const submitHandle = (data: ICreateEarning) => {
         createEarningMutation.mutate(data);
         setModalOpen(false);
     }
@@ -129,7 +130,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                     disabled={createEarningMutation.isPending}
                     earning_type={earning_type}
                     createdById={1}
-                    userId={userId}
+                    user={user}
                     onSubmit={submitHandle}
                 />
             }

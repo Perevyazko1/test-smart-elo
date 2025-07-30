@@ -1,6 +1,7 @@
 from datetime import date
 
 from staff.models import Employee
+from staff.serializers import EmployeeSerializer
 from ..models import Earning
 from ..serializers import EarningSerializer
 
@@ -23,8 +24,7 @@ def get_user_info(user_id: int, date_from: date, date_to: date):
     )[:200]
 
     user_info["user_info"] = {
-        "name": str(employee),
-        "id": user_id,
+        "user": EmployeeSerializer(employee).data,
         "balance": sum(earnings.values_list("amount", flat=True)),
     }
 

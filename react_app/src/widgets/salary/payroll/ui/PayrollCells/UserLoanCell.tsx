@@ -53,7 +53,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
             info={"Внести погашение займа"}
             valueInfo={'Списано в счет погашения займов'}
             disabled={disabled}
-            userId={userInfo.user_id}
+            user={userInfo.user}
             week={week}
             earning_type={"ПОГ.ЗАЙМА"}
             about={`Списание ЗП в счет погашения займа нед ${week.weekNumber}`}

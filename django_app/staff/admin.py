@@ -21,7 +21,6 @@ class CustomUserAdmin(UserAdmin):
         'kpd',
     ]
     list_display_links = ['username']
-    readonly_fields = ['current_balance']
 
     fieldsets = (
         (None, {"fields": ("username", "password")}),
@@ -32,7 +31,6 @@ class CustomUserAdmin(UserAdmin):
             "patronymic",
             "email",
             'pin_code',
-            'current_balance',
             'boss',
             'kpd',
             'departments',

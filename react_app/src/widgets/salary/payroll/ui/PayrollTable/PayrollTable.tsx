@@ -50,7 +50,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
         return (<div>Загрузка...</div>)
     }
 
-    const totalBalance = data?.data?.reduce((sum, row) => sum + row.start_balance, 0) || 0;
+    const totalBalance = data?.data?.reduce((sum, row) => sum + row.balance_sum, 0) || 0;
     const totalCard = data?.data?.reduce((sum, row) => sum + row.card_sum, 0) || 0;
     const totalEarned = data?.data?.reduce((sum, row) => sum + row.earned_sum, 0) || 0;
     const totalBonus = data?.data?.reduce((sum, row) => sum + row.bonus_sum, 0) || 0;

@@ -14,5 +14,6 @@ export interface IUser {
     is_active: boolean;
     groups: string;
     piecework_wages: boolean;
+    piecework_amount: number | null;
     token: string;
 }

@@ -1,4 +1,5 @@
 import type {IEarning} from "@/entities/salary";
+import {getUserName} from "@/shared/utils/getUserName.ts";
 
 
 interface EarningDetailProps {
@@ -17,7 +18,7 @@ export const EarningDetail = (props: EarningDetailProps) => {
             </div>
             <div>
                 <div>Кому начислен:</div>
-                <div>{earning.user_name}</div>
+                <div>{getUserName(earning.user)}</div>
             </div>
             <div>
                 <div>Тип:</div>

@@ -10,7 +10,7 @@ import type {AxiosResponse} from "axios";
 import {payrollService} from "../../model/api";
 import {SALARY_STATUSES} from "@/shared/consts";
 import {formatNumber} from "@/shared/utils/formatNumber.ts";
-import {UserEarnCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserEarnCell.tsx";
+import {UserCashCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserCashCell.tsx";
 import {UserAddCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserAddCell.tsx";
 import {UserEarningsCell} from "../PayrollCells/UserEarningsCell.tsx";
 import {UserLoanCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserLoanCell.tsx";
@@ -72,7 +72,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
     return (
         <tr
-            id={`payrollRow${userInfo.user_id}`}
+            id={`payrollRow${userInfo.user.id}`}
             className={
                 twMerge(
                     'transition-all duration-300 ease-in-out',
@@ -91,7 +91,10 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
             <td className="text-end">
                 <TT description={`Баланс на начало ${week.weekNumber} нед.`}>
-                    {formatNumber(userInfo.start_balance, false)}
+                    {formatNumber(
+                        userInfo.hide_balance ? 0: userInfo.balance_sum,
+                        false
+                    )}
                 </TT>
             </td>
 
@@ -101,7 +104,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 week={week}
             />
 
-            <UserEarnCell
+            <UserCashCell
                 week={week}
                 disabled={!statusLessThen("6") || userInfo.is_locked}
                 userInfo={userInfo}
@@ -115,7 +118,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 info={"Выдать сотруднику наличные ДС"}
                 valueInfo={'Выдано наличными'}
                 disabled={!statusLessThen("5") || userInfo.is_closed}
-                userId={userInfo.user_id}
+                user={userInfo.user}
                 week={week}
                 earning_type={"Выдача НАЛ"}
                 about={`Выдача НАЛ ЗП нед ${week.weekNumber}`}
@@ -126,7 +129,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 info={'Внести выдачу на карту или БН'}
                 valueInfo={'Выдано на карту или по безналу'}
                 disabled={!statusLessThen("6") || userInfo.is_closed}
-                userId={userInfo.user_id}
+                user={userInfo.user}
                 week={week}
                 earning_type={"На карту"}
                 about={`Выдача безнал ЗП нед ${week.weekNumber}`}
@@ -137,7 +140,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 info={'Добавить удержание налога и сборов'}
                 valueInfo={'Удержано налога (НДФЛ и пр)'}
                 disabled={!statusLessThen("6") || userInfo.is_closed}
-                userId={userInfo.user_id}
+                user={userInfo.user}
                 week={week}
                 earning_type={"Налог"}
                 about={`Удержанный налог в ${week.weekNumber} неделе`}

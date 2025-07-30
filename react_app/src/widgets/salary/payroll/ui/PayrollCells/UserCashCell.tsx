@@ -6,7 +6,7 @@ import type {IWeek} from "@/shared/utils/date.ts";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
 
 
-interface UserEarnCellProps {
+interface UserCashCellProps {
     disabled: boolean;
     userInfo: IPayrollRow;
     onChange: (arg: number) => void;
@@ -14,7 +14,7 @@ interface UserEarnCellProps {
 }
 
 
-export const UserEarnCell = (props: UserEarnCellProps) => {
+export const UserCashCell = (props: UserCashCellProps) => {
     const {disabled, userInfo, onChange} = props;
     const [issuedInputValue, setIssuedInputValue] = useState(userInfo.cash_payout || undefined);
 

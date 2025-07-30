@@ -33,7 +33,7 @@ export const AppModal = (props: AppModalProps) => {
             <DialogTrigger asChild>
                 {trigger}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-yellow-100 max-h-screen overflow-y-auto">
+            <DialogContent className="sm:max-w-fit bg-yellow-100 max-h-screen overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{title}</DialogTitle>
                     <DialogDescription>

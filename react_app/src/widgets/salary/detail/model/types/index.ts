@@ -1,8 +1,8 @@
 import type {IEarning} from "@/entities/salary";
+import type {IUser} from "@/entities/user";
 
 export interface ISalaryDetailUserInfo {
-    name: string;
-    id: number;
+    user: IUser;
     balance: number;
 }
 

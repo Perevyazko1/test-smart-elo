@@ -49,7 +49,6 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'description',
             'boss',
             'current_department',
-            'current_balance',
             'permanent_department',
             'favorite_users',
             'pin_code',
@@ -57,6 +56,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'is_active',
             'groups',
             'piecework_wages',
+            'piecework_amount',
 
             'token',
         ]
@@ -165,6 +165,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
         # Обновление статуса активности и формы оплаты
         instance.is_active = validated_data.get('is_active', instance.is_active)
         instance.piecework_wages = validated_data.get('piecework_wages', instance.piecework_wages)
+        instance.piecework_amount = validated_data.get('piecework_amount', instance.piecework_wages)
 
         instance.save()
 

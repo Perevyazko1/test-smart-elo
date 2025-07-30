@@ -8,7 +8,7 @@ import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {WeekDetailsTable} from "@/widgets/salary/detail/table/WeekDetailsTable.tsx";
 import {Switch} from "@/components/ui/switch";
 import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
-import {TT} from "@/shared/ui/tooltip/TT.tsx";
+import {UserPanelWidget} from "@/widgets/salary/detail/widgets/UserPanelWidget.tsx";
 
 interface SalaryDetailWidgetProps {
     selectedUserId: number;
@@ -44,13 +44,15 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
     return (
         <div className={'p-3'}>
             <h1 className={"text-xl mb-4"}>
-                <b>Детализация по сотруднику {details.user_info.id}</b>
+                <b>Детализация по сотруднику {details.user_info.user.id}</b>
             </h1>
 
             <div className={'bg-gray-200 pb-10 pt-3 px-4'}>
-                <div className={'p-2 border border-black'}>
-                    <b>{details.user_info.name}</b>
-                </div>
+
+                <UserPanelWidget
+                    user={details.user_info.user}
+                />
+
                 <div className={'flex items-center w-fit border gap-3 px-3 mb-5'}>
                     <div>
                         Текущая задолженность:
@@ -58,15 +60,13 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                     <div className={'text-lg'}>
                         <b>{details.user_info.balance.toLocaleString("ru-RU")} Р.</b>
                     </div>
-                    <TT asChild description={'Внести займ сотрудника'}>
-                        <AddEarningBtn
-                            info={"Внести выдачу займа сотруднику"}
-                            disabled={isFetching}
-                            week={currentWeek}
-                            userId={details.user_info.id}
-                            earning_type={"ЗАЙМ"}
-                        />
-                    </TT>
+                    <AddEarningBtn
+                        info={"Внести выдачу займа сотруднику"}
+                        disabled={isFetching}
+                        week={currentWeek}
+                        user={details.user_info.user}
+                        earning_type={"ЗАЙМ"}
+                    />
                 </div>
 
                 <div className={'flex gap-10 justify-between min-w-0 overflow-auto max-w-full'}>

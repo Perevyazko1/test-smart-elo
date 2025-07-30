@@ -4,6 +4,7 @@ import {type IWeek, toRuDate} from "@/shared/utils/date";
 
 import {DeleteEarningBtn} from "@/widgets/cash/actions/DeleteEarningBtn.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
+import {getUserName} from "@/shared/utils/getUserName.ts";
 
 
 interface DetailRowProps {
@@ -22,7 +23,7 @@ export const DetailRow = (props: DetailRowProps) => {
         <tr className={'text-[.8em]'}>
             <td>{toRuDate(earning.target_date)}</td>
             <td className={'text-[.9em]'}>Касса</td>
-            <td className={'text-[.9em]'}>{earning.user ? earning.user_name : "-"}</td>
+            <td className={'text-[.9em]'}>{getUserName(earning.user)}</td>
             <td className={'text-[.9em]'}>{earning.comment}</td>
             <td className={'text-end'}>
                 {isPositive && (Math.abs(earning.amount).toLocaleString('ru-RU'))}</td>

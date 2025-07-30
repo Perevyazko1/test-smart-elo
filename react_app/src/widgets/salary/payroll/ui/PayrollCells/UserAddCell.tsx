@@ -5,13 +5,14 @@ import type {IWeek} from "@/shared/utils/date.ts";
 import type {IEarningType} from "@/entities/salary";
 import type {ReactNode} from "react";
 import {twMerge} from "tailwind-merge";
+import type {IUser} from "@/entities/user";
 
 interface UserAddCellProps {
     value: number;
     info: string;
     valueInfo: string;
     disabled: boolean;
-    userId: number;
+    user: IUser | null;
     week: IWeek;
     earning_type: IEarningType;
     about: string;
@@ -20,7 +21,7 @@ interface UserAddCellProps {
 }
 
 export const UserAddCell = (props: UserAddCellProps) => {
-    const {value, hide = false, info, valueInfo, disabled, userId, week, earning_type, about, extra} = props;
+    const {value, user, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
 
     return (
         <td className="text-end relative">
@@ -39,7 +40,7 @@ export const UserAddCell = (props: UserAddCellProps) => {
                         disabled={disabled}
                         info={info}
                         week={week}
-                        userId={userId}
+                        user={user}
                         earning_type={earning_type}
                         about={about}
                     />

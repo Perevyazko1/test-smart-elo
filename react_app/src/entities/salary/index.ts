@@ -1,21 +1,23 @@
 import {SALARY_STATUSES} from "@/shared/consts";
+import type {IUser} from "@/entities/user";
 
 export interface IPayrollRow {
     id: number;
     name: string;
-    user_id: number;
+    user: IUser;
     is_locked: boolean;
     week: string;
     comment: string;
     issued_sum: number;
     tax_sum: number;
     card_sum: number;
-    start_balance: number;
+    balance_sum: number;
     cash_payout: number;
     earned_sum: number;
     bonus_sum: number;
     department_name: string;
     has_unconfirmed: boolean;
+    hide_balance: boolean;
     is_closed: boolean;
     full_loan_sum: number;
     end_loan_sum: number;
@@ -36,8 +38,8 @@ export interface IPayroll {
 export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ" | "ЗАЙМ" | "ПОГ.ЗАЙМА";
 
 export interface IEarning {
-    id?: number;
-    user: number | null;
+    id: number;
+    user: IUser | null;
     is_locked: boolean;
     crated_at: string;
     target_date: string;
@@ -47,7 +49,14 @@ export interface IEarning {
     approval_by: number;
     comment: string;
     earning_comment: string;
-    user_name: string;
     created_by_name: string;
     approval_by_name: string;
+}
+
+export interface IUpdateEarning extends Omit<IEarning, 'user'> {
+    user_id: number | null;
+}
+
+
+export interface ICreateEarning extends Omit<IUpdateEarning, 'id'> {
 }

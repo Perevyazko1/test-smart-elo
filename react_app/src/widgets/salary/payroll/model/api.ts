@@ -54,11 +54,14 @@ class PayrollService {
         )
     }
 
-    closePayrollRow(props: {payroll_row_id: number}): Promise<AxiosResponse<IPayrollRow>> {
-        const {payroll_row_id} = props;
+    closePayrollRow(props: {payroll_row_id: number, close: boolean}): Promise<AxiosResponse<IPayrollRow>> {
+        const {payroll_row_id, close} = props;
         return $axios.post<IPayrollRow>(
             `/salary/close_payroll_row/`,
-            {payroll_row_id}
+            {
+                payroll_row_id,
+                close
+            }
         );
     }
 }

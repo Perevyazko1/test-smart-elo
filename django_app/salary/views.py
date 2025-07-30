@@ -74,6 +74,7 @@ def confirm_earnings(request):
 @api_view(['POST'])
 def close_payroll_row(request):
     payroll_row_id = request.data.get('payroll_row_id')
+    close = request.data.get('close')
 
     try:
         payroll_row_id = int(payroll_row_id)
@@ -82,7 +83,14 @@ def close_payroll_row(request):
             {'error': 'Invalid payroll_row_id format. Must be integer'},
         )
 
-    payroll_row = payroll_row_close(payroll_row_id)
+    try:
+        close = bool(close)
+    except (ValueError, TypeError):
+        return Response(
+            {'error': 'Invalid close format. Must be bool'},
+        )
+
+    payroll_row = payroll_row_close(payroll_row_id, close)
 
     return Response(status=status.HTTP_200_OK, data=PayrollRowSerializer(payroll_row).data)
 

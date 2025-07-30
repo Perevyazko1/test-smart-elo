@@ -3,7 +3,7 @@ import {twMerge} from "tailwind-merge";
 import {EditIcon} from "lucide-react";
 
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import type {IEarning, IEarningType} from "@/entities/salary";
+import type {ICreateEarning, IEarning, IEarningType} from "@/entities/salary";
 import {CreateEarningForm} from "@/widgets/salary/accrual/CreateEarningForm.tsx";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 import type {IWeek} from "@/shared/utils/date";
@@ -58,7 +58,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
     const client = useQueryClient();
 
     const updateEarning = useMutation({
-        mutationFn: (data: IEarning) => {
+        mutationFn: (data: ICreateEarning) => {
             return earningService.updateEarning({
                 id: earning.id!,
                 ...data,
@@ -117,7 +117,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
                     disabled={updateEarning.isPending}
                     earning_type={earning.earning_type}
                     createdById={currentUser!.id!}
-                    userId={earning.user}
+                    user={earning.user}
                     onSubmit={updateEarning.mutate}
                 />
             }

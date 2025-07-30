@@ -1,6 +1,8 @@
 import {$axios} from "@/shared/api";
 import type {AxiosResponse} from "axios";
-import type {IUser} from "@/pages/login/model/types.ts";
+
+
+import type {IUser} from "@/entities/user";
 
 interface ILoginProps {
     pin_code: string;

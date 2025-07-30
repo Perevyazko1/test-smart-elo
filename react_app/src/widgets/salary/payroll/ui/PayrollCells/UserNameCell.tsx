@@ -1,5 +1,5 @@
 import {Toggle} from "@/components/ui/toggle.tsx";
-import {ExitIcon, LockClosedIcon} from "@radix-ui/react-icons";
+import {EnterIcon, ExitIcon, LockClosedIcon} from "@radix-ui/react-icons";
 import {LockOpen} from "lucide-react";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
@@ -36,12 +36,16 @@ export const UserNameCell = (props: UserNameCellProps) => {
                 }
             });
             queryClient.setQueryData(['payrollRows', updatedData.data.id], updatedData.data);
+            queryClient.invalidateQueries({queryKey: ['payrollRows', week.weekNumber + 1]});
         }
     });
 
     const closeWeekRowHandle = () => {
-        if (window.confirm("Закрыть расчеты по текущей неделе с сотрудником для расчета баланса?")) {
-            closeRow.mutate({payroll_row_id: userInfo.id})
+        if (window.confirm(`${userInfo.is_closed ? "Открыть" : "Закрыть"} расчеты по текущей неделе с сотрудником для расчета баланса?`)) {
+            closeRow.mutate({
+                payroll_row_id: userInfo.id,
+                close: !userInfo.is_closed,
+            })
         }
     }
 
@@ -70,7 +74,7 @@ export const UserNameCell = (props: UserNameCellProps) => {
                     <TT asChild description={"Перейти в детализацию по сотруднику"}>
                         <Btn
                             className={"text-nowrap"}
-                            onClick={() => setSelectedUserId(userInfo.user_id)}
+                            onClick={() => setSelectedUserId(userInfo.user.id!)}
                         >
                             {userInfo.name}
                         </Btn>
@@ -78,14 +82,18 @@ export const UserNameCell = (props: UserNameCellProps) => {
 
                 </div>
 
-                <TT asChild description={"Закрыть неделю по сотруднику"}>
+                <TT asChild description={`${userInfo.is_closed ? "Открыть" : "Закрыть"} неделю по сотруднику`}>
                     <Btn
-                        disabled={userInfo.is_closed || userInfo.has_unconfirmed}
+                        disabled={userInfo.has_unconfirmed}
                         className={'text-16 bg-transparent px-2'}
                         name={'Payroll'}
                         onClick={closeWeekRowHandle}
                     >
-                        <ExitIcon/>
+                        {userInfo.is_closed ? (
+                            <EnterIcon/>
+                        ) : (
+                            <ExitIcon/>
+                        )}
                     </Btn>
                 </TT>
             </div>

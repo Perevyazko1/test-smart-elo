@@ -23,7 +23,7 @@ export const UserEarningsCell = (props: UserEarningsCellProps) => {
             <div className={'flex items-center justify-between max-w-[7em] min-w-full'}>
                 <TT asChild description={"Подтвердить сумму начислений"}>
                     <ConfirmEarningsBtn
-                        userId={userInfo.user_id}
+                        userId={userInfo.user.id!}
                         week={week}
                         active={userInfo.has_unconfirmed && !userInfo.is_closed}
                     />
@@ -51,7 +51,7 @@ export const UserEarningsCell = (props: UserEarningsCellProps) => {
                     info={"Добавить ДОП начисление сотруднику"}
                     disabled={disabled}
                     week={week}
-                    userId={userInfo.user_id}
+                    user={userInfo.user}
                     earning_type={"ДОП"}
                 />
             </div>

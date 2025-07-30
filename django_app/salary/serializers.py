@@ -1,19 +1,21 @@
 from rest_framework import serializers
 from salary.models import Earning, PayrollRow, Payroll
+from staff.serializers import EmployeeSerializer
 
 
 class EarningSerializer(serializers.ModelSerializer):
     approval_by_name = serializers.SerializerMethodField()
-    user_name = serializers.SerializerMethodField()
     created_by_name = serializers.SerializerMethodField()
+    user = EmployeeSerializer(read_only=True)
+    user_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Earning
         fields = [
             'id',
             'user',
+            'user_id',
             'is_locked',
-            'user_name',
             'amount',
             'earning_type',
             'target_date',
@@ -29,19 +31,13 @@ class EarningSerializer(serializers.ModelSerializer):
     def get_approval_by_name(self, obj: Earning):
         return str(obj.approval_by)
 
-    def get_user_name(self, obj: Earning):
-        return str(obj.user)
-
     def get_created_by_name(self, obj: Earning):
         return str(obj.created_by)
 
 
-
-
-
 class PayrollRowSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
-    user_id = serializers.SerializerMethodField()
+    user = EmployeeSerializer()
     week = serializers.SerializerMethodField()
     tax_sum = serializers.SerializerMethodField()
     full_loan_sum = serializers.SerializerMethodField()
@@ -51,7 +47,9 @@ class PayrollRowSerializer(serializers.ModelSerializer):
     card_sum = serializers.SerializerMethodField()
     earned_sum = serializers.SerializerMethodField()
     bonus_sum = serializers.SerializerMethodField()
+    balance_sum = serializers.SerializerMethodField()
     department_name = serializers.SerializerMethodField()
+    hide_balance = serializers.SerializerMethodField()
 
     has_unconfirmed = serializers.SerializerMethodField()
 
@@ -61,7 +59,7 @@ class PayrollRowSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'payroll',
-            'user_id',
+            'user',
             'week',
             'is_locked',
             'is_closed',
@@ -69,12 +67,13 @@ class PayrollRowSerializer(serializers.ModelSerializer):
             'issued_sum',
             'tax_sum',
             'card_sum',
-            'start_balance',
+            'balance_sum',
             'cash_payout',
             'earned_sum',
             'bonus_sum',
             'department_name',
             'has_unconfirmed',
+            'hide_balance',
             'full_loan_sum',
             'end_loan_sum',
             'loan_sum',
@@ -82,9 +81,6 @@ class PayrollRowSerializer(serializers.ModelSerializer):
 
     def get_name(self, obj):
         return str(obj.user)
-
-    def get_user_id(self, obj):
-        return str(obj.user.id)
 
     def get_week(self, obj):
         return obj.payroll.name
@@ -99,6 +95,13 @@ class PayrollRowSerializer(serializers.ModelSerializer):
                    obj.payroll.date_from <= e.target_date <= obj.payroll.date_to and
                    e.approval_by is not None and
                    e.earning_type == 'Налог')
+
+    def get_balance_sum(self, obj: PayrollRow):
+        all_earnings = obj.user.earnings.all()  # .all() здесь не делает нового запроса
+        return sum(e.amount for e in all_earnings if
+                   e.target_date < obj.payroll.date_from and
+                   e.approval_by is not None and
+                   not e.earning_type == 'ЗАЙМ')
 
     def get_card_sum(self, obj):
         all_earnings = obj.user.earnings.all()
@@ -150,9 +153,16 @@ class PayrollRowSerializer(serializers.ModelSerializer):
             approval_by__isnull=True,
         ).exists()
 
+    def get_hide_balance(self, obj: PayrollRow):
+        return PayrollRow.objects.filter(
+            user=obj.user,
+            is_closed=False,
+            payroll__date_to__lt=obj.payroll.date_from,
+        ).exists()
 
 
 class PayrollSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Payroll
         fields = [

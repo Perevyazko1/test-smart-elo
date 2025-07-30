@@ -1,10 +1,11 @@
 import {createContext, type ReactNode, useEffect, useState} from "react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
-import type {IUser} from "@/pages/login/model/types";
 import {$axios} from "@/shared/api";
 import {USER_LOCALSTORAGE_TOKEN} from "@/shared/consts";
 import {toast} from "sonner";
+
+import type {IUser} from "@/entities/user";
 
 
 interface ContextProviderProps {

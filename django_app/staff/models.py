@@ -1,8 +1,5 @@
-import datetime
-
-from django.db import models
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
+from django.db import models
 
 from staff.service import validate_color
 
@@ -68,11 +65,12 @@ class Employee(AbstractUser):
         blank=True, null=True,
         on_delete=models.SET_NULL,
     )
-    current_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
     kpd = models.DecimalField('КПД Сотрудника', max_digits=4, decimal_places=2, default=1.00)
     description = models.CharField('Описание', max_length=250, blank=True, null=True)
 
     piecework_wages = models.BooleanField('Сдельная форма оплаты труда', default=True)
+    piecework_amount = models.PositiveIntegerField('Тариф в час', default=0, blank=True, null=True)
 
     attention = models.BooleanField(default=False)
 
@@ -168,24 +166,6 @@ class Transaction(models.Model):
     is_locked = models.BooleanField(default=False)
 
     created_automatically = models.BooleanField(default=True)
-
-    def save(self, *args, **kwargs):
-        # TODO вернуть блокировку
-        # if self.is_locked:
-        #     raise ValidationError("This transaction is locked and cannot be edited.")
-
-        if self.amount and self.inspector:
-            self.starting_balance = self.employee.current_balance
-            if self.transaction_type == 'accrual':
-                self.ending_balance = self.employee.current_balance + self.amount
-                self.employee.current_balance += self.amount
-            else:
-                self.ending_balance = self.employee.current_balance - self.amount
-                self.employee.current_balance -= self.amount
-            self.employee.save()
-            self.inspect_date = datetime.datetime.now()
-            self.is_locked = True  # блокировка модели для редактирования
-        super(Transaction, self).save(*args, **kwargs)
 
     def __str__(self):
         return '{}'.format(f'{self.amount} || {self.add_date.strftime("%m.%d.%Y - %H:%M")} в пользу {self.executor}')

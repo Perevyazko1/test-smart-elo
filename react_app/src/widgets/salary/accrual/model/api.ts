@@ -1,5 +1,5 @@
 import {$axios} from "@/shared/api";
-import type {IEarning} from "@/entities/salary";
+import type {ICreateEarning, IUpdateEarning} from "@/entities/salary";
 
 interface IConfirmEarningProps {
     date_from: string;
@@ -9,14 +9,14 @@ interface IConfirmEarningProps {
 
 
 class EarningService {
-    createEarning(props: Omit<IEarning, 'id'>) {
+    createEarning(props: ICreateEarning) {
         return $axios.post(
             `/salary/earnings/`,
             props,
         );
     }
 
-    updateEarning(props: IEarning) {
+    updateEarning(props: IUpdateEarning) {
         const {id, ...otherProps} = props;
 
         return $axios.patch(

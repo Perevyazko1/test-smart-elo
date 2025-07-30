@@ -62,7 +62,7 @@ export const CashBody = (props: CashBodyProps) => {
                         <AddEarningBtn
                             info={"Внести выдачу НАЛ"}
                             earning_type={'Выдача НАЛ'}
-                            userId={null}
+                            user={null}
                             disabled={isFetching}
                             week={currentWeek}
                         >
@@ -86,7 +86,7 @@ export const CashBody = (props: CashBodyProps) => {
                         <AddEarningBtn
                             info={"Внести внесение НАЛ"}
                             earning_type={'Внесение НАЛ'}
-                            userId={null}
+                            user={null}
                             disabled={isFetching}
                             week={currentWeek}
                         >
