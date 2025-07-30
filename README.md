@@ -24,6 +24,12 @@ docker compose -f docker-compose-dev.yml up --build -d
 docker-compose -f docker-compose-preprod.yml up -d --build
 ```
 
+Миграции на проде
+```bash
+
+docker exec -it elo_server python3 manage.py migrate
+```
+
 #### run command
 ```bash 
   docker exec -it server 
