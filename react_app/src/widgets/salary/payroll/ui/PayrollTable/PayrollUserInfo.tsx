@@ -103,7 +103,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
             <UserEarnCell
                 week={week}
-                disabled={!statusLessThen("6")}
+                disabled={!statusLessThen("6") || userInfo.is_locked}
                 userInfo={userInfo}
                 onChange={(value) => {
                     debouncedUpdateRow({cash_payout: value})
@@ -152,7 +152,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             <td className="relative">
                 <div className={'flex items-center h-full text-[0.8em]'}>
                     <TextArea
-                        disabled={!statusLessThen("6") || userInfo.is_closed}
+                        disabled={!statusLessThen("6")}
                         className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
                         value={commentInputValue}
                         onChange={commentChangeHandle}

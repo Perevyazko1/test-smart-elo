@@ -49,21 +49,23 @@ export const UserNameCell = (props: UserNameCellProps) => {
         <td>
             <div className="flex justify-between flex-nowrap">
                 <div className="flex items-center">
-                    <Toggle
-                        disabled={isPending}
-                        className={'cursor-pointer'}
-                        pressed={userInfo.is_locked}
-                        onPressedChange={() => mutateClb({
-                            id: userInfo.id,
-                            is_locked: !userInfo.is_locked
-                        })}
-                    >
-                        {userInfo.is_locked ? (
-                            <LockClosedIcon className={'text-red-800'}/>
-                        ) : (
-                            <LockOpen className={'text-green-800'}/>
-                        )}
-                    </Toggle>
+                    <TT asChild description={'Заблокировать изменение суммы к выплате'}>
+                        <Toggle
+                            disabled={isPending}
+                            className={'cursor-pointer'}
+                            pressed={userInfo.is_locked}
+                            onPressedChange={() => mutateClb({
+                                id: userInfo.id,
+                                is_locked: !userInfo.is_locked
+                            })}
+                        >
+                            {userInfo.is_locked ? (
+                                <LockClosedIcon className={'text-red-800'}/>
+                            ) : (
+                                <LockOpen className={'text-green-800'}/>
+                            )}
+                        </Toggle>
+                    </TT>
 
                     <TT asChild description={"Перейти в детализацию по сотруднику"}>
                         <Btn
@@ -88,5 +90,6 @@ export const UserNameCell = (props: UserNameCellProps) => {
                 </TT>
             </div>
         </td>
-    );
+    )
+        ;
 };
