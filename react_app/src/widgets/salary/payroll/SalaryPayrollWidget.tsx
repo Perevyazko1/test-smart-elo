@@ -1,4 +1,4 @@
-import {type ChangeEvent, useState} from "react";
+import {type ChangeEvent, useEffect, useState} from "react";
 import {ArrowRight} from "lucide-react";
 import {twMerge} from "tailwind-merge";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
@@ -11,6 +11,8 @@ import {PayrollTable} from "./ui/PayrollTable/PayrollTable.tsx";
 import {SALARY_STATUSES} from "@/shared/consts";
 import type {IPayroll} from "@/entities/salary";
 import {payrollService} from "./model/api.ts";
+import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
+import {DotFilledIcon} from "@radix-ui/react-icons";
 
 
 interface SalaryPayrollWidgetProps {
@@ -22,7 +24,9 @@ interface SalaryPayrollWidgetProps {
 export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     const {setSelectedUserId, currentWeek} = props;
     const queryClient = useQueryClient();
-    const [cashValue, setCashValue] = useState<number>();
+    const [cashValue, setCashValue] = useState<number | null>();
+    const [descriptionValue, setDescriptionValue] = useState<string | null>();
+    const [payrollData, setPayrollData] = useState<IPayroll | null>();
 
     const createPayrollMutation = useMutation({
         mutationFn: payrollService.createNewPayroll,
@@ -44,27 +48,32 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         }
     });
 
-    const {data, isFetching} = useQuery({
+    const {data, isLoading} = useQuery({
         queryKey: ['payroll', currentWeek.weekNumber],
-        queryFn: () => {
-            return payrollService.getPayroll({
-                date_from: currentWeek.date_from,
-            });
-        },
+        queryFn: () => payrollService.getPayroll({
+            date_from: currentWeek.date_from,
+        }),
         staleTime: Infinity,
     });
+
+    useEffect(() => {
+        setCashValue(data?.data?.cash_payout);
+        setDescriptionValue(data?.data?.description);
+        setPayrollData(data?.data);
+    }, [data?.data]);
 
     const debouncedUpdatePayroll = useDebounce(
         (data: {
             cash_payout?: number;
+            description?: string;
         }) => updatePayroll.mutate({
             date_from: currentWeek.date_from,
-            cash_payout: data.cash_payout,
+            ...data,
         }),
-        1500
+        2000
     );
 
-    if (isFetching) {
+    if (isLoading) {
         return <div>Загрузка...</div>
     }
 
@@ -87,13 +96,20 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         debouncedUpdatePayroll({cash_payout: value});
     }
 
+    const descriptionChangeHandle = (e: ChangeEvent<HTMLTextAreaElement>) => {
+        e.preventDefault();
+        setDescriptionValue(e.target.value);
+        debouncedUpdatePayroll({description: e.target.value});
+    }
+
     const statusLessThen = (status: keyof typeof SALARY_STATUSES) => {
         return Number(data?.data?.state) < Number(status);
     }
 
+
     return (
         <div className={'p-3 overflow-auto'}>
-            <div className={'flex gap-8 bg-yellow-100 p-3 items-center'}>
+            <div className={'flex gap-8 bg-yellow-100 p-3 pb-1 items-center'}>
                 <div className={'flex flex-col'}>
                     <h1 className={"text-xl font-bold"}>
                         Ведомость за {currentWeek.weekNumber} нед.
@@ -101,10 +117,11 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                     <div className={'flex gap-2 items-center'}>
                         К выплате:
                         <input
+                            id={`${currentWeek.weekNumber}cash`}
                             disabled={!statusLessThen("4")}
                             type="text"
                             className={'p-2 w-1/3 outline-none border-none text-center h-full bg-white disabled:bg-transparent'}
-                            value={cashValue?.toLocaleString('ru-RU') || data?.data?.cash_payout.toLocaleString('ru-RU')}
+                            value={cashValue?.toLocaleString('ru-RU') || data?.data?.cash_payout?.toLocaleString('ru-RU')}
                             onChange={issuedChangeHandle}
                         />
                     </div>
@@ -144,7 +161,25 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                 </div>
             </div>
 
-            {(!data?.data) && (
+            <div className={'relative'}>
+                <div className={'flex items-center h-full text-[0.8em]'}>
+                    <TextArea
+                        id={`${currentWeek.weekNumber}description`}
+                        placeholder={'Комментарий к неделе'}
+                        disabled={!statusLessThen("6")}
+                        value={descriptionValue || ""}
+                        onChange={descriptionChangeHandle}
+                        className={'p-2 resize-none w-full bg-yellow-50'}
+                    />
+                </div>
+                {descriptionValue !== data?.data?.description && (
+                    <DotFilledIcon
+                        className={'absolute top-0 right-0 text-green-800 animate-pulse'}
+                    />
+                )}
+            </div>
+
+            {(!payrollData) && (
                 <Btn
                     onClick={() => {
                         createPayrollMutation.mutate({
@@ -156,11 +191,15 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                     {createPayrollMutation.isPending ? 'Формирование...' : 'Сформировать ведомость'}
                 </Btn>
             )}
-            <PayrollTable
-                currentWeek={currentWeek}
-                setSelectedUserId={setSelectedUserId}
-                payroll={data?.data}
-            />
+
+            {payrollData && (
+                <PayrollTable
+                    currentWeek={currentWeek}
+                    setSelectedUserId={setSelectedUserId}
+                    payrollId={payrollData.id}
+                    state={payrollData.state}
+                />
+            )}
         </div>
     );
 };

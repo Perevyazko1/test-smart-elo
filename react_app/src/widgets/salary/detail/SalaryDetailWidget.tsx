@@ -60,6 +60,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                     </div>
                     <TT asChild description={'Внести займ сотрудника'}>
                         <AddEarningBtn
+                            info={"Внести выдачу займа сотруднику"}
                             disabled={isFetching}
                             week={currentWeek}
                             userId={details.user_info.id}

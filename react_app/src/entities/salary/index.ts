@@ -27,9 +27,10 @@ export interface IPayroll {
     state: keyof typeof SALARY_STATUSES;
     date_from: string;
     date_to: string;
-    cash_payout: number;
+    cash_payout: number | null;
     is_closed: boolean;
     name: string;
+    description?: string | null;
 }
 
 export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ" | "ЗАЙМ" | "ПОГ.ЗАЙМА";

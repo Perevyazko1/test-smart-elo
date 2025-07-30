@@ -4,6 +4,8 @@ import {CheckCircle} from "lucide-react";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {earningService} from "@/widgets/salary/accrual/model/api.ts";
 import type {IWeek} from "@/shared/utils/date.ts";
+import type {AxiosResponse} from "axios";
+import type {IPayrollRow} from "@/entities/salary";
 
 
 interface ConfirmEarningsBtnProps {
@@ -19,10 +21,16 @@ export const ConfirmEarningsBtn = (props: ConfirmEarningsBtnProps) => {
 
     const updateEarnings = useMutation({
         mutationFn: earningService.confirmEarnings,
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ['payrollRows', week.weekNumber]
+        onSuccess: (updatedData: AxiosResponse<IPayrollRow>) => {
+            queryClient.setQueryData(['payrollRows', week.weekNumber], (oldRows: { data: IPayrollRow[] }) => {
+                return {
+                    ...oldRows,
+                    data: oldRows.data.map(row =>
+                        row.id === updatedData.data.id ? updatedData.data : row
+                    )
+                }
             });
+            queryClient.setQueryData(['payrollRows', updatedData.data.id], updatedData.data);
         }
     })
 
@@ -37,6 +45,7 @@ export const ConfirmEarningsBtn = (props: ConfirmEarningsBtnProps) => {
     return (
         <Btn
             onClick={clickHandle}
+            disabled={updateEarnings.isPending}
             className={twMerge([
                 'text-green-800 p-2',
                 active

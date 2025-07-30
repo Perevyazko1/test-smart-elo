@@ -59,7 +59,16 @@ def confirm_earnings(request):
         approval_by__isnull=True,
     ).update(approval_by=request.user)
 
-    return Response(status=status.HTTP_200_OK)
+    target_row = PayrollRow.objects.filter(
+        user=user_id,
+        payroll__date_from=date_from,
+        payroll__date_to=date_to,
+    )
+
+    return Response(
+        PayrollRowSerializer(target_row.first()).data,
+        status=status.HTTP_200_OK
+    )
 
 
 @api_view(['POST'])

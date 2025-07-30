@@ -1,6 +1,4 @@
-import {useMemo} from "react";
-
-import type {IPayroll} from "@/entities/salary";
+import {memo, useMemo} from "react";
 import {Table} from "@/shared/ui/table/Table.tsx";
 import {THead} from "@/shared/ui/table/THead.tsx";
 import {useQuery} from "@tanstack/react-query";
@@ -14,18 +12,19 @@ import {PayrollTh} from "./PayrollTh.tsx";
 
 interface PayrollTableProps {
     currentWeek: IWeek;
-    payroll?: IPayroll | null;
+    payrollId: number;
+    state: "1" | "2" | "3" | "4" | "5" | "6";
     setSelectedUserId: (arg: number) => void;
 }
 
-export const PayrollTable = (props: PayrollTableProps) => {
-    const {payroll, currentWeek, setSelectedUserId} = props;
+export const PayrollTable = memo((props: PayrollTableProps) => {
+    const {payrollId, state, currentWeek, setSelectedUserId} = props;
 
     const {data, isError, isFetching} = useQuery({
         queryKey: ['payrollRows', currentWeek.weekNumber],
         queryFn: () => {
             return payrollService.getPayrollRows({
-                payroll_id: payroll!.id,
+                payroll_id: payrollId,
             });
         },
         staleTime: Infinity,
@@ -59,12 +58,6 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalPayout = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
     const totalIssued = data?.data?.reduce((sum, row) => sum + row.issued_sum, 0) || 0;
     const totalLoan = data?.data?.reduce((sum, row) => sum + row.loan_sum, 0) || 0;
-
-    if (!payroll) {
-        return (
-            <div>----</div>
-        )
-    }
 
     return (
         <Table>
@@ -112,10 +105,10 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     departmentName={departmentName}
                     earnings={earnings}
                     key={departmentName}
-                    state={payroll.state}
+                    state={state}
                 />
             ))}
             </tbody>
         </Table>
     );
-};
+});

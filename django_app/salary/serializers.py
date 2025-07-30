@@ -162,5 +162,6 @@ class PayrollSerializer(serializers.ModelSerializer):
             'date_to',
             'cash_payout',
             'is_closed',
+            'description',
             'name',
         ]

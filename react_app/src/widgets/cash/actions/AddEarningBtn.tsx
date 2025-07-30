@@ -11,6 +11,7 @@ import type {IWeek} from "@/shared/utils/date.ts";
 import {type ReactNode, useState} from "react";
 import {twMerge} from "tailwind-merge";
 import {useCurrentUser} from "@/shared/utils/useCurrentUser.ts";
+import {TT} from "@/shared/ui/tooltip/TT.tsx";
 
 
 interface AddEarningBtnProps {
@@ -19,11 +20,12 @@ interface AddEarningBtnProps {
     week: IWeek;
     disabled: boolean;
     about?: string;
+    info: string;
     children?: ReactNode;
 }
 
 export const AddEarningBtn = (props: AddEarningBtnProps) => {
-    const {earning_type, userId, week, disabled, about, children} = props;
+    const {earning_type, info, userId, week, disabled, about, children} = props;
     const queryClient = useQueryClient();
     const {currentUser} = useCurrentUser();
 
@@ -103,20 +105,22 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             onOpenChange={setModalOpen}
             trigger={
                 children ? children :
-                    <Btn
-                        disabled={disabled}
-                        onClick={() => setModalOpen(true)}
-                        className={twMerge([
-                            'text-sm p-2 pe-1 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
-                            ["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
-                        ])}
-                    >
-                        {["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ?
-                            <PlusCircle size={16}/>
-                            :
-                            <MinusCircle size={16}/>
-                        }
-                    </Btn>
+                    <TT asChild description={info}>
+                        <Btn
+                            disabled={disabled}
+                            onClick={() => setModalOpen(true)}
+                            className={twMerge([
+                                'text-sm p-2 pe-1 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
+                                ["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
+                            ])}
+                        >
+                            {["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ?
+                                <PlusCircle size={16}/>
+                                :
+                                <MinusCircle size={16}/>
+                            }
+                        </Btn>
+                    </TT>
             }
             content={
                 <CreateEarningForm

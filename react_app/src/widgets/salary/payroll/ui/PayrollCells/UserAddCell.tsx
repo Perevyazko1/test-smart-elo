@@ -35,15 +35,14 @@ export const UserAddCell = (props: UserAddCellProps) => {
                     </TT>
                 </div>
                 {!hide && (
-                    <TT asChild description={info}>
-                        <AddEarningBtn
-                            disabled={disabled}
-                            week={week}
-                            userId={userId}
-                            earning_type={earning_type}
-                            about={about}
-                        />
-                    </TT>
+                    <AddEarningBtn
+                        disabled={disabled}
+                        info={info}
+                        week={week}
+                        userId={userId}
+                        earning_type={earning_type}
+                        about={about}
+                    />
                 )}
             </div>
 

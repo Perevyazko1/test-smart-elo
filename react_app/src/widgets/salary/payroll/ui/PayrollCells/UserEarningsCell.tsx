@@ -47,14 +47,13 @@ export const UserEarningsCell = (props: UserEarningsCellProps) => {
                     </TT>
                 </div>
 
-                <TT asChild description={'Добавить ДОП начисление сотруднику'}>
-                    <AddEarningBtn
-                        disabled={disabled}
-                        week={week}
-                        userId={userInfo.user_id}
-                        earning_type={"ДОП"}
-                    />
-                </TT>
+                <AddEarningBtn
+                    info={"Добавить ДОП начисление сотруднику"}
+                    disabled={disabled}
+                    week={week}
+                    userId={userInfo.user_id}
+                    earning_type={"ДОП"}
+                />
             </div>
         </td>
     );
