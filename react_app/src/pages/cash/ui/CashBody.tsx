@@ -60,6 +60,7 @@ export const CashBody = (props: CashBodyProps) => {
                 )}>
                     <div className={'flex gap-8 justify-between'}>
                         <AddEarningBtn
+                            targetIsCashDate
                             info={"Внести выдачу НАЛ"}
                             earning_type={'Выдача НАЛ'}
                             user={null}
@@ -84,6 +85,7 @@ export const CashBody = (props: CashBodyProps) => {
 
                     <div className={'flex gap-8 justify-between'}>
                         <AddEarningBtn
+                            targetIsCashDate
                             info={"Внести внесение НАЛ"}
                             earning_type={'Внесение НАЛ'}
                             user={null}

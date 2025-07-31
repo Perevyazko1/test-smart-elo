@@ -12,10 +12,11 @@ import {SALARY_STATUSES} from "@/shared/consts";
 import {formatNumber} from "@/shared/utils/formatNumber.ts";
 import {UserCashCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserCashCell.tsx";
 import {UserAddCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserAddCell.tsx";
-import {UserEarningsCell} from "../PayrollCells/UserEarningsCell.tsx";
 import {UserLoanCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserLoanCell.tsx";
 import {UserNameCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserNameCell.tsx";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import {ConfirmEarningsBtn} from "@/widgets/salary/accrual/ConfirmEarningsBtn.tsx";
 
 
 interface PayrollUserInfoProps {
@@ -77,6 +78,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 twMerge(
                     'transition-all duration-300 ease-in-out',
                     userInfo.is_closed ? 'bg-green-50' : '',
+                    userInfo.is_locked ? 'bg-red-50' : '',
                 )
             }
         >
@@ -91,18 +93,30 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
             <td className="text-end">
                 <TT description={`Баланс на начало ${week.weekNumber} нед.`}>
-                    {formatNumber(
-                        userInfo.hide_balance ? 0: userInfo.balance_sum,
-                        false
-                    )}
+                    <NiceNum value={userInfo.hide_balance ? null : userInfo.balance_sum}/>
                 </TT>
             </td>
 
-            <UserEarningsCell
-                userInfo={userInfo}
+            <UserAddCell
+                value={(userInfo.earned_sum || 0) + (userInfo.bonus_sum || 0)}
+                info={"Добавить ДОП начисление сотруднику"}
+                valueInfo={`ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`}
                 disabled={!statusLessThen("3") || userInfo.is_closed}
+                user={userInfo.user}
                 week={week}
-            />
+                earning_type={"ДОП"}
+                about={`ДОП за `}
+            >
+                {userInfo.has_unconfirmed && (
+                    <TT asChild description={"Подтвердить сумму начислений"}>
+                        <ConfirmEarningsBtn
+                            userId={userInfo.user.id!}
+                            week={week}
+                            active={!userInfo.is_closed}
+                        />
+                    </TT>
+                )}
+            </UserAddCell>
 
             <UserCashCell
                 week={week}
@@ -122,6 +136,17 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 week={week}
                 earning_type={"Выдача НАЛ"}
                 about={`Выдача НАЛ ЗП нед ${week.weekNumber}`}
+            />
+
+            <UserAddCell
+                value={userInfo.ip_sum}
+                info={"Выдать сотруднику через средства ИП"}
+                valueInfo={'Выдача на ИП сотрудника'}
+                disabled={!statusLessThen("5") || userInfo.is_closed}
+                user={userInfo.user}
+                week={week}
+                earning_type={"ИП"}
+                about={`Выдача на ИП ЗП нед ${week.weekNumber}`}
             />
 
             <UserAddCell
@@ -155,7 +180,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             <td className="relative">
                 <div className={'flex items-center h-full text-[0.8em]'}>
                     <TextArea
-                        disabled={!statusLessThen("6")}
+                        disabled={!statusLessThen("6") || userInfo.is_locked}
                         className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
                         value={commentInputValue}
                         onChange={commentChangeHandle}

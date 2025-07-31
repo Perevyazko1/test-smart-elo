@@ -32,7 +32,7 @@ export const EarningDetail = (props: EarningDetailProps) => {
             <hr/>
             <div>
                 <div>Дата создания:</div>
-                <div>{earning.crated_at}</div>
+                <div>{earning.created_at}</div>
             </div>
             <div>
                 <div>Комментарий зарплатный:</div>

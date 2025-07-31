@@ -31,7 +31,6 @@ export const UserCashCell = (props: UserCashCellProps) => {
         onChange(value);
     }
 
-
     return (
         <td className="max-w-[7em] relative">
             {(issuedInputValue && issuedInputValue !== userInfo.cash_payout) ? (
@@ -40,11 +39,11 @@ export const UserCashCell = (props: UserCashCellProps) => {
                 />
             ) : null}
 
-            <TT description={'Сумма к дальнейшей выдаче наличкой и БН'}>
+            <TT description={'Сумма к дальнейшей выдаче наличкой и ИП'}>
                 <input
                     disabled={disabled}
                     type="text"
-                    className={'p-2 w-full outline-none border-none text-end h-full bg-yellow-50 disabled:bg-transparent'}
+                    className={'p-2 font-mono w-full outline-none border-none text-end h-full bg-yellow-50 disabled:bg-transparent'}
                     value={issuedInputValue?.toLocaleString('ru-RU')}
                     onChange={issuedChangeHandle}
                 />

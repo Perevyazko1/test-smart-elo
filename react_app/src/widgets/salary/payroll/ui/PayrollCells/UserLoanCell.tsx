@@ -18,12 +18,12 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
 
     const loanPercent = 100 - Math.abs(
         Math.floor(
-            userInfo.end_loan_sum / userInfo.full_loan_sum * 100
+            (userInfo.end_loan_sum || 0) / (userInfo.full_loan_sum || 0) * 100
         )
     );
 
 
-    const extraLoan = userInfo.full_loan_sum + userInfo.end_loan_sum !== 0 && (
+    const extraLoan = (userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0) !== 0 && (
         <>
             <div className={'absolute bottom-0 left-0 right-0 h-1 w-full'}>
                 <div
@@ -39,7 +39,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
                     из ${formatNumber(userInfo.full_loan_sum)}`
                 }>
                     {Math.abs(
-                        userInfo.full_loan_sum + userInfo.end_loan_sum
+                        (userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)
                     ).toLocaleString('ru-RU')}
                 </TT>
             </div>
@@ -49,7 +49,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
     return (
         <UserAddCell
             value={userInfo.loan_sum}
-            hide={(userInfo.full_loan_sum + userInfo.end_loan_sum) === 0}
+            hide={((userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)) === 0}
             info={"Внести погашение займа"}
             valueInfo={'Списано в счет погашения займов'}
             disabled={disabled}

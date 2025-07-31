@@ -6,9 +6,10 @@ import type {IEarningType} from "@/entities/salary";
 import type {ReactNode} from "react";
 import {twMerge} from "tailwind-merge";
 import type {IUser} from "@/entities/user";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface UserAddCellProps {
-    value: number;
+    value: number | null;
     info: string;
     valueInfo: string;
     disabled: boolean;
@@ -17,22 +18,23 @@ interface UserAddCellProps {
     earning_type: IEarningType;
     about: string;
     extra?: ReactNode;
+    children?: ReactNode;
     hide?: boolean;
 }
 
 export const UserAddCell = (props: UserAddCellProps) => {
-    const {value, user, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
+    const {value, user, children, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
 
     return (
         <td className="text-end relative">
-
             <div className={'flex items-center justify-between'}>
+                {children}
                 <div className={twMerge(
                     'flex flex-1 justify-end pe-2 border-gray-400',
                     !hide && ('border-r-1'),
                 )}>
                     <TT description={valueInfo}>
-                        {formatNumber(value, false)}
+                        <NiceNum value={value}/>
                     </TT>
                 </div>
                 {!hide && (

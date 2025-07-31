@@ -9,6 +9,7 @@ import {WeekDetailsTable} from "@/widgets/salary/detail/table/WeekDetailsTable.t
 import {Switch} from "@/components/ui/switch";
 import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
 import {UserPanelWidget} from "@/widgets/salary/detail/widgets/UserPanelWidget.tsx";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface SalaryDetailWidgetProps {
     selectedUserId: number;
@@ -57,8 +58,8 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                     <div>
                         Текущая задолженность:
                     </div>
-                    <div className={'text-lg'}>
-                        <b>{details.user_info.balance.toLocaleString("ru-RU")} Р.</b>
+                    <div className={'flex flex-nowrap text-lg gap-2'}>
+                        <NiceNum value={details.user_info.balance}/> Р.
                     </div>
                     <AddEarningBtn
                         info={"Внести выдачу займа сотруднику"}
@@ -70,7 +71,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                 </div>
 
                 <div className={'flex gap-10 justify-between min-w-0 overflow-auto max-w-full'}>
-                    <div className={'flex flex-col flex-1'}>
+                    <div className={'flex flex-col flex-1 p-4'}>
                         <div className={'flex gap-3 items-center bg-amber-100'}>
                             <Btn
                                 className={'p-1 px-4 border border-gray-300 bg-white w-fit text-black'}
@@ -102,12 +103,6 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                             />
                         }
 
-                    </div>
-
-                    <div>
-                        <WeekDetailsTable
-                            earnings={details.week_report}
-                        />
                     </div>
                 </div>
             </div>

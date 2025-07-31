@@ -60,7 +60,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         setCashValue(data?.data?.cash_payout);
         setDescriptionValue(data?.data?.description);
         setPayrollData(data?.data);
-    }, [data?.data]);
+    }, [data?.data, currentWeek.weekNumber]);
 
     const debouncedUpdatePayroll = useDebounce(
         (data: {

@@ -133,8 +133,8 @@ def user_info(request):
         )
 
     try:
-        date_from = datetime.strptime(request.query_params.get('date_from'), '%Y-%m-%d').date()
-        date_to = datetime.strptime(request.query_params.get('date_to'), '%Y-%m-%d').date()
+        date_from = datetime.strptime(request.query_params.get('date_from'), '%Y-%m-%d')
+        date_to = datetime.strptime(request.query_params.get('date_to'), '%Y-%m-%d')
     except (ValueError, TypeError):
         return Response(
             {'error': 'Invalid date format. Use YYYY-MM-DD'},
@@ -153,8 +153,8 @@ def user_info(request):
 @api_view(['GET'])
 def cash_info(request):
     try:
-        date_from = datetime.strptime(request.query_params.get('date_from'), '%Y-%m-%d').date()
-        date_to = datetime.strptime(request.query_params.get('date_to'), '%Y-%m-%d').date()
+        date_from = datetime.strptime(request.query_params.get('date_from'), '%Y-%m-%d')
+        date_to = datetime.strptime(request.query_params.get('date_to'), '%Y-%m-%d')
     except (ValueError, TypeError):
         return Response(
             {'error': 'Invalid date format. Use YYYY-MM-DD'},

@@ -8,20 +8,21 @@ export interface IPayrollRow {
     is_locked: boolean;
     week: string;
     comment: string;
-    issued_sum: number;
-    tax_sum: number;
-    card_sum: number;
-    balance_sum: number;
-    cash_payout: number;
-    earned_sum: number;
-    bonus_sum: number;
+    issued_sum: number | null;
+    ip_sum: number | null;
+    tax_sum: number | null;
+    card_sum: number | null;
+    balance_sum: number | null;
+    cash_payout: number | null;
+    earned_sum: number | null;
+    bonus_sum: number | null;
     department_name: string;
     has_unconfirmed: boolean;
     hide_balance: boolean;
     is_closed: boolean;
-    full_loan_sum: number;
-    end_loan_sum: number;
-    loan_sum: number;
+    full_loan_sum:  number | null;
+    end_loan_sum:  number | null;
+    loan_sum:  number | null;
 }
 
 export interface IPayroll {
@@ -35,13 +36,23 @@ export interface IPayroll {
     description?: string | null;
 }
 
-export type IEarningType = "ЭЛО" | "ДОП" | "На карту" | "Налог" | "Выдача НАЛ" | "Внесение НАЛ" | "ЗАЙМ" | "ПОГ.ЗАЙМА";
+export type IEarningType =
+    "ЭЛО" |
+    "ДОП" |
+    "На карту" |
+    "Налог" |
+    "Выдача НАЛ" |
+    "Внесение НАЛ" |
+    "ЗАЙМ" |
+    "ПОГ.ЗАЙМА" |
+    "ИП";
 
 export interface IEarning {
     id: number;
     user: IUser | null;
     is_locked: boolean;
-    crated_at: string;
+    created_at: string;
+    cash_date: string;
     target_date: string;
     amount: number;
     earning_type: IEarningType;

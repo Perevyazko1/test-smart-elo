@@ -4,6 +4,7 @@ import {THead} from "@/shared/ui/table/THead.tsx";
 
 import {SalaryDetailRow} from "./SalaryDetailRow";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface DetailTableProps {
     earnings: IEarning[] | null;
@@ -53,16 +54,15 @@ export const DetailTable = (props: DetailTableProps) => {
 
             <tr className={'bg-gray-200 text-nowrap'}>
                 <th
-                    colSpan={3}
+                    colSpan={4}
                     className="py-2 px-4 border border-gray-300 text-right"
                 >
                     <b>Итого:</b>
                 </th>
                 <th
-                    colSpan={2}
-                    className="py-2 px-4 border border-gray-300 text-left"
+                    className="py-2 px-1 border border-gray-300 text-end"
                 >
-                    <b>{detailTotalSum.toLocaleString("ru-RU")} Р.</b>
+                    <NiceNum value={detailTotalSum}/>
                 </th>
             </tr>
             </tbody>

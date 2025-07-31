@@ -3,6 +3,7 @@ import {Table} from "@/shared/ui/table/Table.tsx";
 import {THead} from "@/shared/ui/table/THead.tsx";
 import {SalaryGroupedRow} from "@/widgets/salary/detail/table/SalaryGroupedRow.tsx";
 import {groupEarnings} from "@/shared/utils/groupEarning.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface DetailGroupedTableProps {
     earnings?: IEarning[] | null;
@@ -54,16 +55,16 @@ export const DetailGroupedTable = (props: DetailGroupedTableProps) => {
 
             <tr className={'bg-gray-200 text-nowrap'}>
                 <th
-                    colSpan={3}
+                    colSpan={4}
                     className="py-2 px-4 border border-gray-300 text-right"
                 >
                     <b>Итого:</b>
                 </th>
                 <th
                     colSpan={2}
-                    className="py-2 px-4 border border-gray-300 text-left"
+                    className="py-2 px-1 border font-bold border-gray-300 text-end"
                 >
-                    <b>{detailTotalSum.toLocaleString("ru-RU")} Р.</b>
+                    <NiceNum value={detailTotalSum}/>
                 </th>
             </tr>
             </tbody>

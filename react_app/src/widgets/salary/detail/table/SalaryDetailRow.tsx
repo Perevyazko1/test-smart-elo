@@ -10,6 +10,7 @@ import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 import {EarningDetail} from "@/widgets/salary/detail/table/EarningDetail.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface SalaryDetailRowProps {
     earning: IEarning;
@@ -67,9 +68,6 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
             <TD className={'text-[.8em]'}>
                 {earning.comment}
             </TD>
-            <TD>
-                {earning.amount.toLocaleString("ru-RU")}
-            </TD>
             <TD className={'relative'}>
                 {earning.earning_comment}
 
@@ -94,6 +92,9 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
                     )}
 
                 </div>
+            </TD>
+            <TD className={'text-end'}>
+                <NiceNum value={earning.amount}/>
             </TD>
         </tr>
     );

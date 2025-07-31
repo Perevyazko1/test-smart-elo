@@ -8,6 +8,8 @@ import {payrollService} from "../../model/api.ts";
 
 import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
+import {formatNumber} from "@/shared/utils/formatNumber.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 
 interface PayrollTableProps {
@@ -50,14 +52,15 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
         return (<div>Загрузка...</div>)
     }
 
-    const totalBalance = data?.data?.reduce((sum, row) => sum + row.balance_sum, 0) || 0;
-    const totalCard = data?.data?.reduce((sum, row) => sum + row.card_sum, 0) || 0;
-    const totalEarned = data?.data?.reduce((sum, row) => sum + row.earned_sum, 0) || 0;
-    const totalBonus = data?.data?.reduce((sum, row) => sum + row.bonus_sum, 0) || 0;
-    const totalTax = data?.data?.reduce((sum, row) => sum + row.tax_sum, 0) || 0;
-    const totalPayout = data?.data?.reduce((sum, row) => sum + row.cash_payout, 0) || 0;
-    const totalIssued = data?.data?.reduce((sum, row) => sum + row.issued_sum, 0) || 0;
-    const totalLoan = data?.data?.reduce((sum, row) => sum + row.loan_sum, 0) || 0;
+    const totalBalance = data?.data?.reduce((sum, row) => sum + (row.balance_sum || 0), 0) || 0;
+    const totalCard = data?.data?.reduce((sum, row) => sum + (row.card_sum || 0), 0) || 0;
+    const totalEarned = data?.data?.reduce((sum, row) => sum + (row.earned_sum || 0), 0) || 0;
+    const totalBonus = data?.data?.reduce((sum, row) => sum + (row.bonus_sum || 0), 0) || 0;
+    const totalTax = data?.data?.reduce((sum, row) => sum + (row.tax_sum || 0), 0) || 0;
+    const totalPayout = data?.data?.reduce((sum, row) => sum + (row.cash_payout || 0), 0) || 0;
+    const totalIssued = data?.data?.reduce((sum, row) => sum + (row.issued_sum || 0), 0) || 0;
+    const totalLoan = data?.data?.reduce((sum, row) => sum + (row.loan_sum || 0), 0) || 0;
+    const totalIp = data?.data?.reduce((sum, row) => sum + (row.ip_sum || 0), 0) || 0;
 
     return (
         <Table>
@@ -65,7 +68,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                 <tr>
                     <PayrollTh
                         rowSpan={2}
-                        className={'w-1/4 text-center'}
+                        className={'text-center'}
                     >
                         Отдел / ФИО
                     </PayrollTh>
@@ -73,6 +76,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                     <PayrollTh>Заработано</PayrollTh>
                     <PayrollTh>К выплате</PayrollTh>
                     <PayrollTh>НАЛ</PayrollTh>
+                    <PayrollTh>ИП</PayrollTh>
                     <PayrollTh>БН</PayrollTh>
                     <PayrollTh>Налог</PayrollTh>
                     <PayrollTh>Займы</PayrollTh>
@@ -84,16 +88,17 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                     </PayrollTh>
                 </tr>
                 <tr>
-                    <PayrollTh>{totalBalance.toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{(totalEarned + totalBonus).toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{totalPayout.toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{Math.abs(totalIssued).toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{Math.abs(totalCard).toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{Math.abs(totalTax).toLocaleString('ru-RU')}</PayrollTh>
-                    <PayrollTh>{Math.abs(totalLoan).toLocaleString('ru-RU')}</PayrollTh>
+                    <PayrollTh><NiceNum value={totalBalance}/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalPayout}/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalIssued} abs/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalIp} abs/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalCard} abs/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalTax} abs/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalLoan} abs/></PayrollTh>
                 </tr>
                 <tr>
-                    <th colSpan={7}><br/></th>
+                    <th colSpan={10}><br/></th>
                 </tr>
             </THead>
 

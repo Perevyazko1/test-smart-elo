@@ -1,3 +1,5 @@
+from django.utils.timezone import now
+
 from django.db import models
 
 from staff.models import Employee
@@ -96,14 +98,21 @@ class Earning(models.Model):
         related_name='earnings'
     )
 
-    crated_at = models.DateTimeField(
+    created_at = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,
         blank=True,
         null=True
     )
 
-    target_date = models.DateField(
+    cash_date = models.DateTimeField(
+        'Дата отображения в кассе',
+        default=now,
+        blank=True,
+        null=True
+    )
+
+    target_date = models.DateTimeField(
         'Дата закрепления',
         null=True,
         blank=True,
@@ -140,6 +149,5 @@ class Earning(models.Model):
             f'{self.earning_type} - '
             f'{self.target_date.day} - '
             f'{self.amount} - '
-            f'{self.user.first_name} '
-            f'{self.user.last_name}'
+            f'{self.user.get_initials() if self.user else ""}'
         )

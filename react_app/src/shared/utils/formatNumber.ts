@@ -1,9 +1,9 @@
 export const formatNumber = (value: number | null, abs: boolean = true) => {
-    if (!value) {
+    if (value === null) {
         return "";
     }
     if (abs) {
-        return Math.abs(value).toLocaleString('ru-RU');
+        return Math.abs(value / 100).toFixed(2);
     }
-    return value.toLocaleString('ru-RU');
+    return (value / 100).toFixed(2);
 }

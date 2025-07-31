@@ -1,4 +1,4 @@
-from datetime import date
+import datetime
 
 from django.db.models import Sum
 
@@ -6,16 +6,16 @@ from salary.models import Earning
 from salary.serializers import EarningSerializer
 
 
-def get_cash_info(date_from: date, date_to: date):
+def get_cash_info(date_from: datetime, date_to: datetime):
     target_earnings = Earning.objects.filter(
-        target_date__gte=date_from,
-        target_date__lte=date_to,
+        cash_date__date__gte=date_from.date(),
+        cash_date__date__lte=date_to.date(),
         earning_type__in=["Выдача НАЛ", "Внесение НАЛ"],
     )
 
     start_balance = Earning.objects.filter(
         earning_type__in=["Выдача НАЛ", "Внесение НАЛ"],
-        target_date__lt=date_from,
+        cash_date__date__lt=date_from.date(),
     ).aggregate(Sum('amount'))['amount__sum'] or 0
 
     balance = Earning.objects.filter(

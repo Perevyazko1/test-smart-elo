@@ -1,7 +1,7 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {MinusCircle, PlusCircle} from "lucide-react";
 
-import type {ICreateEarning, IEarning, IEarningType} from "@/entities/salary";
+import type {ICreateEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 
@@ -23,16 +23,18 @@ interface AddEarningBtnProps {
     about?: string;
     info: string;
     children?: ReactNode;
+    targetIsCashDate?: boolean;
 }
 
 export const AddEarningBtn = (props: AddEarningBtnProps) => {
-    const {earning_type, info, user, week, disabled, about, children} = props;
+    const {earning_type, info, user, week, disabled, about, children, targetIsCashDate = false} = props;
     const queryClient = useQueryClient();
     const {currentUser} = useCurrentUser();
 
     const [modalOpen, setModalOpen] = useState(false);
 
     const titleMap: Record<IEarningType, string> = {
+        "ИП": "Внести выдаче средств на ИП сотрудника",
         "ЗАЙМ": "Выдать займ сотруднику",
         "ПОГ.ЗАЙМА": "Внести погашение займа сотрудником",
         "ДОП": "Начислить ДОП сотруднику",
@@ -49,6 +51,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
     const title = titleMap[earning_type]
 
     const descriptionMap: Record<IEarningType, string> = {
+        "ИП": "Данный расчет будет добавлен в ведомость к сумме выданных средств на ИП сотрудника",
         "ЗАЙМ": "Данное начисление будет добавлено в раздел займов. Не относится к балансу заработной платы",
         "ПОГ.ЗАЙМА": "Погашение займа будет учтено в столбце займов. Не относится к балансу заработной платы",
         "ДОП": "Данное начисление будет добавлено в ведомость к сумме ДОП заработанных средств",
@@ -69,10 +72,13 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             return earningService.createEarning({
                 ...data,
                 created_by: currentUser?.id!,
-                amount: ["ЭЛО", "ДОП", "Внесение НАЛ", "ЗАЙМ"].includes(earning_type) ? data.amount : -data.amount,
-                ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ", "ПОГ.ЗАЙМА", "ЗАЙМ"].includes(earning_type) ?
+                amount: ["ЭЛО", "ДОП", "Внесение НАЛ", "ЗАЙМ"].includes(earning_type) ? data.amount * 100 : -data.amount * 100,
+                ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ", "ПОГ.ЗАЙМА", "ЗАЙМ", "ИП"].includes(earning_type) ?
                         {approval_by: currentUser?.id!} : {}
                 ),
+                ...(targetIsCashDate ? {
+                    cash_date: data.target_date,
+                } : {}),
             });
         },
         onSuccess: () => {

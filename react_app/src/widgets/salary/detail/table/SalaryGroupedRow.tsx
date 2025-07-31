@@ -1,4 +1,5 @@
 import {TD} from "@/shared/ui/table/TD.tsx";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface SalaryGroupedRowProps {
     date: string;
@@ -19,14 +20,14 @@ export const SalaryGroupedRow = (props: SalaryGroupedRowProps) => {
             <TD>
                 {name}
             </TD>
-            <TD className={'text-[.8em]'}>
-                {amount.toLocaleString("ru-RU")}
+            <TD className={'text-end'}>
+                <NiceNum value={amount}/>
             </TD>
-            <TD>
+            <TD className={'font-mono'}>
                 {quantity}
             </TD>
-            <TD>
-                {total.toLocaleString("ru-RU")}
+            <TD className={'text-end'}>
+                <NiceNum value={total}/>
             </TD>
         </tr>
     );

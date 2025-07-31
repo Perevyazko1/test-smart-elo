@@ -101,6 +101,13 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                         disabled={disabled}
                         className={'bg-white p-2 w-full'}
                         type="number"
+                        step="0.01"
+                        onInput={(e) => {
+                            const value = e.currentTarget.value;
+                            if (value.includes('.') && value.split('.')[1].length > 2) {
+                                e.currentTarget.value = Number(value).toFixed(2);
+                            }
+                        }}
                         {...register("amount", {
                             required: "Укажите сумму",
                             min: {value: 1, message: "Сумма не может быть отрицательной или нулем"}

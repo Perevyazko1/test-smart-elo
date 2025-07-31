@@ -25,6 +25,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
     const [modalOpen, setModalOpen] = useState(false);
 
     const titleMap: Record<IEarningType, string> = {
+        "ИП": `Изменить выдачу ИП №${earning.id}`,
         "ЗАЙМ": `Изменить займ №${earning.id}`,
         "ПОГ.ЗАЙМА": `Изменить погашение займа №${earning.id}`,
         "ДОП": `Изменить ДОП сотруднику №${earning.id}`,
@@ -41,6 +42,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
     const title = titleMap[earning.earning_type]
 
     const descriptionMap: Record<IEarningType, string> = {
+        "ИП": "Данный расчет будет добавлен в ведомость к сумме выданных средств на ИП",
         "ЗАЙМ": "Данное начисление будет добавлено в раздел займов. Не относится к балансу заработной платы",
         "ПОГ.ЗАЙМА": "Погашение займа будет учтено в столбце займов. Не относится к балансу заработной платы",
         "ДОП": "Данное начисление будет добавлено в ведомость к сумме ДОП заработанных средств",
