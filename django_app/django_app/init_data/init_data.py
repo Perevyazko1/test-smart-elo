@@ -11,17 +11,8 @@ def init_data():
         target_date__lte=date_to,
     )
 
-    other_earnings = Earning.objects.filter(
-        target_date__gt=date_to,
-    )
-
     for earning in target_earnings:
         # earning.cash_date = earning.target_date + timedelta(days=7)
-        earning.amount = earning.amount * 100
-        earning.save()
-
-    for earning in other_earnings:
-        earning.amount = earning.amount * 100
         earning.save()
 
     print('PASS')
