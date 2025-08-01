@@ -15,6 +15,7 @@ def init_data():
 
     for row in all_rows:
         row.cash_payout = row.cash_payout * 100
+        row.save()
 
     # for earning in target_earnings:
         # earning.cash_date = earning.target_date + timedelta(days=7)
