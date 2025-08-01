@@ -22,7 +22,7 @@ export const DetailRow = (props: DetailRowProps) => {
 
     return (
         <tr className={'text-[.8em]'}>
-            <td>{toRuDate(earning.target_date)}</td>
+            <td>{toRuDate(earning.cash_date)}</td>
             <td className={'text-[.9em]'}>Касса</td>
             <td className={'text-[.9em]'}>{getUserName(earning.user)}</td>
             <td className={'text-[.9em]'}>{earning.comment}</td>
