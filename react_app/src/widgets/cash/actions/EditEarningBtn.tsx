@@ -66,7 +66,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
                 ...data,
                 created_by: currentUser?.id!,
                 amount: ["ЭЛО", "ДОП", "Внесение НАЛ"].includes(earning.earning_type) ? data.amount : -data.amount,
-                ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ"].includes(earning.earning_type) ?
+                ...(["На карту", "Налог", "ИП", "Выдача НАЛ", "Внесение НАЛ"].includes(earning.earning_type) ?
                         {approval_by: currentUser?.id!} : {}
                 ),
             });

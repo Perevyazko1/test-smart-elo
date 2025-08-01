@@ -39,8 +39,6 @@ export const CashBody = (props: CashBodyProps) => {
         )
     }
 
-
-
     return (
         <>
             <div className={'min-h-full flex flex-col'}>
@@ -76,12 +74,12 @@ export const CashBody = (props: CashBodyProps) => {
                             </Btn>
                         </AddEarningBtn>
 
-                        <Btn
-                            className={'bg-gray-200 border-gray-700 border-2 flex-1'}
-                        >
-                            <div>ВЫДАТЬ</div>
-                            <div>(БН И КАРТА)</div>
-                        </Btn>
+                        {/*<Btn*/}
+                        {/*    className={'bg-gray-200 border-gray-700 border-2 flex-1'}*/}
+                        {/*>*/}
+                        {/*    <div>ВЫДАТЬ</div>*/}
+                        {/*    <div>(БН И КАРТА)</div>*/}
+                        {/*</Btn>*/}
                     </div>
 
                     <div className={'flex gap-8 justify-between'}>
@@ -102,12 +100,12 @@ export const CashBody = (props: CashBodyProps) => {
                         </AddEarningBtn>
 
 
-                        <Btn
-                            className={'bg-gray-200 border-gray-700 border-2 flex-1'}
-                        >
-                            <div>ВНЕСТИ</div>
-                            <div>(БН И КАРТА)</div>
-                        </Btn>
+                        {/*<Btn*/}
+                        {/*    className={'bg-gray-200 border-gray-700 border-2 flex-1'}*/}
+                        {/*>*/}
+                        {/*    <div>ВНЕСТИ</div>*/}
+                        {/*    <div>(БН И КАРТА)</div>*/}
+                        {/*</Btn>*/}
                     </div>
                 </div>
             </div>

@@ -22,10 +22,10 @@ export const DetailRow = (props: DetailRowProps) => {
 
     return (
         <tr className={'text-[.8em]'}>
-            <td>{toRuDate(earning.cash_date)}</td>
+            <td className={'text-nowrap'}>{toRuDate(earning.cash_date)}</td>
             <td className={'text-[.9em]'}>Касса</td>
             <td className={'text-[.9em]'}>{getUserName(earning.user)}</td>
-            <td className={'text-[.9em]'}>{earning.comment}</td>
+            <td className={'text-[.9em]'} colSpan={2}>{earning.comment}</td>
             <td className={'text-end'}>
                 {isPositive && <NiceNum value={earning.amount} abs/>}</td>
             <td className={'text-end'}>
@@ -33,7 +33,7 @@ export const DetailRow = (props: DetailRowProps) => {
             <td className={'text-end'}>
                 <NiceNum value={balance}/>
             </td>
-            <td>
+            <td className={'w-[4em]'}>
                 <div className={'flex items-center gap-1 scale-90'}>
                     {!earning.is_locked && (
                         <>

@@ -3,13 +3,7 @@ import {generateWeeks, type IWeek} from "@/shared/utils/date.ts";
 import {CashBody} from "@/pages/cash/ui/CashBody.tsx";
 
 
-interface CashPageProps {
-
-}
-
-
-export const CashPage = (props: CashPageProps) => {
-    const {} = props;
+export const CashPage = () => {
 
     const [weeks, setWeeks] = useState<IWeek[]>([]);
     const [currentWeek, setCurrentWeek] = useState<IWeek | null>(null);

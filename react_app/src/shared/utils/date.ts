@@ -10,7 +10,7 @@ export interface IWeek {
 
 export const toRuDate = (dateStr: string): string => {
     const date = new Date(dateStr);
-    return format(date, 'd MMM yyyy', {locale: ru});
+    return format(date, 'd MMM yy', {locale: ru});
 };
 
 export const generateWeeks = (count: number = 7): IWeek[] => {

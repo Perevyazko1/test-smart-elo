@@ -101,26 +101,6 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                             disabled={disabled}
                             name={"amount"}
                         />
-                        {/*<input*/}
-                        {/*    disabled={disabled}*/}
-                        {/*    className={'bg-white p-2 w-full'}*/}
-                        {/*    type="number"*/}
-                        {/*    step="0.01"*/}
-                        {/*    onInput={(e) => {*/}
-                        {/*        const value = e.currentTarget.value;*/}
-                        {/*        if (value.includes('.') && value.split('.')[1].length > 2) {*/}
-                        {/*            e.currentTarget.value = Number(value).toFixed(2);*/}
-                        {/*        }*/}
-                        {/*    }}*/}
-                        {/*    {...register("amount", {*/}
-                        {/*        required: "Укажите сумму",*/}
-                        {/*        min: {value: 1, message: "Сумма не может быть отрицательной или нулем"}*/}
-                        {/*    })}*/}
-                        {/*    placeholder="Amount"*/}
-                        {/*/>*/}
-                        {/*{errors.amount && (*/}
-                        {/*    <span className="text-red-500">{errors.amount.message}</span>*/}
-                        {/*)}*/}
                     </div>
 
                     <div className="space-y-2">
@@ -131,17 +111,6 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                             className={'bg-white p-2 w-full min-w-[30em]'}
                             name={'comment'}
                         />
-                        {/*<TextArea*/}
-                        {/*    disabled={disabled}*/}
-                        {/*    className={'bg-white p-2 w-full min-w-[30em]'}*/}
-                        {/*    {...register("comment", {*/}
-                        {/*        required: "Указание описание"*/}
-                        {/*    })}*/}
-                        {/*    placeholder="Комментарий"*/}
-                        {/*/>*/}
-                        {/*{errors.comment && (*/}
-                        {/*    <span className="text-red-500">{errors.comment.message}</span>*/}
-                        {/*)}*/}
                     </div>
 
                     <div className="space-y-2">
