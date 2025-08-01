@@ -5,6 +5,7 @@ import {type IWeek, toRuDate} from "@/shared/utils/date";
 import {DeleteEarningBtn} from "@/widgets/cash/actions/DeleteEarningBtn.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
 import {getUserName} from "@/shared/utils/getUserName.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 
 interface DetailRowProps {
@@ -26,11 +27,12 @@ export const DetailRow = (props: DetailRowProps) => {
             <td className={'text-[.9em]'}>{getUserName(earning.user)}</td>
             <td className={'text-[.9em]'}>{earning.comment}</td>
             <td className={'text-end'}>
-                {isPositive && (Math.abs(earning.amount).toLocaleString('ru-RU'))}</td>
+                {isPositive && <NiceNum value={earning.amount} abs/>}</td>
             <td className={'text-end'}>
-                {!isPositive && (Math.abs(earning.amount).toLocaleString('ru-RU'))}</td>
+                {!isPositive && <NiceNum value={earning.amount} abs/>}</td>
             <td className={'text-end'}>
-                {balance.toLocaleString('ru-RU')}</td>
+                <NiceNum value={balance}/>
+            </td>
             <td>
                 <div className={'flex items-center gap-1 scale-90'}>
                     {!earning.is_locked && (

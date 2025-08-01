@@ -1,13 +1,14 @@
 import {type ChangeEvent, type FormEvent, useState} from "react";
-import {useForm} from "react-hook-form";
+import {FormProvider, useForm} from "react-hook-form";
 import type {ICreateEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
 import type {IUser} from "@/entities/user";
 import {useClipboard} from "use-clipboard-copy";
 import {CopyIcon} from "lucide-react";
 import {toast} from "sonner";
+import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
+import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
 
 
 interface CreateEarningFormProps {
@@ -28,11 +29,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     const clipboardComment = useClipboard();
 
 
-    const {
-        register,
-        handleSubmit,
-        formState: {errors},
-    } = useForm<ICreateEarning>({
+    const methods = useForm<ICreateEarning>({
         defaultValues: {
             amount: amount || undefined,
             user_id: user?.id || null,
@@ -56,7 +53,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     const onSubmitHandler = (e: FormEvent) => {
         e.preventDefault();
         if (onSubmit) {
-            handleSubmit(onSubmit)(e);
+            methods.handleSubmit(onSubmit)(e);
         }
     };
 
@@ -91,77 +88,92 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
 
     return (
         <div className={'flex flex-nowrap gap-4'}>
-            <form onSubmit={onSubmitHandler} className="space-y-4">
-                <div className="space-y-2">
-                    <label htmlFor={"amount"}>
-                        Сумма
-                    </label>
-                    <input
-                        id={"amount"}
-                        disabled={disabled}
-                        className={'bg-white p-2 w-full'}
-                        type="number"
-                        step="0.01"
-                        onInput={(e) => {
-                            const value = e.currentTarget.value;
-                            if (value.includes('.') && value.split('.')[1].length > 2) {
-                                e.currentTarget.value = Number(value).toFixed(2);
-                            }
-                        }}
-                        {...register("amount", {
-                            required: "Укажите сумму",
-                            min: {value: 1, message: "Сумма не может быть отрицательной или нулем"}
-                        })}
-                        placeholder="Amount"
-                    />
-                    {errors.amount && (
-                        <span className="text-red-500">{errors.amount.message}</span>
-                    )}
-                </div>
+            <FormProvider {...methods}>
+                <form onSubmit={onSubmitHandler} className="space-y-4">
+                    <div className="space-y-2">
+                        <label htmlFor={"amount"}>
+                            Сумма
+                        </label>
 
-                <div className="space-y-2">
-                    <TextArea
-                        disabled={disabled}
-                        className={'bg-white p-2 w-full min-w-[30em]'}
-                        {...register("comment", {
-                            required: "Указание описание"
-                        })}
-                        placeholder="Комментарий"
-                    />
-                    {errors.comment && (
-                        <span className="text-red-500">{errors.comment.message}</span>
-                    )}
-                </div>
+                        <PriceInputForm
+                            placeholder="Сумма"
+                            className={'bg-white p-2 w-full'}
+                            disabled={disabled}
+                            name={"amount"}
+                        />
+                        {/*<input*/}
+                        {/*    disabled={disabled}*/}
+                        {/*    className={'bg-white p-2 w-full'}*/}
+                        {/*    type="number"*/}
+                        {/*    step="0.01"*/}
+                        {/*    onInput={(e) => {*/}
+                        {/*        const value = e.currentTarget.value;*/}
+                        {/*        if (value.includes('.') && value.split('.')[1].length > 2) {*/}
+                        {/*            e.currentTarget.value = Number(value).toFixed(2);*/}
+                        {/*        }*/}
+                        {/*    }}*/}
+                        {/*    {...register("amount", {*/}
+                        {/*        required: "Укажите сумму",*/}
+                        {/*        min: {value: 1, message: "Сумма не может быть отрицательной или нулем"}*/}
+                        {/*    })}*/}
+                        {/*    placeholder="Amount"*/}
+                        {/*/>*/}
+                        {/*{errors.amount && (*/}
+                        {/*    <span className="text-red-500">{errors.amount.message}</span>*/}
+                        {/*)}*/}
+                    </div>
 
-                <div className="space-y-2">
-                    <label htmlFor={"target_date"}>
-                        Дата закрепления
-                    </label>
-                    <br/>
-                    <input
-                        id={"target_date"}
-                        disabled={disabled}
-                        className={'bg-white p-2'}
-                        type="date"
-                        {...register("target_date", {required: "Дата закрепления обязательна"})}
-                    />
-                    {errors.target_date && (
-                        <span className="text-red-500">{errors.target_date.message}</span>
-                    )}
-                </div>
+                    <div className="space-y-2">
+                        <TextAreaForm
+                            placeholder="Комментарий"
+                            required
+                            disabled={disabled}
+                            className={'bg-white p-2 w-full min-w-[30em]'}
+                            name={'comment'}
+                        />
+                        {/*<TextArea*/}
+                        {/*    disabled={disabled}*/}
+                        {/*    className={'bg-white p-2 w-full min-w-[30em]'}*/}
+                        {/*    {...register("comment", {*/}
+                        {/*        required: "Указание описание"*/}
+                        {/*    })}*/}
+                        {/*    placeholder="Комментарий"*/}
+                        {/*/>*/}
+                        {/*{errors.comment && (*/}
+                        {/*    <span className="text-red-500">{errors.comment.message}</span>*/}
+                        {/*)}*/}
+                    </div>
 
-                <Btn
-                    className={'px-8 py-2 bg-black text-white'}
-                    disabled={disabled}
-                    type="submit"
-                >
-                    {amount ?
-                        "Изменить"
-                        :
-                        "Создать"
-                    }
-                </Btn>
-            </form>
+                    <div className="space-y-2">
+                        <label htmlFor={"target_date"}>
+                            Дата закрепления
+                        </label>
+                        <br/>
+                        <input
+                            id={"target_date"}
+                            disabled={disabled}
+                            className={'bg-white p-2'}
+                            type="date"
+                            {...methods.register("target_date", {required: "Дата закрепления обязательна"})}
+                        />
+                        {/*{errors.target_date && (*/}
+                        {/*    <span className="text-red-500">{errors.target_date.message}</span>*/}
+                        {/*)}*/}
+                    </div>
+
+                    <Btn
+                        className={'px-8 py-2 bg-black text-white'}
+                        disabled={disabled}
+                        type="submit"
+                    >
+                        {amount ?
+                            "Изменить"
+                            :
+                            "Создать"
+                        }
+                    </Btn>
+                </form>
+            </FormProvider>
 
             {(!user?.piecework_wages && earning_type === "ДОП") && (
                 <div className={'flex flex-col gap-3'}>

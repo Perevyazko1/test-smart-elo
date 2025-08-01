@@ -5,6 +5,7 @@ import {useQuery} from "@tanstack/react-query";
 import {cashService} from "@/pages/cash/model/api.ts";
 import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
 import {DetailsTable} from "@/widgets/cash/details/DetailsTable.tsx";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface CashBodyProps {
     weeks: IWeek[];
@@ -47,7 +48,7 @@ export const CashBody = (props: CashBodyProps) => {
                     <div>Остаток</div>
                     <div className={'flex justify-between gap-10'}>
                         <div>Наличные:</div>
-                        <div>{(data.data.cash_balance).toLocaleString('ru-RU')}</div>
+                        <div><NiceNum value={data.data.cash_balance}/></div>
                     </div>
                     <div className={'flex justify-between gap-10'}>
                         <div>На картах:</div>

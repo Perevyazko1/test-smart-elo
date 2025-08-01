@@ -72,7 +72,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             return earningService.createEarning({
                 ...data,
                 created_by: currentUser?.id!,
-                amount: ["ЭЛО", "ДОП", "Внесение НАЛ", "ЗАЙМ"].includes(earning_type) ? data.amount * 100 : -data.amount * 100,
+                amount: ["ЭЛО", "ДОП", "Внесение НАЛ", "ЗАЙМ"].includes(earning_type) ? data.amount: -data.amount,
                 ...(["На карту", "Налог", "Выдача НАЛ", "Внесение НАЛ", "ПОГ.ЗАЙМА", "ЗАЙМ", "ИП"].includes(earning_type) ?
                         {approval_by: currentUser?.id!} : {}
                 ),

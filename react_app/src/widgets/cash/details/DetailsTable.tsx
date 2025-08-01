@@ -2,6 +2,7 @@ import type {IEarning} from "@/entities/salary";
 import {DetailRow} from "@/widgets/cash/details/DetailRow.tsx";
 import {ReaderIcon} from "@radix-ui/react-icons";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface DetailsTableProps {
     earnings: IEarning[];
@@ -38,9 +39,9 @@ export const DetailsTable = (props: DetailsTableProps) => {
                 </th>
             </tr>
             <tr>
-                <th>{positiveSum.toLocaleString('ru-RU')}</th>
-                <th>{negativeSum.toLocaleString('ru-RU')}</th>
-                <th>{start_balance.toLocaleString('ru-RU')}</th>
+                <th><NiceNum value={positiveSum}/></th>
+                <th><NiceNum value={negativeSum}/></th>
+                <th><NiceNum value={start_balance}/></th>
             </tr>
             </thead>
 
@@ -58,8 +59,7 @@ export const DetailsTable = (props: DetailsTableProps) => {
                 <th colSpan={5}></th>
                 <th>КОН БАЛАНС:</th>
                 <th>
-                    {(start_balance + positiveSum - negativeSum
-                    ).toLocaleString('ru-RU')}
+                    <NiceNum value={start_balance + positiveSum - negativeSum}/>
                 </th>
             </tr>
             </tbody>
