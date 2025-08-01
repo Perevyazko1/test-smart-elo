@@ -22,7 +22,7 @@ export const DetailsTable = (props: DetailsTableProps) => {
     );
 
     const groupedEarnings = earnings.reduce((groups, item) => {
-        const date = item.cash_date;
+        const date = item.cash_date.split('T')[0];
         if (!groups[date]) {
             groups[date] = [];
         }
