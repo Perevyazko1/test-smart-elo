@@ -8,6 +8,7 @@ import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
+import {useQueryClient} from "@tanstack/react-query";
 
 interface UserPanelWidgetProps {
     user: IUser;
@@ -24,12 +25,17 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
         }
     });
 
+    const client = useQueryClient();
+
     const updateUserData = (data: Partial<IUser>) => {
         toast.promise($axios.patch<IUser>(`/staff/employees/${user.id}/`, {
                 ...data
             }), {
                 loading: 'Применение изменений',
                 success: (data) => {
+                    client.invalidateQueries({
+                        queryKey: ['payrollRows']}
+                    );
                     setUserData(data.data);
                     return 'Данные пользователя успешно обновлены';
                 },
