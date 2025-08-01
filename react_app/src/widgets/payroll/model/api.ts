@@ -12,7 +12,7 @@ interface IGetPayrollRowsProps {
 
 export interface IUpdatePayrollRow {
     id: number;
-    cash_payout?: number;
+    cash_payout?: number | null;
     comment?: string;
     is_locked?: boolean;
 }

@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {SalaryPayrollWidget} from "@/widgets/salary/payroll/SalaryPayrollWidget.tsx";
+import {SalaryPayrollWidget} from "@/widgets/payroll/SalaryPayrollWidget.tsx";
 import {SalaryDetailWidget} from "@/widgets/salary/detail/SalaryDetailWidget.tsx";
 
 import {SalaryPanel} from "./panel/SalaryPanel.tsx";

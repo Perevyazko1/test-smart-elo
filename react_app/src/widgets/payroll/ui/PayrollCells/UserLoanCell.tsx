@@ -1,8 +1,9 @@
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
 import {formatNumber} from "@/shared/utils/formatNumber.ts";
-import {UserAddCell} from "@/widgets/salary/payroll/ui/PayrollCells/UserAddCell.tsx";
+import {UserAddCell} from "@/widgets/payroll/ui/PayrollCells/UserAddCell.tsx";
 import type {IPayrollRow} from "@/entities/salary";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 
 interface UserLoanCellProps {
@@ -38,9 +39,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
                     `Погашено ${formatNumber(userInfo.end_loan_sum)} 
                     из ${formatNumber(userInfo.full_loan_sum)}`
                 }>
-                    {Math.abs(
-                        (userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)
-                    ).toLocaleString('ru-RU')}
+                    <NiceNum value={(userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)} abs/>
                 </TT>
             </div>
         </>

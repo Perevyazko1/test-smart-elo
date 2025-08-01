@@ -4,7 +4,7 @@ import {LockOpen} from "lucide-react";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
 import type {IPayrollRow} from "@/entities/salary";
-import {type IUpdatePayrollRow, payrollService} from "@/widgets/salary/payroll/model/api.ts";
+import {type IUpdatePayrollRow, payrollService} from "@/widgets/payroll/model/api.ts";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import type {AxiosResponse} from "axios";
 import type {IWeek} from "@/shared/utils/date.ts";

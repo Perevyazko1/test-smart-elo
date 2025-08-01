@@ -1,5 +1,5 @@
 import type {IPayrollRow} from "@/entities/salary";
-import {PayrollUserInfo} from "@/widgets/salary/payroll/ui/PayrollTable/PayrollUserInfo.tsx";
+import {PayrollUserInfo} from "@/widgets/payroll/ui/PayrollTable/PayrollUserInfo.tsx";
 import {PayrollDepartment} from "./PayrollDepartment.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
 import {SALARY_STATUSES} from "@/shared/consts";
