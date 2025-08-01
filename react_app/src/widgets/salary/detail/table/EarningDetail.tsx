@@ -1,5 +1,6 @@
 import type {IEarning} from "@/entities/salary";
 import {getUserName} from "@/shared/utils/getUserName.ts";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 
 interface EarningDetailProps {
@@ -14,7 +15,7 @@ export const EarningDetail = (props: EarningDetailProps) => {
         <div className={'flex flex-col gap-3 bg-white p-2 px-5'}>
             <div>
                 <div>Сумма:</div>
-                <div>{earning.amount}</div>
+                <div><NiceNum value={earning.amount}/></div>
             </div>
             <div>
                 <div>Кому начислен:</div>

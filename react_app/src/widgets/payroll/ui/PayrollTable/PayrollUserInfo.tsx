@@ -149,7 +149,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     value={userInfo.issued_sum}
                     info={"Выдать сотруднику наличные ДС"}
                     valueInfo={'Выдано наличными'}
-                    disabled={!statusLessThen("5") || userInfo.is_closed}
+                    disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
                     week={week}
                     earning_type={"Выдача НАЛ"}
@@ -160,7 +160,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     value={userInfo.ip_sum}
                     info={"Выдать сотруднику через средства ИП"}
                     valueInfo={'Выдача на ИП сотрудника'}
-                    disabled={!statusLessThen("5") || userInfo.is_closed}
+                    disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
                     week={week}
                     earning_type={"ИП"}
