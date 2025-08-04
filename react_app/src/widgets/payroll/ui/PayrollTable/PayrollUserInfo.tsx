@@ -39,7 +39,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             id: userInfo.id,
             ...data
         }),
-        1000
+        500
     );
 
     const methods = useForm<Partial<IUpdatePayrollRow>>({
