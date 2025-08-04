@@ -13,6 +13,10 @@ interface IGetPayrollRowsProps {
 export interface IUpdatePayrollRow {
     id: number;
     cash_payout?: number | null;
+    ip_payout?: number | null;
+    card_payout?: number | null;
+    tax_payout?: number | null;
+    loan_payout?: number | null;
     comment?: string;
     is_locked?: boolean;
 }

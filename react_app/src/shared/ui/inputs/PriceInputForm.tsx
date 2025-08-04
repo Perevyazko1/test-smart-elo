@@ -40,6 +40,7 @@ export const PriceInputForm = (props: PriceInputProps) => {
                     placeholder="0.00"
                     className={twMerge(
                         'font-mono border-none text-end p-2',
+                        !value && "text-gray-300",
                         className
                     )}
                     type="text"

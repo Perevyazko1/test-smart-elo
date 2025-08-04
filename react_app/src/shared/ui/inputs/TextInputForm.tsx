@@ -1,4 +1,4 @@
-import {type ChangeEvent, type InputHTMLAttributes, useLayoutEffect, useRef} from "react";
+import {type ChangeEvent, type InputHTMLAttributes, useRef} from "react";
 import {twMerge} from "tailwind-merge";
 import {Controller, useFormContext} from "react-hook-form";
 
@@ -35,13 +35,13 @@ export const TextAreaForm = (props: TextAreaFormProps) => {
                         ref(e);
                         internalRef.current = e;
                     }}
+                    rows={2}
                     value={value || ''}
                     onChange={(e) => {
                         handleInput(e);
                         onChange(e);
                     }}
                     onBlur={onBlur}
-                    rows={1}
                     className={twMerge([
                         'outline-0 border-0',
                         className

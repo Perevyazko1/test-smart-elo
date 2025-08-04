@@ -75,7 +75,13 @@ class PayrollRowSerializer(serializers.ModelSerializer):
             'tax_sum',
             'card_sum',
             'balance_sum',
+
             'cash_payout',
+            'card_payout',
+            'ip_payout',
+            'tax_payout',
+            'loan_payout',
+
             'earned_sum',
             'bonus_sum',
             'department_name',

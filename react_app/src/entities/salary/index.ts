@@ -8,21 +8,29 @@ export interface IPayrollRow {
     is_locked: boolean;
     week: string;
     comment: string;
+
     issued_sum: number | null;
     ip_sum: number | null;
     tax_sum: number | null;
     card_sum: number | null;
     balance_sum: number | null;
+    loan_sum:  number | null;
+
     cash_payout: number | null;
+    card_payout: number | null;
+    ip_payout: number | null;
+    tax_payout: number | null;
+    loan_payout: number | null;
+
     earned_sum: number | null;
     bonus_sum: number | null;
+
     department_name: string;
     has_unconfirmed: boolean;
     hide_balance: boolean;
     is_closed: boolean;
     full_loan_sum:  number | null;
     end_loan_sum:  number | null;
-    loan_sum:  number | null;
 }
 
 export interface IPayroll {

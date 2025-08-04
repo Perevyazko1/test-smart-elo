@@ -17,17 +17,18 @@ export const NiceNum = (props: NiceNumProps) => {
         <div
             className={twMerge(
                 'monospace font-mono',
+                value === null ? 'text-gray-100' : 'text-black',
                 className
             )}
             {...otherProps}
         >
-            {value === null ? ("") :
+            {value === null ? ("0.00") :
                 (<>
                     <span>
                         {(!abs && value < 0) ? '-' : ''}
                         {integerPart.toLocaleString('ru-RU')}
                     </span>
-                    <span
+                    <sup
                         className={
                         fractionalPart === '00' ?
                             'text-gray-400' :
@@ -35,7 +36,7 @@ export const NiceNum = (props: NiceNumProps) => {
                         }
                     >
                         .{fractionalPart}
-                    </span>
+                    </sup>
                 </>)
             }
         </div>

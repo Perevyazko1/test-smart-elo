@@ -2,31 +2,39 @@ import {DotFilledIcon} from "@radix-ui/react-icons";
 
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
+import {twMerge} from "tailwind-merge";
 
 
 interface UserCashCellProps {
     disabled: boolean;
     isLoading: boolean;
+    name: string;
+    info: string;
 }
 
 
 export const UserCashCell = (props: UserCashCellProps) => {
-    const {disabled, isLoading} = props;
+    const {disabled, isLoading, name, info} = props;
 
 
     return (
-        <td className="max-w-[7em] relative">
+        <td className="max-w-[7em] relative bg-blue-100">
             {isLoading && (
                 <DotFilledIcon
                     className={'absolute top-0 right-0 text-green-800 animate-pulse'}
                 />
             )}
 
-            <TT description={'Сумма к дальнейшей выдаче наличкой и ИП'}>
+            <TT description={info}>
                 <PriceInputForm
                     disabled={disabled}
-                    className={'w-full outline-none h-full bg-yellow-50 disabled:bg-transparent'}
-                    name={'cash_payout'}
+                    className={
+                        twMerge(
+                            'w-full outline-none h-full bg-yellow-50 disabled:bg-transparent',
+                        )
+
+                    }
+                    name={name}
                 />
             </TT>
         </td>

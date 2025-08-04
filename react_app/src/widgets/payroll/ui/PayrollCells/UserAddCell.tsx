@@ -20,13 +20,17 @@ interface UserAddCellProps {
     extra?: ReactNode;
     children?: ReactNode;
     hide?: boolean;
+    className?: string;
 }
 
 export const UserAddCell = (props: UserAddCellProps) => {
-    const {value, user, children, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
+    const {value, user, className, children, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
 
     return (
-        <td className="text-end relative">
+        <td className={twMerge(
+            "text-end relative",
+            className
+        )}>
             <div className={'flex items-center justify-between'}>
                 {children}
                 <div className={twMerge(

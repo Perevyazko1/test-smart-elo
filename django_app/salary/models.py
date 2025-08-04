@@ -74,6 +74,13 @@ class PayrollRow(models.Model):
     )
 
     cash_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
+    card_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
+    ip_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
+    tax_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
+    loan_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
+
+
+
     cash_approval = models.BooleanField('Сумма к выдаче НАЛ согласована', default=False)
 
     is_locked = models.BooleanField('Блокировка начислений', default=False)

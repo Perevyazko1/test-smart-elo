@@ -10,6 +10,7 @@ import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
 import {formatNumber} from "@/shared/utils/formatNumber.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import type {IPayrollRow} from "@/entities/salary";
 
 
 interface PayrollTableProps {
@@ -52,20 +53,27 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
         return (<div>Загрузка...</div>)
     }
 
-    const totalBalance = data?.data?.reduce((sum, row) => sum + (row.balance_sum || 0), 0) || 0;
-    const totalCard = data?.data?.reduce((sum, row) => sum + (row.card_sum || 0), 0) || 0;
-    const totalEarned = data?.data?.reduce((sum, row) => sum + (row.earned_sum || 0), 0) || 0;
-    const totalBonus = data?.data?.reduce((sum, row) => sum + (row.bonus_sum || 0), 0) || 0;
-    const totalTax = data?.data?.reduce((sum, row) => sum + (row.tax_sum || 0), 0) || 0;
-    const totalPayout = data?.data?.reduce((sum, row) => sum + (row.cash_payout || 0), 0) || 0;
-    const totalIssued = data?.data?.reduce((sum, row) => sum + (row.issued_sum || 0), 0) || 0;
-    const totalLoan = data?.data?.reduce((sum, row) => sum + (row.loan_sum || 0), 0) || 0;
-    const totalIp = data?.data?.reduce((sum, row) => sum + (row.ip_sum || 0), 0) || 0;
+    const calculateTotal = (field: keyof IPayrollRow) =>
+        data?.data?.reduce((sum, row) => Number(sum) + Number(row[field] || 0), 0) || 0;
+
+    const totalBalance = calculateTotal('balance_sum');
+    const totalCard = calculateTotal('card_sum');
+    const totalEarned = calculateTotal('earned_sum');
+    const totalBonus = calculateTotal('bonus_sum');
+    const totalTax = calculateTotal('tax_sum');
+    const totalIssued = calculateTotal('issued_sum');
+    const totalLoan = calculateTotal('loan_sum');
+    const totalIp = calculateTotal('ip_sum');
+    const totalCashPayout = calculateTotal('cash_payout');
+    const totalIpPayout = calculateTotal('ip_payout');
+    const totalCardPayout = calculateTotal('card_payout');
+    const totalTaxPayout = calculateTotal('tax_payout');
+    const totalLoanPayout = calculateTotal('loan_payout');
 
     return (
         <Table>
             <THead>
-                <tr>
+            <tr>
                     <PayrollTh
                         rowSpan={2}
                         className={'text-center'}
@@ -74,15 +82,24 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                     </PayrollTh>
                     <PayrollTh>Хвост</PayrollTh>
                     <PayrollTh>Заработано</PayrollTh>
-                    <PayrollTh>К выплате</PayrollTh>
-                    <PayrollTh>НАЛ</PayrollTh>
-                    <PayrollTh>ИП</PayrollTh>
-                    <PayrollTh>БН</PayrollTh>
-                    <PayrollTh>Налог</PayrollTh>
-                    <PayrollTh>Займы</PayrollTh>
+
+                    <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>Налог</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
+
+                    <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
+                    <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
+                    <PayrollTh className={'bg-purple-50'}>БН</PayrollTh>
+                    <PayrollTh className={'bg-purple-50'}>Налог</PayrollTh>
+                    <PayrollTh className={'bg-purple-50'}>Займы</PayrollTh>
+
+                    <PayrollTh className={'bg-purple-50'}>Остаток</PayrollTh>
+
                     <PayrollTh
                         rowSpan={2}
-                        className={'text-center'}
+                        className={'text-center bg-purple-50'}
                     >
                         Комментарий
                     </PayrollTh>
@@ -90,12 +107,60 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                 <tr>
                     <PayrollTh><NiceNum value={totalBalance}/></PayrollTh>
                     <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalPayout}/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalIssued} abs/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalIp} abs/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalCard} abs/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalTax} abs/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalLoan} abs/></PayrollTh>
+
+                    <PayrollTh className={'bg-blue-100 font-bold'}>
+                        <NiceNum value={totalCashPayout}/></PayrollTh>
+                    <PayrollTh className={'bg-blue-100 font-bold'}>
+                        <NiceNum value={totalIpPayout}/></PayrollTh>
+                    <PayrollTh className={'bg-blue-100 font-bold'}>
+                        <NiceNum value={totalCardPayout}/></PayrollTh>
+                    <PayrollTh className={'bg-blue-100 font-bold'}>
+                        <NiceNum value={totalTaxPayout}/></PayrollTh>
+                    <PayrollTh className={'bg-blue-100 font-bold'}>
+                        <NiceNum value={totalLoanPayout}/></PayrollTh>
+
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={totalIssued} abs/>
+                    </PayrollTh>
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={totalIp} abs/>
+                    </PayrollTh>
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={totalCard} abs/>
+                    </PayrollTh>
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={totalTax} abs/>
+                    </PayrollTh>
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={totalLoan} abs/>
+                    </PayrollTh>
+
+                    <PayrollTh
+                        className={'bg-purple-50 font-bold'}
+                    >
+                        <NiceNum value={
+                            totalCashPayout +
+                            totalIpPayout +
+                            totalCardPayout +
+                            totalTaxPayout +
+                            totalLoanPayout +
+                            totalIssued +
+                            totalIp +
+                            totalCard +
+                            totalTax +
+                            totalLoan
+                        }/>
+                    </PayrollTh>
                 </tr>
                 <tr>
                     <th colSpan={10}><br/></th>

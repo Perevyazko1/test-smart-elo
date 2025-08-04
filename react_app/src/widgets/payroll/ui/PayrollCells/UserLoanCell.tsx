@@ -10,11 +10,12 @@ interface UserLoanCellProps {
     userInfo: IPayrollRow;
     week: IWeek;
     disabled: boolean;
+    className?: string;
 }
 
 
 export const UserLoanCell = (props: UserLoanCellProps) => {
-    const {userInfo, week, disabled} = props;
+    const {userInfo, className, week, disabled} = props;
 
 
     const loanPercent = 100 - Math.abs(
@@ -47,6 +48,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
 
     return (
         <UserAddCell
+            className={className}
             value={userInfo.loan_sum}
             hide={((userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)) === 0}
             info={"Внести погашение займа"}

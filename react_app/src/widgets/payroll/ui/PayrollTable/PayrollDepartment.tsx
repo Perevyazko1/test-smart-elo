@@ -15,7 +15,7 @@ export const PayrollDepartment = (props: PayrollRowDepartmentProps) => {
                     "py-1 px-2 border-b border-gray-300 text-left",
                     className
                 ])}
-                colSpan={10}
+                colSpan={14}
                 {...otherProps}
             >
                 {children}
