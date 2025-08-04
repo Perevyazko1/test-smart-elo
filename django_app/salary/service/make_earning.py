@@ -30,7 +30,7 @@ def make_earning(
     with transaction.atomic():
         earning = Earning.objects.create(
             user=user,
-            amount=amount,
+            amount=amount * 100,
             target_date=target_date,
             earning_type=earning_type,
             comment=comment,
