@@ -9,10 +9,20 @@ admin.site.register(PayrollRow)
 
 class EarningAdmin(admin.ModelAdmin):
     search_fields = ['comment']
-    list_display = ['user', 'created_at', 'target_date', 'amount', 'earning_type', 'comment']
+    list_display = [
+        'user',
+        'created_at',
+        'target_date',
+        'cash_date',
+        'amount',
+        'earning_type',
+        'comment'
+    ]
 
     list_filter = [
         ('target_date', DateRangeFilter),
+        ('created_at', DateRangeFilter),
+        ('cash_date', DateRangeFilter),
         'user',
         'target_date'
     ]
