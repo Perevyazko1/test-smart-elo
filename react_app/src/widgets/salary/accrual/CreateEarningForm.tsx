@@ -84,7 +84,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     }
 
     const totalMinutes = Object.values(weekData).reduce((sum, time) => sum + (time.hours || 0) * 60 + (time.minutes || 0), 0);
-    const totalHours = Math.ceil((totalMinutes / 60) * 100) / 100;
+    const totalHours = Math.floor(totalMinutes / 60) + "ч " + (totalMinutes % 60) + "м";
     const totalAmountInCents = totalMinutes * (user?.piecework_amount || 0) / 60;
     const totalAmount = Math.ceil(totalAmountInCents) / 100;
 
@@ -99,7 +99,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                 return `${day}: ${parts.join(' ')}`;
             })
             .join(', ');
-        return `${about} - ${totalHours} часов (${daysStr})`;
+        return `${about} - ${totalHours} (${daysStr})`;
     }
 
     const copyAmountHandle = () => {
