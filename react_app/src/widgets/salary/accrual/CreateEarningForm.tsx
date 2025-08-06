@@ -2,13 +2,14 @@ import {type ChangeEvent, type FormEvent, useState} from "react";
 import {FormProvider, useForm} from "react-hook-form";
 import type {ICreateEarning, IEarningType} from "@/entities/salary";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import type {IWeek} from "@/shared/utils/date.ts";
-import type {IUser} from "@/entities/user";
+import {APP_PERM, type IUser} from "@/entities/user";
 import {useClipboard} from "use-clipboard-copy";
 import {CopyIcon} from "lucide-react";
 import {toast} from "sonner";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
+import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import { usePermission } from "@/shared/utils/permissions";
 
 
 interface CreateEarningFormProps {
@@ -17,14 +18,14 @@ interface CreateEarningFormProps {
     createdById: number;
     earning_type: IEarningType;
     disabled?: boolean;
-    week: IWeek;
+    target_date: string;
     about?: string;
     amount?: number;
 }
 
 
 export const CreateEarningForm = (props: CreateEarningFormProps) => {
-    const {onSubmit, amount, week, about, disabled = true, earning_type, user, createdById} = props;
+    const {onSubmit, amount, target_date, about, disabled = true, earning_type, user, createdById} = props;
     const clipboardAmount = useClipboard();
     const clipboardComment = useClipboard();
 
@@ -34,7 +35,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
             amount: amount || undefined,
             user_id: user?.id || null,
             created_by: createdById,
-            target_date: week.date_from,
+            target_date: target_date,
             earning_type: earning_type,
             comment: about
         }
@@ -66,13 +67,13 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     }
 
     const totalHours = Math.ceil(Object.values(weekData).reduce((sum, hours) => sum + hours, 0) * 100) / 100;
-    const totalAmount = Math.ceil(totalHours * (user?.piecework_amount || 0));
+    const totalAmount = Math.ceil(totalHours * (user?.piecework_amount || 0)) / 100;
 
     const getRecommendedComment = () => {
         const daysStr = Object.entries(weekData)
             .map(([day, hours]) => `${day}:${hours}`)
             .join(', ');
-        return `Начисление ЗП нед ${week.weekNumber} - ${totalHours} часов (${daysStr})`;
+        return `${about} - ${totalHours} часов (${daysStr})`;
     }
 
     const copyAmountHandle = () => {
@@ -84,6 +85,8 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
         clipboardComment.copy();
         toast.success("Комментарий скопирован");
     }
+
+    const canSetDate = usePermission(APP_PERM.ADMIN);
 
 
     return (
@@ -120,14 +123,11 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                         <br/>
                         <input
                             id={"target_date"}
-                            disabled={disabled}
+                            disabled={!canSetDate}
                             className={'bg-white p-2'}
                             type="date"
                             {...methods.register("target_date", {required: "Дата закрепления обязательна"})}
                         />
-                        {/*{errors.target_date && (*/}
-                        {/*    <span className="text-red-500">{errors.target_date.message}</span>*/}
-                        {/*)}*/}
                     </div>
 
                     <Btn
@@ -154,6 +154,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                                 <input
                                     className={'p-2 w-16 text-end bg-yellow-50 disabled:bg-transparent'}
                                     value={value}
+                                    max={24}
                                     type="number"
                                     onChange={(e) => weekDataChangeHandle(e, day)}
                                 />
@@ -161,8 +162,8 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                         ))}
                     </div>
                     <hr/>
-                    <div>
-                        Часов: <b>{totalHours}</b> Ставка: <b>{user?.piecework_amount || 0}</b>
+                    <div className={'flex gap-2'}>
+                        Часов: <b>{totalHours}</b> Ставка: <b><NiceNum value={user?.piecework_amount || 0}/></b>
                     </div>
                     <hr/>
 

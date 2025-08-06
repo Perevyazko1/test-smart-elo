@@ -440,7 +440,6 @@ class EqUpdateAssignmentsStatus:
 
     def _get_audit_details(self) -> str:
         result = ''
-
         if self.view_mode == 'boss':
             result += 'В режиме бригадира'
         if not self.original_user == self.employee:

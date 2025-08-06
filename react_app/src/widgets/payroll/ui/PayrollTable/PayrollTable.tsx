@@ -17,11 +17,10 @@ interface PayrollTableProps {
     currentWeek: IWeek;
     payrollId: number;
     state: "1" | "2" | "3" | "4" | "5" | "6";
-    setSelectedUserId: (arg: number) => void;
 }
 
 export const PayrollTable = memo((props: PayrollTableProps) => {
-    const {payrollId, state, currentWeek, setSelectedUserId} = props;
+    const {payrollId, state, currentWeek} = props;
 
     const {data, isError, isFetching} = useQuery({
         queryKey: ['payrollRows', currentWeek.weekNumber],
@@ -171,7 +170,6 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
             {groupedData && Object.entries(groupedData).map(([departmentName, earnings]) => (
                 <PayrollDepartmentInfo
                     week={currentWeek}
-                    setSelectedUserId={setSelectedUserId}
                     departmentName={departmentName}
                     earnings={earnings}
                     key={departmentName}

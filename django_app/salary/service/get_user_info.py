@@ -1,9 +1,9 @@
-import datetime
+from datetime import datetime
 
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
-from ..models import Earning
-from ..serializers import EarningSerializer
+from ..models import Earning, PayrollRow
+from ..serializers import EarningSerializer, PayrollRowSerializer
 
 
 def get_user_info(user_id: int, date_from: datetime, date_to: datetime):
@@ -18,17 +18,20 @@ def get_user_info(user_id: int, date_from: datetime, date_to: datetime):
         target_date__date__lte=date_to.date(),
     )
 
-    last_week_earnings = Earning.objects.filter(
+    balance = sum(earnings.exclude(
+        earning_type__in=["ЗАЙМ", "Внесение НАЛ"]
+    ).values_list("amount", flat=True))
+
+    last_payroll_rows = PayrollRow.objects.filter(
         user=employee,
-    )[:200]
+    )[:5]
 
     user_info["user_info"] = {
         "user": EmployeeSerializer(employee).data,
-        "balance": sum(earnings.values_list("amount", flat=True)),
+        "balance": balance,
     }
 
     user_info["detail_report"] = EarningSerializer(current_earnings, many=True).data
-
-    user_info["week_report"] = EarningSerializer(last_week_earnings, many=True).data
+    user_info["week_report"] = PayrollRowSerializer(last_payroll_rows, many=True).data
 
     return user_info

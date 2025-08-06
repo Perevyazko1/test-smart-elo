@@ -1,24 +1,27 @@
 import type {IEarning} from "@/entities/salary";
-import {type IWeek, toRuDate} from "@/shared/utils/date";
+import {getToday, toRuDate} from "@/shared/utils/date";
 
 
 import {DeleteEarningBtn} from "@/widgets/cash/actions/DeleteEarningBtn.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
 import {getUserName} from "@/shared/utils/getUserName.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import {usePermission} from "@/shared/utils/permissions.ts";
+import {APP_PERM} from "@/entities/user";
 
 
 interface DetailRowProps {
     earning: IEarning;
     balance: number;
-    week: IWeek;
 }
 
 
 export const DetailRow = (props: DetailRowProps) => {
-    const {earning, balance, week} = props;
+    const {earning, balance} = props;
 
     const isPositive = earning.amount > 0;
+
+    const canEdit = usePermission(APP_PERM.ADMIN)
 
     return (
         <tr className={'text-[.8em]'}>
@@ -35,7 +38,7 @@ export const DetailRow = (props: DetailRowProps) => {
             </td>
             <td className={'w-[4em]'}>
                 <div className={'flex items-center gap-1 scale-90'}>
-                    {!earning.is_locked && (
+                    {canEdit && (
                         <>
                             <DeleteEarningBtn
                                 amount={earning.amount}
@@ -44,7 +47,7 @@ export const DetailRow = (props: DetailRowProps) => {
 
                             <EditEarningBtn
                                 earning={earning}
-                                week={week}
+                                target_date={getToday()}
                             />
                         </>
                     )}

@@ -8,11 +8,9 @@ export const App = () => {
 
 
     return (
-        <div className={'bg-gray-500 h-screen'}>
+        <div className={'bg-gray-500 min-h-screen'}>
             <Navbar/>
-            <div style={{height: 'calc(100dvh - 50px'}}>
-                <Outlet/>
-            </div>
+            <Outlet/>
         </div>
     )
 }

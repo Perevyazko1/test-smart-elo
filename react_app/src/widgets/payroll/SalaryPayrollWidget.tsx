@@ -16,13 +16,12 @@ import {DotFilledIcon} from "@radix-ui/react-icons";
 
 
 interface SalaryPayrollWidgetProps {
-    setSelectedUserId: (arg: number) => void;
     currentWeek: IWeek;
 }
 
 
 export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
-    const {setSelectedUserId, currentWeek} = props;
+    const {currentWeek} = props;
     const queryClient = useQueryClient();
     const [cashValue, setCashValue] = useState<number | null>();
     const [descriptionValue, setDescriptionValue] = useState<string | null>();
@@ -195,7 +194,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
             {payrollData && (
                 <PayrollTable
                     currentWeek={currentWeek}
-                    setSelectedUserId={setSelectedUserId}
                     payrollId={payrollData.id}
                     state={payrollData.state}
                 />

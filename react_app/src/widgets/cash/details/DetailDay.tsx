@@ -44,7 +44,6 @@ export const DetailDay = (props: DetailDayProps) => {
 
             {earnings.map((earning, index) => (
                 <DetailRow
-                    week={week}
                     balance={startBalance + earnings.slice(0, index + 1).reduce((acc, curr) => acc + curr.amount, 0)}
                     key={earning.id}
                     earning={earning}

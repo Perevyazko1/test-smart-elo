@@ -6,7 +6,6 @@ import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import type {ICreateEarning, IEarning, IEarningType} from "@/entities/salary";
 import {CreateEarningForm} from "@/widgets/salary/accrual/CreateEarningForm.tsx";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
-import type {IWeek} from "@/shared/utils/date";
 import {useCurrentUser} from "@/shared/utils/useCurrentUser.ts";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {earningService} from "@/widgets/salary/accrual/model/api.ts";
@@ -14,11 +13,12 @@ import {earningService} from "@/widgets/salary/accrual/model/api.ts";
 interface EditEarningBtnProps {
     earning: IEarning;
     children?: ReactNode;
-    week: IWeek;
+    target_date: string;
+
 }
 
 export const EditEarningBtn = (props: EditEarningBtnProps) => {
-    const {earning, children, week} = props;
+    const {earning, children, target_date} = props;
 
     const {currentUser} = useCurrentUser();
 
@@ -73,7 +73,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
         },
         onSuccess: () => {
             client.invalidateQueries({
-                queryKey: ['payrollRows', week.weekNumber]
+                queryKey: ['payrollRows']
             });
             client.invalidateQueries({
                 queryKey: ['cashDetail']
@@ -115,7 +115,7 @@ export const EditEarningBtn = (props: EditEarningBtnProps) => {
                 <CreateEarningForm
                     amount={Math.abs(earning.amount)}
                     about={earning.comment}
-                    week={week}
+                    target_date={target_date}
                     disabled={updateEarning.isPending}
                     earning_type={earning.earning_type}
                     createdById={currentUser!.id!}

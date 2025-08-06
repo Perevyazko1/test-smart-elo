@@ -8,19 +8,19 @@ import {type IUpdatePayrollRow, payrollService} from "@/widgets/payroll/model/ap
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import type {AxiosResponse} from "axios";
 import type {IWeek} from "@/shared/utils/date.ts";
+import {Link} from "react-router-dom";
 
 
 interface UserNameCellProps {
     userInfo: IPayrollRow;
     mutateClb: (args: IUpdatePayrollRow) => void;
     isPending: boolean;
-    setSelectedUserId: (arg: number) => void;
     week: IWeek;
 }
 
 
 export const UserNameCell = (props: UserNameCellProps) => {
-    const {userInfo, mutateClb, isPending, setSelectedUserId, week} = props;
+    const {userInfo, mutateClb, isPending, week} = props;
 
     const queryClient = useQueryClient();
 
@@ -72,12 +72,12 @@ export const UserNameCell = (props: UserNameCellProps) => {
                     </TT>
 
                     <TT asChild description={"Перейти в детализацию по сотруднику"}>
-                        <Btn
-                            className={"text-nowrap"}
-                            onClick={() => setSelectedUserId(userInfo.user.id!)}
+                        <Link
+                            className={"text-nowrap inline-block text-left"}
+                            to={`/user_wage/${userInfo.user.id}/${week.date_from}/${week.date_to}/`}
                         >
                             {userInfo.name}
-                        </Btn>
+                        </Link>
                     </TT>
 
                 </div>

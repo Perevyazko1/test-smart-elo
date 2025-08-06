@@ -1,4 +1,3 @@
-import {formatNumber} from "@/shared/utils/formatNumber.ts";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
 import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
 import type {IWeek} from "@/shared/utils/date.ts";
@@ -45,7 +44,7 @@ export const UserAddCell = (props: UserAddCellProps) => {
                     <AddEarningBtn
                         disabled={disabled}
                         info={info}
-                        week={week}
+                        target_date={week.date_from}
                         user={user}
                         earning_type={earning_type}
                         about={about}

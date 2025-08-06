@@ -1,4 +1,4 @@
-import type {IEarning} from "@/entities/salary";
+import type {IEarning, IPayrollRow} from "@/entities/salary";
 import type {IUser} from "@/entities/user";
 
 export interface ISalaryDetailUserInfo {
@@ -9,5 +9,5 @@ export interface ISalaryDetailUserInfo {
 export interface ISalaryDetail {
     user_info: ISalaryDetailUserInfo;
     detail_report: IEarning[] | null;
-    week_report: IEarning[] | null;
+    week_report: IPayrollRow[] | null;
 }

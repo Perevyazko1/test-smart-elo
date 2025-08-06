@@ -1,5 +1,6 @@
-import {getISOWeek, startOfISOWeek, endOfISOWeek, format, subWeeks} from 'date-fns';
+import {getISOWeek, startOfISOWeek, endOfISOWeek, format, subWeeks, addWeeks} from 'date-fns';
 import {ru} from 'date-fns/locale';
+import {useCallback, useEffect, useState} from 'react';
 
 export interface IWeek {
     weekNumber: number;
@@ -36,4 +37,64 @@ export const generateWeeks = (count: number = 7): IWeek[] => {
     return weeks;
 };
 
+export const getToday = () => format(new Date(), 'yyyy-MM-dd');
+
+export interface UseWeeksReturn {
+    weeks: IWeek[];
+    currentWeek: IWeek | null;
+    setCurrentWeek: (week: IWeek) => void;
+    nextWeek: () => void;
+    previousWeek: () => void;
+}
+
+export const useWeeks = (props: {count?: number, initialDateFrom?: string}): UseWeeksReturn => {
+    const {count = 7, initialDateFrom} = props;
+
+    const [weeks, setWeeks] = useState<IWeek[]>([]);
+    const [currentWeek, setCurrentWeek] = useState<IWeek | null>(null);
+
+    useEffect(() => {
+        const generatedWeeks = generateWeeks(count);
+        setWeeks(generatedWeeks);
+
+        if (generatedWeeks.length > 0) {
+            if (initialDateFrom) {
+                const initialWeek = generatedWeeks.find(week =>
+                    week.date_from === initialDateFrom
+                );
+                if (initialWeek) {
+                    setCurrentWeek(initialWeek);
+                } else {
+                    setCurrentWeek(generatedWeeks[0]);
+                }
+            } else {
+                setCurrentWeek(generatedWeeks[0]);
+            }
+        }
+    }, [count, initialDateFrom]);
+
+    const nextWeek = useCallback(() => {
+        if (!currentWeek) return;
+        const currentIndex = weeks.findIndex(week => week.weekNumber === currentWeek.weekNumber);
+        if (currentIndex > 0) {
+            setCurrentWeek(weeks[currentIndex - 1]);
+        }
+    }, [currentWeek, weeks]);
+
+    const previousWeek = useCallback(() => {
+        if (!currentWeek) return;
+        const currentIndex = weeks.findIndex(week => week.weekNumber === currentWeek.weekNumber);
+        if (currentIndex < weeks.length - 1) {
+            setCurrentWeek(weeks[currentIndex + 1]);
+        }
+    }, [currentWeek, weeks]);
+
+    return {
+        weeks,
+        currentWeek,
+        setCurrentWeek,
+        nextWeek,
+        previousWeek
+    };
+};
 

@@ -7,7 +7,6 @@ import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 
 import {CreateEarningForm} from "../../salary/accrual/CreateEarningForm.tsx";
 import {earningService} from "../../salary/accrual/model/api.ts";
-import type {IWeek} from "@/shared/utils/date.ts";
 import {type ReactNode, useState} from "react";
 import {twMerge} from "tailwind-merge";
 import {useCurrentUser} from "@/shared/utils/useCurrentUser.ts";
@@ -18,7 +17,7 @@ import type {IUser} from "@/entities/user";
 interface AddEarningBtnProps {
     earning_type: IEarningType;
     user: IUser | null;
-    week: IWeek;
+    target_date: string;
     disabled: boolean;
     about?: string;
     info: string;
@@ -27,7 +26,7 @@ interface AddEarningBtnProps {
 }
 
 export const AddEarningBtn = (props: AddEarningBtnProps) => {
-    const {earning_type, info, user, week, disabled, about, children, targetIsCashDate = false} = props;
+    const {earning_type, info, user, target_date, disabled, about, children, targetIsCashDate = false} = props;
     const queryClient = useQueryClient();
     const {currentUser} = useCurrentUser();
 
@@ -83,7 +82,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({
-                queryKey: ['payrollRows', week.weekNumber]
+                queryKey: ['payrollRows']
             });
             queryClient.invalidateQueries({
                 queryKey: ['cashDetail']
@@ -132,7 +131,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
             content={
                 <CreateEarningForm
                     about={about}
-                    week={week}
+                    target_date={target_date}
                     disabled={createEarningMutation.isPending}
                     earning_type={earning_type}
                     createdById={1}

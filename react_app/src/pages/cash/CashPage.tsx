@@ -19,7 +19,7 @@ export const CashPage = () => {
 
 
     return (
-        <div className={'flex flex-row bg-yellow-50 h-full p-2'}>
+        <div className={'flex flex-row bg-yellow-50 min-h-full p-2'}>
             {currentWeek && (
                 <CashBody
                     weeks={weeks}

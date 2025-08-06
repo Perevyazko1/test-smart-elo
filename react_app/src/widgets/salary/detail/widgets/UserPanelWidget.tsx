@@ -1,14 +1,15 @@
 import {toast} from "sonner";
-import {type ChangeEvent, useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import {FormProvider, useForm, useWatch} from "react-hook-form";
 
-import type {IUser} from "@/entities/user";
+import {APP_PERM, type IUser} from "@/entities/user";
 import {$axios} from "@/shared/api";
 import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
 import {useQueryClient} from "@tanstack/react-query";
+import {usePermission} from "@/shared/utils/permissions.ts";
 
 interface UserPanelWidgetProps {
     user: IUser;
@@ -22,6 +23,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
     const methods = useForm<Partial<IUser>>({
         defaultValues: {
             description: user.description,
+            piecework_amount: user.piecework_amount,
         }
     });
 
@@ -34,7 +36,8 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                 loading: 'Применение изменений',
                 success: (data) => {
                     client.invalidateQueries({
-                        queryKey: ['payrollRows']}
+                            queryKey: ['payrollRows']
+                        }
                     );
                     setUserData(data.data);
                     return 'Данные пользователя успешно обновлены';
@@ -49,9 +52,15 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
         name: "description"
     });
 
+    const piecework_amount = useWatch({
+        control: methods.control,
+        name: "piecework_amount"
+    });
+
     const dUpdateData = useDebounce(
         (data: {
             description?: string;
+            piecework_amount?: number;
         }) => updateUserData({
             ...data,
         }),
@@ -60,20 +69,20 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
 
     useEffect(() => {
         if (description !== userData.description) {
-            dUpdateData({description: description});
+            dUpdateData({description});
         }
     }, [description]);
 
-    const amountChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const value = Number(e.target.value.replace(/[^\d]/g, ''));
-        if (isNaN(value) || value < 0) {
-            return;
+    useEffect(() => {
+        if (piecework_amount !== userData.piecework_amount) {
+            dUpdateData({piecework_amount});
         }
-        setUserData({...userData, piecework_amount: value});
-        dUpdateData({piecework_amount: value});
-    }
+    }, [piecework_amount]);
 
+    const canEditUser = usePermission([
+        APP_PERM.WAGES_PAGE,
+        APP_PERM.ADMIN,
+    ]);
 
     return (
         <FormProvider {...methods}>
@@ -81,29 +90,35 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                 <div>
                     <b>{userData.first_name || ""} {userData.last_name || ""}</b>
                 </div>
-                <div className="relative">
-                    <div className={'flex items-center h-full text-[0.8em] w-1/2 gap-2'}>
-                        <span>Комментарий:</span>
 
-                        <TextAreaForm
-                            className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
-                            name={'description'}
-                        />
+                {canEditUser && (
+                    <div className="relative">
+                        <div className={'flex items-center h-full text-[0.8em] w-1/2 gap-2'}>
+                            <span>Комментарий:</span>
+
+                            <TextAreaForm
+                                className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
+                                name={'description'}
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
+
                 <div className={'flex flex-col gap-2'}>
                     <div className={'flex gap-3 items-center'}>
                     <span>
                         Форма оплаты:
                     </span>
                         <b>{userData.piecework_wages ? "Сделка" : "Оклад"}</b>
-                        <Btn
-                            onClick={() => {
-                                updateUserData({piecework_wages: !userData.piecework_wages});
-                            }}
-                        >
-                            Переключить на {userData.piecework_wages ? "Оклад" : "Сделка"}
-                        </Btn>
+                        {canEditUser && (
+                            <Btn
+                                onClick={() => {
+                                    updateUserData({piecework_wages: !userData.piecework_wages});
+                                }}
+                            >
+                                Переключить на {userData.piecework_wages ? "Оклад" : "Сделка"}
+                            </Btn>
+                        )}
                     </div>
 
                     {!userData.piecework_wages && (
@@ -112,12 +127,8 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
 
                             <PriceInputForm
                                 name={'piecework_amount'}
-                            />
-                            <input
+                                disabled={!canEditUser}
                                 className={'p-2 w-[5em] text-end bg-yellow-50 disabled:bg-transparent'}
-                                value={userData.piecework_amount || 0}
-                                type="number"
-                                onChange={amountChangeHandle}
                             />
                         </div>
                     )}

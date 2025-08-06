@@ -3,17 +3,15 @@ import {Table} from "@/shared/ui/table/Table.tsx";
 import {THead} from "@/shared/ui/table/THead.tsx";
 
 import {SalaryDetailRow} from "./SalaryDetailRow";
-import type {IWeek} from "@/shared/utils/date.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 interface DetailTableProps {
     earnings: IEarning[] | null;
-    week: IWeek;
     selectedUserId: number;
 }
 
 export const DetailTable = (props: DetailTableProps) => {
-    const {earnings, week, selectedUserId} = props;
+    const {earnings, selectedUserId} = props;
 
     const detailTotalSum = earnings?.reduce(
         (acc, item) => acc + item.amount, 0
@@ -33,10 +31,11 @@ export const DetailTable = (props: DetailTableProps) => {
                         Изделие / Описание
                     </th>
                     <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
-                        Сумма
-                    </th>
-                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
                         Примечание
+                    </th>
+
+                    <th className={'py-1 px-2 border-b border-gray-300 text-left'}>
+                        Сумма
                     </th>
                 </tr>
             </THead>
@@ -47,7 +46,6 @@ export const DetailTable = (props: DetailTableProps) => {
                 <SalaryDetailRow
                     earning={row}
                     selectedUserId={selectedUserId}
-                    week={week}
                     key={row.id}
                 />
             ))}

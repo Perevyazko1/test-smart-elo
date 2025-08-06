@@ -5,7 +5,6 @@ import type {IWeek} from "@/shared/utils/date.ts";
 import {SALARY_STATUSES} from "@/shared/consts";
 
 interface PayrollDepartmentInfoProps {
-    setSelectedUserId: (arg: number) => void;
     week: IWeek;
     departmentName: string;
     earnings: IPayrollRow[];
@@ -13,7 +12,7 @@ interface PayrollDepartmentInfoProps {
 }
 
 export const PayrollDepartmentInfo = (props: PayrollDepartmentInfoProps) => {
-    const {departmentName, state, earnings, setSelectedUserId, week} = props;
+    const {departmentName, state, earnings,  week} = props;
 
     return (
         <>
@@ -27,7 +26,6 @@ export const PayrollDepartmentInfo = (props: PayrollDepartmentInfoProps) => {
                     week={week}
                     key={earning.id}
                     userInfo={earning}
-                    setSelectedUserId={setSelectedUserId}
                 />
             ))}
             <tr>

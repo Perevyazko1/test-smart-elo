@@ -32,7 +32,7 @@ export const Navbar = (props: NavbarProps) => {
                     СЗМК Зарплата
                 </div>
                 <Link
-                    to={'/'}
+                    to={'/salary'}
                 >
                     Зарплата
                 </Link>

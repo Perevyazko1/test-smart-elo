@@ -1,6 +1,6 @@
 import {twMerge} from "tailwind-merge";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import type {IWeek} from "@/shared/utils/date.ts";
+import {getToday, type IWeek} from "@/shared/utils/date.ts";
 import {useQuery} from "@tanstack/react-query";
 import {cashService} from "@/pages/cash/model/api.ts";
 import {AddEarningBtn} from "@/widgets/cash/actions/AddEarningBtn.tsx";
@@ -24,7 +24,6 @@ export const CashBody = (props: CashBodyProps) => {
                 date_to: currentWeek.date_to,
             });
         },
-        staleTime: Infinity
     });
 
     if (isFetching) {
@@ -50,7 +49,9 @@ export const CashBody = (props: CashBodyProps) => {
                     </div>
                     <div className={'flex justify-between gap-10'}>
                         <div>На картах:</div>
-                        <div>{(data.data.card_balance).toLocaleString('ru-RU')}</div>
+                        <div>
+                            <NiceNum value={data.data.card_balance}/>
+                        </div>
                     </div>
                 </div>
                 <div className={twMerge(
@@ -64,7 +65,7 @@ export const CashBody = (props: CashBodyProps) => {
                             earning_type={'Выдача НАЛ'}
                             user={null}
                             disabled={isFetching}
-                            week={currentWeek}
+                            target_date={getToday()}
                         >
                             <Btn
                                 className={'bg-yellow-100 border-yellow-700 border-2 flex-1'}
@@ -73,13 +74,6 @@ export const CashBody = (props: CashBodyProps) => {
                                 <div>(РАСХОД НАЛ)</div>
                             </Btn>
                         </AddEarningBtn>
-
-                        {/*<Btn*/}
-                        {/*    className={'bg-gray-200 border-gray-700 border-2 flex-1'}*/}
-                        {/*>*/}
-                        {/*    <div>ВЫДАТЬ</div>*/}
-                        {/*    <div>(БН И КАРТА)</div>*/}
-                        {/*</Btn>*/}
                     </div>
 
                     <div className={'flex gap-8 justify-between'}>
@@ -89,7 +83,7 @@ export const CashBody = (props: CashBodyProps) => {
                             earning_type={'Внесение НАЛ'}
                             user={null}
                             disabled={isFetching}
-                            week={currentWeek}
+                            target_date={getToday()}
                         >
                             <Btn
                                 className={'bg-green-100 border-green-700 border-2 flex-1'}
@@ -98,17 +92,10 @@ export const CashBody = (props: CashBodyProps) => {
                                 <div>(БАНКОМАТ)</div>
                             </Btn>
                         </AddEarningBtn>
-
-
-                        {/*<Btn*/}
-                        {/*    className={'bg-gray-200 border-gray-700 border-2 flex-1'}*/}
-                        {/*>*/}
-                        {/*    <div>ВНЕСТИ</div>*/}
-                        {/*    <div>(БН И КАРТА)</div>*/}
-                        {/*</Btn>*/}
                     </div>
                 </div>
             </div>
+
             <div className={'min-h-full flex flex-col flex-1'}>
                 <div className={twMerge(
                     'flex gap-2 p-2',

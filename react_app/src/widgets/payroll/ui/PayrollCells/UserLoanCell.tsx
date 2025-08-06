@@ -51,7 +51,10 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
             className={className}
             value={userInfo.loan_sum}
             hide={((userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)) === 0}
-            info={"Внести погашение займа"}
+            info={
+                disabled ? "Блок - статус либо закрыта неделя" :
+                    "Внести погашение займа"
+            }
             valueInfo={'Списано в счет погашения займов'}
             disabled={disabled}
             user={userInfo.user}

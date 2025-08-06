@@ -23,12 +23,11 @@ import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 interface PayrollUserInfoProps {
     userInfo: IPayrollRow;
     week: IWeek;
-    setSelectedUserId: (arg: number) => void;
     state: keyof typeof SALARY_STATUSES;
 }
 
 export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
-    const {userInfo, state, week, setSelectedUserId} = props;
+    const {userInfo, state, week} = props;
     const queryClient = useQueryClient();
 
     const debouncedUpdateRow = useDebounce(
@@ -128,7 +127,6 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     mutateClb={mutate}
                     isPending={isPending}
                     userInfo={userInfo}
-                    setSelectedUserId={setSelectedUserId}
                     week={week}
                 />
 
@@ -141,13 +139,17 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
                 <UserAddCell
                     value={(userInfo.earned_sum || 0) + (userInfo.bonus_sum || 0)}
-                    info={"Добавить ДОП начисление сотруднику"}
+                    info={
+                        !statusLessThen("3") ? "Блок - статус ведомости" :
+                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                "Добавить ДОП начисление сотруднику"
+                    }
                     valueInfo={`ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`}
                     disabled={!statusLessThen("3") || userInfo.is_closed}
                     user={userInfo.user}
                     week={week}
                     earning_type={"ДОП"}
-                    about={``}
+                    about={`ЗП Нед ${week.weekNumber}`}
                 >
                     {userInfo.has_unconfirmed && (
                         <TT asChild description={"Подтвердить сумму начислений"}>
@@ -194,7 +196,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.issued_sum}
-                    info={"Выдать сотруднику наличные ДС"}
+                    info={
+                        !statusLessThen("6") ? "Блок - статус ведомости" :
+                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                "Выдать сотруднику наличные ДС"
+                    }
                     valueInfo={'Выдано наличными'}
                     disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
@@ -206,7 +212,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.ip_sum}
-                    info={"Выдать сотруднику через средства ИП"}
+                    info={
+                        !statusLessThen("6") ? "Блок - статус ведомости" :
+                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                "Выдать сотруднику через средства ИП"
+                    }
                     valueInfo={'Выдача на ИП сотрудника'}
                     disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
@@ -218,7 +228,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.card_sum}
-                    info={'Внести выдачу на карту или БН'}
+                    info={
+                        !statusLessThen("6") ? "Блок - статус ведомости" :
+                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                "Внести выдачу на карту или БН"
+                    }
                     valueInfo={'Выдано на карту или по безналу'}
                     disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
@@ -230,7 +244,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.tax_sum}
-                    info={'Добавить удержание налога и сборов'}
+                    info={
+                        !statusLessThen("6") ? "Блок - статус ведомости" :
+                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                "Добавить удержание налога и сборов"
+                    }
                     valueInfo={'Удержано налога (НДФЛ и пр)'}
                     disabled={!statusLessThen("6") || userInfo.is_closed}
                     user={userInfo.user}
@@ -248,13 +266,13 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
                 <td className={twMerge(
                     "text-end bg-purple-50 font-bold",
-                )} >
+                )}>
                     <TT description={`Остаток к выплате`}>
                         <NiceNum
                             className={totalValue === 0 ? "opacity-20" : ""}
                             value={
-                            totalValue
-                        }/>
+                                totalValue
+                            }/>
                     </TT>
                 </td>
 

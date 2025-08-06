@@ -63,19 +63,9 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
     const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]);
 
-    const targetUserId = useMemo<number>(() => {
-        if (queryParameters.view_mode) {
-            if (!['boss', 'unfinished', 'distribute'].includes(queryParameters.view_mode)) {
-                return Number(queryParameters.view_mode);
-            }
-        }
-        return currentUser.id;
-    }, [currentUser.id, queryParameters.view_mode]);
-
     const handleOpenWages = () => {
         handleOpen(
             <WagesInfo
-                employeeId={targetUserId}
                 endDate={weekData?.dt_dates[6] || ''}
                 startDate={weekData?.dt_dates[0] || ''}
             />

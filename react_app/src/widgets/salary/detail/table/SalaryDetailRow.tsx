@@ -9,17 +9,18 @@ import type {IEarning} from "@/entities/salary";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 import {EarningDetail} from "@/widgets/salary/detail/table/EarningDetail.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
-import type {IWeek} from "@/shared/utils/date.ts";
+import {getToday} from "@/shared/utils/date.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import {usePermission} from "@/shared/utils/permissions.ts";
+import {APP_PERM} from "@/entities/user";
 
 interface SalaryDetailRowProps {
     earning: IEarning;
-    week: IWeek;
     selectedUserId: number;
 }
 
 export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
-    const {earning, week, selectedUserId} = props;
+    const {earning} = props;
 
     const qClient = useQueryClient();
 
@@ -28,7 +29,7 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
             return earningService.deleteEarning({earning_id: earning.id!});
         },
         onSuccess: () => {
-            qClient.invalidateQueries({queryKey: ['salaryDetail', week.weekNumber, selectedUserId]});
+            qClient.invalidateQueries({queryKey: ['salaryDetail']});
             toast.success("Начисление успешно удалено!")
         }
     });
@@ -37,6 +38,9 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
         mutateRow.mutate();
     };
 
+    const canEdit = usePermission([
+        APP_PERM.ADMIN,
+    ]);
 
     return (
         <tr>
@@ -72,16 +76,18 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
                 {earning.earning_comment}
 
                 <div className={'absolute top-1 -right-6 flex flex-nowrap gap-1 items-center'}>
-                    {!earning.is_locked && (
+                    {canEdit && (
                         <EditEarningBtn
                             earning={earning}
-                            week={week}
+                            target_date={getToday()}
                         />
                     )}
 
-                    {!!earning.approval_by ? (
+                    {!!earning.approval_by && (
                         <CheckIcon color={'green'} className={'opacity-50'}/>
-                    ) : (
+                    )}
+
+                    {canEdit && (
                         <Btn
                             disabled={mutateRow.isPending}
                             className={'rounded-full bg-black p-[.25em]'}
