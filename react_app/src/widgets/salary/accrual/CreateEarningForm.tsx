@@ -9,7 +9,7 @@ import {toast} from "sonner";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
-import { usePermission } from "@/shared/utils/permissions";
+import {usePermission} from "@/shared/utils/permissions";
 
 
 interface CreateEarningFormProps {
@@ -42,14 +42,14 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     });
 
     const [weekData, setWeekData] = useState({
-        "ПН": 8,
-        "ВТ": 8,
-        "СР": 8,
-        "ЧТ": 8,
-        "ПТ": 8,
-        "СБ": 0,
-        "ВС": 0,
-    })
+        "ПН": {hours: 8, minutes: 0},
+        "ВТ": {hours: 8, minutes: 0},
+        "СР": {hours: 8, minutes: 0},
+        "ЧТ": {hours: 8, minutes: 0},
+        "ПТ": {hours: 8, minutes: 0},
+        "СБ": {hours: 0, minutes: 0},
+        "ВС": {hours: 0, minutes: 0},
+    });
 
     const onSubmitHandler = (e: FormEvent) => {
         e.preventDefault();
@@ -58,20 +58,46 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
         }
     };
 
-    const weekDataChangeHandle = (e: ChangeEvent<HTMLInputElement>, day: string) => {
-        const newValue = Number(e.target.value);
+    const weekDataChangeHandle = (e: ChangeEvent<HTMLInputElement>, day: string, type: 'hours' | 'minutes') => {
+        const value = e.target.value;
+        let newValue = parseInt(value, 10);
+
         if (isNaN(newValue) || newValue < 0) {
-            return
+            newValue = 0;
         }
-        setWeekData({...weekData, [day]: newValue});
+
+        if (type === 'minutes' && newValue > 59) {
+            newValue = 59;
+        }
+
+        if (type === 'hours' && newValue > 24) {
+            newValue = 24;
+        }
+
+        setWeekData(prev => ({
+            ...prev,
+            [day]: {
+                ...prev[day as keyof typeof prev],
+                [type]: newValue
+            }
+        }));
     }
 
-    const totalHours = Math.ceil(Object.values(weekData).reduce((sum, hours) => sum + hours, 0) * 100) / 100;
-    const totalAmount = Math.ceil(totalHours * (user?.piecework_amount || 0)) / 100;
+    const totalMinutes = Object.values(weekData).reduce((sum, time) => sum + (time.hours || 0) * 60 + (time.minutes || 0), 0);
+    const totalHours = Math.ceil((totalMinutes / 60) * 100) / 100;
+    const totalAmountInCents = totalMinutes * (user?.piecework_amount || 0) / 60;
+    const totalAmount = Math.ceil(totalAmountInCents) / 100;
+
 
     const getRecommendedComment = () => {
         const daysStr = Object.entries(weekData)
-            .map(([day, hours]) => `${day}:${hours}`)
+            .filter(([_, time]) => time.hours > 0 || time.minutes > 0)
+            .map(([day, time]) => {
+                const parts = [];
+                if (time.hours > 0) parts.push(`${time.hours}ч`);
+                if (time.minutes > 0) parts.push(`${time.minutes}м`);
+                return `${day}: ${parts.join(' ')}`;
+            })
             .join(', ');
         return `${about} - ${totalHours} часов (${daysStr})`;
     }
@@ -152,11 +178,22 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                             <div key={index} className="flex flex-col gap-2 items-center">
                                 <span>{day}</span>
                                 <input
-                                    className={'p-2 w-16 text-end bg-yellow-50 disabled:bg-transparent'}
-                                    value={value}
+                                    className={'p-2 py-1 w-14 text-end bg-yellow-50 disabled:bg-transparent'}
+                                    value={value.hours || ''}
+                                    min={0}
                                     max={24}
+                                    placeholder="ч"
                                     type="number"
-                                    onChange={(e) => weekDataChangeHandle(e, day)}
+                                    onChange={(e) => weekDataChangeHandle(e, day, 'hours')}
+                                />
+                                <input
+                                    className={'p-2 py-1 w-14 text-end bg-yellow-50 disabled:bg-transparent'}
+                                    value={value.minutes || ''}
+                                    min={0}
+                                    max={59}
+                                    placeholder="м"
+                                    type="number"
+                                    onChange={(e) => weekDataChangeHandle(e, day, 'minutes')}
                                 />
                             </div>
                         ))}
