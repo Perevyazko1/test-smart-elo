@@ -52,7 +52,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         queryFn: () => payrollService.getPayroll({
             date_from: currentWeek.date_from,
         }),
-        staleTime: Infinity,
     });
 
     useEffect(() => {

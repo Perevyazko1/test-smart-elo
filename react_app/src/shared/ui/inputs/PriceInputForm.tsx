@@ -36,8 +36,8 @@ export const PriceInputForm = (props: PriceInputProps) => {
                     fixedDecimalScale
                     allowNegative={false}
                     thousandSeparator=" "
-                    decimalSeparator="."
-                    placeholder="0.00"
+                    decimalSeparator=","
+                    placeholder="0,00"
                     className={twMerge(
                         'font-mono border-none text-end p-2',
                         !value && "text-gray-300",
