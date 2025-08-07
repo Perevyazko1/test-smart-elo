@@ -55,6 +55,15 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         }),
     });
 
+    useEffect(() => {
+        if (cashValue !== data?.data?.cash_payout) {
+            setCashValue(data?.data?.cash_payout);
+        }
+        if (descriptionValue !== data?.data?.description) {
+            setDescriptionValue(data?.data?.description);
+        }
+    }, [data?.data, currentWeek.weekNumber]);
+
     const debouncedUpdatePayroll = useDebounce(
         (data: {
             cash_payout?: number;
@@ -100,15 +109,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     }
 
     const payrollData = data?.data;
-
-    useEffect(() => {
-        if (cashValue !== data?.data?.cash_payout) {
-            setCashValue(data?.data?.cash_payout);
-        }
-        if (descriptionValue !== data?.data?.description) {
-            setDescriptionValue(data?.data?.description);
-        }
-    }, [data?.data, currentWeek.weekNumber]);
 
     return (
         <div className={'p-3 overflow-auto'}>
