@@ -8,7 +8,6 @@ import {payrollService} from "../../model/api.ts";
 
 import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
-import {formatNumber} from "@/shared/utils/formatNumber.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import type {IPayrollRow} from "@/entities/salary";
 
@@ -29,7 +28,6 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                 payroll_id: payrollId,
             });
         },
-        staleTime: Infinity,
     });
 
     const groupedData = useMemo(() => {

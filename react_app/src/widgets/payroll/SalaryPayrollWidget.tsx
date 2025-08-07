@@ -13,6 +13,7 @@ import type {IPayroll} from "@/entities/salary";
 import {payrollService} from "./model/api.ts";
 import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
 import {DotFilledIcon} from "@radix-ui/react-icons";
+import {toast} from "sonner";
 
 
 interface SalaryPayrollWidgetProps {
@@ -25,7 +26,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     const queryClient = useQueryClient();
     const [cashValue, setCashValue] = useState<number | null>();
     const [descriptionValue, setDescriptionValue] = useState<string | null>();
-    const [payrollData, setPayrollData] = useState<IPayroll | null>();
 
     const createPayrollMutation = useMutation({
         mutationFn: payrollService.createNewPayroll,
@@ -41,6 +41,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
             });
         },
         onSuccess: () => {
+            toast.success("Ведомость обновлена ✔️")
             queryClient.invalidateQueries({
                 queryKey: ['payroll', currentWeek.weekNumber],
             });
@@ -53,12 +54,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
             date_from: currentWeek.date_from,
         }),
     });
-
-    useEffect(() => {
-        setCashValue(data?.data?.cash_payout);
-        setDescriptionValue(data?.data?.description);
-        setPayrollData(data?.data);
-    }, [data?.data, currentWeek.weekNumber]);
 
     const debouncedUpdatePayroll = useDebounce(
         (data: {
@@ -104,6 +99,16 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         return Number(data?.data?.state) < Number(status);
     }
 
+    const payrollData = data?.data;
+
+    useEffect(() => {
+        if (cashValue !== data?.data?.cash_payout) {
+            setCashValue(data?.data?.cash_payout);
+        }
+        if (descriptionValue !== data?.data?.description) {
+            setDescriptionValue(data?.data?.description);
+        }
+    }, [data?.data, currentWeek.weekNumber]);
 
     return (
         <div className={'p-3 overflow-auto'}>
