@@ -93,7 +93,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                     behavior: 'smooth',
                     block: 'center'
                 });
-            }, 1000)
+            }, 2000)
         }
     });
 

@@ -117,7 +117,8 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             className={
                 twMerge(
                     'transition-all duration-300 ease-in-out',
-                    userInfo.is_closed ? 'bg-green-50' : '',
+                    userInfo.is_closed ? 'bg-green-50' :
+                        userInfo.is_locked ? 'bg-pink-50' :'',
                 )
             }
         >

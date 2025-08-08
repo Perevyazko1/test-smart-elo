@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'tasks',
     'salary',
 
+    'easyaudit',
     'django_celery_beat',
     'django_celery_results',
     'rest_framework',
@@ -47,12 +48,23 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+
+    # Сначала токен-аутентификация
+    'django_app.middleware.CustomAuthenticationMiddleware',
+
+    # Потом стандартная Django auth (сессии и request.user)
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+
     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # И только потом аудит
+    'django_app.middleware.RequestAndAuditMiddleware',
+    'easyaudit.middleware.easyaudit.EasyAuditMiddleware',
 ]
 
 ROOT_URLCONF = 'django_app.urls'
@@ -77,8 +89,6 @@ WSGI_APPLICATION = 'django_app.wsgi.application'
 ASGI_APPLICATION = 'django_app.asgi.application'
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -90,6 +100,7 @@ DATABASES = {
     }
 }
 
+# Redis
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -100,8 +111,6 @@ CHANNEL_LAYERS = {
 }
 
 # Password validation
-# https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -118,18 +127,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.1/topics/i18n/
-
 LANGUAGE_CODE = 'ru'
-
 TIME_ZONE = 'Europe/Moscow'
 USE_TZ = False
-
 USE_I18N = True
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.1/howto/static-files/
-
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
@@ -137,23 +140,23 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# DRF
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',  # Для поддержки сессий, если нужно
     ],
     'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ),
 }
 
+# CORS
 CORS_ORIGIN_ALLOW_ALL = True
-
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -163,7 +166,6 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 60 * 60 * 10
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
-
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 
 CACHES = {
@@ -184,22 +186,32 @@ TELEGRAM_LOGGING_TOKEN = TELEGRAM_BOT_TOKEN
 TELEGRAM_LOGGING_CHAT = TELEGRAM_CHAT_ID
 TELEGRAM_LOGGING_EMIT_ON_DEBUG = True
 
+DJANGO_EASY_AUDIT_WATCH_REQUEST_EVENTS = False
+
+import os
+import logging
+from django.utils.timezone import now
+
 LOGGING = {
-    'version': 1,
-    'handlers': {
-        'telegram': {
-            'level': 'ERROR',
-            'class': 'django_telegram_logging.handler.TelegramHandler',
-        },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'telegram'],
-            'level': 'INFO',
+
+    "loggers": {
+        "django.request": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+        "django.server": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
         },
     },
 }
