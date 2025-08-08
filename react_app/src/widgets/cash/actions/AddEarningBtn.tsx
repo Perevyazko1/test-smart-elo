@@ -116,7 +116,7 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                             disabled={disabled}
                             onClick={() => setModalOpen(true)}
                             className={twMerge([
-                                'text-sm p-2 pe-1 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black',
+                                'text-sm p-2 pe-1 opacity-25 hover:opacity-100 disabled:opacity-25 disabled:text-black noPrint',
                                 ["ДОП", "ЭЛО", "ЗАЙМ"].includes(earning_type) ? "text-green-800" : "text-yellow-800",
                             ])}
                         >

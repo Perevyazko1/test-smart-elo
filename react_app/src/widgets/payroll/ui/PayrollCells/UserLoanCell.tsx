@@ -27,7 +27,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
 
     const extraLoan = (userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0) !== 0 && (
         <>
-            <div className={'absolute bottom-0 left-0 right-0 h-1 w-full'}>
+            <div className={'absolute bottom-0 left-0 right-0 h-1 w-full noPrint'}>
                 <div
                     style={{
                         width: `${loanPercent}%`,
@@ -35,7 +35,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
                     className={'bg-purple-100 h-full'}/>
             </div>
 
-            <div className={'absolute bottom-[0.1em] left-1 text-[0.7em] font-bold'}>
+            <div className={'absolute bottom-[0.1em] left-1 text-[0.7em] font-bold noPrint'}>
                 <TT description={
                     `Погашено ${formatNumber(userInfo.end_loan_sum)} 
                     из ${formatNumber(userInfo.full_loan_sum)}`

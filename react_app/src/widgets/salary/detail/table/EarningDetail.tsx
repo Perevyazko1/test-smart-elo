@@ -1,6 +1,7 @@
 import type {IEarning} from "@/entities/salary";
 import {getUserName} from "@/shared/utils/getUserName.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
+import {toRuDate} from "@/shared/utils/date.ts";
 
 
 interface EarningDetailProps {
@@ -27,13 +28,13 @@ export const EarningDetail = (props: EarningDetailProps) => {
             </div>
             <div>
                 <div>Дата закрепления:</div>
-                <div>{earning.target_date}</div>
+                <div>{toRuDate(earning.target_date, false)}</div>
             </div>
 
             <hr/>
             <div>
                 <div>Дата создания:</div>
-                <div>{earning.created_at}</div>
+                <div>{toRuDate(earning.created_at, false)}</div>
             </div>
             <div>
                 <div>Комментарий зарплатный:</div>

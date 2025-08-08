@@ -20,7 +20,7 @@ export const Navbar = (props: NavbarProps) => {
     return (
         <div
             className={twMerge([
-                "sticky top-0 left-0 right-0 z-10",
+                "sticky top-0 left-0 right-0 z-10 noPrint",
                 "flex flex-row flex-nowrap items-center justify-between",
                 "bg-black text-white",
                 "h-10 gap-5 px-4",

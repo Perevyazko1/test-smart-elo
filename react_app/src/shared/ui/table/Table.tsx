@@ -11,7 +11,7 @@ export const Table = (props: TableProps) => {
     return (
         <table
             className={twMerge(
-                "min-w-full bg-white border border-gray-300 text-sm",
+                "w-full bg-white border border-gray-300 text-sm",
                 className
             )}
             {...otherProps}

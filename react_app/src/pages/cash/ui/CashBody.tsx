@@ -41,7 +41,7 @@ export const CashBody = (props: CashBodyProps) => {
     return (
         <>
             <div className={'min-h-full flex flex-col'}>
-                <div className={'text-[36px] border-2 border-black p-8 pt-4'}>
+                <div className={'text-[30px] border-2 border-black p-8 pt-4'}>
                     <div>Остаток</div>
                     <div className={'flex justify-between gap-10'}>
                         <div>Наличные:</div>

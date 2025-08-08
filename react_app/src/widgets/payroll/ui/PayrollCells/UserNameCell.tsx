@@ -56,7 +56,7 @@ export const UserNameCell = (props: UserNameCellProps) => {
                     <TT asChild description={'Заблокировать изменение суммы к выплате'}>
                         <Toggle
                             disabled={isPending}
-                            className={'cursor-pointer'}
+                            className={'cursor-pointer noPrint'}
                             pressed={userInfo.is_locked}
                             onPressedChange={() => mutateClb({
                                 id: userInfo.id,
@@ -85,7 +85,7 @@ export const UserNameCell = (props: UserNameCellProps) => {
                 <TT asChild description={`${userInfo.is_closed ? "Открыть" : "Закрыть"} неделю по сотруднику`}>
                     <Btn
                         disabled={userInfo.has_unconfirmed}
-                        className={'text-16 bg-transparent px-2'}
+                        className={'text-16 bg-transparent px-2 noPrint'}
                         name={'Payroll'}
                         onClick={closeWeekRowHandle}
                     >

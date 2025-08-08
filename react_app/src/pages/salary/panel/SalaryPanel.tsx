@@ -14,7 +14,7 @@ export const SalaryPanel = (props: SalaryPanelProps) => {
 
     return (
         <div className={twMerge([
-            'flex items-center gap-2 p-1 px-2 bg-blue-100 min-w-full',
+            'flex items-center gap-2 p-1 px-2 bg-blue-100 min-w-full noPrint',
             'border border-gray-400 text-nowrap'
         ])}>
             <div className={'flex items-center gap-2 min-w-0'}>

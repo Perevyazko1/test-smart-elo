@@ -1,20 +1,22 @@
 import type {IEarning} from "@/entities/salary";
 import {DetailRow} from "./DetailRow";
-import type {IWeek} from "@/shared/utils/date.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 
 
 interface DetailDayProps {
     earnings: IEarning[];
     date: string;
-    week: IWeek;
     startBalance: number;
     endBalance: number;
 }
 
 
 export const DetailDay = (props: DetailDayProps) => {
-    const {earnings, week, date, startBalance, endBalance} = props;
+    const {earnings: unsortedEarnings, date, startBalance, endBalance} = props;
+
+    const earnings = [...unsortedEarnings].sort((a, b) =>
+        new Date(a.cash_date).getTime() - new Date(b.cash_date).getTime()
+    );
 
     const positiveSum = earnings.reduce((acc, curr) =>
         curr.amount > 0 ? acc + curr.amount : acc, 0
@@ -30,6 +32,7 @@ export const DetailDay = (props: DetailDayProps) => {
                 <td className={"text-[2em]"} colSpan={4} rowSpan={2}>
                     {new Date(date).toLocaleDateString('ru-RU', {weekday: 'short'})}
                 </td>
+
                 <th>Н.БАЛАНС</th>
                 <th>Приход</th>
                 <th>Расход</th>

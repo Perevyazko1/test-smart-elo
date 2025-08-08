@@ -47,7 +47,7 @@ export const ConfirmEarningsBtn = (props: ConfirmEarningsBtnProps) => {
             onClick={clickHandle}
             disabled={updateEarnings.isPending}
             className={twMerge([
-                'text-green-800 p-2',
+                'text-green-800 p-2 noPrint',
                 active
                     ? ""
                     : "opacity-0 cursor-not-allowed pointer-events-none"

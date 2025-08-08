@@ -111,8 +111,8 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     const payrollData = data?.data;
 
     return (
-        <div className={'p-3 overflow-auto'}>
-            <div className={'flex gap-8 bg-yellow-100 p-3 pb-1 items-center'}>
+        <div className={'p-3 overflow-auto print:p-0'}>
+            <div className={'flex gap-8 bg-yellow-100 p-3 print:p-0 pb-1 items-center'}>
                 <div className={'flex flex-col'}>
                     <h1 className={"text-xl font-bold"}>
                         Ведомость за {currentWeek.weekNumber} нед.
@@ -138,7 +138,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                             onClick={() => setPayrollStatus(status as keyof typeof SALARY_STATUSES)}
                             key={status}
                             className={twMerge([
-                                'flex items-center gap-2 bg-transparent',
+                                'flex items-center gap-2 bg-transparent noPrint',
                                 data?.data?.state === status
                                     ? 'text-yellow-800'
                                     : Number(data?.data?.state) < Number(status)

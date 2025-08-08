@@ -35,7 +35,10 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
             amount: amount || undefined,
             user_id: user?.id || null,
             created_by: createdById,
-            target_date: target_date,
+            target_date: target_date ?
+                target_date.includes('T')
+                    ? target_date
+                    : (target_date + 'T00:00') : undefined,
             earning_type: earning_type,
             comment: about
         }
@@ -151,7 +154,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                             id={"target_date"}
                             disabled={!canSetDate}
                             className={'bg-white p-2'}
-                            type="date"
+                            type="datetime-local"
                             {...methods.register("target_date", {required: "Дата закрепления обязательна"})}
                         />
                     </div>

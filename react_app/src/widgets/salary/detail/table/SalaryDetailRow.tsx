@@ -9,7 +9,7 @@ import type {IEarning} from "@/entities/salary";
 import {AppModal} from "@/shared/ui/modal/AppModal.tsx";
 import {EarningDetail} from "@/widgets/salary/detail/table/EarningDetail.tsx";
 import {EditEarningBtn} from "@/widgets/cash/actions/EditEarningBtn.tsx";
-import {getToday} from "@/shared/utils/date.ts";
+import {getToday, toRuDate} from "@/shared/utils/date.ts";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import {usePermission} from "@/shared/utils/permissions.ts";
 import {APP_PERM} from "@/entities/user";
@@ -38,9 +38,15 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
         mutateRow.mutate();
     };
 
-    const canEdit = usePermission([
+    const isAdmin = usePermission([
         APP_PERM.ADMIN,
     ]);
+
+    const wagesAccess = usePermission([
+        APP_PERM.WAGES_PAGE,
+    ])
+
+    const canEdit = isAdmin || (wagesAccess && !earning.approval_by);
 
     return (
         <tr>
@@ -59,7 +65,7 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
                         />
                     }
                     title={
-                        `Начисление № ${earning.id} от ${earning.target_date}`
+                        `Начисление № ${earning.id} от ${toRuDate(earning.target_date, false)}`
                     }
                     description={
                         `Детализация по начислению`

@@ -123,7 +123,6 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             }
         >
             <FormProvider {...methods}>
-
                 <UserNameCell
                     mutateClb={mutate}
                     isPending={isPending}

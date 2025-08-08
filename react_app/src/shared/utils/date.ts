@@ -1,4 +1,4 @@
-import {getISOWeek, startOfISOWeek, endOfISOWeek, format, subWeeks, addWeeks} from 'date-fns';
+import {endOfISOWeek, format, getISOWeek, startOfISOWeek, subWeeks} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {useCallback, useEffect, useState} from 'react';
 
@@ -9,9 +9,9 @@ export interface IWeek {
     date_to: string;
 }
 
-export const toRuDate = (dateStr: string): string => {
+export const toRuDate = (dateStr: string, short: boolean = true): string => {
     const date = new Date(dateStr);
-    return format(date, 'd MMM yy', {locale: ru});
+    return format(date, short ? 'd MMM yy' : 'ddMMMyy HH:mm', {locale: ru});
 };
 
 export const generateWeeks = (count: number = 7): IWeek[] => {
@@ -37,7 +37,7 @@ export const generateWeeks = (count: number = 7): IWeek[] => {
     return weeks;
 };
 
-export const getToday = () => format(new Date(), 'yyyy-MM-dd');
+export const getToday = () => format(new Date(), 'yyyy-MM-dd\'T\'HH:mm');
 
 export interface UseWeeksReturn {
     weeks: IWeek[];

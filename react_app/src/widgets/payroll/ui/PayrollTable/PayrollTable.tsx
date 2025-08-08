@@ -70,7 +70,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
     return (
         <Table>
             <THead>
-            <tr>
+                <tr>
                     <PayrollTh
                         rowSpan={2}
                         className={'text-center'}

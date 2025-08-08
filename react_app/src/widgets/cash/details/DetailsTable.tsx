@@ -86,7 +86,6 @@ export const DetailsTable = (props: DetailsTableProps) => {
             {Object.entries(sortedGroupedEarnings).map(([date, item]) => (
                 <DetailDay
                     key={date}
-                    week={week}
                     date={date}
                     earnings={item.earnings}
                     startBalance={item.startBalance}
