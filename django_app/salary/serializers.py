@@ -102,83 +102,40 @@ class PayrollRowSerializer(serializers.ModelSerializer):
         return obj.user.permanent_department.name if obj.user.permanent_department else None
 
     def get_tax_sum(self, obj):
-        # Фильтруем уже загруженные данные в Python, а не в БД
-        all_earnings = obj.user.earnings.all()  # .all() здесь не делает нового запроса
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.approval_by is not None and
-                   e.earning_type == 'Налог') or None
+        return obj.annotated_tax_sum or None
 
     def get_balance_sum(self, obj: PayrollRow):
-        all_earnings = obj.user.earnings.all()  # .all() здесь не делает нового запроса
-        return sum(e.amount for e in all_earnings if
-                   e.target_date.date() < obj.payroll.date_from and
-                   e.approval_by is not None and
-                   not e.earning_type == 'ЗАЙМ')
+        return obj.annotated_balance_sum or None
 
     def get_card_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.approval_by is not None and
-                   e.earning_type == 'На карту') or None
+        return obj.annotated_card_sum or None
 
     def get_earned_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.approval_by is not None and
-                   e.earning_type == 'ЭЛО')
+        return obj.annotated_earned_sum or None
 
     def get_bonus_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.earning_type == 'ДОП')
+        return obj.annotated_bonus_sum or None
 
     def get_issued_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.approval_by is not None and
-                   e.earning_type == 'Выдача НАЛ') or None
+        return obj.annotated_issued_sum or None
 
     def get_ip_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.approval_by is not None and
-                   e.earning_type == 'ИП') or None
+        return obj.annotated_ip_sum or None
 
     def get_full_loan_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   e.earning_type == 'ЗАЙМ') or None
+        return obj.annotated_full_loan_sum or None
 
     def get_end_loan_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   e.earning_type == 'ПОГ.ЗАЙМА')
+        return obj.annotated_end_loan_sum or None
 
     def get_loan_sum(self, obj):
-        all_earnings = obj.user.earnings.all()
-        return sum(e.amount for e in all_earnings if
-                   obj.payroll.date_from <= e.target_date.date() <= obj.payroll.date_to and
-                   e.earning_type == 'ПОГ.ЗАЙМА') or None
+        return obj.annotated_loan_sum or None
 
-    def get_has_unconfirmed(self, obj: PayrollRow):
-        return obj.user.earnings.filter(
-            target_date__date__gte=obj.payroll.date_from,
-            target_date__date__lte=obj.payroll.date_to,
-            approval_by__isnull=True,
-        ).exists()
+    def get_has_unconfirmed(self, obj):
+        return obj.annotated_has_unconfirmed
 
-    def get_hide_balance(self, obj: PayrollRow):
-        return PayrollRow.objects.filter(
-            user=obj.user,
-            is_closed=False,
-            payroll__date_to__lt=obj.payroll.date_from,
-        ).exists()
+    def get_hide_balance(self, obj):
+        return obj.annotated_hide_balance
 
 
 class PayrollSerializer(serializers.ModelSerializer):
