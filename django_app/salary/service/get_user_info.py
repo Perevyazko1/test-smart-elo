@@ -53,7 +53,6 @@ def get_user_info(user_id: int, date_from: datetime, date_to: datetime):
         user_id=OuterRef('user_id'),
         target_date__date__gte=OuterRef('payroll__date_from'),
         target_date__date__lte=OuterRef('payroll__date_to'),
-        approval_by__isnull=False
     )
 
     balance_earnings = Earning.objects.filter(
