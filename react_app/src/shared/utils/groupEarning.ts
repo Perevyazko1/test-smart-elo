@@ -18,10 +18,11 @@ interface IGroupedByDateType {
 
 export const groupEarnings = (earnings: IEarning[]): IGroupedEarning[] => {
     const groups = earnings.reduce((acc, earning) => {
-        const key = `${earning.target_date}-${earning.comment}-${earning.amount}`;
+        const date = earning.target_date.split('T')[0];
+        const key = `${date}-${earning.comment}-${earning.amount}`;
         if (!acc[key]) {
             acc[key] = {
-                date: earning.target_date,
+                date: date,
                 name: earning.comment,
                 amount: earning.amount,
                 quantity: 0,
@@ -40,10 +41,11 @@ export const groupEarnings = (earnings: IEarning[]): IGroupedEarning[] => {
 
 export const groupEarningsByDateType = (earnings: IEarning[]): IGroupedByDateType[] => {
     const groups = earnings.reduce((acc, earning) => {
-        const key = `${earning.target_date}-${earning.earning_type}-${earning.amount > 0}`;
+        const date = earning.target_date.split('T')[0];
+        const key = `${date}-${earning.earning_type}-${earning.amount > 0}`;
         if (!acc[key]) {
             acc[key] = {
-                date: earning.target_date,
+                date: date,
                 earning_type: earning.earning_type,
                 sum: 0,
             };

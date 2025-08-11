@@ -6,7 +6,6 @@ from core.models import (
     Assignment,
     Product,
     ProductionStep,
-    OrderProduct,
 )
 
 from staff.models import Employee

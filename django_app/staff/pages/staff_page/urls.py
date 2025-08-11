@@ -1,15 +1,13 @@
-from rest_framework import routers
 from django.urls import path, include
+from rest_framework import routers
 
-from .views import StaffInfoViewSet, TransactionViewSet, get_assignment_counts, confirm_transactions
+from .views import StaffInfoViewSet, get_assignment_counts
 
 router = routers.DefaultRouter()
 router.register(r'staff_info', StaffInfoViewSet)
-router.register(r'transactions', TransactionViewSet)
 
 urlpatterns = [
     path('', include(router.urls)),
 
     path('get_assignment_counts/', get_assignment_counts),
-    path('confirm_transactions/', confirm_transactions),
 ]

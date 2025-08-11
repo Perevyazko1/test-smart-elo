@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from rangefilter.filters import DateRangeFilter
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm
-from .models import Employee, Department, Transaction, Audit
+from .models import Employee, Department, Audit
 
 
 class CustomUserAdmin(UserAdmin):
@@ -56,28 +56,6 @@ class CustomUserAdmin(UserAdmin):
 admin.site.register(Employee, CustomUserAdmin)
 
 admin.site.register(Department)
-
-
-@admin.register(Transaction)
-class TransactionAdmin(admin.ModelAdmin):
-    list_display = [
-        'add_date',
-        'transaction_type',
-        'details',
-        'amount',
-        'employee',
-        'inspector',
-    ]
-
-    list_filter = [
-        ('add_date', DateRangeFilter),
-        ('target_date', DateRangeFilter),
-        'employee',
-        'executor',
-        'inspector'
-    ]
-
-    search_fields = ['description']
 
 
 @admin.register(Audit)

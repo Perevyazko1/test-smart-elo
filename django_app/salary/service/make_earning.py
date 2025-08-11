@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 from typing import Optional
 
 from django.db import transaction
@@ -10,22 +10,31 @@ from staff.models import Employee
 def make_earning(
         user: Employee,
         amount: int,
-        target_date: date,
+        target_date: datetime,
         earning_type: str,
         created_by: Employee,
         approval_by: Optional[Employee] = None,
         comment: Optional[str] = None,
         earning_comment: Optional[str] = None,
 ) -> Earning:
+
+    day = target_date.date()
+
     payroll_list = Payroll.objects.filter(
-        date_to__lte=target_date,
-        date_from__gte=target_date,
+        date_from__lte=day,
+        date_to__gte=day,
     )
-    
+
+    print(
+        target_date.date(),
+        payroll_list.exists(),
+        amount
+    )
     if payroll_list.exists():
         payroll = payroll_list.first()
-        if int(payroll.state) < 2:
-            target_date = datetime.now().date()
+        print(int(payroll.state), int(payroll.state) > 1)
+        if int(payroll.state) > 1:
+            target_date = datetime.now()
 
     with transaction.atomic():
         earning = Earning.objects.create(

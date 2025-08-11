@@ -3,8 +3,8 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 
 from core.models import Assignment, OrderProduct, AssignmentCoExecutor
-from ...models import Department, Employee
 from tasks.models import TaskExecutor, Task
+from ...models import Department
 
 
 @api_view(['GET'])

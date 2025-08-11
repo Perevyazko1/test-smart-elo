@@ -20,7 +20,7 @@ from core.models import (
 )
 from salary.service.make_earning import make_earning
 from staff.models import (
-    Audit, Transaction,
+    Audit,
 )
 from .filters import TarifficationPageListFilter
 from .serializers import (
@@ -271,16 +271,6 @@ def set_post_tariffication(request):
             f'Производство ЭЛО - {assignment.order_product.product.name}'
         )
         if assignment.executor.piecework_wages:
-            Transaction.objects.create(
-                transaction_type='accrual',
-                target_date=datetime.datetime.now(),
-                details='wages',
-                amount=assignment.new_tariff.amount,
-                employee=assignment.executor,
-                executor=request.user,
-                inspector=request.user,
-                description=description,
-            )
             make_earning(
                 earning_type="ЭЛО",
                 amount=assignment.new_tariff.amount,

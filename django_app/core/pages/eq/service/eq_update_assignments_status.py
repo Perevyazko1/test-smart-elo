@@ -5,10 +5,10 @@ from django.db import transaction
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import EqNotificationActions, ws_update_notification, ws_send_to_department, ws_group_updates
-from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep
+from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep, Order
 from core.signals import update_assignments_and_clean_cache
 from salary.service.make_earning import make_earning
-from staff.models import Department, Employee, Transaction, Audit
+from staff.models import Department, Employee, Audit
 
 
 class EqUpdateAssignmentsStatus:
@@ -32,7 +32,7 @@ class EqUpdateAssignmentsStatus:
             self.employee = Employee.objects.get(id=target_id)
 
     def _update_target_numbers(self):
-        qs_filter = {
+        qs_filter: dict[str, int | list[int] | str] = {
             "id__in": self.assignment_ids
         }
 
@@ -40,14 +40,11 @@ class EqUpdateAssignmentsStatus:
             case 'await_to_in_work':
                 self.action_name = 'Взял в работу'
 
-                update_data = {
+                update_data: dict[str, int | list[int] | str | Employee | datetime | None | bool] = {
                     'status': 'in_work',
                     'executor': self.employee,
                     'appointment_date': datetime.now(),
                 }
-
-                if not self.employee.piecework_wages:
-                    update_data["amount"] = 0
 
                 qs_filter["status"] = "await"
 
@@ -67,14 +64,6 @@ class EqUpdateAssignmentsStatus:
                 }
                 qs_filter["status"] = "in_work"
 
-                if self.department.piecework_wages:
-                    if self.employee.piecework_wages:
-                        assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
-                        if assignment_example.new_tariff:
-                            update_data["amount"] = assignment_example.new_tariff.amount
-                    else:
-                        update_data["amount"] = 0
-
             case 'in_work_to_await_distribute':
                 self.action_name = 'Вернул в распределение'
                 update_data = {
@@ -82,11 +71,6 @@ class EqUpdateAssignmentsStatus:
                     'executor': self.original_user,
                     'appointed_by_boss': False,
                 }
-
-                if self.department.piecework_wages:
-                    assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
-                    if assignment_example.new_tariff:
-                        update_data["amount"] = assignment_example.new_tariff.amount
 
                 qs_filter["status"] = "in_work"
 
@@ -102,7 +86,6 @@ class EqUpdateAssignmentsStatus:
                 }
 
                 qs_filter["status"] = "in_work"
-                # qs_filter["assembled"] = True
 
             case 'ready_to_in_work':
                 self.action_name = 'Вернул в работу'
@@ -124,11 +107,6 @@ class EqUpdateAssignmentsStatus:
                 }
 
                 qs_filter["status"] = "in_work"
-
-                if self.department.piecework_wages:
-                    assignment_example = Assignment.objects.get(id=self.assignment_ids[0])
-                    if assignment_example.new_tariff:
-                        update_data["amount"] = assignment_example.new_tariff.amount
 
                 AssignmentCoExecutor.objects.filter(
                     assignment__id__in=self.assignment_ids,
@@ -179,7 +157,7 @@ class EqUpdateAssignmentsStatus:
         ).exists()
 
     def _get_order_all_ready(self) -> bool:
-        target_order = self.order_product.order
+        target_order: Order = self.order_product.order
 
         for related_order_product in target_order.order_products.all():
             if related_order_product.status != '1':
@@ -264,7 +242,7 @@ class EqUpdateAssignmentsStatus:
                     )
                     update_assignments_and_clean_cache(
                         assignments_qs=assignments,
-                        order_product__id=order_product,
+                        order_product__id=order_product.id,
                         department__id=department.id,
                         assembled=True
                     )
@@ -334,95 +312,66 @@ class EqUpdateAssignmentsStatus:
         # Флаг для отправки уведомления на обновление ЗП
         tariff_created = False
         now = datetime.now()
-
-        for assignment_id in self.assignment_ids:
-            target_assignment = Assignment.objects.get(
-                id=assignment_id,
+        if not self.department.piecework_wages:
+            Assignment.objects.filter(
+                id__in=self.assignment_ids,
+            ).update(
+                tariffication_date=now,
             )
-            if target_assignment.date_completion:
-                days_diff = (now - target_assignment.date_completion).days
-                # Если разница больше 3 дней - используем текущую дату
-                if days_diff > 3:
-                    tariffication_date = now
-                # Если разница меньше или равна 3 дням - используем дату готовности
-                else:
-                    tariffication_date = target_assignment.date_completion
-            else:
-                # Если дата готовности не установлена - используем текущую дату
-                tariffication_date = now
-
-            if not self.department.piecework_wages:
-                target_assignment.tariffication_date = tariffication_date
-                target_assignment.save()
-                continue
-
-            if target_assignment.new_tariff and not target_assignment.tariffication_date:
-                # Проверяем разницу между датой готовности и текущей датой
-
-                target_assignment.tariffication_date = tariffication_date
-                target_assignment.save()
-
-                if target_assignment.new_tariff.amount:
-                    tariff_created = True
-
-                    co_executors = AssignmentCoExecutor.objects.filter(
-                        assignment=target_assignment
-                    )
-                    description = (
-                        f'{target_assignment.department.name} - '
-                        f'Соисполнитель ЭЛО - {self.order_product.product.name}'
-                    )
-                    for co_executor in co_executors:
-                        if co_executor.wages_amount:
-                            make_earning(
-                                earning_type="ЭЛО",
-                                amount=co_executor.wages_amount,
-                                user=co_executor.co_executor,
-                                created_by=target_assignment.inspector,
-                                approval_by=target_assignment.inspector,
-                                target_date=tariffication_date,
-                                comment=description,
-                                earning_comment=str(target_assignment),
-                            )
-
-                            Transaction.objects.create(
-                                target_date=tariffication_date,  # Используем вычисленную дату
-                                transaction_type='accrual',
-                                details='wages',
-                                amount=co_executor.wages_amount,
-                                employee=co_executor.co_executor,
-                                executor=target_assignment.inspector,
-                                inspector=target_assignment.inspector,
-                                description=description,
-                            )
-
-                    description = (
-                        f'{target_assignment.department.name} - '
-                        f'Производство ЭЛО - '
-                        f'{self.order_product.product.name}'
-                    )
-
-                    if target_assignment.amount:
-                        make_earning(
-                            user=target_assignment.executor,
-                            amount=target_assignment.amount,
-                            target_date=tariffication_date,
-                            created_by=target_assignment.inspector,
-                            approval_by=target_assignment.inspector,
-                            comment=description,
-                            earning_type="ЭЛО",
-                            earning_comment=str(target_assignment),
+        else:
+            for assignment_id in self.assignment_ids:
+                target_assignment = Assignment.objects.get(id=assignment_id)
+                # Если есть тариф, и еще нет даты тарифа
+                if target_assignment.new_tariff and not target_assignment.tariffication_date:
+                    if target_assignment.new_tariff.amount:
+                        earning = None
+                        co_executors = AssignmentCoExecutor.objects.filter(
+                            assignment=target_assignment
                         )
-                        Transaction.objects.create(
-                            target_date=tariffication_date,
-                            transaction_type='accrual',
-                            details='wages',
-                            amount=target_assignment.amount,
-                            employee=target_assignment.executor,
-                            executor=target_assignment.inspector,
-                            inspector=target_assignment.inspector,
-                            description=description,
+                        description = (
+                            f'{target_assignment.department.name} - '
+                            f'Соисполнитель ЭЛО - {self.order_product.product.name}'
                         )
+                        for executor in co_executors:
+                            if executor.co_executor.piecework_wages:
+                                tariff_created = True
+                                earning = make_earning(
+                                    earning_type="ЭЛО",
+                                    amount=executor.amount,
+                                    user=executor.co_executor,
+                                    created_by=target_assignment.inspector,
+                                    approval_by=target_assignment.inspector,
+                                    target_date=target_assignment.date_completion,
+                                    comment=description,
+                                    earning_comment=str(target_assignment),
+                                )
+
+                        description = (
+                            f'{target_assignment.department.name} - '
+                            f'Производство ЭЛО - '
+                            f'{self.order_product.product.name}'
+                        )
+
+                        if target_assignment.amount:
+                            if target_assignment.executor.piecework_wages:
+                                tariff_created = True
+                                earning = make_earning(
+                                    user=target_assignment.executor,
+                                    amount=target_assignment.amount,
+                                    target_date=target_assignment.date_completion,
+                                    created_by=target_assignment.inspector,
+                                    approval_by=target_assignment.inspector,
+                                    comment=description,
+                                    earning_type="ЭЛО",
+                                    earning_comment=str(target_assignment),
+                                )
+
+                        if earning is not None:
+                            target_assignment.tariffication_date = earning.target_date
+                        else:
+                            target_assignment.tariffication_date = now
+
+                        target_assignment.save()
 
         if tariff_created:
             ws_send_to_department(

@@ -138,7 +138,6 @@ export const EqBody = () => {
         return isDragging ? 'block' : 'none';
     }, [isDragging])
 
-    console.log("ФИЛЬТРА", filtersReady);
     return (
         <div className={'d-flex justify-content-center position-relative'} style={{
             background: "var(--bs-gray-300)",

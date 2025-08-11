@@ -188,7 +188,7 @@ class TaskSerializer(serializers.ModelSerializer):
         set_executors(**executors_params)
 
         if verified_at:
-            task_confirmation_instructions(task, verified_at)
+            task_confirmation_instructions(task)
 
         task.refresh_from_db()
 

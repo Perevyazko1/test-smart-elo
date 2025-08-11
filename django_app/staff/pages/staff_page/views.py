@@ -1,19 +1,13 @@
-from django.http import JsonResponse
 from django.db.models import Sum, Min, Max, Q
-
-from django_filters.rest_framework import DjangoFilterBackend
-
+from django.http import JsonResponse
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
-from rest_framework.filters import OrderingFilter
 
 from core.models import Assignment, ProductPicture, AssignmentCoExecutor
-from staff.models import Employee, Transaction
-
+from staff.models import Employee
+from .filters import StaffInfoModelFilter
 from .lib.range_info import get_range_info
-
-from .serializers import StaffInfoSerializer, TransactionSerializer
-from .filters import StaffInfoModelFilter, TransactionModelFilter
+from .serializers import StaffInfoSerializer
 
 
 class StaffInfoViewSet(viewsets.ModelViewSet):
@@ -28,23 +22,6 @@ class StaffInfoViewSet(viewsets.ModelViewSet):
 
         context['range_info'] = get_range_info(start_date, end_date)
         return context
-
-
-class TransactionViewSet(viewsets.ModelViewSet):
-    queryset = Transaction.objects.all()
-    serializer_class = TransactionSerializer
-    filterset_class = TransactionModelFilter
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
-    ordering_fields = ['inspector']
-
-    def update(self, request, *args, **kwargs):
-        # Переопределяем обновление объекта, что бы он возвращал полный объект
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return self.retrieve(request, *args, **kwargs)
 
 
 @api_view(['GET'])
@@ -165,50 +142,3 @@ def get_assignment_counts(request):
         )
 
     return JsonResponse({'results': data}, json_dumps_params={"ensure_ascii": False})
-
-
-@api_view(['POST'])
-def confirm_transactions(request):
-    start_date = request.data.get('start_date', None)
-    end_date = request.data.get('end_date', None)
-    by_target_date = request.data.get('by_target_date', None)
-    ids: [] = request.data.get('ids', None)
-    target_list = request.data.get('target_list', None)
-    wages_only = request.data.get('wages_only', None)
-
-    user = request.user
-
-    if None in [start_date, end_date, by_target_date, ids, target_list, wages_only]:
-        return JsonResponse({'error': 'Не корректные данные запроса'}, status=404)
-
-    target_ids = []
-
-    attention_users = Employee.objects.filter(
-        attention=True
-    )
-
-    for user_id in ids:
-        if attention_users.filter(id=user_id).exists():
-            continue
-        target_ids.append(user_id)
-
-    filter_params = {
-        "inspector__isnull": True,
-        f"{'target_date' if by_target_date else 'add_date'}__date__gte": start_date,
-        f"{'target_date' if by_target_date else 'add_date'}__date__lte": end_date,
-        "employee__id__in": target_ids,
-        "transaction_type__in": ['accrual', 'debiting'] if target_list == 'wages' else ['cash', 'card', 'tax']
-    }
-
-    if wages_only:
-        filter_params['details__in'] = ['wages', 'prize', 'fine']
-
-    target_transactions = Transaction.objects.filter(
-        **filter_params
-    )
-
-    for transaction in target_transactions:
-        transaction.inspector = user
-        transaction.save()
-
-    return JsonResponse({'result': 'ok'}, json_dumps_params={"ensure_ascii": False})
