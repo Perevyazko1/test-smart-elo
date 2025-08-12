@@ -28,6 +28,7 @@ class Employee(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ['last_name', 'first_name']
 
     # Пин код для входа в приложение
     pin_code = models.CharField('Пин код для входа', max_length=6, unique=True)
@@ -75,8 +76,8 @@ class Employee(AbstractUser):
     attention = models.BooleanField(default=False)
 
     def __str__(self):
-        if self.first_name:
-            return '{}'.format(f'{self.first_name} {self.last_name}')
+        if self.first_name and self.last_name:
+            return '{}'.format(f'{self.last_name} {self.first_name}')
         return self.username
 
     def get_initials(self):
