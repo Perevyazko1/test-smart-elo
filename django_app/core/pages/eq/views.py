@@ -185,29 +185,30 @@ def update_assignments(request):
                         assignment=assignment
                     )
                     for co_executor in co_executors:
-                        if co_executor.wages_amount:
+                        if co_executor.co_executor.piecework_wages:
                             make_earning(
                                 earning_type="ЭЛО",
                                 amount=-co_executor.wages_amount,
                                 user=co_executor.co_executor,
                                 created_by=user,
                                 approval_by=user,
-                                target_date=datetime.now().date(),
+                                target_date=datetime.now(),
                                 comment=description,
                                 earning_comment=str(assignment),
                             )
 
                     if assignment.amount:
-                        make_earning(
-                            earning_type="ЭЛО",
-                            amount=-assignment.amount,
-                            user=assignment.executor,
-                            created_by=user,
-                            approval_by=user,
-                            target_date=datetime.now().date(),
-                            comment=description,
-                            earning_comment=str(assignment),
-                        )
+                        if assignment.executor.piecework_wages:
+                            make_earning(
+                                earning_type="ЭЛО",
+                                amount=-assignment.amount,
+                                user=assignment.executor,
+                                created_by=user,
+                                approval_by=user,
+                                target_date=datetime.now(),
+                                comment=description,
+                                earning_comment=str(assignment),
+                            )
 
         actualized_assembled(op)
 

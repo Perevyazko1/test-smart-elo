@@ -25,11 +25,6 @@ def make_earning(
         date_to__gte=day,
     )
 
-    print(
-        target_date.date(),
-        payroll_list.exists(),
-        amount
-    )
     if payroll_list.exists():
         payroll = payroll_list.first()
         print(int(payroll.state), int(payroll.state) > 1)
