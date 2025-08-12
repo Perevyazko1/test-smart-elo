@@ -271,16 +271,18 @@ def set_post_tariffication(request):
             f'Производство ЭЛО - {assignment.order_product.product.name}'
         )
         if assignment.executor.piecework_wages:
-            make_earning(
+            earning = make_earning(
                 earning_type="ЭЛО",
                 amount=assignment.new_tariff.amount,
                 user=assignment.executor,
                 created_by=request.user,
                 approval_by=request.user,
-                target_date=datetime.datetime.now().date(),
+                target_date=assignment.date_completion,
                 comment=description,
                 earning_comment=str(assignment),
             )
+            assignment.tariffication_date = earning.target_date
+            assignment.save()
 
     # Создаем аудит
     detail = (
