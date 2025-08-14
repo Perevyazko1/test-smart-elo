@@ -23,10 +23,11 @@ interface AddEarningBtnProps {
     info: string;
     children?: ReactNode;
     targetIsCashDate?: boolean;
+    amount?: number;
 }
 
 export const AddEarningBtn = (props: AddEarningBtnProps) => {
-    const {earning_type, info, user, target_date, disabled, about, children, targetIsCashDate = false} = props;
+    const {earning_type, amount, info, user, target_date, disabled, about, children, targetIsCashDate = false} = props;
     const queryClient = useQueryClient();
     const {currentUser} = useCurrentUser();
 
@@ -134,9 +135,10 @@ export const AddEarningBtn = (props: AddEarningBtnProps) => {
                     target_date={target_date}
                     disabled={createEarningMutation.isPending}
                     earning_type={earning_type}
-                    createdById={1}
+                    createdById={currentUser!.id!}
                     user={user}
                     onSubmit={submitHandle}
+                    amount={amount}
                 />
             }
         />

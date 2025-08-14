@@ -69,8 +69,8 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
 
     return (
         <Table>
-            <THead>
-                <tr>
+            <THead className={'sticky top-0 z-10'}>
+                <tr className={'relative'}>
                     <PayrollTh
                         rowSpan={2}
                         className={'text-center'}
@@ -85,6 +85,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                     <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
                     <PayrollTh className={'bg-blue-100'}>К выплате <br/>Налог</PayrollTh>
                     <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>П.ИТОГ</PayrollTh>
 
                     <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
                     <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
@@ -101,7 +102,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                         Комментарий
                     </PayrollTh>
                 </tr>
-                <tr>
+                <tr className={'z-2'}>
                     <PayrollTh><NiceNum value={totalBalance}/></PayrollTh>
                     <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
 
@@ -115,6 +116,20 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                         <NiceNum value={totalTaxPayout}/></PayrollTh>
                     <PayrollTh className={'bg-blue-100 font-bold'}>
                         <NiceNum value={totalLoanPayout}/></PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>
+                        <sup>
+                            <NiceNum value={
+                                totalBalance +
+                                totalBonus +
+                                totalEarned -
+                                totalCashPayout -
+                                totalCardPayout -
+                                totalIpPayout -
+                                totalTaxPayout -
+                                totalLoanPayout
+                            } className={'text-gray-500'}/>
+                        </sup>
+                    </PayrollTh>
 
                     <PayrollTh
                         className={'bg-purple-50 font-bold'}
@@ -159,12 +174,10 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                         }/>
                     </PayrollTh>
                 </tr>
-                <tr>
-                    <th colSpan={10}><br/></th>
-                </tr>
             </THead>
 
             <tbody>
+            <tr><td colSpan={15}>-----</td></tr>
             {groupedData && Object.entries(groupedData).map(([departmentName, earnings]) => (
                 <PayrollDepartmentInfo
                     week={currentWeek}

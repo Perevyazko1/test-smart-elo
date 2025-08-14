@@ -7,7 +7,7 @@ from httpx import Response
 from pydantic import BaseModel
 
 # Настройка логирования
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.ERROR)  # Changed from INFO to ERROR
 logger = logging.getLogger(__name__)
 
 # Определяем тип переменную для дженерика
@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     SKLAD_API_TOKEN: str = "b6cbd1444a9cf14ee0c03efa27933a6c9cbbed14"
     SKLAD_API_URL: str = "https://api.moysklad.ru/api/remap/1.2"
     SKLAD_API_TIMEOUT: int = 30
-    SKLAD_API_RETRIES: int = 2
+    SKLAD_API_RETRIES: int = 3
     SKLAD_API_SLEEP_TIME: float = 1
 
     @staticmethod
@@ -61,9 +61,6 @@ class SkladClient:
 
         while retries < self.client_settings.SKLAD_API_RETRIES:
             try:
-                logger.info(
-                    f"🔄 Попытка {retries + 1} из {self.client_settings.SKLAD_API_RETRIES} для {method.upper()} {args[0]}")
-
                 response = getattr(self.client, method)(*args, **kwargs)
 
                 # Проверяем статус код
@@ -71,7 +68,6 @@ class SkladClient:
 
                 # Для DELETE запросов возвращаем просто Response объект
                 if method == "delete":
-                    logger.info(f"✅ Успешный запрос {method.upper()} {args[0]}")
                     return response  # Возвращаем объект Response без обработки данных
 
                 # Затем парсим JSON для других методов
@@ -86,8 +82,6 @@ class SkladClient:
                 if isinstance(data, dict) and "errors" in data:
                     logger.error(f"❌ Ошибка от MoySklad: {data['errors']}")
                     raise ValueError(f"Ошибка в ответе API: {data['errors']}")
-
-                logger.info(f"✅ Успешный запрос {method.upper()} {args[0]}")
 
                 # Если response_type это Pydantic модель, создаем экземпляр
                 if hasattr(response_type, '__annotations__') and issubclass(response_type, BaseModel):
@@ -119,7 +113,6 @@ class SkladClient:
 
             retries += 1
             if retries < self.client_settings.SKLAD_API_RETRIES:
-                logger.info(f"⏳ Ожидание {self.client_settings.SKLAD_API_SLEEP_TIME} с перед следующей попыткой...")
                 sleep(self.client_settings.SKLAD_API_SLEEP_TIME)
 
         # Если дошли сюда, значит все попытки исчерпаны
@@ -127,48 +120,22 @@ class SkladClient:
         logger.error(error_msg)
         raise Exception(error_msg)
 
-    def get(self, url: str, response_type: Type[T] = Dict) -> T:
+    def get(self, path: str, response_type: Type[T] = Dict, params: Optional[Dict] = None) -> T:
         """
-        Выполняет GET запрос с возможностью указания ожидаемого типа ответа
+            GET с поддержкой query-параметров (params кодируются httpx автоматически).
+            path — это относительный путь, например: "entity/customerorder"
+        """
 
-        Args:
-            url: URL для запроса
-            response_type: Ожидаемый тип ответа (Dict, Pydantic модель и т.д.)
+        return self._retry_request("get", response_type, path, params=params)
 
-        Returns:
-            Объект указанного типа
-        """
-        return self._retry_request("get", response_type, url)
+    def post(self, path: str, data: Dict, response_type: Type[T] = Dict, params: Optional[Dict] = None) -> T:
+        return self._retry_request("post", response_type, path, json=data, params=params)
 
-    def post(self, url: str, data: Dict, response_type: Type[T] = Dict) -> T:
-        """
-        Выполняет POST запрос с возможностью указания ожидаемого типа ответа
-        """
-        return self._retry_request("post", response_type, url, json=data)
+    def put(self, path: str, data: Dict, response_type: Type[T] = Dict, params: Optional[Dict] = None) -> T:
+        return self._retry_request("put", response_type, path, json=data, params=params)
 
-    def put(self, url: str, data: Dict, response_type: Type[T] = Dict) -> T:
-        """
-        Выполняет PUT запрос с возможностью указания ожидаемого типа ответа
-        """
-        return self._retry_request("put", response_type, url, json=data)
-
-    def delete(self, url: str, response_type: Type[T] = Dict) -> T:
-        """
-        Выполняет PUT запрос с возможностью указания ожидаемого типа ответа
-        """
-        return self._retry_request("delete", response_type, url)
-
-    def get_image_data(self, url: str):
-        """
-        Выполняет GET запрос с возможностью получения данных из изображения
-
-        Args:
-            url: URL для запроса
-
-        Returns:
-            Данные изображения в виде байтов
-        """
-        return self._retry_request("get", bytes, url)
+    def delete(self, path: str, response_type: Type[T] = Dict, params: Optional[Dict] = None) -> T:
+        return self._retry_request("delete", response_type, path, params=params)
 
     def download_image(self, url: str) -> Optional[Response]:
         """Загрузка и кодирование изображения в base64"""

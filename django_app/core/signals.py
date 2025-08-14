@@ -1,5 +1,5 @@
 from django.db.models import QuerySet,Sum
-from django.db.models.signals import post_save, post_delete
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 
@@ -20,12 +20,12 @@ def clean_all_eq_card_info_cache(order_product__id: int, department__id: int):
     cache.delete_pattern(f'eq_card_{order_product__id}_{department__id}_*')
 
 
-@receiver([post_save, post_delete], sender=Assignment)
+@receiver([post_save, pre_delete], sender=Assignment)
 def clear_assignment_cache(sender, instance: Assignment, **kwargs):
     clean_all_eq_card_info_cache(instance.order_product.id, instance.department.id)
 
 
-@receiver([post_save, post_delete], sender=AssignmentCoExecutor)
+@receiver([post_save, pre_delete], sender=AssignmentCoExecutor)
 def clear_assignment_cache(sender, instance: AssignmentCoExecutor, **kwargs):
     if instance.assignment.department.piecework_wages and instance.assignment.new_tariff:
         if instance.assignment.executor.piecework_wages:

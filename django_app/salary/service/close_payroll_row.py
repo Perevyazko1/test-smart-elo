@@ -1,4 +1,5 @@
 from salary.models import PayrollRow, Earning
+from salary.utils import annotate_payroll_rows
 
 
 def payroll_row_close(payroll_row_id: int, close: bool):
@@ -15,5 +16,6 @@ def payroll_row_close(payroll_row_id: int, close: bool):
     payroll_row.is_closed = close
     payroll_row.save()
 
-    payroll_row.refresh_from_db()
-    return payroll_row
+    return annotate_payroll_rows(
+        PayrollRow.objects.filter(id=payroll_row.id)
+    ).first()

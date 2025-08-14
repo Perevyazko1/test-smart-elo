@@ -17,6 +17,13 @@ class SkladListMetadata(BaseModel):
         extra = "ignore"
 
 
+class SkladListNoExpand(BaseModel):
+    meta: SkladListMetadata
+
+    class Config:
+        extra = "ignore"
+
+
 class SkladApiListResponse(BaseModel, Generic[G]):
     meta: SkladListMetadata
     rows: list[G]
@@ -32,6 +39,10 @@ class SkladBaseMetadata(BaseModel):
 
     class Config:
         extra = "ignore"
+
+
+class SkladImageMetadata(SkladBaseMetadata):
+    downloadHref: str
 
 
 class SkladState(BaseModel):
@@ -56,13 +67,62 @@ class ImageMetadata(BaseModel):
 
 
 class SkladAttribute(BaseModel):
-    # meta: SkladBaseMetadata
     id: str
     name: str
     type: str
-    value: Optional[str | bool] = None
+    value: Optional[str | bool | int | dict | list] = None
 
-    # description: Optional[str]
+    class Config:
+        extra = "ignore"
+
+
+
+class SkladProject(BaseModel):
+    id: str
+    name: str
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladProductImage(BaseModel):
+    filename: str
+    meta: SkladImageMetadata
+    miniature: SkladImageMetadata
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladProduct(BaseModel):
+    id: str
+    name: str
+    pathName: str
+    updated: str
+    images: Optional[SkladListNoExpand] = None
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladPosition(BaseModel):
+    id: str
+    assortment: SkladProduct
+    price: int
+    quantity: float
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladOrderExpandProjectPositionsAssortment(BaseModel):
+    id: str
+    name: str
+    moment: str
+    sum: int
+    project: Optional[SkladProject] | None = None
+    attributes: Optional[list[SkladAttribute]] = None
+    positions: SkladApiListResponse[SkladPosition]
 
     class Config:
         extra = "ignore"

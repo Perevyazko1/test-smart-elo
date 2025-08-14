@@ -11,11 +11,12 @@ interface UserLoanCellProps {
     week: IWeek;
     disabled: boolean;
     className?: string;
+    amount?: number;
 }
 
 
 export const UserLoanCell = (props: UserLoanCellProps) => {
-    const {userInfo, className, week, disabled} = props;
+    const {userInfo, amount, className, week, disabled} = props;
 
 
     const loanPercent = 100 - Math.abs(
@@ -62,6 +63,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
             earning_type={"ПОГ.ЗАЙМА"}
             about={`Списание ЗП в счет погашения займа нед ${week.weekNumber}`}
             extra={extraLoan}
+            amount={amount}
         />
     );
 };

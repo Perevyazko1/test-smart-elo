@@ -51,6 +51,7 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+
   elo_celery_worker:
     build:
       context: ./django_app
@@ -85,6 +86,7 @@ services:
       - .env.docker.prod
     networks:
       - app-network
+
   elo_client_build:
     build:
       context: ./new_react

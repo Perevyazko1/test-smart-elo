@@ -111,6 +111,16 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
         (userInfo.tax_sum || 0) +
         (userInfo.loan_sum || 0)
 
+    const prevTotal =
+        (userInfo.balance_sum || 0) +
+        (userInfo.earned_sum || 0) +
+        (userInfo.bonus_sum || 0) -
+        (userInfo.cash_payout || 0) -
+        (userInfo.ip_payout || 0) -
+        (userInfo.card_payout || 0) -
+        (userInfo.tax_payout || 0) -
+        (userInfo.loan_payout || 0)
+
     return (
         <tr
             id={`payrollRow${userInfo.user.id}`}
@@ -118,7 +128,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 twMerge(
                     'transition-all duration-300 ease-in-out',
                     userInfo.is_closed ? 'bg-green-50' :
-                        userInfo.is_locked ? 'bg-pink-50' :'',
+                        userInfo.is_locked ? 'bg-pink-50' : '',
                 )
             }
         >
@@ -193,9 +203,24 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     disabled={!statusLessThen("5") || userInfo.is_locked}
                 />
 
+                <td className={twMerge(
+                    "text-end bg-blue-100",
+                    userInfo.hide_balance ? "text-blue-100" : "text-black"
+                )}>
+                    <TT description={`Подытог после проведения расчета ${formatNumber(prevTotal, false)}`}>
+                        <sup>
+                            <NiceNum
+                                className={userInfo.hide_balance ? "text-transparent" : 'text-gray-500'}
+                                value={userInfo.hide_balance ? null : prevTotal}
+                            />
+                        </sup>
+                    </TT>
+                </td>
+
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.issued_sum}
+                    amount={(userInfo.issued_sum || 0) + (userInfo.cash_payout || 0)}
                     info={
                         !statusLessThen("6") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
@@ -212,6 +237,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.ip_sum}
+                    amount={(userInfo.ip_sum || 0) + (userInfo.ip_payout || 0)}
                     info={
                         !statusLessThen("6") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
@@ -228,6 +254,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.card_sum}
+                    amount={(userInfo.card_sum || 0) + (userInfo.card_payout || 0)}
                     info={
                         !statusLessThen("6") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
@@ -244,6 +271,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                 <UserAddCell
                     className={'bg-purple-50'}
                     value={userInfo.tax_sum}
+                    amount={(userInfo.tax_sum || 0) + (userInfo.tax_payout || 0)}
                     info={
                         !statusLessThen("6") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
@@ -259,6 +287,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
                 <UserLoanCell
                     className={'bg-purple-50'}
+                    amount={(userInfo.loan_sum || 0) + (userInfo.loan_payout || 0)}
                     disabled={!statusLessThen("4") || userInfo.is_closed}
                     week={week}
                     userInfo={userInfo}

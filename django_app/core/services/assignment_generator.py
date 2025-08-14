@@ -88,6 +88,7 @@ class AssignmentGenerator:
                     }
                 )
                 return
+
         else:
             """Делаем выборку этапов производства исключая Конструкторов, Старт и Готово"""
             production_steps = ProductionStep.objects.filter(

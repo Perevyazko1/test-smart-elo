@@ -164,11 +164,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                         disabled={disabled}
                         type="submit"
                     >
-                        {amount ?
-                            "Изменить"
-                            :
-                            "Создать"
-                        }
+                        Подтвердить
                     </Btn>
                 </form>
             </FormProvider>

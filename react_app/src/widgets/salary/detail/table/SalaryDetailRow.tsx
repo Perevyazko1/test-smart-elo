@@ -44,9 +44,13 @@ export const SalaryDetailRow = (props: SalaryDetailRowProps) => {
 
     const wagesAccess = usePermission([
         APP_PERM.WAGES_PAGE,
-    ])
+    ]);
 
-    const canEdit = isAdmin || (wagesAccess && !earning.approval_by);
+    const createdAt = new Date(earning.created_at);
+    const now = new Date();
+    const hoursSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60 * 60);
+
+    const canEdit = isAdmin || (wagesAccess && (!earning.approval_by || hoursSinceCreation <= 1));
 
     return (
         <tr>

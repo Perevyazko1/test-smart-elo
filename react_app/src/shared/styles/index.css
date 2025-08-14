@@ -150,9 +150,14 @@ body {
     }
 }
 
-table, th, td {
+table, td {
     border: 1px solid #b6b6b6;
     border-collapse: collapse;
+}
+
+th {
+    outline: 1px solid #868686;
+    outline-offset: -2px;
 }
 
 td {

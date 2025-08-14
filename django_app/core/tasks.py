@@ -1,8 +1,9 @@
 from celery import shared_task
 
-from core.api_moy_sklad.services.import_orders import ImportOrders
+from src.ms_import.ms_import import import_ms
 
 
 @shared_task(name="import_orders")
 def import_orders():
-    ImportOrders().execute()
+    import_ms()
+

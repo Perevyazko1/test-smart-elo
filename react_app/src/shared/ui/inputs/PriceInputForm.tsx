@@ -3,6 +3,7 @@ import {NumericFormat} from 'react-number-format';
 import {twMerge} from 'tailwind-merge';
 import type {FocusEvent} from "react";
 import type {InputHTMLAttributes} from "react";
+import {useShowCoins} from "@/shared/state/payroll/showCoins.ts";
 
 interface PriceInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'name'> {
     name: string;
@@ -11,6 +12,8 @@ interface PriceInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'v
 export const PriceInputForm = (props: PriceInputProps) => {
     const {name, className, onBlur, onFocus, disabled} = props;
     const {control} = useFormContext();
+    const showCoins = useShowCoins(s => s.showCoins);
+
 
     return (
         <Controller
@@ -32,7 +35,7 @@ export const PriceInputForm = (props: PriceInputProps) => {
                         e.target.select();
                         onFocus?.(e);
                     }}
-                    decimalScale={2}
+                    decimalScale={showCoins ? 2 : 0}
                     fixedDecimalScale
                     allowNegative={false}
                     thousandSeparator=" "

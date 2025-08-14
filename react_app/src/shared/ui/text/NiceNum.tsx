@@ -1,5 +1,6 @@
 import type {HTMLAttributes} from "react";
 import {twMerge} from "tailwind-merge";
+import {useShowCoins} from "@/shared/state/payroll/showCoins.ts";
 
 
 interface NiceNumProps extends HTMLAttributes<HTMLDivElement> {
@@ -8,7 +9,8 @@ interface NiceNumProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export const NiceNum = (props: NiceNumProps) => {
-    const {value, className, abs=false, ...otherProps} = props;
+    const {value, className, abs = false, ...otherProps} = props;
+    const showCoins = useShowCoins(s => s.showCoins);
 
     const integerPart = value ? Math.floor(Math.abs(value) / 100) : 0;
     const fractionalPart = value ? String(Math.abs(value) % 100).padStart(2, '0') : '00';
@@ -22,21 +24,23 @@ export const NiceNum = (props: NiceNumProps) => {
             )}
             {...otherProps}
         >
-            {value === null ? ("0.00") :
+            {value === null ? (showCoins ? "0.00" : "0") :
                 (<>
                     <span>
                         {(!abs && value < 0) ? '-' : ''}
                         {integerPart.toLocaleString('ru-RU')}
                     </span>
-                    <sup
-                        className={
-                        fractionalPart === '00' ?
-                            'text-gray-400' :
-                            'text-black'
-                        }
-                    >
-                        .{fractionalPart}
-                    </sup>
+                    {showCoins && (
+                        <sup
+                            className={
+                                fractionalPart === '00' ?
+                                    'text-gray-400' :
+                                    'text-black'
+                            }
+                        >
+                            .{fractionalPart}
+                        </sup>
+                    )}
                 </>)
             }
         </div>

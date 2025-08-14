@@ -89,10 +89,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <div className={cls.numbersBlock}>
                 <div className={'fs-7 fw-bold h-100'}>
                     <div>
-                        {card.assignments.length > 1 ?
-                            <div>{card.assignments.length}:</div> :
-                            <div>_</div>
-                        }
+                        <div>{card.assignments.length}:</div>
                     </div>
                     <div>{
                         showPrice && <div style={{fontSize: 8}}>{

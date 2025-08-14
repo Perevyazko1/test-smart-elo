@@ -8,8 +8,10 @@ services:
     volumes:
       - ./django_app:/app
     depends_on:
-      - pg
-      - redis
+      pg:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     ports:
@@ -29,6 +31,12 @@ services:
       - "5432:5432"
     env_file:
       - .env
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
     networks:
       - dev-network
 
@@ -53,6 +61,11 @@ services:
     container_name: redis
     build: services/redis
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
     ports:
       - "6379:6379"
     networks:
@@ -86,6 +99,46 @@ services:
     env_file:
       - .env
     restart: unless-stopped
+
+
+  celery_worker:
+    build:
+      context: ./django_app
+      dockerfile: DockerfileDev
+    container_name: celery_worker
+    restart: unless-stopped
+    volumes:
+      - ./django_app:/app
+    depends_on:
+      - server
+      - redis
+    ports:
+      - "58231"
+    command: celery -A django_app worker -l info
+    env_file:
+      - .env
+    networks:
+      - dev-network
+
+  celery_beat:
+    build:
+      context: ./django_app
+      dockerfile: DockerfileDev
+    container_name: celery_beat
+    restart: unless-stopped
+    depends_on:
+      - server
+      - redis
+    volumes:
+      - ./django_app:/app
+    ports:
+      - "58232"
+    command: celery -A django_app beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    env_file:
+      - .env
+    networks:
+      - dev-network
+
 
 networks:
   dev-network:

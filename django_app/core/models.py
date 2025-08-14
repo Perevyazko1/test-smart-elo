@@ -3,11 +3,10 @@ from io import BytesIO
 
 from PIL import Image
 from django.core.files.base import ContentFile
-from django.core.files.storage import default_storage
 from django.db import models
+from django.utils import timezone
 
 from staff.models import Department, Employee
-from django.utils import timezone
 
 
 class Product(models.Model):
@@ -28,8 +27,9 @@ class Product(models.Model):
     status = models.CharField('Статус', max_length=25, choices=STATUS_CHOICES, default='1')
     product_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Наименование официальное', max_length=250, blank=True, unique=True)
+    updated = models.DateTimeField('Обновлен в API', default=timezone.now)
 
-    # Возможность устанавливать внутреннее, не официальное наименование
+    # Возможность устанавливать внутреннее, неофициальное наименование
     name_internal = models.CharField('Наименование внутреннее', max_length=250, blank=True)
 
     # Выбор типа товара. Нужен для соответствия модели товаров в системе МойСклад и дальнейшей обработке
@@ -116,6 +116,7 @@ class Fabric(models.Model):
 
     fabric_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Название ткани', max_length=255)
+    updated = models.DateTimeField('Обновлен в API', default=timezone.now)
 
     image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
     image = models.ImageField(
@@ -134,24 +135,34 @@ class Fabric(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        # Сохраняем объект, чтобы убедиться, что у нас есть ID для генерации имени файла миниатюры
         super().save(*args, **kwargs)
 
-        if self.image:
-            # Проверяем, существует ли уже миниатюра
-            if not default_storage.exists(self.image.name):
-                img = Image.open(self.image.path)
-                img.thumbnail((100, 100))
+        if self.image and not self.thumbnail:  # Генерируем миниатюру, если есть изображение, но нет миниатюры
+            try:
+                from io import BytesIO
+                from PIL import Image
+                import os
+                from django.core.files.base import ContentFile
 
-                image_io = BytesIO()
-                img.save(image_io, format=img.format, quality=90)
-                image_content = ContentFile(image_io.getvalue())
+                img = Image.open(self.image.path)  # Открываем оригинал
+                img.thumbnail((100, 100))  # Уменьшаем
 
-                # Сохраняем миниатюру
-                self.thumbnail.save(self.image.name, image_content, save=False)
+                temp_thumb = BytesIO()
+                img.save(temp_thumb, format=img.format or 'PNG', quality=90)  # Сохраняем в буфер
+                temp_thumb.seek(0)
 
-            # Обновляем только поле thumbnail, чтобы избежать рекурсии
-            super(Fabric, self).save(update_fields=['thumbnail'])
+                image_content = ContentFile(temp_thumb.read())
+
+                # Используем базовое имя файла
+                file_name = os.path.basename(self.image.name)
+
+                self.thumbnail.save(file_name, image_content, save=False)
+
+                # Сохраняем только поле thumbnail, чтобы избежать рекурсии
+                super(Fabric, self).save(update_fields=['thumbnail'])
+            except FileNotFoundError:
+                # Если файл изображения не найден, ничего не делаем
+                pass
 
     def __str__(self):
         return '{}'.format(f'{self.name}')
