@@ -28,7 +28,7 @@ export const Navbar = (props: NavbarProps) => {
             ])}
             {...otherProps}
         >
-            <div className={'flex flex-nowrap gap-5'}>
+            <div className={'flex flex-nowrap gap-5 items-center'}>
                 <div>
                     СЗМК Зарплата
                 </div>
@@ -42,8 +42,8 @@ export const Navbar = (props: NavbarProps) => {
                 >
                     Касса
                 </Link>
+                {children}
             </div>
-            {children}
 
             <div>
                 <Btn

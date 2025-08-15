@@ -18,6 +18,9 @@ import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import {ConfirmEarningsBtn} from "@/widgets/salary/accrual/ConfirmEarningsBtn.tsx";
 import {FormProvider, useForm, useWatch} from "react-hook-form";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
+import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
+import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
+import {PayrollTh} from "@/widgets/payroll/ui/PayrollTable/PayrollTh.tsx";
 
 
 interface PayrollUserInfoProps {
@@ -29,6 +32,9 @@ interface PayrollUserInfoProps {
 export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
     const {userInfo, state, week} = props;
     const queryClient = useQueryClient();
+
+    const showDayPrice = useShowDayPrice(s => s.showDayPrice);
+    const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
 
     const debouncedUpdateRow = useDebounce(
         (data: {
@@ -139,7 +145,17 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     userInfo={userInfo}
                     week={week}
                 />
-
+                {showDayPrice && (
+                    <td className="text-end">
+                        <TT description={`Ставка в день.`}>
+                            <NiceNum value={
+                                userInfo.user.piecework_amount ?
+                                    userInfo.user.piecework_amount * 8
+                                    : null
+                            }/>
+                        </TT>
+                    </td>
+                )}
 
                 <td className="text-end">
                     <TT description={`Баланс на начало ${week.weekNumber} нед.`}>
@@ -147,14 +163,31 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </TT>
                 </td>
 
+                {showEarnedDetail && (
+                    <td className="text-end">
+                        <TT description={`Заработано ЭЛО сделка`}>
+                            <NiceNum value={userInfo.earned_sum}/>
+                        </TT>
+                    </td>
+                )}
+
                 <UserAddCell
-                    value={(userInfo.earned_sum || 0) + (userInfo.bonus_sum || 0)}
+                    value={
+                        showEarnedDetail ?
+                            userInfo.bonus_sum
+                            :
+                            (userInfo.earned_sum || 0) + (userInfo.bonus_sum || 0)
+                    }
                     info={
                         !statusLessThen("3") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
                                 "Добавить ДОП начисление сотруднику"
                     }
-                    valueInfo={`ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`}
+                    valueInfo={showEarnedDetail ?
+                        "Начислено ДОП и задачи"
+                        :
+                        `ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`
+                }
                     disabled={!statusLessThen("3") || userInfo.is_closed}
                     user={userInfo.user}
                     week={week}

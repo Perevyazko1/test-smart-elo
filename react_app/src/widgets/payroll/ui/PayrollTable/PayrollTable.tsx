@@ -1,4 +1,4 @@
-import {memo, useMemo} from "react";
+import {useMemo} from "react";
 import {Table} from "@/shared/ui/table/Table.tsx";
 import {THead} from "@/shared/ui/table/THead.tsx";
 import {useQuery} from "@tanstack/react-query";
@@ -10,6 +10,8 @@ import {PayrollDepartmentInfo} from "./PayrollDepartmentInfo.tsx";
 import {PayrollTh} from "./PayrollTh.tsx";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import type {IPayrollRow} from "@/entities/salary";
+import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
+import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 
 
 interface PayrollTableProps {
@@ -18,8 +20,11 @@ interface PayrollTableProps {
     state: "1" | "2" | "3" | "4" | "5" | "6";
 }
 
-export const PayrollTable = memo((props: PayrollTableProps) => {
+export const PayrollTable = (props: PayrollTableProps) => {
     const {payrollId, state, currentWeek} = props;
+
+    const showDayPrice = useShowDayPrice(s => s.showDayPrice);
+    const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
 
     const {data, isError, isFetching} = useQuery({
         queryKey: ['payrollRows', currentWeek.weekNumber],
@@ -66,6 +71,7 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
     const totalCardPayout = calculateTotal('card_payout');
     const totalTaxPayout = calculateTotal('tax_payout');
     const totalLoanPayout = calculateTotal('loan_payout');
+    const totalDaySum = data?.data?.reduce((sum, row) => Number(sum) + Number(row.user.piecework_amount || 0), 0) || 0;
 
     return (
         <Table>
@@ -75,10 +81,20 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                         rowSpan={2}
                         className={'text-center'}
                     >
-                        Отдел / ФИО
+                        Отдел / ФИО {showDayPrice}
                     </PayrollTh>
+                    {showDayPrice && (
+                        <PayrollTh>Ставка в <br/>день</PayrollTh>
+                    )}
                     <PayrollTh>Хвост</PayrollTh>
-                    <PayrollTh>Заработано</PayrollTh>
+                    {showEarnedDetail ? (
+                        <>
+                            <PayrollTh>ЭЛО</PayrollTh>
+                            <PayrollTh>ДОП</PayrollTh>
+                        </>
+                    ) : (
+                        <PayrollTh>Заработано</PayrollTh>
+                    )}
 
                     <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
                     <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
@@ -102,9 +118,21 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
                         Комментарий
                     </PayrollTh>
                 </tr>
+
                 <tr className={'z-2'}>
+                    {showDayPrice && (
+                        <PayrollTh><NiceNum value={totalDaySum * 8}/></PayrollTh>
+                    )}
                     <PayrollTh><NiceNum value={totalBalance}/></PayrollTh>
-                    <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
+                    {showEarnedDetail ? (
+                        <>
+                            <PayrollTh><NiceNum value={totalEarned}/></PayrollTh>
+                            <PayrollTh><NiceNum value={totalBonus}/></PayrollTh>
+                        </>
+                    ) : (
+                        <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
+                    )}
+
 
                     <PayrollTh className={'bg-blue-100 font-bold'}>
                         <NiceNum value={totalCashPayout}/></PayrollTh>
@@ -177,7 +205,9 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
             </THead>
 
             <tbody>
-            <tr><td colSpan={15}>-----</td></tr>
+            <tr>
+                <td colSpan={15}>-----</td>
+            </tr>
             {groupedData && Object.entries(groupedData).map(([departmentName, earnings]) => (
                 <PayrollDepartmentInfo
                     week={currentWeek}
@@ -190,4 +220,4 @@ export const PayrollTable = memo((props: PayrollTableProps) => {
             </tbody>
         </Table>
     );
-});
+};
