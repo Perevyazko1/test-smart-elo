@@ -20,7 +20,7 @@ import {FormProvider, useForm, useWatch} from "react-hook-form";
 import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
-import {PayrollTh} from "@/widgets/payroll/ui/PayrollTable/PayrollTh.tsx";
+import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
 
 
 interface PayrollUserInfoProps {
@@ -35,6 +35,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
 
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
+    const showTotal = useShowTotal(s => s.showTotal);
 
     const debouncedUpdateRow = useDebounce(
         (data: {
@@ -187,7 +188,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                         "Начислено ДОП и задачи"
                         :
                         `ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`
-                }
+                    }
                     disabled={!statusLessThen("3") || userInfo.is_closed}
                     user={userInfo.user}
                     week={week}
@@ -205,126 +206,157 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     )}
                 </UserAddCell>
 
-                <UserCashCell
-                    name={"cash_payout"}
-                    info={"Сумма к выдаче наличными"}
-                    isLoading={methods.watch("cash_payout") !== userInfo.cash_payout}
-                    disabled={!statusLessThen("5") || userInfo.is_locked}
-                />
-                <UserCashCell
-                    name={"ip_payout"}
-                    info={"Сумма к выдаче через ИП"}
-                    isLoading={methods.watch("ip_payout") !== userInfo.ip_payout}
-                    disabled={!statusLessThen("5") || userInfo.is_locked}
-                />
-                <UserCashCell
-                    name={"card_payout"}
-                    info={"Сумма к выдаче официалка"}
-                    isLoading={methods.watch("card_payout") !== userInfo.card_payout}
-                    disabled={!statusLessThen("5") || userInfo.is_locked}
-                />
-                <UserCashCell
-                    name={"tax_payout"}
-                    info={"Сумма к удержанию НДФЛ"}
-                    isLoading={methods.watch("tax_payout") !== userInfo.tax_payout}
-                    disabled={!statusLessThen("5") || userInfo.is_locked}
-                />
-                <UserCashCell
-                    name={"loan_payout"}
-                    info={"Сумма к удержанию в займы"}
-                    isLoading={methods.watch("loan_payout") !== userInfo.loan_payout}
-                    disabled={!statusLessThen("5") || userInfo.is_locked}
-                />
+                {showTotal ? (
+                    <td className="text-end bg-blue-100">
+                        <TT description={`Итого к выдаче`}>
+                            <NiceNum value={
+                                (userInfo.earned_sum || 0) +
+                                (userInfo.ip_payout || 0) +
+                                (userInfo.card_payout || 0) +
+                                (userInfo.tax_payout || 0) +
+                                (userInfo.loan_payout || 0)
+                            }/>
+                        </TT>
+                    </td>
+                ) : (
+                    <>
+                        <UserCashCell
+                            name={"cash_payout"}
+                            info={"Сумма к выдаче наличными"}
+                            isLoading={methods.watch("cash_payout") !== userInfo.cash_payout}
+                            disabled={!statusLessThen("5") || userInfo.is_locked}
+                        />
+                        <UserCashCell
+                            name={"ip_payout"}
+                            info={"Сумма к выдаче через ИП"}
+                            isLoading={methods.watch("ip_payout") !== userInfo.ip_payout}
+                            disabled={!statusLessThen("5") || userInfo.is_locked}
+                        />
+                        <UserCashCell
+                            name={"card_payout"}
+                            info={"Сумма к выдаче официалка"}
+                            isLoading={methods.watch("card_payout") !== userInfo.card_payout}
+                            disabled={!statusLessThen("5") || userInfo.is_locked}
+                        />
+                        <UserCashCell
+                            name={"tax_payout"}
+                            info={"Сумма к удержанию НДФЛ"}
+                            isLoading={methods.watch("tax_payout") !== userInfo.tax_payout}
+                            disabled={!statusLessThen("5") || userInfo.is_locked}
+                        />
+                        <UserCashCell
+                            name={"loan_payout"}
+                            info={"Сумма к удержанию в займы"}
+                            isLoading={methods.watch("loan_payout") !== userInfo.loan_payout}
+                            disabled={!statusLessThen("5") || userInfo.is_locked}
+                        />
+                    </>
+                )}
 
                 <td className={twMerge(
                     "text-end bg-blue-100",
                     userInfo.hide_balance ? "text-blue-100" : "text-black"
                 )}>
                     <TT description={`Подытог после проведения расчета ${formatNumber(prevTotal, false)}`}>
-                        <sup>
                             <NiceNum
-                                className={userInfo.hide_balance ? "text-transparent" : 'text-gray-500'}
+                                className={userInfo.hide_balance ? "text-transparent" : ''}
                                 value={userInfo.hide_balance ? null : prevTotal}
                             />
-                        </sup>
                     </TT>
                 </td>
 
-                <UserAddCell
-                    className={'bg-purple-50'}
-                    value={userInfo.issued_sum}
-                    amount={(userInfo.issued_sum || 0) + (userInfo.cash_payout || 0)}
-                    info={
-                        !statusLessThen("6") ? "Блок - статус ведомости" :
-                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
-                                "Выдать сотруднику наличные ДС"
-                    }
-                    valueInfo={'Выдано наличными'}
-                    disabled={!statusLessThen("6") || userInfo.is_closed}
-                    user={userInfo.user}
-                    week={week}
-                    earning_type={"Выдача НАЛ"}
-                    about={`Выдача НАЛ ЗП нед ${week.weekNumber}`}
-                />
+                {showTotal ? (
+                    <td className="text-end bg-purple-50">
+                        <TT description={`Итого выдано`}>
+                            <NiceNum value={
+                                (userInfo.issued_sum || 0) +
+                                (userInfo.ip_sum || 0) +
+                                (userInfo.card_sum || 0) +
+                                (userInfo.tax_sum || 0) +
+                                (userInfo.loan_sum || 0)
+                            }/>
+                        </TT>
+                    </td>
+                ) : (
+                    <>
 
-                <UserAddCell
-                    className={'bg-purple-50'}
-                    value={userInfo.ip_sum}
-                    amount={(userInfo.ip_sum || 0) + (userInfo.ip_payout || 0)}
-                    info={
-                        !statusLessThen("6") ? "Блок - статус ведомости" :
-                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
-                                "Выдать сотруднику через средства ИП"
-                    }
-                    valueInfo={'Выдача на ИП сотрудника'}
-                    disabled={!statusLessThen("6") || userInfo.is_closed}
-                    user={userInfo.user}
-                    week={week}
-                    earning_type={"ИП"}
-                    about={`Выдача на ИП ЗП нед ${week.weekNumber}`}
-                />
+                        <UserAddCell
+                            className={'bg-purple-50'}
+                            value={userInfo.issued_sum}
+                            amount={(userInfo.issued_sum || 0) + (userInfo.cash_payout || 0)}
+                            info={
+                                !statusLessThen("6") ? "Блок - статус ведомости" :
+                                    userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                        "Выдать сотруднику наличные ДС"
+                            }
+                            valueInfo={'Выдано наличными'}
+                            disabled={!statusLessThen("6") || userInfo.is_closed}
+                            user={userInfo.user}
+                            week={week}
+                            earning_type={"Выдача НАЛ"}
+                            about={`Выдача НАЛ ЗП нед ${week.weekNumber}`}
+                        />
 
-                <UserAddCell
-                    className={'bg-purple-50'}
-                    value={userInfo.card_sum}
-                    amount={(userInfo.card_sum || 0) + (userInfo.card_payout || 0)}
-                    info={
-                        !statusLessThen("6") ? "Блок - статус ведомости" :
-                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
-                                "Внести выдачу на карту или БН"
-                    }
-                    valueInfo={'Выдано на карту или по безналу'}
-                    disabled={!statusLessThen("6") || userInfo.is_closed}
-                    user={userInfo.user}
-                    week={week}
-                    earning_type={"На карту"}
-                    about={`Выдача безнал ЗП нед ${week.weekNumber}`}
-                />
+                        <UserAddCell
+                            className={'bg-purple-50'}
+                            value={userInfo.ip_sum}
+                            amount={(userInfo.ip_sum || 0) + (userInfo.ip_payout || 0)}
+                            info={
+                                !statusLessThen("6") ? "Блок - статус ведомости" :
+                                    userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                        "Выдать сотруднику через средства ИП"
+                            }
+                            valueInfo={'Выдача на ИП сотрудника'}
+                            disabled={!statusLessThen("6") || userInfo.is_closed}
+                            user={userInfo.user}
+                            week={week}
+                            earning_type={"ИП"}
+                            about={`Выдача на ИП ЗП нед ${week.weekNumber}`}
+                        />
 
-                <UserAddCell
-                    className={'bg-purple-50'}
-                    value={userInfo.tax_sum}
-                    amount={(userInfo.tax_sum || 0) + (userInfo.tax_payout || 0)}
-                    info={
-                        !statusLessThen("6") ? "Блок - статус ведомости" :
-                            userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
-                                "Добавить удержание налога и сборов"
-                    }
-                    valueInfo={'Удержано налога (НДФЛ и пр)'}
-                    disabled={!statusLessThen("6") || userInfo.is_closed}
-                    user={userInfo.user}
-                    week={week}
-                    earning_type={"Налог"}
-                    about={`Удержанный налог в ${week.weekNumber} неделе`}
-                />
+                        <UserAddCell
+                            className={'bg-purple-50'}
+                            value={userInfo.card_sum}
+                            amount={(userInfo.card_sum || 0) + (userInfo.card_payout || 0)}
+                            info={
+                                !statusLessThen("6") ? "Блок - статус ведомости" :
+                                    userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                        "Внести выдачу на карту или БН"
+                            }
+                            valueInfo={'Выдано на карту или по безналу'}
+                            disabled={!statusLessThen("6") || userInfo.is_closed}
+                            user={userInfo.user}
+                            week={week}
+                            earning_type={"На карту"}
+                            about={`Выдача безнал ЗП нед ${week.weekNumber}`}
+                        />
 
-                <UserLoanCell
-                    className={'bg-purple-50'}
-                    amount={(userInfo.loan_sum || 0) + (userInfo.loan_payout || 0)}
-                    disabled={!statusLessThen("4") || userInfo.is_closed}
-                    week={week}
-                    userInfo={userInfo}
-                />
+                        <UserAddCell
+                            className={'bg-purple-50'}
+                            value={userInfo.tax_sum}
+                            amount={(userInfo.tax_sum || 0) + (userInfo.tax_payout || 0)}
+                            info={
+                                !statusLessThen("6") ? "Блок - статус ведомости" :
+                                    userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
+                                        "Добавить удержание налога и сборов"
+                            }
+                            valueInfo={'Удержано налога (НДФЛ и пр)'}
+                            disabled={!statusLessThen("6") || userInfo.is_closed}
+                            user={userInfo.user}
+                            week={week}
+                            earning_type={"Налог"}
+                            about={`Удержанный налог в ${week.weekNumber} неделе`}
+                        />
+
+                        <UserLoanCell
+                            className={'bg-purple-50'}
+                            amount={(userInfo.loan_sum || 0) + (userInfo.loan_payout || 0)}
+                            disabled={!statusLessThen("4") || userInfo.is_closed}
+                            week={week}
+                            userInfo={userInfo}
+                        />
+                    </>
+                )}
 
                 <td className={twMerge(
                     "text-end bg-purple-50 font-bold",

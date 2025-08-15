@@ -12,6 +12,7 @@ import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import type {IPayrollRow} from "@/entities/salary";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
+import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
 
 
 interface PayrollTableProps {
@@ -25,6 +26,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
 
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
+    const showTotal = useShowTotal(s => s.showTotal);
 
     const {data, isError, isFetching} = useQuery({
         queryKey: ['payrollRows', currentWeek.weekNumber],
@@ -96,18 +98,31 @@ export const PayrollTable = (props: PayrollTableProps) => {
                         <PayrollTh>Заработано</PayrollTh>
                     )}
 
-                    <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
-                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
-                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
-                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>Налог</PayrollTh>
-                    <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
+
+                    {showTotal ? (
+                        <PayrollTh className={'bg-blue-100'}>К выплате <br/> ИТОГ</PayrollTh>
+                    ) : (
+                        <>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Налог</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
+                        </>
+                    )}
                     <PayrollTh className={'bg-blue-100'}>П.ИТОГ</PayrollTh>
 
-                    <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
-                    <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
-                    <PayrollTh className={'bg-purple-50'}>БН</PayrollTh>
-                    <PayrollTh className={'bg-purple-50'}>Налог</PayrollTh>
-                    <PayrollTh className={'bg-purple-50'}>Займы</PayrollTh>
+                    {showTotal ? (
+                        <PayrollTh className={'bg-purple-50'}>Выплачено <br/> ИТОГ</PayrollTh>
+                    ) : (
+                        <>
+                            <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>БН</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Налог</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Займы</PayrollTh>
+                        </>
+                    )}
 
                     <PayrollTh className={'bg-purple-50'}>Остаток</PayrollTh>
 
@@ -133,19 +148,38 @@ export const PayrollTable = (props: PayrollTableProps) => {
                         <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
                     )}
 
+                    {showTotal ? (
+                        <PayrollTh className={'bg-blue-100 font-bold'}>
+                            <NiceNum value={
+                                totalCashPayout +
+                                totalIpPayout +
+                                totalCardPayout +
+                                totalTaxPayout +
+                                totalLoanPayout
+                            }/>
+                        </PayrollTh>
+                    ) : (
+                        <>
+                            <PayrollTh className={'bg-blue-100 font-bold'}>
+                                <NiceNum value={totalCashPayout}/>
+                            </PayrollTh>
+                            <PayrollTh className={'bg-blue-100 font-bold'}>
+                                <NiceNum value={totalIpPayout}/>
+                            </PayrollTh>
+                            <PayrollTh className={'bg-blue-100 font-bold'}>
+                                <NiceNum value={totalCardPayout}/>
+                            </PayrollTh>
+                            <PayrollTh className={'bg-blue-100 font-bold'}>
+                                <NiceNum value={totalTaxPayout}/>
+                            </PayrollTh>
+                            <PayrollTh className={'bg-blue-100 font-bold'}>
+                                <NiceNum value={totalLoanPayout}/>
+                            </PayrollTh>
+                        </>
+                    )}
 
-                    <PayrollTh className={'bg-blue-100 font-bold'}>
-                        <NiceNum value={totalCashPayout}/></PayrollTh>
-                    <PayrollTh className={'bg-blue-100 font-bold'}>
-                        <NiceNum value={totalIpPayout}/></PayrollTh>
-                    <PayrollTh className={'bg-blue-100 font-bold'}>
-                        <NiceNum value={totalCardPayout}/></PayrollTh>
-                    <PayrollTh className={'bg-blue-100 font-bold'}>
-                        <NiceNum value={totalTaxPayout}/></PayrollTh>
-                    <PayrollTh className={'bg-blue-100 font-bold'}>
-                        <NiceNum value={totalLoanPayout}/></PayrollTh>
+
                     <PayrollTh className={'bg-blue-100'}>
-                        <sup>
                             <NiceNum value={
                                 totalBalance +
                                 totalBonus +
@@ -155,35 +189,51 @@ export const PayrollTable = (props: PayrollTableProps) => {
                                 totalIpPayout -
                                 totalTaxPayout -
                                 totalLoanPayout
-                            } className={'text-gray-500'}/>
-                        </sup>
+                            }/>
                     </PayrollTh>
 
-                    <PayrollTh
-                        className={'bg-purple-50 font-bold'}
-                    >
-                        <NiceNum value={totalIssued} abs/>
-                    </PayrollTh>
-                    <PayrollTh
-                        className={'bg-purple-50 font-bold'}
-                    >
-                        <NiceNum value={totalIp} abs/>
-                    </PayrollTh>
-                    <PayrollTh
-                        className={'bg-purple-50 font-bold'}
-                    >
-                        <NiceNum value={totalCard} abs/>
-                    </PayrollTh>
-                    <PayrollTh
-                        className={'bg-purple-50 font-bold'}
-                    >
-                        <NiceNum value={totalTax} abs/>
-                    </PayrollTh>
-                    <PayrollTh
-                        className={'bg-purple-50 font-bold'}
-                    >
-                        <NiceNum value={totalLoan} abs/>
-                    </PayrollTh>
+
+                    {showTotal ? (
+                        <PayrollTh className={'bg-purple-50 font-bold'}>
+                            <NiceNum value={
+                                totalIssued +
+                                totalIp +
+                                totalCard +
+                                totalTax +
+                                totalLoan
+                            }/>
+                        </PayrollTh>
+                    ) : (
+                        <>
+
+                            <PayrollTh
+                                className={'bg-purple-50 font-bold'}
+                            >
+                                <NiceNum value={totalIssued} abs/>
+                            </PayrollTh>
+                            <PayrollTh
+                                className={'bg-purple-50 font-bold'}
+                            >
+                                <NiceNum value={totalIp} abs/>
+                            </PayrollTh>
+                            <PayrollTh
+                                className={'bg-purple-50 font-bold'}
+                            >
+                                <NiceNum value={totalCard} abs/>
+                            </PayrollTh>
+                            <PayrollTh
+                                className={'bg-purple-50 font-bold'}
+                            >
+                                <NiceNum value={totalTax} abs/>
+                            </PayrollTh>
+                            <PayrollTh
+                                className={'bg-purple-50 font-bold'}
+                            >
+                                <NiceNum value={totalLoan} abs/>
+                            </PayrollTh>
+                        </>
+                    )}
+
 
                     <PayrollTh
                         className={'bg-purple-50 font-bold'}
@@ -205,9 +255,6 @@ export const PayrollTable = (props: PayrollTableProps) => {
             </THead>
 
             <tbody>
-            <tr>
-                <td colSpan={15}>-----</td>
-            </tr>
             {groupedData && Object.entries(groupedData).map(([departmentName, earnings]) => (
                 <PayrollDepartmentInfo
                     week={currentWeek}

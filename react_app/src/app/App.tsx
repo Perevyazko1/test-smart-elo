@@ -7,6 +7,7 @@ import {EyeClosedIcon, EyeOpenIcon} from "@radix-ui/react-icons";
 import {Toggle} from "@/components/ui/toggle.tsx";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
+import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
 
 
 export const App = () => {
@@ -16,8 +17,11 @@ export const App = () => {
     const setShowDayPrice = useShowDayPrice(s => s.setShowDayPrice);
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
 
-    const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail)
-    const setShowEarnedDetail = useShowEarnedDetail(s => s.setShowEarnedDetail)
+    const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
+    const setShowEarnedDetail = useShowEarnedDetail(s => s.setShowEarnedDetail);
+
+    const showTotal = useShowTotal(s => s.showTotal);
+    const setShowTotal = useShowTotal(s => s.setShowTotal);
 
     return (
         <div className={'bg-gray-500 min-h-[100dvh] max-h-[100dvh] overflow-y-hidden'}>
@@ -64,6 +68,22 @@ export const App = () => {
                         onPressedChange={() => setShowEarnedDetail(!showEarnedDetail)}
                     >
                         {showEarnedDetail ? (
+                            <EyeOpenIcon className={'text-red-800'}/>
+                        ) : (
+                            <EyeClosedIcon className={'text-green-800'}/>
+                        )}
+                    </Toggle>
+                </div>
+
+                <div className={'text-xs flex items-center gap-2'}>
+                    <span>Итоги: </span>
+
+                    <Toggle
+                        className={'cursor-pointer noPrint bg-gray-800'}
+                        pressed={showTotal}
+                        onPressedChange={() => setShowTotal(!showTotal)}
+                    >
+                        {showTotal ? (
                             <EyeOpenIcon className={'text-red-800'}/>
                         ) : (
                             <EyeClosedIcon className={'text-green-800'}/>
