@@ -1,4 +1,4 @@
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 
 from pydantic import BaseModel
 
@@ -48,10 +48,19 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
     generator = _index_number_generator(order)
 
     # Учет комиссионных
-    commission_percent = 1
-    commission = get_attribute_value("Комиссионные", order.attributes)
-    if commission:
-        commission_percent = Decimal(commission_percent - (float(commission) / (order.sum / 100)))
+    commission_percent = Decimal('1')
+    commission_val = get_attribute_value("Комиссионные", order.attributes)
+    if commission_val:
+        try:
+            commission_decimal = Decimal(commission_val)
+            order_sum_decimal = Decimal(order.sum)
+
+            if order_sum_decimal != Decimal('0'):
+                commission_percent = Decimal('1') - (commission_decimal / (order_sum_decimal / Decimal('100')))
+        except InvalidOperation:
+            print(
+                f"Warning: Значение атрибута 'Комиссионные' '{commission_val}' не является допустимым числом. Используется значение commission_percent по умолчанию (1).")
+
 
     for position in order.positions.rows:
         group = position.assortment.pathName
@@ -68,7 +77,7 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
             order_product_entity = _get_base_order_product(order)
             order_product_entity.series_id = next(generator)
             order_product_entity.product_id = position.assortment.id
-            order_product_entity.price = Decimal(Decimal(position.price / 100) * commission_percent)
+            order_product_entity.price = ((Decimal(position.price) / Decimal('100')) * commission_percent).quantize(Decimal('0.00'))
             order_product_entity.quantity = int(position.quantity)
             order_product_entity.group = group
             current_products.append(order_product_entity)

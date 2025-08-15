@@ -1,5 +1,4 @@
 import logging
-from decimal import Decimal
 
 from core.models import OrderProduct, Product, Order, Fabric, Assignment
 from core.services.assignment_generator import AssignmentGenerator
@@ -10,12 +9,11 @@ logger = logging.getLogger()
 
 def _check_difference(order_product: OrderProduct, defaults: dict):
     for key, value in defaults.items():
-        if key == "price":
-            continue
         if getattr(order_product, key) != value:
-            print(f"Key: {key}, value: {value}, old value: {getattr(order_product, key)}")
+            print(f"Field '{key}' differs: {getattr(order_product, key)} != {value}")
             return True
     return False
+
 
 def _create_order_product(series_id: str, defaults: dict):
     return OrderProduct.objects.update_or_create(
@@ -55,7 +53,7 @@ def order_product_to_db(order_product_entity: OrderProductEntity):
                 raise ValueError(error)
             else:
                 op.delete()
-                order_product, _ =_create_order_product(order_product_entity.series_id, defaults)
+                order_product, _ = _create_order_product(order_product_entity.series_id, defaults)
                 AssignmentGenerator().init_order_product_assignments(order_product)
                 print("🎫 Changed 🎫")
         else:
