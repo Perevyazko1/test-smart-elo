@@ -24,7 +24,7 @@ def _save_product(product: SkladProduct):
             updated = True
         if updated:
             same_product_name.save()
-        return same_product_name
+        return same_product_name.refresh_from_db()
 
     # Данный механизм нужен на случай, если товар был просто переименован
     elif same_product_id.exists():
@@ -38,7 +38,7 @@ def _save_product(product: SkladProduct):
             updated = True
         if updated:
             same_product.save()
-        return same_product_id
+        return same_product.refresh_from_db()
     else:
         new_product = Product.objects.create(
             product_id=product.id,
@@ -50,7 +50,7 @@ def _save_product(product: SkladProduct):
             department=Department.objects.get(number=1),
             product=new_product,
         )
-        return new_product
+        return new_product.refresh_from_db()
 
 
 def _save_fabric(fabric: SkladProduct):
