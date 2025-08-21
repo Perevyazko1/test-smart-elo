@@ -419,7 +419,7 @@ def print_labels(request):
         ])
 
         printer = Printer()
-        qr_text = f"elo.szmk.pro/assignments/{target_assignment.id}"
+        qr_text = f"elo.szmk.pro/elo?view_mode=boss&search={target_assignment.order_product.series_id}&assignment_id={target_assignment.id}"
         order_text = [
             (order_number, 14),
             ('---------', 8),

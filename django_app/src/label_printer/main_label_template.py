@@ -80,7 +80,7 @@ def main_label_template(
             qr_data,
             Z_MAIN_TEXT['width_mm'],
             GAP_MM,
-            Z_QR['width_mm'] * 2.15
+            Z_QR['width_mm'] * 2
         )
     )
 
