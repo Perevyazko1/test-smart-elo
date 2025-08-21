@@ -447,6 +447,17 @@ class Assignment(models.Model):
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
     assembled = models.BooleanField('Укомплектован', blank=True, default=True)
 
+    print_count = models.IntegerField('Напечатан раз', default=0)
+    last_print_by = models.ForeignKey(
+        Employee,
+        related_name='assignments_print',
+        verbose_name='Последний напечатал',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
+    last_print_date = models.DateTimeField('Дата последней печати', null=True, blank=True)
+
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.order_product.series_id}')
 

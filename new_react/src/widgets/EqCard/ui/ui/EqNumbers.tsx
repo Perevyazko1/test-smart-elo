@@ -1,6 +1,6 @@
 import React, {useCallback} from "react";
 
-import {useEmployeeName, usePermission} from "@shared/hooks";
+import {useCurrentUser, useEmployeeName, usePermission} from "@shared/hooks";
 import {EqAssignment} from "@widgets/EqCardList";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";
@@ -19,7 +19,10 @@ export const EqNumbers = (props: EqNumbersProps) => {
     const {assignmentsLists, targetUserId, setNumber} = props;
     const {getNameById} = useEmployeeName();
 
-    const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE)
+    const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
+    const isAdmin = usePermission(APP_PERM.ADMIN);
+    const {currentUser} = useCurrentUser();
+
 
     const getCoExecutorAmount = useCallback((item: EqAssignment) => {
         return item.co_executors?.find(co_executor => co_executor.co_executor === targetUserId)?.wages_amount;
@@ -31,33 +34,35 @@ export const EqNumbers = (props: EqNumbersProps) => {
     ] = useLazyPrintLabels();
 
     const targetAssignments = [
-        ...assignmentsLists.primary.map(item => item.id),
-        ...assignmentsLists.selectedLocked.map(item => item.id),
+        ...assignmentsLists.primary.filter(item => item.print_count === 0),
+        ...assignmentsLists.selectedLocked.filter(item => item.print_count === 0),
     ]
 
     const printLabels = () => {
         if (window.confirm(`Распечатать бегуны ${targetAssignments.length} шт?`)) {
             requestPrintLabels({
-                assignment_ids: targetAssignments
+                assignment_ids: targetAssignments.map(item => item.id),
+                is_admin: isAdmin,
             })
         }
     }
 
     const printNumber = (assignment_id: number) => {
-        if (window.confirm(`Распечатать бегун 1 шт?`)) {
+        if (isAdmin && window.confirm(`Распечатать бегун 1 шт?`)) {
             requestPrintLabels({
-                assignment_ids: [assignment_id]
+                assignment_ids: [assignment_id],
+                is_admin: isAdmin,
             })
         }
     }
 
     return (
         <>
-            {isBoss && (
+            {(isBoss && currentUser.current_department?.number === 2) && (
                 <button
                     className={"appBtn p-1 rounded h-100 fw-bold position-relative"}
                     style={{minWidth: '35px', fontSize: 12}}
-                    disabled={printLoading || targetAssignments.length === 0 || true}
+                    disabled={printLoading || targetAssignments.length === 0}
                     onClick={printLabels}
                 >
                     🖨️

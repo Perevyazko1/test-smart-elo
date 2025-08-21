@@ -135,11 +135,11 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                     <th>Исполнитель</th>
                     <th>Исп.(доп)</th>
                     <th>Статус</th>
-                    <th>Взят в работу</th>
-                    <th>Дата готовности</th>
-                    <th>Проверяющий</th>
-                    <th>Дата визы</th>
-                    <th>Дата закреп.</th>
+                    <th>Взят в раб.</th>
+                    <th>Готов</th>
+                    <th>Виза</th>
+                    <th>Закреп</th>
+                    <th>Печать</th>
                     {currentUser.current_department?.piecework_wages && <th>Тариф</th>}
 
                 </tr>

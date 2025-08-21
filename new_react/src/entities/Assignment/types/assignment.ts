@@ -25,6 +25,7 @@ export interface BaseAssignment {
     tariffication_date: string | null;
     appointed_by_boss: boolean;
     assembled: boolean;
+    print_count: number;
 }
 
 type ExtendedFields = 'department' | 'new_tariff' | 'order_product';
@@ -57,6 +58,8 @@ export interface Assignment extends Omit<BaseAssignment, ExtendedFields> {
     order_product: OrderProduct;
     department: Department;
     new_tariff: AssignmentTariff | null;
+    last_print_by: number | null;
+    last_print_date: string | null;
 }
 
 export interface AssignmentApiList extends ApiList<Assignment> {

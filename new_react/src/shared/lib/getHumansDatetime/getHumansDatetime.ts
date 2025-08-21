@@ -46,7 +46,7 @@ export const getHumansDatetime = (
             {hour: '2-digit', minute: '2-digit'}
         );
 
-        return `${date}${time}`
+        return `${date} ${time}`
     }
 
 }

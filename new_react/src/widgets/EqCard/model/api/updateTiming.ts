@@ -7,6 +7,7 @@ interface ISetTiming {
 
 interface IPrintLabels {
     assignment_ids: number[];
+    is_admin: boolean;
 }
 
 

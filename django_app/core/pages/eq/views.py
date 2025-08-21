@@ -355,12 +355,25 @@ def get_plan_info(request):
 @api_view(['get'])
 def print_labels(request):
     assignment_ids = request.query_params.get('assignment_ids').split(',')
+    is_admin = request.query_params.get('is_admin')
+
     if not assignment_ids:
         return JsonResponse({'error': 'assignment_ids must be a list of integers'}, status=400)
     user = request.user.get_initials()
 
+    op = None
+    department = None
+
     for assignment_id in assignment_ids:
         target_assignment = Assignment.objects.get(id=assignment_id)
+
+        # Если нет админ прав и номер уже печатался - то игнорируем
+        if is_admin == "false" and target_assignment.print_count > 0:
+            continue
+
+        op = target_assignment.order_product
+        department = target_assignment.department
+
         project = target_assignment.order_product.order.project
         order_number = target_assignment.order_product.order.number
         position_number = target_assignment.order_product.series_id.split('-')[0]
@@ -426,5 +439,25 @@ def print_labels(request):
             department_text
         )
         printer.print_label(label)
+
+        target_assignment.print_count = target_assignment.print_count + 1
+        target_assignment.last_print_date = datetime.now()
+        target_assignment.last_print_by = request.user
+        target_assignment.save()
+
+    if op is not None:
+        clean_all_eq_card_info_cache(
+            order_product__id=op.id,
+            department__id=department.id,
+        )
+        notification_data = {str(department.number): {
+            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+            'data': op.id,
+        }}
+
+        ws_group_updates(
+            pin_code='',
+            notification_data=notification_data
+        )
 
     return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})

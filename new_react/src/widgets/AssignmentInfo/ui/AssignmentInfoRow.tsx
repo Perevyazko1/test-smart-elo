@@ -208,7 +208,7 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
                 <td>{assignment.appointed_by_boss && <i className="far fa-check-circle text-success"/>}</td>
                 <td className={'fs-6 fw-bold'}>{assignment.number}</td>
                 <td className={'fs-7 text-danger fw-bold'}>
-                    {getHumansDatetime(assignment.plane_date || '')}
+                    {getHumansDatetime(assignment.plane_date || '', "short")}
                 </td>
 
                 <td onClick={setSelectedExecutor} className={executorCellBg} style={{cursor: 'pointer'}}>
@@ -236,26 +236,25 @@ export const AssignmentInfoRow = (props: AssignmentInfoRowProps) => {
 
 
                 <td className={'fs-7'}>
-                    {getHumansDatetime(assignment.appointment_date || "")}
+                    {getHumansDatetime(assignment.appointment_date || "", "short")}
                 </td>
 
 
                 <td className={'fs-7'}>
-                    {getHumansDatetime(assignment.date_completion || "")}
+                    {getHumansDatetime(assignment.date_completion || "", "short")}
                 </td>
 
                 <td>
-                    {getNameById(assignment.inspector, 'nameLastName')}
+                    {getNameById(assignment.inspector, 'initials')} {getHumansDatetime(assignment.inspect_date || "", "short")}
                 </td>
 
                 <td className={'fs-7'}>
-                    {getHumansDatetime(assignment.inspect_date || "")}
+                    {getHumansDatetime(assignment.tariffication_date || "", "short")}
                 </td>
 
                 <td className={'fs-7'}>
-                    {getHumansDatetime(assignment.tariffication_date || "")}
+                    {getHumansDatetime(assignment.last_print_date || "", "short")} {getNameById(assignment.last_print_by, "initials")} ({assignment.print_count})
                 </td>
-
 
                 {!!assignment.new_tariff &&
                     <td className={'align-middle pb-0 fw-bold'} style={{fontSize: 14}}>

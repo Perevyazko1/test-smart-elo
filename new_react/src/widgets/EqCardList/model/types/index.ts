@@ -37,6 +37,7 @@ export interface EqAssignment {
     id: number;
     new_tariff: EqTariff | null;
     executor: number | null;
+    print_count: number;
     amount: number;
     number: number;
     plane_date: string | null;

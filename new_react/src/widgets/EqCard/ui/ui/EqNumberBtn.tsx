@@ -65,57 +65,21 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
                 </div>
                 : null
             }
+
+            <div
+                className={
+                'position-absolute top-0 end-0 rounded-circle ' +
+                    (item.print_count > 0 ?
+                        'bg-success' :
+                        'bg-warning')
+            }
+                style={{
+                    height: 5,
+                    width: 5,
+                }}
+            >
+
+            </div>
         </button>
     );
 });
-
-
-// Альтернативный макет с датой/временем в нарядах
-//
-// <button
-//     className={buttonClasses}
-//     style={{minWidth: '55px', fontSize: fontSize}}
-//     {...buttonProps}
-// >
-//     <div className={'d-flex w-100 justify-content-evenly'}>
-//         <div className={'position-relative'}>
-//             {item.number}
-//             <div
-//                 className={'position-absolute'}
-//                 style={{
-//                     top: -8.5,
-//                     fontSize: cardHeight / 12,
-//                     left: '50%',
-//                     transform: "translate(-50%)",
-//                 }}
-//             >
-//                 {userInitials}
-//             </div>
-//
-//             {amount ?
-//                 <div
-//                     className={'position-absolute'}
-//                     style={{
-//                         bottom: -8.5,
-//                         fontSize: cardHeight / 11,
-//                         left: '50%',
-//                         transform: "translate(-50%)",
-//                     }}
-//                 >
-//                     {amount}
-//                 </div>
-//                 : null
-//             }
-//         </div>
-//
-//         <div style={{width: 2, borderLeft: '2px solid black'}}>
-//
-//         </div>
-//         <div style={{fontSize: 10, lineHeight: 1}}>
-//             04.10
-//             <br/>
-//             10:32
-//         </div>
-//     </div>
-// </button>
-

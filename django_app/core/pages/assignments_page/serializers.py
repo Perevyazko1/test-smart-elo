@@ -47,7 +47,8 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'plane_date',
             'assembled',
             'appointed_by_boss',
-            'co_executors'
+            'co_executors',
+            'print_count'
         ]
 
 
@@ -91,4 +92,7 @@ class AssignmentExtendedSerializer(serializers.ModelSerializer):
             'appointed_by_boss',
             'new_tariff',
             'amount',
+            'print_count',
+            'last_print_by',
+            'last_print_date',
         ]
