@@ -13,7 +13,7 @@ export const DepartmentFilter = () => {
     const {inited, setValue} = useStorageString({
         key: QUERY_KEY,
         onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
-        storageType: "sessionStorage",
+        storageType: "localStorage",
         skip: isLoading,
     });
 

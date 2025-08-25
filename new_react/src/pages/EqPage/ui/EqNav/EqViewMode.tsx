@@ -42,7 +42,7 @@ export const EqViewMode = () => {
             dispatch(eqPageActions.viewModeInited());
         },
         defaultValue: "",
-        storageType: "sessionStorage",
+        storageType: "localStorage",
     });
 
     const selectedViewMode = viewModes ?

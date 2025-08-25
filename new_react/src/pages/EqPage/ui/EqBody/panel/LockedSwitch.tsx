@@ -17,7 +17,7 @@ export const LockedSwitch = () => {
                 )
             },
             defaultValue: "",
-            storageType: "sessionStorage",
+            storageType: "localStorage",
         }
     );
 

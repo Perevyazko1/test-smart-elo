@@ -5,13 +5,7 @@ import {getEqProjects} from "@pages/EqPage/model/selectors/filterSelectors";
 import {eqPageActions} from "@pages/EqPage";
 
 
-interface EqProjectFilterProps {
-
-}
-
-
-export const EqProjectFilter = (props: EqProjectFilterProps) => {
-    const {} = props;
+export const EqProjectFilter = () => {
     const {queryParameters, setQueryParam} = useAppQuery();
     const projects = useAppSelector(getEqProjects);
     const dispatch = useAppDispatch();
@@ -29,7 +23,7 @@ export const EqProjectFilter = (props: EqProjectFilterProps) => {
             dispatch(eqPageActions.projectsInited());
         },
         defaultValue: "",
-        storageType: "sessionStorage",
+        storageType: "localStorage",
     });
 
     const selectedProject = projects ?

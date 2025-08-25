@@ -52,7 +52,7 @@ export const ViewModeNav = () => {
         key: QUERY_KEY,
         onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
         defaultValue: allViewModes[0].key,
-        storageType: "sessionStorage",
+        storageType: "localStorage",
     });
 
     return (

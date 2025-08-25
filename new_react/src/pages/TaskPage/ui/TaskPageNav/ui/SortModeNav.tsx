@@ -21,7 +21,7 @@ export const SortModeNav = () => {
         key: QUERY_KEY,
         onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
         defaultValue: sortVariants[1],
-        storageType: "sessionStorage",
+        storageType: "localStorage",
     });
 
     return (

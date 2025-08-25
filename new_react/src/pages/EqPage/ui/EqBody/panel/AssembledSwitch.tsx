@@ -12,7 +12,7 @@ export const AssembledSwitch = () => {
         key: QUERY_KEY,
         onChangeCallback: (mode) => setQueryParam(QUERY_KEY, mode || ""),
         defaultValue: "",
-        storageType: "sessionStorage",
+        storageType: "localStorage",
     });
 
     const showAssembledOnly = () => {
