@@ -403,11 +403,12 @@ def print_labels(request):
         main_text = [
             (project, 14 if len(project) < 15 else 11),
             ("---------", 8),
-            (product_name, 9),
+            (product_name, 12),
+            ("---------", 8),
         ]
 
         if t1:
-            main_text.append((f'Т1: {t1}', 7))
+            main_text.append((f'Т1: {t1}', 10))
         if t2:
             main_text.append((f'Т2: {t2}', 7))
         if t3:
