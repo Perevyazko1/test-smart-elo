@@ -48,17 +48,17 @@ export const EqNumbers = (props: EqNumbersProps) => {
     }
 
     const printNumber = (assignment_id: number) => {
-        if (isAdmin && window.confirm(`Распечатать бегун 1 шт?`)) {
+        if ((isAdmin || currentUser.current_department?.number === 10) && window.confirm(`Распечатать бегун 1 шт?`)) {
             requestPrintLabels({
                 assignment_ids: [assignment_id],
-                is_admin: isAdmin,
+                is_admin: isAdmin || currentUser.current_department?.number === 10,
             })
         }
     }
 
     return (
         <>
-            {(isBoss && currentUser.current_department?.number === 2) && (
+            {(isBoss && [2, 10].includes(currentUser.current_department?.number || 0)) && (
                 <button
                     className={"appBtn p-1 rounded h-100 fw-bold position-relative"}
                     style={{minWidth: '35px', fontSize: 12}}

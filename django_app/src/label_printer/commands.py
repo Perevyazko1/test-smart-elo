@@ -48,40 +48,26 @@ def get_wrap_text_with_sizes(text_size_pairs, with_area_mm):
         font_width_mm = text_pair[1] / DOTS_MM  # Преобразуем размер шрифта в мм
 
         # Разбить текст на строки с учетом данного размера шрифта
-        chars_per_line = int(with_area_mm // (font_width_mm * 1.45))
-        words = text.split()
+        chars_per_line = int(with_area_mm // (font_width_mm * 1.5))
         current_line = []
         current_length = 0
 
-        for word in words:
-            if len(word) > chars_per_line:
-                # Если текущая строка не пуста, добавляем ее в результат
+        for char in text:
+            if current_length + 1 <= chars_per_line:
+                current_line.append(char)
+                current_length += 1
+            else:
                 if current_line:
-                    result.append([' '.join(current_line), text_pair[1]])
+                    result.append([''.join(current_line), text_pair[1]])
+                if char != ' ':
+                    current_line = [char]
+                    current_length = 1
+                else:
                     current_line = []
                     current_length = 0
 
-                # Разбиваем длинное слово на части
-                start = 0
-                while start < len(word):
-                    part = word[start:start + chars_per_line]
-                    if start + chars_per_line < len(word):
-                        part += "-"
-                    result.append([part, text_pair[1]])
-                    start += chars_per_line
-            else:
-                word_length = len(word)
-                if current_length + word_length + 1 <= chars_per_line:
-                    current_line.append(word)
-                    current_length += word_length + 1
-                else:
-                    if current_line:
-                        result.append([' '.join(current_line), text_pair[1]])
-                    current_line = [word]
-                    current_length = word_length
-
         if current_line:
-            result.append([' '.join(current_line), text_pair[1]])
+            result.append([''.join(current_line), text_pair[1]])
 
     return result
 
