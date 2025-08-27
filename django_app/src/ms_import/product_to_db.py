@@ -14,17 +14,17 @@ def _save_product(product: SkladProduct):
 
     # Данный механизм нужен, так как ранее из системы выводились модификации. Поэтому работаем через name
     if same_product_name.exists():
-        same_product_name = same_product_name.first()
+        same_product = same_product_name.first()
         updated = False
-        if same_product_name.product_id != product.id:
-            same_product_name.product_id = product.id
+        if same_product.product_id != product.id:
+            same_product.product_id = product.id
             updated = True
-        if same_product_name.group != product.pathName:
-            same_product_name.group = product.pathName
+        if same_product.group != product.pathName:
+            same_product.group = product.pathName
             updated = True
         if updated:
-            same_product_name.save()
-        return same_product_name.refresh_from_db()
+            same_product.save()
+        return same_product
 
     # Данный механизм нужен на случай, если товар был просто переименован
     elif same_product_id.exists():
@@ -38,19 +38,18 @@ def _save_product(product: SkladProduct):
             updated = True
         if updated:
             same_product.save()
-        return same_product.refresh_from_db()
+        return same_product
     else:
         new_product = Product.objects.create(
             product_id=product.id,
             name=product.name,
             group=product.pathName,
-            updated=product.updated,
         )
         ProductionStep.objects.create(
             department=Department.objects.get(number=1),
             product=new_product,
         )
-        return new_product.refresh_from_db()
+        return new_product
 
 
 def _save_fabric(fabric: SkladProduct):
