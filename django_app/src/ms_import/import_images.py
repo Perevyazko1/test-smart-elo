@@ -68,6 +68,8 @@ def import_images(product: SkladProduct):
                     fabric = Fabric.objects.get(fabric_id=product.id)
                     fabric.image_filename = image_filename
                     fabric.image.save(image_filename, ContentFile(image_data))
+                    print(f"Saving image {image_filename} for fabric {fabric.name}")
+                    fabric.save()
                 break
 
     # Delete removed images
