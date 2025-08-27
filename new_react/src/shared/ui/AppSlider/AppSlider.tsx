@@ -36,7 +36,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
         images?.map(image => (
             <SwiperSlide
                 style={{width: width, height: height}}
-                className={"d-flex justify-content-center align-items-center py-1"}
+                className={"d-flex justify-content-center align-items-center"}
                 key={image}
             >
                 <img
@@ -47,7 +47,7 @@ export const AppSlider = memo((props: AppSliderProps) => {
                         objectFit: 'contain',
                         objectPosition: 'center',
                     }}
-                    className="rounded m-0 p-0"
+                    className="rounded rounded-1 m-0 p-0"
                     alt={"Slide"}
                     loading={"lazy"}
                 />

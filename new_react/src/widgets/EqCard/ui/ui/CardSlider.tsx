@@ -7,7 +7,7 @@ import {useAppModal, useCurrentUser, usePermission} from "@shared/hooks";
 import cls from "./EqCard.module.scss";
 
 import {createEqImageUrls} from "../../model/lib/createEqImageUrls";
-import {APP_PERM} from "@shared/consts";
+import {APP_PERM, STATIC_URL} from "@shared/consts";
 
 
 interface CardSliderProps {
@@ -46,39 +46,81 @@ export const CardSlider = (props: CardSliderProps) => {
     const sliderImages = createEqImageUrls(card);
 
     return (
-        <div className={cls.sliderBlock + ' bg-light rounded'} style={{
-            width: 72,
-            minWidth: 72,
-            maxWidth: 72,
-        }}
-             onClick={() => sliderImages.thumbnails.length > 0 && handleOpen(
-                 <AppSlider
-                     images={sliderImages.images}
-                     width={'90vw'}
-                     height={'90vh'}
-                 />
-             )}
-        >
-            <AppSlider
-                images={sliderImages.thumbnails}
-                width={'100%'}
-                height={'100%'}
-                bgColor={card.card_info.tariff !== null
-                    ? " bg-light"
-                    : card.card_info.proposed_tariff !== null
-                        ? " bg-warning"
-                        : " bg-danger"
-                }
-                price={showPrice
-                    ?
-                    card.card_info.tariff
-                        ? card.card_info.tariff
-                        : (card.card_info.proposed_tariff && bossBerm)
-                            ? card.card_info.proposed_tariff
-                            : 0
-                    : undefined}
-                totalPrice={showPrice ? cardType !== 'await' ? totalCount : 0 : 0}
-            />
-        </div>
+        <>
+            <div className={cls.sliderBlock + ' bg-light rounded'} style={{
+                width: 72,
+                minWidth: 72,
+                maxWidth: 72,
+            }}
+                 onClick={() => sliderImages.thumbnails.length > 0 && handleOpen(
+                     <AppSlider
+                         images={sliderImages.images}
+                         width={'90vw'}
+                         height={'90vh'}
+                     />
+                 )}
+            >
+                <AppSlider
+                    images={sliderImages.thumbnails}
+                    width={'100%'}
+                    height={'100%'}
+                    bgColor={card.card_info.tariff !== null
+                        ? " bg-light"
+                        : card.card_info.proposed_tariff !== null
+                            ? " bg-warning"
+                            : " bg-danger"
+                    }
+                    price={showPrice
+                        ?
+                        card.card_info.tariff
+                            ? card.card_info.tariff
+                            : (card.card_info.proposed_tariff && bossBerm)
+                                ? card.card_info.proposed_tariff
+                                : 0
+                        : undefined}
+                    totalPrice={showPrice ? cardType !== 'await' ? totalCount : 0 : 0}
+                />
+            </div>
+
+
+            <div className={cls.sliderBlock + ' bg-light rounded position-relative'} style={{
+                width: 50,
+                minWidth: 50,
+                maxWidth: 50,
+                overflow: 'hidden',
+                textShadow: '#ffffff 0 0 2px',
+
+            }}
+                 onClick={() => sliderImages.thumbnails.length > 0 && handleOpen(
+                     <AppSlider
+                         images={sliderImages.images}
+                         width={'90vw'}
+                         height={'90vh'}
+                     />
+                 )}
+            >
+                {card.main_fabric?.image && (
+                    <img
+                        src={card.main_fabric.image.startsWith("http") || card.main_fabric.image.startsWith("blob") ? card.main_fabric.image : STATIC_URL + card.main_fabric.image}
+                        style={{
+                            maxHeight: '100%',
+                        }}
+                        className="rounded m-0 p-0"
+                        alt={"Slide"}
+                        loading={"lazy"}
+                    />
+                )}
+                <span
+                    className={'position-absolute bottom-0 start-0 text-center fw-bold'}
+                    style={{
+                        fontSize: 8,
+                        wordBreak: 'break-all'
+                    }}
+                >
+                    {card.main_fabric?.name}
+                </span>
+            </div>
+
+        </>
     );
 }
