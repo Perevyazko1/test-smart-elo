@@ -5,22 +5,23 @@ from core.models import (
     OrderProduct,
     ProductPicture,
     Order,
-    Fabric, )
+    Fabric,
+    FabricPicture,
+)
 from .service.get_eq_card_assignments import get_eq_card_assignments
 from .service.get_eq_card_info import get_eq_card_info
 from ...serializers import ProductSerializer
 
 
-class EqFabricSerializer(serializers.ModelSerializer):
+class EqFabricPictureSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
 
     class Meta:
         """Metadata. """
-        model = Fabric
+        model = FabricPicture
         fields = [
             'id',
-            'name',
             'image',
             'thumbnail',
         ]
@@ -36,6 +37,19 @@ class EqFabricSerializer(serializers.ModelSerializer):
         if obj.thumbnail:
             return obj.thumbnail.url
         return None
+
+
+class EqFabricSerializer(serializers.ModelSerializer):
+    fabric_pictures = EqFabricPictureSerializer(many=True)
+
+    class Meta:
+        """Metadata. """
+        model = Fabric
+        fields = [
+            'id',
+            'name',
+            'fabric_pictures',
+        ]
 
 
 class EqProductPictureSerializer(serializers.ModelSerializer):

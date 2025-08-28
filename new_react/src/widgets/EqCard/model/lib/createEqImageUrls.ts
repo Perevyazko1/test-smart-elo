@@ -14,14 +14,30 @@ export const createEqImageUrls = (card: EqOrderProduct): {images: string[], thum
         }
     });
 
-    if (card.main_fabric?.image) imagesSet.add(card.main_fabric?.image);
-    if (card.main_fabric?.thumbnail) thumbnailsSet.add(card.main_fabric?.thumbnail);
-
-    if (card.second_fabric?.image) imagesSet.add(card.second_fabric?.image);
-    if (card.second_fabric?.thumbnail) thumbnailsSet.add(card.second_fabric?.thumbnail);
-
-    if (card.third_fabric?.image) imagesSet.add(card.third_fabric?.image);
-    if (card.third_fabric?.thumbnail) thumbnailsSet.add(card.third_fabric?.thumbnail);
+    card.main_fabric?.fabric_pictures?.forEach((picture) => {
+        if (picture.image) {
+            imagesSet.add(picture.image);
+        }
+        if (picture.thumbnail) {
+            thumbnailsSet.add(picture.thumbnail);
+        }
+    });
+    card.second_fabric?.fabric_pictures?.forEach((picture) => {
+        if (picture.image) {
+            imagesSet.add(picture.image);
+        }
+        if (picture.thumbnail) {
+            thumbnailsSet.add(picture.thumbnail);
+        }
+    });
+    card.third_fabric?.fabric_pictures?.forEach((picture) => {
+        if (picture.image) {
+            imagesSet.add(picture.image);
+        }
+        if (picture.thumbnail) {
+            thumbnailsSet.add(picture.thumbnail);
+        }
+    });
 
     return {
         images: Array.from(imagesSet),

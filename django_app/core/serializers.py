@@ -48,9 +48,34 @@ class ProductPicturesSerializer(serializers.ModelSerializer):
         return None
 
 
-class FabricSerializer(serializers.ModelSerializer):
+class FabricPictureSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
     thumbnail = serializers.SerializerMethodField()
+
+    class Meta:
+        """Metadata. """
+        model = FabricPicture
+        fields = [
+            'id',
+            'image',
+            'thumbnail',
+        ]
+
+    def get_image(self, obj):
+        """Get image url method. """
+        if obj.image:
+            return obj.image.url
+        return None
+
+    def get_thumbnail(self, obj):
+        """Get thumbnail url method. """
+        if obj.thumbnail:
+            return obj.thumbnail.url
+        return None
+
+
+class FabricSerializer(serializers.ModelSerializer):
+    fabric_pictures = FabricPictureSerializer(many=True)
 
     class Meta:
         model = Fabric
@@ -58,20 +83,8 @@ class FabricSerializer(serializers.ModelSerializer):
             'id',
             'fabric_id',
             'name',
-            'image_filename',
-            'image',
-            'thumbnail',
+            'fabric_pictures',
         ]
-
-    def get_image(self, obj):
-        if obj.image:
-            return obj.image.url
-        return None
-
-    def get_thumbnail(self, obj):
-        if obj.thumbnail:
-            return obj.thumbnail.url
-        return None
 
 
 class OrderSerializer(serializers.ModelSerializer):

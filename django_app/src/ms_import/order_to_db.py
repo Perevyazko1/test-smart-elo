@@ -1,10 +1,12 @@
+import logging
 from typing import Any, Dict
 
-from django.db import transaction
 from core.models import Order
 from src.api.sklad_schemas import SkladOrderExpandProjectPositionsAssortment
 from src.ms_import.config import DEFAULT_URGENCY_LEVEL
 from src.ms_import.lib import parse_datetime, get_attribute_value
+
+logger = logging.getLogger(__name__)
 
 
 def _collect_defaults(order: SkladOrderExpandProjectPositionsAssortment) -> Dict[str, Any]:
@@ -26,29 +28,34 @@ def _collect_defaults(order: SkladOrderExpandProjectPositionsAssortment) -> Dict
 def order_to_db(order: SkladOrderExpandProjectPositionsAssortment):
     data = _collect_defaults(order)
 
-    # Блокируем строку при наличии, чтобы избежать гонок при параллельном обновлении
-    obj = (
-        Order.objects.select_for_update()
-        .filter(order_id=order.id)
-        .first()
-    )
+    try:
+        # Блокируем строку
+        obj = (
+            Order.objects.select_for_update()
+            .filter(order_id=order.id)
+            .first()
+        )
 
-    if obj is None:
-        # Создаем новый объект
-        obj = Order(order_id=order.id, **data)
-        obj.save()
-        created = True
-    else:
-        created = False
-        # Вычисляем изменившиеся поля
-        changed_fields: Dict[str, Any] = {}
-        for field, new_value in data.items():
-            if getattr(obj, field) != new_value:
-                setattr(obj, field, new_value)
-                changed_fields[field] = new_value
+        if obj is None:
+            # Создаем новый объект
+            obj = Order(order_id=order.id, **data)
+            obj.save()
+            created = True
+        else:
+            created = False
+            # Вычисляем изменившиеся поля
+            changed_fields: Dict[str, Any] = {}
+            for field, new_value in data.items():
+                if getattr(obj, field) != new_value:
+                    setattr(obj, field, new_value)
+                    changed_fields[field] = new_value
 
-        if changed_fields:
-            # Обновляем только изменившиеся поля
-            obj.save(update_fields=list(changed_fields.keys()))
+            if changed_fields:
+                # Обновляем только изменившиеся поля
+                obj.save(update_fields=list(changed_fields.keys()))
 
-    return obj, created
+        return obj, created
+
+    except Exception as e:
+        logger.error(f"❌ Ошибка в order_to_db для заказа {order.id}: {e}", exc_info=True)
+        raise

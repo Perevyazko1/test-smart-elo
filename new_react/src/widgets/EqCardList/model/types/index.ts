@@ -13,11 +13,15 @@ export interface EqOrder {
     inner_number: string;
 }
 
+export interface EqFabricPicture {
+    image: string | null;
+    thumbnail: string | null;
+}
+
 export interface EqFabric {
     id: number;
     name: string;
-    image: string | null;
-    thumbnail: string | null;
+    fabric_pictures: EqFabricPicture[] | null;
 }
 
 export interface EqTariff {

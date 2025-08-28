@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from core.models import Product, ProductPicture, Fabric, Order, OrderProduct, Assignment, ProductionStep, \
-    TechnologicalProcess, OrderProductComment, Tariff
+    TechnologicalProcess, OrderProductComment, Tariff, FabricPicture
 
 
 @admin.register(Product)
@@ -103,3 +103,4 @@ class TechnologicalProcessAdmin(admin.ModelAdmin):
 admin.site.register(Fabric)
 admin.site.register(OrderProductComment)
 admin.site.register(Tariff)
+admin.site.register(FabricPicture)

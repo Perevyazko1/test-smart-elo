@@ -45,6 +45,9 @@ export const CardSlider = (props: CardSliderProps) => {
 
     const sliderImages = createEqImageUrls(card);
 
+    const targetPicture = card.main_fabric?.fabric_pictures ?
+        card.main_fabric.fabric_pictures[0] : null
+
     return (
         <>
             <div className={cls.sliderBlock + ' bg-light rounded'} style={{
@@ -99,9 +102,9 @@ export const CardSlider = (props: CardSliderProps) => {
                      />
                  )}
             >
-                {card.main_fabric?.image && (
+                {targetPicture && (
                     <img
-                        src={card.main_fabric.image.startsWith("http") || card.main_fabric.image.startsWith("blob") ? card.main_fabric.image : STATIC_URL + card.main_fabric.image}
+                        src={targetPicture.image?.startsWith("http") || targetPicture.image?.startsWith("blob") ? targetPicture.image : STATIC_URL + targetPicture.image}
                         style={{
                             maxHeight: '100%',
                         }}

@@ -1,3 +1,4 @@
+import os
 import uuid
 from io import BytesIO
 
@@ -118,54 +119,51 @@ class Fabric(models.Model):
     name = models.CharField('Название ткани', max_length=255)
     updated = models.DateTimeField('Обновлен в API', default=timezone.now)
 
-    image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
-    image = models.ImageField(
-        'Ссылка на изображение',
-        upload_to=f"images/products/",
-        blank=True,
-        null=True,
-        max_length=256,
-    )
-    thumbnail = models.ImageField(
-        'Миниатюра',
-        upload_to=f"images/products/thumbnails/",
-        blank=True,
-        null=True,
-        max_length=256,
-    )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-
-        if self.image and not self.thumbnail:  # Генерируем миниатюру, если есть изображение, но нет миниатюры
-            try:
-                from io import BytesIO
-                from PIL import Image
-                import os
-                from django.core.files.base import ContentFile
-
-                img = Image.open(self.image.path)  # Открываем оригинал
-                img.thumbnail((100, 100))  # Уменьшаем
-
-                temp_thumb = BytesIO()
-                img.save(temp_thumb, format=img.format or 'PNG', quality=90)  # Сохраняем в буфер
-                temp_thumb.seek(0)
-
-                image_content = ContentFile(temp_thumb.read())
-
-                # Используем базовое имя файла
-                file_name = os.path.basename(self.image.name)
-
-                self.thumbnail.save(file_name, image_content, save=False)
-
-                # Сохраняем только поле thumbnail, чтобы избежать рекурсии
-                super(Fabric, self).save(update_fields=['thumbnail'])
-            except FileNotFoundError:
-                # Если файл изображения не найден, ничего не делаем
-                pass
-
     def __str__(self):
         return '{}'.format(f'{self.name}')
+
+
+class FabricPicture(models.Model):
+    """Изображения тканей"""
+
+    class Meta:
+        verbose_name = "Изображение ткани"
+        verbose_name_plural = "Изображения тканей"
+        ordering = ['-id']
+
+    fabric = models.ForeignKey(
+        'Fabric',
+        related_name='fabric_pictures',
+        on_delete=models.CASCADE,
+    )
+
+    image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
+    image = models.ImageField('Ссылка на изображение', upload_to=f"images/fabrics/", blank=True, null=True)
+
+    thumbnail = models.ImageField('Миниатюра', upload_to=f"images/fabrics/thumbnails/", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        # Если у экземпляра есть атрибут _creating_thumbnail и он True, мы пропускаем создание миниатюры
+        if hasattr(self, '_creating_thumbnail') and self._creating_thumbnail:
+            super().save(*args, **kwargs)
+            return
+
+        super().save(*args, **kwargs)
+
+        if self.image:
+            img = Image.open(self.image.path)
+            img.thumbnail((100, 100))
+
+            image_io = BytesIO()
+            img.save(image_io, format=img.format)
+            image_content = ContentFile(image_io.getvalue(), self.image_filename)
+
+            self._creating_thumbnail = True
+            self.thumbnail.save(self.image_filename, image_content)
+            del self._creating_thumbnail
+
+    def __str__(self):
+        return '{}'.format(f'{self.image}')
 
 
 class Order(models.Model):
@@ -237,11 +235,11 @@ class OrderProduct(models.Model):
     )
     # До трех видов ткани на изделие
     main_fabric = models.ForeignKey(Fabric, related_name='order_products_main', verbose_name='Ткань основа',
-                                    on_delete=models.CASCADE, null=True, blank=True)
+                                    on_delete=models.SET_NULL, null=True, blank=True)
     second_fabric = models.ForeignKey(Fabric, related_name='order_products_second', verbose_name='Ткань компаньон',
-                                      on_delete=models.CASCADE, null=True, blank=True)
+                                      on_delete=models.SET_NULL, null=True, blank=True)
     third_fabric = models.ForeignKey(Fabric, related_name='order_products_third', verbose_name='Ткань дополнительная',
-                                     on_delete=models.CASCADE, null=True, blank=True)
+                                     on_delete=models.SET_NULL, null=True, blank=True)
 
     quantity = models.IntegerField('Количество', default=1)
 
@@ -249,6 +247,8 @@ class OrderProduct(models.Model):
 
     # Индивидуальное назначение срочности производства
     urgency = models.SmallIntegerField('Срочность', default=3)
+
+
 
     def __str__(self):
         return '{}'.format(f'{self.series_id}: {self.product.name_internal} - {self.status}')

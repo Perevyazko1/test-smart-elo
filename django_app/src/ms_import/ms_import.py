@@ -19,7 +19,9 @@ logger.setLevel(logging.INFO)
 @transaction.atomic
 def _update_order(order: SkladOrderExpandProjectPositionsAssortment, updated_products: list[str]):
     try:
-        db_order, _ = order_to_db(order)
+        db_order, created = order_to_db(order)
+        logger.info(f"Заказ {db_order.id} {'создан' if created else 'обновлён'}")
+
         put_elo_link(
             order.id,
             get_attribute_value('Ссылка на спец-ю:', order.attributes),
@@ -27,27 +29,32 @@ def _update_order(order: SkladOrderExpandProjectPositionsAssortment, updated_pro
         )
 
         for position in order.positions.rows:
-            # Считать и зафиксировать дату обновления изделия
-            if position.assortment.id in updated_products:
-                continue
+            try:
+                # Считать и зафиксировать дату обновления изделия
+                if position.assortment.id in updated_products:
+                    continue
 
-            product = product_to_db(position.assortment)
-            updated_products.append(position.assortment.id)
+                product = product_to_db(position.assortment)
+                updated_products.append(position.assortment.id)
 
-            if product is None:
-                logger.info("Изделие не найдено либо не целевое")
-                continue
+                if product is None:
+                    logger.info("Изделие не найдено либо не целевое")
+                    continue
 
-            logger.info(f"{product.name} {product.updated} {parse_datetime(position.assortment.updated)}")
+                logger.info(f"{product.name} {product.updated} {parse_datetime(position.assortment.updated)}")
 
-            if product.updated == parse_datetime(position.assortment.updated):
-                logger.info("🐞 Product is actual")
-                continue
+                if product.updated == parse_datetime(position.assortment.updated):
+                    logger.info("🐞 Product is actual")
+                    continue
 
-            import_images(position.assortment)
-            product.updated = parse_datetime(position.assortment.updated)
-            product.save()
-            logger.info("🎉 Product updated")
+                import_images(position.assortment)
+                product.updated = parse_datetime(position.assortment.updated)
+                product.save()
+                logger.info("🎉 Product updated")
+
+            except Exception as e:
+                logger.error(f"❌ Ошибка обработки позиции {position.assortment.name}: {e}", exc_info=True)
+                raise
 
         order_products = create_order_products(order)
         for entity in order_products:
@@ -55,7 +62,7 @@ def _update_order(order: SkladOrderExpandProjectPositionsAssortment, updated_pro
 
         return updated_products
     except Exception as e:
-        logger.error(f"Error updating order: {str(e)}")
+        logger.error(f"⛔ Критическая ошибка при обновлении заказа: {e}", exc_info=True)
         raise
 
 

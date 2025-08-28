@@ -1,9 +1,19 @@
+import logging
+
 from django.db.models import QuerySet,Sum
+from django.core.files.base import ContentFile
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.core.cache import cache
 
-from core.models import Assignment, AssignmentCoExecutor
+from PIL import Image
+from io import BytesIO
+import os
+
+from core.models import Assignment, AssignmentCoExecutor, Fabric
+
+
+logger = logging.getLogger(__name__)
 
 
 def update_assignments_and_clean_cache(
