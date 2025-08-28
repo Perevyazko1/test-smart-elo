@@ -94,12 +94,8 @@ class SkladClient:
                 last_exception = e
                 logger.error(f"❌ HTTP ошибка {e.response.status_code}: {e.response.text[:200]}")
 
-                # Для 404 ошибки сразу возвращаем исключение без повторов
-                if e.response.status_code == 404:
-                    raise e
-
                 # Для остальных критических ошибок тоже не повторяем
-                if e.response.status_code in [401, 403]:
+                if e.response.status_code in [401, 403, 404]:
                     logger.error(f"❌ Критическая ошибка {e.response.status_code}, повторы бесполезны")
                     raise e
 

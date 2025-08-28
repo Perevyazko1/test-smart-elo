@@ -43,6 +43,7 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
 
     result = []
     current_products = []
+    fabrics_applied = False  # флаг: к текущей группе уже добавляли ткани
 
     # Генератор номера серии
     generator = _index_number_generator(order)
@@ -61,18 +62,33 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
             print(
                 f"Warning: Значение атрибута 'Комиссионные' '{commission_val}' не является допустимым числом. Используется значение commission_percent по умолчанию (1).")
 
-
     for position in order.positions.rows:
         group = position.assortment.pathName
         if group in PRODUCT_GROUPS:
-            """Если группа продукта содержится в целевом списке групп товаров, фиксируем ее как основной продукт"""
-            if current_products and group == 'Мебель и готовые изделия/Прочее':
-                """
-                Если текущий продукт относится к группе 'Прочие', добавляем все текущие продукты в результат 
-                и начинаем новый цикл так как это не мягкие изделия
-                """
+            """Начинается новое изделие"""
+            if group == 'Мебель и готовые изделия/Прочее':
+                # Завершаем текущую группу изделий (если была)
+                if current_products:
+                    result.extend(current_products)
+                    current_products = []
+                    fabrics_applied = False
+
+                # Прочее — отдельная позиция без тканей, сразу в результат
+                order_product_entity = _get_base_order_product(order)
+                order_product_entity.series_id = next(generator)
+                order_product_entity.product_id = position.assortment.id
+                order_product_entity.price = ((Decimal(position.price) / Decimal('100')) * commission_percent).quantize(Decimal('0.00'))
+                order_product_entity.quantity = int(position.quantity)
+                order_product_entity.group = group
+                result.append(order_product_entity)
+                continue
+
+            # Обычное мягкое изделие
+            # Если к текущей группе уже применялись ткани — это новая группа изделий
+            if fabrics_applied and current_products:
                 result.extend(current_products)
                 current_products = []
+                fabrics_applied = False
 
             order_product_entity = _get_base_order_product(order)
             order_product_entity.series_id = next(generator)
@@ -84,7 +100,7 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
             continue
 
         elif group in FABRIC_GROUPS:
-            """Если группа товара в целевом списке тканей, фиксируем ее как ткань"""
+            """Ткань «приклеивается» ко всем изделиям текущей группы (кроме 'Прочее')"""
             for product in current_products:
                 if product.group != 'Мебель и готовые изделия/Прочее':
                     if not product.main_fabric_id:
@@ -93,6 +109,9 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
                         product.second_fabric_id = position.assortment.id
                     elif not product.third_fabric_id:
                         product.third_fabric_id = position.assortment.id
+            # Отметим, что к текущей группе уже добавляли ткани
+            if current_products:
+                fabrics_applied = True
             continue
 
         else:
