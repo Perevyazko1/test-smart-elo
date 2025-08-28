@@ -114,9 +114,11 @@ export const CardSlider = (props: CardSliderProps) => {
                     />
                 )}
                 <span
-                    className={'position-absolute bottom-0 start-0 text-center fw-bold'}
+                    className={'position-absolute bottom-0 start-0 text-center fw-bold pt-1'}
                     style={{
                         fontSize: 8,
+                        lineHeight: 1,
+                        backgroundColor: 'rgba(255, 255, 255, 0.15)',
                         wordBreak: 'break-all'
                     }}
                 >
