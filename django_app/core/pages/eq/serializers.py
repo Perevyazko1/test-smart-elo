@@ -49,6 +49,11 @@ class EqFabricSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'fabric_pictures',
+            'reserve',
+            'quantity',
+            'intransit',
+            'barcode',
+            'is_actual',
         ]
 
 

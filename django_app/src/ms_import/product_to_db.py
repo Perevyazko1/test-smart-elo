@@ -1,6 +1,7 @@
 from core.models import Product, ProductionStep, Fabric
-from src.api.sklad_schemas import SkladProduct
+from src.api.sklad_schemas import SkladProduct, SkladStock
 from src.ms_import.config import FABRIC_GROUPS, PRODUCT_GROUPS
+from src.ms_import.lib import get_attribute_value
 from staff.models import Department
 
 
@@ -52,20 +53,30 @@ def _save_product(product: SkladProduct):
         return new_product
 
 
-def _save_fabric(fabric: SkladProduct):
+def _save_fabric(fabric: SkladProduct, stock: SkladStock):
     existing_fabric = Fabric.objects.filter(fabric_id=fabric.id).first()
-    if not existing_fabric or existing_fabric.name != fabric.name:
+    if (not existing_fabric or
+            existing_fabric.name != fabric.name or
+            existing_fabric.quantity != stock.quantity or
+            existing_fabric.reserve != stock.reserve or
+            existing_fabric.intransit != stock.intransit or
+            existing_fabric.is_actual != bool(get_attribute_value('Инвентаризирован', fabric.attributes))):
         return Fabric.objects.update_or_create(
             fabric_id=fabric.id,
             defaults={
-                'name': fabric.name
+                'name': fabric.name,
+                'is_actual': bool(get_attribute_value('Инвентаризирован', fabric.attributes)),
+                'quantity': stock.quantity,
+                'reserve': stock.reserve,
+                'intransit': stock.intransit,
+                'barcode': fabric.barcodes[0].ean13 if fabric.barcodes else None,
             }
         )[0]
     return existing_fabric
 
-def product_to_db(product: SkladProduct) -> Product | Fabric | None:
+def product_to_db(product: SkladProduct, stock: SkladStock) -> Product | Fabric | None:
     if product.pathName in FABRIC_GROUPS:
-        return _save_fabric(product)
+        return _save_fabric(product, stock)
     if product.pathName in PRODUCT_GROUPS:
         return _save_product(product)
     return None

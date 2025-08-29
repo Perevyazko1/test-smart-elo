@@ -1,4 +1,3 @@
-import os
 import uuid
 from io import BytesIO
 
@@ -118,6 +117,13 @@ class Fabric(models.Model):
     fabric_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     name = models.CharField('Название ткани', max_length=255)
     updated = models.DateTimeField('Обновлен в API', default=timezone.now)
+    barcode = models.CharField('Штрихкод', max_length=240, blank=True, null=True)
+
+    reserve = models.FloatField("Остаток", default=0.00, blank=True, null=True)
+    quantity = models.FloatField("Остаток", default=0.00, blank=True, null=True)
+    intransit = models.FloatField("Остаток", default=0.00, blank=True, null=True)
+
+    is_actual = models.BooleanField("Актуальность", default=False)
 
     def __str__(self):
         return '{}'.format(f'{self.name}')
@@ -139,6 +145,7 @@ class FabricPicture(models.Model):
 
     image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/fabrics/", blank=True, null=True)
+
 
     thumbnail = models.ImageField('Миниатюра', upload_to=f"images/fabrics/thumbnails/", blank=True, null=True)
 

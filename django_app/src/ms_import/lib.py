@@ -17,7 +17,7 @@ def parse_datetime(value: Any) -> Optional[datetime]:
         return None
 
 
-def get_attribute_value(attribute_name: str, attribute_value_list: list[SkladAttribute] | None) -> str:
+def get_attribute_value(attribute_name: str, attribute_value_list: list[SkladAttribute] | None) -> str | bool:
     if not attribute_value_list:
         return ''
     for attribute in attribute_value_list:

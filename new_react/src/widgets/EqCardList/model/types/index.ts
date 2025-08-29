@@ -22,6 +22,11 @@ export interface EqFabric {
     id: number;
     name: string;
     fabric_pictures: EqFabricPicture[] | null;
+    reserve: number;
+    quantity: number;
+    intransit: number;
+    barcode: string;
+    is_actual: boolean;
 }
 
 export interface EqTariff {

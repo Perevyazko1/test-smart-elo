@@ -10,4 +10,9 @@ export interface Fabric {
     fabric_id: string;
     name: string;
     fabric_pictures: FabricPicture[] | null;
+    reserve: number;
+    quantity: number;
+    intransit: number;
+    barcode: string;
+    is_actual: boolean;
 }

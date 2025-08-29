@@ -83,7 +83,12 @@ class FabricSerializer(serializers.ModelSerializer):
             'id',
             'fabric_id',
             'name',
+            'barcode',
             'fabric_pictures',
+            'reserve',
+            'quantity',
+            'intransit',
+            'is_actual',
         ]
 
 

@@ -11,6 +11,7 @@ def _fetch_orders(offset=0):
         "expand": ','.join(map(str, ORDER_EXPAND)),
         "limit": 100,
         "offset": offset,
+        "fields": "stock",
     }
 
     order_list = client.get(

@@ -124,6 +124,18 @@ export const CardSlider = (props: CardSliderProps) => {
                 >
                     {card.main_fabric?.name}
                 </span>
+
+                <span
+                    className={'position-absolute top-0 end-0 text-center fw-bold pt-1'}
+                    style={{
+                        fontSize: 15,
+                        lineHeight: 1,
+                        backgroundColor: card.main_fabric?.is_actual ? 'rgba(114,255,0,0.25)' : 'rgba(255,0,0,0.25)',
+                        wordBreak: 'break-all',
+                    }}
+                >
+                    {card.main_fabric?.quantity.toFixed(1)}
+                </span>
             </div>
 
         </>

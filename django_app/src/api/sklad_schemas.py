@@ -94,12 +94,36 @@ class SkladProductImage(BaseModel):
         extra = "ignore"
 
 
+class SkladBarcode(BaseModel):
+    ean8:Optional[str] = None
+    ean13:Optional[str] = None
+    code128:Optional[str] = None
+    gtin:Optional[str] = None
+    upc:Optional[str] = None
+
+    class Config:
+        extra = "ignore"
+
+
 class SkladProduct(BaseModel):
     id: str
     name: str
     pathName: str
     updated: str
     images: Optional[SkladListNoExpand] = None
+    attributes: Optional[list[SkladAttribute]] = None
+    barcodes: Optional[list[SkladBarcode]] = None
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladStock(BaseModel):
+    available: float
+    cost: float
+    intransit: float
+    quantity: float
+    reserve: float
 
     class Config:
         extra = "ignore"
@@ -110,6 +134,7 @@ class SkladPosition(BaseModel):
     assortment: SkladProduct
     price: int
     quantity: float
+    stock: SkladStock
 
     class Config:
         extra = "ignore"

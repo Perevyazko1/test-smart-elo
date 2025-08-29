@@ -34,7 +34,7 @@ def _update_order(order: SkladOrderExpandProjectPositionsAssortment, updated_pro
                 if position.assortment.id in updated_products:
                     continue
 
-                product = product_to_db(position.assortment)
+                product = product_to_db(position.assortment, stock=position.stock)
                 updated_products.append(position.assortment.id)
 
                 if product is None:
