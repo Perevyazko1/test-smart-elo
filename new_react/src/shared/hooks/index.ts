@@ -1,3 +1,4 @@
+export { useOnlineStatus } from "./useOnlineStatus/useOnlineStatus";
 export {useStorageString} from "./useStorageString/useStorageString";
 export {useEmployeeName} from "./useEmployeeName";
 export {useFormattedValue} from "./useFormattedValue/useFormattedValue";
