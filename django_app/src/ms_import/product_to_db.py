@@ -60,6 +60,7 @@ def _save_fabric(fabric: SkladProduct, stock: SkladStock):
             existing_fabric.quantity != stock.quantity or
             existing_fabric.reserve != stock.reserve or
             existing_fabric.intransit != stock.intransit or
+            existing_fabric.barcode != fabric.barcodes[0].ean13 if fabric.barcodes else None or
             existing_fabric.is_actual != bool(get_attribute_value('Инвентаризирован', fabric.attributes))):
         return Fabric.objects.update_or_create(
             fabric_id=fabric.id,

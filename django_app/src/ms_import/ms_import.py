@@ -33,15 +33,16 @@ def _update_order(order: SkladOrderExpandProjectPositionsAssortment, updated_pro
                 # Считать и зафиксировать дату обновления изделия
                 if position.assortment.id in updated_products:
                     continue
+                updated_products.append(position.assortment.id)
 
                 product = product_to_db(position.assortment, stock=position.stock)
-                updated_products.append(position.assortment.id)
 
                 if product is None:
                     logger.info("Изделие не найдено либо не целевое")
                     continue
 
                 logger.info(f"{product.name} {product.updated} {parse_datetime(position.assortment.updated)}")
+
 
                 if product.updated == parse_datetime(position.assortment.updated):
                     logger.info("🐞 Product is actual")
