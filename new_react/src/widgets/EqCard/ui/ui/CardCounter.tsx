@@ -26,13 +26,29 @@ export const CardCounter = (props: CardCounterProps) => {
         )
     };
 
+    const getBgColor = () => {
+        if (card.card_info.count_ready < card.shipped) {
+            return "#ffc107"
+        } else if (card.shipped === card.card_info.count_ready && card.shipped === card.card_info.count_all) {
+            return "rgb(197,255,186)"
+        }
+        // else if (card.shipped > card.card_info.count_ready) {
+        //     return "rgb(189,245,255)"
+        // }
+        else {
+            return "bg-white"
+        }
+    }
+
     return (
         <div
             className={
-            cls.cardCounts
-                + ' fs-7 fw-bold rounded'
-                + (card.card_info.count_ready < card.shipped ? " bg-warning" : " bg-white")
-        }
+                cls.cardCounts
+                + ' fs-7 fw-bold rounded '
+            }
+            style={{
+                backgroundColor: getBgColor(),
+            }}
             onClick={openModalWithInfo}
         >
             <IndicatorWrapper
@@ -45,7 +61,7 @@ export const CardCounter = (props: CardCounterProps) => {
                     indicator={'tech-process'}
                     show={!card.product.technological_process}
                     color={' bg-danger'}
-                    top={`${!!card.order.comment_base || !!card.order.comment_case ?  3 : -3}px`}
+                    top={`${!!card.order.comment_base || !!card.order.comment_case ? 3 : -3}px`}
                 >
                     <div className={cls.infoItem}>
                         <span>Всего:</span>
