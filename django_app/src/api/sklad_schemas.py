@@ -108,7 +108,7 @@ class SkladBarcode(BaseModel):
 class SkladProduct(BaseModel):
     id: str
     name: str
-    pathName: str
+    pathName: Optional[str] = None
     updated: str
     images: Optional[SkladListNoExpand] = None
     attributes: Optional[list[SkladAttribute]] = None
@@ -132,7 +132,7 @@ class SkladStock(BaseModel):
 class SkladPosition(BaseModel):
     id: str
     assortment: SkladProduct
-    price: int
+    price: float
     quantity: float
     shipped: float
     stock: SkladStock
