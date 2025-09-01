@@ -47,35 +47,26 @@ export const CardCounter = (props: CardCounterProps) => {
                     color={' bg-danger'}
                     top={`${!!card.order.comment_base || !!card.order.comment_case ?  3 : -3}px`}
                 >
-                    <div className={
-                        (card.card_info.count_all === 0 ? 'text-muted ' : '' ) + cls.infoItem
-                    }
-                    >
+                    <div className={cls.infoItem}>
                         <span>Всего:</span>
                         <span>{card.card_info.count_all}</span>
 
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={
-                        (card.card_info.count_in_work === 0 ? 'text-muted ' : '') + cls.infoItem
-                    }>
+                    <div className={cls.infoItem}>
                         <span>В раб:</span>
                         <span>{card.card_info.count_in_work}</span>
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={
-                        (card.card_info.count_await === 0 ? 'text-muted ' : '') + cls.infoItem
-                    }>
+                    <div className={cls.infoItem}>
                         <span>Отгр.:</span>
                         <span>{card.shipped}</span>
                     </div>
                     <hr className={cls.contentHr}/>
 
-                    <div className={
-                        (card.card_info.count_ready === 0 ? 'text-muted ' : '') + cls.infoItem
-                    }>
+                    <div className={cls.infoItem}>
                         <span>Готов:</span>
                         <span>{card.card_info.count_ready}</span>
                     </div>
