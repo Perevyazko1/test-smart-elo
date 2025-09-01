@@ -134,6 +134,7 @@ class SkladPosition(BaseModel):
     assortment: SkladProduct
     price: int
     quantity: float
+    shipped: float
     stock: SkladStock
 
     class Config:

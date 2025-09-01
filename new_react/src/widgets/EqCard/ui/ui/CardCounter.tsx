@@ -28,7 +28,11 @@ export const CardCounter = (props: CardCounterProps) => {
 
     return (
         <div
-            className={cls.cardCounts + ' fs-7 fw-bold rounded'}
+            className={
+            cls.cardCounts
+                + ' fs-7 fw-bold rounded'
+                + (card.card_info.count_ready < card.shipped ? " bg-warning" : " bg-white")
+        }
             onClick={openModalWithInfo}
         >
             <IndicatorWrapper
@@ -64,8 +68,8 @@ export const CardCounter = (props: CardCounterProps) => {
                     <div className={
                         (card.card_info.count_await === 0 ? 'text-muted ' : '') + cls.infoItem
                     }>
-                        <span>Своб:</span>
-                        <span>{card.card_info.count_await}</span>
+                        <span>Отгр.:</span>
+                        <span>{card.shipped}</span>
                     </div>
                     <hr className={cls.contentHr}/>
 

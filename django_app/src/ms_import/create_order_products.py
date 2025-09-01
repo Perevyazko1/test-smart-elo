@@ -15,6 +15,7 @@ class OrderProductEntity(BaseModel):
     second_fabric_id: str | None = None
     third_fabric_id: str | None = None
     quantity: int = 1
+    shipped: float = 0
     price: Decimal = Decimal(0.00)
     urgency: int = DEFAULT_URGENCY_LEVEL
     group: str = ''
@@ -76,6 +77,8 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
                 # Прочее — отдельная позиция без тканей, сразу в результат
                 order_product_entity = _get_base_order_product(order)
                 order_product_entity.series_id = next(generator)
+                order_product_entity.shipped = position.shipped
+                print("▶️▶️▶️▶️", position.shipped, "◀️◀️◀️◀️")
                 order_product_entity.product_id = position.assortment.id
                 order_product_entity.price = ((Decimal(position.price) / Decimal('100')) * commission_percent).quantize(Decimal('0.00'))
                 order_product_entity.quantity = int(position.quantity)
@@ -93,6 +96,8 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
             order_product_entity = _get_base_order_product(order)
             order_product_entity.series_id = next(generator)
             order_product_entity.product_id = position.assortment.id
+            order_product_entity.shipped = position.shipped
+            print("▶️▶️▶️▶️", position.shipped, "◀️◀️◀️◀️")
             order_product_entity.price = ((Decimal(position.price) / Decimal('100')) * commission_percent).quantize(Decimal('0.00'))
             order_product_entity.quantity = int(position.quantity)
             order_product_entity.group = group

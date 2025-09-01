@@ -250,6 +250,8 @@ class OrderProduct(models.Model):
 
     quantity = models.IntegerField('Количество', default=1)
 
+    shipped = models.FloatField('Отгружено', default=0)
+
     price = models.DecimalField('Цена', max_digits=10, decimal_places=2, default=0.00)
 
     # Индивидуальное назначение срочности производства

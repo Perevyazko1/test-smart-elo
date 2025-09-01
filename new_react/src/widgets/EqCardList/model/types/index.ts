@@ -81,6 +81,7 @@ export interface EqOrderProduct {
     id: number;
     series_id: string;
     urgency: number;
+    shipped: number;
     price: number;
     product: Product;
     order: EqOrder;

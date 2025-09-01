@@ -122,6 +122,7 @@ class EqOrderProductSerializer(serializers.ModelSerializer):
             'third_fabric',
             'assignments',
             'card_info',
+            'shipped',
         ]
 
     def get_assignments(self, obj: OrderProduct):

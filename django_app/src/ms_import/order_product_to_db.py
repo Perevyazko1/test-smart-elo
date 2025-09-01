@@ -34,6 +34,7 @@ def order_product_to_db(order_product_entity: OrderProductEntity):
         'quantity': order_product_entity.quantity,
         'price': order_product_entity.price,
         'urgency': order_product_entity.urgency,
+        'shipped': order_product_entity.shipped,
     }
 
     if op_qs.exists():
