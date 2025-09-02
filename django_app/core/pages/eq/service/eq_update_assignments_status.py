@@ -156,14 +156,6 @@ class EqUpdateAssignmentsStatus:
             inspector__isnull=True,
         ).exists()
 
-    def _get_order_all_ready(self) -> bool:
-        target_order: Order = self.order_product.order
-
-        for related_order_product in target_order.order_products.all():
-            if related_order_product.status != '1':
-                return False
-        return True
-
     def _api_change_order_status_to_ready(self):
         change_order_status(str(self.order_product.order.order_id))
 
@@ -173,9 +165,6 @@ class EqUpdateAssignmentsStatus:
         if not self._get_unconfirmed_assignments_exists():
             self.order_product.status = '1'
             self.order_product.save()
-
-            if self._get_order_all_ready():
-                self._api_change_order_status_to_ready()
 
     def _get_related_assignments_confirmed_minimum_count(self, next_step: Department) -> int:
         """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""
