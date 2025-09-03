@@ -76,7 +76,7 @@ export const BarcodeCard = (props: BarcodeCardProps) => {
                     <span>ШК: {barcode}</span>
                     <br/>
                     <span>
-                        ОСТ: {position.quantity} {position.uom.name}
+                        ОСТ: {position.stock} {position.uom.name}
                         {!inventState?.value ? "🔴" : "🟢"}
                     </span>
                     <br/>

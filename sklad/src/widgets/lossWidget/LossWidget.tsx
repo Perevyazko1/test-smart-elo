@@ -46,7 +46,7 @@ export const LossWidget = (props: LossWidgetProps) => {
         if (type !== "inventory") {
             return type;
         } else {
-            if (parseFloat(inputValue) > position.quantity) {
+            if (parseFloat(inputValue) > position.stock) {
                 return "enter";
             } else {
                 return "loss";
@@ -58,8 +58,8 @@ export const LossWidget = (props: LossWidgetProps) => {
         if (type !== "inventory") {
             return parseFloat(inputValue);
         } else {
-            if (parseFloat(inputValue) > position.quantity) {
-                return parseFloat(inputValue) - position.quantity;
+            if (parseFloat(inputValue) > position.stock) {
+                return parseFloat(inputValue) - position.stock;
             } else {
                 return position.quantity - parseFloat(inputValue);
             }
@@ -79,7 +79,7 @@ export const LossWidget = (props: LossWidgetProps) => {
             alert("Пожалуйста, введите корректное число!");
             return;
         }
-        if (type === "loss" && getQuantity() > position.quantity) {
+        if (type === "loss" && getQuantity() > position.stock) {
             alert("Вы пытаетесь списать больше, чем есть на складе!");
             return;
         } else if (getQuantity() < 0) {
