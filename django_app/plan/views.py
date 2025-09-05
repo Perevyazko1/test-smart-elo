@@ -36,12 +36,12 @@ def get_plan_table(request):
         product_image = order_product.product.product_pictures.first()
         picture_url = None
         if product_image:
-            picture_url = product_image.image.url
+            picture_url = product_image.thumbnail.url
 
         fabric_image = order_product.main_fabric.fabric_pictures.first() if order_product.main_fabric else None
         fabric_url = None
         if fabric_image:
-            fabric_url = fabric_image.image.url
+            fabric_url = fabric_image.thumbnail.url
 
         if key not in result:
             result[key] = {
