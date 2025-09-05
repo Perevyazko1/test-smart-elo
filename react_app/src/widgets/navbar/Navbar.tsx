@@ -42,6 +42,11 @@ export const Navbar = (props: NavbarProps) => {
                 >
                     Касса
                 </Link>
+                <Link
+                    to={'/plan'}
+                >
+                    План
+                </Link>
                 {children}
             </div>
 

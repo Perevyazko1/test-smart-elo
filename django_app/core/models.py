@@ -452,6 +452,7 @@ class Assignment(models.Model):
         null=True,
         blank=True,
     )
+    sort_date = models.DateTimeField('Дата сортировки', null=True, blank=True)
 
     appointed_by_boss = models.BooleanField('Назначен бригадиром', blank=True, default=False)
     assembled = models.BooleanField('Укомплектован', blank=True, default=True)

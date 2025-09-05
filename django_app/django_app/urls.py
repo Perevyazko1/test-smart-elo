@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/v1/staff/', include('staff.urls')),
     path('api/v1/tasks/', include('tasks.urls')),
     path('api/v1/salary/', include('salary.urls')),
+    path('api/v1/plan/', include('plan.urls')),
 
     path('init/', init_app_data),
 ]

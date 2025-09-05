@@ -13,6 +13,9 @@ import {Toaster} from "@/components/ui/sonner.tsx";
 import {UserWage} from "@/pages/userWage/UserWage.tsx";
 import {RequirePermission} from "@/app/RequirePermission.tsx";
 import {APP_PERM} from "@/entities/user";
+import {PlanPage} from "@/pages/plan/PlanPage.tsx";
+import {CashNav} from "@/widgets/navbar/cashNav/CashNav.tsx";
+import {PlanNav} from "@/widgets/navbar/planNav/PlanNav.tsx";
 
 // @ts-ignore
 createRoot(document.getElementById('root')!).render(
@@ -21,10 +24,23 @@ createRoot(document.getElementById('root')!).render(
         <ContextProvider>
             <Routes>
                 <Route path="/" element={<RequireAuth/>}>
-                    <Route path="/" element={<App/>}>
-                        <Route element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>
+                    <Route path="/" element={<App nav={<CashNav/>}/>}>
+                        <Route
+                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>
                             <Route index path="/salary/:date_from?/:date_to?/" element={<SalaryPage/>}/>
-                            <Route path="cash" element={<CashPage/>}/>
+                            <Route path="/cash" element={<CashPage/>}/>
+                        </Route>
+                    </Route>
+
+                    <Route path="/" element={<App nav={<PlanNav/>}/>}>
+                        <Route
+                            element={
+                                <RequirePermission
+                                    requiredPermissions={
+                                        [APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]
+                                    }/>
+                            }>
+                            <Route path="/plan" element={<PlanPage/>}/>
                         </Route>
                     </Route>
                 </Route>
