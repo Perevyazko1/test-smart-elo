@@ -112,7 +112,7 @@ def _handle_ready(eq_params, order_product):
     current_week = GetWeekInfo(week=None, year=None).execute()
     show_all = eq_params.get('show_all') and eq_params.get('project_filter')
 
-    cache_key = _build_cache_key(eq_params, order_product, week_info, current_week)
+    cache_key = _build_cache_key(eq_params, order_product, week_info, current_week, show_all)
     cached_data = cache.get(cache_key)
     if cached_data and not show_all:
         return cached_data
@@ -124,10 +124,10 @@ def _handle_ready(eq_params, order_product):
     return result
 
 
-def _build_cache_key(eq_params, order_product, week_info, current_week):
+def _build_cache_key(eq_params, order_product, week_info, current_week, show_all):
     cache_key = (
         f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_ready_'
-        f'{week_info.week}_{week_info.year}'
+        f'{week_info.week}_{week_info.year}_{show_all}'
     )
 
     is_current = current_week.week == week_info.week and current_week.year == week_info.year
