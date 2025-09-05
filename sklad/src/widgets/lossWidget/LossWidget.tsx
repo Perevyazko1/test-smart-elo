@@ -61,7 +61,7 @@ export const LossWidget = (props: LossWidgetProps) => {
             if (parseFloat(inputValue) > position.stock) {
                 return parseFloat(inputValue) - position.stock;
             } else {
-                return position.quantity - parseFloat(inputValue);
+                return position.stock - parseFloat(inputValue);
             }
         }
     };
@@ -86,7 +86,11 @@ export const LossWidget = (props: LossWidgetProps) => {
             alert("Нельзя списать/оприходовать отрицательное количество!");
             return;
         } else if (getQuantity() === 0) {
-            alert("Введите количество!");
+            if (type === "inventory") {
+                setInv({product: position})
+            } else {
+                alert("Введите количество!");
+            }
             return;
         } else {
             if (type === "inventory") {
