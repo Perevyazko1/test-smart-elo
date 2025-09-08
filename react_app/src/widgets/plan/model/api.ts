@@ -1,6 +1,5 @@
 import {type AxiosResponse} from "axios";
 import {$axios} from "@/shared/api";
-import type {IPayroll, IPayrollRow} from "@/entities/salary";
 import type {PlanData} from "@/entities/plan";
 
 
@@ -17,6 +16,16 @@ class PlanService {
     getProjects(props: {}): Promise<AxiosResponse<{ data: string[] }>> {
         return $axios.get<{ data: string[] }>(
             `/core/get_project_filters/`,
+        );
+    }
+
+    setTargetDate(props: {
+        target_date: string | null;
+        series_id: string;
+    }): Promise<AxiosResponse<{ success: boolean }>> {
+        return $axios.post<{ success: boolean  }>(
+            `/plan/set_target_date/`,
+            props,
         );
     }
 }

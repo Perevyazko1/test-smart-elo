@@ -3,6 +3,11 @@ import {ProgressiveCell} from "@/widgets/plan/planCard/ProgressiveCell.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {CrossCircledIcon, CheckCircledIcon} from "@radix-ui/react-icons";
 import type {PlanDataRow} from "@/entities/plan";
+import type {IUser} from "@/entities/user";
+import {toast} from "sonner";
+import {$axios} from "@/shared/api";
+import {planService} from "@/widgets/plan/model/api.ts";
+import {useState} from "react";
 
 interface IProps {
     data: PlanDataRow;
@@ -11,6 +16,30 @@ interface IProps {
 
 export function PlanRow(props: IProps) {
     const {data, index} = props;
+
+    const [inputValue, setInputValue] = useState<string | undefined>(data.date ? new Date(data.date).toISOString().slice(0, 10) : '')
+
+    const updateTargetDate = (data: {
+        target_date: string | null;
+        series_id: string;
+    }) => {
+        toast.promise(planService.setTargetDate(data), {
+                loading: 'Применение изменений 🔄️',
+                success: () => {
+                    return 'Дата успешно обновлена ✅';
+                },
+                error: 'Ошибка применения даты ❌',
+            }
+        )
+    }
+
+    const updateHandle = () => {
+        updateTargetDate({
+            target_date: inputValue || null,
+            series_id: data.series_id,
+        })
+    }
+
     const empty = {
         "all": 0,
         "ready": 0,
@@ -27,12 +56,31 @@ export function PlanRow(props: IProps) {
             <td className={'max-w-30'}>
                 <input
                     type="date"
+                    value={inputValue ? inputValue.slice(0, 10) : ''}
+                    onChange={(e) => {
+                        if (e.target.value) {
+                            const date = new Date(e.target.value);
+                            const isoDate = date.toISOString();
+                            setInputValue(isoDate.slice(0, 10));
+                        } else {
+                            setInputValue('');
+                        }
+                    }}
                     className={'text-xs border-1 border-black p-1 w-full mb-1'}
-                    value={data.date ? new Date(data.date).toISOString().split('T')[0] : ''}
                 />
                 <div className={'flex justify-evenly gap-1'}>
-                    <Btn className={'text-green-700 m-0 p-1 border-1 border-black'}><CheckCircledIcon/></Btn>
-                    <Btn className={'text-red-700 m-0 p-1 border-1 border-black'}><CrossCircledIcon/></Btn>
+                    <Btn
+                        className={'text-green-700 m-0 p-1 border-1 border-black'}
+                        onClick={updateHandle}
+                    >
+                        <CheckCircledIcon/>
+                    </Btn>
+                    <Btn
+                        className={'text-red-700 m-0 p-1 border-1 border-black'}
+                        onClick={() => setInputValue("")}
+                    >
+                        <CrossCircledIcon/>
+                    </Btn>
                 </div>
             </td>
             <td className={'max-w-15'}>

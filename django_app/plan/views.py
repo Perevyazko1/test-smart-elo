@@ -1,7 +1,9 @@
 from django.http import JsonResponse
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from rest_framework.decorators import api_view
 
-from core.models import Assignment
+from core.models import Assignment, OrderProduct
 
 
 @api_view(['GET'])
@@ -45,7 +47,7 @@ def get_plan_table(request):
 
         if key not in result:
             result[key] = {
-                "date": assignment.sort_date,
+                "date": assignment.sort_date.date() if assignment.sort_date else None,
                 "product_name": order_product.product.name,
                 "product_picture": picture_url,
                 "order": order_product.order.inner_number,
@@ -68,3 +70,26 @@ def get_plan_table(request):
             result[key]["assignments"][department_name]["ready"] += 1
 
     return JsonResponse(result)
+
+
+@api_view(['POST'])
+def set_target_date(request):
+    target_date = request.data.get('target_date')
+    series_id = request.data.get('series_id')
+
+    print(target_date, series_id)
+
+    if target_date:
+        target_datetime = parse_datetime(target_date)
+        if target_datetime and timezone.is_naive(target_datetime):
+            target_datetime = timezone.make_aware(target_datetime)
+    else:
+        target_datetime = None
+
+    target_order_product = OrderProduct.objects.get(series_id=series_id)
+    Assignment.objects.filter(
+        order_product=target_order_product
+    ).update(
+        sort_date=target_datetime,
+    )
+    return JsonResponse({"success": True})
