@@ -66,20 +66,11 @@ class PayrollRow(models.Model):
 
     comment = models.TextField('Комментарий', blank=True, null=True)
 
-    start_balance = models.IntegerField(
-        'Баланс на начало периода',
-        default=0,
-        blank=True,
-        null=True,
-    )
-
     cash_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
     card_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
     ip_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
     tax_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
     loan_payout = models.IntegerField('Сумма к выдаче НАЛ', default=0)
-
-
 
     cash_approval = models.BooleanField('Сумма к выдаче НАЛ согласована', default=False)
 
@@ -87,7 +78,7 @@ class PayrollRow(models.Model):
     is_closed = models.BooleanField('Период закрыт', default=False)
 
     def __str__(self):
-        return '{}'.format(f'{self.payroll.date_from.day} - {self.user.first_name} {self.user.last_name}')
+        return '{}'.format(f'{self.payroll.name} - {self.user.first_name} {self.user.last_name}')
 
 
 class Earning(models.Model):
