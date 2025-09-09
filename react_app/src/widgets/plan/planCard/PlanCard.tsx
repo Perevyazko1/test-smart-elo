@@ -34,10 +34,12 @@ export function PlanCard(props: IProps) {
 
             <div className={'overflow-y-auto flex-1'}>
                 <div>
-                    <b>{data.project}</b> {data.series_id} {data.price}
+                    <b>{data.project}</b> {data.series_id}
                 </div>
                 <div>
                     {data.product_name}
+                    <br/>
+                    {data.fabric_name}
                 </div>
             </div>
         </div>
