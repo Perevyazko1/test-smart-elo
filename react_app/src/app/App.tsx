@@ -11,16 +11,16 @@ interface IProps {
 
 export const App = (props: IProps) => {
     return (
-        <div className={'bg-gray-500 min-h-[100dvh] max-h-[100dvh] overflow-y-hidden'}>
+        <div className={'bg-gray-500 relative'}>
             <Navbar>
                 {props.nav}
             </Navbar>
             <div
-                style={{
-                    minHeight: 'calc(100dvh - 45px)',
-                    maxHeight: 'calc(100dvh - 45px)',
-                    height: 'calc(100dvh - 45px)',
-                }}
+                // style={{
+                //     minHeight: 'calc(100dvh - 45px)',
+                //     maxHeight: 'calc(100dvh - 45px)',
+                //     height: 'calc(100dvh - 45px)',
+                // }}
                 className={'relative overflow-y-auto'}>
                 <Outlet/>
             </div>

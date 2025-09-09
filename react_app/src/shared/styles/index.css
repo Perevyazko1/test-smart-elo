@@ -177,20 +177,19 @@ td {
     table {
         width: 100%;
         page-break-inside: auto;
-        font-size: 9px !important;
+        font-size: 10px !important;
     }
 
     tr td {
         page-break-inside: avoid;
         page-break-after: auto;
-        padding: .1em;
+        /*padding: .1em;*/
     }
 
     * {
-        color: #000 !important;
-        background: #fff !important;
         box-shadow: none !important;
         text-shadow: none !important;
-        border-right: none !important;
+        /*border-right: none !important;*/
+        -webkit-print-color-adjust: exact;
     }
 }

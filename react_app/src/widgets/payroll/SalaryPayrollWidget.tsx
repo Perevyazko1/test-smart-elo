@@ -111,7 +111,9 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     const payrollData = data?.data;
 
     return (
-        <div className={'p-3 print:p-0'}>
+        <div className={'p-3 print:p-0 relative'} style={{
+            maxHeight: 'calc(100dvh - 100px)',
+        }}>
             <div className={'flex gap-8 bg-yellow-100 p-3 print:p-0 pb-1 items-center'}>
                 <div className={'flex flex-col'}>
                     <h1 className={"text-xl font-bold"}>

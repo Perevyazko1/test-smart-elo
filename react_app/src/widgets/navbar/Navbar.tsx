@@ -21,7 +21,7 @@ export const Navbar = (props: NavbarProps) => {
     return (
         <div
             className={twMerge([
-                "noPrint",
+                "noPrint sticky top-0 z-50",
                 "flex flex-row flex-nowrap items-center justify-between",
                 "bg-black text-white",
                 "h-10 gap-5 px-4",

@@ -9,7 +9,7 @@ export function ProgressiveCell(props: IProps) {
     const targetWidth = Math.abs(Math.max(15, left / (left + right) * 100));
 
     return (
-        <td className={'relative p-0'}>
+        <td className={'relative min-w-[5em]'}>
             <div className={'absolute inset-0 flex justify-between items-center p-1'}>
                 {left > 0 && (
                     <div

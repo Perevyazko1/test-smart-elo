@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from core.models import (
     OrderProduct,
-    ProductPicture,
     Order,
     Fabric,
     FabricPicture,
@@ -56,31 +55,6 @@ class EqFabricSerializer(serializers.ModelSerializer):
             'is_actual',
         ]
 
-
-class EqProductPictureSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-    thumbnail = serializers.SerializerMethodField()
-
-    class Meta:
-        """Metadata. """
-        model = ProductPicture
-        fields = [
-            'id',
-            'image',
-            'thumbnail',
-        ]
-
-    def get_image(self, obj):
-        """Get image url method. """
-        if obj.image:
-            return obj.image.url
-        return None
-
-    def get_thumbnail(self, obj):
-        """Get thumbnail url method. """
-        if obj.thumbnail:
-            return obj.thumbnail.url
-        return None
 
 
 class EqOrderSerializer(serializers.ModelSerializer):

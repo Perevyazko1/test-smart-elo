@@ -87,7 +87,7 @@ export function PlanRow(props: IProps) {
                 <input
                     type="number"
                     defaultValue={data.quantity}
-                    className={'text-xl max-w-full'}
+                    className={'text-xl max-w-full text-end'}
                 />
             </td>
             <td><PlanCard data={data}/></td>

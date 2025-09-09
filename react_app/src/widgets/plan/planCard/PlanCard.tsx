@@ -11,7 +11,7 @@ export function PlanCard(props: IProps) {
     const {data} = props;
 
     return (
-        <div className={'border-2 border-purple-500 h-15 flex flex-row gap-1 flex-nowrap max-w-[50dvw]'}>
+        <div className={'border-2 border-purple-500 h-15 flex flex-row gap-1 flex-nowrap'}>
 
             <div className={'border-2 border-black h-full w-15 flex justify-center items-center'}>
                 <img
