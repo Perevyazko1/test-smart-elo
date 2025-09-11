@@ -17,10 +17,6 @@ def get_filtered_await_queryset(queryset, eq_params):
                 "status": "0",
                 "product__technological_process_confirmed__isnull": True,
             }
-            if eq_params['locked']:
-                filter_params['assignments__appointed_by_boss'] = False
-                filter_params['assignments__department'] = eq_params['department']
-
             queryset = queryset.filter(
                 **filter_params
             ).distinct()
@@ -35,17 +31,9 @@ def get_filtered_await_queryset(queryset, eq_params):
             if not eq_params['assembled']:
                 filter_params['assignments__assembled'] = True
 
-            if eq_params['locked']:
-                del filter_params['assignments__status__in']
-                queryset = queryset.filter(
-                    **filter_params,
-                    assignments__status='await',
-                    assignments__appointed_by_boss=False,
-                ).distinct()
-            else:
-                queryset = queryset.filter(
-                    **filter_params
-                ).distinct()
+            queryset = queryset.filter(
+                **filter_params
+            ).distinct()
 
     # Фильтр при включенном режима недоделки
     elif eq_params['view_mode_key'] == 'unfinished':
