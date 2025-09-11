@@ -174,6 +174,8 @@ def update_assignments(request):
             assignment.inspect_date = None
             assignment.tariffication_date = None
             assignment.date_completion = datetime.now()
+            assignment.order_product.status = "0"
+            assignment.order_product.save()
             assignment.save()
 
             if assignment.new_tariff:
