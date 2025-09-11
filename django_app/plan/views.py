@@ -18,10 +18,16 @@ def get_plan_table(request):
         "Сборка",
     ]
 
+    query_filter = {
+        "order_product__status": "0",
+        "department__name__in": department_names,
+    }
+
+    if project:
+        query_filter["order_product__order__project"] = project
+
     assignments = Assignment.objects.filter(
-        order_product__status="0",
-        department__name__in=department_names,
-        order_product__order__project=project,
+        **query_filter
     ).select_related(
         'department',
         'order_product__product',

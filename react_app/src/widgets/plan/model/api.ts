@@ -4,7 +4,7 @@ import type {PlanData} from "@/entities/plan";
 
 
 class PlanService {
-    getPlanTable(props: { project: string }): Promise<AxiosResponse<PlanData | null>> {
+    getPlanTable(props: { project: string | null }): Promise<AxiosResponse<PlanData | null>> {
         return $axios.get<PlanData | null>(
             `/plan/plan_table/`,
             {

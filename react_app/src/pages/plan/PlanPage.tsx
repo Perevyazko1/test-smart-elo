@@ -10,7 +10,7 @@ export const PlanPage = () => {
         queryKey: ['planTable', planProject],
         queryFn: () => {
             return planService.getPlanTable({
-                project: planProject,
+                project: planProject === "Все проекты" ? null : planProject,
             });
         },
     });
