@@ -87,17 +87,17 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <hr className={'m-0 p-0'}/>
 
             <div className={cls.numbersBlock}>
-                <div className={'fs-7 fw-bold h-100'}>
+                <div className={' fw-bold '} style={{fontSize: '12px', lineHeight: '1.1em'}}>
                     <div>
-                        <div>{card.assignments.length}:</div>
+                        <div>{card.assignments.length}</div>
                     </div>
-                    <div>{
-                        showPrice && <div style={{fontSize: 8}}>{
-                            Math.round(card.price).toLocaleString("ru-RU")
-                        }:</div>
-                    }</div>
+                    {listType === "ready" && (
+                        <div>
+                            <div>({assignmentsLists.primary.length + assignmentsLists.secondary.length})</div>
+                        </div>
+                    )}
                 </div>
-
+                :
                 <EqNumbers
                     targetUserId={targetUserId}
                     assignmentsLists={assignmentsLists}
