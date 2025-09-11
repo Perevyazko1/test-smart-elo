@@ -2,6 +2,7 @@
 import logging
 
 from core.models import OrderProduct, Assignment
+from staff.models import Department
 
 logger = logging.getLogger(__name__)
 
@@ -22,6 +23,20 @@ def init_data():
         print(f"{order_product.series_id} все наряды закрыты")
         order_product.status = "1"
         order_product.save()
+
+    dep = Department.objects.get(
+        name="Малярка"
+    )
+
+    target_assignments = Assignment.objects.filter(
+        tariffication_date__isnull=True,
+        inspect_date__isnull=False,
+        department=dep,
+    )
+
+    for assignment in target_assignments:
+        assignment.tariffication_date = assignment.inspect_date
+        assignment.save()
 
     print('PASS')
     return f"Oki"
