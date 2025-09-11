@@ -74,18 +74,14 @@ def get_filtered_await_queryset(queryset, eq_params):
         filter_params = {
             "status": "0",
             "assignments__department": eq_params['department'],
-            "assignments__status__in": ['await', 'in_work'],
+            "assignments__status": 'await',
+            'assignments__appointed_by_boss': False
         }
 
         if not eq_params['assembled']:
             filter_params['assignments__assembled'] = True
-
-        if eq_params['locked']:
-            del filter_params['assignments__status__in']
             queryset = queryset.filter(
                 **filter_params,
-                assignments__status='await',
-                assignments__appointed_by_boss=False,
             ).distinct()
         else:
             queryset = queryset.filter(
@@ -197,6 +193,7 @@ def get_filtered_ready_queryset(queryset, eq_params):
         )
 
     return queryset.distinct().order_by('urgency', 'order', 'id')
+
 
 def get_eq_card_queryset(queryset, request):
     """Фильтр кверисета для запроса карточек"""

@@ -11,9 +11,9 @@ export function PlanCard(props: IProps) {
     const {data} = props;
 
     return (
-        <div className={'border-2 border-purple-500 h-15 flex flex-row gap-1 flex-nowrap'}>
+        <div className={'border-2 border-purple-500 h-20 flex flex-row gap-1 flex-nowrap'}>
 
-            <div className={'border-2 border-black h-full w-15 flex justify-center items-center'}>
+            <div className={'border-2 border-black h-full w-20 flex justify-center items-center'}>
                 <img
                     loading={'lazy'}
                     src={STATIC_URL + data.product_picture}
@@ -22,7 +22,7 @@ export function PlanCard(props: IProps) {
                 />
             </div>
             {data.fabric_picture && (
-                <div className={'border-2 border-black h-full w-15 flex justify-center items-center'}>
+                <div className={'border-2 border-black h-full w-20 flex justify-center items-center'}>
                     <img
                         loading={'lazy'}
                         src={STATIC_URL + data.fabric_picture}

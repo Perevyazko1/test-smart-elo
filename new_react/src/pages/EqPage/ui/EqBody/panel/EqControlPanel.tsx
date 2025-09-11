@@ -4,7 +4,6 @@ import {useQueryParams} from "@shared/hooks";
 import {ListTypes} from "@widgets/EqCardList";
 
 import {AssembledSwitch} from "./AssembledSwitch";
-import {LockedSwitch} from "./LockedSwitch";
 import {SwitchGroupByPlanDate} from "./SwitchGroupByPlanDate";
 import {SwitchShowSum} from "./SwitchShowSum";
 import {SwitchTimingInfo} from "@pages/EqPage/ui/EqBody/panel/SwitchTimingInfo";
@@ -50,7 +49,6 @@ export const EqControlPanel = memo((props: EqControlPanelProps) => {
                 {listType === "await" && (
                     <>
                         <AssembledSwitch/>
-                        <LockedSwitch/>
                     </>
                 )}
 
