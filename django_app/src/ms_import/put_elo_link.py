@@ -1,7 +1,3 @@
-import json
-import requests
-
-from core.api_moy_sklad.config import BASE_URL, POST_AUTH
 from src.api.sklad_client import SkladClient
 
 

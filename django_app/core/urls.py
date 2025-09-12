@@ -3,8 +3,8 @@
 from django.urls import path, include
 from rest_framework import routers
 
+from src.ms_import.ms_import import import_ms
 from .views import (
-    import_orders,
     get_project_filters,
     get_op_dep_info,
     get_op_prod_info,
@@ -20,7 +20,7 @@ router.register(r'production_step_comments', ProductionStepCommentViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 
-    path('import_orders/', import_orders),
+    path('import_orders/', import_ms),
 
     path('get_project_filters/', get_project_filters),
     path('get_op_dep_info/', get_op_dep_info),

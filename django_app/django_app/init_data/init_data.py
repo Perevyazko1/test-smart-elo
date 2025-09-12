@@ -1,7 +1,7 @@
 """Initial methods and scripts."""
 import logging
 
-from core.models import OrderProduct, Assignment
+from core.models import OrderProduct, Assignment, Order
 from staff.models import Department
 
 logger = logging.getLogger(__name__)
@@ -23,20 +23,19 @@ def init_data():
         print(f"{order_product.series_id} все наряды закрыты")
         order_product.status = "1"
         order_product.save()
+        if order_product.order.status == "0":
+            order_product.order.status = "1"
+            order_product.order.save()
 
-    dep = Department.objects.get(
-        name="Малярка"
-    )
+    orders = Order.objects.filter(status="0")
 
-    target_assignments = Assignment.objects.filter(
-        tariffication_date__isnull=True,
-        inspect_date__isnull=False,
-        department=dep,
-    )
+    for order in orders:
+        ops = OrderProduct.objects.filter(order=order, status="0")
 
-    for assignment in target_assignments:
-        assignment.tariffication_date = assignment.inspect_date
-        assignment.save()
+        if ops.exists():
+            continue
+        order.status = "1"
+        order.save()
 
     print('PASS')
     return f"Oki"

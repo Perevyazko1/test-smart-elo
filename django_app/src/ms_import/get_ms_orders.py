@@ -3,6 +3,20 @@ from src.api.sklad_schemas import SkladApiListResponse, SkladOrderExpandProjectP
 from src.ms_import.config import ORDER_FILTER_LIST, ORDER_EXPAND
 
 
+def _fetch_order(order_id: str) -> SkladOrderExpandProjectPositionsAssortment:
+    client = SkladClient()
+    params = {
+        "expand": ','.join(map(str, ORDER_EXPAND)),
+        "fields": "stock",
+    }
+
+    return client.get(
+        "entity/customerorder/" + order_id,
+        SkladOrderExpandProjectPositionsAssortment,
+        params=params
+    )
+
+
 def _fetch_orders(offset=0):
     client = SkladClient()
 
