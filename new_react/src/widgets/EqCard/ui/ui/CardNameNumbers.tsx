@@ -93,7 +93,7 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
                     </div>
                     {listType === "ready" && (
                         <div>
-                            <div>({assignmentsLists.primary.length + assignmentsLists.secondary.length})</div>
+                            <div>({assignmentsLists.primary.length + assignmentsLists.secondary.length + assignmentsLists.lockedNums.length})</div>
                         </div>
                     )}
                 </div>
