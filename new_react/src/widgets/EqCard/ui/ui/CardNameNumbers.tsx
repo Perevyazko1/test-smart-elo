@@ -89,7 +89,13 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <div className={cls.numbersBlock}>
                 <div className={' fw-bold '} style={{fontSize: '12px', lineHeight: '1.1em'}}>
                     <div>
-                        <div>{card.assignments.length}</div>
+                        <div>
+                            {card.assignments.length}
+                            {showPrice && (
+                                <sub> {Math.round(card.price).toLocaleString('ru-RU')}</sub>
+                            )}
+                        </div>
+
                     </div>
                     {listType === "ready" && (
                         <div>
