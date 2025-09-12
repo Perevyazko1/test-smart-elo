@@ -75,15 +75,16 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalLoanPayout = calculateTotal('loan_payout');
     const totalDaySum = data?.data?.reduce((sum, row) => Number(sum) + Number(row.user.piecework_amount || 0), 0) || 0;
 
+    const totalPayout = totalCashPayout + totalIpPayout + totalCardPayout + totalTaxPayout + totalLoanPayout;
+
     return (
         <Table>
             <THead className={'sticky top-0 z-10'}>
                 <tr className={'relative'}>
                     <PayrollTh
-                        rowSpan={2}
                         className={'text-center'}
                     >
-                        Отдел / ФИО {showDayPrice}
+                        Всего к выплате: <NiceNum value={totalPayout}/>
                     </PayrollTh>
                     {showDayPrice && (
                         <PayrollTh>Ставка в <br/>день</PayrollTh>
@@ -135,6 +136,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                 </tr>
 
                 <tr className={'z-2'}>
+                    <PayrollTh className={'text-center'}>Отдел / ФИО</PayrollTh>
                     {showDayPrice && (
                         <PayrollTh><NiceNum value={totalDaySum * 8}/></PayrollTh>
                     )}
@@ -150,13 +152,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
 
                     {showTotal ? (
                         <PayrollTh className={'bg-blue-100 font-bold'}>
-                            <NiceNum value={
-                                totalCashPayout +
-                                totalIpPayout +
-                                totalCardPayout +
-                                totalTaxPayout +
-                                totalLoanPayout
-                            }/>
+                            <NiceNum value={totalPayout}/>
                         </PayrollTh>
                     ) : (
                         <>
@@ -180,18 +176,17 @@ export const PayrollTable = (props: PayrollTableProps) => {
 
 
                     <PayrollTh className={'bg-blue-100'}>
-                            <NiceNum value={
-                                totalBalance +
-                                totalBonus +
-                                totalEarned -
-                                totalCashPayout -
-                                totalCardPayout -
-                                totalIpPayout -
-                                totalTaxPayout -
-                                totalLoanPayout
-                            }/>
+                        <NiceNum value={
+                            totalBalance +
+                            totalBonus +
+                            totalEarned -
+                            totalCashPayout -
+                            totalCardPayout -
+                            totalIpPayout -
+                            totalTaxPayout -
+                            totalLoanPayout
+                        }/>
                     </PayrollTh>
-
 
                     {showTotal ? (
                         <PayrollTh className={'bg-purple-50 font-bold'}>
