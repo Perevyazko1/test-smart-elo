@@ -84,7 +84,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh
                         className={'text-center'}
                     >
-                        Всего к выплате: <NiceNum value={totalPayout}/>
+                        Всего НАЛ ИП БН: <NiceNum value={totalPayout - totalTaxPayout - totalLoanPayout}/>
                     </PayrollTh>
                     {showDayPrice && (
                         <PayrollTh>Ставка в <br/>день</PayrollTh>
