@@ -111,7 +111,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
                         </>
                     )}
-                    <PayrollTh className={'bg-blue-100'}>П.ИТОГ</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>П.ИТОГ <br/>Хвоста</PayrollTh>
 
                     {showTotal ? (
                         <PayrollTh className={'bg-purple-50'}>Выплачено <br/> ИТОГ</PayrollTh>
