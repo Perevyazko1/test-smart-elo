@@ -169,7 +169,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                 </form>
             </FormProvider>
 
-            {(!user?.piecework_wages && earning_type === "ДОП") && (
+            {(user?.piecework_amount && earning_type === "ДОП") && (
                 <div className={'flex flex-col gap-3'}>
 
                     <div className={'flex gap-3'}>
