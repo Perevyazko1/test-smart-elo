@@ -1,7 +1,10 @@
 """Initial methods and scripts."""
 import logging
+from pprint import pprint
 
-from core.models import OrderProduct, Order
+from src.api.sklad_client import SkladClient
+from src.api.sklad_schemas import SkladApiListResponse, SkladOrderExpandProjectPositionsAssortment
+from src.ms_import.config import ORDER_EXPAND
 
 logger = logging.getLogger(__name__)
 
@@ -9,15 +12,22 @@ logger = logging.getLogger(__name__)
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    orders = Order.objects.filter(status="0")
+    client = SkladClient()
 
-    for order in orders:
-        ops = OrderProduct.objects.filter(order=order, status="0")
+    params = {
+        "expand": ','.join(map(str, ORDER_EXPAND)),
+        "limit": 1,
+        "offset": 0,
+        "fields": "stock",
+    }
 
-        if ops.exists():
-            continue
-        order.status = "1"
-        order.save()
+    order_list = client.get(
+        "entity/customerorder",
+        SkladApiListResponse[SkladOrderExpandProjectPositionsAssortment],
+        params=params
+    )
+
+    pprint(order_list.model_dump())
 
     print('PASS')
     return f"Oki"

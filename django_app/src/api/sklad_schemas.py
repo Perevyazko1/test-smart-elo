@@ -141,6 +141,26 @@ class SkladPosition(BaseModel):
         extra = "ignore"
 
 
+class SkladEmployee(BaseModel):
+    id: str
+    name: str
+    firstName: str = None
+    lastName: str = None
+    middleName: str = None
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladAgent(BaseModel):
+    id: str
+    name: str
+    tags: Optional[list[str]] = []
+
+    class Config:
+        extra = "ignore"
+
+
 class SkladOrderExpandProjectPositionsAssortment(BaseModel):
     id: str
     name: str
@@ -149,6 +169,10 @@ class SkladOrderExpandProjectPositionsAssortment(BaseModel):
     project: Optional[SkladProject] | None = None
     attributes: Optional[list[SkladAttribute]] = None
     positions: SkladApiListResponse[SkladPosition]
+
+    updated: str
+    owner: SkladEmployee
+    agent: SkladAgent
 
     class Config:
         extra = "ignore"

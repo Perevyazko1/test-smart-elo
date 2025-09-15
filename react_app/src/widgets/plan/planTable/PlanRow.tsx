@@ -2,7 +2,7 @@ import {PlanCard} from "@/widgets/plan/planCard/PlanCard.tsx";
 import {ProgressiveCell} from "@/widgets/plan/planCard/ProgressiveCell.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {CrossCircledIcon, CheckCircledIcon} from "@radix-ui/react-icons";
-import type {PlanDataRow} from "@/entities/plan";
+import type {IPlanDataRow} from "@/entities/plan";
 import type {IUser} from "@/entities/user";
 import {toast} from "sonner";
 import {$axios} from "@/shared/api";
@@ -10,7 +10,7 @@ import {planService} from "@/widgets/plan/model/api.ts";
 import {useState} from "react";
 
 interface IProps {
-    data: PlanDataRow;
+    data: IPlanDataRow;
     index: number;
 }
 

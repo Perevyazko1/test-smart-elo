@@ -1,7 +1,16 @@
 
+export interface IAgentTag {
+    id: number;
+    name: string;
+}
 
+export interface IAgent {
+    name: string;
+    id: number;
+    tags: IAgentTag[]
+}
 
-export interface PlanDataRow {
+export interface IPlanDataRow {
     date: string;
     product_name: string;
     product_picture: string;
@@ -21,6 +30,6 @@ export interface PlanDataRow {
     }
 }
 
-export interface PlanData {
-    [key: string]: PlanDataRow;
+export interface IPlanData {
+    [key: string]: IPlanDataRow;
 }

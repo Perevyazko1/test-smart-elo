@@ -1,11 +1,14 @@
 import {type AxiosResponse} from "axios";
 import {$axios} from "@/shared/api";
-import type {PlanData} from "@/entities/plan";
-
+import type {IAgent, IAgentTag, IPlanData} from "@/entities/plan";
+import type {IUser} from "@/entities/user";
 
 class PlanService {
-    getPlanTable(props: { project: string | null }): Promise<AxiosResponse<PlanData | null>> {
-        return $axios.get<PlanData | null>(
+    getPlanTable(props: {
+        project: string | null;
+        manager_id: number | null;
+    }): Promise<AxiosResponse<IPlanData | null>> {
+        return $axios.get<IPlanData | null>(
             `/plan/plan_table/`,
             {
                 params: props
@@ -13,9 +16,21 @@ class PlanService {
         );
     }
 
-    getProjects(props: {}): Promise<AxiosResponse<{ data: string[] }>> {
-        return $axios.get<{ data: string[] }>(
-            `/core/get_project_filters/`,
+    getProjects(props: {}): Promise<AxiosResponse<{ result: string[] }>> {
+        return $axios.get<{ result: string[] }>(
+            `/plan/get_projects/`,
+        );
+    }
+
+    getManagers(props: {}): Promise<AxiosResponse<{ result: IUser[] }>> {
+        return $axios.get<{ result: IUser[] }>(
+            `/plan/get_managers/`,
+        );
+    }
+
+    getAgents(props: {}): Promise<AxiosResponse<{ result: IAgentTag[] }>> {
+        return $axios.get<{ result: IAgentTag[] }>(
+            `/plan/get_agents/`,
         );
     }
 
@@ -23,7 +38,7 @@ class PlanService {
         target_date: string | null;
         series_id: string;
     }): Promise<AxiosResponse<{ success: boolean }>> {
-        return $axios.post<{ success: boolean  }>(
+        return $axios.post<{ success: boolean }>(
             `/plan/set_target_date/`,
             props,
         );

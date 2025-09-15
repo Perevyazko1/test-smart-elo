@@ -1,16 +1,19 @@
 import {PlanRow} from "@/widgets/plan/planTable/PlanRow.tsx";
 import {useQuery} from "@tanstack/react-query";
 import {planService} from "@/widgets/plan/model/api.ts";
-import {usePlanProject} from "@/shared/state/payroll/planProject.ts";
+import {usePlanProject} from "@/shared/state/plan/planProject.ts";
+import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 
 
 export const PlanPage = () => {
     const planProject = usePlanProject(s => s.planProject);
+    const planManager = usePlanManager(s => s.planManager);
     const {data, isFetching, isPending} = useQuery({
-        queryKey: ['planTable', planProject],
+        queryKey: ['planTable', planProject, planManager],
         queryFn: () => {
             return planService.getPlanTable({
                 project: planProject === "Все проекты" ? null : planProject,
+                manager_id: planManager,
             });
         },
     });

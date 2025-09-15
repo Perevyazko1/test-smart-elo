@@ -3,12 +3,18 @@ from django.utils.dateparse import parse_datetime
 from django.utils import timezone
 from rest_framework.decorators import api_view
 
-from core.models import Assignment, OrderProduct
+from core.models import Assignment, OrderProduct, Order, Agent, AgentTag
+from core.serializers import AgentSerializer, AgentTagSerializer
+from staff.models import Employee
+from staff.serializers import EmployeeSerializer
 
 
 @api_view(['GET'])
 def get_plan_table(request):
     project = request.query_params.get('project')
+    manager_id = request.query_params.get('manager_id')
+
+
 
     department_names = [
         "Конструктора",
@@ -24,7 +30,14 @@ def get_plan_table(request):
     }
 
     if project:
+        if project == "Без проекта":
+            project = ""
         query_filter["order_product__order__project"] = project
+
+    if manager_id:
+        owner = Employee.objects.get(id=manager_id)
+        query_filter["order_product__order__owner"] = owner
+        print(owner)
 
     assignments = Assignment.objects.filter(
         **query_filter
@@ -32,7 +45,8 @@ def get_plan_table(request):
         'department',
         'order_product__product',
         'order_product__order',
-        'order_product__main_fabric'
+        'order_product__main_fabric',
+        'order_product__order__owner',
     ).order_by('order_product__series_id', 'sort_date')
 
     result = {}
@@ -99,3 +113,40 @@ def set_target_date(request):
         sort_date=target_datetime,
     )
     return JsonResponse({"success": True})
+
+
+@api_view(['GET'])
+def get_projects(request):
+    projects = list(
+        Order.objects
+        .filter(order_products__status=0)
+        .distinct('project')
+        .values_list('project', flat=True)
+    )
+
+    result = ['Все проекты']
+
+    result += projects
+
+    return JsonResponse({"result": result}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_managers(request):
+    users = Employee.objects.filter(
+        api_id__isnull=False
+    )
+    return JsonResponse({"result": EmployeeSerializer(users, many=True).data})
+
+
+@api_view(['GET'])
+def get_agents(request):
+    agents = AgentTag.objects.all()
+    return JsonResponse(
+        {
+            "result": AgentTagSerializer(data=agents, many=True).data
+        },
+        json_dumps_params={
+            "ensure_ascii": False
+        }
+    )

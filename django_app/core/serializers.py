@@ -1,7 +1,29 @@
 from rest_framework import serializers
 
-from staff.serializers import DepartmentSerializer
+from staff.serializers import DepartmentSerializer, EmployeeSerializer
 from .models import *
+
+
+
+class AgentTagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AgentTag
+        fields = [
+            "id",
+            "name",
+        ]
+
+
+class AgentSerializer(serializers.ModelSerializer):
+    tags = AgentTagSerializer(many=True)
+
+    class Meta:
+        model = Agent
+        fields = [
+            "id",
+            "name",
+            "tags",
+        ]
 
 
 class ProductionStepCommentSerializer(serializers.ModelSerializer):
@@ -93,6 +115,9 @@ class FabricSerializer(serializers.ModelSerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
+    agent = AgentSerializer()
+    owner = EmployeeSerializer()
+
     class Meta:
         model = Order
         fields = [
@@ -101,6 +126,8 @@ class OrderSerializer(serializers.ModelSerializer):
             'moment',
             'number',
             'planned_date',
+            'agent',
+            'owner',
         ]
 
 

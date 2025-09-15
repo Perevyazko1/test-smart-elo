@@ -11,7 +11,9 @@ ORDER_FILTER_LIST = [
 ORDER_EXPAND = [
     'positions.assortment',
     'positions.assortment.product',
-    'project'
+    'project',
+    'owner',
+    'agent',
 ]
 
 # Expand для товаров

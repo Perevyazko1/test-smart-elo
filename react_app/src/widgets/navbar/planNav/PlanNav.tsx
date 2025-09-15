@@ -1,12 +1,9 @@
-import {useState} from "react";
-import {Popover, PopoverContent, PopoverTrigger} from "@/components/ui/popover.tsx";
-import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import {Check, ChevronsUpDown} from "lucide-react";
-import {Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList} from "@/components/ui/command.tsx";
-import {twMerge} from "tailwind-merge";
 import {useQuery} from "@tanstack/react-query";
 import {planService} from "@/widgets/plan/model/api.ts";
-import {usePlanProject} from "@/shared/state/payroll/planProject.ts";
+import {usePlanProject} from "@/shared/state/plan/planProject.ts";
+import {Dropdown} from "@/shared/ui/inputs/Dropdown.tsx";
+import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
+import type {IUser} from "@/entities/user";
 
 interface IProps {
 
@@ -15,58 +12,50 @@ interface IProps {
 
 export function PlanNav(props: IProps) {
     const {} = props;
-    const [open, setOpen] = useState(false);
 
     const planProject = usePlanProject(s => s.planProject);
     const setPlanProject = usePlanProject(s => s.setPlanProject);
 
-    const {data, isFetching} = useQuery({
+    const planManager = usePlanManager(s => s.planManager);
+    const setPlanManager = usePlanManager(s => s.setPlanManager);
+
+
+    const {data: projects} = useQuery({
         queryKey: ['planProjects'],
         queryFn: planService.getProjects,
     });
 
+    const {data: managers} = useQuery({
+        queryKey: ['plaManagers'],
+        queryFn: planService.getManagers,
+    });
+
+    const projectList = projects?.data?.result.map((project) => (project === "" ? "Без проекта" : project));
+    const managerList = managers?.data?.result;
+
+    const getManager = () => {
+        return managers?.data.result?.find((manager) => manager.id === planManager);
+    }
+
+    const setManager = (manager: IUser | undefined | null) => {
+        setPlanManager(manager?.id || null)
+    }
+
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Btn
-                    role="combobox"
-                    aria-expanded={open}
-                    className="justify-between flex bg-black text-white gap-4"
-                >
-                    {planProject
-                        ? data?.data?.data.find((project) => project === planProject)
-                        : "Проект..."}
-                    <ChevronsUpDown className="opacity-50"/>
-                </Btn>
-            </PopoverTrigger>
-            <PopoverContent className="w-[250px] p-0">
-                <Command>
-                    <CommandInput placeholder="Поиск..." className="h-9"/>
-                    <CommandList>
-                        <CommandEmpty>Проект не найден</CommandEmpty>
-                        <CommandGroup>
-                            {data?.data.data.map((project) => (
-                                <CommandItem
-                                    key={project}
-                                    value={project}
-                                    onSelect={(currentValue) => {
-                                        setPlanProject(currentValue === planProject ? "" : currentValue)
-                                        setOpen(false)
-                                    }}
-                                >
-                                    {project}
-                                    <Check
-                                        className={twMerge(
-                                            "ml-auto",
-                                            planProject === project ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
+        <>
+            <Dropdown<string>
+                selectedItem={planProject}
+                items={projectList || []}
+                setSelectedItem={(item) => setPlanProject(item || null)}
+                getItemLabel={(item) => item || "Проект..."}
+            />
+
+            <Dropdown<IUser>
+                selectedItem={getManager()}
+                items={managerList || []}
+                setSelectedItem={setManager}
+                getItemLabel={(user) => (user ? `${user.first_name} ${user.last_name}` : "Менеджер...")}
+            />
+        </>
     );
 }

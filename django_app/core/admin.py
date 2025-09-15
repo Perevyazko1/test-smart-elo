@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 
 from core.models import Product, ProductPicture, Fabric, Order, OrderProduct, Assignment, ProductionStep, \
-    TechnologicalProcess, OrderProductComment, Tariff, FabricPicture
+    TechnologicalProcess, OrderProductComment, Tariff, FabricPicture, Agent, AgentTag
 
 
 @admin.register(Product)
@@ -104,3 +104,5 @@ admin.site.register(Fabric)
 admin.site.register(OrderProductComment)
 admin.site.register(Tariff)
 admin.site.register(FabricPicture)
+admin.site.register(Agent)
+admin.site.register(AgentTag)

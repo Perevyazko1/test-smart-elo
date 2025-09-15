@@ -146,7 +146,6 @@ class FabricPicture(models.Model):
     image_filename = models.CharField('Имя файла', max_length=240, blank=True, null=True)
     image = models.ImageField('Ссылка на изображение', upload_to=f"images/fabrics/", blank=True, null=True)
 
-
     thumbnail = models.ImageField('Миниатюра', upload_to=f"images/fabrics/thumbnails/", blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -173,6 +172,34 @@ class FabricPicture(models.Model):
         return '{}'.format(f'{self.image}')
 
 
+class AgentTag(models.Model):
+    """Client tag model. """
+
+    class Meta:
+        verbose_name = 'Тег клиента'
+        verbose_name_plural = 'Теги клиента'
+
+    name = models.CharField("Наименование тега", max_length=255)
+
+    def __str__(self):
+        return '{}'.format(f'{self.name}')
+
+
+class Agent(models.Model):
+    """Client model. """
+
+    class Meta:
+        verbose_name = 'Клиент'
+        verbose_name_plural = 'Клиенты'
+
+    api_id = models.UUIDField('API ID', blank=True, null=True)
+    name = models.CharField('Наименование', max_length=255, blank=True, null=True)
+    tags = models.ManyToManyField(AgentTag, related_name='clients')
+
+    def __str__(self):
+        return '{}'.format(f'{self.name}')
+
+
 class Order(models.Model):
     """Order model. """
 
@@ -185,7 +212,6 @@ class Order(models.Model):
         ("1", "Изготовлен"),
     ]
 
-    order_id = models.UUIDField('API ID', default=uuid.uuid4, unique=True)
     # Номер заказа берется из учетной системы
     number = models.CharField('Номер заказа', max_length=30, blank=True, unique=True)
     moment = models.DateTimeField('Дата документа', blank=True, null=True)
@@ -203,6 +229,24 @@ class Order(models.Model):
     comment_case = models.TextField('Коммент. (чехол):', blank=True)
 
     status = models.CharField('Статус', max_length=50, choices=STATUS_CHOICES, default="0")
+
+    # API Fields
+    order_id = models.UUIDField('API order ID', default=uuid.uuid4, blank=True, null=True)
+    updated = models.DateTimeField('Обновлен в API', default=timezone.now)
+    owner = models.ForeignKey(
+        Employee,
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    agent = models.ForeignKey(
+        Agent,
+        related_name='orders',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return '{}'.format(f'{self.number} {self.project}')
@@ -256,8 +300,6 @@ class OrderProduct(models.Model):
 
     # Индивидуальное назначение срочности производства
     urgency = models.SmallIntegerField('Срочность', default=3)
-
-
 
     def __str__(self):
         return '{}'.format(f'{self.series_id}: {self.product.name_internal} - {self.status}')

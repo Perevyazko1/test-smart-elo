@@ -1,10 +1,10 @@
 import chairPath from "./Chair.jpg";
 import fabricPath from "./Fabric.png";
-import type {PlanDataRow} from "@/entities/plan";
+import type {IPlanDataRow} from "@/entities/plan";
 import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 
 interface IProps {
-    data: PlanDataRow;
+    data: IPlanDataRow;
 }
 
 export function PlanCard(props: IProps) {

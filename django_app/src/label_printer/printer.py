@@ -1,6 +1,6 @@
 import socket
 
-from src.label_printer.config import PRINTER_IP, PRINTER_PORT, WIDTH_MM, HEIGHT_MM, GAP_MM
+from src.label_printer.config import PRINTER_IP, PRINTER_PORT, WIDTH_MM, HEIGHT_MM
 
 
 class Printer:

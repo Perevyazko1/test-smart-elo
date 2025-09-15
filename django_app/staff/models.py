@@ -30,6 +30,7 @@ class Employee(AbstractUser):
         verbose_name_plural = 'Пользователи'
         ordering = ['last_name', 'first_name']
 
+    api_id = models.UUIDField('API ID', blank=True, null=True)
     # Пин код для входа в приложение
     pin_code = models.CharField('Пин код для входа', max_length=6, unique=True)
     # Принадлежность к отделу. По этому параметру определяется выгрузка нарядов в приложение.
