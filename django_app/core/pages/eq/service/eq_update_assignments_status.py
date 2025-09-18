@@ -150,21 +150,21 @@ class EqUpdateAssignmentsStatus:
             quantity=len(self.assignment_ids),
         )
 
-    def _get_unconfirmed_assignments_exists(self) -> bool:
-        return Assignment.objects.filter(
-            order_product=self.order_product,
-            inspector__isnull=True,
-        ).exists()
-
     def _api_change_order_status_to_ready(self):
         change_order_status(str(self.order_product.order.order_id))
 
-    def _ready_department_instruction(self):
-        self._create_api_enter()
-
-        if not self._get_unconfirmed_assignments_exists():
+    def _check_order_product_full_ready(self):
+        shipped = self.order_product.quantity == self.order_product.shipped
+        has_unconfirmed = Assignment.objects.filter(
+            order_product=self.order_product,
+            inspector__isnull=True,
+        ).exists()
+        if shipped and not has_unconfirmed:
             self.order_product.status = '1'
             self.order_product.save()
+            return True
+
+        return False
 
     def _get_related_assignments_confirmed_minimum_count(self, next_step: Department) -> int:
         """Получение минимального количества подтвержденных нарядов со всех предыдущих отделов"""
@@ -248,50 +248,46 @@ class EqUpdateAssignmentsStatus:
                 is_active=True,
             ).next_steps.all()
 
-            for department in next_departments:
-                """
-                Итерируемся по всем последующим отделам. 
-                Если отдел Готово - выполняем инструкцию по готовности и выходим.
-                """
+            if not self._check_order_product_full_ready():
+                for department in next_departments:
+                    """
+                    Итерируемся по всем последующим отделам. 
+                    """
 
-                if department.name == "Готово":
-                    self._ready_department_instruction()
-                    break
+                    """Вычисляем количество нарядов к обновлению"""
+                    target_size = self._get_target_size_for_activate_assignments(department)
 
-                """Вычисляем количество нарядов к обновлению"""
-                target_size = self._get_target_size_for_activate_assignments(department)
+                    if target_size:
+                        """Если количество отлично от нуля переводим наряды в статус ожидает"""
+                        start_position = Assignment.objects.filter(
+                            order_product=self.order_product,
+                            department=department,
+                            assembled=True,
+                        ).count()
 
-                if target_size:
-                    """Если количество отлично от нуля переводим наряды в статус ожидает"""
-                    start_position = Assignment.objects.filter(
-                        order_product=self.order_product,
-                        department=department,
-                        assembled=True,
-                    ).count()
+                        last_position = start_position + target_size
+                        if last_position > self.order_product.quantity:
+                            last_position = self.order_product.quantity
+                        numbers = [i for i in range(start_position + 1, last_position + 1)]
 
-                    last_position = start_position + target_size
-                    if last_position > self.order_product.quantity:
-                        last_position = self.order_product.quantity
-                    numbers = [i for i in range(start_position + 1, last_position + 1)]
+                        assignments = Assignment.objects.filter(
+                            order_product=self.order_product,
+                            department=department,
+                            number__in=numbers,
+                            assembled=False,
+                        )
+                        # Очистка кеша по карточкам
+                        update_assignments_and_clean_cache(
+                            assignments_qs=assignments,
+                            order_product__id=self.order_product.id,
+                            department__id=department.id,
+                            assembled=True
+                        )
 
-                    assignments = Assignment.objects.filter(
-                        order_product=self.order_product,
-                        department=department,
-                        number__in=numbers,
-                        assembled=False,
-                    )
-                    # Очистка кеша по карточкам
-                    update_assignments_and_clean_cache(
-                        assignments_qs=assignments,
-                        order_product__id=self.order_product.id,
-                        department__id=department.id,
-                        assembled=True
-                    )
-
-                    self.notification_data[department.number] = {
-                        'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
-                        'data': self.order_product.id,
-                    }
+                        self.notification_data[department.number] = {
+                            'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
+                            'data': self.order_product.id,
+                        }
 
     def _set_technological_process_confirmed(self):
         self.order_product.product.technological_process_confirmed = self.original_user

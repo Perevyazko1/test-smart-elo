@@ -3,7 +3,7 @@ import logging
 from django.db import transaction
 from django.http import JsonResponse
 
-from core.models import Order, OrderProduct
+from core.models import Order, OrderProduct, Assignment
 from src.api.sklad_schemas import SkladOrderExpandProjectPositionsAssortment
 from src.ms_import.create_order_products import create_order_products
 from src.ms_import.get_ms_orders import get_ms_orders, _fetch_order
@@ -16,6 +16,24 @@ from src.ms_import.put_elo_link import put_elo_link
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+
+def _check_order_product_full_ready(order_product: OrderProduct):
+    has_active_assignments = Assignment.objects.filter(
+        order_product=order_product,
+        inspector__isnull=True,
+    ).exists()
+
+    has_no_shipment_positions = order_product.shipped != order_product.quantity
+
+    if has_active_assignments or has_no_shipment_positions:
+        logger.warning(f"Позиция {order_product.series_id} активна ✅")
+        return False
+
+    logger.warning(f"Позиция {order_product.series_id} закрыта ❌")
+    order_product.status = "1"
+    order_product.save()
+    return True
 
 
 @transaction.atomic
@@ -63,7 +81,8 @@ def _update_order(
 
         order_products = create_order_products(order)
         for entity in order_products:
-            order_product_to_db(entity)
+            order_product = order_product_to_db(entity)
+            _check_order_product_full_ready(order_product)
 
         return updated_products
     except Exception as e:

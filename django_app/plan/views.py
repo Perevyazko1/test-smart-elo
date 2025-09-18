@@ -36,7 +36,6 @@ def get_plan_table(request):
     if manager_id:
         owner = Employee.objects.get(id=manager_id)
         query_filter["order_product__order__owner"] = owner
-        print(owner)
 
     assignments = Assignment.objects.filter(
         **query_filter

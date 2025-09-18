@@ -22,7 +22,7 @@ def _create_order_product(series_id: str, defaults: dict):
     )
 
 
-def order_product_to_db(order_product_entity: OrderProductEntity):
+def order_product_to_db(order_product_entity: OrderProductEntity) -> OrderProduct:
     op_qs = OrderProduct.objects.filter(series_id=order_product_entity.series_id)
 
     defaults = {
@@ -57,13 +57,19 @@ def order_product_to_db(order_product_entity: OrderProductEntity):
                 order_product, _ = _create_order_product(order_product_entity.series_id, defaults)
                 AssignmentGenerator().init_order_product_assignments(order_product)
                 print("🎫 Changed 🎫")
+
+            return order_product
+
         else:
             if _check_difference(op, defaults):
                 _create_order_product(order_product_entity.series_id, defaults)
                 print("🎫 Updated 🎫")
             else:
                 print("🎫 No difference 🎫")
+
+            return op
     else:
         order_product, _ = _create_order_product(order_product_entity.series_id, defaults)
         AssignmentGenerator().init_order_product_assignments(order_product)
         print("🎫 Created 🎫")
+        return order_product

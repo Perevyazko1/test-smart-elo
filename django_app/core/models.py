@@ -264,6 +264,7 @@ class OrderProduct(models.Model):
     STATUS_CHOICES = [
         ("0", "Ожидает"),
         ("1", "Изготовлен"),
+        ("2", "Отменен"),
     ]
 
     series_id = models.CharField('ID Серии', max_length=50, unique=True, null=True)

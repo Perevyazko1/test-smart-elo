@@ -1,10 +1,8 @@
 """Initial methods and scripts."""
 import logging
-from pprint import pprint
 
-from src.api.sklad_client import SkladClient
-from src.api.sklad_schemas import SkladApiListResponse, SkladOrderExpandProjectPositionsAssortment
-from src.ms_import.config import ORDER_EXPAND
+from core.models import OrderProduct, Assignment
+from src.ms_import.ms_import import _check_order_product_full_ready
 
 logger = logging.getLogger(__name__)
 
@@ -12,22 +10,23 @@ logger = logging.getLogger(__name__)
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
-    client = SkladClient()
 
-    params = {
-        "expand": ','.join(map(str, ORDER_EXPAND)),
-        "limit": 1,
-        "offset": 0,
-        "fields": "stock",
-    }
+    order_products = OrderProduct.objects.all()
 
-    order_list = client.get(
-        "entity/customerorder",
-        SkladApiListResponse[SkladOrderExpandProjectPositionsAssortment],
-        params=params
-    )
+    for order_product in order_products:
+        if order_product.status == "2":
+            continue
 
-    pprint(order_list.model_dump())
+        if not _check_order_product_full_ready(order_product):
+            if order_product.status != "0":
+                logger.warning(f"Позиция {order_product.series_id} переведена в активный статус ✅")
+                order_product.status = "0"
+                order_product.save()
+        else:
+            if order_product.status != "1":
+                logger.warning(f"Позиция {order_product.series_id} закрыта ❌")
+                order_product.status = "1"
+                order_product.save()
 
     print('PASS')
     return f"Oki"
