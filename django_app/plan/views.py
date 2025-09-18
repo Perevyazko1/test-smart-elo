@@ -1,10 +1,10 @@
 from django.http import JsonResponse
-from django.utils.dateparse import parse_datetime
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view
 
-from core.models import Assignment, OrderProduct, Order, Agent, AgentTag
-from core.serializers import AgentSerializer, AgentTagSerializer
+from core.models import Assignment, OrderProduct, Order, AgentTag
+from core.serializers import AgentTagSerializer
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
 
@@ -13,8 +13,6 @@ from staff.serializers import EmployeeSerializer
 def get_plan_table(request):
     project = request.query_params.get('project')
     manager_id = request.query_params.get('manager_id')
-
-
 
     department_names = [
         "Конструктора",
@@ -84,11 +82,14 @@ def get_plan_table(request):
 
         department_name = assignment.department.name
         if department_name not in result[key]["assignments"]:
-            result[key]["assignments"][department_name] = {"all": 0, "ready": 0}
+            result[key]["assignments"][department_name] = {"all": 0, "ready": 0, "await": 0}
 
         result[key]["assignments"][department_name]["all"] += 1
         if assignment.status == "ready":
-            result[key]["assignments"][department_name]["ready"] += 1
+            if not assignment.inspector:
+                result[key]["assignments"][department_name]["await"] += 1
+            else:
+                result[key]["assignments"][department_name]["ready"] += 1
 
     return JsonResponse(result)
 
@@ -97,8 +98,6 @@ def get_plan_table(request):
 def set_target_date(request):
     target_date = request.data.get('target_date')
     series_id = request.data.get('series_id')
-
-    print(target_date, series_id)
 
     if target_date:
         target_datetime = parse_datetime(target_date)

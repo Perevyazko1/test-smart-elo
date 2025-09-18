@@ -1,10 +1,11 @@
 interface IProps {
     left: number;
+    center: number;
     right: number;
 }
 
 export function ProgressiveCell(props: IProps) {
-    const {left, right} = props;
+    const {left, right, center} = props;
 
     const targetWidth = Math.abs(Math.max(15, left / (left + right) * 100));
 
@@ -23,8 +24,19 @@ export function ProgressiveCell(props: IProps) {
                     </div>
                 )}
 
+                {center > 0 && (
+                    <div
+                        className={'bg-fuchsia-300 h-2/3 flex items-center justify-center border-1 flex-1 border-black'}
+                        style={{
+                            minWidth: 'content',
+                        }}
+                    >
+                        <b>{center}</b>
+                    </div>
+                )}
+
                 {right > 0 && (
-                    <div className={'flex-1  h-2/3 flex items-center justify-center border-1 border-black text-red-500'}>
+                    <div className={'flex-1 h-2/3 flex items-center justify-center border-1 border-black text-red-500'}>
                         <b>{right}</b>
                     </div>
                 )}

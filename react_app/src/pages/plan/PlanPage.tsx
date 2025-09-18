@@ -96,7 +96,12 @@ export const PlanPage = () => {
                         >
                             {dept}
                         </th>
+
                     ))}
+
+                    <th rowSpan={2}>
+                        МС ОТГР
+                    </th>
                 </tr>
                 <tr>
                     <th>#</th>

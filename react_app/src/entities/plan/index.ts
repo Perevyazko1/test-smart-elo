@@ -26,6 +26,7 @@ export interface IPlanDataRow {
         [key: string]: {
             all: number;
             ready: number;
+            await: number;
         };
     }
 }
