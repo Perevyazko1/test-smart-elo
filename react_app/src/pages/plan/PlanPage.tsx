@@ -12,6 +12,7 @@ const DEPARTMENTS = [
     "Пошив",
     "Малярка",
     "Обивка",
+    "Упаковка",
 ];
 
 export const PlanPage = () => {
@@ -96,7 +97,6 @@ export const PlanPage = () => {
                             {dept}
                         </th>
                     ))}
-                    <th rowSpan={2}>Отгрузить <br/>ДОК</th>
                 </tr>
                 <tr>
                     <th>#</th>

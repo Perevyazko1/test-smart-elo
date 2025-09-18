@@ -49,6 +49,7 @@ export function PlanRow(props: IProps) {
     const d3 = data.assignments["Пошив"] || empty;
     const d4 = data.assignments["Малярка"] || empty;
     const d5 = data.assignments["Обивка"] || empty;
+    const d6 = data.assignments["Упаковка"] || empty;
 
     return (
         <tr>
@@ -96,8 +97,7 @@ export function PlanRow(props: IProps) {
             <ProgressiveCell left={d3.ready} right={d3.all - d3.ready}/>
             <ProgressiveCell left={d4.ready} right={d4.all - d4.ready}/>
             <ProgressiveCell left={d5.ready} right={d5.all - d5.ready}/>
-
-            <ProgressiveCell left={data.shipped} right={data.quantity - data.shipped}/>
+            <ProgressiveCell left={d6.ready} right={d6.all - d6.ready}/>
         </tr>
     )
         ;

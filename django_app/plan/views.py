@@ -22,6 +22,7 @@ def get_plan_table(request):
         "Пошив",
         "Малярка",
         "Сборка",
+        "Упаковка",
     ]
 
     query_filter = {
