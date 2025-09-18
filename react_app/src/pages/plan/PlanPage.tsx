@@ -5,6 +5,7 @@ import {usePlanProject} from "@/shared/state/plan/planProject.ts";
 import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 import {useState, useMemo} from "react";
 import {twMerge} from "tailwind-merge";
+import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 
 const DEPARTMENTS = [
     "Конструктора",
@@ -18,13 +19,15 @@ const DEPARTMENTS = [
 export const PlanPage = () => {
     const planProject = usePlanProject((s) => s.planProject);
     const planManager = usePlanManager((s) => s.planManager);
+    const planAgent = usePlanAgent(s => s.planAgent);
 
     const {data, isFetching, isPending} = useQuery({
-        queryKey: ["planTable", planProject, planManager],
+        queryKey: ["planTable", planProject, planManager, planAgent],
         queryFn: () =>
             planService.getPlanTable({
                 project: planProject === "Все проекты" ? null : planProject,
                 manager_id: planManager,
+                agent_id: planAgent,
             }),
     });
 

@@ -92,12 +92,12 @@ export function PlanRow(props: IProps) {
                 />
             </td>
             <td><PlanCard data={data}/></td>
-            <ProgressiveCell left={d1.ready} right={d1.all - d1.ready} center={d1.await}/>
-            <ProgressiveCell left={d2.ready} right={d2.all - d2.ready} center={d2.await}/>
-            <ProgressiveCell left={d3.ready} right={d3.all - d3.ready} center={d3.await}/>
-            <ProgressiveCell left={d4.ready} right={d4.all - d4.ready} center={d4.await}/>
-            <ProgressiveCell left={d5.ready} right={d5.all - d5.ready} center={d5.await}/>
-            <ProgressiveCell left={d6.ready} right={d6.all - d6.ready} center={d6.await}/>
+            <ProgressiveCell left={d1.ready} right={d1.all - d1.ready - d1.await} center={d1.await}/>
+            <ProgressiveCell left={d2.ready} right={d2.all - d2.ready - d2.await} center={d2.await}/>
+            <ProgressiveCell left={d3.ready} right={d3.all - d3.ready - d3.await} center={d3.await}/>
+            <ProgressiveCell left={d4.ready} right={d4.all - d4.ready - d4.await} center={d4.await}/>
+            <ProgressiveCell left={d5.ready} right={d5.all - d5.ready - d5.await} center={d5.await}/>
+            <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}/>
 
             <ProgressiveCell left={data.shipped} right={data.quantity - data.shipped} center={0}/>
         </tr>

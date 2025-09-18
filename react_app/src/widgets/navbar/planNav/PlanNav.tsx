@@ -4,6 +4,8 @@ import {usePlanProject} from "@/shared/state/plan/planProject.ts";
 import {Dropdown} from "@/shared/ui/inputs/Dropdown.tsx";
 import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 import type {IUser} from "@/entities/user";
+import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
+import type {IAgentTag} from "@/entities/plan";
 
 interface IProps {
 
@@ -19,6 +21,9 @@ export function PlanNav(props: IProps) {
     const planManager = usePlanManager(s => s.planManager);
     const setPlanManager = usePlanManager(s => s.setPlanManager);
 
+    const planAgent = usePlanAgent(s => s.planAgent);
+    const setPlanAgent = usePlanAgent(s => s.setPlanAgent);
+
 
     const {data: projects} = useQuery({
         queryKey: ['planProjects'],
@@ -26,12 +31,18 @@ export function PlanNav(props: IProps) {
     });
 
     const {data: managers} = useQuery({
-        queryKey: ['plaManagers'],
+        queryKey: ['planManagers'],
         queryFn: planService.getManagers,
+    });
+
+    const {data: agents} = useQuery({
+        queryKey: ['planAgents'],
+        queryFn: planService.getAgents,
     });
 
     const projectList = projects?.data?.result.map((project) => (project === "" ? "Без проекта" : project));
     const managerList = managers?.data?.result;
+    const agentList = agents?.data?.result;
 
     const getManager = () => {
         return managers?.data.result?.find((manager) => manager.id === planManager);
@@ -41,8 +52,15 @@ export function PlanNav(props: IProps) {
         setPlanManager(manager?.id || null)
     }
 
+    const getAgent = () => {
+        return agents?.data.result?.find((agent) => agent.id === planAgent);
+    }
+    const setAgent = (agent: IAgentTag | undefined | null) => {
+        setPlanAgent(agent?.id || null)
+    }
+
     return (
-        <>
+        <div className={'flex gap-1'}>
             <Dropdown<string>
                 selectedItem={planProject}
                 items={projectList || []}
@@ -56,6 +74,13 @@ export function PlanNav(props: IProps) {
                 setSelectedItem={setManager}
                 getItemLabel={(user) => (user ? `${user.first_name} ${user.last_name}` : "Менеджер...")}
             />
-        </>
+
+            <Dropdown<IAgentTag>
+                selectedItem={getAgent()}
+                items={agentList || []}
+                setSelectedItem={setAgent}
+                getItemLabel={(item) => item?.name || "Заказчик..."}
+            />
+        </div>
     );
 }

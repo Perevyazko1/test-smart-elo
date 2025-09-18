@@ -7,6 +7,7 @@ class PlanService {
     getPlanTable(props: {
         project: string | null;
         manager_id: number | null;
+        agent_id: number | null;
     }): Promise<AxiosResponse<IPlanData | null>> {
         return $axios.get<IPlanData | null>(
             `/plan/plan_table/`,

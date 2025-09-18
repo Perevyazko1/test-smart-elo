@@ -1,3 +1,5 @@
+from django.db.models import Count, Q
+from django.db.models.functions import TruncDate
 from django.http import JsonResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -8,11 +10,100 @@ from core.serializers import AgentTagSerializer
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
 
+#
+# @api_view(['GET'])
+# def get_plan_table(request):
+#     project = request.query_params.get('project')
+#     manager_id = request.query_params.get('manager_id')
+#     agent_id = request.query_params.get('agent_id')
+#
+#     department_names = [
+#         "Конструктора",
+#         "Обивка",
+#         "Пошив",
+#         "Малярка",
+#         "Сборка",
+#         "Упаковка",
+#     ]
+#
+#     query_filter = {
+#         "order_product__status": "0",
+#         "department__name__in": department_names,
+#     }
+#
+#     if project:
+#         if project == "Без проекта":
+#             project = ""
+#         query_filter["order_product__order__project"] = project
+#
+#     if manager_id:
+#         owner = Employee.objects.get(id=manager_id)
+#         query_filter["order_product__order__owner"] = owner
+#
+#     if agent_id:
+#         query_filter["order_product__order__agent__tags__id"] = agent_id
+#
+#     assignments = Assignment.objects.filter(
+#         **query_filter
+#     ).select_related(
+#         'department',
+#         'order_product__product',
+#         'order_product__order',
+#         'order_product__main_fabric',
+#         'order_product__order__owner',
+#     ).order_by('order_product__series_id', 'sort_date')
+#
+#     result = {}
+#     for assignment in assignments:
+#         order_product = assignment.order_product
+#         plane_date_key = assignment.sort_date.date() if assignment.sort_date else 'nodate'
+#         key = f'{order_product.series_id}-{plane_date_key}'
+#
+#         product_image = order_product.product.product_pictures.first()
+#         picture_url = None
+#         if product_image:
+#             picture_url = product_image.thumbnail.url
+#
+#         fabric_image = order_product.main_fabric.fabric_pictures.first() if order_product.main_fabric else None
+#         fabric_url = None
+#         if fabric_image:
+#             fabric_url = fabric_image.thumbnail.url
+#
+#         if key not in result:
+#             result[key] = {
+#                 "date": assignment.sort_date.date() if assignment.sort_date else None,
+#                 "product_name": order_product.product.name,
+#                 "product_picture": picture_url,
+#                 "order": order_product.order.inner_number,
+#                 "series_id": order_product.series_id,
+#                 "price": order_product.price,
+#                 "fabric_name": order_product.main_fabric.name if order_product.main_fabric else "-",
+#                 "fabric_picture": fabric_url,
+#                 "project": order_product.order.project,
+#                 "quantity": order_product.quantity,
+#                 "shipped": order_product.shipped,
+#                 "assignments": {}
+#             }
+#
+#         department_name = assignment.department.name
+#         if department_name not in result[key]["assignments"]:
+#             result[key]["assignments"][department_name] = {"all": 0, "ready": 0, "await": 0}
+#
+#         result[key]["assignments"][department_name]["all"] += 1
+#         if assignment.status == "ready":
+#             if not assignment.inspector:
+#                 result[key]["assignments"][department_name]["await"] += 1
+#             else:
+#                 result[key]["assignments"][department_name]["ready"] += 1
+#
+#     return JsonResponse(result)
+
 
 @api_view(['GET'])
 def get_plan_table(request):
     project = request.query_params.get('project')
     manager_id = request.query_params.get('manager_id')
+    agent_id = request.query_params.get('agent_id')
 
     department_names = [
         "Конструктора",
@@ -34,61 +125,92 @@ def get_plan_table(request):
         query_filter["order_product__order__project"] = project
 
     if manager_id:
-        owner = Employee.objects.get(id=manager_id)
-        query_filter["order_product__order__owner"] = owner
+        query_filter["order_product__order__owner_id"] = manager_id
 
-    assignments = Assignment.objects.filter(
-        **query_filter
+    if agent_id:
+        query_filter["order_product__order__agent__tags__id"] = agent_id
+
+    assignments_query = Assignment.objects.filter(**query_filter)
+
+    dept_map = {
+        "Конструктора": "konstruktora",
+        "Обивка": "obivka",
+        "Пошив": "poshiv",
+        "Малярка": "malyarka",
+        "Сборка": "sborka",
+        "Упаковка": "upakovka",
+    }
+    department_aggregates = {}
+    for dept_name, dept_key in dept_map.items():
+        department_aggregates[f'{dept_key}_all'] = Count('id', filter=Q(department__name=dept_name))
+        department_aggregates[f'{dept_key}_ready'] = Count(
+            'id', filter=Q(department__name=dept_name, status="ready", inspector__isnull=False)
+        )
+        department_aggregates[f'{dept_key}_await'] = Count(
+            'id', filter=Q(department__name=dept_name, status="ready", inspector__isnull=True)
+        )
+
+    assignment_groups = assignments_query.values(
+        'order_product_id',
+        'order_product__series_id',
+        sort_date_trunc=TruncDate('sort_date')
+    ).annotate(**department_aggregates).order_by('order_product__series_id', 'sort_date_trunc')
+
+    order_product_ids = assignments_query.values_list('order_product_id', flat=True).distinct()
+
+    order_products = OrderProduct.objects.filter(
+        id__in=order_product_ids
     ).select_related(
-        'department',
-        'order_product__product',
-        'order_product__order',
-        'order_product__main_fabric',
-        'order_product__order__owner',
-    ).order_by('order_product__series_id', 'sort_date')
+        'product', 'order', 'main_fabric', 'order__owner'
+    ).prefetch_related(
+        'product__product_pictures', 'main_fabric__fabric_pictures'
+    )
+
+    order_products_map = {op.id: op for op in order_products}
 
     result = {}
-    for assignment in assignments:
-        order_product = assignment.order_product
-        plane_date_key = assignment.sort_date.date() if assignment.sort_date else 'nodate'
-        key = f'{order_product.series_id}-{plane_date_key}'
+    for group in assignment_groups:
+        order_product = order_products_map.get(group['order_product_id'])
+        if not order_product:
+            continue
+
+        sort_date_val = group['sort_date_trunc']
+        plane_date_key = sort_date_val if sort_date_val else 'nodate'
+        key = f"{group['order_product__series_id']}-{plane_date_key}"
+
+        assignments_data = {}
+        for dept_name, dept_key in dept_map.items():
+            all_count = group[f'{dept_key}_all']
+            if all_count > 0:
+                assignments_data[dept_name] = {
+                    "all": all_count,
+                    "ready": group[f'{dept_key}_ready'],
+                    "await": group[f'{dept_key}_await'],
+                }
+
+        if not assignments_data:
+            continue
 
         product_image = order_product.product.product_pictures.first()
-        picture_url = None
-        if product_image:
-            picture_url = product_image.thumbnail.url
+        picture_url = product_image.thumbnail.url if product_image else None
 
         fabric_image = order_product.main_fabric.fabric_pictures.first() if order_product.main_fabric else None
-        fabric_url = None
-        if fabric_image:
-            fabric_url = fabric_image.thumbnail.url
+        fabric_url = fabric_image.thumbnail.url if fabric_image else None
 
-        if key not in result:
-            result[key] = {
-                "date": assignment.sort_date.date() if assignment.sort_date else None,
-                "product_name": order_product.product.name,
-                "product_picture": picture_url,
-                "order": order_product.order.inner_number,
-                "series_id": order_product.series_id,
-                "price": order_product.price,
-                "fabric_name": order_product.main_fabric.name if order_product.main_fabric else "-",
-                "fabric_picture": fabric_url,
-                "project": order_product.order.project,
-                "quantity": order_product.quantity,
-                "shipped": order_product.shipped,
-                "assignments": {}
-            }
-
-        department_name = assignment.department.name
-        if department_name not in result[key]["assignments"]:
-            result[key]["assignments"][department_name] = {"all": 0, "ready": 0, "await": 0}
-
-        result[key]["assignments"][department_name]["all"] += 1
-        if assignment.status == "ready":
-            if not assignment.inspector:
-                result[key]["assignments"][department_name]["await"] += 1
-            else:
-                result[key]["assignments"][department_name]["ready"] += 1
+        result[key] = {
+            "date": sort_date_val,
+            "product_name": order_product.product.name,
+            "product_picture": picture_url,
+            "order": order_product.order.inner_number,
+            "series_id": order_product.series_id,
+            "price": order_product.price,
+            "fabric_name": order_product.main_fabric.name if order_product.main_fabric else "-",
+            "fabric_picture": fabric_url,
+            "project": order_product.order.project,
+            "quantity": order_product.quantity,
+            "shipped": order_product.shipped,
+            "assignments": assignments_data
+        }
 
     return JsonResponse(result)
 
@@ -143,7 +265,7 @@ def get_agents(request):
     agents = AgentTag.objects.all()
     return JsonResponse(
         {
-            "result": AgentTagSerializer(data=agents, many=True).data
+            "result": AgentTagSerializer(agents, many=True).data
         },
         json_dumps_params={
             "ensure_ascii": False

@@ -22,7 +22,7 @@ export function Dropdown<T>(props: IProps<T>) {
                 <Btn
                     role="combobox"
                     aria-expanded={open}
-                    className="justify-between flex bg-black text-white gap-4"
+                    className="justify-between flex bg-black text-white gap-4 capitalize"
                 >
                     {getItemLabel(selectedItem)}
                     <ChevronsUpDown className="opacity-50"/>
@@ -45,7 +45,8 @@ export function Dropdown<T>(props: IProps<T>) {
                                         setOpen(false)
                                     }}
                                 >
-                                    {getItemLabel(item)}
+                                    <span
+                                    className={'capitalize'}>{getItemLabel(item)}</span>
                                     <Check
                                         className={twMerge(
                                             "ml-auto",
