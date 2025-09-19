@@ -133,7 +133,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
             id={`payrollRow${userInfo.user.id}`}
             className={
                 twMerge(
-                    'transition-all duration-300 ease-in-out',
+                    'transition-all duration-100 ease-in-out hover:outline-2 hover:outline-green-600 hover:-outline-offset-2 hover:bg-amber-100',
                     userInfo.is_closed ? 'bg-green-50' :
                         userInfo.is_locked ? 'bg-pink-50' : '',
                 )
