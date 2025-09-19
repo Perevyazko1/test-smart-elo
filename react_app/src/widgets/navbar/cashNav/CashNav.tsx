@@ -5,6 +5,7 @@ import {Toggle} from "@/components/ui/toggle.tsx";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
+import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
 
 interface IProps {
 
@@ -24,6 +25,9 @@ export function CashNav(props: IProps) {
 
     const showTotal = useShowTotal(s => s.showTotal);
     const setShowTotal = useShowTotal(s => s.setShowTotal);
+
+    const hideSum = useHideSum(s => s.hideSum);
+    const setHideSum = useHideSum(s => s.setHideSum);
 
     return (
         <>
@@ -85,6 +89,22 @@ export function CashNav(props: IProps) {
                         onPressedChange={() => setShowTotal(!showTotal)}
                     >
                         {showTotal ? (
+                            <EyeOpenIcon className={'text-red-800'}/>
+                        ) : (
+                            <EyeClosedIcon className={'text-green-800'}/>
+                        )}
+                    </Toggle>
+                </div>
+
+            <div className={'text-xs flex items-center gap-2'}>
+                    <span>Выдача: </span>
+
+                    <Toggle
+                        className={'cursor-pointer noPrint bg-gray-800'}
+                        pressed={hideSum}
+                        onPressedChange={() => setHideSum(!hideSum)}
+                    >
+                        {hideSum ? (
                             <EyeOpenIcon className={'text-red-800'}/>
                         ) : (
                             <EyeClosedIcon className={'text-green-800'}/>

@@ -10,15 +10,19 @@ interface UserCashCellProps {
     isLoading: boolean;
     name: string;
     info: string;
+    className?: string;
 }
 
 
 export const UserCashCell = (props: UserCashCellProps) => {
-    const {disabled, isLoading, name, info} = props;
+    const {disabled, isLoading, name, info, className = ""} = props;
 
 
     return (
-        <td className="max-w-[7em] relative bg-blue-100">
+        <td className={twMerge(
+            "max-w-[7em] relative bg-blue-100",
+            className
+        )}>
             {isLoading && (
                 <DotFilledIcon
                     className={'absolute top-0 right-0 text-green-800 animate-pulse'}

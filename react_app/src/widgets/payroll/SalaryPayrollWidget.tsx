@@ -14,6 +14,7 @@ import {payrollService} from "./model/api.ts";
 import {TextArea} from "@/shared/ui/textarea/TextArea.tsx";
 import {DotFilledIcon} from "@radix-ui/react-icons";
 import {toast} from "sonner";
+import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
 
 
 interface SalaryPayrollWidgetProps {
@@ -26,6 +27,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
     const queryClient = useQueryClient();
     const [cashValue, setCashValue] = useState<number | null>();
     const [descriptionValue, setDescriptionValue] = useState<string | null>();
+    const hideSum = useHideSum(s => s.hideSum);
 
     const createPayrollMutation = useMutation({
         mutationFn: payrollService.createNewPayroll,
@@ -121,14 +123,16 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                     </h1>
                     <div className={'flex gap-2 items-center'}>
                         ФОТ ПЛАН:
-                        <input
-                            id={`${currentWeek.weekNumber}cash`}
-                            disabled={!statusLessThen("4")}
-                            type="text"
-                            className={'p-2 w-1/3 outline-none border-none text-center h-full bg-white disabled:bg-transparent'}
-                            value={cashValue?.toLocaleString('ru-RU') || data?.data?.cash_payout?.toLocaleString('ru-RU')}
-                            onChange={issuedChangeHandle}
-                        />
+                        {!hideSum && (
+                            <input
+                                id={`${currentWeek.weekNumber}cash`}
+                                disabled={!statusLessThen("4")}
+                                type="text"
+                                className={'p-2 w-1/3 outline-none border-none text-center h-full bg-white disabled:bg-transparent'}
+                                value={cashValue?.toLocaleString('ru-RU') || data?.data?.cash_payout?.toLocaleString('ru-RU')}
+                                onChange={issuedChangeHandle}
+                            />
+                        )}
                     </div>
 
                 </div>
@@ -168,14 +172,16 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
 
             <div className={'relative'}>
                 <div className={'flex items-center h-full text-[0.8em]'}>
-                    <TextArea
-                        id={`${currentWeek.weekNumber}description`}
-                        placeholder={'Комментарий к неделе'}
-                        disabled={!statusLessThen("6")}
-                        value={descriptionValue || ""}
-                        onChange={descriptionChangeHandle}
-                        className={'p-2 resize-none w-full bg-yellow-50'}
-                    />
+                    {!hideSum && (
+                        <TextArea
+                            id={`${currentWeek.weekNumber}description`}
+                            placeholder={'Комментарий к неделе'}
+                            disabled={!statusLessThen("6")}
+                            value={descriptionValue || ""}
+                            onChange={descriptionChangeHandle}
+                            className={'p-2 resize-none w-full bg-yellow-50'}
+                        />
+                    )}
                 </div>
                 {descriptionValue !== data?.data?.description && (
                     <DotFilledIcon

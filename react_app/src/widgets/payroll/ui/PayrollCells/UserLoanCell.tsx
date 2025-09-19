@@ -12,11 +12,12 @@ interface UserLoanCellProps {
     disabled: boolean;
     className?: string;
     amount?: number;
+    textClassName?: string;
 }
 
 
 export const UserLoanCell = (props: UserLoanCellProps) => {
-    const {userInfo, amount, className, week, disabled} = props;
+    const {userInfo, amount, className, week, disabled, textClassName} = props;
 
 
     const loanPercent = 100 - Math.abs(
@@ -41,7 +42,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
                     `Погашено ${formatNumber(userInfo.end_loan_sum)} 
                     из ${formatNumber(userInfo.full_loan_sum)}`
                 }>
-                    <NiceNum value={(userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)} abs/>
+                    <NiceNum className={textClassName} value={(userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)} abs/>
                 </TT>
             </div>
         </>
@@ -50,6 +51,7 @@ export const UserLoanCell = (props: UserLoanCellProps) => {
     return (
         <UserAddCell
             className={className}
+            textClassName={textClassName}
             value={userInfo.loan_sum}
             hide={((userInfo.full_loan_sum || 0) + (userInfo.end_loan_sum || 0)) === 0}
             info={

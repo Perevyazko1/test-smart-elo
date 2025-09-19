@@ -20,11 +20,12 @@ interface UserAddCellProps {
     children?: ReactNode;
     hide?: boolean;
     className?: string;
+    textClassName?: string;
     amount?: number;
 }
 
 export const UserAddCell = (props: UserAddCellProps) => {
-    const {value, user, amount, className, children, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
+    const {value, user, amount, className, textClassName, children, hide = false, info, valueInfo, disabled, week, earning_type, about, extra} = props;
 
     return (
         <td className={twMerge(
@@ -38,7 +39,7 @@ export const UserAddCell = (props: UserAddCellProps) => {
                     !hide && ('border-r-1'),
                 )}>
                     <TT description={valueInfo}>
-                        <NiceNum value={value}/>
+                        <NiceNum value={value} className={textClassName}/>
                     </TT>
                 </div>
                 {!hide && (

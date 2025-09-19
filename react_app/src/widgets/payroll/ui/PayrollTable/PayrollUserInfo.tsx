@@ -21,6 +21,7 @@ import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
+import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
 
 
 interface PayrollUserInfoProps {
@@ -36,6 +37,7 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
     const showTotal = useShowTotal(s => s.showTotal);
+    const hideSum = useHideSum(s => s.hideSum);
 
     const debouncedUpdateRow = useDebounce(
         (data: {
@@ -128,50 +130,73 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
         (userInfo.tax_payout || 0) -
         (userInfo.loan_payout || 0)
 
+    const blurStateClass = hideSum ? 'text-transparent group-hover:text-black' : '';
+
     return (
         <tr
             id={`payrollRow${userInfo.user.id}`}
             className={
                 twMerge(
-                    'transition-all duration-100 ease-in-out hover:outline-2 hover:outline-green-600 hover:-outline-offset-2 hover:bg-amber-100',
+                    'transition-all duration-100 ease-in-out',
+                    'hover:outline-2 hover:outline-green-600 hover:-outline-offset-2 hover:bg-amber-100',
+                    'group',
                     userInfo.is_closed ? 'bg-green-50' :
                         userInfo.is_locked ? 'bg-pink-50' : '',
                 )
             }
         >
             <FormProvider {...methods}>
+                {/*Имя*/}
                 <UserNameCell
                     mutateClb={mutate}
                     isPending={isPending}
                     userInfo={userInfo}
                     week={week}
                 />
+
+                {/*Стоимость дня*/}
                 {showDayPrice && (
-                    <td className="text-end">
+                    <td className={twMerge(
+                        "text-end"
+                    )}>
                         <TT description={`Ставка в день.`}>
                             <NiceNum value={
                                 userInfo.user.piecework_amount ?
                                     userInfo.user.piecework_amount * 8
                                     : null
-                            }/>
+                            } className={blurStateClass}/>
                         </TT>
                     </td>
                 )}
 
-                <td className="text-end">
+                {/*Баланс на начало недели*/}
+                <td className={twMerge(
+                    "text-end"
+                )}>
                     <TT description={`Баланс на начало ${week.weekNumber} нед.`}>
-                        <NiceNum value={userInfo.hide_balance ? null : userInfo.balance_sum}/>
+                        <NiceNum
+                            className={blurStateClass}
+                            value={userInfo.hide_balance ? null : userInfo.balance_sum}
+                        />
                     </TT>
                 </td>
 
+                {/*Отдельно Заработано ЭЛО*/}
                 {showEarnedDetail && (
-                    <td className="text-end">
+                    <td className={twMerge(
+                        "text-end"
+                    )}>
                         <TT description={`Заработано ЭЛО сделка`}>
-                            <NiceNum value={userInfo.earned_sum}/>
+                            <NiceNum
+                                className={blurStateClass}
+                                value={userInfo.earned_sum}
+                            />
                         </TT>
                     </td>
                 )}
 
+
+                {/*Начислено ДОП и задачи*/}
                 <UserAddCell
                     value={
                         showEarnedDetail ?
@@ -194,6 +219,10 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     week={week}
                     earning_type={"ДОП"}
                     about={`ЗП Нед ${week.weekNumber}`}
+                    className={twMerge(
+                        blurStateClass,
+                    )}
+                    textClassName={blurStateClass}
                 >
                     {userInfo.has_unconfirmed && (
                         <TT asChild description={"Подтвердить сумму начислений"}>
@@ -206,67 +235,108 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     )}
                 </UserAddCell>
 
+                {/*Итого к выдаче*/}
                 {showTotal ? (
-                    <td className="text-end bg-blue-100">
+                    <td
+                        className={twMerge(
+                            "text-end bg-blue-100"
+                        )}
+                    >
                         <TT description={`Итого к выдаче`}>
-                            <NiceNum value={
-                                (userInfo.earned_sum || 0) +
-                                (userInfo.ip_payout || 0) +
-                                (userInfo.card_payout || 0) +
-                                (userInfo.tax_payout || 0) +
-                                (userInfo.loan_payout || 0)
-                            }/>
+                            <NiceNum
+                                value={
+                                    (userInfo.earned_sum || 0) +
+                                    (userInfo.ip_payout || 0) +
+                                    (userInfo.card_payout || 0) +
+                                    (userInfo.tax_payout || 0) +
+                                    (userInfo.loan_payout || 0)
+                                }
+                                className={twMerge(
+                                    blurStateClass,
+                                )}
+                            />
                         </TT>
                     </td>
                 ) : (
                     <>
+                        {/*К выдаче НАЛ*/}
                         <UserCashCell
                             name={"cash_payout"}
                             info={"Сумма к выдаче наличными"}
                             isLoading={methods.watch("cash_payout") !== userInfo.cash_payout}
                             disabled={!statusLessThen("5") || userInfo.is_locked}
+                            className={twMerge(
+                                blurStateClass,
+                            )}
                         />
+                        {/*К выдаче ИП*/}
                         <UserCashCell
                             name={"ip_payout"}
                             info={"Сумма к выдаче через ИП"}
                             isLoading={methods.watch("ip_payout") !== userInfo.ip_payout}
                             disabled={!statusLessThen("5") || userInfo.is_locked}
+                            className={twMerge(
+                                blurStateClass,
+                            )}
                         />
+                        {/*К выдаче ОФИЦИАЛКА*/}
                         <UserCashCell
                             name={"card_payout"}
                             info={"Сумма к выдаче официалка"}
                             isLoading={methods.watch("card_payout") !== userInfo.card_payout}
                             disabled={!statusLessThen("5") || userInfo.is_locked}
+                            className={twMerge(
+                                blurStateClass,
+                            )}
                         />
+                        {/*К выдаче НДФЛ*/}
                         <UserCashCell
                             name={"tax_payout"}
                             info={"Сумма к удержанию НДФЛ"}
                             isLoading={methods.watch("tax_payout") !== userInfo.tax_payout}
                             disabled={!statusLessThen("5") || userInfo.is_locked}
+                            className={twMerge(
+                                blurStateClass,
+                            )}
                         />
+                        {/*К выдаче ЗАЙМ*/}
                         <UserCashCell
                             name={"loan_payout"}
                             info={"Сумма к удержанию в займы"}
                             isLoading={methods.watch("loan_payout") !== userInfo.loan_payout}
                             disabled={!statusLessThen("5") || userInfo.is_locked}
+                            className={twMerge(
+                                blurStateClass,
+                            )}
                         />
                     </>
                 )}
 
+                {/*Хвосты подытог после выдачи*/}
                 <td className={twMerge(
                     "text-end bg-blue-100",
-                    userInfo.hide_balance ? "text-blue-100" : "text-black"
+                    userInfo.hide_balance ? "text-blue-100" : "text-black",
+                    blurStateClass,
                 )}>
                     <TT description={`Подытог после проведения расчета ${formatNumber(prevTotal, false)}`}>
-                            <NiceNum
-                                className={userInfo.hide_balance ? "text-transparent" : ''}
-                                value={userInfo.hide_balance ? null : prevTotal}
-                            />
+                        <NiceNum
+                            className={
+                                twMerge(
+                                    userInfo.hide_balance ? "text-transparent" : '',
+                                    blurStateClass
+                                )
+                            }
+                            value={userInfo.hide_balance ? null : prevTotal}
+                        />
                     </TT>
                 </td>
 
+                {/*Итого выдано*/}
                 {showTotal ? (
-                    <td className="text-end bg-purple-50">
+                    <td className={twMerge(
+                        "text-end bg-purple-50",
+                        blurStateClass,
+                    )}>
                         <TT description={`Итого выдано`}>
                             <NiceNum value={
                                 (userInfo.issued_sum || 0) +
@@ -274,14 +344,21 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                                 (userInfo.card_sum || 0) +
                                 (userInfo.tax_sum || 0) +
                                 (userInfo.loan_sum || 0)
-                            }/>
+                            }
+                                     className={twMerge(
+                                         blurStateClass,
+                                     )}
+                            />
                         </TT>
                     </td>
                 ) : (
                     <>
-
+                        {/*Выдано НАЛ*/}
                         <UserAddCell
-                            className={'bg-purple-50'}
+                            className={twMerge(
+                                'bg-purple-50',
+                            )}
+                            textClassName={blurStateClass}
                             value={userInfo.issued_sum}
                             amount={(userInfo.issued_sum || 0) + (userInfo.cash_payout || 0)}
                             info={
@@ -297,8 +374,12 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                             about={`Выдача НАЛ ЗП нед ${week.weekNumber}`}
                         />
 
+                        {/*Выдано ИП*/}
                         <UserAddCell
-                            className={'bg-purple-50'}
+                            className={twMerge(
+                                'bg-purple-50',
+                            )}
+                            textClassName={blurStateClass}
                             value={userInfo.ip_sum}
                             amount={(userInfo.ip_sum || 0) + (userInfo.ip_payout || 0)}
                             info={
@@ -314,8 +395,12 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                             about={`Выдача на ИП ЗП нед ${week.weekNumber}`}
                         />
 
+                        {/*Выдано ОФИЦИАЛКА*/}
                         <UserAddCell
-                            className={'bg-purple-50'}
+                            className={twMerge(
+                                'bg-purple-50',
+                            )}
+                            textClassName={blurStateClass}
                             value={userInfo.card_sum}
                             amount={(userInfo.card_sum || 0) + (userInfo.card_payout || 0)}
                             info={
@@ -331,8 +416,12 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                             about={`Выдача безнал ЗП нед ${week.weekNumber}`}
                         />
 
+                        {/*Выдано НДФЛ*/}
                         <UserAddCell
-                            className={'bg-purple-50'}
+                            className={twMerge(
+                                'bg-purple-50',
+                            )}
+                            textClassName={blurStateClass}
                             value={userInfo.tax_sum}
                             amount={(userInfo.tax_sum || 0) + (userInfo.tax_payout || 0)}
                             info={
@@ -348,8 +437,12 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                             about={`Удержанный налог в ${week.weekNumber} неделе`}
                         />
 
+                        {/*Выдано ЗАЙМ*/}
                         <UserLoanCell
-                            className={'bg-purple-50'}
+                            textClassName={blurStateClass}
+                            className={twMerge(
+                                'bg-purple-50',
+                            )}
                             amount={(userInfo.loan_sum || 0) + (userInfo.loan_payout || 0)}
                             disabled={!statusLessThen("4") || userInfo.is_closed}
                             week={week}
@@ -358,23 +451,36 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </>
                 )}
 
+                {/*Остаток к выплате*/}
                 <td className={twMerge(
                     "text-end bg-purple-50 font-bold",
+                    blurStateClass,
                 )}>
                     <TT description={`Остаток к выплате`}>
                         <NiceNum
-                            className={totalValue === 0 ? "opacity-20" : ""}
+                            className={
+                                twMerge(
+                                    totalValue === 0 ? "opacity-20" : "",
+                                    blurStateClass,
+                                )
+                            }
                             value={
                                 totalValue
                             }/>
                     </TT>
                 </td>
 
+                {/*Комментарий*/}
                 <td className="relative bg-purple-50 px-2">
                     <div className={'flex items-center min-h-full text-[0.8em]'}>
                         <TextAreaForm
                             name="comment"
-                            className={'w-full bg-yellow-50 min-h-full disabled:bg-transparent'}
+                            className={
+                                twMerge(
+                                    blurStateClass,
+                                    'w-full bg-yellow-50 min-h-full disabled:bg-transparent'
+                                )
+                            }
                             disabled={!statusLessThen("6") || userInfo.is_locked}
                         />
                     </div>

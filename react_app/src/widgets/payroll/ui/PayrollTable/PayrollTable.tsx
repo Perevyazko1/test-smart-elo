@@ -13,6 +13,7 @@ import type {IPayrollRow} from "@/entities/salary";
 import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
+import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
 
 
 interface PayrollTableProps {
@@ -27,6 +28,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
     const showTotal = useShowTotal(s => s.showTotal);
+    const hideSum = useHideSum(s => s.hideSum);
 
     const {data, isError, isFetching} = useQuery({
         queryKey: ['payrollRows', currentWeek.weekNumber],
@@ -76,15 +78,19 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalDaySum = data?.data?.reduce((sum, row) => Number(sum) + Number(row.user.piecework_amount || 0), 0) || 0;
 
     const totalPayout = totalCashPayout + totalIpPayout + totalCardPayout + totalTaxPayout + totalLoanPayout;
+    const blurStateClass = hideSum ? 'text-transparent group-hover:text-black' : '';
 
     return (
         <Table>
-            <THead className={'sticky top-0 z-10'}>
+            <THead className={'sticky top-0 z-10 group'}>
                 <tr className={'relative'}>
                     <PayrollTh
                         className={'text-center'}
                     >
-                        Всего НАЛ ИП БН: <NiceNum value={totalPayout - totalTaxPayout - totalLoanPayout}/>
+                        Всего НАЛ ИП БН: <NiceNum
+                        value={totalPayout - totalTaxPayout - totalLoanPayout}
+                        className={blurStateClass}
+                    />
                     </PayrollTh>
                     {showDayPrice && (
                         <PayrollTh>Ставка в <br/>день</PayrollTh>
@@ -138,38 +144,49 @@ export const PayrollTable = (props: PayrollTableProps) => {
                 <tr className={'z-2'}>
                     <PayrollTh className={'text-center'}>Отдел / ФИО</PayrollTh>
                     {showDayPrice && (
-                        <PayrollTh><NiceNum value={totalDaySum * 8}/></PayrollTh>
+                        <PayrollTh><NiceNum value={totalDaySum * 8}
+                        className={blurStateClass}/></PayrollTh>
                     )}
-                    <PayrollTh><NiceNum value={totalBalance}/></PayrollTh>
+                    <PayrollTh><NiceNum value={totalBalance}
+                        className={blurStateClass}/></PayrollTh>
                     {showEarnedDetail ? (
                         <>
-                            <PayrollTh><NiceNum value={totalEarned}/></PayrollTh>
-                            <PayrollTh><NiceNum value={totalBonus}/></PayrollTh>
+                            <PayrollTh><NiceNum value={totalEarned}
+                        className={blurStateClass}/></PayrollTh>
+                            <PayrollTh><NiceNum value={totalBonus}
+                        className={blurStateClass}/></PayrollTh>
                         </>
                     ) : (
-                        <PayrollTh><NiceNum value={totalEarned + totalBonus}/></PayrollTh>
+                        <PayrollTh><NiceNum value={totalEarned + totalBonus}
+                        className={blurStateClass}/></PayrollTh>
                     )}
 
                     {showTotal ? (
                         <PayrollTh className={'bg-blue-100 font-bold'}>
-                            <NiceNum value={totalPayout}/>
+                            <NiceNum value={totalPayout}
+                        className={blurStateClass}/>
                         </PayrollTh>
                     ) : (
                         <>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
-                                <NiceNum value={totalCashPayout}/>
+                                <NiceNum value={totalCashPayout}
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
-                                <NiceNum value={totalIpPayout}/>
+                                <NiceNum value={totalIpPayout}
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
-                                <NiceNum value={totalCardPayout}/>
+                                <NiceNum value={totalCardPayout}
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
-                                <NiceNum value={totalTaxPayout}/>
+                                <NiceNum value={totalTaxPayout}
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
-                                <NiceNum value={totalLoanPayout}/>
+                                <NiceNum value={totalLoanPayout}
+                        className={blurStateClass}/>
                             </PayrollTh>
                         </>
                     )}
@@ -185,7 +202,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             totalIpPayout -
                             totalTaxPayout -
                             totalLoanPayout
-                        }/>
+                        }
+                        className={blurStateClass}/>
                     </PayrollTh>
 
                     {showTotal ? (
@@ -196,7 +214,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
                                 totalCard +
                                 totalTax +
                                 totalLoan
-                            }/>
+                            }
+                        className={blurStateClass}/>
                         </PayrollTh>
                     ) : (
                         <>
@@ -204,27 +223,32 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
-                                <NiceNum value={totalIssued} abs/>
+                                <NiceNum value={totalIssued} abs
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
-                                <NiceNum value={totalIp} abs/>
+                                <NiceNum value={totalIp} abs
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
-                                <NiceNum value={totalCard} abs/>
+                                <NiceNum value={totalCard} abs
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
-                                <NiceNum value={totalTax} abs/>
+                                <NiceNum value={totalTax} abs
+                        className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
-                                <NiceNum value={totalLoan} abs/>
+                                <NiceNum value={totalLoan} abs
+                        className={blurStateClass}/>
                             </PayrollTh>
                         </>
                     )}
@@ -244,7 +268,8 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             totalCard +
                             totalTax +
                             totalLoan
-                        }/>
+                        }
+                        className={blurStateClass}/>
                     </PayrollTh>
                 </tr>
             </THead>
