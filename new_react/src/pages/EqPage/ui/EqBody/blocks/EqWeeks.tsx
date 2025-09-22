@@ -61,8 +61,6 @@ export const EqWeeks = (props: EqWeeksProps) => {
         currentUser.current_department
     ]);
 
-    const getEarnedSum = useMemo(() => weekData?.earned || "0", [weekData?.earned]);
-
     const handleOpenWages = () => {
         handleOpen(
             <WagesInfo
@@ -156,7 +154,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                                         className={'appBtn px-1 rounded mx-1 fs-7'}
                                         onClick={handleOpenWages}
                                     >
-                                        {getEarnedSum}
+                                        Просм.
                                     </button>
                                 </> :
                                 <AppSkeleton className={'h-100 flex-fill'}/>

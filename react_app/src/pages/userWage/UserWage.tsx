@@ -24,7 +24,10 @@ export const UserWage = () => {
     return (
         <div className={'bg-gray-500 min-h-screen'}>
             {canNavigate && (
-                <Navbar/>
+                <Navbar
+                    date_from={date_from}
+                    date_to={currentWeek?.date_to}
+                />
             )}
 
             <SalaryPanel

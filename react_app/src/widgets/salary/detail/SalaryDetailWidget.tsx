@@ -134,7 +134,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                             {details.week_report?.map(item => (
                                 <tr key={item.id}>
                                     <td>{item.week}</td>
-                                    <td><NiceNum value={item.balance_sum}/></td>
+                                    <td><NiceNum value={item.hide_balance ? null : item.balance_sum}/></td>
                                     <td><NiceNum value={item.bonus_sum}/></td>
                                     <td><NiceNum value={item.earned_sum}/></td>
                                     <td><NiceNum value={item.issued_sum}/></td>
@@ -142,7 +142,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
                                     <td><NiceNum value={item.card_sum}/></td>
                                     <td><NiceNum value={item.tax_sum}/></td>
                                     <td><NiceNum value={item.loan_sum}/></td>
-                                    <td><NiceNum value={
+                                    <td><NiceNum value={item.hide_balance ? null :
                                         (item.balance_sum || 0) +
                                         (item.bonus_sum || 0) +
                                         (item.earned_sum || 0) +

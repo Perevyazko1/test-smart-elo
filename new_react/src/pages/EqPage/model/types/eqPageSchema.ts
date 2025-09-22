@@ -54,7 +54,6 @@ export const InitialEqBodySchema: EqPageSchema = {
         year: undefined,
         hasUpdated: false,
         isLoading: true,
-        earned: "0",
         inited: false,
     },
 

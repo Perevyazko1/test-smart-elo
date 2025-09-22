@@ -95,24 +95,6 @@ def get_week_data(request):
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
-    elo_amount = Earning.objects.filter(
-        user=eq_params['user'],
-        target_date__date__gte=week_info.date_range[0],
-        target_date__date__lte=week_info.date_range[1],
-        earning_type="ЭЛО",
-    ).aggregate(Sum('amount')).get('amount__sum') or 0
-
-    extra_amount = Earning.objects.filter(
-        user=eq_params['user'],
-        target_date__date__gte=week_info.date_range[0],
-        target_date__date__lte=week_info.date_range[1],
-        earning_type="ДОП",
-    ).aggregate(Sum('amount')).get('amount__sum') or 0
-
-    week_info.earned = f'{int(elo_amount / 100)}'
-    if extra_amount:
-        week_info.earned += f'{"+" if extra_amount >= 0 else ""}{int(extra_amount / 100)}(доп)'
-
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
 

@@ -9,7 +9,6 @@ export interface WeekData extends WeekInfo {
     date_range: string[];
     previous_week_data: WeekData | null;
     next_week_data: WeekData | null;
-    earned: string;
     hasUpdated: boolean;
     isLoading: boolean;
     inited: boolean;

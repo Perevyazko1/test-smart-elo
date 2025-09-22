@@ -6,12 +6,13 @@ import {USER_LOCALSTORAGE_TOKEN} from "@/shared/consts";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 
 interface NavbarProps extends HTMLAttributes<HTMLDivElement> {
+    date_from?: string;
+    date_to?: string;
 }
 
 export const Navbar = (props: NavbarProps) => {
-    const {children, ...otherProps} = props;
+    const {date_from, date_to, children, ...otherProps} = props;
     const {setCurrentUser} = useCurrentUser();
-
 
     const logoutHandle = () => {
         setCurrentUser(undefined);
@@ -33,12 +34,22 @@ export const Navbar = (props: NavbarProps) => {
                     СЗМК Зарплата
                 </div>
                 <Link
-                    to={'/salary'}
+                    to={
+                        (date_from && date_to) ?
+                            `/salary/${date_from}/${date_to}`
+                            :
+                            '/salary'
+                    }
                 >
                     Зарплата
                 </Link>
                 <Link
-                    to={'/cash'}
+                    to={
+                        (date_from && date_to) ?
+                            `/cash/${date_from}/${date_to}`
+                            :
+                            '/cash'
+                    }
                 >
                     Касса
                 </Link>
