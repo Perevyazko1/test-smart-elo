@@ -74,15 +74,6 @@ def get_tasks_count(request):
 
     result = {}
 
-    if user.groups.filter(name="Визирование нарядов").exists():
-        await_visa = Assignment.objects.filter(
-            department__in=user.departments.all(),
-            inspector__isnull=True,
-            status="ready"
-        ).count()
-        if await_visa:
-            result['await_visa'] = await_visa
-
     if user.groups.filter(name="Изменение техпроцессов"):
         await_tech_process = Assignment.objects.filter(
             inspector__isnull=True,
@@ -90,23 +81,6 @@ def get_tasks_count(request):
         ).count()
         if await_tech_process:
             result['await_tech_process'] = await_tech_process
-
-    if user.groups.filter(name="Первичная тарификация").exists():
-        active_products = Product.objects.filter(
-            order_products__status="0"
-        ).distinct()
-
-        target_departments = user.departments.filter(
-            piecework_wages=True
-        )
-        total_tariff_count = ProductionStep.objects.filter(
-            product__in=active_products,
-            department__in=target_departments,
-            proposed_tariff__isnull=True
-        ).distinct().count()
-
-        if total_tariff_count:
-            result['await_tariff'] = total_tariff_count
 
     if user.groups.filter(name="Подтверждение тарификаций").exists():
         await_tariff_visa = ProductionStep.objects.filter(
