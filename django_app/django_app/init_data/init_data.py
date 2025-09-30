@@ -1,32 +1,48 @@
 """Initial methods and scripts."""
 import logging
+from pprint import pprint
 
-from core.models import OrderProduct, Assignment
-from src.ms_import.ms_import import _check_order_product_full_ready
+from core.models import TechnologicalProcess
+from staff.models import Department
 
 logger = logging.getLogger(__name__)
+
+
+def get_target_department_name(schema: dict):
+    for key, value in schema.items():
+        if key == 'Обивка' or "Обивка" in value:
+            return 'Обивка'
+
+    for key, value in schema.items():
+        if "Упаковка" in value:
+            return key
+
+    for key, value in schema.items():
+        if "Готово" in value:
+            return key
+
+    pprint(schema)
+    raise Exception("Схема не корректна")
 
 
 def init_data():
     """Функция для активации скриптов через вызов url /init"""
     print('ИНИЦИАЛИЗАЦИЯ ФУНКЦИИ')
 
-    order_products = OrderProduct.objects.all()
+    tech_processes = TechnologicalProcess.objects.all()
 
-    for order_product in order_products:
-        if order_product.status == "2":
-            continue
+    for tech_process in tech_processes:
+        print(f"Технологический процесс: {tech_process.name}")
 
-        if not _check_order_product_full_ready(order_product):
-            if order_product.status != "0":
-                logger.warning(f"Позиция {order_product.series_id} переведена в активный статус ✅")
-                order_product.status = "0"
-                order_product.save()
-        else:
-            if order_product.status != "1":
-                logger.warning(f"Позиция {order_product.series_id} закрыта ❌")
-                order_product.status = "1"
-                order_product.save()
+        schema = tech_process.schema
+
+        department_name = get_target_department_name(schema)
+
+        print(department_name)
+
+        tech_process.final_department = Department.objects.get(name=department_name)
+
+        tech_process.save()
 
     print('PASS')
     return f"Oki"

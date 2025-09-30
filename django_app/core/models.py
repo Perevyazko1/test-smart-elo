@@ -540,6 +540,10 @@ class TechnologicalProcess(models.Model):
 
     name = models.CharField('Наименование', max_length=250)
     schema = models.JSONField('Схема', default=None)
+    final_department = models.ForeignKey(Department,
+                                         on_delete=models.SET_NULL,
+                                         null=True,
+                                         verbose_name="Конечный отдел готовности изделия")
     image = models.ImageField('Изображение схемы процесса', upload_to=f"images/processes/", blank=True, null=True)
 
     def __str__(self):

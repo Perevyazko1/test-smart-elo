@@ -30,9 +30,17 @@ const EqCardApi = rtkAPI.injectEndpoints({
                 params: props,
             }),
         }),
+        printFabric: build.query<any, {fabric_id: number}>({
+            query: (props: {fabric_id: number}) => ({
+                url: '/core/print_fabric/',
+                method: 'GET',
+                params: props,
+            }),
+        }),
     }),
 
 });
 
 export const useSetTiming = EqCardApi.useEditTimingMutation;
 export const useLazyPrintLabels = EqCardApi.useLazyPrintLabelsQuery;
+export const useLazyPrintFabric = EqCardApi.useLazyPrintFabricQuery;

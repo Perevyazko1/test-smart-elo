@@ -3,21 +3,41 @@ import {ProgressiveCell} from "@/widgets/plan/planCard/ProgressiveCell.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {CrossCircledIcon, CheckCircledIcon} from "@radix-ui/react-icons";
 import type {IPlanDataRow} from "@/entities/plan";
-import type {IUser} from "@/entities/user";
+import {APP_PERM, type IUser} from "@/entities/user";
 import {toast} from "sonner";
 import {$axios} from "@/shared/api";
 import {planService} from "@/widgets/plan/model/api.ts";
 import {useState} from "react";
+import {usePlanSum} from "@/shared/state/plan/planSum.ts";
+import {usePermission} from "@/shared/utils/permissions.ts";
 
 interface IProps {
     data: IPlanDataRow;
     index: number;
+    sum: number;
 }
 
 export function PlanRow(props: IProps) {
-    const {data, index} = props;
+    const {data, index, sum} = props;
 
     const [inputValue, setInputValue] = useState<string | undefined>(data.date ? new Date(data.date).toISOString().slice(0, 10) : '')
+
+    const showSums = usePermission([
+        APP_PERM.KPI_PAGE,
+        APP_PERM.ADMIN,
+    ]);
+
+    const planSum = usePlanSum(s => s.planSum);
+    const weekStyles = [
+        'bg-teal-100',
+        'bg-amber-100',
+        'bg-red-100',
+        'bg-violet-100',
+        'bg-neutral-200',
+    ]
+    const currentStyle = weekStyles[
+        Math.floor(sum / ((planSum || 0) / 5))
+        ] || weekStyles[0];
 
     const updateTargetDate = (data: {
         target_date: string | null;
@@ -53,7 +73,18 @@ export function PlanRow(props: IProps) {
 
     return (
         <tr>
-            <td>{index + 1}</td>
+            <td
+                className={currentStyle}
+            >
+                {index + 1} <br/>
+                {showSums && (
+                    <>
+                        {sum.toLocaleString('ru-RU')} <br/>
+                        {data.price}
+
+                    </>
+                )}
+            </td>
             <td className={'max-w-30'}>
                 <input
                     type="date"
@@ -97,9 +128,13 @@ export function PlanRow(props: IProps) {
             <ProgressiveCell left={d3.ready} right={d3.all - d3.ready - d3.await} center={d3.await}/>
             <ProgressiveCell left={d4.ready} right={d4.all - d4.ready - d4.await} center={d4.await}/>
             <ProgressiveCell left={d5.ready} right={d5.all - d5.ready - d5.await} center={d5.await}/>
-            <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}/>
+
+            {!planSum && (
+                <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}/>
+            )}
 
             <ProgressiveCell left={data.shipped} right={data.quantity - data.shipped} center={0}/>
+            <ProgressiveCell left={data.quantity - data.final_waiting} right={data.final_waiting} center={0}/>
         </tr>
     );
 }

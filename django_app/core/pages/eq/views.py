@@ -10,11 +10,13 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import (
-    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment)
+    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment, Fabric)
 from salary.models import Earning
 from salary.service.make_earning import make_earning
+from src.label_printer.fabric_temlate import get_fabric_label_commands
 from src.label_printer.main_label_template import main_label_template
 from src.label_printer.printer import Printer
+from src.label_printer.printer_tspl2 import PrinterTSPL2
 from staff.models import Employee, Department
 from staff.service import is_user_in_group
 from .serializers import EqOrderProductSerializer
@@ -444,5 +446,25 @@ def print_labels(request):
             pin_code='',
             notification_data=notification_data
         )
+
+    return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['get'])
+def print_fabric(request):
+    fabric_id = request.query_params.get('fabric_id')
+
+    if not fabric_id:
+        return JsonResponse({'error': 'fabric_id must be integer'}, status=400)
+    fabric = Fabric.objects.get(id=fabric_id)
+
+    printer = PrinterTSPL2()
+
+    commands = get_fabric_label_commands(
+        name=fabric.name,
+        barcode=fabric.barcode,
+    )
+
+    printer.print_label(commands)
 
     return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})

@@ -1,3 +1,5 @@
+import re
+
 from src.label_printer.config import DOTS_MM
 
 
@@ -22,11 +24,17 @@ def get_qr_command(barcode_data, margin_left_mm, margin_top_mm, size_mm):
     )
 
 
-def get_text_command(text, margin_left_mm, margin_top_mm, font_width, font_height):
+def get_text_command(
+        text,
+        margin_left_mm,
+        margin_top_mm,
+        font_width,
+        font_height,
+):
     """Формирование команды печати текста. """
     return (
         f'TEXT {mm_to_dots(margin_left_mm)},{mm_to_dots(margin_top_mm)}'
-        f',"0",0,{font_width},{font_height},0,"{text}"'
+        f',"1",0,{font_width},{font_height},0,"{text}"'
     )
 
 
@@ -70,6 +78,35 @@ def get_wrap_text_with_sizes(text_size_pairs, with_area_mm):
             result.append([''.join(current_line), text_pair[1]])
 
     return result
+
+
+def escape_tspl2(text: str) -> str:
+    """
+    Экранирует строку для TSPL2:
+    - удваивает кавычки (") → ("")
+    - убирает управляющие символы (tab, \n, \r, \x00..)
+    - заменяет потенциально проблемные символы
+    """
+    if not text:
+        return ""
+
+    # 1. Удвоение кавычек (по мануалу TSPL2)
+    text = text.replace('"', "'")
+    text = text.replace("'", '')
+
+    # 2. Убираем управляющие символы (0x00–0x1F кроме пробела)
+    text = re.sub(r"[\x00-\x1F]", "", text)
+
+    # 3. (Опционально) заменяем символы, которые иногда ломают синтаксис
+    # например, перевод строки, табуляция и т.п.
+    text = text.replace("\t", " ")   # таб → пробел
+    text = text.replace("\n", " ")   # перенос строки → пробел
+    text = text.replace("\r", "")    # возврат каретки → убираем
+
+    # Заменяем другие потенциально проблемные символы на пробелы
+    text = re.sub(r'[\\,()\[\]{}]', '*', text)
+
+    return text.strip()
 
 
 def get_text_commands_with_sizes(margin_left_mm, margin_top_mm, text_size_pairs, width_area_mm, max_height_mm):

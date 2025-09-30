@@ -5,6 +5,7 @@ import {Link} from "react-router-dom";
 import {useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 import {EqOrderProduct} from "@widgets/EqCardList";
+import {useLazyPrintFabric} from "@widgets/EqCard/model/api/updateTiming";
 
 
 interface EqCardTableProps {
@@ -15,6 +16,12 @@ export const EqCardTable = (props: EqCardTableProps) => {
     const {card} = props;
     const {currentUser} = useCurrentUser();
     const productPerm = usePermission(APP_PERM.PRODUCT_PAGE);
+
+
+    const [
+        requestPrintFabric,
+        {isLoading: printLoading}
+    ] = useLazyPrintFabric();
 
     return (
         <>
@@ -106,19 +113,53 @@ export const EqCardTable = (props: EqCardTableProps) => {
                 </tr>
                 {card.main_fabric &&
                     <tr>
-                        <td>Основная ткань</td>
+                        <td>
+                            Основная ткань
+                            <Button
+                                className={'ms-3'}
+                                variant={'outline-secondary'}
+                                onClick={() => requestPrintFabric({
+                                    fabric_id: card.main_fabric?.id || 0
+                                })}
+                            >
+                                🖨️
+                            </Button>
+                        </td>
                         <td>{card.main_fabric?.name}</td>
                     </tr>
                 }
                 {card.second_fabric &&
                     <tr>
-                        <td>Доп 1 ткань</td>
+                        <td>
+                            Доп 1 ткань
+
+                            <Button
+                                className={'ms-3'}
+                                variant={'outline-secondary'}
+                                onClick={() => requestPrintFabric({
+                                    fabric_id: card.second_fabric?.id || 0
+                                })}
+                            >
+                                🖨️
+                            </Button>
+                        </td>
                         <td>{card.second_fabric?.name}</td>
                     </tr>
                 }
                 {card.third_fabric &&
                     <tr>
-                        <td>Доп 2 ткань</td>
+                        <td>
+                            Доп 2 ткань
+                            <Button
+                                className={'ms-3'}
+                                variant={'outline-secondary'}
+                                onClick={() => requestPrintFabric({
+                                    fabric_id: card.third_fabric?.id || 0
+                                })}
+                            >
+                                🖨️
+                            </Button>
+                        </td>
                         <td>{card.third_fabric?.name}</td>
                     </tr>
                 }

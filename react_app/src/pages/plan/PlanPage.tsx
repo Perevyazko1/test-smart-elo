@@ -6,6 +6,9 @@ import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 import {useState, useMemo} from "react";
 import {twMerge} from "tailwind-merge";
 import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
+import {usePermission} from "@/shared/utils/permissions.ts";
+import {APP_PERM} from "@/entities/user";
+import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 
 const DEPARTMENTS = [
     "Конструктора",
@@ -20,7 +23,11 @@ export const PlanPage = () => {
     const planProject = usePlanProject((s) => s.planProject);
     const planManager = usePlanManager((s) => s.planManager);
     const planAgent = usePlanAgent(s => s.planAgent);
-
+    const planSum = usePlanSum(s => s.planSum);
+    const showSums = usePermission([
+        APP_PERM.KPI_PAGE,
+        APP_PERM.ADMIN,
+    ]);
     const {data, isFetching, isPending} = useQuery({
         queryKey: ["planTable", planProject, planManager, planAgent],
         queryFn: () =>
@@ -35,10 +42,26 @@ export const PlanPage = () => {
         null
     );
 
+    const [showMode, setShowMode] = useState<"final_waiting" | "shipped" | null>(null)
+
     const sortedEntries = useMemo(() => {
         const filtered = Object.entries(data?.data || {}).filter(([_, item]) => {
-            if (!selectedDepartment) return true;
+            if (!selectedDepartment) {
+                if (showMode === "final_waiting") {
+                    return item.final_waiting > 0;
+                }
+                if (showMode === "shipped") {
+                    return item.quantity > item.shipped;
+                }
+                return true;
+            }
             const dept = item.assignments[selectedDepartment];
+            if (showMode === "final_waiting") {
+                return dept && dept.all !== dept.ready && item.final_waiting > 0;
+            }
+            if (showMode === "shipped") {
+                return dept && dept.all !== dept.ready && item.quantity > item.shipped;
+            }
             return dept && dept.all !== dept.ready;
         });
 
@@ -51,7 +74,7 @@ export const PlanPage = () => {
                 new Date(b[1].date).getTime()
             );
         });
-    }, [data, selectedDepartment]);
+    }, [data, selectedDepartment, showMode]);
 
     // Автоматический расчет тоталов по отделам
     const totals = useMemo(() => {
@@ -67,6 +90,14 @@ export const PlanPage = () => {
         }
         return result;
     }, [sortedEntries]);
+
+    const getTotalSum = (index: number) => {
+        return sortedEntries.slice(0, index).reduce((acc, [_, item]) => {
+            return acc + item.final_waiting * item.price;
+        }, 0);
+    }
+
+    const deps = DEPARTMENTS.filter(dept => planSum ? dept !== "Упаковка" : true);
 
     return (
         <div className="max-w-dvw bg-white p-4">
@@ -84,7 +115,7 @@ export const PlanPage = () => {
                     <th rowSpan={2}>ДАТА</th>
                     <th rowSpan={2}>ШТ</th>
                     <th rowSpan={2}>Изделие</th>
-                    {DEPARTMENTS.map((dept) => (
+                    {deps.map((dept) => (
                         <th
                             key={dept}
                             onClick={() =>
@@ -102,15 +133,32 @@ export const PlanPage = () => {
 
                     ))}
 
-                    <th rowSpan={2}>
+                    <th
+                        rowSpan={2}
+                        onClick={() => setShowMode(showMode === "shipped" ? null : "shipped")}
+                        className={twMerge(
+                            "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
+                            showMode === "shipped" ? "bg-blue-200 cursor-pointer" : "cursor-pointer"
+                        )}
+                    >
                         МС ОТГР
+                    </th>
+                    <th
+                        rowSpan={2}
+                        onClick={() => setShowMode(showMode === "final_waiting" ? null : "final_waiting")}
+                        className={twMerge(
+                            "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
+                            showMode === "final_waiting" ? "bg-blue-200 cursor-pointer" : "cursor-pointer"
+                        )}
+                    >
+                        Готовность
                     </th>
                 </tr>
                 <tr>
                     <th>#</th>
-                    {DEPARTMENTS.map((dept) => (
+                    {deps.map((dept) => (
                         <th key={dept} className="px-1 text-right">
-                            {Math.round(totals[dept] || 0).toLocaleString("ru-RU")}
+                            {showSums ? Math.round(totals[dept] || 0).toLocaleString("ru-RU") : "-"}
                         </th>
                     ))}
                 </tr>
@@ -118,7 +166,12 @@ export const PlanPage = () => {
 
                 <tbody>
                 {sortedEntries.map(([key, item], index) => (
-                    <PlanRow key={key} index={index} data={item}/>
+                    <PlanRow
+                        key={key}
+                        index={index}
+                        data={item}
+                        sum={getTotalSum(index)}
+                    />
                 ))}
                 </tbody>
             </table>

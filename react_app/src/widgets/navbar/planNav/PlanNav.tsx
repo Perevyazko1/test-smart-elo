@@ -6,6 +6,8 @@ import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 import type {IUser} from "@/entities/user";
 import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 import type {IAgentTag} from "@/entities/plan";
+import {usePlanSum} from "@/shared/state/plan/planSum.ts";
+import {Input } from "@/components/ui/input"
 
 interface IProps {
 
@@ -23,6 +25,10 @@ export function PlanNav(props: IProps) {
 
     const planAgent = usePlanAgent(s => s.planAgent);
     const setPlanAgent = usePlanAgent(s => s.setPlanAgent);
+
+
+    const planSum = usePlanSum(s => s.planSum);
+    const setPlanSum = usePlanSum(s => s.setPlanSum);
 
 
     const {data: projects} = useQuery({
@@ -81,6 +87,16 @@ export function PlanNav(props: IProps) {
                 setSelectedItem={setAgent}
                 getItemLabel={(item) => item?.name || "Заказчик..."}
             />
+
+            <div>
+            <Input
+                className={'px-2'}
+                type={'number'}
+                onChange={(e) => setPlanSum(Number(e.target.value))}
+                value={String(planSum)}
+            />
+
+            </div>
         </div>
     );
 }

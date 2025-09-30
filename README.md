@@ -37,7 +37,8 @@ docker exec -it elo_server python3 manage.py migrate
 
 #### example command
 ```bash 
-docker exec -it server python3 manage.py startapp salary
+docker exec -it server python3 manage.py makemigrations
+docker exec -it server python3 manage.py migrate
 ```
 
 Создание виртуального окружения: 
