@@ -101,17 +101,29 @@ export const EqCardList = memo((props: EqCardListProps) => {
                     }
                 }
 
+                const sortDateA = (a.assignments.length > 0 && a.assignments[0].sort_date) ?
+                    new Date(a.assignments[0].sort_date) :
+                    new Date(0);
+                const sortDateB = (b.assignments.length > 0 && b.assignments[0].sort_date) ?
+                    new Date(b.assignments[0].sort_date) :
+                    new Date(0);
+
+                const sortDateDiff = sortDateA.getTime() - sortDateB.getTime();
+                if (sortDateA.getTime() === 0 && sortDateB.getTime() === 0) {
+                    return 0;
+                } else if (sortDateA.getTime() === 0) {
+                    return 1;
+                } else if (sortDateB.getTime() === 0) {
+                    return -1;
+                }
+                if (sortDateDiff !== 0) {
+                    return sortDateDiff;
+                }
+
                 const urgencyDiff = a.urgency - b.urgency;
 
                 if (urgencyDiff !== 0) {
                     return urgencyDiff;
-                }
-
-                const plannedDateA = a.order.planned_date ? new Date(a.order.planned_date) : new Date(0);
-                const plannedDateB = b.order.planned_date ? new Date(b.order.planned_date) : new Date(0);
-                const plannedDateDiff = plannedDateA.getTime() - plannedDateB.getTime();
-                if (plannedDateDiff !== 0) {
-                    return plannedDateDiff;
                 }
 
                 const orderNumberDiff = a.order.id - b.order.id;

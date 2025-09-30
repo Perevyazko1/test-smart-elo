@@ -50,6 +50,7 @@ export interface EqAssignment {
     amount: number;
     number: number;
     plane_date: string | null;
+    sort_date: string | null;
     status: 'in_work' | 'await' | 'ready' | 'created';
     inspector: number | null;
     appointed_by_boss: boolean;

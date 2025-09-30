@@ -170,12 +170,11 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     const getPlaneDate = useCallback((first: boolean) => {
         const targetDate = () => {
             const assignment_dates = card.assignments
-                .map(item => item.plane_date ? new Date(item.plane_date) : null)
+                .map(item => item.sort_date ? new Date(item.sort_date) : null)
                 .filter(date => date !== null) as Date[];
 
             const minDate = assignment_dates.reduce((min, current) => current < min ? current : min, assignment_dates[0]);
-            const minDateString = minDate ? minDate.toISOString() : null;
-            return minDateString || card.order.planned_date;
+            return minDate ? minDate.toISOString() : null;
         }
         if (listType === 'await' && first) {
             return targetDate();

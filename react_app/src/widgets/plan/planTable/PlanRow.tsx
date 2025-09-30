@@ -80,7 +80,7 @@ export function PlanRow(props: IProps) {
                 {showSums && (
                     <>
                         {sum.toLocaleString('ru-RU')} <br/>
-                        {data.price}
+                        {Number(data.price).toLocaleString('ru-RU')}<br/>
                     </>
                 )}
             </td>

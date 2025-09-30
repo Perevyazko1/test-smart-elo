@@ -47,6 +47,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'plane_date',
             'assembled',
             'appointed_by_boss',
+            'sort_date',
             'co_executors',
             'print_count'
         ]

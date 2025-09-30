@@ -30,6 +30,12 @@ docker-compose -f docker-compose-preprod.yml up -d --build
 docker exec -it elo_server python3 manage.py migrate
 ```
 
+#### REDIS Очистка
+```bash 
+  redis-cli
+  FLUSHALL 
+```
+
 #### run command
 ```bash 
   docker exec -it server 
