@@ -74,14 +74,13 @@ export function PlanRow(props: IProps) {
     return (
         <tr>
             <td
-                className={currentStyle}
+                className={data.price !== "0.00" ? currentStyle : 'bg-red-300'}
             >
                 {index + 1} <br/>
                 {showSums && (
                     <>
                         {sum.toLocaleString('ru-RU')} <br/>
                         {data.price}
-
                     </>
                 )}
             </td>

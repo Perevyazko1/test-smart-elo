@@ -82,10 +82,10 @@ export const PlanPage = () => {
         for (const dept of DEPARTMENTS) {
             result[dept] = sortedEntries.reduce((acc, [_, item]) => {
                 if (dept === "Отгружено") {
-                    return acc + (item.quantity - item.shipped) * item.price;
+                    return acc + (item.quantity - item.shipped) * Number(item.price);
                 }
                 const d = item.assignments[dept];
-                return acc + ((d?.all || 0) - (d?.ready || 0)) * item.price * (dept === "Конструктора" ? item.quantity : 1);
+                return acc + ((d?.all || 0) - (d?.ready || 0)) * Number(item.price) * (dept === "Конструктора" ? item.quantity : 1);
             }, 0);
         }
         return result;
@@ -93,7 +93,7 @@ export const PlanPage = () => {
 
     const getTotalSum = (index: number) => {
         return sortedEntries.slice(0, index).reduce((acc, [_, item]) => {
-            return acc + item.final_waiting * item.price;
+            return acc + item.final_waiting * Number(item.price);
         }, 0);
     }
 

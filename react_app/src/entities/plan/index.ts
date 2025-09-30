@@ -16,7 +16,7 @@ export interface IPlanDataRow {
     product_picture: string;
     order: string;
     series_id: string;
-    price: number;
+    price: string;
     fabric_name: string;
     fabric_picture: string;
     project: string | null;
