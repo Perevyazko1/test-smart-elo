@@ -13,6 +13,7 @@ from core.models import (
     OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment, Fabric)
 from salary.models import Earning
 from salary.service.make_earning import make_earning
+from src.label_printer.fabric.print_label_fabric import print_label_fabric
 from src.label_printer.fabric_temlate import get_fabric_label_commands
 from src.label_printer.main_label_template import main_label_template
 from src.label_printer.printer import Printer
@@ -458,13 +459,6 @@ def print_fabric(request):
         return JsonResponse({'error': 'fabric_id must be integer'}, status=400)
     fabric = Fabric.objects.get(id=fabric_id)
 
-    printer = PrinterTSPL2()
-
-    commands = get_fabric_label_commands(
-        name=fabric.name,
-        barcode=fabric.barcode,
-    )
-
-    printer.print_label(commands)
+    print_label_fabric(fabric.name + "\n пог.м", fabric.barcode)
 
     return JsonResponse({'data': 'ok'}, json_dumps_params={"ensure_ascii": False})
