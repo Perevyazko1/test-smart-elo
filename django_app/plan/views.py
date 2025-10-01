@@ -117,6 +117,7 @@ def get_plan_table(request):
             "price": order_product.price,
             "fabric_name": order_product.main_fabric.name if order_product.main_fabric else "-",
             "fabric_picture": fabric_url,
+            "fabric_stock": order_product.main_fabric.quantity if order_product.main_fabric and order_product.main_fabric.is_actual else None,
             "project": order_product.order.project,
             "quantity": order_product.quantity,
             "shipped": order_product.shipped,

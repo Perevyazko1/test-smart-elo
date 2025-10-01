@@ -119,9 +119,9 @@ class Fabric(models.Model):
     updated = models.DateTimeField('Обновлен в API', default=timezone.now)
     barcode = models.CharField('Штрихкод', max_length=240, blank=True, null=True)
 
-    reserve = models.FloatField("Остаток", default=0.00, blank=True, null=True)
+    reserve = models.FloatField("Резерв", default=0.00, blank=True, null=True)
     quantity = models.FloatField("Остаток", default=0.00, blank=True, null=True)
-    intransit = models.FloatField("Остаток", default=0.00, blank=True, null=True)
+    intransit = models.FloatField("В пути", default=0.00, blank=True, null=True)
 
     is_actual = models.BooleanField("Актуальность", default=False)
 

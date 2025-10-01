@@ -19,6 +19,7 @@ export interface IPlanDataRow {
     price: string;
     fabric_name: string;
     fabric_picture: string;
+    fabric_stock: number | null;
     project: string | null;
     quantity: number;
     shipped: number;

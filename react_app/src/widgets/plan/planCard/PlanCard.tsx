@@ -22,13 +22,19 @@ export function PlanCard(props: IProps) {
                 />
             </div>
             {data.fabric_picture && (
-                <div className={'border-2 border-black h-full w-20 flex justify-center items-center'}>
+                <div className={'border-2 border-black h-full w-20 flex justify-center items-center relative'}>
                     <img
                         loading={'lazy'}
                         src={STATIC_URL + data.fabric_picture}
                         alt="Chair"
                         className={'object-fill max-h-full max-w-full'}
                     />
+
+                    <span
+                        className={'absolute bottom-0 right-0 bg-black text-white text-xs ps-1'}
+                    >
+                        {data.fabric_stock}
+                    </span>
                 </div>
             )}
 
