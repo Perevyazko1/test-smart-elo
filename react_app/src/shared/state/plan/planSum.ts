@@ -7,7 +7,7 @@ interface PlanSumState {
 }
 
 export const usePlanSum = create<PlanSumState>((set) => ({
-    planSum: 14_000_000,
+    planSum: null,
     setPlanSum: (planSum: number | null) => {
         set({planSum})
     }
