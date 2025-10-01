@@ -8,6 +8,7 @@ import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 import type {IAgentTag} from "@/entities/plan";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {Input } from "@/components/ui/input"
+import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 
 interface IProps {
 
@@ -30,6 +31,10 @@ export function PlanNav(props: IProps) {
     const planSum = usePlanSum(s => s.planSum);
     const setPlanSum = usePlanSum(s => s.setPlanSum);
 
+    const dUpdateSum = useDebounce(
+        (data: number) => setPlanSum(data),
+        2000
+    );
 
     const {data: projects} = useQuery({
         queryKey: ['planProjects'],
@@ -92,7 +97,7 @@ export function PlanNav(props: IProps) {
             <Input
                 className={'px-2'}
                 type={'number'}
-                onChange={(e) => setPlanSum(Number(e.target.value))}
+                onChange={(e) => dUpdateSum(Number(e.target.value))}
                 value={String(planSum)}
             />
 
