@@ -78,10 +78,10 @@ export function PlanRow(props: IProps) {
             >
                 {index + 1} <br/>
                 {showSums && (
-                    <>
-                        {sum.toLocaleString('ru-RU')} <br/>
-                        {Number(data.price).toLocaleString('ru-RU')}<br/>
-                    </>
+                    <span className={'text-sm'}>
+                        {Math.round(Number(data.price) / 1000).toLocaleString('ru-RU')}т.р.<br/>
+                        {(sum / 1_000_000).toFixed(1)}м<br/>
+                    </span>
                 )}
             </td>
             <td className={'max-w-30'}>

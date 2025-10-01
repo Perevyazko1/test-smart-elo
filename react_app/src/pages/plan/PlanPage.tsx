@@ -158,7 +158,7 @@ export const PlanPage = () => {
                     <th>#</th>
                     {deps.map((dept) => (
                         <th key={dept} className="px-1 text-right">
-                            {showSums ? Math.round(totals[dept] || 0).toLocaleString("ru-RU") : "-"}
+                            {showSums ? Math.round((totals[dept] || 0) / 1000).toLocaleString("ru-RU") : "-"}
                         </th>
                     ))}
                 </tr>
