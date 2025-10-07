@@ -55,6 +55,8 @@ export const InitialEqBodySchema: EqPageSchema = {
         hasUpdated: false,
         isLoading: true,
         inited: false,
+        earned: 0,
+        is_boss: false,
     },
 
     notRelevantIds: [],

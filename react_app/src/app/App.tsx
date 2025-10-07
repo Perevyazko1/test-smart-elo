@@ -16,11 +16,6 @@ export const App = (props: IProps) => {
                 {props.nav}
             </Navbar>
             <div
-                // style={{
-                //     minHeight: 'calc(100dvh - 45px)',
-                //     maxHeight: 'calc(100dvh - 45px)',
-                //     height: 'calc(100dvh - 45px)',
-                // }}
                 className={'relative overflow-y-auto'}>
                 <Outlet/>
             </div>

@@ -45,8 +45,7 @@ export function Dropdown<T>(props: IProps<T>) {
                                         setOpen(false)
                                     }}
                                 >
-                                    <span
-                                    className={'capitalize'}>{getItemLabel(item)}</span>
+                                    <span className={'capitalize'}>{getItemLabel(item)}</span>
                                     <Check
                                         className={twMerge(
                                             "ml-auto",

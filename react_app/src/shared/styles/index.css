@@ -193,3 +193,7 @@ td {
         -webkit-print-color-adjust: exact;
     }
 }
+
+.border-ridge {
+    border-style: ridge;
+}

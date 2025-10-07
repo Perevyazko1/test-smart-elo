@@ -10,6 +10,7 @@ from core.serializers import AgentTagSerializer
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
 
+
 @api_view(['GET'])
 def get_plan_table(request):
     project = request.query_params.get('project')

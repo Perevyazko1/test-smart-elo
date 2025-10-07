@@ -10,6 +10,9 @@ import {planService} from "@/widgets/plan/model/api.ts";
 import {useState} from "react";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {usePermission} from "@/shared/utils/permissions.ts";
+import {useShipmentState} from "@/shared/state/shipment/shipmentState.ts";
+import {PlusCircleIcon} from "lucide-react";
+import {twMerge} from "tailwind-merge";
 
 interface IProps {
     data: IPlanDataRow;
@@ -52,6 +55,10 @@ export function PlanRow(props: IProps) {
             }
         )
     }
+
+    const addItem = useShipmentState(s => s.addItem);
+    const shipment = useShipmentState(s => s.shipment);
+    const added = shipment.items.some(item => item.series_id === data.series_id)
 
     const updateHandle = () => {
         updateTargetDate({
@@ -111,6 +118,27 @@ export function PlanRow(props: IProps) {
                         onClick={() => setInputValue("")}
                     >
                         <CrossCircledIcon/>
+                    </Btn>
+
+                    <Btn
+                        className={
+                            twMerge(
+                                'm-0 p-1 outline-black transition-all duration-300',
+                                added ? 'bg-green-300 text-red-700 outline-2' : 'text-amber-400 outline-1'
+                            )
+
+                        }
+                        onClick={() => addItem(data)}
+                    >
+                        <PlusCircleIcon
+                            className={
+                                twMerge(
+                                    'transition-all duration-300',
+                                    added ? 'rotate-45' : 'rotate-0'
+                                )
+                            }
+                            size={16}
+                        />
                     </Btn>
                 </div>
             </td>

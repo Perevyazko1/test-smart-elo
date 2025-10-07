@@ -7,9 +7,11 @@ import type {IUser} from "@/entities/user";
 import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 import type {IAgentTag} from "@/entities/plan";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
-import {Input } from "@/components/ui/input"
+import {Input} from "@/components/ui/input"
 import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {useEffect, useState} from "react";
+import {ArchiveIcon} from "lucide-react";
+import {ShipmentWidget} from "@/widgets/shipment/ShipmentWidget.tsx";
 
 interface IProps {
 
@@ -29,7 +31,6 @@ export function PlanNav(props: IProps) {
     const setPlanAgent = usePlanAgent(s => s.setPlanAgent);
 
 
-    const planSum = usePlanSum(s => s.planSum);
     const setPlanSum = usePlanSum(s => s.setPlanSum);
 
     const [inputValue, setInputValue] = useState<number>()
@@ -78,36 +79,41 @@ export function PlanNav(props: IProps) {
     }
 
     return (
-        <div className={'flex gap-1'}>
-            <Dropdown<string>
-                selectedItem={planProject}
-                items={projectList || []}
-                setSelectedItem={(item) => setPlanProject(item || null)}
-                getItemLabel={(item) => item || "Проект..."}
-            />
+        <div className={'flex flex-row justify-between items-center gap-2 flex-1'}>
+            <div className={'flex gap-1'}>
+                <Dropdown<string>
+                    selectedItem={planProject}
+                    items={projectList || []}
+                    setSelectedItem={(item) => setPlanProject(item || null)}
+                    getItemLabel={(item) => item || "Проект..."}
+                />
 
-            <Dropdown<IUser>
-                selectedItem={getManager()}
-                items={managerList || []}
-                setSelectedItem={setManager}
-                getItemLabel={(user) => (user ? `${user.first_name} ${user.last_name}` : "Менеджер...")}
-            />
+                <Dropdown<IUser>
+                    selectedItem={getManager()}
+                    items={managerList || []}
+                    setSelectedItem={setManager}
+                    getItemLabel={(user) => (user ? `${user.first_name} ${user.last_name}` : "Менеджер...")}
+                />
 
-            <Dropdown<IAgentTag>
-                selectedItem={getAgent()}
-                items={agentList || []}
-                setSelectedItem={setAgent}
-                getItemLabel={(item) => item?.name || "Заказчик..."}
-            />
+                <Dropdown<IAgentTag>
+                    selectedItem={getAgent()}
+                    items={agentList || []}
+                    setSelectedItem={setAgent}
+                    getItemLabel={(item) => item?.name || "Заказчик..."}
+                />
 
-            <div>
-            <Input
-                className={'px-2'}
-                type={'number'}
-                onChange={(e) => setInputValue(Number(e.target.value))}
-                value={String(inputValue)}
-            />
+                <div>
+                    <Input
+                        placeholder={'План сумма'}
+                        className={'px-2'}
+                        type={'number'}
+                        onChange={(e) => setInputValue(Number(e.target.value))}
+                        value={String(inputValue)}
+                    />
+                </div>
             </div>
+
+            <ShipmentWidget/>
         </div>
     );
 }

@@ -14,6 +14,7 @@ class WeekInfo:
     previous_week_data: dict
     next_week_data: dict
     earned: str = "0"
+    is_boss: bool = False
 
 
 class GetWeekInfo:

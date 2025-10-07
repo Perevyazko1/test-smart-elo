@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from core.models import (
     OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment, Fabric)
 from salary.models import Earning
+from salary.service.get_user_info import get_user_info
 from salary.service.make_earning import make_earning
 from src.label_printer.fabric.print_label_fabric import print_label_fabric
 from src.label_printer.fabric_temlate import get_fabric_label_commands
@@ -26,6 +27,7 @@ from .service.get_eq_card_queryset import get_eq_card_queryset
 from .service.get_eq_req_params import get_eq_req_params
 from .service.get_project_filter import get_project_filters
 from .service.get_view_modes import get_view_modes
+from .service.user_is_boss import get_user_is_boss
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
 from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
@@ -93,11 +95,31 @@ def get_eq_filters(request):
 def get_week_data(request):
     eq_params = get_eq_req_params(request=request)
 
-    if str(eq_params['view_mode_key']).isdigit():
-        eq_params['user'] = Employee.objects.get(id=eq_params['view_mode_key'])
-
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
+    if str(eq_params['view_mode_key']).isdigit():
+        user = request.user
+        target_user = Employee.objects.get(id=eq_params['view_mode_key'])
+
+        boss_mode = get_user_is_boss(user, target_user)
+        admin_mode = is_user_in_group(user, "Администраторы")
+        wages_mode = is_user_in_group(user, "ЗП - Страница")
+        self_mode = user.id == target_user.id
+
+        employee = target_user if boss_mode or admin_mode or wages_mode else user
+
+        balance_earnings = Earning.objects.filter(
+            user=employee,
+            target_date__date__gte=week_info.dt_dates[0],
+            target_date__date__lte=week_info.dt_dates[-1],
+            approval_by__isnull=False,
+            earning_type__in=['ЭЛО', 'ДОП']
+        ).aggregate(sum=Sum('amount'))['sum'] or 0
+
+        week_info.earned = balance_earnings / 100
+        week_info.is_boss = boss_mode or self_mode or admin_mode or wages_mode
+    else:
+        week_info.is_boss = True
     return JsonResponse(asdict(week_info), json_dumps_params={"ensure_ascii": False})
 
 

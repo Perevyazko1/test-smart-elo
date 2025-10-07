@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {Button} from "react-bootstrap";
 import {ConnectDragSource} from "react-dnd";
 
@@ -9,6 +9,7 @@ import {eqFiltersReady, getWeekData} from "../../../model/selectors/filterSelect
 import {fetchWeekData} from "../../../model/api/fetchWeekData";
 
 import {WagesInfo} from "../widgets/WagesInfo";
+import {PinCodeCheck} from "@widgets/PinCodeCheck/PinCodeCheck";
 
 
 interface EqWeeksProps {
@@ -31,7 +32,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
         expanded,
     } = props;
 
-    const {handleOpen} = useAppModal();
+    const {handleOpen, closeNoConfirm} = useAppModal();
 
     const blockWidthPx = expanded ? rightBlockWidth : leftBlockWidth;
 
@@ -43,12 +44,31 @@ export const EqWeeks = (props: EqWeeksProps) => {
     const handleDoubleTap = useDoubleTap(resetSize);
     const weekData = useAppSelector(getWeekData);
 
+    const [remainingTime, setRemainingTime] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setRemainingTime((prevTime) => {
+                if (prevTime === 0) {
+                    return 0;
+                }
+                return prevTime - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+
     useEffect(() => {
         if (weekData?.hasUpdated !== undefined && filtersReady && currentUser.current_department) {
             dispatch(fetchWeekData({
                 department_id: currentUser.current_department.id,
                 ...queryParameters
             }))
+        }
+        if (remainingTime !== 0) {
+            setRemainingTime(60);
         }
         // eslint-disable-next-line
     }, [
@@ -62,12 +82,24 @@ export const EqWeeks = (props: EqWeeksProps) => {
     ]);
 
     const handleOpenWages = () => {
-        handleOpen(
-            <WagesInfo
-                endDate={weekData?.dt_dates[6] || ''}
-                startDate={weekData?.dt_dates[0] || ''}
-            />
-        );
+        if (remainingTime === 0) {
+            handleOpen(
+                <PinCodeCheck
+                    onSuccess={() => {
+                        closeNoConfirm();
+                        setRemainingTime(60);
+                    }}
+                />
+            )
+        } else {
+            handleOpen(
+                <WagesInfo
+                    is_boss={weekData?.is_boss || false}
+                    endDate={weekData?.dt_dates[6] || ''}
+                    startDate={weekData?.dt_dates[0] || ''}
+                />
+            );
+        }
     }
 
     const getWeekString = useMemo(() => {
@@ -146,15 +178,19 @@ export const EqWeeks = (props: EqWeeksProps) => {
                             <i className="fas fa-angle-double-left fs-3"/>
                         </Button>
 
-                        <div className={'d-flex flex-fill justify-content-center align-items-center'}>
+                        <div className={
+                            'd-flex flex-fill justify-content-center align-items-center'}>
                             {!weekData?.isLoading ?
                                 <>
+
                                     {getWeekString}
                                     <button
-                                        className={'appBtn px-1 rounded mx-1 fs-7'}
+                                        className={
+                                            `appBtn px-1 rounded mx-1 fs-7 ${weekData?.is_boss ? "greenBtn" : "yellowBtn"}`
+                                        }
                                         onClick={handleOpenWages}
                                     >
-                                        Просм.
+                                        {remainingTime !== 0 ? weekData.earned : `👁️`} <sup>{remainingTime}s</sup>
                                     </button>
                                 </> :
                                 <AppSkeleton className={'h-100 flex-fill'}/>

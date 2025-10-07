@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'core',
     'tasks',
     'salary',
+    'plan',
 
     'easyaudit',
     'django_celery_beat',

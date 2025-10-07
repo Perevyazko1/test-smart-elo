@@ -8,6 +8,7 @@ import {errorApiHandler} from "@shared/api";
 
 type fetchWeekDataProps = {
     department_id: number;
+    view_mode?: string;
 }
 
 

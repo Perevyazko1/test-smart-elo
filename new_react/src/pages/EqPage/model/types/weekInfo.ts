@@ -12,4 +12,6 @@ export interface WeekData extends WeekInfo {
     hasUpdated: boolean;
     isLoading: boolean;
     inited: boolean;
+    earned: number;
+    is_boss?: boolean;
 }
