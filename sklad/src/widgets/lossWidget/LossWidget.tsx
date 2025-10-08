@@ -155,7 +155,8 @@ export const LossWidget = (props: LossWidgetProps) => {
                 {positionImage && (
                     <Image
                         style={{
-                            maxHeight: "50%",
+                            maxHeight: 150,
+                            maxWidth: 150,
                         }}
                         alt={'Ткань'}
                         src={positionImage}
