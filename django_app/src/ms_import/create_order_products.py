@@ -106,15 +106,14 @@ def create_order_products(order: SkladOrderExpandProjectPositionsAssortment) -> 
             continue
 
         elif group in FABRIC_GROUPS:
-            """Ткань «приклеивается» ко всем изделиям текущей группы (кроме 'Прочее')"""
+            """Ткань «приклеивается» ко всем изделиям текущей группы"""
             for product in current_products:
-                if product.group != 'Мебель и готовые изделия/Прочее':
-                    if not product.main_fabric_id:
-                        product.main_fabric_id = position.assortment.id
-                    elif not product.second_fabric_id:
-                        product.second_fabric_id = position.assortment.id
-                    elif not product.third_fabric_id:
-                        product.third_fabric_id = position.assortment.id
+                if not product.main_fabric_id:
+                    product.main_fabric_id = position.assortment.id
+                elif not product.second_fabric_id:
+                    product.second_fabric_id = position.assortment.id
+                elif not product.third_fabric_id:
+                    product.third_fabric_id = position.assortment.id
             # Отметим, что к текущей группе уже добавляли ткани
             if current_products:
                 fabrics_applied = True
