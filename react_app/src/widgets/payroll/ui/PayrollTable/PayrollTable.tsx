@@ -82,7 +82,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
 
     return (
         <Table>
-            <THead className={'sticky top-0 z-10 group'}>
+            <THead className={'sticky top-[51px] z-10 group'}>
                 <tr className={'relative'}>
                     <PayrollTh
                         className={'text-center'}

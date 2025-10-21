@@ -13,9 +13,10 @@ export const SalaryPage = (props: SalaryPageProps) => {
     const {date_from} = useParams();
 
     const {weeks, currentWeek} = useWeeks({initialDateFrom: date_from});
+    
 
     return (
-        <div className={'max-w-dvw'}>
+        <div className={'max-w-dvw relative'}>
             <SalaryPanel
                 weeks={weeks}
                 url={'/salary'}
