@@ -34,6 +34,8 @@ INSTALLED_APPS = [
     'tasks',
     'salary',
     'plan',
+    'shipment',
+    'sklad',
 
     'easyaudit',
     'django_celery_beat',

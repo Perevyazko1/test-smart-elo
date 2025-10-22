@@ -4,7 +4,7 @@ import CleaningServicesOutlinedIcon from '@mui/icons-material/CleaningServicesOu
 import {AppNavbar} from "@widgets/AppNavbar";
 import {AppInput, AppSelect, AppTooltip} from "@shared/ui";
 import {useCurrentUser, useDebounce, useQueryParams} from "@shared/hooks";
-import {Department} from "@entities/Department";
+import {Department, useDepartmentList} from "@entities/Department";
 import {AssignmentStatus, assignmentStatusOptions, getAssignmentStatusName} from "@entities/Assignment";
 
 
@@ -13,7 +13,7 @@ export const AssignmentNavBar = () => {
     const {currentUser} = useCurrentUser();
 
     const [seriesIdInput, setSeriesIdInput] = useState<string>(queryParameters.order_product__series_id || '')
-
+    const {data, isLoading} = useDepartmentList({});
     // Дебаунсим изменение поисковой строки
     const debouncedSetQueryParam = useDebounce(
         (param: string, value: string) => setQueryParam(param, value),
@@ -33,10 +33,8 @@ export const AssignmentNavBar = () => {
     };
 
     const selectedDepartment = useMemo(() => {
-        return currentUser.departments.find(
-            department => String(department.id) === queryParameters.department__id
-        ) || null;
-    }, [currentUser.departments, queryParameters.department__id]);
+        return data?.find(item => item.id === Number(queryParameters.department__id)) || null;
+    }, [data, queryParameters.department__id]);
 
     const clearFiltersHandle = () => {
         setQueryParam('order_product__series_id', '');
@@ -65,9 +63,10 @@ export const AssignmentNavBar = () => {
             <AppSelect
                 variant={'select'}
                 noInput
+                isLoading={isLoading}
                 value={selectedDepartment}
                 label={'Отдел'}
-                options={currentUser.departments}
+                options={data?.filter(item => currentUser.departments.includes(item.id)) || []}
                 getOptionLabel={item => item ? item.name : ""}
                 onSelect={setDepartmentClb}
                 colorScheme={'darkInput'}

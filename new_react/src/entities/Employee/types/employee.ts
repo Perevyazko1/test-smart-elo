@@ -22,13 +22,11 @@ export interface BaseEmployee {
     token: string,
 }
 
-type ExtendedFields = 'groups' | 'departments' | 'current_department' | 'permanent_department';
+type ExtendedFields = 'groups';
 
 export interface Employee extends Omit<BaseEmployee, ExtendedFields>{
     groups: Group[],
-    departments: Department[],
-    current_department: Department | null,
-    permanent_department: Department | null,
+    current_department_details: Department | null,
 }
 
 export interface GroupedEmployeeItem {

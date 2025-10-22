@@ -24,10 +24,10 @@ export const CardSlider = (props: CardSliderProps) => {
     const bossBerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
     const showPrice = useMemo(() => {
-        return currentUser.current_department?.piecework_wages && (
+        return currentUser.current_department_details?.piecework_wages && (
             currentUser.piecework_wages || bossBerm
         )
-    }, [bossBerm, currentUser.current_department?.piecework_wages, currentUser.piecework_wages])
+    }, [bossBerm, currentUser.current_department_details?.piecework_wages, currentUser.piecework_wages])
 
     const totalCount = useMemo(() => {
         let total = 0;

@@ -4,6 +4,7 @@ import {Controller, useFormContext} from "react-hook-form";
 
 interface TextAreaFormProps extends Omit<InputHTMLAttributes<HTMLTextAreaElement>, 'value' | 'onChange' | 'name'> {
     name: string;
+    rows?: number;
 }
 
 export const TextAreaForm = (props: TextAreaFormProps) => {

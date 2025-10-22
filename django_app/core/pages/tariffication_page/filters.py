@@ -7,14 +7,14 @@ from core.models import ProductionStep, Product
 class TarifficationPageListFilter(django_filters.FilterSet):
     """Filter for tariffication page list. """
     product__name = django_filters.CharFilter(lookup_expr='icontains')
-    department__name = django_filters.CharFilter(lookup_expr='icontains')
+    department__id = django_filters.CharFilter(lookup_expr='icontains')
     project = django_filters.CharFilter(method="filter_by_project")
     tariff_status = django_filters.CharFilter(method="filter_by_tariff_status")
 
     class Meta:
         """Metadata. """
         model = ProductionStep
-        fields = ['product__name', 'department__name', 'project', 'tariff_status']
+        fields = ['product__name', 'department__id', 'project', 'tariff_status']
 
     def filter_by_project(self, queryset, name, value):
         """Filter list by project. """

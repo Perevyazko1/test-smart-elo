@@ -94,7 +94,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                 target_list: listType,
                 offset: 0,
                 limit: limit,
-                department_id: currentUser.current_department?.id || 0,
+                department_id: currentUser.current_department_details?.id || 0,
                 ...queryParameters,
                 ...extraParams,
             }, abortController.signal);
@@ -107,7 +107,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
                         target_list: listType,
                         limit: initialResponse.count - limit,
                         offset: limit,
-                        department_id: currentUser.current_department?.id || 0,
+                        department_id: currentUser.current_department_details?.id || 0,
                         ...queryParameters,
                         ...extraParams,
                     }, abortController.signal);
@@ -147,7 +147,7 @@ export const useFetchListData = (props: useFetchListDataProps) => {
         try {
             const updatedItem = await fetchItemData(id, {
                 target_list: listType,
-                department_id: currentUser.current_department?.id || 0,
+                department_id: currentUser.current_department_details?.id || 0,
                 ...queryParameters,
                 ...extraParams,
             },);

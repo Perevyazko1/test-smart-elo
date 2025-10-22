@@ -22,7 +22,15 @@ interface CurrentUserContextType {
 
 export const CurrentUserContext = createContext<CurrentUserContextType | undefined>(undefined);
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+    defaultOptions: {
+        queries: {
+            refetchOnWindowFocus: false, // чтобы не дергал при возврате к вкладке
+            retry: 1,                    // количество повторов при ошибке
+            staleTime: 1000 * 60 * 5,    // 5 минут данные считаются актуальными
+        },
+    },
+});
 
 
 export const ContextProvider = (props: ContextProviderProps) => {

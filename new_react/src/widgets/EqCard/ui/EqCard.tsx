@@ -133,7 +133,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
     }, [assignmentsLists.primary, assignmentsLists.selectedLocked, bossPerm, card.assignments, listType]);
 
     const getBtnClb = useCallback((first: boolean) => {
-        if (!currentUser.current_department) {
+        if (!currentUser.current_department_details) {
             return;
         }
         if (listType === 'await' && firstBtnIsLocked) {
@@ -155,7 +155,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             setCardDisabled(true);
             dispatch(fetchEqUpdCard({
                 op_id: card.id,
-                department_id: currentUser.current_department.id,
+                department_id: currentUser.current_department_details.id,
                 assignment_ids: targetNumbers.map(item => item.id),
                 action: getAction(first),
                 ...queryParameters,
@@ -165,7 +165,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
             });
         }
 
-    }, [currentUser.current_department, listType, firstBtnIsLocked, getAction, returnLocked, handleOpen, dispatch, card.id, targetNumbers, queryParameters]);
+    }, [currentUser.current_department_details, listType, firstBtnIsLocked, getAction, returnLocked, handleOpen, dispatch, card.id, targetNumbers, queryParameters]);
 
     const getPlaneDate = useCallback((first: boolean) => {
         const targetDate = () => {
@@ -187,7 +187,7 @@ export const EqCard = memo((props: EqInWorkCardProps) => {
         } else {
             return;
         }
-    }, [card.assignments, card.order.planned_date, expanded, listType]);
+    }, [card.assignments, expanded, listType]);
 
     const showPlanDate = useMemo(() => {
         if (listType === "ready") return false;

@@ -8,17 +8,20 @@ import {SalaryPage} from "@/pages/salary/SalaryPage.tsx";
 import {CashPage} from "@/pages/cash/CashPage.tsx";
 import {ShipmentPage} from "@/pages/shipment/ShipmentPage.tsx";
 import {PlanPage} from "@/pages/plan/PlanPage.tsx";
+import {SkladPage} from "@/pages/skladPage/SkladPage.tsx";
+import {ShipmentDetailPage} from "@/pages/shipmentDetail/ShipmentDetailPage.tsx";
+import {UserWage} from "@/pages/userWage/UserWage.tsx";
 
 import '@/shared/styles/index.css';
 
+import {RequirePermission} from "@/app/RequirePermission.tsx";
 import {RequireAuth} from "@/components/RequireAuth.tsx";
 import {Toaster} from "@/components/ui/sonner.tsx";
-import {UserWage} from "@/pages/userWage/UserWage.tsx";
-import {RequirePermission} from "@/app/RequirePermission.tsx";
 import {APP_PERM} from "@/entities/user";
 import {CashNav} from "@/widgets/navbar/cashNav/CashNav.tsx";
 import {PlanNav} from "@/widgets/navbar/planNav/PlanNav.tsx";
 import {ShipmentNav} from "@/widgets/navbar/shipmentNav/ShipmentNav.tsx";
+import {SkladNav} from "@/widgets/navbar/skladNav/SkladNav.tsx";
 
 // @ts-ignore
 createRoot(document.getElementById('root')!).render(
@@ -44,7 +47,6 @@ createRoot(document.getElementById('root')!).render(
                                         [APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]
                                     }/>
                             }>
-                            <Route index element={<PlanPage/>}/>
                             <Route path="/plan" element={<PlanPage/>}/>
                         </Route>
                     </Route>
@@ -58,6 +60,19 @@ createRoot(document.getElementById('root')!).render(
                                     }/>
                             }>
                             <Route path="/shipment" element={<ShipmentPage/>}/>
+                            <Route path="/shipment/:shipmentId" element={<ShipmentDetailPage/>}/>
+                        </Route>
+                    </Route>
+
+                    <Route path="/" element={<App nav={<SkladNav/>}/>}>
+                        <Route
+                            element={
+                                <RequirePermission
+                                    requiredPermissions={
+                                        [APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]
+                                    }/>
+                            }>
+                            <Route path="/sklad" element={<SkladPage/>}/>
                         </Route>
                     </Route>
                 </Route>

@@ -132,7 +132,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
 
                             <tbody>
                             {details.week_report?.map(item => (
-                                <tr key={item.id}>
+                                <tr key={item.id} className={'text-end'}>
                                     <td>{item.week}</td>
                                     <td><NiceNum value={item.hide_balance ? null : item.balance_sum}/></td>
                                     <td><NiceNum value={item.bonus_sum}/></td>

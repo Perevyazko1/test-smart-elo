@@ -10,10 +10,11 @@ interface IProps<T> {
     selectedItem: T | undefined | null;
     setSelectedItem: (arg: T | undefined | null) => void;
     getItemLabel: (arg: T | undefined | null) => string;
+    className?: string;
 }
 
 export function Dropdown<T>(props: IProps<T>) {
-    const {items, setSelectedItem, selectedItem, getItemLabel} = props;
+    const {items, setSelectedItem, selectedItem, getItemLabel, className} = props;
     const [open, setOpen] = useState(false);
 
     return (
@@ -22,7 +23,13 @@ export function Dropdown<T>(props: IProps<T>) {
                 <Btn
                     role="combobox"
                     aria-expanded={open}
-                    className="justify-between flex bg-black text-white gap-4 capitalize"
+                    className={
+                        twMerge(
+                            "justify-between flex bg-black text-white gap-4 capitalize",
+                            className
+                        )
+                    }
+
                 >
                     {getItemLabel(selectedItem)}
                     <ChevronsUpDown className="opacity-50"/>

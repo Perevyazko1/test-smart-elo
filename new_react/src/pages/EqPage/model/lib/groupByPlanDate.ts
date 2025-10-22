@@ -57,7 +57,7 @@ export const groupByPlanDate = (
                 return inspectorDiff;
             }
 
-            if (currentUser.current_department?.piecework_wages) {
+            if (currentUser.current_department_details?.piecework_wages) {
                 const hasTariffA =
                     itemA.assignments.length > 0
                         ? itemA.assignments[0].new_tariff?.id

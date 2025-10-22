@@ -11,7 +11,7 @@ export const TarifficationNav = () => {
     return (
         <AppNavbar>
             <ProductNameInput/>
-            <DepartmentDropdown/>
+            <DepartmentDropdown piecework_wages={true}/>
             <ProjectDropdown/>
             <TariffStatusDropdown/>
         </AppNavbar>

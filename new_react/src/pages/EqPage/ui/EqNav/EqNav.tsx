@@ -62,7 +62,7 @@ export const EqNav = () => {
 
             <EqFilters/>
 
-            {!currentUser.current_department?.single && !isViewer &&
+            {!currentUser.current_department_details?.single && !isViewer &&
 
                 <AppTooltip title={'Количество нарядов для одновременного изменения'}>
                     <EqSeriesSize queryParameters={queryParameters} clb={seriesSizeClb}/>

@@ -12,7 +12,6 @@ import {OrdersPage} from "@pages/OrdersPage";
 import {OrderDetailPage} from "@pages/OrderDetailPage";
 import {TarifficationPage} from "@pages/TarifficationPage";
 import {TaskPage} from "@pages/TaskPage";
-import {StaffPage} from "@pages/StaffPage";
 import {KpiPage} from "@pages/KpiPage";
 
 export interface AppRoute {
@@ -33,7 +32,6 @@ enum AppRoutes {
     PRODUCT = 'product',
     PRODUCT_DETAILS = 'product_detail',
     TARIFFICATION = 'tariffication',
-    STAFF = 'staff',
     SPECIFICATIONS = 'specifications',
     ORDER_DETAILS = 'order_details',
     TASK = 'task',
@@ -74,13 +72,6 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         mobile: false,
         navigate: true,
         permissions: [APP_PERM.TARIFFICATION_PAGE]
-    },
-    [AppRoutes.STAFF]: {
-        route: {path: '/staff', element: <StaffPage/>, errorElement: <ErrorPage/>},
-        name: 'Персонал',
-        mobile: false,
-        navigate: true,
-        permissions: [APP_PERM.WAGES_PAGE]
     },
     [AppRoutes.SPECIFICATIONS]: {
         route: {path: '/orders', element: <OrdersPage/>, errorElement: <ErrorPage/>},

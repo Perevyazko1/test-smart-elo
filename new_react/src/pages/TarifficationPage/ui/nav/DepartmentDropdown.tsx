@@ -1,44 +1,32 @@
-import {AppDropdown} from "@shared/ui";
+import {AppSelect} from "@shared/ui";
 import {useAppQuery, useCurrentUser} from "@shared/hooks";
-import {useMemo, useState} from "react";
+import {Department, useDepartmentList} from "@entities/Department";
 
-export const DepartmentDropdown = () => {
+
+export const DepartmentDropdown = (props: {piecework_wages?: boolean}) => {
     const {setQueryParam, queryParameters} = useAppQuery();
     const {currentUser} = useCurrentUser();
+    const {data, isLoading} = useDepartmentList({});
 
-    const allDepartment: string = 'Все отделы';
+    const targetDepartments = data?.filter(
+        item => currentUser.departments?.includes(item.id)
+            && (!props.piecework_wages || item.piecework_wages)
+    ) || [];
 
-    const getInitialDepartment = (): string => {
-        const queryDepartmentName = queryParameters.department__name;
-        if (queryDepartmentName) {
-            return currentUser.departments?.find(department => department.name === queryDepartmentName)?.name || allDepartment;
-        } else {
-            return allDepartment;
-        }
-    };
-
-    const [currentDepartment, setCurrentDepartment] = useState<string>(getInitialDepartment());
-
-    const departments = useMemo(
-        () => currentUser.departments.map(department => department.name),
-        [currentUser.departments]
-    );
-
-    const setDepartmentClb = (department: string) => {
-        setCurrentDepartment(department);
-        if (department !== allDepartment) {
-            setQueryParam('department__name', department)
-        } else {
-            setQueryParam('department__name', '')
-        }
+    const setDepartmentClb = (department: Department | null) => {
+        setQueryParam('department__id', department ? String(department.id) : '')
     };
 
     return (
-        <AppDropdown
-            selected={currentDepartment}
-            active={currentDepartment !== allDepartment}
-            items={[allDepartment, ...departments]}
-            onSelect={setDepartmentClb}
+        <AppSelect
+            variant={"select"}
+            label={'Отдел'}
+            isLoading={isLoading}
+            value={data?.find(item => item.id === Number(queryParameters.department__id)) || null}
+            options={targetDepartments}
+            getOptionLabel={item => item ? item.name : "Все отделы"}
+            onSelect={item => setDepartmentClb(item)}
+            colorScheme={'darkInput'}
         />
     );
 };

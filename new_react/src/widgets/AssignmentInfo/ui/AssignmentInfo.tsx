@@ -28,12 +28,12 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
     const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
 
     const {data, isLoading, isFetching} = useGetAssignmentInfo({
-        department__id: currentUser.current_department?.id || 100,
+        department__id: currentUser.current_department_details?.id || 100,
         order_product__series_id: seriesId,
     });
 
     const {data: userList} = useEmployeeList({
-        departments: [currentUser.current_department?.id],
+        departments: [currentUser.current_department_details?.id],
         is_staff: false,
         is_active: true,
     });
@@ -52,11 +52,11 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
 
     const PageSkeleton = useMemo(() => (
         <tr>
-            <td colSpan={currentUser.current_department?.piecework_wages ? 13 : 12}>
+            <td colSpan={currentUser.current_department_details?.piecework_wages ? 13 : 12}>
                 <AppSkeleton style={{height: '25px', width: '100%'}} className={'mb-1'}/>
             </td>
         </tr>
-    ), [currentUser.current_department?.piecework_wages]);
+    ), [currentUser.current_department_details?.piecework_wages]);
 
     const filteredData = useMemo(() => {
         let newData: Assignment[] = [];
@@ -140,7 +140,7 @@ export const AssignmentInfo = (props: AssignmentInfoProps) => {
                     <th>Виза</th>
                     <th>Закреп</th>
                     <th>Печать</th>
-                    {currentUser.current_department?.piecework_wages && <th>Тариф</th>}
+                    {currentUser.current_department_details?.piecework_wages && <th>Тариф</th>}
 
                 </tr>
                 </thead>

@@ -20,7 +20,6 @@ export const EqCardTable = (props: EqCardTableProps) => {
 
     const [
         requestPrintFabric,
-        {isLoading: printLoading}
     ] = useLazyPrintFabric();
 
     return (
@@ -168,7 +167,7 @@ export const EqCardTable = (props: EqCardTableProps) => {
 
             </Table>
             <Link to={
-                `/assignment/?order_product__series_id=${card.series_id}&department__id=${currentUser.current_department?.id || ''}`
+                `/assignment/?order_product__series_id=${card.series_id}&department__id=${currentUser.current_department_details?.id || ''}`
             }>
                 <Button
                     className={'m-2'}

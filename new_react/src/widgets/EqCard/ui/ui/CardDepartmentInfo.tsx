@@ -39,10 +39,10 @@ export const CardDepartmentInfo = (props: CardDepartmentInfoProps) => {
     }, [card.assignments]);
 
     const lockedHandle = () => {
-        if (currentUser.current_department) {
+        if (currentUser.current_department_details) {
             setLocked(!locked)
             editAssignments({
-                department__id: currentUser.current_department.id,
+                department__id: currentUser.current_department_details.id,
                 series_id: card.series_id,
                 ids: [],
                 date: '',

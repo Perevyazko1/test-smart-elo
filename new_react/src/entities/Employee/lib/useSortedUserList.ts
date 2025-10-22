@@ -3,7 +3,7 @@ import {useMemo} from "react";
 import {useCurrentUser} from "@shared/hooks";
 
 import {GroupedEmployeeItem} from "../types/employee";
-import { useEmployeeList } from "../api";
+import {useEmployeeList} from "../api";
 
 
 export const useSortedUserList = () => {
@@ -26,7 +26,7 @@ export const useSortedUserList = () => {
                 })
             } else {
                 groupedList.push({
-                    group: user.permanent_department?.name || 'Без отдела',
+                    group: String(user.permanent_department) || 'Без отдела',
                     user: user
                 })
             }

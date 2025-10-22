@@ -61,9 +61,9 @@ export const EqWeeks = (props: EqWeeksProps) => {
 
 
     useEffect(() => {
-        if (weekData?.hasUpdated !== undefined && filtersReady && currentUser.current_department) {
+        if (weekData?.hasUpdated !== undefined && filtersReady && currentUser.current_department_details) {
             dispatch(fetchWeekData({
-                department_id: currentUser.current_department.id,
+                department_id: currentUser.current_department_details.id,
                 ...queryParameters
             }))
         }
@@ -154,7 +154,7 @@ export const EqWeeks = (props: EqWeeksProps) => {
                 className={`d-flex justify-content-${expanded ? "start" : "end"} align-items-center px-1 gap-1 rounded border border-1 `}
                 style={{
                     height: '36px',
-                    backgroundColor: currentUser.current_department?.color || '#ffffff',
+                    backgroundColor: currentUser.current_department_details?.color || '#ffffff',
                     width: blockWidthPx,
                     maxWidth: '1200px',
                     position: 'absolute',

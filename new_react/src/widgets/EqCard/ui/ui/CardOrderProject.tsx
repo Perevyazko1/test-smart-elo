@@ -26,7 +26,7 @@ export const CardOrderProject = (props: CardOrderProjectProps) => {
              onClick={onClickHandler}
              style={{
                  lineHeight: '16px',
-                 backgroundColor: currentUser.current_department?.color || "#ffffff"
+                 backgroundColor: currentUser.current_department_details?.color || "#ffffff"
              }}
         >
             <div className={'fs-7 fw-bold text-nowrap'}>

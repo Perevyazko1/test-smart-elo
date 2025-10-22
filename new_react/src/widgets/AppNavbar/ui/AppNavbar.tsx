@@ -46,7 +46,7 @@ export const AppNavbar = memo((props: AppNavbarProps) => {
         if (isBoss) {
             dispatch(fetchHasNotifications({}))
         }
-    }, [isBoss, currentUser.current_department, hasUpdated, dispatch])
+    }, [isBoss, currentUser.current_department_details, hasUpdated, dispatch])
 
     let navigate = useNavigate();
 

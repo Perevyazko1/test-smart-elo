@@ -19,7 +19,7 @@ export const useWebSocket = () => {
 
     const connect = useCallback(() => {
         socketRef.current = new WebSocket(
-            `${SERVER_WS_ADDRESS}/ws/${currentUser.pin_code}/${currentUser.current_department?.number || 0}/`
+            `${SERVER_WS_ADDRESS}/ws/${currentUser.pin_code}/${currentUser.current_department_details?.number || 0}/`
         );
 
         socketRef.current.onopen = () => {
@@ -43,7 +43,7 @@ export const useWebSocket = () => {
             handleSocketMessage(data);
         };
         // eslint-disable-next-line
-    }, [currentUser.pin_code, currentUser.current_department]);
+    }, [currentUser.pin_code, currentUser.current_department_details]);
 
     const handleSocketMessage = (data: any) => {
         console.log("WS COMMAND: ", data);
@@ -71,16 +71,16 @@ export const useWebSocket = () => {
                         data: {
                             url: data.url,
                         },
-                        actions: [
-                            {
-                                action: "open",
-                                title: "Просмотреть",
-                            },
-                            {
-                                action: "dismiss",
-                                title: "Закрыть",
-                            },
-                        ],
+                        // actions: [
+                        //     {
+                        //         action: "open",
+                        //         title: "Просмотреть",
+                        //     },
+                        //     {
+                        //         action: "dismiss",
+                        //         title: "Закрыть",
+                        //     },
+                        // ],
                         body: data.body,
                         tag: data.tag,
                     }
@@ -95,13 +95,13 @@ export const useWebSocket = () => {
             socketRef.current = null;
         }
         // Далее проверка не анонимный ли пользователь
-        if (currentUser.current_department && currentUser.current_department.number !== 0) {
+        if (currentUser.current_department_details && currentUser.current_department_details.number !== 0) {
             connect();
         }
         return () => {
             socketRef.current?.close();
         };
-    }, [connect, currentUser.current_department]);
+    }, [connect, currentUser.current_department_details]);
 
     return socketRef.current;
 }

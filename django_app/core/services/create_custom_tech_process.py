@@ -1,5 +1,3 @@
-from pprint import pprint
-
 from core.models import TechnologicalProcess, Product
 from staff.models import Department
 
@@ -17,7 +15,6 @@ def get_target_department_name(schema: dict):
         if "Готово" in value:
             return key
 
-    pprint(schema)
     raise Exception("Схема не корректна")
 
 

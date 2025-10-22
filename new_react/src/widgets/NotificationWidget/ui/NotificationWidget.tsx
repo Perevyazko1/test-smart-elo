@@ -4,7 +4,6 @@ import {Button, Container, Spinner, Table} from "react-bootstrap";
 import {useNavigate} from "react-router-dom";
 
 import {$axiosAPI} from "@shared/api"
-import {useCurrentUser} from "@shared/hooks";
 import {AppSkeleton} from "@shared/ui";
 
 
@@ -20,7 +19,6 @@ interface NotificationType {
 export const NotificationWidget = (props: { closeClb: () => void }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [data, setData] = useState<NotificationType>({});
-    const {currentUser} = useCurrentUser();
     const navigate = useNavigate();
 
     const getData = async () => {
@@ -57,9 +55,6 @@ export const NotificationWidget = (props: { closeClb: () => void }) => {
 
     const awaitTechProcessClb = () => {
         navigate("/?view_mode=boss");
-        if (currentUser.current_department?.number !== 1) {
-            alert("После перенаправления на страницу ЭЛО переключитесь на конструкторский отдел.")
-        }
         props.closeClb();
     }
 

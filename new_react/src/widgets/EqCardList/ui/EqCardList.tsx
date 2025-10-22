@@ -89,7 +89,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                         return inspectorDiff;
                     }
 
-                    if (currentUser.current_department?.piecework_wages) {
+                    if (currentUser.current_department_details?.piecework_wages) {
                         const hasTariffA = a.assignments.length > 0 ? a.assignments[0].new_tariff?.id ? 0 : 1 : 1;
                         const hasTariffB = b.assignments.length > 0 ? b.assignments[0].new_tariff?.id ? 0 : 1 : 1;
 
@@ -134,7 +134,7 @@ export const EqCardList = memo((props: EqCardListProps) => {
                 return a.id - b.id;
             }) || [])
         }
-    }, [currentUser, currentUser.current_department?.piecework_wages, data, getGroupMode, listType, listUpdated]);
+    }, [currentUser, currentUser.current_department_details?.piecework_wages, data, getGroupMode, listType, listUpdated]);
 
 
     // Делаем элемент управляемым, чтобы отслеживать положение скролла

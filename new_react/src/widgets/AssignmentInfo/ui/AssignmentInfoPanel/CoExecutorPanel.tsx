@@ -59,7 +59,7 @@ export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
 
     const maxRangeValue = useMemo(() => {
         let result = 0;
-        if (data && selectedIds.length > 0 && currentUser.current_department?.piecework_wages) {
+        if (data && selectedIds.length > 0 && currentUser.current_department_details?.piecework_wages) {
             result = Math.max.apply(null,
                 data.filter(assignment => selectedIds.includes(assignment.id)).map(
                     item => item.new_tariff?.amount || 0
@@ -67,7 +67,7 @@ export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
             )
         }
         return result;
-    }, [currentUser.current_department?.piecework_wages, data, selectedIds]);
+    }, [currentUser.current_department_details?.piecework_wages, data, selectedIds]);
 
     return (
         <div className={'fs-7'}>
@@ -93,7 +93,7 @@ export const CoExecutorPanel = (props: CoExecutorPanelProps) => {
                             getOptionLabel={option => getEmployeeName(option, 'listNameInitials')}
                         />
 
-                        {currentUser.current_department?.piecework_wages &&
+                        {currentUser.current_department_details?.piecework_wages &&
                             <AppRangeInput
                                 disabled={maxRangeValue === 0 || disabled}
                                 maxValue={maxRangeValue}

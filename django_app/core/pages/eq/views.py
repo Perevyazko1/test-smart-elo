@@ -97,9 +97,12 @@ def get_week_data(request):
 
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
 
-    if str(eq_params['view_mode_key']).isdigit():
+    if str(eq_params['view_mode_key']).isdigit() or eq_params['view_mode_key'] is None:
         user = request.user
-        target_user = Employee.objects.get(id=eq_params['view_mode_key'])
+        if eq_params['view_mode_key'] is None:
+            target_user = user
+        else:
+            target_user = Employee.objects.get(id=eq_params['view_mode_key'])
 
         boss_mode = get_user_is_boss(user, target_user)
         admin_mode = is_user_in_group(user, "Администраторы")

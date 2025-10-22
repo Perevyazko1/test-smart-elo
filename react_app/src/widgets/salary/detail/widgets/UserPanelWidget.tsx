@@ -10,6 +10,10 @@ import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
 import {useQueryClient} from "@tanstack/react-query";
 import {usePermission} from "@/shared/utils/permissions.ts";
+import {SelectUser} from "@/widgets/select/SelectUser.tsx";
+import {SelectDepartment} from "@/widgets/select/SelectDepartment.tsx";
+import {useDepartments} from "@/shared/utils/useDepartments.ts";
+import {twMerge} from "tailwind-merge";
 
 interface UserPanelWidgetProps {
     user: IUser;
@@ -19,17 +23,35 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
     const {user} = props;
 
     const [userData, setUserData] = useState(user);
+    const {data: departments, isLoading} = useDepartments();
 
-    const methods = useForm<Partial<IUser>>({
+    interface IUserForm extends Pick<IUser,
+        'first_name' |
+        'last_name' |
+        'patronymic' |
+        'description' |
+        'boss' |
+        'piecework_wages' |
+        'piecework_amount'
+    > {
+        permanent_department: number | null;
+    }
+
+    const methods = useForm<Partial<IUserForm>>({
         defaultValues: {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            patronymic: user.patronymic,
             description: user.description,
             piecework_amount: user.piecework_amount,
+            permanent_department: user.permanent_department,
+            boss: user.boss,
         }
     });
 
     const client = useQueryClient();
 
-    const updateUserData = (data: Partial<IUser>) => {
+    const updateUserData = (data: Partial<IUserForm>) => {
         toast.promise($axios.patch<IUser>(`/staff/employees/${user.id}/`, {
                 ...data
             }), {
@@ -47,37 +69,26 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
         )
     }
 
-    const description = useWatch({
-        control: methods.control,
-        name: "description"
-    });
-
-    const piecework_amount = useWatch({
-        control: methods.control,
-        name: "piecework_amount"
-    });
-
+    const watchedValues = useWatch({control: methods.control});
     const dUpdateData = useDebounce(
-        (data: {
-            description?: string;
-            piecework_amount?: number;
-        }) => updateUserData({
-            ...data,
+        () => updateUserData({
+            ...watchedValues,
         }),
         1000
     )
 
     useEffect(() => {
-        if (description !== userData.description) {
-            dUpdateData({description});
-        }
-    }, [description]);
+        const hasChanges = Object.entries(watchedValues).some(([key, value]) => {
+            if (userData[key as keyof IUserForm] !== value) {
+                console.log(key, value)
+            }
+            return userData[key as keyof IUserForm] !== value;
+        });
 
-    useEffect(() => {
-        if (piecework_amount !== userData.piecework_amount) {
-            dUpdateData({piecework_amount});
+        if (hasChanges) {
+            dUpdateData();
         }
-    }, [piecework_amount]);
+    }, [watchedValues, userData]);
 
     const canEditUser = usePermission([
         APP_PERM.WAGES_PAGE,
@@ -86,54 +97,143 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
 
     return (
         <FormProvider {...methods}>
-            <div className={'flex flex-col gap-3 p-2 border border-black'}>
-                <div>
-                    <b>{userData.first_name || ""} {userData.last_name || ""}</b>
-                </div>
-
-                {canEditUser && (
-                    <div className="relative">
-                        <div className={'flex items-center h-full text-[0.8em] w-1/2 gap-2'}>
-                            <span>Комментарий:</span>
-
+            <div className={'flex gap-3 p-2 border border-black'}>
+                <div className={'flex flex-col flex-1 gap-2'}>
+                    {/*Блок имя*/}
+                    <div className={'flex gap-2'}>
+                        <div className={'flex flex-col'}>
+                            <span className={"text-sm"}>Фамилия</span>
                             <TextAreaForm
-                                className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
-                                name={'description'}
+                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                name={'last_name'}
+                                disabled={!canEditUser}
+                                maxLength={255}
+                                rows={1}
+                                placeholder={'Фамилия'}
+                            />
+                        </div>
+                        <div className={'flex flex-col'}>
+                            <span className={"text-sm"}>Имя</span>
+                            <TextAreaForm
+                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                name={'first_name'}
+                                disabled={!canEditUser}
+                                maxLength={255}
+                                rows={1}
+                                placeholder={'Имя'}
+                            />
+                        </div>
+
+                        <div className={'flex flex-col'}>
+                            <span className={"text-sm"}>Отчество</span>
+                            <TextAreaForm
+                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                name={'patronymic'}
+                                disabled={!canEditUser}
+                                maxLength={255}
+                                placeholder={'Отчество'}
+                                rows={1}
                             />
                         </div>
                     </div>
-                )}
-
-                <div className={'flex flex-col gap-2'}>
-                    <div className={'flex gap-3 items-center'}>
-                    <span>
-                        Форма оплаты:
-                    </span>
-                        <b>{userData.piecework_wages ? "Сделка" : "Оклад"}</b>
+                    {/*Блок комментарий и сделка*/}
+                    <div>
                         {canEditUser && (
-                            <Btn
-                                onClick={() => {
-                                    updateUserData({piecework_wages: !userData.piecework_wages});
-                                }}
-                            >
-                                Переключить на {userData.piecework_wages ? "Оклад" : "Сделка"}
-                            </Btn>
+                            <div className="relative">
+                                <div className={'flex flex-col h-full text-[0.8em] w-1/2'}>
+                                    <span>Комментарий:</span>
+
+                                    <TextAreaForm
+                                        className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
+                                        name={'description'}
+                                    />
+                                </div>
+                            </div>
                         )}
                     </div>
+                    <div>
 
-                    {!userData.piecework_wages && (
-                        <div className={'flex gap-2 items-center'}>
-                            <span>Ставка в час:</span>
+                        <div className={'flex gap-3 items-center'}>
+                            <div className={'flex gap-2 items-center'}>
+                                <span
+                                    className={"text-sm"}
+                                >
+                                    Форма оплаты: <b>{userData.piecework_wages ? "Сделка" : "Оклад"}</b>
+                                </span>
+                                {canEditUser && (
+                                    <Btn
+                                        className={'max-w-content text-sm bg-yellow-50'}
+                                        onClick={() => {
+                                            updateUserData({piecework_wages: !userData.piecework_wages});
+                                        }}
+                                    >
+                                        Изменить
+                                    </Btn>
+                                )}
+                            </div>
 
-                            <PriceInputForm
-                                name={'piecework_amount'}
-                                disabled={!canEditUser}
-                                className={'p-2 w-[5em] text-end bg-yellow-50 disabled:bg-transparent'}
-                            />
+                            {!userData.piecework_wages && (
+                                <div className={'flex gap-2 items-center mt-1'}>
+                                    <span>Ставка в час:</span>
+
+                                    <PriceInputForm
+                                        name={'piecework_amount'}
+                                        disabled={!canEditUser}
+                                        className={'px-2 py-1 w-[5em] text-end bg-yellow-50 disabled:bg-transparent'}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
+
+
+                <div className={'flex flex-col gap-2'}>
+                    <div className={'flex flex-col'}>
+                        <span className={"text-sm"}>Начальник:</span>
+                        <SelectUser
+                            defaultValue={user.boss}
+                            onChange={(value) => {
+                                methods.setValue('boss', value);
+                            }}
+                        />
+                    </div>
+
+                    <div className={'flex flex-col'}>
+                        <span className={"text-sm"}>Отдел:</span>
+                        <SelectDepartment
+                            defaultValue={user.permanent_department}
+                            onChange={(value) => {
+                                methods.setValue('permanent_department', value);
+                            }}
+                        />
+                    </div>
+
+                    <div className={'flex flex-col'}>
+                        <span className={"text-sm"}>Доступ к отделам ЭЛО:</span>
+                        {isLoading ?
+                            "Загрузка" : (
+                                <div className={'flex gap-2 flex-wrap'}>
+                                    {departments?.map((department) => (
+                                        <Btn
+                                            key={department.id}
+                                            className={
+                                                twMerge(
+                                                    userData.departments.includes(department.id) ? 'bg-green-300' : 'bg-red-300',
+                                                    'p-0 px-1 text-sm'
+                                                )
+                                            }
+                                        >
+                                            {department.name}
+                                        </Btn>))}
+                                </div>
+                            )
+                        }
+                    </div>
+                </div>
+
             </div>
+
         </FormProvider>
     );
 };

@@ -33,8 +33,8 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
     const kpiPlan = usePermission(APP_PERM.KPI_PAGE);
 
     const showAmount = useMemo(() => {
-        return currentUser.current_department?.piecework_wages && bossPerm;
-    }, [bossPerm, currentUser.current_department?.piecework_wages]);
+        return currentUser.current_department_details?.piecework_wages && bossPerm;
+    }, [bossPerm, currentUser.current_department_details?.piecework_wages]);
 
     const showPrice = useMemo(() => {
         const localValue = localStorage.getItem(`${listType}ShowSum`)

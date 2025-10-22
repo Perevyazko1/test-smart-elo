@@ -31,11 +31,9 @@ class DepartmentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
-    departments = DepartmentSerializer(many=True, read_only=True)
-    current_department = DepartmentSerializer(many=False, read_only=True)
-    permanent_department = DepartmentSerializer(many=False, read_only=True)
     groups = GroupSerializer(many=True, read_only=True)
     token = serializers.SerializerMethodField()
+    current_department_details = DepartmentSerializer(source='current_department', read_only=True)
 
     class Meta:
         model = Employee
@@ -49,6 +47,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'description',
             'boss',
             'current_department',
+            'current_department_details',
             'permanent_department',
             'favorite_users',
             'pin_code',
@@ -63,11 +62,11 @@ class EmployeeSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'username',
-            'boss',
             'pin_code',
             'groups',
             'token',
         ]
+
 
     def get_token(self, obj):
         token, created = Token.objects.get_or_create(user=obj)

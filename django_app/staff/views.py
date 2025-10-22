@@ -22,11 +22,6 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     ordering_fields = ['permanent_department']
-    #
-    # def list(self, request, *args, **kwargs):
-    #     response = super().list(request, *args, **kwargs)
-    #
-    #     return response
 
 
 class DepartmentViewSet(viewsets.ModelViewSet):

@@ -36,6 +36,7 @@ export const Navbar = (props: NavbarProps) => {
     const cashPage = usePermission([APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]);
     const planPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
     const shipmentPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
+    const skladPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
 
     const WagesLink = (props: { border: boolean }) => (
         <AppLink
@@ -77,6 +78,14 @@ export const Navbar = (props: NavbarProps) => {
         <AppLink
             path={"/shipment"}
             name={"Отгрузки"}
+            border={props.border}
+        />
+    )
+
+    const SkladLink = (props: { border: boolean }) => (
+        <AppLink
+            path={"/sklad"}
+            name={"Склад"}
             border={props.border}
         />
     )
@@ -151,6 +160,10 @@ export const Navbar = (props: NavbarProps) => {
 
                         {shipmentPage && (
                             <ShipmentLink border={true}/>
+                        )}
+
+                        {skladPage && (
+                            <SkladLink border={true}/>
                         )}
 
 

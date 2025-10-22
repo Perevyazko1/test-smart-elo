@@ -1,3 +1,5 @@
+import type {IDepartment} from "@/entities/department";
+
 export const APP_PERM = {
     ANON: 'Анонимный пользователь',
     ADMIN: 'Администраторы',
@@ -39,15 +41,15 @@ export interface IGroup {
 
 export interface IUser {
     id?: number;
-    first_name: string;
-    last_name: string;
-    patronymic: string;
+    first_name: string | null;
+    last_name: string | null;
+    patronymic: string | null;
     username: string;
-    departments: string;
-    description: string;
-    boss: string;
-    current_department: number;
-    permanent_department: number;
+    departments: number[];
+    description: string | null;
+    boss: number | null;
+    current_department: number | null;
+    permanent_department: number | null;
     pin_code: string;
     attention: boolean;
     is_active: boolean;

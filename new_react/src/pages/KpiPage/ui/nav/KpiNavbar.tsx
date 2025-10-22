@@ -1,28 +1,12 @@
 import {AppNavbar} from "@widgets/AppNavbar";
-import {useCurrentUser, useQueryParams} from "@shared/hooks";
-import {AppSelect, AppSwitch, AppTooltip} from "@shared/ui";
-import React, {useMemo} from "react";
-import {Department} from "@entities/Department";
+import {useQueryParams} from "@shared/hooks";
+import {AppSwitch, AppTooltip} from "@shared/ui";
+import React from "react";
+import {DepartmentDropdown} from "@pages/TarifficationPage/ui/nav/DepartmentDropdown";
 
 
 export const KpiNavbar = () => {
     const {queryParameters, setQueryParam} = useQueryParams();
-
-    const {currentUser} = useCurrentUser();
-
-    const selectedDepartment = useMemo(() => {
-        return currentUser.departments.find(
-            department => String(department.id) === queryParameters.department__id
-        ) || null;
-    }, [currentUser.departments, queryParameters.department__id]);
-
-    const setDepartmentClb = (department: Department | null) => {
-        if (department) {
-            setQueryParam('department__id', String(department.id))
-        } else {
-            setQueryParam('department__id', '')
-        }
-    };
 
     const switchHandle = () => {
         if (queryParameters.showSum) {
@@ -34,16 +18,7 @@ export const KpiNavbar = () => {
 
     return (
         <AppNavbar>
-            <AppSelect
-                variant={'select'}
-                noInput
-                value={selectedDepartment}
-                label={'Отдел'}
-                options={currentUser.departments}
-                getOptionLabel={item => item ? item.name : ""}
-                onSelect={setDepartmentClb}
-                colorScheme={'darkInput'}
-            />
+            <DepartmentDropdown/>
 
             <AppTooltip title="Показывать сделку">
                 <AppSwitch

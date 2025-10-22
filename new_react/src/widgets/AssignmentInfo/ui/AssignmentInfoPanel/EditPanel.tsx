@@ -40,10 +40,10 @@ export const EditPanel = (props: EditPanelProps) => {
 
 
     const updateClb = (mode: 'selected' | 'remove_visa') => {
-        if (currentUser.current_department) {
+        if (currentUser.current_department_details) {
             editAssignments({
                 series_id: seriesId,
-                department__id: currentUser.current_department.id,
+                department__id: currentUser.current_department_details.id,
                 date: inputDate,
                 ids: selectedIds,
                 mode: mode,

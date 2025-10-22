@@ -10,6 +10,7 @@ import {TextAreaForm} from "@/shared/ui/inputs/TextInputForm.tsx";
 import {PriceInputForm} from "@/shared/ui/inputs/PriceInputForm.tsx";
 import {NiceNum} from "@/shared/ui/text/NiceNum.tsx";
 import {usePermission} from "@/shared/utils/permissions";
+import {twMerge} from "tailwind-merge";
 
 
 interface CreateEarningFormProps {
@@ -28,6 +29,8 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
     const {onSubmit, amount, target_date, about, disabled = true, earning_type, user, createdById} = props;
     const clipboardAmount = useClipboard();
     const clipboardComment = useClipboard();
+
+    const [taxAdded, setTaxAdded] = useState(false);
 
 
     const methods = useForm<ICreateEarning>({
@@ -110,6 +113,7 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
         toast.success("Сумма скопирована");
     }
 
+
     const copyCommentHandle = () => {
         clipboardComment.copy();
         toast.success("Комментарий скопирован");
@@ -117,15 +121,43 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
 
     const canSetDate = usePermission(APP_PERM.ADMIN);
 
+    const handleAddTax = () => {
+        const currentAmount = methods.getValues("amount");
+        if (taxAdded) {
+            const newAmount = Number((currentAmount * 0.94).toFixed(2));
+            methods.setValue("amount", newAmount);
+            setTaxAdded(false);
+        } else {
+            const newAmount = Number((currentAmount / 0.94).toFixed(2));
+            methods.setValue("amount", newAmount);
+            setTaxAdded(true);
+        }
+    };
 
     return (
         <div className={'flex flex-nowrap gap-4'}>
             <FormProvider {...methods}>
                 <form onSubmit={onSubmitHandler} className="space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor={"amount"}>
-                            Сумма
-                        </label>
+                        <div className={'flex justify-between items-center gap-2'}>
+                            <label htmlFor={"amount"}>
+                                Сумма
+                            </label>
+                            <Btn
+                                className={twMerge(
+                                    taxAdded ? "bg-red-200" : "bg-teal-200",
+                                    "py-0 px-2"
+                                )}
+                                onClick={handleAddTax}
+                            >
+                                {taxAdded ?
+                                    "Убрать налог 6%"
+                                    :
+                                    "Начислить налог 6%"
+                                }
+                            </Btn>
+                        </div>
+
 
                         <PriceInputForm
                             placeholder="Сумма"
@@ -171,7 +203,6 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
 
             {(user?.piecework_amount && earning_type === "ДОП") && (
                 <div className={'flex flex-col gap-3'}>
-
                     <div className={'flex gap-3'}>
                         {Object.entries(weekData).map(([day, value], index) => (
                             <div key={index} className="flex flex-col gap-2 items-center">
@@ -218,7 +249,6 @@ export const CreateEarningForm = (props: CreateEarningFormProps) => {
                             readOnly
                         />
                     </div>
-
                     <hr/>
                     <div
                         onClick={copyCommentHandle}

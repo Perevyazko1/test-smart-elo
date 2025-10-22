@@ -66,7 +66,6 @@ def update_orders():
                 order_product = OrderProduct.objects.get(series_id=entity.series_id)
 
                 if order_product.product.product_id == entity.product_id or order_product.product.name == entity.product_name:
-                    print(f"▶️▶️▶️ {order_product.product.name} {entity.shipped} {order_product.shipped}")
                     order_product.shipped = entity.shipped
                     order_product.price = entity.price
                     order_product.save()

@@ -16,9 +16,9 @@ export const EqFilters = () => {
     const bossPerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
 
     useEffect(() => {
-        if (currentUser.current_department?.number && !initialLoad) {
+        if (currentUser.current_department_details?.number && !initialLoad) {
             dispatch(fetchEqFilters({
-                department_id: currentUser.current_department.id,
+                department_id: currentUser.current_department_details.id,
                 project_mode: queryParameters.project_mode,
             }));
         }
@@ -26,7 +26,7 @@ export const EqFilters = () => {
             dispatch(eqPageActions.viewModeInited());
         }
         // eslint-disable-next-line
-    }, [bossPerm, currentUser.current_department?.number, dispatch, initialLoad, queryParameters.project_mode]);
+    }, [bossPerm, currentUser.current_department_details?.number, dispatch, initialLoad, queryParameters.project_mode]);
 
 
     return (

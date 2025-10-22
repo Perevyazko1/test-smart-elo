@@ -26,12 +26,12 @@ export const AreaGhost = (props: AreaGhostProps) => {
     const [{isOver}, drop] = useDrop({
         accept: 'eq_card',
         drop: (item: { assignmentsLists: EqNumberListTipe, card: EqOrderProduct }) => {
-            if (item && currentUser.current_department?.id) {
+            if (item && currentUser.current_department_details?.id) {
                 const assignments = [...item.assignmentsLists.primary, ...item.assignmentsLists.selectedLocked];
                 editAssignments({
                     ids: assignments.map(assignment => assignment.id),
                     date: dayInfo.dtDay || '',
-                    department__id: currentUser.current_department.id,
+                    department__id: currentUser.current_department_details.id,
                     series_id: item.card.series_id,
                     mode: 'selected'
                 }).then(() => {
@@ -43,7 +43,7 @@ export const AreaGhost = (props: AreaGhostProps) => {
             isOver: monitor.isOver(),
         }),
     });
-    
+
     const loadPercent = useMemo(() => {
         if (!total_units_day || current_load === null) {
             return null;
@@ -63,8 +63,7 @@ export const AreaGhost = (props: AreaGhostProps) => {
         item.card.card_info.timing,
         total_units_day
     ])
-    
-    
+
 
     return (
         <div
