@@ -195,7 +195,6 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     </td>
                 )}
 
-
                 {/*Начислено ДОП и задачи*/}
                 <UserAddCell
                     value={

@@ -1,7 +1,7 @@
 import {Controller, useFormContext} from "react-hook-form";
 import {NumericFormat} from 'react-number-format';
 import {twMerge} from 'tailwind-merge';
-import type {FocusEvent} from "react";
+import {type FocusEvent, useId} from "react";
 import type {InputHTMLAttributes} from "react";
 import {useShowCoins} from "@/shared/state/payroll/showCoins.ts";
 
@@ -14,6 +14,7 @@ export const PriceInputForm = (props: PriceInputProps) => {
     const {control} = useFormContext();
     const showCoins = useShowCoins(s => s.showCoins);
 
+    const inputId = useId();
 
     return (
         <Controller
@@ -21,6 +22,7 @@ export const PriceInputForm = (props: PriceInputProps) => {
             control={control}
             render={({field: {onChange, onBlur: rhfOnBlur, value, ref}}) => (
                 <NumericFormat
+                    key={inputId + showCoins}
                     getInputRef={ref}
                     value={(value ?? 0) / 100}
                     onValueChange={(values) => {

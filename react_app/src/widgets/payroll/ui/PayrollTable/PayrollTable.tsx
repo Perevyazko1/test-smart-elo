@@ -14,6 +14,7 @@ import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
 import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
+import {useShowCoins} from "@/shared/state/payroll/showCoins.ts";
 
 
 interface PayrollTableProps {
@@ -28,6 +29,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const showDayPrice = useShowDayPrice(s => s.showDayPrice);
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
     const showTotal = useShowTotal(s => s.showTotal);
+    const showCoins = useShowCoins(s => s.showCoins);
     const hideSum = useHideSum(s => s.hideSum);
 
     const {data, isError, isFetching} = useQuery({
@@ -51,16 +53,14 @@ export const PayrollTable = (props: PayrollTableProps) => {
         }, {} as Record<string, typeof data.data>);
     }, [data?.data]);
 
-    if (isError) {
-        return (<div>Ошибка...</div>)
+    const calculateTotal = (field: keyof IPayrollRow) => {
+        if (!data?.data) return 0;
+        return data.data.reduce((sum, row) => {
+            const value = Number(row[field] ?? 0);
+            const roundedValue = showCoins ? value : Math.round(value / 100) * 100;
+            return sum + roundedValue;
+        }, 0);
     }
-
-    if (isFetching) {
-        return (<div>Загрузка...</div>)
-    }
-
-    const calculateTotal = (field: keyof IPayrollRow) =>
-        data?.data?.reduce((sum, row) => Number(sum) + Number(row[field] || 0), 0) || 0;
 
     const totalBalance = calculateTotal('balance_sum');
     const totalCard = calculateTotal('card_sum');
@@ -80,6 +80,13 @@ export const PayrollTable = (props: PayrollTableProps) => {
     const totalPayout = totalCashPayout + totalIpPayout + totalCardPayout + totalTaxPayout + totalLoanPayout;
     const blurStateClass = hideSum ? 'text-transparent group-hover:text-black' : '';
 
+    if (isError) {
+        return (<div>Ошибка...</div>)
+    }
+
+    if (isFetching) {
+        return (<div>Загрузка...</div>)
+    }
     return (
         <Table>
             <THead className={'sticky top-[51px] z-10 group'}>
@@ -87,6 +94,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh
                         className={'text-center'}
                     >
+                        {String(showCoins)}
                         Всего НАЛ ИП БН: <NiceNum
                         value={totalPayout - totalTaxPayout - totalLoanPayout}
                         className={blurStateClass}
@@ -145,48 +153,48 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh className={'text-center'}>Отдел / ФИО</PayrollTh>
                     {showDayPrice && (
                         <PayrollTh><NiceNum value={totalDaySum * 8}
-                        className={blurStateClass}/></PayrollTh>
+                                            className={blurStateClass}/></PayrollTh>
                     )}
                     <PayrollTh><NiceNum value={totalBalance}
-                        className={blurStateClass}/></PayrollTh>
+                                        className={blurStateClass}/></PayrollTh>
                     {showEarnedDetail ? (
                         <>
                             <PayrollTh><NiceNum value={totalEarned}
-                        className={blurStateClass}/></PayrollTh>
+                                                className={blurStateClass}/></PayrollTh>
                             <PayrollTh><NiceNum value={totalBonus}
-                        className={blurStateClass}/></PayrollTh>
+                                                className={blurStateClass}/></PayrollTh>
                         </>
                     ) : (
                         <PayrollTh><NiceNum value={totalEarned + totalBonus}
-                        className={blurStateClass}/></PayrollTh>
+                                            className={blurStateClass}/></PayrollTh>
                     )}
 
                     {showTotal ? (
                         <PayrollTh className={'bg-blue-100 font-bold'}>
                             <NiceNum value={totalPayout}
-                        className={blurStateClass}/>
+                                     className={blurStateClass}/>
                         </PayrollTh>
                     ) : (
                         <>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
                                 <NiceNum value={totalCashPayout}
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
                                 <NiceNum value={totalIpPayout}
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
                                 <NiceNum value={totalCardPayout}
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
                                 <NiceNum value={totalTaxPayout}
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh className={'bg-blue-100 font-bold'}>
                                 <NiceNum value={totalLoanPayout}
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                         </>
                     )}
@@ -203,7 +211,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             totalTaxPayout -
                             totalLoanPayout
                         }
-                        className={blurStateClass}/>
+                                 className={blurStateClass}/>
                     </PayrollTh>
 
                     {showTotal ? (
@@ -215,7 +223,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                                 totalTax +
                                 totalLoan
                             }
-                        className={blurStateClass}/>
+                                     className={blurStateClass}/>
                         </PayrollTh>
                     ) : (
                         <>
@@ -224,31 +232,31 @@ export const PayrollTable = (props: PayrollTableProps) => {
                                 className={'bg-purple-50 font-bold'}
                             >
                                 <NiceNum value={totalIssued} abs
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
                                 <NiceNum value={totalIp} abs
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
                                 <NiceNum value={totalCard} abs
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
                                 <NiceNum value={totalTax} abs
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                             <PayrollTh
                                 className={'bg-purple-50 font-bold'}
                             >
                                 <NiceNum value={totalLoan} abs
-                        className={blurStateClass}/>
+                                         className={blurStateClass}/>
                             </PayrollTh>
                         </>
                     )}
@@ -269,7 +277,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             totalTax +
                             totalLoan
                         }
-                        className={blurStateClass}/>
+                                 className={blurStateClass}/>
                     </PayrollTh>
                 </tr>
             </THead>

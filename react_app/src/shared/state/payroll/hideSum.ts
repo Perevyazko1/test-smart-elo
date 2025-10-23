@@ -8,7 +8,8 @@ interface HideSumState {
 
 
 export const useHideSum = create<HideSumState>((set) => ({
-    hideSum: localStorage.getItem('hideSum') === 'true',
+    hideSum:
+        typeof window !== 'undefined' ? localStorage.getItem('hideSum') === 'true' : false,
     setHideSum: (hideSum: boolean) => {
         localStorage.setItem('hideSum', hideSum.toString());
         set({hideSum})

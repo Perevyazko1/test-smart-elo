@@ -12,7 +12,11 @@ export const NiceNum = (props: NiceNumProps) => {
     const {value, className, abs = false, ...otherProps} = props;
     const showCoins = useShowCoins(s => s.showCoins);
 
-    const integerPart = value ? Math.floor(Math.abs(value) / 100) : 0;
+    const integerPart = value ? Math.floor(Math.abs(
+        showCoins ? value / 100 :
+        Math.round(value / 100)
+    )) : 0;
+
     const fractionalPart = value ? String(Math.abs(value) % 100).padStart(2, '0') : '00';
 
     return (

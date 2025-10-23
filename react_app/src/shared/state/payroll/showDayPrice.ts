@@ -8,7 +8,7 @@ interface ShowDayPriceState {
 
 
 export const useShowDayPrice = create<ShowDayPriceState>((set) => ({
-    showDayPrice: localStorage.getItem('showDayPrice') === 'true',
+    showDayPrice: typeof window !== 'undefined' ? localStorage.getItem('showDayPrice') === 'true' : false,
     setShowDayPrice: (showDayPrice: boolean) => {
         localStorage.setItem('showDayPrice', showDayPrice.toString());
         set({showDayPrice})

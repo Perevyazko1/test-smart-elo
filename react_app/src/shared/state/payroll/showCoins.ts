@@ -8,7 +8,7 @@ interface ShowCoinsState {
 
 
 export const useShowCoins = create<ShowCoinsState>((set) => ({
-    showCoins: localStorage.getItem('showCoins') === 'true',
+    showCoins: typeof window !== 'undefined' ? localStorage.getItem('showCoins') === 'true' : false,
     setShowCoins: (showCoins: boolean) => {
         localStorage.setItem('showCoins', showCoins.toString());
         set({showCoins})

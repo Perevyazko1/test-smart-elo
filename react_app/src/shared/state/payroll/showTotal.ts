@@ -8,7 +8,8 @@ interface ShowTotalState {
 
 
 export const useShowTotal = create<ShowTotalState>((set) => ({
-    showTotal: localStorage.getItem('showTotal') === 'true',
+    showTotal:
+        typeof window !== 'undefined' ? localStorage.getItem('showTotal') === 'true' : false,
     setShowTotal: (showTotal: boolean) => {
         localStorage.setItem('showTotal', showTotal.toString());
         set({showTotal})
