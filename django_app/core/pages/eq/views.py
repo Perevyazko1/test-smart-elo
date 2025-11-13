@@ -2,6 +2,7 @@
 import re
 from dataclasses import asdict
 from datetime import datetime, timedelta
+from time import sleep
 
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
@@ -384,8 +385,10 @@ def print_labels(request):
 
         if department.name in ["Конструктора", "Лазер"]:
             target_ip = "172.16.1.115"
-        elif department.name in ["Обивка", "ППУ", "Подрядчики", "Упаковка"]:
+        elif department.name in ["Обивка", "ППУ"]:
             target_ip = "172.16.1.116"
+        elif department.name in ["Подрядчики", "Упаковка"]:
+            target_ip = "172.16.1.38"
         elif department.name in ["Крой", "Пошив"]:
             target_ip = "172.16.1.117"
         elif department.name in ["Сборка", "Пила"]:
@@ -423,6 +426,7 @@ def print_labels(request):
             department=department_name
         )
         print_assignment_label(label, target_ip=target_ip)
+        sleep(1)
 
         target_assignment.print_count = target_assignment.print_count + 1
         target_assignment.last_print_date = datetime.now()
