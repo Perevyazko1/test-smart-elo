@@ -334,9 +334,7 @@ def print_assignment_label(label_data: LabelData, font_path: Optional[str] = Non
     draw_label_layout(img, draw, label_data, fonts, label_width, label_height)
 
     # Сохранение в BMP
-    bmp_path = os.path.join(os.path.dirname(__file__), "label.bmp")
     img = img.convert("1")
-    img.save(bmp_path)
 
     # Отправка на принтер
     raw_data = img.tobytes()

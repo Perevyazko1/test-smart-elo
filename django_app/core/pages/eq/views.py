@@ -426,7 +426,7 @@ def print_labels(request):
             department=department_name
         )
         print_assignment_label(label, target_ip=target_ip)
-        sleep(1)
+        sleep(1.5)
 
         target_assignment.print_count = target_assignment.print_count + 1
         target_assignment.last_print_date = datetime.now()
