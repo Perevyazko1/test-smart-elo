@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from "react";
-import {Container, Spinner, Table} from "react-bootstrap";
+import {Spinner, Table} from "react-bootstrap";
 
 import cls from './AssignmentPage.module.scss';
 

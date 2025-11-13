@@ -17,7 +17,7 @@
       <sourceFolder url="file://$MODULE_DIR$/django_app" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/react_app" isTestSource="false" />
     </content>
-    <orderEntry type="jdk" jdkName="Remote Python 3.12.10 Docker Compose (server)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Remote Python 3.12.12 Docker (eq-server:latest) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="PyDocumentationSettings">

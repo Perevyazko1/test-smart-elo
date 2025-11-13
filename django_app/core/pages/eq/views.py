@@ -1,7 +1,7 @@
 """Views for EQ Page. """
+import re
 from dataclasses import asdict
 from datetime import datetime, timedelta
-import re
 
 from django.db.models import Sum
 from django.http import JsonResponse, Http404
@@ -10,15 +10,11 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from core.models import (
-    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, OrderProductComment, Fabric)
+    OrderProduct, Assignment, ProductionStep, AssignmentCoExecutor, Fabric)
 from salary.models import Earning
-from salary.service.get_user_info import get_user_info
 from salary.service.make_earning import make_earning
+from src.label_printer.assignment.assignment import LabelData, print_assignment_label
 from src.label_printer.fabric.print_label_fabric import print_label_fabric
-from src.label_printer.fabric_temlate import get_fabric_label_commands
-from src.label_printer.main_label_template import main_label_template
-from src.label_printer.printer import Printer
-from src.label_printer.printer_tspl2 import PrinterTSPL2
 from staff.models import Employee, Department
 from staff.service import is_user_in_group
 from .serializers import EqOrderProductSerializer
@@ -386,9 +382,21 @@ def print_labels(request):
         op = target_assignment.order_product
         department = target_assignment.department
 
+        if department.name in ["Конструктора", "Лазер"]:
+            target_ip = "172.16.1.115"
+        elif department.name in ["Обивка", "ППУ", "Подрядчики", "Упаковка"]:
+            target_ip = "172.16.1.116"
+        elif department.name in ["Крой", "Пошив"]:
+            target_ip = "172.16.1.117"
+        elif department.name in ["Сборка", "Пила"]:
+            target_ip = "172.16.1.118"
+        elif department.name in ["Столярка", "Малярка"]:
+            target_ip = "172.16.1.119"
+        else:
+            raise Exception
+
         project = target_assignment.order_product.order.project
-        order_number = target_assignment.order_product.order.number
-        position_number = target_assignment.order_product.series_id.split('-')[0]
+        order = target_assignment.order_product.series_id
         product_name = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '', target_assignment.order_product.product.name)
         t1 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
                     target_assignment.order_product.main_fabric.name) if target_assignment.order_product.main_fabric else ""
@@ -397,61 +405,24 @@ def print_labels(request):
         t3 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
                     target_assignment.order_product.third_fabric.name) if target_assignment.order_product.third_fabric else ""
 
-        op_comments = OrderProductComment.objects.filter(
-            order_product=target_assignment.order_product
-        ).exclude(
-            deleted=True
-        ).order_by('-important', '-add_date')
-
-        comments = []
-        for comment in op_comments:
-            comments.append(re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '', comment.text))
-
         department_name = target_assignment.department.name
-        inner_number = target_assignment.order_product.order.inner_number
 
-        print_date = datetime.now().strftime('%d.%m %H:%M:%S')
+        print_date = datetime.now().strftime('%d.%m %H:%M')
 
-        main_text = [
-            (project, 14 if len(project) < 15 else 11),
-            ("---------", 8),
-            (product_name, 12),
-            ("---------", 8),
-        ]
-
-        if t1:
-            main_text.append((f'Т1: {t1}', 10))
-        if t2:
-            main_text.append((f'Т2: {t2}', 7))
-        if t3:
-            main_text.append((f'Т3: {t3}', 7))
-
-        main_text.extend([
-            *(("К: " + comment, 8) for comment in comments),
-            ("---------", 8),
-        ])
-
-        printer = Printer()
-        qr_text = f"assignment_id={target_assignment.id}"
-        order_text = [
-            (order_number, 14),
-            ('---------', 8),
-            (f'{position_number} ПОЗ', 11),
-            ('---------', 8),
-            (f'№ {target_assignment.number}', 11),
-            (f'{print_date}{user}', 5),
-        ]
-        department_text = [
-            (f"{department_name}: {inner_number}", 10),
-        ]
-
-        label = main_label_template(
-            main_text,
-            qr_text,
-            order_text,
-            department_text
+        label = LabelData(
+            project=project,
+            order_number=f"{order} №{target_assignment.number}",
+            product=product_name,
+            fabrics=[
+                f'Т1:{t1}',
+                f'Т2:{t2}',
+                f'Т3:{t3}',
+            ],
+            qr_data=f"{assignment_id}",
+            inspector_info=f"ОКК:{user} {print_date}",
+            department=department_name
         )
-        printer.print_label(label)
+        print_assignment_label(label, target_ip=target_ip)
 
         target_assignment.print_count = target_assignment.print_count + 1
         target_assignment.last_print_date = datetime.now()

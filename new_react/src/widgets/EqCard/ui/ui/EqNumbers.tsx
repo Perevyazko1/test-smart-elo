@@ -58,7 +58,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
 
     return (
         <>
-            {(isBoss && [2, 10].includes(currentUser.current_department_details?.number || 0)) && (
+            {isBoss && (
                 <button
                     className={"appBtn p-1 rounded h-100 fw-bold position-relative"}
                     style={{minWidth: '35px', fontSize: 12}}

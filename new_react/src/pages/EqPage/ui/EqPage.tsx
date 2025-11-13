@@ -2,11 +2,10 @@ import {ModalProvider} from "@app";
 
 import {DynamicComponent, QueryContext, ReducersList} from "@features";
 
-import {eqPageReducer} from "../model/slice/eqPageSlice";
+import {eqPageReducer} from "@pages/EqPage";
 
 import {EqNav} from "./EqNav/EqNav";
 import {EqBody} from "./EqBody/EqBody";
-import {Container} from "react-bootstrap";
 
 // Список редьюсеров для инициализации
 const initialReducers: ReducersList = {

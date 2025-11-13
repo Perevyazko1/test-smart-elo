@@ -1,6 +1,6 @@
 import {useCurrentUser, useEmployeeName, useQueryParams} from "@shared/hooks";
 import {SALARY_URL} from "@shared/consts/serverConfig/serverConfig";
-import {useCallback, useState} from "react";
+import {useCallback} from "react";
 
 
 interface WagesInfoProps {

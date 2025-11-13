@@ -65,6 +65,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 pytz==2025.2
 PyYAML==6.0.1
+qrcode==8.2
 redis==5.0.4
 requests==2.32.3
 service-identity==24.1.0
