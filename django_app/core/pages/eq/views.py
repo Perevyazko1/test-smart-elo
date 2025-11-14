@@ -385,10 +385,10 @@ def print_labels(request):
 
         if department.name in ["Конструктора", "Лазер"]:
             target_ip = "172.16.1.38"
-        elif department.name in ["Обивка", "ППУ"]:
-            target_ip = "172.16.1.116"
         elif department.name in ["Подрядчики", "Упаковка"]:
             target_ip = "172.16.1.115"
+        elif department.name in ["Обивка", "ППУ"]:
+            target_ip = "172.16.1.116"
         elif department.name in ["Крой", "Пошив"]:
             target_ip = "172.16.1.117"
         elif department.name in ["Сборка", "Пила"]:
