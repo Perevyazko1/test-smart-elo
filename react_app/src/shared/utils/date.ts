@@ -1,4 +1,4 @@
-import {endOfISOWeek, format, getISOWeek, startOfISOWeek, subWeeks} from 'date-fns';
+import {addWeeks, endOfISOWeek, format, getISOWeek, startOfISOWeek, subWeeks} from 'date-fns';
 import {ru} from 'date-fns/locale';
 import {useCallback, useEffect, useState} from 'react';
 
@@ -13,10 +13,31 @@ export const toRuDate = (dateStr: string, short: boolean = true): string => {
     const date = new Date(dateStr);
     return format(date, short ? 'd MMM yy' : 'ddMMMyy HH:mm', {locale: ru});
 };
-
-export const generateWeeks = (count: number = 7): IWeek[] => {
+export const generateWeeks = (count: number = 7, startDate?: Date | string): IWeek[] => {
     const weeks: IWeek[] = [];
-    let currentDate = new Date();
+    let currentDate: Date;
+    const today = new Date();
+
+    if (startDate) {
+        // Convert startDate to Date object if it's a string
+        const inputDate = typeof startDate === 'string' ? new Date(startDate) : startDate;
+
+        // Get the start of the week for both dates
+        const startOfInputWeek = startOfISOWeek(inputDate);
+        const startOfCurrentWeek = startOfISOWeek(today);
+
+        // If the input week is in the future or current, start from current week
+        if (startOfInputWeek > startOfCurrentWeek) {
+            currentDate = today;
+        } else {
+            // If the input week is in the past, add one week to it
+            const nextWeek = startOfISOWeek(addWeeks(inputDate, 1));
+            // If the next week is in the future, start from current week
+            currentDate = nextWeek > startOfCurrentWeek ? today : nextWeek;
+        }
+    } else {
+        currentDate = today;
+    }
 
     for (let i = 0; i < count; i++) {
         const start = startOfISOWeek(currentDate);
@@ -54,7 +75,10 @@ export const useWeeks = (props: {count?: number, initialDateFrom?: string}): Use
     const [currentWeek, setCurrentWeek] = useState<IWeek | null>(null);
 
     useEffect(() => {
-        const generatedWeeks = generateWeeks(count);
+        const generatedWeeks = generateWeeks(
+            count,
+            initialDateFrom
+        );
         setWeeks(generatedWeeks);
 
         if (generatedWeeks.length > 0) {
