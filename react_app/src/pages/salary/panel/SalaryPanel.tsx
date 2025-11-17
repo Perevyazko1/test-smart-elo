@@ -20,12 +20,22 @@ export const SalaryPanel = (props: SalaryPanelProps) => {
         ])}>
             <div className={'flex items-center gap-2 min-w-0'}>
                 <div className={'hidden md:block'}>
-                    Недели:
+                    <div>Недели:</div>
+                    {url === "/salary" && (
+                        <Link
+                            to={`${url}`}
+                        >
+                            <Btn className={'p-0 w-full text-sm outline-2'}>
+                                ⏮️
+                            </Btn>
+                        </Link>
+                    )}
                 </div>
                 <div className={twMerge([
                     'flex text-sm',
                     'overflow-x-auto'
                 ])}>
+
                     {weeks.map((week) => (
                         <Link
                             key={week.weekNumber}
