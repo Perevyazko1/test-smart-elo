@@ -21,8 +21,6 @@ export const EqNumbers = (props: EqNumbersProps) => {
 
     const isBoss = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
     const isAdmin = usePermission(APP_PERM.ADMIN);
-    const {currentUser} = useCurrentUser();
-
 
     const getCoExecutorAmount = useCallback((item: EqAssignment) => {
         return item.co_executors?.find(co_executor => co_executor.co_executor === targetUserId)?.wages_amount;
