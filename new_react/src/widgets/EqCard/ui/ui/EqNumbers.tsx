@@ -51,7 +51,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
         if (isBoss && window.confirm(`Распечатать бегун 1 шт?`)) {
             requestPrintLabels({
                 assignment_ids: [assignment_id],
-                is_admin: isAdmin || currentUser.current_department_details?.number === 10,
+                is_admin: isBoss,
             })
         }
     }
