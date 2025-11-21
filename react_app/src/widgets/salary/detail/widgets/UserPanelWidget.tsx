@@ -58,7 +58,11 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                 loading: 'Применение изменений',
                 success: (data) => {
                     client.invalidateQueries({
-                            queryKey: ['payrollRows']
+                        queryKey: ['payrollRows']
+                        }
+                    );
+                    client.invalidateQueries({
+                        queryKey: ['salaryDetail']
                         }
                     );
                     setUserData(data.data);
@@ -74,14 +78,11 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
         () => updateUserData({
             ...watchedValues,
         }),
-        1000
+        2000
     )
 
     useEffect(() => {
         const hasChanges = Object.entries(watchedValues).some(([key, value]) => {
-            if (userData[key as keyof IUserForm] !== value) {
-                console.log(key, value)
-            }
             return userData[key as keyof IUserForm] !== value;
         });
 
@@ -91,7 +92,12 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
     }, [watchedValues, userData]);
 
     const canEditUser = usePermission([
-        APP_PERM.WAGES_PAGE,
+        APP_PERM.HR,
+        APP_PERM.ADMIN,
+    ]);
+
+    const canAddEarnings = usePermission([
+        APP_PERM.WAGES_ADD_TRANSACTION,
         APP_PERM.ADMIN,
     ]);
 
@@ -104,7 +110,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                         <div className={'flex flex-col'}>
                             <span className={"text-sm"}>Фамилия</span>
                             <TextAreaForm
-                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                className={'p-2 resize-none bg-yellow-50'}
                                 name={'last_name'}
                                 disabled={!canEditUser}
                                 maxLength={255}
@@ -115,7 +121,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                         <div className={'flex flex-col'}>
                             <span className={"text-sm"}>Имя</span>
                             <TextAreaForm
-                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                className={'p-2 resize-none bg-yellow-50'}
                                 name={'first_name'}
                                 disabled={!canEditUser}
                                 maxLength={255}
@@ -127,7 +133,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                         <div className={'flex flex-col'}>
                             <span className={"text-sm"}>Отчество</span>
                             <TextAreaForm
-                                className={'p-2 resize-none bg-yellow-50 disabled:bg-transparent'}
+                                className={'p-2 resize-none bg-yellow-50'}
                                 name={'patronymic'}
                                 disabled={!canEditUser}
                                 maxLength={255}
@@ -138,14 +144,15 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                     </div>
                     {/*Блок комментарий и сделка*/}
                     <div>
-                        {canEditUser && (
+                        {(canEditUser || canAddEarnings) && (
                             <div className="relative">
                                 <div className={'flex flex-col h-full text-[0.8em] w-1/2'}>
-                                    <span>Комментарий:</span>
+                                    <span>Особенности расчета:</span>
 
                                     <TextAreaForm
                                         className={'p-2 resize-none w-full bg-yellow-50 disabled:bg-transparent'}
                                         name={'description'}
+                                        disabled={!canEditUser}
                                     />
                                 </div>
                             </div>
@@ -193,6 +200,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                         <span className={"text-sm"}>Начальник:</span>
                         <SelectUser
                             defaultValue={user.boss}
+                            disabled={!canEditUser}
                             onChange={(value) => {
                                 methods.setValue('boss', value);
                             }}
@@ -202,6 +210,7 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                     <div className={'flex flex-col'}>
                         <span className={"text-sm"}>Отдел:</span>
                         <SelectDepartment
+                            disabled={!canEditUser}
                             defaultValue={user.permanent_department}
                             onChange={(value) => {
                                 methods.setValue('permanent_department', value);

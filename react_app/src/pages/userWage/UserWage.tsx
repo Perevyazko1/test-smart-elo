@@ -9,17 +9,15 @@ import React from "react";
 
 export const UserWage = () => {
     const {userId, date_from} = useParams();
-
-    if (!userId || isNaN(Number(userId))) {
-        return <div>Invalid user ID provided</div>;
-    }
-
     const {weeks, currentWeek} = useWeeks({initialDateFrom: date_from});
-
     const canNavigate = usePermission([
         APP_PERM.WAGES_PAGE,
         APP_PERM.ADMIN,
     ]);
+
+    if (!userId || isNaN(Number(userId))) {
+        return <div>Invalid user ID provided</div>;
+    }
 
     return (
         <div className={'bg-gray-500 min-h-screen'}>

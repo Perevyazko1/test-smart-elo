@@ -1,8 +1,7 @@
-import type {IDepartment} from "@/entities/department";
-
 export const APP_PERM = {
     ANON: 'Анонимный пользователь',
     ADMIN: 'Администраторы',
+    HR: 'HR',
 
     ELO_PAGE: 'Страница ЭЛО',
     ELO_VIEW_ONLY: 'ЭЛО наблюдатель',

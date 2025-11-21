@@ -6,10 +6,11 @@ interface TTProps {
     children: ReactNode;
     description: string;
     asChild?: boolean;
+    className?: string;
 }
 
 export const TT = (props: TTProps) => {
-    const {children, description, asChild=false} = props;
+    const {children, description, asChild=false, className} = props;
 
     return (
         <Tooltip>
@@ -17,7 +18,7 @@ export const TT = (props: TTProps) => {
                 {children}
             </TooltipTrigger>
             <TooltipContent>
-                <p>{description}</p>
+                <p className={className}>{description}</p>
             </TooltipContent>
         </Tooltip>
     );

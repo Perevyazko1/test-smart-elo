@@ -51,7 +51,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
             acc[row.department_name].sort((a, b) => a.name.localeCompare(b.name));
             return acc;
         }, {} as Record<string, typeof data.data>);
-    }, [data?.data]);
+    }, [data]);
 
     const calculateTotal = (field: keyof IPayrollRow) => {
         if (!data?.data) return 0;
@@ -94,7 +94,6 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh
                         className={'text-center'}
                     >
-                        {String(showCoins)}
                         Всего НАЛ ИП БН: <NiceNum
                         value={totalPayout - totalTaxPayout - totalLoanPayout}
                         className={blurStateClass}

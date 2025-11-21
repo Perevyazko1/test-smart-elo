@@ -6,10 +6,11 @@ import type {IDepartment} from "@/entities/department";
 interface IProps {
     defaultValue?: number | null;
     onChange?: (value: number | null) => void;
+    disabled?: boolean;
 }
 
 export function SelectDepartment(props: IProps) {
-    const {defaultValue, onChange} = props;
+    const {defaultValue, onChange, disabled = false} = props;
 
     const {data: departments, isLoading} = useDepartments();
     const [selectedDepartment, setSelectedDepartment] = useState<IDepartment | null>();
@@ -28,6 +29,7 @@ export function SelectDepartment(props: IProps) {
         <Dropdown<IDepartment>
             className={'bg-yellow-50 text-black'}
             items={departments}
+            disabled={disabled}
             selectedItem={selectedDepartment}
             setSelectedItem={handleSelect}
             getItemLabel={(item) => item ?

@@ -1,5 +1,5 @@
 import {Toggle} from "@/components/ui/toggle.tsx";
-import {EnterIcon, ExitIcon, LockClosedIcon} from "@radix-ui/react-icons";
+import {EnterIcon, ExitIcon, InfoCircledIcon, LockClosedIcon} from "@radix-ui/react-icons";
 import {LockOpen} from "lucide-react";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {TT} from "@/shared/ui/tooltip/TT.tsx";
@@ -9,6 +9,8 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import type {AxiosResponse} from "axios";
 import type {IWeek} from "@/shared/utils/date.ts";
 import {Link} from "react-router-dom";
+import {usePermission} from "@/shared/utils/permissions.ts";
+import {APP_PERM} from "@/entities/user";
 
 
 interface UserNameCellProps {
@@ -23,6 +25,12 @@ export const UserNameCell = (props: UserNameCellProps) => {
     const {userInfo, mutateClb, isPending, week} = props;
 
     const queryClient = useQueryClient();
+
+    const canReadDescription = usePermission([
+        APP_PERM.WAGES_ADD_TRANSACTION,
+        APP_PERM.HR,
+        APP_PERM.ADMIN,
+    ]);
 
     const closeRow = useMutation({
         mutationFn: payrollService.closePayrollRow,
@@ -82,20 +90,32 @@ export const UserNameCell = (props: UserNameCellProps) => {
 
                 </div>
 
-                <TT asChild description={`${userInfo.is_closed ? "Открыть" : "Закрыть"} неделю по сотруднику`}>
-                    <Btn
-                        disabled={userInfo.has_unconfirmed}
-                        className={'text-16 bg-transparent px-2 noPrint'}
-                        name={'Payroll'}
-                        onClick={closeWeekRowHandle}
-                    >
-                        {userInfo.is_closed ? (
-                            <EnterIcon/>
-                        ) : (
-                            <ExitIcon/>
-                        )}
-                    </Btn>
-                </TT>
+                <div className={'flex items-center gap-2'}>
+                    {canReadDescription && userInfo.user.description && (
+                        <TT
+                            asChild
+                            className={"whitespace-pre-wrap"}
+                            description={`${userInfo.user.description}`}
+                        >
+                            <InfoCircledIcon/>
+                        </TT>
+                    )}
+
+                    <TT asChild description={`${userInfo.is_closed ? "Открыть" : "Закрыть"} неделю по сотруднику`}>
+                        <Btn
+                            disabled={userInfo.has_unconfirmed}
+                            className={'text-16 bg-transparent px-2 noPrint'}
+                            name={'Payroll'}
+                            onClick={closeWeekRowHandle}
+                        >
+                            {userInfo.is_closed ? (
+                                <EnterIcon/>
+                            ) : (
+                                <ExitIcon/>
+                            )}
+                        </Btn>
+                    </TT>
+                </div>
             </div>
         </td>
     )

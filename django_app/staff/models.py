@@ -76,6 +76,8 @@ class Employee(AbstractUser):
 
     attention = models.BooleanField(default=False)
 
+
+
     def __str__(self):
         if self.first_name and self.last_name:
             return '{}'.format(f'{self.last_name} {self.first_name}')

@@ -22,6 +22,8 @@ import {useShowDayPrice} from "@/shared/state/payroll/showDayPrice.ts";
 import {useShowEarnedDetail} from "@/shared/state/payroll/showEarnedDetail.ts";
 import {useShowTotal} from "@/shared/state/payroll/showTotal.ts";
 import {useHideSum} from "@/shared/state/payroll/hideSum.ts";
+import {usePermission} from "@/shared/utils/permissions.ts";
+import {APP_PERM} from "@/entities/user";
 
 
 interface PayrollUserInfoProps {
@@ -38,6 +40,11 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
     const showEarnedDetail = useShowEarnedDetail(s => s.showEarnedDetail);
     const showTotal = useShowTotal(s => s.showTotal);
     const hideSum = useHideSum(s => s.hideSum);
+
+    const canAddEarning = usePermission([
+        APP_PERM.WAGES_ADD_TRANSACTION,
+        APP_PERM.ADMIN,
+    ]);
 
     const debouncedUpdateRow = useDebounce(
         (data: {
@@ -206,14 +213,15 @@ export const PayrollUserInfo = (props: PayrollUserInfoProps) => {
                     info={
                         !statusLessThen("3") ? "Блок - статус ведомости" :
                             userInfo.is_closed ? "Блок - расчеты с сотр. завершены" :
-                                "Добавить ДОП начисление сотруднику"
+                                !canAddEarning ? "Нет прав на добавление ДОП начислений" :
+                                    "Добавить ДОП начисление сотруднику"
                     }
                     valueInfo={showEarnedDetail ?
                         "Начислено ДОП и задачи"
                         :
                         `ЭЛО: ${formatNumber(userInfo.earned_sum)}, ДОП: ${formatNumber(userInfo.bonus_sum)}`
                     }
-                    disabled={!statusLessThen("3") || userInfo.is_closed}
+                    disabled={!statusLessThen("3") || userInfo.is_closed || !canAddEarning}
                     user={userInfo.user}
                     week={week}
                     earning_type={"ДОП"}

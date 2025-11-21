@@ -11,15 +11,19 @@ interface IProps<T> {
     setSelectedItem: (arg: T | undefined | null) => void;
     getItemLabel: (arg: T | undefined | null) => string;
     className?: string;
+    disabled?: boolean;
 }
 
 export function Dropdown<T>(props: IProps<T>) {
-    const {items, setSelectedItem, selectedItem, getItemLabel, className} = props;
+    const {items, setSelectedItem, selectedItem, getItemLabel, className, disabled = false} = props;
     const [open, setOpen] = useState(false);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
+        <Popover
+            open={open}
+            onOpenChange={setOpen}
+        >
+            <PopoverTrigger asChild className={"w-full disabled:text-black"} disabled={disabled}>
                 <Btn
                     role="combobox"
                     aria-expanded={open}
@@ -32,7 +36,9 @@ export function Dropdown<T>(props: IProps<T>) {
 
                 >
                     {getItemLabel(selectedItem)}
-                    <ChevronsUpDown className="opacity-50"/>
+                    {!disabled && (
+                        <ChevronsUpDown className="opacity-50"/>
+                    )}
                 </Btn>
             </PopoverTrigger>
             <PopoverContent className="w-[250px] p-0">

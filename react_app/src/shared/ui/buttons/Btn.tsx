@@ -13,7 +13,7 @@ export const Btn = (props: BtnProps) => {
             className={twMerge([
                 `px-4 py-1 bg-white text-black cursor-pointer transition-all`,
                 "active:translate-[1px]",
-                "disabled:opacity-25 disabled:cursor-not-allowed",
+                "disabled:cursor-not-allowed",
                 className
             ])}
             {...otherProps}

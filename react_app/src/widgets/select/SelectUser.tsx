@@ -6,10 +6,11 @@ import {useUsers} from "@/shared/utils/useUsers.ts";
 interface IProps {
     defaultValue?: number | null;
     onChange?: (value: number | null) => void;
+    disabled?: boolean;
 }
 
 export function SelectUser(props: IProps) {
-    const {defaultValue, onChange} = props;
+    const {defaultValue, onChange, disabled = false} = props;
 
     const {data: users, isLoading} = useUsers();
     const [selectedUser, setSelectedUser] = useState<IUser | null>();
@@ -29,6 +30,7 @@ export function SelectUser(props: IProps) {
         <Dropdown<IUser>
             className={'bg-yellow-50 text-black'}
             items={users}
+            disabled={disabled}
             selectedItem={selectedUser}
             setSelectedItem={handleSelect}
             getItemLabel={(item) => item ?
