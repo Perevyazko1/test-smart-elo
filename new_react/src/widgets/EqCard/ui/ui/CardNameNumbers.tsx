@@ -87,24 +87,25 @@ export const CardNameNumbers = (props: CardNameNumbersProps) => {
             <hr className={'m-0 p-0'}/>
 
             <div className={cls.numbersBlock}>
-                <div className={' fw-bold '} style={{fontSize: '12px', lineHeight: '1.1em'}}>
-                    <div>
-                        {card.assignments.length}
-                        {showPrice && (
-                            <sub> {Math.round(card.price).toLocaleString('ru-RU')}</sub>
-                        )}
-                    </div>
-                    {listType === "ready" && (
+                {listType !== "await" && (
+                    <div className={' fw-bold '} style={{fontSize: '12px', lineHeight: '1.1em'}}>
                         <div>
-                            ({
+                            {card.assignments.length}
+                            {showPrice && (
+                                <sub> {Math.round(card.price).toLocaleString('ru-RU')}</sub>
+                            )}:
+                        </div>
+                        {listType === "ready" && (
+                            <div>
+                                ({
                                 assignmentsLists.primary.length +
                                 assignmentsLists.secondary.length +
                                 assignmentsLists.lockedNums.length
                             })
-                        </div>
-                    )}
-                </div>
-                :
+                            </div>
+                        )}
+                    </div>
+                )}
                 <EqNumbers
                     targetUserId={targetUserId}
                     assignmentsLists={assignmentsLists}
