@@ -61,10 +61,6 @@ export const UserPanelWidget = (props: UserPanelWidgetProps) => {
                         queryKey: ['payrollRows']
                         }
                     );
-                    client.invalidateQueries({
-                        queryKey: ['salaryDetail']
-                        }
-                    );
                     setUserData(data.data);
                     return 'Данные пользователя успешно обновлены';
                 },
