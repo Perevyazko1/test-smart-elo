@@ -58,7 +58,7 @@ export const SalaryDetailWidget = (props: SalaryDetailWidgetProps) => {
 
             <div className={'bg-gray-200 pb-10 pt-3 px-4'}>
                 <UserPanelWidget
-                    user={details.user_info.user}
+                    userId={details.user_info.user.id!}
                 />
 
                 <div className={'flex items-center w-fit border gap-3 px-3 mb-5'}>
