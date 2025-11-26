@@ -28,7 +28,6 @@ from .serializers import (
     PostTarifficationSerializer, TariffSerializer,
 )
 from ...consumers import EqNotificationActions, ws_group_updates
-from ...signals import clean_all_eq_card_info_cache, update_assignments_and_clean_cache
 
 
 @api_view(['GET'])
@@ -108,7 +107,6 @@ def set_proposed_tariff(request):
     )
 
     for order_product in active_order_products:
-        clean_all_eq_card_info_cache(order_product.id, production_step.department.id)
 
         notification_data = {str(production_step.department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -166,17 +164,13 @@ def set_confirmed_tariff(request):
 
     # Циклы разнесены чтобы кеш успевал обновиться
     for order_product in active_order_products:
-        clean_all_eq_card_info_cache(order_product.id, production_step.department.id)
 
         assignments_for_update = Assignment.objects.filter(
             order_product=order_product,
             department=production_step.department,
             inspector__isnull=True,
         )
-        update_assignments_and_clean_cache(
-            assignments_for_update,
-            order_product.id,
-            production_step.department.id,
+        assignments_for_update.update(
             new_tariff=new_tariff,
             amount=new_tariff.amount,
         )
@@ -328,8 +322,6 @@ def set_post_tariffication(request):
     ).distinct()
 
     for order_product in order_products:
-        clean_all_eq_card_info_cache(order_product.id, production_step.department.id)
-
         notification_data = {str(production_step.department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
             'data': order_product.id,

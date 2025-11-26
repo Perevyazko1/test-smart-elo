@@ -1,6 +1,6 @@
 import React, {useCallback} from "react";
 
-import {useCurrentUser, useEmployeeName, usePermission} from "@shared/hooks";
+import {useEmployeeName, usePermission} from "@shared/hooks";
 import {EqAssignment} from "@widgets/EqCardList";
 
 import {EqNumberListTipe} from "../../model/lib/createEqNumberLists";

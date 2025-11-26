@@ -27,7 +27,7 @@ from .service.get_view_modes import get_view_modes
 from .service.user_is_boss import get_user_is_boss
 from ...consumers import EqNotificationActions, ws_group_updates
 from ...services.get_week_info import GetWeekInfo
-from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
+# from ...signals import update_assignments_and_clean_cache, clean_all_eq_card_info_cache
 from ...views import actualized_assembled
 
 
@@ -232,12 +232,7 @@ def update_assignments(request):
             appointed_by_boss=True
         ).exists()
 
-        update_assignments_and_clean_cache(
-            target_assignments,
-            op.id,
-            department.id,
-            appointed_by_boss=not locked_status,
-        )
+        target_assignments.update(appointed_by_boss=not locked_status)
 
     else:
         if date == '':
@@ -261,11 +256,6 @@ def update_assignments(request):
                 {"result": 'ok'},
                 json_dumps_params={"ensure_ascii": False}
             )
-
-    clean_all_eq_card_info_cache(
-        order_product__id=op.id,
-        department__id=department.id,
-    )
 
     notification_data = {str(department.number): {
         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -298,10 +288,6 @@ def update_timing_info(request):
     )
 
     for op in order_products:
-        clean_all_eq_card_info_cache(
-            order_product__id=op.id,
-            department__id=ps.department.id,
-        )
         notification_data = {str(ps.department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
             'data': op.id,
@@ -434,10 +420,6 @@ def print_labels(request):
         target_assignment.save()
 
     if op is not None:
-        clean_all_eq_card_info_cache(
-            order_product__id=op.id,
-            department__id=department.id,
-        )
         notification_data = {str(department.number): {
             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
             'data': op.id,

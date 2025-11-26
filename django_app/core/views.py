@@ -13,7 +13,6 @@ from .services.assignment_generator import AssignmentGenerator
 from .services.check_schema import check_schema, compare_schemas
 from .services.create_custom_tech_process import create_and_set_tech_process
 from .services.update_production_steps import update_production_steps
-from .signals import update_assignments_and_clean_cache
 
 
 class ProductionStepCommentViewSet(viewsets.ModelViewSet):
@@ -256,13 +255,7 @@ def actualized_assembled(order_product: OrderProduct):
         other_assignments = Assignment.objects.filter(
             order_product__in=active_ops,
         ).exclude(id=constructor_assignment.first().id)
-
-        update_assignments_and_clean_cache(
-            other_assignments,
-            order_product.id,
-            None,
-            assembled=False,
-        )
+        other_assignments.update(assembled=False)
         return False
 
     production_steps = ProductionStep.objects.filter(
@@ -307,12 +300,7 @@ def actualized_assembled(order_product: OrderProduct):
                 number__gt=number_from,
             ).order_by('number')
 
-            update_assignments_and_clean_cache(
-                assignments_qs=assignments,
-                order_product__id=order_product.id,
-                department__id=ps.department.id,
-                assembled=assembled
-            )
+            assignments.update(assembled=assembled)
 
     return True
 

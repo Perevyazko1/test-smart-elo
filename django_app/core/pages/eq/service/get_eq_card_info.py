@@ -1,16 +1,10 @@
 from django.db.models import Count, Q
 
-# from django.core.cache import cache
 from core.models import OrderProduct, Assignment, ProductionStep
 from staff.models import Department
 
 
 def get_eq_card_info(order_product: OrderProduct, department: Department):
-    # cache_key = f'eq_card_{order_product.id}_{department.id}_info'
-    # cached_data = cache.get(cache_key)
-    # if cached_data:
-    #     return cached_data
-
     scheduled_time = 0
 
     production_step = ProductionStep.objects.filter(
@@ -95,5 +89,4 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
         "employees_info": employees_info
     }
 
-    # cache.set(cache_key, result, timeout=60 * 60 * 8)
     return result

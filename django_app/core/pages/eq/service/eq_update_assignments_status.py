@@ -6,7 +6,6 @@ from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import EqNotificationActions, ws_update_notification, ws_send_to_department, ws_group_updates
 from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep, Order
-from core.signals import update_assignments_and_clean_cache
 from salary.service.make_earning import make_earning
 from staff.models import Department, Employee, Audit
 
@@ -132,10 +131,7 @@ class EqUpdateAssignmentsStatus:
                     f'Сообщите о проблеме администратору'
                 )
 
-        update_assignments_and_clean_cache(
-            assignments_qs=Assignment.objects.filter(**qs_filter),
-            order_product__id=self.order_product.id,
-            department__id=self.department.id,
+        Assignment.objects.filter(**qs_filter).update(
             **update_data
         )
 
@@ -229,12 +225,7 @@ class EqUpdateAssignmentsStatus:
                         department=department,
                         assembled=False,
                     )
-                    update_assignments_and_clean_cache(
-                        assignments_qs=assignments,
-                        order_product__id=order_product.id,
-                        department__id=department.id,
-                        assembled=True
-                    )
+                    assignments.update(assembled=True)
 
                     self.notification_data[department.number] = {
                         'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,
@@ -276,13 +267,7 @@ class EqUpdateAssignmentsStatus:
                             number__in=numbers,
                             assembled=False,
                         )
-                        # Очистка кеша по карточкам
-                        update_assignments_and_clean_cache(
-                            assignments_qs=assignments,
-                            order_product__id=self.order_product.id,
-                            department__id=department.id,
-                            assembled=True
-                        )
+                        assignments.update(assembled=True)
 
                         self.notification_data[department.number] = {
                             'action': EqNotificationActions.UPDATE_TARGET_ITEM.value,

@@ -41,7 +41,15 @@ services:
       - elo_redis
       - postgres
     command: >
-      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000"
+      sh -c "uvicorn django_app.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --limit-concurrency 1000"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
 
   elo_redis:
     container_name: elo_redis
@@ -51,6 +59,14 @@ services:
     restart: unless-stopped
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
 
   elo_celery_worker:
     build:
@@ -64,11 +80,19 @@ services:
       - elo_server
     ports:
       - "58231"
-    command: celery -A django_app worker -l info
+    command: celery -A django_app worker -l info --concurrency=4 --max-tasks-per-child=100 --max-memory-per-child=200000
     env_file:
       - .env.docker.prod
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
   elo_celery_beat:
     build:
       context: ./django_app
@@ -119,6 +143,15 @@ services:
       - app-network
     env_file:
       - .env.docker.prod
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+        reservations:
+          cpus: '1'
+          memory: 1G
+    command: postgres -c max_connections=200 -c shared_buffers=256MB -c effective_cache_size=1GB -c work_mem=8MB
   pgadmin:
     build:
       context: ./services/pgadmin

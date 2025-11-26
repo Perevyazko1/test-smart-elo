@@ -1,4 +1,3 @@
-# from django.core.cache import cache
 from django.db.models import Q
 
 from core.models import OrderProduct
@@ -64,18 +63,6 @@ def _handle_await(eq_params, order_product):
 
 
 def _handle_in_work(eq_params, order_product):
-    # cache_key = (
-    #     f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_in_work_'
-    # )
-    # if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
-    #     cache_key += f"_{eq_params['user'].id}"
-    # else:
-    #     cache_key += f"_{eq_params['view_mode_key']}"
-    #
-    # cached_data = cache.get(cache_key)
-    # if cached_data:
-    #     return cached_data
-
     assignments = order_product.assignments
     if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
         assignments = assignments.filter(
@@ -97,8 +84,6 @@ def _handle_in_work(eq_params, order_product):
         ).distinct()
 
     result = SimpleAssignmentSerializer(assignments, many=True).data
-    """Кешируем результат. """
-    # cache.set(cache_key, result, timeout=60 * 60 * 8)
 
     return result
 
@@ -111,15 +96,9 @@ def _handle_ready(eq_params, order_product):
     week_info = GetWeekInfo(week=eq_params['week'], year=eq_params['year']).execute()
     current_week = GetWeekInfo(week=None, year=None).execute()
     show_all = eq_params.get('show_all') and eq_params.get('project_filter')
-    #
-    # cache_key = _build_cache_key(eq_params, order_product, week_info, current_week, show_all)
-    # cached_data = cache.get(cache_key)
-    # if cached_data and not show_all:
-    #     return cached_data
 
     assignments = _get_ready_assignments(eq_params, order_product, week_info, current_week, show_all)
     result = SimpleAssignmentSerializer(assignments, many=True).data
-    # cache.set(cache_key, result, timeout=60 * 60 * 8)
 
     return result
 

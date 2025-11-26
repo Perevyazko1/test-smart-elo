@@ -424,6 +424,11 @@ class Assignment(models.Model):
     """Класс хранящий данные о состоянии выполнения нарядов"""
 
     class Meta:
+        indexes = [
+            models.Index(fields=['order_product', 'department', 'status']),
+            models.Index(fields=['executor', 'status']),
+            models.Index(fields=['inspector', 'status']),
+        ]
         verbose_name = 'Наряд'
         verbose_name_plural = 'Наряды'
         ordering = ['id']

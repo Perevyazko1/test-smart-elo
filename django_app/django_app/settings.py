@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'shipment',
     # 'sklad',
 
-    'easyaudit',
+    # 'easyaudit',
     'django_celery_beat',
     'django_celery_results',
     'rest_framework',
@@ -99,7 +99,13 @@ DATABASES = {
         'USER': os.getenv('POSTGRES_USER', 'postgres'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'RLcb!!Dk'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', 5432)
+        'PORT': os.getenv('POSTGRES_PORT', 5432),
+        'CONN_MAX_AGE': 600, 
+        'CONN_HEALTH_CHECKS': True,
+        'OPTIONS': {
+            'connect_timeout': 10,
+            'options': '-c statement_timeout=30000'  # 30 секунд таймаут на запросы
+        }
     }
 }
 
@@ -167,9 +173,25 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CELERY_TIMEZONE = "Europe/Moscow"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 60 * 60 * 10
+CELERY_TASK_SOFT_TIME_LIMIT = 60 * 60 * 9  # Мягкий лимит раньше жесткого
 CELERY_RESULT_BACKEND = 'django-db'
 CELERY_CACHE_BACKEND = 'default'
 DJANGO_CELERY_BEAT_TZ_AWARE = False
+
+# Оптимизация воркеров
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1  # Одна задача на воркер
+CELERY_WORKER_MAX_TASKS_PER_CHILD = 100  # Перезапуск после 100 задач (защита от утечек памяти)
+CELERY_WORKER_MAX_MEMORY_PER_CHILD = 200000  # 200MB лимит памяти на воркер
+
+# Оптимизация брокера
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BROKER_CONNECTION_MAX_RETRIES = 10
+CELERY_BROKER_POOL_LIMIT = 10  # Макс. соединений с Redis
+
+# Производительность
+CELERY_TASK_ACKS_LATE = True  # Подтверждать задачи после выполнения
+CELERY_TASK_REJECT_ON_WORKER_LOST = True  # Вернуть задачу в очередь при падении воркера
+CELERY_WORKER_DISABLE_RATE_LIMITS = True  # Отключить rate limiting если не используется
 
 CACHES = {
     "default": {

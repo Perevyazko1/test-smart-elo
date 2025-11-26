@@ -3,9 +3,7 @@ import time
 
 from django.contrib.auth.middleware import get_user
 from django.http import HttpRequest
-from django.utils import timezone
 from django.utils.deprecation import MiddlewareMixin
-from easyaudit.signals.request_signals import audit_logger
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.request import Request as DRFRequest
@@ -97,14 +95,14 @@ class RequestAndAuditMiddleware(MiddlewareMixin):
         logger.info(log_message)
 
         # --- Аудит в БД (часть CustomAuditMiddleware) ---
-        user_id = getattr(request.user, 'id', None)
-        if user_id:
-            audit_logger.request({
-                "url": request.path,
-                "method": request.method,
-                "query_string": f'{request.GET.urlencode()} T-({int(duration)}ms) S-({status}) ',
-                "user_id": user_id,
-                "remote_ip": request.META.get('REMOTE_ADDR'),
-                "datetime": timezone.now(),
-            })
+        # user_id = getattr(request.user, 'id', None)
+        # if user_id:
+        #     audit_logger.request({
+        #         "url": request.path,
+        #         "method": request.method,
+        #         "query_string": f'{request.GET.urlencode()} T-({int(duration)}ms) S-({status}) ',
+        #         "user_id": user_id,
+        #         "remote_ip": request.META.get('REMOTE_ADDR'),
+        #         "datetime": timezone.now(),
+        #     })
         return response
