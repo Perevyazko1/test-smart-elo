@@ -45,6 +45,7 @@ class AssignmentGenerator:
                     "amount": amount,
                     "notes": 'Создан автоматически',
                     "assembled": assembled,
+                    "sort_date": order_product.order.planned_date
                 }
             )
         notification_data[department.number] = {
