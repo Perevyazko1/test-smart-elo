@@ -100,11 +100,11 @@ DATABASES = {
         'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'RLcb!!Dk'),
         'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
         'PORT': os.getenv('POSTGRES_PORT', 5432),
-        'CONN_MAX_AGE': 600, 
+        'CONN_MAX_AGE': 6000,
         'CONN_HEALTH_CHECKS': True,
         'OPTIONS': {
-            'connect_timeout': 10,
-            'options': '-c statement_timeout=30000'  # 30 секунд таймаут на запросы
+            'connect_timeout': 100,
+            'options': '-c statement_timeout=300000'  # 30 секунд таймаут на запросы
         }
     }
 }

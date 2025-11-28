@@ -1,13 +1,12 @@
 import {PlanCard} from "@/widgets/plan/planCard/PlanCard.tsx";
 import {ProgressiveCell} from "@/widgets/plan/planCard/ProgressiveCell.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import {CrossCircledIcon, CheckCircledIcon} from "@radix-ui/react-icons";
+import {CheckCircledIcon, CrossCircledIcon} from "@radix-ui/react-icons";
 import type {IPlanDataRow} from "@/entities/plan";
-import {APP_PERM, type IUser} from "@/entities/user";
+import {APP_PERM} from "@/entities/user";
 import {toast} from "sonner";
-import {$axios} from "@/shared/api";
 import {planService} from "@/widgets/plan/model/api.ts";
-import {useState} from "react";
+import {useState, useEffect, useRef} from "react";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {usePermission} from "@/shared/utils/permissions.ts";
 import {useShipmentState} from "@/shared/state/shipment/shipmentState.ts";
@@ -24,6 +23,7 @@ export function PlanRow(props: IProps) {
     const {data, index, sum} = props;
 
     const [inputValue, setInputValue] = useState<string | undefined>(data.date ? new Date(data.date).toISOString().slice(0, 10) : '')
+    const isFirstRender = useRef(true);
 
     const showSums = usePermission([
         APP_PERM.KPI_PAGE,
@@ -67,6 +67,20 @@ export function PlanRow(props: IProps) {
         })
     }
 
+    // Авто‑обновление даты: при изменении значения сразу отправляем запрос
+    useEffect(() => {
+        if (isFirstRender.current) {
+            // пропускаем первый рендер, чтобы не триггерить запрос на инициализацию
+            isFirstRender.current = false;
+            return;
+        }
+        updateTargetDate({
+            target_date: inputValue || null,
+            series_id: data.series_id,
+        })
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [inputValue])
+
     const empty = {
         "all": 0,
         "ready": 0,
@@ -107,12 +121,6 @@ export function PlanRow(props: IProps) {
                     className={'text-xs border-1 border-black p-1 w-full mb-1'}
                 />
                 <div className={'flex justify-evenly gap-1'}>
-                    <Btn
-                        className={'text-green-700 m-0 p-1 border-1 border-black'}
-                        onClick={updateHandle}
-                    >
-                        <CheckCircledIcon/>
-                    </Btn>
                     <Btn
                         className={'text-red-700 m-0 p-1 border-1 border-black'}
                         onClick={() => setInputValue("")}
