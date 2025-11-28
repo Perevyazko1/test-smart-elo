@@ -1,12 +1,12 @@
 import {PlanCard} from "@/widgets/plan/planCard/PlanCard.tsx";
 import {ProgressiveCell} from "@/widgets/plan/planCard/ProgressiveCell.tsx";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
-import {CheckCircledIcon, CrossCircledIcon} from "@radix-ui/react-icons";
+import {CrossCircledIcon} from "@radix-ui/react-icons";
 import type {IPlanDataRow} from "@/entities/plan";
 import {APP_PERM} from "@/entities/user";
 import {toast} from "sonner";
 import {planService} from "@/widgets/plan/model/api.ts";
-import {useState, useEffect, useRef} from "react";
+import {useEffect, useRef, useState} from "react";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {usePermission} from "@/shared/utils/permissions.ts";
 import {useShipmentState} from "@/shared/state/shipment/shipmentState.ts";
@@ -59,13 +59,6 @@ export function PlanRow(props: IProps) {
     const addItem = useShipmentState(s => s.addItem);
     const shipment = useShipmentState(s => s.shipment);
     const added = shipment.items.some(item => item.series_id === data.series_id)
-
-    const updateHandle = () => {
-        updateTargetDate({
-            target_date: inputValue || null,
-            series_id: data.series_id,
-        })
-    }
 
     // Авто‑обновление даты: при изменении значения сразу отправляем запрос
     useEffect(() => {
