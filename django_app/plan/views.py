@@ -101,13 +101,14 @@ def get_plan_table(request):
 
         final_department = order_product.product.technological_process.final_department if order_product.product.technological_process else None
 
-        final_waiting = 0
         if final_department:
             final_waiting = Assignment.objects.filter(
                 department=final_department,
                 order_product=order_product,
                 inspector__isnull=True,
             ).count()
+        else:
+            final_waiting = order_product.quantity
 
         result[key] = {
             "date": sort_date_val,
