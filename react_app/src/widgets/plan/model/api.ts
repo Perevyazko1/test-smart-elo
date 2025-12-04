@@ -1,6 +1,6 @@
 import {type AxiosResponse} from "axios";
 import {$axios} from "@/shared/api";
-import type {IAgent, IAgentTag, IPlanData} from "@/entities/plan";
+import type {IAgentTag, IPlanData} from "@/entities/plan";
 import type {IUser} from "@/entities/user";
 
 class PlanService {
@@ -32,16 +32,6 @@ class PlanService {
     getAgents(props: {}): Promise<AxiosResponse<{ result: IAgentTag[] }>> {
         return $axios.get<{ result: IAgentTag[] }>(
             `/plan/get_agents/`,
-        );
-    }
-
-    setTargetDate(props: {
-        target_date: string | null;
-        series_id: string;
-    }): Promise<AxiosResponse<{ success: boolean }>> {
-        return $axios.post<{ success: boolean }>(
-            `/plan/set_target_date/`,
-            props,
         );
     }
 }

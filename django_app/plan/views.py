@@ -1,9 +1,6 @@
-from pprint import pprint
-
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
-from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view
 
@@ -218,9 +215,6 @@ def set_target_date(request):
 
     all_quantity = target_order_product.quantity
     numbers = [i for i in range(1, all_quantity + 1)]
-
-    print(new_map)
-    print(target_date, quantity, urgency, date_from, series_id, old_urgency)
 
     while numbers:
         if not new_map:
