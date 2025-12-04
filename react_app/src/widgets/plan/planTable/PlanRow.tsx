@@ -12,11 +12,13 @@ import {twMerge} from "tailwind-merge";
 import {ButtonGroup} from "@/components/ui/button-group.tsx";
 import {$axios} from "@/shared/api";
 
+
 interface IProps {
     data: IPlanDataRow;
     index: number;
     sum: number;
 }
+
 
 export function PlanRow(props: IProps) {
     const {data, index, sum} = props;
