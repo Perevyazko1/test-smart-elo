@@ -23,6 +23,7 @@ export interface IPlanDataRow {
     project: string | null;
     quantity: number;
     shipped: number;
+    urgency: 1 | 2 | 3;
     final_waiting: number;
     assignments: {
         [key: string]: {

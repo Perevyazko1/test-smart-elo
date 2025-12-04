@@ -105,7 +105,7 @@ export function PlanNav(props: IProps) {
                 <div>
                     <Input
                         placeholder={'План сумма'}
-                        className={'px-2'}
+                        className={'px-2 min-w-[200px]'}
                         type={'number'}
                         onChange={(e) => setInputValue(Number(e.target.value))}
                         value={String(inputValue)}

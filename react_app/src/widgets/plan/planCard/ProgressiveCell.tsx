@@ -1,16 +1,19 @@
+import {twMerge} from "tailwind-merge";
+
 interface IProps {
     left: number;
     center: number;
     right: number;
+    className?: string;
 }
 
 export function ProgressiveCell(props: IProps) {
-    const {left, right, center} = props;
+    const {left, right, center, className} = props;
 
     const targetWidth = Math.abs(Math.max(15, left / (left + right) * 100));
 
     return (
-        <td className={'relative min-w-[5em]'}>
+        <td className={twMerge('relative min-w-[5em]', className)}>
             <div className={'absolute inset-0 flex justify-between items-center p-1'}>
                 {left > 0 && (
                     <div

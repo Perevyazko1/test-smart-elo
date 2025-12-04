@@ -5,13 +5,12 @@ import {CrossCircledIcon} from "@radix-ui/react-icons";
 import type {IPlanDataRow} from "@/entities/plan";
 import {APP_PERM} from "@/entities/user";
 import {toast} from "sonner";
-import {planService} from "@/widgets/plan/model/api.ts";
 import {useEffect, useRef, useState} from "react";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {usePermission} from "@/shared/utils/permissions.ts";
-import {useShipmentState} from "@/shared/state/shipment/shipmentState.ts";
-import {PlusCircleIcon} from "lucide-react";
 import {twMerge} from "tailwind-merge";
+import {ButtonGroup} from "@/components/ui/button-group.tsx";
+import {$axios} from "@/shared/api";
 
 interface IProps {
     data: IPlanDataRow;
@@ -22,8 +21,22 @@ interface IProps {
 export function PlanRow(props: IProps) {
     const {data, index, sum} = props;
 
-    const [inputValue, setInputValue] = useState<string | undefined>(data.date ? new Date(data.date).toISOString().slice(0, 10) : '')
-    const isFirstRender = useRef(true);
+    // Нормализация даты к формату YYYY-MM-DD (строка) либо ""
+    const normalizeDate = (value?: string | null) => {
+        if (!value) return "";
+        try {
+            return new Date(value).toISOString().slice(0, 10);
+        } catch {
+            return "";
+        }
+    };
+
+    const originalValueRef = useRef<string>(normalizeDate(data.date as unknown as string | null));
+    const [dateValue, setDateValue] = useState<string>(originalValueRef.current);
+    const [quantityValue, setQuantityValue] = useState<number>(data.quantity);
+    const [urgency, setUrgency] = useState(data.urgency);
+    // Запоминаем, что уже отправляли, чтобы не дублировать запрос при HMR/StrictMode
+    const lastSentRef = useRef<string | null>(null);
 
     const showSums = usePermission([
         APP_PERM.KPI_PAGE,
@@ -45,8 +58,15 @@ export function PlanRow(props: IProps) {
     const updateTargetDate = (data: {
         target_date: string | null;
         series_id: string;
+        quantity: number;
+        date_from: string | null;
+        urgency: 1 | 2 | 3;
+        old_urgency: 1 | 2 | 3;
     }) => {
-        toast.promise(planService.setTargetDate(data), {
+        toast.promise($axios.post<{ success: boolean }>(
+                `/plan/set_target_date/`,
+                data,
+            ), {
                 loading: 'Применение изменений 🔄️',
                 success: () => {
                     return 'Дата успешно обновлена ✅';
@@ -56,23 +76,41 @@ export function PlanRow(props: IProps) {
         )
     }
 
-    const addItem = useShipmentState(s => s.addItem);
-    const shipment = useShipmentState(s => s.shipment);
-    const added = shipment.items.some(item => item.series_id === data.series_id)
 
-    // Авто‑обновление даты: при изменении значения сразу отправляем запрос
+    // Синхронизация с приходящими данными: если дата в props поменялась — обновляем локальное состояние
     useEffect(() => {
-        if (isFirstRender.current) {
-            // пропускаем первый рендер, чтобы не триггерить запрос на инициализацию
-            isFirstRender.current = false;
-            return;
-        }
-        updateTargetDate({
-            target_date: inputValue || null,
-            series_id: data.series_id,
-        })
+        const next = normalizeDate((data as any).date ?? null);
+        originalValueRef.current = next;
+        setDateValue(next);
+        lastSentRef.current = `${next}|${data.urgency}`; // чтобы не слать сразу повторный запрос
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [inputValue])
+    }, [data.date, data.urgency]);
+
+    // Авто‑обновление даты с дебаунсом и защитой от бесконечных запросов при HMR/StrictMode
+    useEffect(() => {
+        const currentKey = `${dateValue}|${urgency}`;
+        // Не отправляем, если значение совпадает с исходным из props (mount/refresh)
+        if (dateValue === originalValueRef.current && urgency === data.urgency) return;
+        // Не отправляем одно и то же значение повторно
+        if (lastSentRef.current === currentKey) return;
+
+        const timer = setTimeout(() => {
+            // Повторная проверка в момент отправки (на случай двойного вызова эффекта в StrictMode)
+            if (lastSentRef.current === currentKey) return;
+            lastSentRef.current = currentKey;
+            updateTargetDate({
+                target_date: dateValue || null,
+                date_from: originalValueRef.current || null,
+                quantity: quantityValue,
+                series_id: data.series_id,
+                urgency: urgency,
+                old_urgency: data.urgency,
+            });
+        }, 600); // небольшой дебаунс, чтобы не спамить при быстрых изменениях
+
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [dateValue, data.series_id, urgency]);
 
     const empty = {
         "all": 0,
@@ -86,7 +124,12 @@ export function PlanRow(props: IProps) {
     const d6 = data.assignments["Упаковка"] || empty;
 
     return (
-        <tr>
+        <tr className={twMerge(
+            "print:max-h-[20px] print:overflow-hidden print:whitespace-nowrap print:text-xs",
+            urgency === 1 ? 'bg-red-100' :
+                urgency === 2 ? 'bg-yellow-100' :
+                    urgency === 3 ? '' : ''
+        )}>
             <td
                 className={data.price !== "0.00" ? currentStyle : 'bg-red-300'}
             >
@@ -101,52 +144,70 @@ export function PlanRow(props: IProps) {
             <td className={'max-w-30'}>
                 <input
                     type="date"
-                    value={inputValue ? inputValue.slice(0, 10) : ''}
+                    value={dateValue || ''}
                     onChange={(e) => {
-                        if (e.target.value) {
-                            const date = new Date(e.target.value);
-                            const isoDate = date.toISOString();
-                            setInputValue(isoDate.slice(0, 10));
-                        } else {
-                            setInputValue('');
-                        }
+                        const v = e.target.value;
+                        setDateValue(v ? normalizeDate(v) : "");
                     }}
                     className={'text-xs border-1 border-black p-1 w-full mb-1'}
                 />
-                <div className={'flex justify-evenly gap-1'}>
-                    <Btn
-                        className={'text-red-700 m-0 p-1 border-1 border-black'}
-                        onClick={() => setInputValue("")}
-                    >
-                        <CrossCircledIcon/>
-                    </Btn>
-
-                    <Btn
-                        className={
-                            twMerge(
-                                'm-0 p-1 outline-black transition-all duration-300',
-                                added ? 'bg-green-300 text-red-700 outline-2' : 'text-amber-400 outline-1'
-                            )
-
-                        }
-                        onClick={() => addItem(data)}
-                    >
-                        <PlusCircleIcon
+                <div className="w-full">
+                    <ButtonGroup className="w-full grid grid-cols-4">
+                        <Btn
                             className={
                                 twMerge(
-                                    'transition-all duration-300',
-                                    added ? 'rotate-45' : 'rotate-0'
+                                    'text-red-700 m-0 p-1 border-1 font-bold border-black flex-1',
+                                    urgency === 1 && 'bg-red-300'
                                 )
                             }
-                            size={16}
-                        />
-                    </Btn>
+                            onClick={() => setUrgency(1)}
+                        >
+                            1
+                        </Btn>
+                        <Btn
+                            className={
+                                twMerge(
+                                    'text-yellow-700 m-0 p-1 border-1  font-bold border-black flex-1',
+                                    urgency === 2 && 'bg-yellow-300'
+                                )}
+                            onClick={() => setUrgency(2)}
+                        >
+                            2
+                        </Btn>
+                        <Btn
+
+                            className={
+                                twMerge(
+                                    'text-green-700 m-0 p-1 border-1 border-black flex-1',
+                                    urgency === 3 && 'bg-green-300'
+                                )}
+                            onClick={() => setUrgency(3)}
+                        >
+                            3
+                        </Btn>
+                        <Btn
+                            className={'text-red-700 m-0 p-1 border-1 border-black flex-1'}
+                            onClick={() => {
+                                setUrgency(3)
+                                setDateValue("")
+                            }
+                            }
+                        >
+                            <CrossCircledIcon/>
+                        </Btn>
+                    </ButtonGroup>
                 </div>
             </td>
             <td className={'max-w-15'}>
                 <input
                     type="number"
-                    defaultValue={data.quantity}
+                    value={quantityValue}
+                    max={data.quantity}
+                    min={1}
+                    onChange={(e) => {
+                        const v = Number(e.target.value);
+                        setQuantityValue(isNaN(v) ? 0 : v);
+                    }}
                     className={'text-xl max-w-full text-end'}
                 />
             </td>
@@ -156,12 +217,8 @@ export function PlanRow(props: IProps) {
             <ProgressiveCell left={d3.ready} right={d3.all - d3.ready - d3.await} center={d3.await}/>
             <ProgressiveCell left={d4.ready} right={d4.all - d4.ready - d4.await} center={d4.await}/>
             <ProgressiveCell left={d5.ready} right={d5.all - d5.ready - d5.await} center={d5.await}/>
-
-            {!planSum && (
-                <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}/>
-            )}
-
-            <ProgressiveCell left={data.shipped} right={data.quantity - data.shipped} center={0}/>
+            <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}
+                             className={"noPrint"}/>
             <ProgressiveCell left={data.quantity - data.final_waiting} right={data.final_waiting} center={0}/>
         </tr>
     );

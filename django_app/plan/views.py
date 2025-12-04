@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
@@ -5,7 +7,7 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view
 
-from core.models import Assignment, OrderProduct, Order, AgentTag
+from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep
 from core.serializers import AgentTagSerializer
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
@@ -51,12 +53,12 @@ def get_plan_table(request):
         department_aggregates[f'{dept_key}_await'] = Count(
             'id', filter=Q(department__name=dept_name, status="ready", inspector__isnull=True)
         )
-
     assignment_groups = assignments_query.values(
         'order_product_id',
         'order_product__series_id',
+        'urgency',
         sort_date_trunc=TruncDate('sort_date')
-    ).annotate(**department_aggregates).order_by('order_product__series_id', 'sort_date_trunc')
+    ).annotate(**department_aggregates).order_by('order_product__series_id', 'urgency', 'sort_date_trunc')
 
     order_product_ids = assignments_query.values_list('order_product_id', flat=True).distinct()
 
@@ -78,7 +80,9 @@ def get_plan_table(request):
 
         sort_date_val = group['sort_date_trunc']
         plane_date_key = sort_date_val if sort_date_val else 'nodate'
-        key = f"{group['order_product__series_id']}-{plane_date_key}"
+        urgency_val = group.get('urgency') if 'urgency' in group else None
+        urgency_key = urgency_val if urgency_val else 'no_urgency'
+        key = f"{group['order_product__series_id']}-{plane_date_key}-{urgency_key}"
 
         assignments_data = {}
         for dept_name, dept_key in dept_map.items():
@@ -102,16 +106,29 @@ def get_plan_table(request):
         final_department = order_product.product.technological_process.final_department if order_product.product.technological_process else None
 
         if final_department:
-            final_waiting = Assignment.objects.filter(
+            final_waiting_qs = Assignment.objects.filter(
                 department=final_department,
                 order_product=order_product,
                 inspector__isnull=True,
-            ).count()
+            )
+
+            if urgency_val is not None:
+                final_waiting_qs = final_waiting_qs.filter(urgency=urgency_val)
+            else:
+                final_waiting_qs = final_waiting_qs.filter(urgency__isnull=True)
+
+            if sort_date_val:
+                final_waiting_qs = final_waiting_qs.filter(sort_date__date=sort_date_val)
+            else:
+                final_waiting_qs = final_waiting_qs.filter(sort_date__isnull=True)
+
+            final_waiting = final_waiting_qs.count()
         else:
             final_waiting = order_product.quantity
 
         result[key] = {
             "date": sort_date_val,
+            "urgency": urgency_val,
             "product_name": order_product.product.name,
             "product_picture": picture_url,
             "order": order_product.order.inner_number,
@@ -121,7 +138,8 @@ def get_plan_table(request):
             "fabric_picture": fabric_url,
             "fabric_stock": order_product.main_fabric.quantity if order_product.main_fabric and order_product.main_fabric.is_actual else None,
             "project": order_product.order.project,
-            "quantity": order_product.quantity,
+            "quantity": max((data["all"] for data in assignments_data.values()), default=0),
+            "all_quantity": order_product.quantity,
             "shipped": order_product.shipped,
             "final_waiting": final_waiting,
             "assignments": assignments_data
@@ -134,20 +152,99 @@ def get_plan_table(request):
 def set_target_date(request):
     target_date = request.data.get('target_date')
     series_id = request.data.get('series_id')
+    date_from = request.data.get('date_from')
+    quantity = request.data.get('quantity')
+    urgency = request.data.get('urgency')
+    old_urgency = request.data.get('old_urgency')
 
     if target_date:
-        target_datetime = parse_datetime(target_date)
-        if target_datetime and timezone.is_naive(target_datetime):
-            target_datetime = timezone.make_aware(target_datetime)
+        # Normalize target_date to YYYY-MM-DD format
+        target_datetime = parse_datetime(target_date).date()
     else:
         target_datetime = None
 
+    if date_from:
+        # Normalize date_from to YYYY-MM-DD format
+        target_date_from = parse_datetime(date_from).date()
+    else:
+        target_date_from = None
+
     target_order_product = OrderProduct.objects.get(series_id=series_id)
-    Assignment.objects.filter(
-        order_product=target_order_product
-    ).update(
-        sort_date=target_datetime,
+
+    base_department = ProductionStep.objects.filter(
+        product=target_order_product.product,
+        department__single=False,
+        is_active=True,
+    ).first().department
+
+    assignments = Assignment.objects.filter(
+        order_product=target_order_product,
+        department=base_department,
     )
+
+    old_map = {}
+
+    for assignment in assignments:
+        s_date = assignment.sort_date.date() if assignment.sort_date else None
+        key = f'{s_date}|{assignment.urgency}'
+        if key not in old_map:
+            old_map[key] = 1
+        else:
+            old_map[key] += 1
+
+    # Логика создания новой карты
+    new_map = old_map.copy()
+    qty_to_move = int(quantity)
+
+    source_urgency = old_urgency if old_urgency is not None else urgency
+    source_key = f'{target_date_from}|{source_urgency}'
+    dest_key = f'{target_datetime}|{urgency}'
+
+    if source_key in new_map:
+        new_map[source_key] -= qty_to_move
+        if new_map[source_key] <= 0:
+            del new_map[source_key]
+
+    if dest_key not in new_map:
+        new_map[dest_key] = 0
+    new_map[dest_key] += qty_to_move
+
+    # Sort new_map by date and urgency
+    sorted_items = sorted(new_map.items(), key=lambda x: (
+        (True, x[0].split('|')[0]) if x[0].split('|')[0] == 'None' else (False, x[0].split('|')[0]),
+        x[0].split('|')[1]
+    ), reverse=True)
+    new_map = dict(sorted_items)
+
+    all_quantity = target_order_product.quantity
+    numbers = [i for i in range(1, all_quantity + 1)]
+
+    print(new_map)
+    print(target_date, quantity, urgency, date_from, series_id, old_urgency)
+
+    while numbers:
+        if not new_map:
+            urgency = 3
+            date = None
+            nums = numbers
+            numbers = []
+        else:
+            first_item = new_map.popitem()
+            nums = numbers[:first_item[1]]
+            numbers = numbers[first_item[1]:]
+            urgency = first_item[0].split('|')[1]
+            date_str = first_item[0].split('|')[0]
+            date = None if date_str == 'None' else parse_datetime(date_str).date()
+
+        print(nums, date, urgency)
+        Assignment.objects.filter(
+            order_product=target_order_product,
+            number__in=nums,
+        ).update(
+            sort_date=date,
+            urgency=urgency
+        )
+
     return JsonResponse({"success": True})
 
 

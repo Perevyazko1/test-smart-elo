@@ -442,7 +442,14 @@ class Assignment(models.Model):
         ("cancelled", "Отменен"),
     ]
 
+    URGENCY_CHOICES = [
+        (1, "Высокая"),
+        (2, "Средняя"),
+        (3, "Низкая"),
+    ]
+
     number = models.IntegerField('Порядковый номер наряда', default=1)
+    urgency = models.SmallIntegerField('Срочность', choices=URGENCY_CHOICES, default=3)
 
     notes = models.CharField('Заметки', max_length=250, blank=True)
 

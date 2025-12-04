@@ -98,6 +98,11 @@ export const PlanPage = () => {
     }
 
     const deps = DEPARTMENTS.filter(dept => planSum ? dept !== "Упаковка" : true);
+    const excludeItems = [
+        "Упаковка",
+        "МС ОТГР",
+    ]
+    const printDepartments = deps.filter(dept => !excludeItems.includes(dept));
 
     return (
         <div className="max-w-dvw bg-white p-4">
@@ -125,7 +130,8 @@ export const PlanPage = () => {
                             }
                             className={twMerge(
                                 "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
-                                selectedDepartment === dept ? "bg-blue-200 cursor-pointer" : "cursor-pointer"
+                                selectedDepartment === dept ? "bg-blue-200 cursor-pointer" : "cursor-pointer",
+                                printDepartments.includes(dept) ? "" : "noPrint",
                             )}
                         >
                             {dept}
@@ -133,16 +139,6 @@ export const PlanPage = () => {
 
                     ))}
 
-                    <th
-                        rowSpan={2}
-                        onClick={() => setShowMode(showMode === "shipped" ? null : "shipped")}
-                        className={twMerge(
-                            "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
-                            showMode === "shipped" ? "bg-blue-200 cursor-pointer" : "cursor-pointer"
-                        )}
-                    >
-                        МС ОТГР
-                    </th>
                     <th
                         rowSpan={2}
                         onClick={() => setShowMode(showMode === "final_waiting" ? null : "final_waiting")}
@@ -157,7 +153,10 @@ export const PlanPage = () => {
                 <tr>
                     <th>#</th>
                     {deps.map((dept) => (
-                        <th key={dept} className="px-1 text-right">
+                        <th key={dept} className={twMerge(
+                            printDepartments.includes(dept) ? "" : "noPrint",
+                            "px-1 text-right"
+                        )}>
                             {showSums ? Math.round((totals[dept] || 0) / 1000).toLocaleString("ru-RU") : "-"}
                         </th>
                     ))}

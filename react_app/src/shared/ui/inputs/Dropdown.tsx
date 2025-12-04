@@ -29,7 +29,7 @@ export function Dropdown<T>(props: IProps<T>) {
                     aria-expanded={open}
                     className={
                         twMerge(
-                            "justify-between flex bg-black text-white gap-4 capitalize",
+                            "justify-between flex bg-black text-white gap-4 capitalize text-nowrap",
                             className
                         )
                     }
