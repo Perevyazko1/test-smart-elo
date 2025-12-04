@@ -12,6 +12,11 @@ import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {useEffect, useState} from "react";
 import {ArchiveIcon} from "lucide-react";
 import {ShipmentWidget} from "@/widgets/shipment/ShipmentWidget.tsx";
+import {useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
+import {Btn} from "@/shared/ui/buttons/Btn.tsx";
+import {twMerge} from "tailwind-merge";
+import {CrossCircledIcon} from "@radix-ui/react-icons";
+import {ButtonGroup} from "@/components/ui/button-group.tsx";
 
 interface IProps {
 
@@ -30,8 +35,10 @@ export function PlanNav(props: IProps) {
     const planAgent = usePlanAgent(s => s.planAgent);
     const setPlanAgent = usePlanAgent(s => s.setPlanAgent);
 
-
     const setPlanSum = usePlanSum(s => s.setPlanSum);
+
+    const urgency = useUrgencyFilter(s => s.urgencyFilter);
+    const setUrgencyFilter = useUrgencyFilter(s => s.setUrgencyFilter);
 
     const [inputValue, setInputValue] = useState<number>()
 
@@ -110,6 +117,52 @@ export function PlanNav(props: IProps) {
                         onChange={(e) => setInputValue(Number(e.target.value))}
                         value={String(inputValue)}
                     />
+                </div>
+
+                <div className={'w-full'}>
+                    <ButtonGroup className="w-full grid grid-cols-4">
+                        <Btn
+                            className={
+                                twMerge(
+                                    'text-red-700 m-0 p-1 border-1 font-bold border-black flex-1 bg-gray-400',
+                                    urgency === 1 && 'bg-red-300'
+                                )
+                            }
+                            onClick={() => setUrgencyFilter(1)}
+                        >
+                            1
+                        </Btn>
+                        <Btn
+                            className={
+                                twMerge(
+                                    'text-yellow-700 m-0 p-1 border-1  font-bold border-black flex-1 bg-gray-400',
+                                    urgency === 2 && 'bg-yellow-300'
+                                )}
+                            onClick={() => setUrgencyFilter(2)}
+                        >
+                            2
+                        </Btn>
+                        <Btn
+
+                            className={
+                                twMerge(
+                                    'text-green-700 m-0 p-1 border-1 border-black flex-1 bg-gray-400',
+                                    urgency === 3 && 'bg-green-300'
+                                )}
+                            onClick={() => setUrgencyFilter(3)}
+                        >
+                            3
+                        </Btn>
+                        <Btn
+                            className={'text-red-700 m-0 p-1 border-1 border-black flex-1 bg-gray-400'}
+                            onClick={() => {
+                                setUrgencyFilter(null);
+                            }
+                            }
+                        >
+                            <CrossCircledIcon/>
+                        </Btn>
+                    </ButtonGroup>
                 </div>
             </div>
 

@@ -9,6 +9,7 @@ import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 import {usePermission} from "@/shared/utils/permissions.ts";
 import {APP_PERM} from "@/entities/user";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
+import {useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
 
 const DEPARTMENTS = [
     "Конструктора",
@@ -23,6 +24,7 @@ export const PlanPage = () => {
     const planProject = usePlanProject((s) => s.planProject);
     const planManager = usePlanManager((s) => s.planManager);
     const planAgent = usePlanAgent(s => s.planAgent);
+    const urgency = useUrgencyFilter(s => s.urgencyFilter);
     const planSum = usePlanSum(s => s.planSum);
     const showSums = usePermission([
         APP_PERM.KPI_PAGE,
@@ -46,6 +48,10 @@ export const PlanPage = () => {
 
     const sortedEntries = useMemo(() => {
         const filtered = Object.entries(data?.data || {}).filter(([_, item]) => {
+            if (urgency && item.urgency !== urgency) {
+                return false;
+            }
+
             if (!selectedDepartment) {
                 if (showMode === "final_waiting") {
                     return item.final_waiting > 0;
@@ -74,7 +80,7 @@ export const PlanPage = () => {
                 new Date(b[1].date).getTime()
             );
         });
-    }, [data, selectedDepartment, showMode]);
+    }, [data, selectedDepartment, showMode, urgency]);
 
     // Автоматический расчет тоталов по отделам
     const totals = useMemo(() => {
