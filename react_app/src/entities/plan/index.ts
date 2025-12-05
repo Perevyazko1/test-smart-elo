@@ -31,6 +31,7 @@ export interface IPlanDataRow {
     fabric_stock: number | null;
     project: string | null;
     quantity: number;
+    all_quantity: number;
     shipped: number;
     urgency: 1 | 2 | 3;
     final_waiting: number;

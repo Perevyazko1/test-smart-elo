@@ -124,7 +124,7 @@ export const PlanPage = () => {
                 <tr>
                     <th>#</th>
                     <th rowSpan={2}>ДАТА</th>
-                    <th rowSpan={2}>ШТ</th>
+                    <th rowSpan={2} className={'print:max-w-[6]'}>ШТ</th>
                     <th rowSpan={2}>Изделие</th>
                     {deps.map((dept) => (
                         <th

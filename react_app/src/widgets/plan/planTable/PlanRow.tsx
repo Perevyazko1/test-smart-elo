@@ -203,7 +203,7 @@ export function PlanRow(props: IProps) {
                     </ButtonGroup>
                 </div>
             </td>
-            <td className={'max-w-15'}>
+            <td className={'max-w-15 print:max-w-[6]'}>
                 <input
                     type="number"
                     value={quantityValue}
@@ -215,6 +215,9 @@ export function PlanRow(props: IProps) {
                     }}
                     className={'text-xl max-w-full text-end'}
                 />
+                {data.quantity !== data.all_quantity && (
+                    <div className={'fw-bold'}>из {data.all_quantity}</div>
+                )}
             </td>
             <td><PlanCard data={data}/></td>
             <ProgressiveCell left={d1.ready} right={d1.all - d1.ready - d1.await} center={d1.await} className={'print:max-w-[3em]'}/>
