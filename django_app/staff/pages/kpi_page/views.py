@@ -1,5 +1,6 @@
+import openpyxl
 from django.db.models import Sum
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
 
 from core.models import Assignment, OrderProduct, AssignmentCoExecutor
@@ -94,3 +95,72 @@ def get_kpi_data(request):
         'total_amount': int(total_amount),
         'user_report': user_report,
     }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['GET'])
+def get_report(request):
+    date_from = request.query_params.get('date_from')
+    date_to = request.query_params.get('date_to')
+    department__id = request.query_params.get('department__id')
+
+    if department__id:
+        department = Department.objects.get(id=department__id)
+    else:
+        department = request.user.current_department
+
+    target_assignments = Assignment.objects.filter(
+        department=department,
+        tariffication_date__date__gte=date_from,
+        tariffication_date__date__lte=date_to,
+    ).select_related(
+        'order_product__product', 'order_product__order', 'department'
+    )
+
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = "work_report"
+
+    rows = [
+        [
+            "Проект",
+            "Номер заказа",
+            "Номер заказа заказчика",
+            "Изделие",
+            "Цена изделия",
+            "Дата закрепления",
+            "Номер наряда",
+            "Отдел",
+            "Исполнитель",
+            "Тариф",
+        ]
+    ]
+    for assignment in target_assignments:
+        rows.append(
+            [
+                assignment.order_product.order.project,
+                assignment.order_product.order.number,
+                assignment.order_product.order.inner_number,
+                assignment.order_product.product.name,
+                assignment.order_product.price,
+                assignment.tariffication_date.date(),
+                assignment.number,
+                assignment.department.name,
+                assignment.executor.get_full_name(),
+                assignment.amount,
+            ]
+        )
+
+
+    for row in rows:
+        sheet.append(row)
+
+    # Создаем response для Excel файла
+    response = HttpResponse(
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+    response['Content-Disposition'] = 'attachment; filename="report.xlsx"'
+
+    # Сохраняем workbook в response
+    workbook.save(response)
+
+    return response

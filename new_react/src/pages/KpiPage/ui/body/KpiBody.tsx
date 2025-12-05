@@ -8,6 +8,7 @@ import {KpiData} from "./Data/KpiData";
 import {useKpiData} from "@pages/KpiPage/model/api/rtk";
 import {useQueryParams} from "@shared/hooks";
 import {Spinner} from "react-bootstrap";
+import {SERVER_HTTP_ADDRESS} from "@shared/consts";
 
 
 export const KpiBody = () => {
@@ -25,6 +26,8 @@ export const KpiBody = () => {
         }
     }
 
+    const url = SERVER_HTTP_ADDRESS + `/api/v1/staff/kpi/get_report?date_from=${queryParameters.date_from}&date_to=${queryParameters.date_to}&department__id=${queryParameters.department__id}`;
+
 
     return (
         <div className={cls.pageContent}>
@@ -39,6 +42,18 @@ export const KpiBody = () => {
                             disabled={(isFetching || isLoading)}
                         >
                             Вывести отчет
+                        </button>
+
+                        <button
+                            className={'appBtn px-3 py-1 greenBtn'}
+                            disabled={
+                                !queryParameters.date_from || !queryParameters.date_to || !queryParameters.department__id
+                            }
+                            onClick={() => {
+                                window.location.href = url;
+                            }}
+                        >
+                            Скачать
                         </button>
 
                         {(isFetching || isLoading) && <Spinner animation="grow" size="sm"/>}

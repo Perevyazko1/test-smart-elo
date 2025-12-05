@@ -38,7 +38,7 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
             classes += ' urgency-3';
         }
         return classes;
-    }, [colorCls, diagonalBg]);
+    }, [colorCls, diagonalBg, urgency]);
 
     return (
         <button

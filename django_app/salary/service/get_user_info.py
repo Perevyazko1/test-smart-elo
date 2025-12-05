@@ -81,7 +81,7 @@ def get_user_info(user_id: int, date_from: datetime, date_to: datetime):
         annotated_balance_sum=create_sum_subquery(balance_earnings),
         annotated_full_loan_sum=create_sum_subquery(all_time_earnings, 'ЗАЙМ'),
         annotated_end_loan_sum=create_sum_subquery(all_time_earnings, 'ПОГ.ЗАЙМА'),
-    ).order_by('-id')[:15]
+    ).order_by('-id')[:12]
 
     user_info["user_info"] = {
         "user": EmployeeSerializer(employee).data,
