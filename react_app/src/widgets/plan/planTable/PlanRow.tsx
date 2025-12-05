@@ -203,7 +203,7 @@ export function PlanRow(props: IProps) {
                     </ButtonGroup>
                 </div>
             </td>
-            <td className={'max-w-15 print:max-w-[6]'}>
+            <td className={'max-w-15'}>
                 <input
                     type="number"
                     value={quantityValue}
