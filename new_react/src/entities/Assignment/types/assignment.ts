@@ -10,6 +10,7 @@ export const assignmentStatusOptions: AssignmentStatus[] = ['in_work', 'await', 
 export interface BaseAssignment {
     id: number;
     number: number;
+    urgency: 1 | 2 | 3 | null;
     notes: string;
     status: AssignmentStatus;
     department: number;

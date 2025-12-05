@@ -44,6 +44,7 @@ export interface EqAssignmentCoExecutor {
 
 export interface EqAssignment {
     id: number;
+    urgency: 1 | 2 | 3 | null;
     new_tariff: EqTariff | null;
     executor: number | null;
     print_count: number;

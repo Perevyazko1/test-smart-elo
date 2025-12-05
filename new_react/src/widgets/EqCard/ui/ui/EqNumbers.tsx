@@ -70,6 +70,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.primary.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     onClick={() => setNumber(item)}
@@ -82,6 +83,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.coExecuted.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={getCoExecutorAmount(item)}
@@ -94,6 +96,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.selectedLocked.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={item.amount}
@@ -106,6 +109,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.secondary.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={item.amount}
@@ -118,6 +122,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.lockedNums.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={item.amount}
@@ -130,6 +135,7 @@ export const EqNumbers = (props: EqNumbersProps) => {
             {assignmentsLists.confirmed.map((item) => (
                 <EqNumberBtn
                     key={item.id}
+                    urgency={item.urgency}
                     item={item}
                     userInitials={getNameById(item.executor, 'initials')}
                     amount={item.amount}

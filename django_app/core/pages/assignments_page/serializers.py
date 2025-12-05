@@ -40,6 +40,7 @@ class SimpleAssignmentSerializer(serializers.ModelSerializer):
             'id',
             'amount',
             'new_tariff',
+            'urgency',
             'executor',
             'number',
             'status',

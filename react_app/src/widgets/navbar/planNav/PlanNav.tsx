@@ -10,9 +10,8 @@ import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {Input} from "@/components/ui/input"
 import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {useEffect, useState} from "react";
-import {ArchiveIcon} from "lucide-react";
 import {ShipmentWidget} from "@/widgets/shipment/ShipmentWidget.tsx";
-import {useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
+import {type TUrgencyValue, useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {twMerge} from "tailwind-merge";
 import {CrossCircledIcon} from "@radix-ui/react-icons";
@@ -85,6 +84,22 @@ export function PlanNav(props: IProps) {
         setPlanAgent(agent?.id || null)
     }
 
+    const setUrgency = (value: TUrgencyValue | null) => {
+        if (value === null) {
+            setUrgencyFilter(value);
+        } else {
+            if (urgency?.includes(value)) {
+                if (urgency?.length === 1) {
+                    setUrgencyFilter(null);
+                } else {
+                    setUrgencyFilter(urgency.filter(i => i !== value));
+                }
+            } else {
+                setUrgencyFilter(urgency ? [...urgency, value] : [value]);
+            }
+        }
+    }
+
     return (
         <div className={'flex flex-row justify-between items-center gap-2 flex-1'}>
             <div className={'flex gap-1'}>
@@ -125,10 +140,10 @@ export function PlanNav(props: IProps) {
                             className={
                                 twMerge(
                                     'text-red-700 m-0 p-1 border-1 font-bold border-black flex-1 bg-gray-400',
-                                    urgency === 1 && 'bg-red-300'
+                                    urgency?.includes(1) && 'bg-red-300'
                                 )
                             }
-                            onClick={() => setUrgencyFilter(1)}
+                            onClick={() => setUrgency(1)}
                         >
                             1
                         </Btn>
@@ -136,20 +151,19 @@ export function PlanNav(props: IProps) {
                             className={
                                 twMerge(
                                     'text-yellow-700 m-0 p-1 border-1  font-bold border-black flex-1 bg-gray-400',
-                                    urgency === 2 && 'bg-yellow-300'
+                                    urgency?.includes(2) && 'bg-yellow-300'
                                 )}
-                            onClick={() => setUrgencyFilter(2)}
+                            onClick={() => setUrgency(2)}
                         >
                             2
                         </Btn>
                         <Btn
-
                             className={
                                 twMerge(
                                     'text-green-700 m-0 p-1 border-1 border-black flex-1 bg-gray-400',
-                                    urgency === 3 && 'bg-green-300'
+                                    urgency?.includes(3) && 'bg-green-300'
                                 )}
-                            onClick={() => setUrgencyFilter(3)}
+                            onClick={() => setUrgency(3)}
                         >
                             3
                         </Btn>

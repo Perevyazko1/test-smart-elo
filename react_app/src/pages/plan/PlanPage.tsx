@@ -48,7 +48,7 @@ export const PlanPage = () => {
 
     const sortedEntries = useMemo(() => {
         const filtered = Object.entries(data?.data || {}).filter(([_, item]) => {
-            if (urgency && item.urgency !== urgency) {
+            if (urgency && !urgency.includes(item.urgency)) {
                 return false;
             }
 

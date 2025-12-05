@@ -22,15 +22,6 @@ def get_eq_card_assignments(eq_params: dict, target_list: str, order_product: Or
 
 
 def _handle_await(eq_params, order_product):
-    # cache_key = (
-    #     f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_await_{eq_params['assembled']}'
-    # )
-    # if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
-    #     cache_key += f'_{eq_params['view_mode_key']}'
-    #
-    # cached_data = cache.get(cache_key)
-    # if cached_data:
-    #     return cached_data
 
     if eq_params['view_mode_key'] == 'boss':
         if eq_params['assembled']:
@@ -56,8 +47,6 @@ def _handle_await(eq_params, order_product):
             )[:30]
 
     result = SimpleAssignmentSerializer(assignments, many=True).data
-    """Кешируем результат. """
-    # cache.set(cache_key, result, timeout=60 * 60 * 8)
 
     return result
 
@@ -101,23 +90,6 @@ def _handle_ready(eq_params, order_product):
     result = SimpleAssignmentSerializer(assignments, many=True).data
 
     return result
-
-
-def _build_cache_key(eq_params, order_product, week_info, current_week, show_all):
-    cache_key = (
-        f'eq_card_{order_product.id}_{eq_params["department"].id}_assignments_ready_'
-        f'{week_info.week}_{week_info.year}_{show_all}'
-    )
-
-    is_current = current_week.week == week_info.week and current_week.year == week_info.year
-    cache_key += '_current' if is_current else '_not_current'
-
-    if eq_params['view_mode_key'] not in ['boss', 'unfinished']:
-        cache_key += f"_{eq_params['user'].id}"
-    else:
-        cache_key += f"_{eq_params['view_mode_key']}"
-
-    return cache_key
 
 
 def _get_ready_assignments(eq_params, order_product, week_info, current_week, show_all):

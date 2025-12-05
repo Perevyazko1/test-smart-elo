@@ -8,13 +8,14 @@ import {APP_PERM} from "@shared/consts";
 interface EqNumberBtnProps extends HTMLAttributes<HTMLButtonElement> {
     item: EqAssignment;
     userInitials: string;
+    urgency: EqAssignment["urgency"];
     amount?: number;
     colorCls: 'blueBtn' | 'redBtn' | 'blackBtn' | 'greyBtn' | 'greenBtn' | '';
     diagonalBg?: boolean;
 }
 
 export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
-    const {userInitials, item, colorCls, amount, diagonalBg = false, ...buttonProps} = props;
+    const {userInitials, item, colorCls, amount, urgency, diagonalBg = false, ...buttonProps} = props;
     const cardHeight = useCardHeight();
 
     const bossBerm = usePermission(APP_PERM.ELO_BOSS_VIEW_MODE);
@@ -25,9 +26,16 @@ export const EqNumberBtn = memo((props: EqNumberBtnProps) => {
     }, [cardHeight]);
 
     const buttonClasses = useMemo(() => {
-        let classes = `appBtn ${colorCls} p-1 rounded h-100 fw-bold position-relative`;
+        let classes = `appBtn ${colorCls} p-1 rounded h-100 fw-bold position-relative `;
         if (diagonalBg) {
             classes += ' diagonalBg';
+        }
+        if (urgency === 1) {
+            classes += ' urgency-1';
+        } else if (urgency === 2) {
+            classes += ' urgency-2';
+        } else if (urgency === 3) {
+            classes += ' urgency-3';
         }
         return classes;
     }, [colorCls, diagonalBg]);
