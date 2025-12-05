@@ -1,7 +1,8 @@
 import openpyxl
 from django.db.models import Sum
 from django.http import JsonResponse, HttpResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 
 from core.models import Assignment, OrderProduct, AssignmentCoExecutor
 from tasks.models import TaskExecutor, Task
@@ -98,6 +99,7 @@ def get_kpi_data(request):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def get_report(request):
     date_from = request.query_params.get('date_from')
     date_to = request.query_params.get('date_to')
