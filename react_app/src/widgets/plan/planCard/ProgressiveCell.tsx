@@ -13,7 +13,7 @@ export function ProgressiveCell(props: IProps) {
     const targetWidth = Math.abs(Math.max(15, left / (left + right) * 100));
 
     return (
-        <td className={twMerge('relative min-w-[5em]', className)}>
+        <td className={twMerge('relative min-w-[5em] print:min-w-[3em]', className)}>
             <div className={'absolute inset-0 flex justify-between items-center p-1'}>
                 {left > 0 && (
                     <div

@@ -135,7 +135,7 @@ export const PlanPage = () => {
                                 )
                             }
                             className={twMerge(
-                                "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
+                                "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap print:max-w-[3em]",
                                 selectedDepartment === dept ? "bg-blue-200 cursor-pointer" : "cursor-pointer",
                                 printDepartments.includes(dept) ? "" : "noPrint",
                             )}
@@ -149,7 +149,7 @@ export const PlanPage = () => {
                         rowSpan={2}
                         onClick={() => setShowMode(showMode === "final_waiting" ? null : "final_waiting")}
                         className={twMerge(
-                            "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap",
+                            "max-w-[5em] overflow-hidden text-ellipsis whitespace-nowrap print:max-w-[2em]",
                             showMode === "final_waiting" ? "bg-blue-200 cursor-pointer" : "cursor-pointer"
                         )}
                     >

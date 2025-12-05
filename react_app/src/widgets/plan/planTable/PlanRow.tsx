@@ -133,11 +133,14 @@ export function PlanRow(props: IProps) {
                     urgency === 3 ? '' : ''
         )}>
             <td
-                className={data.price !== "0.00" ? currentStyle : 'bg-red-300'}
+                className={twMerge(
+                    'text-[9px]',
+                    data.price !== "0.00" ? currentStyle : 'bg-red-300'
+                )}
             >
                 {index + 1} <br/>
                 {showSums && (
-                    <span className={'text-sm'}>
+                    <span>
                         {Math.round(Number(data.price) / 1000).toLocaleString('ru-RU')}т.р.<br/>
                         {(sum / 1_000_000).toFixed(1)}м<br/>
                     </span>
@@ -214,14 +217,19 @@ export function PlanRow(props: IProps) {
                 />
             </td>
             <td><PlanCard data={data}/></td>
-            <ProgressiveCell left={d1.ready} right={d1.all - d1.ready - d1.await} center={d1.await}/>
-            <ProgressiveCell left={d2.ready} right={d2.all - d2.ready - d2.await} center={d2.await}/>
-            <ProgressiveCell left={d3.ready} right={d3.all - d3.ready - d3.await} center={d3.await}/>
-            <ProgressiveCell left={d4.ready} right={d4.all - d4.ready - d4.await} center={d4.await}/>
-            <ProgressiveCell left={d5.ready} right={d5.all - d5.ready - d5.await} center={d5.await}/>
+            <ProgressiveCell left={d1.ready} right={d1.all - d1.ready - d1.await} center={d1.await} className={'print:max-w-[3em]'}/>
+            <ProgressiveCell left={d2.ready} right={d2.all - d2.ready - d2.await} center={d2.await} className={'print:max-w-[3em]'}/>
+            <ProgressiveCell left={d3.ready} right={d3.all - d3.ready - d3.await} center={d3.await} className={'print:max-w-[3em]'}/>
+            <ProgressiveCell left={d4.ready} right={d4.all - d4.ready - d4.await} center={d4.await} className={'print:max-w-[3em]'}/>
+            <ProgressiveCell left={d5.ready} right={d5.all - d5.ready - d5.await} center={d5.await} className={'print:max-w-[3em]'}/>
             <ProgressiveCell left={d6.ready} right={d6.all - d6.ready - d6.await} center={d6.await}
-                             className={"noPrint"}/>
-            <ProgressiveCell left={data.quantity - data.final_waiting} right={data.final_waiting} center={0}/>
+                             className={"noPrint print:max-w-[3em]"}/>
+            <ProgressiveCell
+                left={data.quantity - data.final_waiting}
+                right={data.final_waiting}
+                center={0}
+                className={'print:max-w-[3em]'}
+            />
         </tr>
     );
 }

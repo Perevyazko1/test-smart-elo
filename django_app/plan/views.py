@@ -4,7 +4,8 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view
 
-from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep
+from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment
+from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
 from staff.models import Employee
 from staff.serializers import EmployeeSerializer
@@ -58,6 +59,18 @@ def get_plan_table(request):
     ).annotate(**department_aggregates).order_by('order_product__series_id', 'urgency', 'sort_date_trunc')
 
     order_product_ids = assignments_query.values_list('order_product_id', flat=True).distinct()
+
+    comments_queryset = OrderProductComment.objects.filter(
+        order_product_id__in=order_product_ids,
+        deleted=False
+    )
+    comments_data = OrderProductCommentSerializer(comments_queryset, many=True).data
+    comments_map = {}
+    for comment in comments_data:
+        op_id = comment['order_product']
+        if op_id not in comments_map:
+            comments_map[op_id] = []
+        comments_map[op_id].append(comment)
 
     order_products = OrderProduct.objects.filter(
         id__in=order_product_ids
@@ -139,6 +152,7 @@ def get_plan_table(request):
             "all_quantity": order_product.quantity,
             "shipped": order_product.shipped,
             "final_waiting": final_waiting,
+            "comments": comments_map.get(order_product.id, []),
             "assignments": assignments_data
         }
 
@@ -230,7 +244,6 @@ def set_target_date(request):
             date_str = first_item[0].split('|')[0]
             date = None if date_str == 'None' else parse_datetime(date_str).date()
 
-        print(nums, date, urgency)
         Assignment.objects.filter(
             order_product=target_order_product,
             number__in=nums,

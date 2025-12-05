@@ -1,4 +1,3 @@
-
 export interface IAgentTag {
     id: number;
     name: string;
@@ -8,6 +7,16 @@ export interface IAgent {
     name: string;
     id: number;
     tags: IAgentTag[]
+}
+
+export interface IPlanComment {
+    id: number;
+    author: number;
+    order_product: number;
+    important: boolean;
+    add_date: string;
+    deleted: boolean;
+    text: string;
 }
 
 export interface IPlanDataRow {
@@ -25,6 +34,7 @@ export interface IPlanDataRow {
     shipped: number;
     urgency: 1 | 2 | 3;
     final_waiting: number;
+    comments: IPlanComment[];
     assignments: {
         [key: string]: {
             all: number;
