@@ -1,10 +1,7 @@
 import cls from "../KpiPage.module.scss"
 
 import {KpiDatesBlock} from "./KpiDatesBlock";
-import {KpiCalculator} from "./KpiCalculator";
-import {KpiTotal} from "./KpiTotal";
 import {KpiTopUsers} from "./TopUsers/KpiTopUsers";
-import {KpiData} from "./Data/KpiData";
 import {useKpiData} from "@pages/KpiPage/model/api/rtk";
 import {useQueryParams} from "@shared/hooks";
 import {Spinner} from "react-bootstrap";
@@ -59,30 +56,7 @@ export const KpiBody = () => {
                         {(isFetching || isLoading) && <Spinner animation="grow" size="sm"/>}
                     </div>
                     <hr/>
-                    <div className={"px-3 p-2"}>
-                        <KpiTotal
-                            total_count={data?.total_count || 0}
-                            total_sum={data?.total_sum || 0}
-                            total_fot={data?.total_amount || 0}
-                        />
-                    </div>
-
-                    <hr/>
-                    {!queryParameters.showSum && (
-                        <div className={"px-3 p-2"}>
-                            <KpiCalculator
-                                total_count={data?.total_count || 0}
-                                total_sum={data?.total_sum || 0}
-                            />
-                        </div>
-                    )}
                 </div>
-
-                {!queryParameters.showSum && (
-                    <div style={{width: '25%'}} className={'border border-black p-2'}>
-                        <KpiData/>
-                    </div>
-                )}
 
             </div>
 
