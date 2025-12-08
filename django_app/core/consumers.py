@@ -43,9 +43,12 @@ class MainConsumer(WebsocketConsumer):
     def disconnect(self, close_code):
         # Leave room group
         if self.group_name and self.channel_name:
-            async_to_sync(self.channel_layer.group_discard)(
-                self.group_name, self.channel_name
-            )
+            try:
+                async_to_sync(self.channel_layer.group_discard)(
+                    self.group_name, self.channel_name
+                )
+            except Exception:
+                pass
 
     def client_message(self, event):
         message = event["message"]
