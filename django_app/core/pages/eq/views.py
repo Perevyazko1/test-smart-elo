@@ -106,6 +106,7 @@ def get_week_data(request):
         wages_mode = is_user_in_group(user, "ЗП - Страница")
         self_mode = user.id == target_user.id
 
+
         employee = target_user if boss_mode or admin_mode or wages_mode else user
 
         balance_earnings = Earning.objects.filter(
