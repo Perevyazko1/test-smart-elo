@@ -18,6 +18,7 @@ import {RequirePermission} from "@/app/RequirePermission.tsx";
 import {RequireAuth} from "@/components/RequireAuth.tsx";
 import {Toaster} from "@/components/ui/sonner.tsx";
 import {APP_PERM} from "@/entities/user";
+import {DefaultRedirect} from "@/components/DefaultRedirect.tsx";
 import {CashNav} from "@/widgets/navbar/cashNav/CashNav.tsx";
 import {PlanNav} from "@/widgets/navbar/planNav/PlanNav.tsx";
 import {ShipmentNav} from "@/widgets/navbar/shipmentNav/ShipmentNav.tsx";
@@ -30,10 +31,13 @@ createRoot(document.getElementById('root')!).render(
         <ContextProvider>
             <Routes>
                 <Route path="/" element={<RequireAuth/>}>
+                    {/* Default landing based on permissions */}
+                    <Route index element={<DefaultRedirect/>}/>
+
                     <Route path="/" element={<App nav={<CashNav/>}/>}>
                         <Route
-                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>
-                            <Route index element={<SalaryPage/>}/>
+                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>                    
+                            {/* Explicit routes for salary/cash */}
                             <Route path="/salary/:date_from?/:date_to?/" element={<SalaryPage/>}/>
                             <Route path="/cash" element={<CashPage/>}/>
                         </Route>
@@ -78,6 +82,8 @@ createRoot(document.getElementById('root')!).render(
                 </Route>
 
                 <Route path="/user_wage/:userId/:date_from/:date_to/" element={<UserWage/>}/>
+                {/* Fallback for permission denials */}
+                <Route path="/unauthorized" element={<div style={{padding: 24}}>Нет доступа</div>}/>
             </Routes>
         </ContextProvider>
     </BrowserRouter>,
