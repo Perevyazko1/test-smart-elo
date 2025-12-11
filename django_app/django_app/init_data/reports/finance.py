@@ -2,8 +2,8 @@ import openpyxl
 
 from core.models import Assignment, OrderProduct
 
-DATE_FROM = '2025-11-01'
-DATE_TO = '2025-11-30'
+DATE_FROM = '2025-12-01'
+DATE_TO = '2025-12-31'
 
 
 def get_finance_report():
