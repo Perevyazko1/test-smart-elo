@@ -37,7 +37,7 @@ def create_payroll(date_from: date, days=6):
             date_to=date_to,
             is_closed=False,
             cash_payout=0,
-            state="1",
+            state="0",
         )
 
         users = Employee.objects.filter(

@@ -28,7 +28,7 @@ def make_earning(
     if payroll_list.exists():
         payroll = payroll_list.first()
         print(int(payroll.state), int(payroll.state) > 1)
-        if int(payroll.state) > 1:
+        if int(payroll.state) >= 1:
             target_date = datetime.now()
 
     with transaction.atomic():

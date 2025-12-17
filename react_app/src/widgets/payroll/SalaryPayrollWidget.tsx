@@ -160,7 +160,7 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                                     {statusName}
                                 </div>
                             </div>
-                            {index < 5 && (
+                            {index < 6 && (
                                 <div>
                                     <ArrowRight/>
                                 </div>

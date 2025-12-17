@@ -20,7 +20,7 @@ import {useShowCoins} from "@/shared/state/payroll/showCoins.ts";
 interface PayrollTableProps {
     currentWeek: IWeek;
     payrollId: number;
-    state: "1" | "2" | "3" | "4" | "5" | "6";
+    state: "0" | "1" | "2" | "3" | "4" | "5" | "6";
 }
 
 export const PayrollTable = (props: PayrollTableProps) => {
