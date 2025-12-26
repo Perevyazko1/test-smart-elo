@@ -3,7 +3,8 @@ from celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_app.settings')
 
-REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_HOST = os.environ.get('REDIS_HOST', 'elo_redis')
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://elo_redis:6379/1')
 
 app = Celery('django_app', broker=f'redis://{REDIS_HOST}:6379/0')
 
