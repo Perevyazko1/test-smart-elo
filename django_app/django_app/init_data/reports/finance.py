@@ -1,3 +1,4 @@
+from django.db.models import F
 import openpyxl
 
 from core.models import Assignment, OrderProduct
@@ -24,42 +25,31 @@ def get_finance_report():
         "Исполнитель",
     ])
 
-    order_products = OrderProduct.objects.filter(
-        assignments__inspect_date__gte=DATE_FROM,
-        assignments__inspect_date__lte=DATE_TO,
+    assignments = Assignment.objects.filter(
+        inspect_date__gte=DATE_FROM,
+        inspect_date__lte=DATE_TO,
+        department=F('order_product__product__technological_process__final_department')
+    ).select_related(
+        'order_product__order',
+        'order_product__product',
+        'department',
+        'executor'
     )
 
-    while order_products:
-        product = order_products.first().product
-        final_department = product.technological_process.final_department
+    for assignment in assignments:
+        result = [
+            assignment.order_product.order.project,
+            assignment.order_product.order.number,
+            assignment.order_product.order.inner_number,
+            assignment.order_product.product.name,
+            assignment.order_product.price,
+            assignment.inspect_date.date(),
+            assignment.number,
+            assignment.department.name,
+            assignment.executor.get_full_name() if assignment.executor else "",
+        ]
 
-        target_ops = order_products.filter(
-            product=product,
-        )
-        assignments = Assignment.objects.filter(
-            order_product__in=target_ops,
-            department=final_department,
-            inspect_date__gte=DATE_FROM,
-            inspect_date__lte=DATE_TO,
-        )
-        for assignment in assignments:
-            result = [
-                assignment.order_product.order.project,
-                assignment.order_product.order.number,
-                assignment.order_product.order.inner_number,
-                product.name,
-                assignment.order_product.price,
-                assignment.inspect_date.date(),
-                assignment.number,
-                assignment.department.name,
-                assignment.executor.get_full_name(),
-            ]
-
-            sheet.append(result)
-
-        order_products = order_products.exclude(
-            product=product,
-        )
+        sheet.append(result)
 
     # Сохраняем Excel-файл
     file_name = "finance.xlsx"
