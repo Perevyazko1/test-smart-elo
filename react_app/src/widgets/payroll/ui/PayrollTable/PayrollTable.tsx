@@ -120,7 +120,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
                             <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
                             <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Налог</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Удержания</PayrollTh>
                             <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
                         </>
                     )}
@@ -133,7 +133,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                             <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
                             <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
                             <PayrollTh className={'bg-purple-50'}>БН</PayrollTh>
-                            <PayrollTh className={'bg-purple-50'}>Налог</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Удержано</PayrollTh>
                             <PayrollTh className={'bg-purple-50'}>Займы</PayrollTh>
                         </>
                     )}
