@@ -12,13 +12,18 @@ class PrinterTSPL2:
         self.port = port
         self.socket: socket.socket | None = None
 
-    def connect(self):
+    def connect(self, timeout: float = 5.0):
         if not self.socket:
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.settimeout(timeout)
             self.socket.connect((self.ip, self.port))
 
     def disconnect(self):
         if self.socket:
+            try:
+                self.socket.shutdown(socket.SHUT_RDWR)
+            except Exception:
+                pass
             self.socket.close()
             self.socket = None
 
@@ -27,13 +32,13 @@ class PrinterTSPL2:
         if not self.socket:
             self.connect()
         data = f"{command}\r\n".encode("ascii")
-        self.socket.send(data)
+        self.socket.sendall(data)
 
     def send_raw(self, data: bytes):
         """Отправка сырых байтов (для BMP, PCX и т.п.)"""
         if not self.socket:
             self.connect()
-        self.socket.send(data)
+        self.socket.sendall(data)
 
     def download_file(self, filename: str, data: bytes):
         """Загрузка файла в память принтера"""

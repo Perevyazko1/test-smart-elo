@@ -339,19 +339,33 @@ def print_assignment_label(label_data: LabelData, font_path: Optional[str] = Non
     # Отправка на принтер
     raw_data = img.tobytes()
     printer = PrinterTSPL2(ip=target_ip)
-    printer.connect()
+    
+    try:
+        printer.connect(timeout=10.0)
 
-    printer.send_command(f"SIZE {LABEL_WIDTH_MM} mm,{LABEL_HEIGHT_MM} mm")
-    printer.send_command("REFERENCE 0,0")
-    printer.send_command("DIRECTION 0")
-    printer.send_command("CLS")
+        # Подготовка команд
+        commands = [
+            f"SIZE {LABEL_WIDTH_MM} mm,{LABEL_HEIGHT_MM} mm",
+            "REFERENCE 0,0",
+            "DIRECTION 0",
+            "CLS"
+        ]
+        
+        # Отправляем основные команды настройки одним пакетом
+        printer.send_command("\r\n".join(commands))
 
-    width_in_bytes = label_width // 8
-    command = f"BITMAP 0,0,{width_in_bytes},{label_height},0,".encode('ascii')
-    printer.send_raw(command + raw_data)
+        # Отправка битмапа
+        width_in_bytes = label_width // 8
+        header = f"BITMAP 0,0,{width_in_bytes},{label_height},0,".encode('ascii')
+        # Важно: после сырых данных BITMAP часто требуется \r\n для корректного завершения команды в TSPL2
+        printer.send_raw(header + raw_data + b"\r\n")
 
-    printer.send_command("PRINT 1")
-    printer.disconnect()
+        # Печать
+        printer.send_command("PRINT 1")
+    except Exception as e:
+        raise RuntimeError(f"Printer error: {str(e)}") from e
+    finally:
+        printer.disconnect()
 
 
 # Пример использования
