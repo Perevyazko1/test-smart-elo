@@ -3,8 +3,8 @@ import openpyxl
 from core.models import Assignment
 from staff.models import Department
 
-DATE_FROM = "2025-07-01"
-DATE_TO = "2025-09-30"
+DATE_FROM = "2025-10-01"
+DATE_TO = "2025-12-31"
 
 
 def constructing_report():

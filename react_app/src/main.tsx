@@ -23,6 +23,9 @@ import {CashNav} from "@/widgets/navbar/cashNav/CashNav.tsx";
 import {PlanNav} from "@/widgets/navbar/planNav/PlanNav.tsx";
 import {ShipmentNav} from "@/widgets/navbar/shipmentNav/ShipmentNav.tsx";
 import {SkladNav} from "@/widgets/navbar/skladNav/SkladNav.tsx";
+import {TransfersPage} from "@/pages/transfers/TransfersPage.tsx";
+import {TariffingPage} from "@/pages/tariffing/TariffingPage.tsx";
+import {TariffingNav} from "@/pages/tariffing/TariffingNav.tsx";
 
 // @ts-ignore
 createRoot(document.getElementById('root')!).render(
@@ -36,10 +39,18 @@ createRoot(document.getElementById('root')!).render(
 
                     <Route path="/" element={<App nav={<CashNav/>}/>}>
                         <Route
-                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>                    
+                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>
                             {/* Explicit routes for salary/cash */}
                             <Route path="/salary/:date_from?/:date_to?/" element={<SalaryPage/>}/>
                             <Route path="/cash" element={<CashPage/>}/>
+                            <Route path="/transfers" element={<TransfersPage/>}/>
+                        </Route>
+                    </Route>
+                    <Route path="/" element={<App nav={<TariffingNav/>}/>}>
+                        <Route
+                            element={<RequirePermission requiredPermissions={[APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]}/>}>
+                            <Route path="/tariffing" element={<TariffingPage/>}/>
+
                         </Route>
                     </Route>
 

@@ -34,9 +34,11 @@ export const Navbar = (props: NavbarProps) => {
 
     const wagesPage = usePermission([APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]);
     const cashPage = usePermission([APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]);
+    const transfersPage = usePermission([APP_PERM.WAGES_PAGE, APP_PERM.ADMIN]);
     const planPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
     const shipmentPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
     const skladPage = usePermission([APP_PERM.SPECIFICATIONS_PAGE, APP_PERM.ADMIN]);
+    const tariffingPage = usePermission([APP_PERM.TARIFFICATION_PAGE, APP_PERM.ADMIN]);
 
     const WagesLink = (props: { border: boolean }) => (
         <AppLink
@@ -90,6 +92,21 @@ export const Navbar = (props: NavbarProps) => {
         />
     )
 
+    const TransfersLink = (props: { border: boolean }) => (
+        <AppLink
+            path={"/transfers"}
+            name={"Переводы"}
+            border={props.border}
+        />
+    )
+
+    const TariffingLink = (props: { border: boolean }) => (
+        <AppLink
+            path={"/tariffing"}
+            name={"Сделка"}
+            border={props.border}
+        />
+    )
     return (
         <div
             className={twMerge([
@@ -164,6 +181,14 @@ export const Navbar = (props: NavbarProps) => {
 
                         {skladPage && (
                             <SkladLink border={true}/>
+                        )}
+
+                        {transfersPage && (
+                            <TransfersLink border={true}/>
+                        )}
+
+                        {tariffingPage && (
+                            <TariffingLink border={true}/>
                         )}
 
 

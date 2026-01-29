@@ -1,11 +1,14 @@
 import {createContext, type ReactNode, useEffect, useState} from "react";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {DndProvider} from 'react-dnd';
+import {TouchBackend} from 'react-dnd-touch-backend'
 
 import {$axios} from "@/shared/api";
 import {USER_LOCALSTORAGE_TOKEN} from "@/shared/consts";
 import {toast} from "sonner";
 
 import type {IUser} from "@/entities/user";
+import {HTML5Backend} from "react-dnd-html5-backend";
 
 
 interface ContextProviderProps {
@@ -74,16 +77,22 @@ export const ContextProvider = (props: ContextProviderProps) => {
         }
     }, [inited]);
 
+    const isTouchDevice = () => {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    };
+
     return (
         <QueryClientProvider client={queryClient}>
-            <CurrentUserContext.Provider value={{
-                currentUser,
-                setCurrentUser,
-                inited,
-                setInited,
-            }}>
-                {props.children}
-            </CurrentUserContext.Provider>
+            <DndProvider backend={isTouchDevice() ? TouchBackend : HTML5Backend}>
+                <CurrentUserContext.Provider value={{
+                    currentUser,
+                    setCurrentUser,
+                    inited,
+                    setInited,
+                }}>
+                    {props.children}
+                </CurrentUserContext.Provider>
+            </DndProvider>
         </QueryClientProvider>
     );
 };

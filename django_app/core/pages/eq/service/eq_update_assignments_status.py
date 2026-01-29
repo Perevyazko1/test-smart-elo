@@ -5,7 +5,7 @@ from django.db import transaction
 from core.api_moy_sklad.network.change_order_status import change_order_status
 from core.api_moy_sklad.network.post_enter import CreateEnterDocument
 from core.consumers import EqNotificationActions, ws_update_notification, ws_send_to_department, ws_group_updates
-from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep, Order
+from core.models import OrderProduct, Assignment, AssignmentCoExecutor, ProductionStep
 from salary.service.make_earning import make_earning
 from staff.models import Department, Employee, Audit
 
@@ -150,12 +150,11 @@ class EqUpdateAssignmentsStatus:
         change_order_status(str(self.order_product.order.order_id))
 
     def _check_order_product_full_ready(self):
-        shipped = self.order_product.quantity == self.order_product.shipped
         has_unconfirmed = Assignment.objects.filter(
             order_product=self.order_product,
             inspector__isnull=True,
         ).exists()
-        if shipped and not has_unconfirmed:
+        if not has_unconfirmed:
             self.order_product.status = '1'
             self.order_product.save()
             return True

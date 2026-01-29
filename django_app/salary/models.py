@@ -119,7 +119,7 @@ class Earning(models.Model):
 
     amount = models.IntegerField('Сумма', default=0)
 
-    """Выдача НАЛ, На карту, Налог, ЭЛО, ДОП, Внесение НАЛ, ЗАЙМ, ПОГ.ЗАЙМА"""
+    """Выдача НАЛ, На карту, Налог, ЭЛО, ДОП, Внесение НАЛ, ЗАЙМ, ПОГ.ЗАЙМА, ИП"""
     earning_type = models.CharField('Тип', max_length=100, blank=True, null=True)
     created_by = models.ForeignKey(
         Employee,

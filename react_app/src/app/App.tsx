@@ -16,7 +16,7 @@ export const App = (props: IProps) => {
                 {props.nav}
             </Navbar>
             <div
-                className={'relative overflow-y-auto'}>
+                className={'relative'}>
                 <Outlet/>
             </div>
         </div>

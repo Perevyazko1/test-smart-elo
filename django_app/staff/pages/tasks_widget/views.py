@@ -17,34 +17,11 @@ def check_tasks_exists(request):
     """Check user has some tasks. """
     user: Employee = request.user
 
-    if user.groups.filter(name="Визирование нарядов").exists():
-        if Assignment.objects.filter(
-                department__in=user.departments.all(),
-                inspector__isnull=True,
-                status="ready"
-        ).exists():
-            return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
-
     if user.groups.filter(name="Изменение техпроцессов"):
         if Assignment.objects.filter(
                 inspector__isnull=True,
                 order_product__product__technological_process__isnull=True,
         ).exists():
-            return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
-
-    if user.groups.filter(name="Первичная тарификация").exists():
-        active_products = Product.objects.filter(
-            order_products__status="0"
-        ).distinct()
-
-        target_departments = user.departments.filter(
-            piecework_wages=True
-        )
-        if ProductionStep.objects.filter(
-                product__in=active_products,
-                department__in=target_departments,
-                proposed_tariff__isnull=True
-        ).distinct().exists():
             return JsonResponse({'result': True}, json_dumps_params={"ensure_ascii": False})
 
     if user.groups.filter(name="Подтверждение тарификаций").exists():

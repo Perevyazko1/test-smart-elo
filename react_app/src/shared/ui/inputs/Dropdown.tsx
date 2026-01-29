@@ -10,12 +10,13 @@ interface IProps<T> {
     selectedItem: T | undefined | null;
     setSelectedItem: (arg: T | undefined | null) => void;
     getItemLabel: (arg: T | undefined | null) => string;
+    resetItem?: string;
     className?: string;
     disabled?: boolean;
 }
 
 export function Dropdown<T>(props: IProps<T>) {
-    const {items, setSelectedItem, selectedItem, getItemLabel, className, disabled = false} = props;
+    const {items, setSelectedItem, selectedItem, getItemLabel, className, disabled = false, resetItem} = props;
     const [open, setOpen] = useState(false);
 
     return (
@@ -47,6 +48,23 @@ export function Dropdown<T>(props: IProps<T>) {
                     <CommandList>
                         <CommandEmpty>Не найдено совпадений</CommandEmpty>
                         <CommandGroup>
+                            {resetItem && (
+                                <CommandItem
+                                    value={resetItem}
+                                    onSelect={() => {
+                                        setSelectedItem(null)
+                                        setOpen(false)
+                                    }}
+                                >
+                                    <span className={'capitalize'}>{resetItem}</span>
+                                    <Check
+                                        className={twMerge(
+                                            "ml-auto",
+                                            selectedItem === null ? "opacity-100" : "opacity-0"
+                                        )}
+                                    />
+                                </CommandItem>
+                            )}
                             {items?.map((item, index) => (
                                 <CommandItem
                                     key={index}

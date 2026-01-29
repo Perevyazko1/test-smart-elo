@@ -25,6 +25,7 @@ urlpatterns = [
     path('api/v1/salary/', include('salary.urls')),
     path('api/v1/plan/', include('plan.urls')),
     path('api/v1/shipment/', include('shipment.urls')),
+    path('api/v1/tariffs/', include('tariffs.urls')),
 
     path('init/', init_app_data),
 ]

@@ -119,8 +119,8 @@ export const PlanPage = () => {
                 )}
             </div>
 
-            <table className="w-full">
-                <thead>
+            <table className="w-full border-collapse">
+                <thead className={"sticky top-10 bg-white z-10 [&>tr>th]:bg-white [&>tr>th]:border [&>tr>th]:border-slate-300"}>
                 <tr>
                     <th>#</th>
                     <th rowSpan={2}>ДАТА</th>

@@ -139,57 +139,6 @@ services:
     networks:
       - dev-network
 
-  prometheus:
-    image: prom/prometheus:v2.55.1
-    container_name: prometheus
-    restart: unless-stopped
-    command:
-      - --config.file=/etc/prometheus/prometheus.yml
-      - --storage.tsdb.path=/prometheus
-    volumes:
-      - prom_data:/prometheus
-      - ./services/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - "9090:9090"
-    networks:
-      - dev-network
-    depends_on:
-      - postgres_exporter
-
-  postgres_exporter:
-    image: prometheuscommunity/postgres-exporter:v0.15.0
-    container_name: postgres_exporter
-    restart: unless-stopped
-    environment:
-      # Берём креды из вашего .env.docker.prod (или задайте вручную)
-      # pg — это container_name вашего Postgres (из основного compose)
-      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pg:5432/${POSTGRES_DB}?sslmode=disable"
-    env_file:
-      - .env
-    networks:
-      - dev-network
-
-  grafana:
-    image: grafana/grafana:11.3.0
-    container_name: grafana
-    restart: unless-stopped
-    environment:
-      # Пароль лучше поменять после первого входа
-      GF_SECURITY_ADMIN_USER: "admin"
-      GF_SECURITY_ADMIN_PASSWORD: "admin"
-      GF_USERS_ALLOW_SIGN_UP: "false"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./services/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
-      - ./services/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
-    ports:
-      - "3002:3000"
-    networks:
-      - dev-network
-    depends_on:
-      - prometheus
-
-
 
 networks:
   dev-network:

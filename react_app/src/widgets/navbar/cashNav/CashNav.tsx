@@ -31,86 +31,86 @@ export function CashNav(props: IProps) {
 
     return (
         <>
-                <div className={'text-xs flex items-center gap-2'}>
-                    <span>Копейки: </span>
+            <div className={'text-xs flex items-center gap-2'}>
+                <span>Копейки: </span>
 
-                    <Toggle
-                        className={'cursor-pointer noPrint bg-gray-800'}
-                        pressed={showCoins}
-                        onPressedChange={() => setShowCoins(!showCoins)}
-                    >
-                        {showCoins ? (
-                            <EyeOpenIcon className={'text-red-800'}/>
-                        ) : (
-                            <EyeClosedIcon className={'text-green-800'}/>
-                        )}
-                    </Toggle>
-                </div>
-
-                <div className={'text-xs flex items-center gap-2'}>
-                    <span>Ст-ть дня: </span>
-
-                    <Toggle
-                        className={'cursor-pointer noPrint bg-gray-800'}
-                        pressed={showDayPrice}
-                        onPressedChange={() => setShowDayPrice(!showDayPrice)}
-                    >
-                        {showDayPrice ? (
-                            <EyeOpenIcon className={'text-red-800'}/>
-                        ) : (
-                            <EyeClosedIcon className={'text-green-800'}/>
-                        )}
-                    </Toggle>
-                </div>
-
-
-                <div className={'text-xs flex items-center gap-2'}>
-                    <span>Детали ЭЛО: </span>
-
-                    <Toggle
-                        className={'cursor-pointer noPrint bg-gray-800'}
-                        pressed={showEarnedDetail}
-                        onPressedChange={() => setShowEarnedDetail(!showEarnedDetail)}
-                    >
-                        {showEarnedDetail ? (
-                            <EyeOpenIcon className={'text-red-800'}/>
-                        ) : (
-                            <EyeClosedIcon className={'text-green-800'}/>
-                        )}
-                    </Toggle>
-                </div>
-
-                <div className={'text-xs flex items-center gap-2'}>
-                    <span>Итоги: </span>
-
-                    <Toggle
-                        className={'cursor-pointer noPrint bg-gray-800'}
-                        pressed={showTotal}
-                        onPressedChange={() => setShowTotal(!showTotal)}
-                    >
-                        {showTotal ? (
-                            <EyeOpenIcon className={'text-red-800'}/>
-                        ) : (
-                            <EyeClosedIcon className={'text-green-800'}/>
-                        )}
-                    </Toggle>
-                </div>
+                <Toggle
+                    className={'cursor-pointer noPrint bg-gray-800'}
+                    pressed={showCoins}
+                    onPressedChange={() => setShowCoins(!showCoins)}
+                >
+                    {showCoins ? (
+                        <EyeOpenIcon className={'text-red-800'}/>
+                    ) : (
+                        <EyeClosedIcon className={'text-green-800'}/>
+                    )}
+                </Toggle>
+            </div>
 
             <div className={'text-xs flex items-center gap-2'}>
-                    <span>Выдача: </span>
+                <span>Ст-ть дня: </span>
 
-                    <Toggle
-                        className={'cursor-pointer noPrint bg-gray-800'}
-                        pressed={hideSum}
-                        onPressedChange={() => setHideSum(!hideSum)}
-                    >
-                        {hideSum ? (
-                            <EyeOpenIcon className={'text-red-800'}/>
-                        ) : (
-                            <EyeClosedIcon className={'text-green-800'}/>
-                        )}
-                    </Toggle>
-                </div>
+                <Toggle
+                    className={'cursor-pointer noPrint bg-gray-800'}
+                    pressed={showDayPrice}
+                    onPressedChange={() => setShowDayPrice(!showDayPrice)}
+                >
+                    {showDayPrice ? (
+                        <EyeOpenIcon className={'text-red-800'}/>
+                    ) : (
+                        <EyeClosedIcon className={'text-green-800'}/>
+                    )}
+                </Toggle>
+            </div>
+
+
+            <div className={'text-xs flex items-center gap-2'}>
+                <span>Детали ЭЛО: </span>
+
+                <Toggle
+                    className={'cursor-pointer noPrint bg-gray-800'}
+                    pressed={showEarnedDetail}
+                    onPressedChange={() => setShowEarnedDetail(!showEarnedDetail)}
+                >
+                    {showEarnedDetail ? (
+                        <EyeOpenIcon className={'text-red-800'}/>
+                    ) : (
+                        <EyeClosedIcon className={'text-green-800'}/>
+                    )}
+                </Toggle>
+            </div>
+
+            <div className={'text-xs flex items-center gap-2'}>
+                <span>Итоги: </span>
+
+                <Toggle
+                    className={'cursor-pointer noPrint bg-gray-800'}
+                    pressed={showTotal}
+                    onPressedChange={() => setShowTotal(!showTotal)}
+                >
+                    {showTotal ? (
+                        <EyeOpenIcon className={'text-red-800'}/>
+                    ) : (
+                        <EyeClosedIcon className={'text-green-800'}/>
+                    )}
+                </Toggle>
+            </div>
+
+            <div className={'text-xs flex items-center gap-2'}>
+                <span>Выдача: </span>
+
+                <Toggle
+                    className={'cursor-pointer noPrint bg-gray-800'}
+                    pressed={hideSum}
+                    onPressedChange={() => setHideSum(!hideSum)}
+                >
+                    {hideSum ? (
+                        <EyeOpenIcon className={'text-red-800'}/>
+                    ) : (
+                        <EyeClosedIcon className={'text-green-800'}/>
+                    )}
+                </Toggle>
+            </div>
         </>
     );
 }
