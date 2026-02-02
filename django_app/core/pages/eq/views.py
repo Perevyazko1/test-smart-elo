@@ -412,8 +412,26 @@ def print_labels(request):
             inspector_info=f"ОКК:{user} {print_date}",
             department=department_name
         )
-        print_assignment_label(label, target_ip=target_ip)
-        sleep(1.5)
+
+        # Печать с механизмом retry
+        max_retries = 5
+        retry_delay = 2
+        for attempt in range(max_retries):
+            try:
+                print_assignment_label(label, target_ip=target_ip)
+                break
+            except Exception as e:
+                if attempt < max_retries - 1:
+                    sleep(retry_delay)
+                    continue
+                else:
+                    # Если все попытки исчерпаны, логируем или пробрасываем
+                    # В данном случае, чтобы не прерывать весь процесс для других assignment_id, 
+                    # можно было бы использовать continue для внешнего цикла, 
+                    # но сохраним текущее поведение прерывания, если печать совсем не идет.
+                    raise e
+
+        sleep(1)
 
         target_assignment.print_count = target_assignment.print_count + 1
         target_assignment.last_print_date = datetime.now()
