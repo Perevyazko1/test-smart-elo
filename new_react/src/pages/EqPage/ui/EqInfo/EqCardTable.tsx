@@ -6,6 +6,8 @@ import {useCurrentUser, usePermission} from "@shared/hooks";
 import {APP_PERM} from "@shared/consts";
 import {EqOrderProduct} from "@widgets/EqCardList";
 import {useLazyPrintFabric} from "@widgets/EqCard/model/api/updateTiming";
+import {AttachmentsWidget} from "@widgets/AttachmentsWidget/AttachmentsWidget";
+import React from "react";
 
 
 interface EqCardTableProps {
@@ -187,6 +189,11 @@ export const EqCardTable = (props: EqCardTableProps) => {
                     Просмотреть тарификации
                 </Button>
             </Link>
+
+            <AttachmentsWidget
+                contentType="product"
+                objectId={card.product.id}
+            />
         </>
     );
 };

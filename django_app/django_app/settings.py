@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'rangefilter',
     'django_telegram_logging',
+    'attachments',
 ]
 
 MIDDLEWARE = [
@@ -240,3 +241,7 @@ LOGGING = {
         },
     },
 }
+
+# 100 МБ в байтах
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600

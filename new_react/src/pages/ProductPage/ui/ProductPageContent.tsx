@@ -11,6 +11,7 @@ import {Spinner, Table} from "react-bootstrap";
 import {AppSkeleton} from "@shared/ui";
 import {PaginationContainer} from "@features";
 import {ProductPageRow} from "@pages/ProductPage/ui/ProductPageRow";
+import {AttachmentsWidget} from "@widgets/AttachmentsWidget/AttachmentsWidget";
 
 export const ProductPageContent = () => {
     const dispatch = useAppDispatch();

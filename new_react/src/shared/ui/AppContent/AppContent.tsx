@@ -8,7 +8,7 @@ export const AppContent = (props: AppContentProps) => {
     const {children, ...otherProps} = props;
 
     return (
-        <div className={'d-flex justify-content-center'}>
+        <div className={'d-flex justify-content-center'} data-bs-theme={'light'}>
             <div style={{
                 maxWidth: 2400,
                 minWidth: 1280,

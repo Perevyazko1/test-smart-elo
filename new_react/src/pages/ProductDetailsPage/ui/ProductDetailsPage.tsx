@@ -19,6 +19,7 @@ import {
     getPageIsLoading
 } from "../model/selectors/productSelectors/productSelectors";
 import {productDetailsPageActions, productDetailsPageReducer} from "../model/slice/productDetailsSlice";
+import {AttachmentsWidget} from "@widgets/AttachmentsWidget/AttachmentsWidget";
 
 
 const initialReducers: ReducersList = {
@@ -96,7 +97,8 @@ export const ProductDetailsPage = () => {
                                             <tr>
                                                 <th>Наряд разработки:</th>
                                                 <td>
-                                                    <Link to={`/assignment?order_product__product__id=${product.id}&department__id=2`}>
+                                                    <Link
+                                                        to={`/assignment?order_product__product__id=${product.id}&department__id=2`}>
                                                         <button className={'appBtn blueBtn px-2 mx-2'}>
                                                             Перейти
                                                         </button>
@@ -126,6 +128,7 @@ export const ProductDetailsPage = () => {
                                         product={product}
                                         updCallback={() => dispatch(productDetailsPageActions.hasUpdated())}
                                     />
+                                    <AttachmentsWidget contentType="product" objectId={product.id}/>
                                 </div>
                             }
                         </Container>
