@@ -176,7 +176,7 @@ export const AttachmentsWidget = (props: Props) => {
 
     return (
         <div className={'d-flex flex-column gap-2 border p-2 bg-white shadow-sm rounded-3'}
-             style={{minHeight: '300px', opacity: isUploading ? 0.7 : 1, pointerEvents: isUploading ? 'none' : 'auto'}}>
+             style={{minHeight: '250px', opacity: isUploading ? 0.7 : 1, pointerEvents: isUploading ? 'none' : 'auto'}}>
             <style>
                 {`
                 .attachment-type-btn:hover {
@@ -266,7 +266,7 @@ export const AttachmentsWidget = (props: Props) => {
                     <div className="spinner-border text-primary"></div>
                 </div>}
                 {!isLoading && attachments.length === 0 &&
-                    <p className="text-muted text-center my-4">Нет добавленных файлов</p>}
+                    <p className="text-muted text-center my-2">Нет добавленных файлов</p>}
 
                 <div className="row g-3">
                     {attachments.map((item) => {
