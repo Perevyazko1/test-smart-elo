@@ -31,6 +31,8 @@ export const CardCounter = (props: CardCounterProps) => {
             return "#ffc107"
         } else if (card.shipped === card.card_info.count_ready && card.shipped === card.card_info.count_all) {
             return "rgb(197,255,186)"
+        } else if (card.card_info.has_extra_info) {
+            return "rgb(220,197,255)"
         }
         // else if (card.shipped > card.card_info.count_ready) {
         //     return "rgb(189,245,255)"

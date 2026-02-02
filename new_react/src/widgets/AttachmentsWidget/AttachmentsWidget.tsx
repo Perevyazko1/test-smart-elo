@@ -1,6 +1,7 @@
 import {useState, ChangeEvent, useEffect} from "react";
 import {AppVoiceInput} from "@shared/ui";
 import {$axiosAPI} from "@shared/api";
+import {useCurrentUser} from "@shared/hooks";
 
 // Определяем типы ввода
 type IInputTypes = 'image' | 'video' | 'audio' | 'text' | 'file';
@@ -11,6 +12,7 @@ interface AttachmentItem {
     content?: File | string;
     name: string;
     url?: string;
+    author?: number;
     file?: string; // URL файла с бэкенда
     text?: string; // Текст с бэкенда
 }
@@ -22,11 +24,15 @@ interface Props {
 }
 
 export const AttachmentsWidget = (props: Props) => {
+    const MAX_FILE_SIZE_MB = 100;
+    const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
     const {contentType, objectId, onSave} = props;
     const [textValue, setTextValue] = useState("");
     const [attachments, setAttachments] = useState<AttachmentItem[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const {currentUser} = useCurrentUser();
 
     // Загрузка существующих вложений
     const fetchAttachments = async () => {
@@ -38,7 +44,6 @@ export const AttachmentsWidget = (props: Props) => {
                     object_id: objectId,
                 }
             });
-            console.log('Attachments fetched:', response.data);
             setAttachments(response.data.results || response.data);
         } catch (error) {
             console.error('Error fetching attachments:', error);
@@ -103,9 +108,32 @@ export const AttachmentsWidget = (props: Props) => {
         }
     };
 
+    const deleteAttachment = async (id: string | number) => {
+        if (!window.confirm('Вы уверены, что хотите удалить эту заметку?')) return;
+
+        try {
+            setIsLoading(true);
+            await $axiosAPI.delete(`/attachments/${id}/`);
+            // Обновляем локальный стейт после успешного удаления
+            setAttachments(prev => prev.filter(item => item.id !== id));
+        } catch (error) {
+            console.error('Error deleting attachment:', error);
+            alert('Ошибка при удалении вложения');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>, type: IInputTypes) => {
         const file = e.target.files?.[0];
         if (file) {
+            // Проверка размера файла
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                alert(`Файл слишком большой. Максимальный размер: ${MAX_FILE_SIZE_MB} МБ. Ваш файл: ${(file.size / (1024 * 1024)).toFixed(2)} МБ`);
+                // Сбрасываем значение инпута, чтобы пользователь мог выбрать другой файл
+                e.target.value = '';
+                return;
+            }
             addAttachment(type, file);
         }
     };
@@ -203,7 +231,7 @@ export const AttachmentsWidget = (props: Props) => {
             <div className="mt-auto pt-3 border-top">
                 <AppVoiceInput
                     style={{
-                        maxWidth:'800px'
+                        maxWidth: '800px'
                     }}
                     value={textValue}
                     onSubmit={handleTextSave}
@@ -230,7 +258,19 @@ export const AttachmentsWidget = (props: Props) => {
                             <div key={item.id} className="card p-2">
                                 <div className="d-flex justify-content-between mb-2 border-bottom pb-1">
                                     <strong>{item.type.toUpperCase()}:
-                                        Вложение {item.id} {fileName && `(${fileName})`}</strong>
+                                        Вложение {item.id} {fileName && `(${fileName})`}
+                                    </strong>
+                                    {currentUser.id === item.author && (
+                                        <button
+                                            className="btn btn-sm btn-outline-danger"
+                                            style={{fontSize: '1rem'}}
+                                            onClick={() => deleteAttachment(item.id)}
+                                            title="Удалить"
+                                        >
+                                            &times;
+                                        </button>
+                                    )}
+
                                 </div>
 
                                 <div className="attachment-preview">

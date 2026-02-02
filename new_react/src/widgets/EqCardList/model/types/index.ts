@@ -67,6 +67,7 @@ export interface EqDepartmentInfo {
 
 export interface EqCardInfo {
     count_all: number;
+    has_extra_info: boolean;
     further_packaging: boolean;
     count_in_work: number;
     count_ready: number;

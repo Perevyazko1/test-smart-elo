@@ -1,5 +1,6 @@
 from django.db.models import Count, Q
 
+from attachments.models import Attachment
 from core.models import OrderProduct, Assignment, ProductionStep
 from staff.models import Department
 
@@ -86,6 +87,7 @@ def get_eq_card_info(order_product: OrderProduct, department: Department):
         "count_in_work": count_in_work,
         "count_ready": count_ready,
         "count_await": count_await,
+        "has_extra_info": Attachment.objects.filter(content_type="product", object_id=order_product.product.id).exists(),
         "employees_info": employees_info
     }
 
