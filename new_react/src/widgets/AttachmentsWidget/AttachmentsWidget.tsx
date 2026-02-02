@@ -175,7 +175,7 @@ export const AttachmentsWidget = (props: Props) => {
     };
 
     return (
-        <div className={'d-flex flex-column gap-4 border p-4 bg-white shadow-sm rounded-3'}
+        <div className={'d-flex flex-column gap-2 border p-2 bg-white shadow-sm rounded-3'}
              style={{minHeight: '300px', opacity: isUploading ? 0.7 : 1, pointerEvents: isUploading ? 'none' : 'auto'}}>
             <style>
                 {`
@@ -191,12 +191,12 @@ export const AttachmentsWidget = (props: Props) => {
                 }
                 `}
             </style>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-                <h4 className="m-0">
+            <div className="d-flex justify-content-between align-items-center mb-0">
+                <div className="m-0">
                     Вложения
                     {contentType && <span className="text-muted ms-1">({contentType}</span>}
                     {objectId && <span className="text-muted"> ID: {objectId})</span>}
-                </h4>
+                </div>
                 {isUploading && <span className="spinner-border spinner-border-sm text-primary" role="status"></span>}
             </div>
 
@@ -244,16 +244,18 @@ export const AttachmentsWidget = (props: Props) => {
                     />
                 </div>
 
-                <AppVoiceInput
-                    style={{
-                        maxWidth: '800px'
-                    }}
-                    value={textValue}
-                    onSubmit={handleTextSave}
-                    setValue={setTextValue}
-                    label={'Текстовая заметка'}
-                    asTextarea={true}
-                />
+                <div className={'flex-grow-1 align-self-center ms-4'}>
+                    <AppVoiceInput
+                        style={{
+                            maxWidth: '800px',
+                        }}
+                        value={textValue}
+                        onSubmit={handleTextSave}
+                        setValue={setTextValue}
+                        label={'Текстовая заметка'}
+                    />
+                </div>
+
             </div>
 
 

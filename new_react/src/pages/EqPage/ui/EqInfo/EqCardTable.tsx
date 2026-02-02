@@ -26,10 +26,15 @@ export const EqCardTable = (props: EqCardTableProps) => {
 
     return (
         <>
+            <AttachmentsWidget
+                contentType="product"
+                objectId={card.product.id}
+            />
             <Table
                 striped
                 bordered
                 hover
+                className={'mt-3'}
             >
                 <thead>
                 <tr>
@@ -190,10 +195,6 @@ export const EqCardTable = (props: EqCardTableProps) => {
                 </Button>
             </Link>
 
-            <AttachmentsWidget
-                contentType="product"
-                objectId={card.product.id}
-            />
         </>
     );
 };
