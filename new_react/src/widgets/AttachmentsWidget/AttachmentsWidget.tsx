@@ -120,8 +120,8 @@ export const AttachmentsWidget = (props: Props) => {
     const boxStyle: React.CSSProperties = {
         fontSize: '4rem',
         border: 'dotted 2px #ccc',
-        width: '120px',
-        height: '120px',
+        width: '100px',
+        height: '100px',
         textAlign: 'center',
         display: 'flex',
         alignItems: 'center',
@@ -202,6 +202,9 @@ export const AttachmentsWidget = (props: Props) => {
             {/* ТЕКСТОВЫЙ ВВОД СНИЗУ */}
             <div className="mt-auto pt-3 border-top">
                 <AppVoiceInput
+                    style={{
+                        maxWidth:'800px'
+                    }}
                     value={textValue}
                     onSubmit={handleTextSave}
                     setValue={setTextValue}

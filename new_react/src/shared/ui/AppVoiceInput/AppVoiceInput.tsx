@@ -19,6 +19,7 @@ interface AppVoiceInputProps {
     isLoading?: boolean;
     disabled?: boolean;
     onSubmit?: () => void;
+    style?: React.CSSProperties;
 }
 
 export const AppVoiceInput = (props: AppVoiceInputProps) => {
@@ -31,6 +32,7 @@ export const AppVoiceInput = (props: AppVoiceInputProps) => {
         asTextarea = false,
         isLoading = false,
         disabled = false,
+        style,
     } = props;
 
     const id = useId();
@@ -107,7 +109,7 @@ export const AppVoiceInput = (props: AppVoiceInputProps) => {
     };
 
     return (
-        <InputGroup>
+        <InputGroup style={style}>
             <InputGroup.Text id="basic-addon1" className={'ps-5 fs-7 position-relative'}>
                 <Fab
                     size="small"
