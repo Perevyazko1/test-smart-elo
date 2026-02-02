@@ -1,7 +1,7 @@
 import {useState, ChangeEvent, useEffect} from "react";
 import {AppVoiceInput} from "@shared/ui";
 import {$axiosAPI} from "@shared/api";
-import {useCurrentUser} from "@shared/hooks";
+import {useAppModal, useCurrentUser} from "@shared/hooks";
 
 // Определяем типы ввода
 type IInputTypes = 'image' | 'video' | 'audio' | 'text' | 'file';
@@ -26,6 +26,9 @@ interface Props {
 export const AttachmentsWidget = (props: Props) => {
     const MAX_FILE_SIZE_MB = 100;
     const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+    const {handleOpen} = useAppModal();
+
 
     const {contentType, objectId, onSave} = props;
     const [textValue, setTextValue] = useState("");
@@ -146,18 +149,19 @@ export const AttachmentsWidget = (props: Props) => {
     };
 
     const boxStyle: React.CSSProperties = {
-        fontSize: '4rem',
-        border: 'dotted 2px #ccc',
-        width: '100px',
-        height: '100px',
+        fontSize: '2rem',
+        border: '2px dashed #dee2e6',
+        width: '80px',
+        height: '80px',
         textAlign: 'center',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         cursor: 'pointer',
         position: 'relative',
-        borderRadius: '8px',
-        backgroundColor: '#f8f9fa'
+        borderRadius: '12px',
+        backgroundColor: '#fff',
+        transition: 'all 0.2s ease'
     };
 
     const inputStyle: React.CSSProperties = {
@@ -171,9 +175,23 @@ export const AttachmentsWidget = (props: Props) => {
     };
 
     return (
-        <div className={'d-flex flex-column gap-4 border p-3 bg-white shadow-sm'}
-             style={{minHeight: '400px', opacity: isUploading ? 0.7 : 1, pointerEvents: isUploading ? 'none' : 'auto'}}>
-            <div className="d-flex justify-content-between align-items-center">
+        <div className={'d-flex flex-column gap-4 border p-4 bg-white shadow-sm rounded-3'}
+             style={{minHeight: '300px', opacity: isUploading ? 0.7 : 1, pointerEvents: isUploading ? 'none' : 'auto'}}>
+            <style>
+                {`
+                .attachment-type-btn:hover {
+                    border-color: #0d6efd !important;
+                    background-color: #f8f9fa !important;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+                }
+                .card:hover {
+                    transform: translateY(-4px);
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+                }
+                `}
+            </style>
+            <div className="d-flex justify-content-between align-items-center mb-2">
                 <h4 className="m-0">
                     Вложения
                     {contentType && <span className="text-muted ms-1">({contentType}</span>}
@@ -184,7 +202,7 @@ export const AttachmentsWidget = (props: Props) => {
 
             {/* ВЕРХНЯЯ ПАНЕЛЬ ВЫБОРА (БЕЗ ТЕКСТА) */}
             <div className={'d-flex gap-3 flex-wrap'}>
-                <div style={boxStyle} title="Сделать фото">
+                <div style={boxStyle} title="Сделать фото" className="attachment-type-btn">
                     <span>📸</span>
                     <input
                         style={inputStyle}
@@ -195,7 +213,7 @@ export const AttachmentsWidget = (props: Props) => {
                     />
                 </div>
 
-                <div style={boxStyle} title="Записать голос">
+                <div style={boxStyle} title="Записать голос" className="attachment-type-btn">
                     <span>🎙️</span>
                     <input
                         style={inputStyle}
@@ -206,7 +224,7 @@ export const AttachmentsWidget = (props: Props) => {
                     />
                 </div>
 
-                <div style={boxStyle} title="Записать видео">
+                <div style={boxStyle} title="Записать видео" className="attachment-type-btn">
                     <span>🎥</span>
                     <input
                         style={inputStyle}
@@ -217,7 +235,7 @@ export const AttachmentsWidget = (props: Props) => {
                     />
                 </div>
 
-                <div style={boxStyle} title="Прикрепить файл">
+                <div style={boxStyle} title="Прикрепить файл" className="attachment-type-btn">
                     <span>📁</span>
                     <input
                         style={inputStyle}
@@ -225,10 +243,7 @@ export const AttachmentsWidget = (props: Props) => {
                         onChange={(e) => handleFileChange(e, 'file')}
                     />
                 </div>
-            </div>
 
-            {/* ТЕКСТОВЫЙ ВВОД СНИЗУ */}
-            <div className="mt-auto pt-3 border-top">
                 <AppVoiceInput
                     style={{
                         maxWidth: '800px'
@@ -241,78 +256,140 @@ export const AttachmentsWidget = (props: Props) => {
                 />
             </div>
 
+
             {/* СПИСОК ДОБАВЛЕННЫХ ФАЙЛОВ И ПРОСМОТР */}
             <div className="flex-grow-1 border-top pt-3">
-                <h5>Список вложений:</h5>
-                {isLoading && <div className="text-center">
-                    <div className="spinner-border spinner-border-sm"></div>
+                <h5 className="mb-3">Список вложений:</h5>
+                {isLoading && <div className="text-center my-4">
+                    <div className="spinner-border text-primary"></div>
                 </div>}
-                {!isLoading && attachments.length === 0 && <p className="text-muted">Нет добавленных файлов</p>}
-                <div className="d-flex flex-column gap-3">
+                {!isLoading && attachments.length === 0 &&
+                    <p className="text-muted text-center my-4">Нет добавленных файлов</p>}
+
+                <div className="row g-3">
                     {attachments.map((item) => {
                         const previewUrl = item.file || item.url;
                         const textContent = item.text || (typeof item.content === 'string' ? item.content : '');
                         const fileName = item.name || (previewUrl ? previewUrl.split('/').pop() : '');
 
                         return (
-                            <div key={item.id} className="card p-2">
-                                <div className="d-flex justify-content-between mb-2 border-bottom pb-1">
-                                    <strong>{item.type.toUpperCase()}:
-                                        Вложение {item.id} {fileName && `(${fileName})`}
-                                    </strong>
-                                    {currentUser.id === item.author && (
-                                        <button
-                                            className="btn btn-sm btn-outline-danger"
-                                            style={{fontSize: '1rem'}}
-                                            onClick={() => deleteAttachment(item.id)}
-                                            title="Удалить"
-                                        >
-                                            &times;
-                                        </button>
-                                    )}
-
-                                </div>
-
-                                <div className="attachment-preview">
-                                    {item.type === 'image' && (
-                                        <img src={previewUrl} alt="preview"
-                                             style={{maxWidth: '100%', maxHeight: '300px', objectFit: 'contain'}}/>
-                                    )}
-
-                                    {item.type === 'video' && (
-                                        <video src={previewUrl} controls
-                                               style={{maxWidth: '100%', maxHeight: '300px'}}/>
-                                    )}
-
-                                    {item.type === 'audio' && (
-                                        <audio src={previewUrl} controls className="w-100"/>
-                                    )}
-
-                                    {item.type === 'text' && (
-                                        <div className="p-2 bg-light border rounded" style={{whiteSpace: 'pre-wrap'}}>
-                                            {textContent}
+                            <div key={item.id} className="col-12 col-sm-6 col-md-4 d-flex">
+                                <div className="card shadow-sm border-0 w-100 overflow-hidden"
+                                     style={{minHeight: '250px', transition: 'transform 0.2s'}}>
+                                    <div
+                                        className="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-1 px-2">
+                                        <div className="d-flex align-items-center gap-2 overflow-hidden">
+                                            <span className="badge bg-secondary-subtle text-secondary text-uppercase"
+                                                  style={{fontSize: '0.7rem'}}>
+                                                {item.type}
+                                            </span>
+                                            <small className="text-truncate fw-semibold" title={fileName}>
+                                                Вложение {item.id} ({fileName || `ID: ${item.id}`})
+                                            </small>
                                         </div>
-                                    )}
-
-                                    {item.type === 'file' && (
-                                        <div
-                                            className="p-3 border rounded bg-light d-flex align-items-center justify-content-between">
-                                            <div className="d-flex align-items-center gap-2">
-                                                <span style={{fontSize: '1.5rem'}}>📄</span>
-                                                <span className="text-truncate"
-                                                      style={{maxWidth: '300px'}}>{fileName}</span>
-                                            </div>
-                                            <a
-                                                href={previewUrl}
-                                                download={fileName}
-                                                className="btn btn-sm btn-outline-primary"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
+                                        {currentUser.id === item.author && (
+                                            <button
+                                                className="btn btn-link text-danger p-0 p-2 ms-2"
+                                                onClick={() => deleteAttachment(item.id)}
+                                                title="Удалить"
+                                                style={{
+                                                    fontSize: '2rem',
+                                                    lineHeight: 1,
+                                                    backgroundColor: 'rgba(248,248,248,0.59)'
+                                                }}
                                             >
-                                                Скачать
-                                            </a>
+                                                &times;
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    <div
+                                        className="position-relative card-body p-0 d-flex flex-column justify-content-center bg-light-subtle">
+                                        <div
+                                            className="attachment-preview w-100 d-flex align-items-center justify-content-center overflow-hidden h-100">
+                                            {item.type === 'image' && (
+                                                <img
+                                                    onClick={() => handleOpen(
+                                                        <img
+                                                            src={previewUrl}
+                                                            alt="preview"
+                                                            style={{
+                                                                width: '100%',
+                                                                maxHeight: '93dvh',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                        />
+                                                    )}
+                                                    src={previewUrl}
+                                                    alt="preview"
+                                                    style={{width: '100%', height: '220px', objectFit: 'cover'}}
+                                                />
+                                            )}
+
+                                            {item.type === 'video' && (
+                                                <video
+                                                    onClick={() => handleOpen(
+                                                        <video
+                                                            src={previewUrl}
+                                                            controls
+                                                            style={{
+                                                                width: '100%',
+                                                                maxHeight: '93dvh',
+                                                                backgroundColor: '#000',
+                                                                objectFit: 'contain'
+                                                            }}/>
+                                                    )}
+                                                    src={previewUrl}
+                                                    style={{
+                                                        width: '100%',
+                                                        height: '220px',
+                                                        backgroundColor: '#000',
+                                                        objectFit: 'contain'
+                                                    }}/>
+                                            )}
+
+                                            {item.type === 'audio' && (
+                                                <div className="p-3 w-100 h-100 d-flex align-items-center">
+                                                    <audio src={previewUrl} controls className="w-100"/>
+                                                </div>
+                                            )}
+
+                                            {item.type === 'text' && (
+                                                <div className="p-3 w-100 overflow-auto h-100"
+                                                     style={{maxHeight: '220px'}}
+                                                     onClick={() => handleOpen(
+                                                         <div style={{whiteSpace: 'pre-wrap', fontSize: '1.2rem'}}>
+                                                             {textContent}
+                                                         </div>
+                                                     )}
+                                                >
+                                                    <div style={{whiteSpace: 'pre-wrap', fontSize: '0.9rem'}}>
+                                                        {textContent}
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {item.type === 'file' && (
+                                                <div
+                                                    className="p-4 w-100 text-center h-100 d-flex flex-column justify-content-center">
+                                                    <div className="display-4 mb-2">📄</div>
+                                                    <div
+                                                        className="text-truncate mb-3 px-2 small fw-bold">{fileName}</div>
+                                                    <div>
+                                                        <a
+                                                            href={previewUrl}
+                                                            download={fileName}
+                                                            className="btn btn-sm btn-primary rounded-pill px-3"
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            Скачать
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
                         );
