@@ -401,7 +401,7 @@ def print_labels(request):
 
         label = LabelData(
             project=project,
-            order_number=f"{order} №{target_assignment.number}",
+            order_number=f"{order} №{target_assignment.number} #{op.order.inner_number}",
             product=product_name,
             fabrics=[
                 f'Т1:{t1}',

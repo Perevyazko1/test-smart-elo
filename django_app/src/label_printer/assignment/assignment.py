@@ -7,7 +7,7 @@ from src.label_printer.commands import mm_to_dots
 from src.label_printer.printer_tspl2 import PrinterTSPL2
 
 # Константы макета
-LINE_SPACE = 2
+LINE_SPACE = 0
 PADDING = 4
 DATA_SPACE = 4
 LINE_WIDTH_THIN = 2
@@ -236,9 +236,9 @@ def draw_label_layout(
     )
     y_offset += project_height + DATA_SPACE
 
-    order_height = get_text_size(fonts['xl'], 1)
+    order_height = get_text_size(fonts['md'], 1)
     draw_text_multiline(
-        draw=draw, text=label_data.order_number, font=fonts['xl'],
+        draw=draw, text=label_data.order_number, font=fonts['md'],
         width=central_width, height=order_height,
         x_offset=PADDING + qr_zone + DATA_SPACE, y_offset=y_offset,
         break_by_char=True, align='left'
@@ -271,10 +271,10 @@ def draw_label_layout(
 
     # Нижняя часть: Информация об инспекторе и отделе
     y_offset = text_part + DATA_SPACE
-    info_height = get_text_size(fonts['xl'], 1)
+    info_height = get_text_size(fonts['md'], 1)
 
     draw_text_multiline(
-        draw=draw, text=label_data.inspector_info, font=fonts['xl'],
+        draw=draw, text=label_data.inspector_info, font=fonts['md'],
         width=label_width - PADDING * 2 - qr_size * 2 - DATA_SPACE * 2,
         height=info_height,
         x_offset=PADDING + qr_zone + DATA_SPACE, y_offset=y_offset,
@@ -283,7 +283,7 @@ def draw_label_layout(
 
     y_offset += info_height + DATA_SPACE
     draw_text_multiline(
-        draw=draw, text=label_data.department, font=fonts['xl'],
+        draw=draw, text=label_data.department, font=fonts['md'],
         width=label_width - PADDING * 2 - qr_size * 2 - DATA_SPACE * 2,
         height=info_height,
         x_offset=PADDING + qr_zone + DATA_SPACE, y_offset=y_offset,
