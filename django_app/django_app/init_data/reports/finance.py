@@ -1,7 +1,7 @@
-from django.db.models import F
 import openpyxl
+from django.db.models import F
 
-from core.models import Assignment, OrderProduct
+from core.models import Assignment
 
 DATE_FROM = '2026-01-01'
 DATE_TO = '2026-01-31'
