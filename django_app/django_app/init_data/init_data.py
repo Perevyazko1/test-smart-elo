@@ -23,7 +23,7 @@ def init_data():
             op.save()
 
 
-    # get_finance_report()
+    get_finance_report()
 
     print('PASS')
     return f"Oki"
