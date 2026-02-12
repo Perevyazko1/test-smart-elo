@@ -1,4 +1,3 @@
-import ImageSrc from "./fabric.jpg";
 import {STATIC_URL} from "@shared/consts";
 import {IFabric} from "@pages/FabricPage/types";
 import {getHumansDatetime} from "@shared/lib";
