@@ -58,6 +58,8 @@ class Product(models.Model):
         on_delete=models.SET_NULL,
     )
 
+    archived = models.BooleanField('Архивный', default=False)
+
     description = models.TextField('Описание товара', blank=True, null=True)
 
     def __str__(self):

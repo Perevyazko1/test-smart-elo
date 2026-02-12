@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/v1/shipment/', include('shipment.urls')),
     path('api/v1/tariffs/', include('tariffs.urls')),
     path('api/v1/attachments/', include('attachments.urls')),
+    path('api/v1/sklad/', include('sklad.urls')),
 
     path('init/', init_app_data),
 ]

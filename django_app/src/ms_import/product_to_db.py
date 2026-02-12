@@ -37,6 +37,9 @@ def _save_product(product: SkladProduct):
         if same_product.group != product.pathName:
             same_product.group = product.pathName
             updated = True
+        if same_product.archived != product.archived:
+            same_product.archived = product.archived
+            updated = True
         if updated:
             same_product.save()
         return same_product
@@ -45,6 +48,7 @@ def _save_product(product: SkladProduct):
             product_id=product.id,
             name=product.name,
             group=product.pathName,
+            archived=product.archived,
         )
         ProductionStep.objects.create(
             department=Department.objects.get(number=1),

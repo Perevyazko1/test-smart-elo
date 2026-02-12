@@ -6,7 +6,7 @@ import '@app/styles/index.scss';
 import {App, ContextProvider, StoreProvider} from "@app";
 import {DndProvider} from "react-dnd";
 import {TouchBackend} from "react-dnd-touch-backend";
-
+import { Toaster } from 'sonner';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement
@@ -28,6 +28,7 @@ root.render(
         <ContextProvider>
             <DndProvider backend={TouchBackend} options={{enableMouseEvents: true}}>
                 <App/>
+                <Toaster position="top-center" duration={1500}/>
             </DndProvider>
         </ContextProvider>
     </StoreProvider>

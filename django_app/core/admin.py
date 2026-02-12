@@ -15,7 +15,7 @@ class ProductAdmin(admin.ModelAdmin):
 
     search_fields = ['name']
 
-    list_filter = ['group', 'status']
+    list_filter = ['group', 'status', 'archived']
 
     @staticmethod
     def product_image(obj: Product):

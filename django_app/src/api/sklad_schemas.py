@@ -110,9 +110,12 @@ class SkladProduct(BaseModel):
     name: str
     pathName: Optional[str] = None
     updated: str
+    archived: bool
+    stock: Optional[float] = None
     images: Optional[SkladListNoExpand] = None
     attributes: Optional[list[SkladAttribute]] = None
     barcodes: Optional[list[SkladBarcode]] = None
+    meta: SkladBaseMetadata
 
     class Config:
         extra = "ignore"
@@ -129,12 +132,29 @@ class SkladStock(BaseModel):
         extra = "ignore"
 
 
+class SkladPositionAssortment(BaseModel):
+    """Assortment может быть либо полным объектом (с expand), либо только meta"""
+    meta: Optional[SkladBaseMetadata] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
+    pathName: Optional[str] = None
+    updated: Optional[str] = None
+    archived: Optional[bool] = None
+    stock: Optional[float] = None
+    images: Optional[SkladListNoExpand] = None
+    attributes: Optional[list[SkladAttribute]] = None
+    barcodes: Optional[list[SkladBarcode]] = None
+
+    class Config:
+        extra = "ignore"
+
+
 class SkladPosition(BaseModel):
     id: str
-    assortment: SkladProduct
+    assortment: SkladPositionAssortment
     price: float
     quantity: float
-    shipped: float
+    shipped: Optional[float] = None
     stock: SkladStock
 
     class Config:
@@ -153,8 +173,10 @@ class SkladEmployee(BaseModel):
 
 
 class SkladAgent(BaseModel):
-    id: str
-    name: str
+    """Agent может быть либо полным объектом (с expand), либо только meta"""
+    meta: Optional[SkladBaseMetadata] = None
+    id: Optional[str] = None
+    name: Optional[str] = None
     tags: Optional[list[str]] = []
 
     class Config:
@@ -173,6 +195,32 @@ class SkladOrderExpandProjectPositionsAssortment(BaseModel):
     updated: str
     owner: SkladEmployee
     agent: SkladAgent
+
+    class Config:
+        extra = "ignore"
+
+
+class SkladOrganization(BaseModel):
+    meta: SkladBaseMetadata
+
+
+class SkladStore(BaseModel):
+    meta: SkladBaseMetadata
+
+
+class SkladPurchaseOrder(BaseModel):
+    id: str
+    name: str
+    moment: str
+    positions: SkladApiListResponse[SkladPosition]
+    project: Optional[SkladProject] | None = None
+    agent: SkladAgent
+    organization: SkladOrganization
+    meta: SkladBaseMetadata
+    store: Optional[SkladStore] | None = None
+    payedSum: float
+    sum: float
+
 
     class Config:
         extra = "ignore"

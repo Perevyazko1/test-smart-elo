@@ -13,6 +13,7 @@ import {OrderDetailPage} from "@pages/OrderDetailPage";
 import {TarifficationPage} from "@pages/TarifficationPage";
 import {TaskPage} from "@pages/TaskPage";
 import {KpiPage} from "@pages/KpiPage";
+import {FabricPage} from "@pages/FabricPage/FabricPage";
 
 export interface AppRoute {
     route: RouteObject,
@@ -24,6 +25,7 @@ export interface AppRoute {
 
 enum AppRoutes {
     LOGIN = 'login',
+    FABRIC = 'fabric',
     EQ = 'eq',
     TEST = 'test',
     KPI = 'kpi',
@@ -114,6 +116,13 @@ export const AppRoutesConfig: Record<AppRoutes, AppRoute> = {
         mobile: false,
         navigate: true,
         permissions: [APP_PERM.KPI_PAGE]
+    },
+    [AppRoutes.FABRIC]: {
+        route: {path: '/fabric', element: <FabricPage/>, errorElement: <ErrorPage/>},
+        name: 'Ткани',
+        mobile: false,
+        navigate: true,
+        permissions: [APP_PERM.ELO_BOSS_VIEW_MODE]
     },
     [AppRoutes.ERROR]: {
         route: {path: '/error', element: <ErrorPage/>},

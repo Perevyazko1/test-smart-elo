@@ -1,13 +1,13 @@
-import React, {memo} from "react";
+import React from "react";
 
 import {AppNavbar} from "@widgets/AppNavbar";
 import {QueryContext} from "@features";
 import {ModalProvider} from "@app";
-import {AttachmentsWidget} from "@widgets/AttachmentsWidget/AttachmentsWidget";
 import {AppContent} from "@shared/ui";
+import {FabricContent} from "@pages/FabricPage/FabricContent";
 
 
-export const TestPage = memo(() => {
+export const FabricPage = () => {
 
     return (
         <QueryContext>
@@ -16,11 +16,9 @@ export const TestPage = memo(() => {
                 </AppNavbar>
 
                 <AppContent>
-                    <AttachmentsWidget contentType="product" objectId="test_id"/>
+                    <FabricContent/>
                 </AppContent>
-                {/*<div data-bs-theme={'light'} style={{overflow: 'auto'}}>*/}
-                {/*</div>*/}
             </ModalProvider>
         </QueryContext>
     );
-});
+};

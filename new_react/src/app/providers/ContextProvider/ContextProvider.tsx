@@ -1,6 +1,9 @@
 import {createContext, ReactNode, useEffect, useState} from "react";
 import {anonEmployee, Employee, useEmployeeList} from "@entities/Employee";
 import {APP_COMPACT_MODE} from "@shared/consts";
+import {QueryClient, QueryClientProvider,} from '@tanstack/react-query'
+
+const queryClient = new QueryClient();
 
 interface ContextProviderProps {
     children: ReactNode;
@@ -47,14 +50,16 @@ export const ContextProvider = (props: ContextProviderProps) => {
     }, []);
 
     return (
-        <CurrentUserContext.Provider value={{currentUser, setCurrentUser: setCurrentUser}}>
-            <UserListContext.Provider value={{isLoading, usersList}}>
-                <AppInCompactMode.Provider value={{isCompactMode, setCompactMode: setIsCompactMode}}>
-                    <AudioContext.Provider value={clickSound}>
-                        {props.children}
-                    </AudioContext.Provider>
-                </AppInCompactMode.Provider>
-            </UserListContext.Provider>
-        </CurrentUserContext.Provider>
+        <QueryClientProvider client={queryClient}>
+            <CurrentUserContext.Provider value={{currentUser, setCurrentUser: setCurrentUser}}>
+                <UserListContext.Provider value={{isLoading, usersList}}>
+                    <AppInCompactMode.Provider value={{isCompactMode, setCompactMode: setIsCompactMode}}>
+                        <AudioContext.Provider value={clickSound}>
+                            {props.children}
+                        </AudioContext.Provider>
+                    </AppInCompactMode.Provider>
+                </UserListContext.Provider>
+            </CurrentUserContext.Provider>
+        </QueryClientProvider>
     );
 };
