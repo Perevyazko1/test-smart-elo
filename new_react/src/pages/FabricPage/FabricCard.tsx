@@ -62,10 +62,10 @@ export const FabricCard = (props: Props) => {
             </div>
             <div>
                 {variant === "await" && (
-                    <>
-                        <div>ОЖИД <b>{item.quantity}</b></div>
-                        <div>ОСТ <b>{item.stock}</b></div>
-                    </>
+                    <div>ОЖИД <b>{item.quantity}</b></div>
+                )}
+                {variant === "stock" && (
+                    <div>ОСТ <b>{item.stock}</b></div>
                 )}
                 {variant === "sklad" && (
                     <div>КОЛ-ВО <b>{item.quantity}</b></div>
