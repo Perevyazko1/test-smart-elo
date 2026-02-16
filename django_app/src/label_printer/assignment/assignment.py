@@ -306,16 +306,16 @@ def draw_label_layout(
 
     # Ткани
     fabric_height = get_text_size(fonts['md'], 1)
-    for fabric in label_data.fabrics:
-        actual_fabric_height = draw_text_multiline(
+    for i, fabric in enumerate(label_data.fabrics):
+        draw_text_multiline(
             draw=draw, text=fabric, font=fonts['md'],
             width=label_width - PADDING * 2, height=fabric_height,
             x_offset=PADDING, y_offset=y_offset,
             break_by_char=True, align='left'
         )
-        print(f"Fabric: {fabric}, height: {actual_fabric_height}, y_offset: {y_offset}")
-        y_offset += actual_fabric_height + DATA_SPACE
-        # draw.line([(0, y_offset), (label_width, y_offset)], fill=0, width=LINE_WIDTH_THIN)
+        y_offset += fabric_height + DATA_SPACE
+        if i < len(label_data.fabrics) - 1:
+            draw.line([(0, y_offset + DATA_SPACE), (label_width, y_offset + DATA_SPACE)], fill=0, width=LINE_WIDTH_THIN)
 
     # Нижняя часть: Информация об инспекторе и отделе
     y_offset = text_part + DATA_SPACE
