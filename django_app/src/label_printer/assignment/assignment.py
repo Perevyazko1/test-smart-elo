@@ -9,12 +9,12 @@ from src.label_printer.printer_tspl2 import PrinterTSPL2
 # Константы макета
 LINE_SPACE = 0
 PADDING = 4
-DATA_SPACE = 4
+DATA_SPACE = 2
 LINE_WIDTH_THIN = 2
 LINE_WIDTH_THICK = 4
 
 # Размеры этикетки
-LABEL_WIDTH_MM = 58
+LABEL_WIDTH_MM = 54
 LABEL_HEIGHT_MM = 40
 
 
@@ -38,6 +38,33 @@ class LabelData:
         self.qr_data = qr_data
         self.inspector_info = inspector_info
         self.department = department
+
+
+def normalize_text_for_font(text: str) -> str:
+    """
+    Заменяет символы, которые могут отсутствовать в шрифте, на альтернативные.
+
+    Args:
+        text: исходный текст
+
+    Returns:
+        str: текст с замененными символами
+    """
+    replacements = {
+        '*': 'x',  # Звездочка -> x (или можно использовать '×' если есть в шрифте)
+        '×': 'x',  # Знак умножения
+        '•': '-',  # Буллет
+        '―': '-',  # Длинное тире
+        '–': '-',  # Среднее тире
+        '"': '"',  # Типографские кавычки
+        ''': "'",
+        ''': "'",
+    }
+
+    for old_char, new_char in replacements.items():
+        text = text.replace(old_char, new_char)
+
+    return text
 
 
 def wrap_text_native(text: str, font: ImageFont.FreeTypeFont, max_width: int, break_by_char: bool = False) -> str:
@@ -83,15 +110,16 @@ def wrap_text_native(text: str, font: ImageFont.FreeTypeFont, max_width: int, br
         word_width = draw.textlength(word, font=font)
 
         # Если слово слишком длинное - разбиваем по буквам
-        if word_width > max_width / 2:
+        if word_width > max_width:
             if current_line:
                 lines.append(current_line)
                 current_line = ""
 
             temp_word = ""
             for char in word:
-                if draw.textlength(temp_word + char, font=font) <= max_width:
-                    temp_word += char
+                test_word = temp_word + char
+                if draw.textlength(test_word, font=font) <= max_width:
+                    temp_word = test_word
                 else:
                     if temp_word:
                         lines.append(temp_word)
@@ -124,7 +152,7 @@ def draw_text_multiline(
         y_offset: int = 0,
         align: str = 'left',
         break_by_char: bool = False
-) -> None:
+) -> int:
     """
     Рисует многострочный текст с автоматическим переносом.
 
@@ -138,22 +166,30 @@ def draw_text_multiline(
         y_offset: смещение по Y
         align: выравнивание ('left', 'center', 'right')
         break_by_char: разбивать по символам или словам
+
+    Returns:
+        int: реальная высота нарисованного текста
     """
+    # Нормализуем текст для шрифта
+    text = normalize_text_for_font(text)
     wrapped_text = wrap_text_native(text, font, width, break_by_char)
 
-    bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=font)
+    bbox = draw.multiline_textbbox((0, 0), wrapped_text, font=font, spacing=LINE_SPACE)
     text_height = bbox[3] - bbox[1]
 
     if text_height > height:
         lines = wrapped_text.split('\n')
-        max_lines = int(height / (font.size + LINE_SPACE))
+        # Используем реальную высоту строки вместо font.size
+        bbox_single = draw.textbbox((0, 0), "Аy", font=font)
+        line_height = bbox_single[3] - bbox_single[1]
+        max_lines = int(height / (line_height + LINE_SPACE))
 
-        if max_lines > 0:
+        if max_lines > 0 and len(lines) > max_lines:
+            # Обрезаем только если строк больше чем max_lines
             lines = lines[:max_lines]
             if len(lines) > 0:
-                lines[-1] = lines[-1][:-3] + "..."
-            else:
-                lines.append("...")
+                # Добавляем многоточие, обрезав только 1 символ
+                lines[-1] = lines[-1][:-1] + "..." if len(lines[-1]) > 1 else "..."
             wrapped_text = "\n".join(lines)
 
     draw.multiline_text(
@@ -162,12 +198,23 @@ def draw_text_multiline(
         font=font,
         fill=0,
         align=align,
+        spacing=LINE_SPACE
     )
+
+    # Возвращаем реальную высоту нарисованного текста
+    final_bbox = draw.multiline_textbbox((x_offset, y_offset), wrapped_text, font=font, spacing=LINE_SPACE)
+    return final_bbox[3] - final_bbox[1]
 
 
 def get_text_size(font: ImageFont.FreeTypeFont, lines: int) -> int:
     """Рассчитывает высоту текста с учётом количества строк"""
-    return int((font.size + LINE_SPACE) * lines)
+    # Используем реальную высоту строки через bbox вместо font.size
+    temp_img = Image.new("1", (1, 1))
+    draw = ImageDraw.Draw(temp_img)
+    # Измеряем реальную высоту одной строки текста
+    bbox = draw.textbbox((0, 0), "Аy", font=font)
+    line_height = bbox[3] - bbox[1]
+    return int(line_height * lines + LINE_SPACE * (lines - 1))
 
 
 def create_qr_code(data: str, size: int) -> Image.Image:
@@ -228,16 +275,16 @@ def draw_label_layout(
     central_width = label_width - qr_zone * 2 - DATA_SPACE * 2
 
     project_height = get_text_size(fonts['xl'], 1)
-    draw_text_multiline(
+    actual_project_height = draw_text_multiline(
         draw=draw, text=label_data.project, font=fonts['xl'],
         width=central_width, height=project_height,
         x_offset=PADDING + qr_zone + DATA_SPACE, y_offset=y_offset,
         break_by_char=True, align='left'
     )
-    y_offset += project_height + DATA_SPACE
+    y_offset += actual_project_height + DATA_SPACE
 
-    order_height = get_text_size(fonts['md'], 1)
-    draw_text_multiline(
+    order_height = get_text_size(fonts['md'], 2)
+    actual_order_height = draw_text_multiline(
         draw=draw, text=label_data.order_number, font=fonts['md'],
         width=central_width, height=order_height,
         x_offset=PADDING + qr_zone + DATA_SPACE, y_offset=y_offset,
@@ -247,27 +294,28 @@ def draw_label_layout(
     # Средняя часть: Продукт и ткани
     y_offset = qr_zone + DATA_SPACE
 
-    product_height = get_text_size(fonts['md'], 2)
-    draw_text_multiline(
+    product_height = get_text_size(fonts['md'], 3)
+    actual_product_height = draw_text_multiline(
         draw=draw, text=label_data.product, font=fonts['md'],
         width=label_width - PADDING * 2, height=product_height,
         x_offset=PADDING, y_offset=y_offset,
         break_by_char=True, align='left'
     )
-    y_offset += product_height + DATA_SPACE
+    y_offset += actual_product_height + DATA_SPACE
     draw.line([(0, y_offset), (label_width, y_offset)], fill=0, width=LINE_WIDTH_THIN)
 
     # Ткани
     fabric_height = get_text_size(fonts['md'], 1)
     for fabric in label_data.fabrics:
-        draw_text_multiline(
+        actual_fabric_height = draw_text_multiline(
             draw=draw, text=fabric, font=fonts['md'],
             width=label_width - PADDING * 2, height=fabric_height,
             x_offset=PADDING, y_offset=y_offset,
             break_by_char=True, align='left'
         )
-        y_offset += fabric_height + DATA_SPACE
-        draw.line([(0, y_offset), (label_width, y_offset)], fill=0, width=LINE_WIDTH_THIN)
+        print(f"Fabric: {fabric}, height: {actual_fabric_height}, y_offset: {y_offset}")
+        y_offset += actual_fabric_height + DATA_SPACE
+        # draw.line([(0, y_offset), (label_width, y_offset)], fill=0, width=LINE_WIDTH_THIN)
 
     # Нижняя часть: Информация об инспекторе и отделе
     y_offset = text_part + DATA_SPACE

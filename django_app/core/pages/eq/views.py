@@ -387,13 +387,10 @@ def print_labels(request):
 
         project = target_assignment.order_product.order.project
         order = target_assignment.order_product.series_id
-        product_name = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '', target_assignment.order_product.product.name)
-        t1 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
-                    target_assignment.order_product.main_fabric.name) if target_assignment.order_product.main_fabric else ""
-        t2 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
-                    target_assignment.order_product.second_fabric.name) if target_assignment.order_product.second_fabric else ""
-        t3 = re.sub(r'[^\w\s\-\(\)\[\]\{\}№#@&\.,]', '',
-                    target_assignment.order_product.third_fabric.name) if target_assignment.order_product.third_fabric else ""
+        product_name = target_assignment.order_product.product.name
+        t1 = target_assignment.order_product.main_fabric.name if target_assignment.order_product.main_fabric else ""
+        t2 = target_assignment.order_product.second_fabric.name if target_assignment.order_product.second_fabric else ""
+        t3 = target_assignment.order_product.third_fabric.name if target_assignment.order_product.third_fabric else ""
 
         department_name = target_assignment.department.name
 
