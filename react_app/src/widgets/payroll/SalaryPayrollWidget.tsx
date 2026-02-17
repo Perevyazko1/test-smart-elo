@@ -88,18 +88,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
         });
     }
 
-    const issuedChangeHandle = (e: ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault();
-        const value = Number(e.target.value.replace(/[^\d]/g, ''));
-
-        if (isNaN(value) || value < 0) {
-            return;
-        }
-
-        setCashValue(value);
-        debouncedUpdatePayroll({cash_payout: value});
-    }
-
     const descriptionChangeHandle = (e: ChangeEvent<HTMLTextAreaElement>) => {
         e.preventDefault();
         setDescriptionValue(e.target.value);
@@ -122,20 +110,6 @@ export const SalaryPayrollWidget = (props: SalaryPayrollWidgetProps) => {
                     <h1 className={"text-xl font-bold"}>
                         Ведомость за {currentWeek.weekNumber} нед.
                     </h1>
-                    <div className={'flex gap-2 items-center'}>
-                        ФОТ ПЛАН:
-                        {!hideSum && (
-                            <input
-                                id={`${currentWeek.weekNumber}cash`}
-                                disabled={!statusLessThen("4")}
-                                type="text"
-                                className={'p-2 w-1/3 outline-none border-none text-center h-full bg-white disabled:bg-transparent'}
-                                value={cashValue?.toLocaleString('ru-RU') || data?.data?.cash_payout?.toLocaleString('ru-RU')}
-                                onChange={issuedChangeHandle}
-                            />
-                        )}
-                    </div>
-
                 </div>
 
                 <div className={'flex items-center gap-3 text-sm'}>

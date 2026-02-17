@@ -94,7 +94,7 @@ export const PayrollTable = (props: PayrollTableProps) => {
                     <PayrollTh
                         className={'text-center'}
                     >
-                        Всего НАЛ ИП БН: <NiceNum
+                        К выдаче (НАЛ ИП БН): <NiceNum
                         value={totalPayout - totalTaxPayout - totalLoanPayout}
                         className={blurStateClass}
                     />
@@ -114,31 +114,31 @@ export const PayrollTable = (props: PayrollTableProps) => {
 
 
                     {showTotal ? (
-                        <PayrollTh className={'bg-blue-100'}>К выплате <br/> ИТОГ</PayrollTh>
+                        <PayrollTh className={'bg-blue-100'}>План <br/> ИТОГ</PayrollTh>
                     ) : (
                         <>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/> НАЛ</PayrollTh>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>ИП</PayrollTh>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>БН</PayrollTh>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Удержания</PayrollTh>
-                            <PayrollTh className={'bg-blue-100'}>К выплате <br/>Займы</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>План <br/>НАЛ</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>План <br/>ИП</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>План <br/>БН</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>План <br/>Удержать</PayrollTh>
+                            <PayrollTh className={'bg-blue-100'}>План <br/>Займы</PayrollTh>
                         </>
                     )}
-                    <PayrollTh className={'bg-blue-100'}>П.ИТОГ <br/>Хвоста</PayrollTh>
+                    <PayrollTh className={'bg-blue-100'}>Остаток <br/>хвост</PayrollTh>
 
                     {showTotal ? (
                         <PayrollTh className={'bg-purple-50'}>Выплачено <br/> ИТОГ</PayrollTh>
                     ) : (
                         <>
-                            <PayrollTh className={'bg-purple-50'}>НАЛ</PayrollTh>
-                            <PayrollTh className={'bg-purple-50'}>ИП</PayrollTh>
-                            <PayrollTh className={'bg-purple-50'}>БН</PayrollTh>
-                            <PayrollTh className={'bg-purple-50'}>Удержано</PayrollTh>
-                            <PayrollTh className={'bg-purple-50'}>Займы</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Факт <br/> НАЛ</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Факт <br/> ИП</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Факт <br/> БН</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Факт <br/> Удержано</PayrollTh>
+                            <PayrollTh className={'bg-purple-50'}>Факт <br/> Займы</PayrollTh>
                         </>
                     )}
 
-                    <PayrollTh className={'bg-purple-50'}>Остаток</PayrollTh>
+                    <PayrollTh className={'bg-purple-50'}>Не выдано<br/>из плана</PayrollTh>
 
                     <PayrollTh
                         rowSpan={2}

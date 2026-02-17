@@ -35,7 +35,6 @@ export const PayrollDepartment = (props: PayrollRowDepartmentProps) => {
             </tr>
 
             <tr className="bg-gray-100 font-bold">
-
                 <td
                     className={twMerge([
                         "py-1 px-2 border-b border-gray-300 text-left",
