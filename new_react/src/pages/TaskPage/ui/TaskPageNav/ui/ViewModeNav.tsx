@@ -30,12 +30,13 @@ const AdminMode: ViewModeItem ={key: '10', name: 'Админ'}
 
 export const ViewModeNav = () => {
     const confirmTariffPerm = usePermission(APP_PERM.TARIFFICATION_CONFIRM);
+    const wagesPagePerm = usePermission(APP_PERM.WAGES_PAGE);
     const adminPerm = usePermission(APP_PERM.ADMIN);
 
     const allViewModes: ViewModeItem[] = useMemo(() => {
         let resultViewModes: ViewModeItem[] = [DefaultViewMode, ...ViewModes]
 
-        if (confirmTariffPerm) {
+        if (confirmTariffPerm || wagesPagePerm) {
             resultViewModes = [...resultViewModes, ...TariffViewModes];
         }
         if (adminPerm) {
