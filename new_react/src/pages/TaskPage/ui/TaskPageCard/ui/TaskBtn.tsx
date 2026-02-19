@@ -1,10 +1,11 @@
 import {useCallback, useMemo} from "react";
 
 import {Task, TaskStatus, UpdateTask} from "@entities/Task";
-import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser} from "@shared/hooks";
+import {useAppDispatch, useAppModal, useClickSound, useCountdown, useCurrentUser, usePermission} from "@shared/hooks";
 import {getTaskExecutor} from "@widgets/TaskForm";
 
 import {updateTask} from "../../../model/api/updateTask";
+import {APP_PERM} from "@shared/consts";
 
 
 interface TaskBtnProps {
@@ -20,6 +21,8 @@ export const TaskBtn = (props: TaskBtnProps) => {
     const {handleOpen} = useAppModal();
     const playSound = useClickSound();
     const dispatch = useAppDispatch();
+
+    const adminPerm = usePermission(APP_PERM.ADMIN);
 
     const initialTimer = {
         targetDate: first ? card.deadline : undefined,
@@ -159,7 +162,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
 
     const updClb = () => {
         playSound()
-        if (cardType === TaskStatus.InProgress && !first && locked) {
+        if (cardType === TaskStatus.InProgress && !first && locked && !adminPerm) {
             handleOpen(
                 <>
                     <h4 className={'my-5'}>
@@ -180,7 +183,7 @@ export const TaskBtn = (props: TaskBtnProps) => {
                     В задаче установлена сделка не завизированная ответственным.
                 </h4>
             )
-        } else if (cardType === TaskStatus.Completed && first && locked) {
+        } else if (cardType === TaskStatus.Completed && first && locked && !adminPerm) {
             handleOpen(
                 <h4 className={'my-5'}>
                     Завизировать выполнение задачи может пользователь, который создал данную задачу.
