@@ -3,8 +3,8 @@ from django.db.models import F
 
 from core.models import Assignment
 
-DATE_FROM = '2026-01-01'
-DATE_TO = '2026-01-31'
+DATE_FROM = '2026-02-01'
+DATE_TO = '2026-02-28'
 
 
 def get_finance_report():
