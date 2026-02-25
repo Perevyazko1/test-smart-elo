@@ -12,6 +12,7 @@ import {useDebounce} from "@/shared/utils/useDebounce.tsx";
 import {useEffect, useState} from "react";
 import {ShipmentWidget} from "@/widgets/shipment/ShipmentWidget.tsx";
 import {type TUrgencyValue, useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
+import {usePlanSort} from "@/shared/state/plan/planSort.ts";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {twMerge} from "tailwind-merge";
 import {CrossCircledIcon} from "@radix-ui/react-icons";
@@ -38,6 +39,9 @@ export function PlanNav(props: IProps) {
 
     const urgency = useUrgencyFilter(s => s.urgencyFilter);
     const setUrgencyFilter = useUrgencyFilter(s => s.setUrgencyFilter);
+
+    const sortMode = usePlanSort(s => s.sortMode);
+    const setSortMode = usePlanSort(s => s.setSortMode);
 
     const [inputValue, setInputValue] = useState<number>()
 
@@ -132,6 +136,38 @@ export function PlanNav(props: IProps) {
                         onChange={(e) => setInputValue(Number(e.target.value))}
                         value={String(inputValue)}
                     />
+                </div>
+
+                <div className={'w-full'}>
+                    <ButtonGroup className="w-full grid grid-cols-3 text-sm">
+                        <Btn
+                            className={twMerge(
+                                'm-0 px-1 border-1 border-black flex-1 bg-gray-400 text-[8px]',
+                                sortMode === 'default' && 'bg-blue-300'
+                            )}
+                            onClick={() => setSortMode('default')}
+                        >
+                            ПО ДАТЕ
+                        </Btn>
+                        <Btn
+                            className={twMerge(
+                                'm-0 px-1 border-1 border-black flex-1 bg-gray-400 text-[8px]',
+                                sortMode === 'project' && 'bg-blue-300'
+                            )}
+                            onClick={() => setSortMode('project')}
+                        >
+                            ПО ПРОЕКТУ
+                        </Btn>
+                        <Btn
+                            className={twMerge(
+                                'm-0 px-1 border-1 border-black flex-1 bg-gray-400 text-[8px]',
+                                sortMode === 'project_min_date' && 'bg-blue-300'
+                            )}
+                            onClick={() => setSortMode('project_min_date')}
+                        >
+                            ПРОЕКТ (ДАТА)
+                        </Btn>
+                    </ButtonGroup>
                 </div>
 
                 <div className={'w-full'}>

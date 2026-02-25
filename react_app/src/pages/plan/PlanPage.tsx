@@ -10,6 +10,7 @@ import {usePermission} from "@/shared/utils/permissions.ts";
 import {APP_PERM} from "@/entities/user";
 import {usePlanSum} from "@/shared/state/plan/planSum.ts";
 import {useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
+import {usePlanSort} from "@/shared/state/plan/planSort.ts";
 
 const DEPARTMENTS = [
     "Конструктора",
@@ -26,6 +27,7 @@ export const PlanPage = () => {
     const planAgent = usePlanAgent(s => s.planAgent);
     const urgency = useUrgencyFilter(s => s.urgencyFilter);
     const planSum = usePlanSum(s => s.planSum);
+    const sortMode = usePlanSort(s => s.sortMode);
     const showSums = usePermission([
         APP_PERM.KPI_PAGE,
         APP_PERM.ADMIN,
@@ -72,6 +74,46 @@ export const PlanPage = () => {
         });
 
         return filtered.sort((a, b) => {
+            if (sortMode === 'project') {
+                const projectA = a[1].project || "";
+                const projectB = b[1].project || "";
+                const byProject = projectA.localeCompare(projectB);
+                if (byProject !== 0) return byProject;
+
+                const dateA = a[1].date ? new Date(a[1].date).getTime() : Infinity;
+                const dateB = b[1].date ? new Date(b[1].date).getTime() : Infinity;
+                return dateA - dateB;
+            }
+
+            if (sortMode === 'project_min_date') {
+                // 1. Находим минимальную дату для каждого проекта
+                const projectMinDates: Record<string, number> = {};
+                filtered.forEach(([_, item]) => {
+                    const p = item.project || "Без проекта";
+                    const d = item.date ? new Date(item.date).getTime() : Infinity;
+                    if (!projectMinDates[p] || d < projectMinDates[p]) {
+                        projectMinDates[p] = d;
+                    }
+                });
+
+                const pA = a[1].project || "Без проекта";
+                const pB = b[1].project || "Без проекта";
+
+                const minA = projectMinDates[pA];
+                const minB = projectMinDates[pB];
+
+                // Сначала сортируем проекты по их минимальной дате
+                if (minA !== minB) return minA - minB;
+
+                // Если минимальные даты проектов одинаковы, сортируем по имени проекта
+                if (pA !== pB) return pA.localeCompare(pB);
+
+                // Внутри проекта сортируем по дате записи
+                const dateA = a[1].date ? new Date(a[1].date).getTime() : Infinity;
+                const dateB = b[1].date ? new Date(b[1].date).getTime() : Infinity;
+                return dateA - dateB;
+            }
+
             if (!a[1].date && !b[1].date) return 0;
             if (!a[1].date) return 1;
             if (!b[1].date) return -1;
@@ -80,7 +122,7 @@ export const PlanPage = () => {
                 new Date(b[1].date).getTime()
             );
         });
-    }, [data, selectedDepartment, showMode, urgency]);
+    }, [data, selectedDepartment, showMode, urgency, sortMode]);
 
     // Автоматический расчет тоталов по отделам
     const totals = useMemo(() => {
