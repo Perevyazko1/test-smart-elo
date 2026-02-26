@@ -6,10 +6,6 @@ import {usePlanManager} from "@/shared/state/plan/planManagers.ts";
 import type {IUser} from "@/entities/user";
 import {usePlanAgent} from "@/shared/state/plan/planAgent.ts";
 import type {IAgentTag} from "@/entities/plan";
-import {usePlanSum} from "@/shared/state/plan/planSum.ts";
-import {Input} from "@/components/ui/input"
-import {useDebounce} from "@/shared/utils/useDebounce.tsx";
-import {useEffect, useState} from "react";
 import {ShipmentWidget} from "@/widgets/shipment/ShipmentWidget.tsx";
 import {type TUrgencyValue, useUrgencyFilter} from "@/shared/state/plan/urgencyFilter.ts";
 import {usePlanSort} from "@/shared/state/plan/planSort.ts";
@@ -35,24 +31,11 @@ export function PlanNav(props: IProps) {
     const planAgent = usePlanAgent(s => s.planAgent);
     const setPlanAgent = usePlanAgent(s => s.setPlanAgent);
 
-    const setPlanSum = usePlanSum(s => s.setPlanSum);
-
     const urgency = useUrgencyFilter(s => s.urgencyFilter);
     const setUrgencyFilter = useUrgencyFilter(s => s.setUrgencyFilter);
 
     const sortMode = usePlanSort(s => s.sortMode);
     const setSortMode = usePlanSort(s => s.setSortMode);
-
-    const [inputValue, setInputValue] = useState<number>()
-
-    const dUpdateSum = useDebounce(
-        (data: number) => setPlanSum(data),
-        2000
-    );
-
-    useEffect(() => {
-        dUpdateSum(inputValue);
-    }, [inputValue]);
 
     const {data: projects} = useQuery({
         queryKey: ['planProjects'],
@@ -106,7 +89,7 @@ export function PlanNav(props: IProps) {
 
     return (
         <div className={'flex flex-row justify-between items-center gap-2 flex-1'}>
-            <div className={'flex gap-1'}>
+            <div className={'flex gap-1 text-[12px]'}>
                 <Dropdown<string>
                     selectedItem={planProject}
                     items={projectList || []}
@@ -127,16 +110,6 @@ export function PlanNav(props: IProps) {
                     setSelectedItem={setAgent}
                     getItemLabel={(item) => item?.name || "Заказчик..."}
                 />
-
-                <div>
-                    <Input
-                        placeholder={'План сумма'}
-                        className={'px-2 min-w-[200px]'}
-                        type={'number'}
-                        onChange={(e) => setInputValue(Number(e.target.value))}
-                        value={String(inputValue)}
-                    />
-                </div>
 
                 <div className={'w-full'}>
                     <ButtonGroup className="w-full grid grid-cols-3 text-sm">
