@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
-from staff.models import Employee
+from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer
 
 
@@ -186,7 +186,12 @@ def set_target_date(request):
         product=target_order_product.product,
         department__single=False,
         is_active=True,
-    ).first().department
+    ).first()
+
+    if not base_department:
+        base_department = Department.objects.get(name="Конструктора")
+    else:
+        base_department = base_department.department
 
     assignments = Assignment.objects.filter(
         order_product=target_order_product,
