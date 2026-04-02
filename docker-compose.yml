@@ -228,6 +228,8 @@ services:
       - N8N_BASIC_AUTH_USER=admin
       - N8N_BASIC_AUTH_PASSWORD=X9k$mP2vL7nQ4wRj
       - N8N_SECURE_COOKIE=false
+      - WEBHOOK_URL=http://159.194.203.33:5678/
+      - N8N_EDITOR_BASE_URL=http://159.194.203.33:5678/
     deploy:
       resources:
         limits:
