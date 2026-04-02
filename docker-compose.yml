@@ -183,6 +183,59 @@ services:
       - .env.docker.prod
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - app-network
+    deploy:
+      resources:
+        limits:
+          cpus: '6'
+          memory: 10G
+        reservations:
+          cpus: '2'
+          memory: 6G
+
+  n8n:
+    image: n8nio/n8n
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    depends_on:
+      - postgres
+      - ollama
+    networks:
+      - app-network
+    environment:
+      - N8N_HOST=0.0.0.0
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+      - DB_POSTGRESDB_USER=postgres
+      - DB_POSTGRESDB_PASSWORD=Qwerty12345
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=X9k$mP2vL7nQ4wRj
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
+
 
 networks:
   app-network:
@@ -193,3 +246,4 @@ volumes:
   db_data:
     driver: local
   media_data:
+  ollama_data:
