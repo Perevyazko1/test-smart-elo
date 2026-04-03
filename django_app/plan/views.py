@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 import requests
 
 from django.db.models import Count, Q
@@ -479,117 +480,36 @@ def generate_ai_plan(request):
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
 
 
-def _search_orders(query: str):
-    """Поиск заказов по текстовому запросу — ищем совпадения в имени продукта,
-    номере заказа, проекте, серии. Возвращаем найденные OrderProduct."""
-    words = query.lower().split()
-
-    # Строим Q-фильтр: каждое слово должно встречаться хотя бы в одном из полей
-    combined_q = Q(status='0')
-    for word in words:
-        if len(word) < 2:
-            continue
-        word_q = (
-            Q(product__name__icontains=word) |
-            Q(order__inner_number__icontains=word) |
-            Q(order__project__icontains=word) |
-            Q(series_id__icontains=word) |
-            Q(main_fabric__name__icontains=word)
-        )
-        combined_q &= word_q
-
-    results = OrderProduct.objects.filter(
-        combined_q
-    ).select_related('product', 'order', 'main_fabric').distinct()[:20]
-
-    return results
-
-
-def _format_orders_for_ai(order_products):
-    """Форматировать найденные заказы для отправки в AI"""
-    orders = []
-    for op in order_products:
-        try:
-            ai_entry = op.ai_plan_entry
-        except AiPlanEntry.DoesNotExist:
-            ai_entry = None
-
-        orders.append({
-            'id': op.series_id,
-            'name': op.product.name[:60],
-            'order': op.order.inner_number if op.order else '',
-            'project': op.order.project if op.order else '',
-            'fabric': op.main_fabric.name[:30] if op.main_fabric else '',
-            'qty': op.quantity,
-            'urgency': op.urgency,
-            'current_weight': ai_entry.sort_weight if ai_entry else 50,
-        })
-    return orders
-
-
 @api_view(['POST'])
 def process_ai_prompt(request):
-    """Обработать текстовый запрос: поиск в БД → отправка найденного в n8n/Ollama"""
+    """Прокидывает промпт в n8n. n8n сам: Ollama парсит → поиск → обновление."""
     user_prompt = request.data.get('prompt', '').strip()
     if not user_prompt:
         return JsonResponse({'success': False, 'error': 'Пустой запрос'}, status=400)
 
     config = _get_ai_config()
 
-    # Шаг 1: Поиск по БД
-    found_products = _search_orders(user_prompt)
-
-    if not found_products.exists():
-        return JsonResponse({
-            'success': False,
-            'error': f'Не найдено заказов по запросу: "{user_prompt}"',
-        }, status=404, json_dumps_params={"ensure_ascii": False})
-
-    orders = _format_orders_for_ai(found_products)
-
-    # Шаг 2: Отправляем найденное + промпт в n8n
     try:
         response = requests.post(
             N8N_WEBHOOK_URL,
             json={
                 'user_prompt': user_prompt,
                 'base_prompt': config.base_prompt,
-                'orders': orders,
-                'found_count': len(orders),
             },
             timeout=300,
         )
         response.raise_for_status()
         ai_data = response.json()
 
-        # Сохраняем сводку
+        # Сохраняем сводку если есть
         summary = ai_data.get('summary', '')
         if summary:
             config.ai_summary = summary
             config.save(update_fields=['ai_summary', 'updated_at'])
 
-        # Сохраняем обновлённые записи
-        updated = 0
-        for entry_data in ai_data.get('entries', []):
-            sid = entry_data.get('series_id')
-            if not sid:
-                continue
-            try:
-                op = OrderProduct.objects.get(series_id=sid)
-                entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
-                entry.sort_weight = entry_data.get('sort_weight', entry.sort_weight)
-                entry.sort_position = entry_data.get('sort_position', entry.sort_position)
-                entry.ai_comment = entry_data.get('ai_comment', entry.ai_comment)
-                entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
-                updated += 1
-            except OrderProduct.DoesNotExist:
-                pass
-
         return JsonResponse({
             'success': True,
-            'summary': summary,
-            'updated': updated,
-            'found': len(orders),
+            'updated': ai_data.get('updated', 0),
             'ai_response': ai_data.get('response', ''),
         }, json_dumps_params={"ensure_ascii": False})
 
@@ -599,3 +519,70 @@ def process_ai_prompt(request):
         return JsonResponse({'success': False, 'error': 'n8n вернул некорректный ответ'}, status=500)
     except requests.exceptions.ConnectionError:
         return JsonResponse({'success': False, 'error': 'Не удалось подключиться к n8n'}, status=503)
+
+
+@api_view(['GET'])
+def search_orders(request):
+    """Поиск заказов по строке (для n8n)"""
+    query = request.query_params.get('q', '').strip()
+    if not query:
+        return JsonResponse({'results': []})
+
+    q_filter = Q(status='0') & (
+        Q(product__name__icontains=query) |
+        Q(order__inner_number__icontains=query) |
+        Q(order__project__icontains=query) |
+        Q(series_id__icontains=query) |
+        Q(main_fabric__name__icontains=query)
+    )
+
+    results = OrderProduct.objects.filter(
+        q_filter
+    ).select_related('product', 'order', 'main_fabric').distinct()[:10]
+
+    data = []
+    for op in results:
+        try:
+            ai_entry = op.ai_plan_entry
+        except AiPlanEntry.DoesNotExist:
+            ai_entry = None
+
+        data.append({
+            'series_id': op.series_id,
+            'product': op.product.name,
+            'order': op.order.inner_number if op.order else '',
+            'project': op.order.project if op.order else '',
+            'fabric': op.main_fabric.name if op.main_fabric else '',
+            'quantity': op.quantity,
+            'urgency': op.urgency,
+            'current_weight': ai_entry.sort_weight if ai_entry else 50,
+        })
+
+    return JsonResponse({'results': data}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_ai_entries(request):
+    """Массовое обновление AI-записей (для n8n)"""
+    entries = request.data.get('entries', [])
+    updated = 0
+
+    for entry_data in entries:
+        sid = entry_data.get('series_id')
+        if not sid:
+            continue
+        try:
+            op = OrderProduct.objects.get(series_id=sid)
+            entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
+            if 'sort_weight' in entry_data:
+                entry.sort_weight = entry_data['sort_weight']
+            if 'sort_position' in entry_data:
+                entry.sort_position = entry_data['sort_position']
+            if 'ai_comment' in entry_data:
+                entry.ai_comment = entry_data['ai_comment']
+            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
+            updated += 1
+        except OrderProduct.DoesNotExist:
+            pass
+
+    return JsonResponse({'success': True, 'updated': updated})
