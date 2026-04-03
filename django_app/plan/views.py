@@ -479,15 +479,17 @@ def generate_ai_plan(request):
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
 
 
+MAX_ORDERS_FOR_PROMPT = 30
+
+
 def _collect_orders_context():
-    """Собрать краткий контекст по всем активным заказам с текущими AI-весами"""
+    """Собрать краткий контекст по активным заказам с текущими AI-весами (макс 30)"""
     order_products = OrderProduct.objects.filter(
         status='0'
-    ).select_related('product', 'order', 'main_fabric')
+    ).select_related('product', 'order').order_by('urgency', 'id')[:MAX_ORDERS_FOR_PROMPT]
 
     orders = []
     for op in order_products:
-        ai_entry = getattr(op, 'ai_plan_entry', None)
         try:
             ai_entry = op.ai_plan_entry
         except AiPlanEntry.DoesNotExist:
