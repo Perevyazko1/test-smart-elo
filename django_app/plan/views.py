@@ -534,9 +534,8 @@ def search_orders(request):
     if not words:
         return JsonResponse({'results': []})
 
-    q_filter = Q(status='0')
-    for word in words:
-        q_filter &= (
+    def make_word_filter(word):
+        return (
             Q(product__name__icontains=word) |
             Q(order__inner_number__icontains=word) |
             Q(order__project__icontains=word) |
@@ -544,9 +543,25 @@ def search_orders(request):
             Q(main_fabric__name__icontains=word)
         )
 
-    results = OrderProduct.objects.filter(
-        q_filter
-    ).select_related('product', 'order', 'main_fabric').distinct()[:10]
+    base = Q(status='0')
+    results = None
+
+    # Постепенно убираем слова пока не найдём результат
+    for n in range(len(words), 0, -1):
+        from itertools import combinations
+        for combo in combinations(words, n):
+            q = base
+            for w in combo:
+                q &= make_word_filter(w)
+            qs = OrderProduct.objects.filter(q).select_related('product', 'order', 'main_fabric').distinct()[:10]
+            if qs.exists():
+                results = qs
+                break
+        if results is not None:
+            break
+
+    if results is None:
+        results = OrderProduct.objects.none()
 
     data = []
     for op in results:
