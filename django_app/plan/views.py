@@ -474,3 +474,94 @@ def generate_ai_plan(request):
         return JsonResponse({'success': False, 'error': 'AI вернула некорректный JSON', 'raw': ai_text}, status=500)
     except requests.exceptions.ConnectionError:
         return JsonResponse({'success': False, 'error': 'Не удалось подключиться к Ollama'}, status=503)
+
+
+N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
+
+
+def _collect_orders_context():
+    """Собрать краткий контекст по всем активным заказам с текущими AI-весами"""
+    order_products = OrderProduct.objects.filter(
+        status='0'
+    ).select_related('product', 'order', 'main_fabric')
+
+    orders = []
+    for op in order_products:
+        ai_entry = getattr(op, 'ai_plan_entry', None)
+        try:
+            ai_entry = op.ai_plan_entry
+        except AiPlanEntry.DoesNotExist:
+            ai_entry = None
+
+        orders.append({
+            'series_id': op.series_id,
+            'product': op.product.name,
+            'order': op.order.inner_number if op.order else '',
+            'project': op.order.project if op.order else '',
+            'quantity': op.quantity,
+            'urgency': op.urgency,
+            'current_weight': ai_entry.sort_weight if ai_entry else 50,
+            'current_position': ai_entry.sort_position if ai_entry else 0,
+        })
+    return orders
+
+
+@api_view(['POST'])
+def process_ai_prompt(request):
+    """Обработать текстовый запрос пользователя через n8n → Ollama"""
+    user_prompt = request.data.get('prompt', '').strip()
+    if not user_prompt:
+        return JsonResponse({'success': False, 'error': 'Пустой запрос'}, status=400)
+
+    config = _get_ai_config()
+    orders = _collect_orders_context()
+
+    try:
+        response = requests.post(
+            N8N_WEBHOOK_URL,
+            json={
+                'user_prompt': user_prompt,
+                'base_prompt': config.base_prompt,
+                'orders': orders,
+            },
+            timeout=300,
+        )
+        response.raise_for_status()
+        ai_data = response.json()
+
+        # Сохраняем сводку
+        summary = ai_data.get('summary', '')
+        if summary:
+            config.ai_summary = summary
+            config.save(update_fields=['ai_summary', 'updated_at'])
+
+        # Сохраняем обновлённые записи
+        updated = 0
+        for entry_data in ai_data.get('entries', []):
+            sid = entry_data.get('series_id')
+            if not sid:
+                continue
+            try:
+                op = OrderProduct.objects.get(series_id=sid)
+                entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
+                entry.sort_weight = entry_data.get('sort_weight', entry.sort_weight)
+                entry.sort_position = entry_data.get('sort_position', entry.sort_position)
+                entry.ai_comment = entry_data.get('ai_comment', entry.ai_comment)
+                entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
+                updated += 1
+            except OrderProduct.DoesNotExist:
+                pass
+
+        return JsonResponse({
+            'success': True,
+            'summary': summary,
+            'updated': updated,
+            'ai_response': ai_data.get('response', ''),
+        }, json_dumps_params={"ensure_ascii": False})
+
+    except requests.exceptions.Timeout:
+        return JsonResponse({'success': False, 'error': 'n8n не ответил вовремя'}, status=504)
+    except json.JSONDecodeError:
+        return JsonResponse({'success': False, 'error': 'n8n вернул некорректный ответ'}, status=500)
+    except requests.exceptions.ConnectionError:
+        return JsonResponse({'success': False, 'error': 'Не удалось подключиться к n8n'}, status=503)

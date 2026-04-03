@@ -96,6 +96,23 @@ export const AiPlanPage = () => {
         );
     }, [queryClient]);
 
+    const handlePrompt = useCallback(() => {
+        if (!prompt.trim()) return;
+        setGenerating(true);
+        toast.promise(
+            $axios.post('/plan/ai_plan/prompt/', {prompt: prompt.trim()}).then(res => {
+                queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                setPrompt("");
+                return res;
+            }).finally(() => setGenerating(false)),
+            {
+                loading: 'AI обрабатывает запрос...',
+                success: (res) => res.data.ai_response || `Обновлено ${res.data.updated} заказов`,
+                error: (err) => err.response?.data?.error || 'Ошибка обработки',
+            }
+        );
+    }, [prompt, queryClient]);
+
     const saveFeedback = useCallback((seriesId: string, feedback: string) => {
         $axios.post('/plan/ai_plan/update_feedback/', {series_id: seriesId, feedback});
     }, []);
@@ -108,11 +125,17 @@ export const AiPlanPage = () => {
                     type="text"
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Спросите AI о планировании..."
-                    className="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-400"
+                    onKeyDown={(e) => e.key === 'Enter' && handlePrompt()}
+                    disabled={generating}
+                    placeholder="Например: заказ для Рыжий очень важен, поднять приоритет..."
+                    className="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-400 disabled:opacity-50"
                 />
-                <Btn className="border border-slate-300 rounded-lg px-4 py-3 text-xl">
-                    🎙
+                <Btn
+                    onClick={handlePrompt}
+                    disabled={generating || !prompt.trim()}
+                    className="border border-slate-300 rounded-lg px-4 py-3 text-sm disabled:opacity-50"
+                >
+                    {generating ? "..." : "Отправить"}
                 </Btn>
             </div>
 
