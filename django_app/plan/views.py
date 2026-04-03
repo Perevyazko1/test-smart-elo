@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
@@ -522,6 +522,8 @@ def process_ai_prompt(request):
 
 
 @api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
 def search_orders(request):
     """Поиск заказов по строке (для n8n)"""
     query = request.query_params.get('q', '').strip()
@@ -562,6 +564,8 @@ def search_orders(request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def update_ai_entries(request):
     """Массовое обновление AI-записей (для n8n)"""
     entries = request.data.get('entries', [])
