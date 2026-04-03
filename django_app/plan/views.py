@@ -530,13 +530,19 @@ def search_orders(request):
     if not query:
         return JsonResponse({'results': []})
 
-    q_filter = Q(status='0') & (
-        Q(product__name__icontains=query) |
-        Q(order__inner_number__icontains=query) |
-        Q(order__project__icontains=query) |
-        Q(series_id__icontains=query) |
-        Q(main_fabric__name__icontains=query)
-    )
+    words = [w for w in query.split() if len(w) >= 2]
+    if not words:
+        return JsonResponse({'results': []})
+
+    q_filter = Q(status='0')
+    for word in words:
+        q_filter &= (
+            Q(product__name__icontains=word) |
+            Q(order__inner_number__icontains=word) |
+            Q(order__project__icontains=word) |
+            Q(series_id__icontains=word) |
+            Q(main_fabric__name__icontains=word)
+        )
 
     results = OrderProduct.objects.filter(
         q_filter
