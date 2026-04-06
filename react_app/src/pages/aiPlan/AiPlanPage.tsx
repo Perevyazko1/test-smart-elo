@@ -124,6 +124,22 @@ export const AiPlanPage = () => {
 
     return (
         <div className="max-w-dvw bg-white p-4 flex flex-col gap-4">
+            {/* Base Prompt */}
+            <div className="border border-slate-200 rounded-lg p-4">
+                <label className="text-xs text-slate-500 font-semibold mb-1 block">
+                    Базовый промпт (о фабрике, сотрудниках, принципах планирования)
+                </label>
+                <textarea
+                    value={currentPrompt}
+                    onChange={(e) => {
+                        setBasePrompt(e.target.value);
+                        saveBasePrompt(e.target.value);
+                    }}
+                    rows={4}
+                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 resize-y"
+                />
+            </div>
+
             {/* Input + Voice */}
             <div className="flex gap-2 items-center">
                 <input
@@ -178,22 +194,6 @@ export const AiPlanPage = () => {
                         onFeedbackSave={saveFeedback}
                     />
                 ))}
-            </div>
-
-            {/* Base Prompt */}
-            <div className="border border-slate-200 rounded-lg p-4">
-                <label className="text-xs text-slate-500 font-semibold mb-1 block">
-                    Базовый промпт (о фабрике, сотрудниках, принципах планирования)
-                </label>
-                <textarea
-                    value={currentPrompt}
-                    onChange={(e) => {
-                        setBasePrompt(e.target.value);
-                        saveBasePrompt(e.target.value);
-                    }}
-                    rows={3}
-                    className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 resize-y"
-                />
             </div>
         </div>
     );
