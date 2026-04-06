@@ -87,7 +87,7 @@ export function NormsTable() {
                     const d = res.data;
                     toast.success(d.response || `Обновлено: ${d.updated}, пропущено: ${d.skipped}`);
                     if (d.remaining > 0) {
-                        runBatch(offset + 20);
+                        runBatch(offset + 50);
                     } else {
                         setClassifying(false);
                         toast.success('Классификация завершена!');
