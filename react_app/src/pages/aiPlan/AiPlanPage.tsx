@@ -11,6 +11,7 @@ import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 import {$axios} from "@/shared/api";
 import {toast} from "sonner";
 import {NormsTable} from "./NormsTable";
+import {WorkersTable} from "./WorkersTable";
 
 const DEPARTMENTS = ["Конструктора", "Сборка", "Пошив", "Малярка", "Обивка", "Упаковка"];
 
@@ -143,6 +144,9 @@ export const AiPlanPage = () => {
 
             {/* Norms Table */}
             <NormsTable />
+
+            {/* Workers Table */}
+            <WorkersTable />
 
             {/* Input + Voice */}
             <div className="flex gap-2 items-center">

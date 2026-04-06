@@ -68,6 +68,20 @@ class ProductionNorm(models.Model):
         return f'{self.product_type} / {self.department}: {self.hours_per_unit}ч'
 
 
+class DepartmentWorkers(models.Model):
+    """Количество рабочих в цехе"""
+
+    class Meta:
+        verbose_name = 'Рабочие в цехе'
+        verbose_name_plural = 'Рабочие в цехах'
+
+    department = models.CharField('Цех', max_length=50, unique=True)
+    workers_count = models.IntegerField('Количество рабочих', default=1)
+
+    def __str__(self):
+        return f'{self.department}: {self.workers_count} чел.'
+
+
 class AiPlanConfig(models.Model):
     """Конфигурация AI-планирования (один экземпляр)"""
 

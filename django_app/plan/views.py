@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, Product
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
-from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm
+from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, DepartmentWorkers
 from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer
 
@@ -365,17 +365,39 @@ def update_ai_config(request):
     return JsonResponse({'success': True})
 
 
+N8N_GENERATE_URL = 'http://n8n:5678/webhook/ai-plan-generate'
+
+
 @api_view(['POST'])
 def generate_ai_plan(request):
-    """Отправить данные в Ollama, получить AI-план и сохранить"""
+    """Собрать данные о производстве, отправить в n8n/GPT, сохранить AI-план"""
+    from datetime import date, timedelta
     config = _get_ai_config()
 
-    # Собираем данные о всех активных позициях
+    # --- Собираем нормативы ---
+    norms = {}
+    for n in ProductionNorm.objects.select_related('product_type').all():
+        if n.product_type.name not in norms:
+            norms[n.product_type.name] = {}
+        norms[n.product_type.name][n.department] = n.hours_per_unit
+
+    # --- Рабочие по цехам ---
+    workers = {dw.department: dw.workers_count for dw in DepartmentWorkers.objects.all()}
+
+    # --- Мощность цехов (изделий в день) ---
+    WORK_HOURS_PER_DAY = 8
+    capacity = {}
+    for dept, count in workers.items():
+        capacity[dept] = count * WORK_HOURS_PER_DAY  # часов в день
+
+    # --- Заказы ---
     order_products = OrderProduct.objects.filter(
         status='0'
-    ).select_related('product', 'order', 'main_fabric')
+    ).select_related('product', 'product__production_type', 'order', 'main_fabric')
 
     orders_info = []
+    dept_load = {}  # суммарная загрузка цехов в часах
+
     for op in order_products:
         assignments = Assignment.objects.filter(order_product=op)
         dept_status = {}
@@ -387,67 +409,77 @@ def generate_ai_plan(request):
             if a.status == 'ready' and a.inspector is not None:
                 dept_status[dept_name]['ready'] += 1
 
+        # Расчёт оставшейся работы
+        product_type_name = op.product.production_type.name if op.product.production_type else None
+        remaining_work = {}
+        if product_type_name and product_type_name in norms:
+            for dept_name, status in dept_status.items():
+                remaining = status['all'] - status['ready']
+                if remaining > 0 and dept_name in norms.get(product_type_name, {}):
+                    hours = remaining * norms[product_type_name][dept_name]
+                    remaining_work[dept_name] = round(hours, 1)
+                    dept_load[dept_name] = dept_load.get(dept_name, 0) + hours
+
+        # Срок
+        sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
+        deadline = min(sort_dates).date() if sort_dates else None
+        days_left = (deadline - date.today()).days if deadline else None
+
+        # Feedback
+        try:
+            ai_entry = op.ai_plan_entry
+            feedback = ai_entry.feedback
+        except AiPlanEntry.DoesNotExist:
+            feedback = ''
+
         orders_info.append({
             'series_id': op.series_id,
             'product': op.product.name,
+            'product_type': product_type_name,
             'order': op.order.inner_number if op.order else '',
             'project': op.order.project if op.order else '',
-            'client': op.order.agent.name if op.order and hasattr(op.order, 'agent') and op.order.agent else '',
             'quantity': op.quantity,
-            'shipped': op.shipped,
             'urgency': op.urgency,
-            'price': str(op.price),
+            'deadline': str(deadline) if deadline else None,
+            'days_left': days_left,
             'departments': dept_status,
+            'remaining_hours': remaining_work,
+            'feedback': feedback,
         })
 
-    prompt = f"""{config.base_prompt}
+    # --- Загрузка цехов ---
+    dept_summary = {}
+    for dept, total_hours in dept_load.items():
+        cap = capacity.get(dept, WORK_HOURS_PER_DAY)
+        days_needed = round(total_hours / cap, 1) if cap > 0 else 999
+        dept_summary[dept] = {
+            'total_hours': round(total_hours, 1),
+            'workers': workers.get(dept, 1),
+            'hours_per_day': cap,
+            'days_needed': days_needed,
+        }
 
-Вот текущие заказы в производстве (JSON):
-{json.dumps(orders_info, ensure_ascii=False, indent=2)}
-
-Проанализируй заказы и верни JSON в таком формате (без markdown, только чистый JSON):
-{{
-  "summary": "Краткая сводка по общей ситуации на производстве (2-3 предложения)",
-  "entries": [
-    {{
-      "series_id": "ID серии",
-      "sort_weight": число от 0 до 100 (важность, 100 = максимальный приоритет),
-      "sort_position": порядковый номер в очереди (1 = самый первый),
-      "ai_comment": "Краткий комментарий по этому заказу"
-    }}
-  ]
-}}
-
-Учитывай сроки, загрузку цехов, срочность и объём заказов при расстановке приоритетов.
-Отвечай только на русском языке. Верни ТОЛЬКО JSON, без пояснений."""
+    payload = {
+        'base_prompt': config.base_prompt,
+        'orders': orders_info,
+        'department_load': dept_summary,
+        'today': str(date.today()),
+    }
 
     try:
-        response = requests.post(
-            OLLAMA_URL,
-            json={
-                'model': 'qwen2.5:7b',
-                'messages': [{'role': 'user', 'content': prompt}],
-                'stream': False,
-            },
-            timeout=300,
-        )
+        response = requests.post(N8N_GENERATE_URL, json=payload, timeout=300)
         response.raise_for_status()
-        result = response.json()
-        ai_text = result.get('message', {}).get('content', '')
+        if not response.text.strip():
+            return JsonResponse({'error': 'n8n вернул пустой ответ'}, status=502)
 
-        # Парсим JSON из ответа
-        ai_text_clean = ai_text.strip()
-        if ai_text_clean.startswith('```'):
-            ai_text_clean = ai_text_clean.split('\n', 1)[1]
-            ai_text_clean = ai_text_clean.rsplit('```', 1)[0]
-
-        ai_data = json.loads(ai_text_clean)
+        ai_data = response.json()
 
         # Сохраняем сводку
         config.ai_summary = ai_data.get('summary', '')
         config.save(update_fields=['ai_summary', 'updated_at'])
 
         # Сохраняем записи
+        entries_count = 0
         for entry_data in ai_data.get('entries', []):
             sid = entry_data.get('series_id')
             if not sid:
@@ -459,22 +491,23 @@ def generate_ai_plan(request):
                 entry.sort_position = entry_data.get('sort_position', 0)
                 entry.ai_comment = entry_data.get('ai_comment', '')
                 entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
+                entries_count += 1
             except OrderProduct.DoesNotExist:
                 logger.warning(f'OrderProduct с series_id={sid} не найден')
 
         return JsonResponse({
             'success': True,
             'summary': ai_data.get('summary', ''),
-            'entries_count': len(ai_data.get('entries', [])),
+            'entries_count': entries_count,
         }, json_dumps_params={"ensure_ascii": False})
 
     except requests.exceptions.Timeout:
-        return JsonResponse({'success': False, 'error': 'Ollama не ответила вовремя (таймаут 5 мин)'}, status=504)
+        return JsonResponse({'error': 'GPT не ответил вовремя (таймаут 5 мин)'}, status=504)
     except json.JSONDecodeError as e:
-        logger.error(f'Ошибка парсинга JSON от Ollama: {e}\nОтвет: {ai_text}')
-        return JsonResponse({'success': False, 'error': 'AI вернула некорректный JSON', 'raw': ai_text}, status=500)
+        logger.error(f'Ошибка парсинга JSON: {e}')
+        return JsonResponse({'error': 'AI вернул некорректный JSON'}, status=500)
     except requests.exceptions.ConnectionError:
-        return JsonResponse({'success': False, 'error': 'Не удалось подключиться к Ollama'}, status=503)
+        return JsonResponse({'error': 'Не удалось подключиться к n8n'}, status=503)
 
 
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
@@ -771,3 +804,29 @@ def set_product_types(request):
         updated += 1
 
     return JsonResponse({'updated': updated, 'skipped': skipped})
+
+
+@api_view(['GET'])
+def get_department_workers(request):
+    """Количество рабочих по цехам"""
+    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    # Создаём записи для новых цехов
+    for dept in departments:
+        DepartmentWorkers.objects.get_or_create(department=dept, defaults={'workers_count': 1})
+
+    rows = list(DepartmentWorkers.objects.filter(department__in=departments).values('department', 'workers_count'))
+    return JsonResponse({'rows': rows}, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_department_workers(request):
+    """Обновить количество рабочих. {rows: [{department: "Сборка", workers_count: 5}, ...]}"""
+    rows = request.data.get('rows', [])
+    for row in rows:
+        dept = row.get('department', '').strip()
+        count = int(row.get('workers_count', 1))
+        if dept:
+            DepartmentWorkers.objects.update_or_create(
+                department=dept, defaults={'workers_count': max(count, 0)}
+            )
+    return JsonResponse({'success': True})

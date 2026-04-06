@@ -26,4 +26,7 @@ urlpatterns = [
     path('products/untyped/', get_untyped_products),
     path('products/set_types/', set_product_types),
     path('products/classify/', classify_products),
+
+    path('workers/', get_department_workers),
+    path('workers/update/', update_department_workers),
 ]
