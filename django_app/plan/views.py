@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
-from plan.models import AiPlanEntry, AiPlanConfig
+from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm
 from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer
 
@@ -611,3 +611,86 @@ def update_ai_entries(request):
             pass
 
     return JsonResponse({'success': True, 'updated': updated})
+
+
+@api_view(['GET'])
+def get_production_norms(request):
+    """Таблица нормативов: типы изделий × цеха → часы"""
+    product_types = ProductType.objects.prefetch_related('norms').all()
+    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+
+    data = []
+    for pt in product_types:
+        norms_map = {n.department: n.hours_per_unit for n in pt.norms.all()}
+        row = {'id': pt.id, 'name': pt.name}
+        for dept in departments:
+            row[dept] = norms_map.get(dept, 0)
+        data.append(row)
+
+    return JsonResponse({
+        'departments': departments,
+        'rows': data,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_production_norms(request):
+    """Обновить нормативы. Принимает {rows: [{id?, name, Обивка: 1, Крой: 0.5, ...}]}"""
+    rows = request.data.get('rows', [])
+    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+
+    for row in rows:
+        name = row.get('name', '').strip()
+        if not name:
+            continue
+
+        pt_id = row.get('id')
+        if pt_id:
+            try:
+                pt = ProductType.objects.get(pk=pt_id)
+                if pt.name != name:
+                    pt.name = name
+                    pt.save(update_fields=['name'])
+            except ProductType.DoesNotExist:
+                pt = ProductType.objects.create(name=name)
+        else:
+            pt, _ = ProductType.objects.get_or_create(name=name)
+
+        for dept in departments:
+            if dept in row:
+                val = float(row[dept] or 0)
+                ProductionNorm.objects.update_or_create(
+                    product_type=pt, department=dept,
+                    defaults={'hours_per_unit': val},
+                )
+
+    return JsonResponse({'success': True})
+
+
+@api_view(['POST'])
+def add_product_type(request):
+    """Добавить новый тип изделия"""
+    name = request.data.get('name', '').strip()
+    if not name:
+        return JsonResponse({'error': 'Пустое название'}, status=400)
+    pt, created = ProductType.objects.get_or_create(name=name)
+    if not created:
+        return JsonResponse({'error': 'Тип уже существует'}, status=400)
+
+    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    for dept in departments:
+        ProductionNorm.objects.create(product_type=pt, department=dept, hours_per_unit=0)
+
+    return JsonResponse({'id': pt.id, 'name': pt.name})
+
+
+@api_view(['POST'])
+def delete_product_type(request):
+    """Удалить тип изделия"""
+    pt_id = request.data.get('id')
+    try:
+        pt = ProductType.objects.get(pk=pt_id)
+        pt.delete()
+        return JsonResponse({'success': True})
+    except ProductType.DoesNotExist:
+        return JsonResponse({'error': 'Не найден'}, status=404)

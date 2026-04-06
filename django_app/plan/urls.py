@@ -17,4 +17,9 @@ urlpatterns = [
     path('ai_plan/prompt/', process_ai_prompt),
     path('ai_plan/search/', search_orders),
     path('ai_plan/update_entries/', update_ai_entries),
+
+    path('norms/', get_production_norms),
+    path('norms/update/', update_production_norms),
+    path('norms/add_type/', add_product_type),
+    path('norms/delete_type/', delete_product_type),
 ]

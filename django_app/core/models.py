@@ -60,6 +60,15 @@ class Product(models.Model):
 
     archived = models.BooleanField('Архивный', default=False)
 
+    production_type = models.ForeignKey(
+        'plan.ProductType',
+        verbose_name='Тип изделия (для планирования)',
+        blank=True,
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='products',
+    )
+
     description = models.TextField('Описание товара', blank=True, null=True)
 
     def __str__(self):

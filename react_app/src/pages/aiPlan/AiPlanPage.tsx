@@ -10,6 +10,7 @@ import type {IPlanDataRow} from "@/entities/plan";
 import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 import {$axios} from "@/shared/api";
 import {toast} from "sonner";
+import {NormsTable} from "./NormsTable";
 
 const DEPARTMENTS = ["Конструктора", "Сборка", "Пошив", "Малярка", "Обивка", "Упаковка"];
 
@@ -139,6 +140,9 @@ export const AiPlanPage = () => {
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 resize-y"
                 />
             </div>
+
+            {/* Norms Table */}
+            <NormsTable />
 
             {/* Input + Voice */}
             <div className="flex gap-2 items-center">
