@@ -477,7 +477,7 @@ def generate_ai_plan(request):
         return JsonResponse({'success': False, 'error': 'Не удалось подключиться к Ollama'}, status=503)
 
 
-N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
+N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-agent'
 
 
 @api_view(['POST'])
