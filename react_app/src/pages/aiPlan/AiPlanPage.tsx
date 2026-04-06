@@ -1,4 +1,4 @@
-import {useState, useMemo, useCallback} from "react";
+import {useState, useMemo, useCallback, useEffect, useRef} from "react";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {Btn} from "@/shared/ui/buttons/Btn.tsx";
 import {twMerge} from "tailwind-merge";
@@ -70,16 +70,21 @@ export const AiPlanPage = () => {
         });
     }, [planData, aiEntries]);
 
-    const saveBasePrompt = useCallback(() => {
-        toast.promise(
-            $axios.post('/plan/ai_plan/update_config/', {base_prompt: currentPrompt}),
-            {
-                loading: 'Сохранение промпта...',
-                success: 'Промпт сохранён',
-                error: 'Ошибка сохранения',
-            }
-        );
-    }, [currentPrompt]);
+    const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const saveBasePrompt = useCallback((value: string) => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+            $axios.post('/plan/ai_plan/update_config/', {base_prompt: value}).then(
+                () => toast.success('Промпт сохранён'),
+                () => toast.error('Ошибка сохранения')
+            );
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
+    }, []);
 
     const handleGenerate = useCallback(() => {
         setGenerating(true);
@@ -182,8 +187,10 @@ export const AiPlanPage = () => {
                 </label>
                 <textarea
                     value={currentPrompt}
-                    onChange={(e) => setBasePrompt(e.target.value)}
-                    onBlur={saveBasePrompt}
+                    onChange={(e) => {
+                        setBasePrompt(e.target.value);
+                        saveBasePrompt(e.target.value);
+                    }}
                     rows={3}
                     className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-400 resize-y"
                 />
