@@ -24,6 +24,7 @@ export function NormsTable() {
     const [rows, setRows] = useState<INormRow[]>([]);
     const [newTypeName, setNewTypeName] = useState("");
     const [collapsed, setCollapsed] = useState(true);
+    const [classifying, setClassifying] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
@@ -77,6 +78,29 @@ export function NormsTable() {
             () => toast.error('Ошибка удаления')
         );
     }, [queryClient]);
+
+    const handleClassify = useCallback(() => {
+        setClassifying(true);
+        const runBatch = (offset: number) => {
+            $axios.post('/plan/products/classify/', {offset}).then(
+                (res) => {
+                    const d = res.data;
+                    toast.success(d.response || `Обновлено: ${d.updated}, пропущено: ${d.skipped}`);
+                    if (d.remaining > 0) {
+                        runBatch(offset + 20);
+                    } else {
+                        setClassifying(false);
+                        toast.success('Классификация завершена!');
+                    }
+                },
+                (err) => {
+                    toast.error(err.response?.data?.error || 'Ошибка классификации');
+                    setClassifying(false);
+                }
+            );
+        };
+        runBatch(0);
+    }, []);
 
     return (
         <div className="border border-slate-200 rounded-lg overflow-hidden">
@@ -153,6 +177,13 @@ export function NormsTable() {
                             className="border border-slate-300 rounded px-3 py-1.5 text-xs hover:bg-slate-50 disabled:opacity-30"
                         >
                             Добавить
+                        </button>
+                        <button
+                            onClick={handleClassify}
+                            disabled={classifying}
+                            className="border border-green-400 bg-green-50 text-green-700 rounded px-3 py-1.5 text-xs hover:bg-green-100 disabled:opacity-50 disabled:cursor-wait"
+                        >
+                            {classifying ? "Классификация..." : "Классифицировать продукты"}
                         </button>
                     </div>
                 </div>

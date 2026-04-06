@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment
+from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, Product
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
 from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm
@@ -478,6 +478,7 @@ def generate_ai_plan(request):
 
 
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
+N8N_CLASSIFY_URL = 'http://n8n:5678/webhook/classify-products'
 
 
 @api_view(['POST'])
@@ -613,6 +614,23 @@ def update_ai_entries(request):
     return JsonResponse({'success': True, 'updated': updated})
 
 
+@api_view(['POST'])
+def classify_products(request):
+    """Запуск классификации продуктов через n8n"""
+    offset = request.data.get('offset', 0)
+    try:
+        response = requests.post(
+            N8N_CLASSIFY_URL,
+            json={'offset': offset},
+            timeout=300,
+        )
+        response.raise_for_status()
+        return JsonResponse(response.json(), json_dumps_params={"ensure_ascii": False})
+    except Exception as e:
+        logger.error(f'Classify products error: {e}')
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 @api_view(['GET'])
 def get_production_norms(request):
     """Таблица нормативов: типы изделий × цеха → часы"""
@@ -694,3 +712,60 @@ def delete_product_type(request):
         return JsonResponse({'success': True})
     except ProductType.DoesNotExist:
         return JsonResponse({'error': 'Не найден'}, status=404)
+
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([])
+def get_untyped_products(request):
+    """Продукты без типа изделия (для n8n классификации). Батч по offset/limit."""
+    offset = int(request.query_params.get('offset', 0))
+    limit = int(request.query_params.get('limit', 50))
+
+    products = Product.objects.filter(
+        production_type__isnull=True,
+        type='product',
+        archived=False,
+    ).values('id', 'name', 'group')[offset:offset + limit]
+
+    types = list(ProductType.objects.values_list('name', flat=True))
+    total = Product.objects.filter(production_type__isnull=True, type='product', archived=False).count()
+
+    return JsonResponse({
+        'products': list(products),
+        'types': types,
+        'total': total,
+        'offset': offset,
+        'limit': limit,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def set_product_types(request):
+    """Массовое назначение типов продуктам. {assignments: [{product_id: 1, type_name: "Диван"}, ...]}"""
+    assignments = request.data.get('assignments', [])
+    updated = 0
+    skipped = 0
+
+    type_cache = {}
+    for a in assignments:
+        pid = a.get('product_id')
+        type_name = (a.get('type_name') or '').strip()
+
+        if not pid or not type_name or type_name == 'null':
+            skipped += 1
+            continue
+
+        if type_name not in type_cache:
+            try:
+                type_cache[type_name] = ProductType.objects.get(name=type_name)
+            except ProductType.DoesNotExist:
+                skipped += 1
+                continue
+
+        Product.objects.filter(pk=pid).update(production_type=type_cache[type_name])
+        updated += 1
+
+    return JsonResponse({'updated': updated, 'skipped': skipped})

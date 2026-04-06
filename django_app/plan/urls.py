@@ -22,4 +22,8 @@ urlpatterns = [
     path('norms/update/', update_production_norms),
     path('norms/add_type/', add_product_type),
     path('norms/delete_type/', delete_product_type),
+
+    path('products/untyped/', get_untyped_products),
+    path('products/set_types/', set_product_types),
+    path('products/classify/', classify_products),
 ]
