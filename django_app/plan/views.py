@@ -625,6 +625,8 @@ def classify_products(request):
             timeout=300,
         )
         response.raise_for_status()
+        if not response.text.strip():
+            return JsonResponse({'error': 'n8n вернул пустой ответ. Проверьте что воркфлоу classify-products импортирован и активирован.'}, status=502)
         return JsonResponse(response.json(), json_dumps_params={"ensure_ascii": False})
     except Exception as e:
         logger.error(f'Classify products error: {e}')
