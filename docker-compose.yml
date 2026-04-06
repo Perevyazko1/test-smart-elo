@@ -231,6 +231,7 @@ services:
       - WEBHOOK_URL=http://159.194.203.33:5678/
       - N8N_EDITOR_BASE_URL=http://159.194.203.33:5678/
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
     deploy:
       resources:
         limits:

@@ -86,11 +86,11 @@ export function NormsTable() {
                 (res) => {
                     const d = res.data;
                     toast.success(d.response || `Обновлено: ${d.updated}, пропущено: ${d.skipped}`);
-                    if (d.remaining > 0) {
+                    if (d.remaining > 0 && d.updated > 0) {
                         runBatch(offset + 50);
                     } else {
                         setClassifying(false);
-                        toast.success('Классификация завершена!');
+                        toast.success(`Классификация завершена! Осталось без типа: ${d.remaining || 0} (комплектующие)`);
                     }
                 },
                 (err) => {
