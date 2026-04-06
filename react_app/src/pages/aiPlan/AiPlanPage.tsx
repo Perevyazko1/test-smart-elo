@@ -60,9 +60,9 @@ export const AiPlanPage = () => {
     const entries = useMemo(() => {
         const items = Object.entries(planData?.data || {});
         return items.sort((a, b) => {
-            const posA = aiEntries[a[1].series_id]?.sort_position ?? 9999;
-            const posB = aiEntries[b[1].series_id]?.sort_position ?? 9999;
-            if (posA !== posB) return posA - posB;
+            const weightA = aiEntries[a[1].series_id]?.sort_weight ?? 50;
+            const weightB = aiEntries[b[1].series_id]?.sort_weight ?? 50;
+            if (weightA !== weightB) return weightB - weightA;
             if (!a[1].date && !b[1].date) return 0;
             if (!a[1].date) return 1;
             if (!b[1].date) return -1;
