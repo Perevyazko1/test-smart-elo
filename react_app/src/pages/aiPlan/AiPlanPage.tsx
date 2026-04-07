@@ -20,6 +20,19 @@ interface IAiEntry {
     sort_position: number;
     ai_comment: string;
     feedback: string;
+    weight_detail?: {
+        deadline: number;
+        progress: number;
+        dept_load: number;
+        adjustment?: number;
+    };
+}
+
+interface IWeightCoefficients {
+    k_deadline: number;
+    k_progress: number;
+    k_dept_load: number;
+    k_feedback: number;
 }
 
 interface IAiPlanData {
@@ -41,6 +54,21 @@ export const AiPlanPage = () => {
     const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [normsModal, setNormsModal] = useState<{productId: number; productName: string} | null>(null);
+
+    const {data: weightsData} = useQuery({
+        queryKey: ["weightCoefficients"],
+        queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
+    });
+    const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
+    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 40, k_feedback: 35};
+
+    const saveWeights = useCallback((w: IWeightCoefficients) => {
+        setLocalWeights(w);
+        $axios.post('/plan/ai_plan/weights/update/', w).then(
+            () => toast.success('Коэффициенты сохранены'),
+            () => toast.error('Ошибка сохранения'),
+        );
+    }, []);
 
     const {data: deptsData} = useQuery({
         queryKey: ["departments"],
@@ -238,6 +266,41 @@ export const AiPlanPage = () => {
 
             {/* Workers Table */}
             <WorkersTable />
+
+            {/* Weight Coefficients Sliders */}
+            <div className="border border-slate-200 rounded-lg p-4">
+                <div className="text-xs text-slate-500 font-semibold mb-3">Настройка приоритетов</div>
+                <div className="grid grid-cols-2 gap-4">
+                    {([
+                        {key: 'k_deadline' as const, label: 'Сроки', desc: 'Влияние дедлайнов и просрочки'},
+                        {key: 'k_progress' as const, label: 'Прогресс', desc: 'Дожимать почти готовые заказы'},
+                        {key: 'k_dept_load' as const, label: 'Загрузка цехов', desc: 'Не давать цехам простаивать'},
+                        {key: 'k_feedback' as const, label: 'Обратная связь', desc: 'Влияние комментариев менеджеров'},
+                    ]).map(({key, label, desc}) => (
+                        <div key={key}>
+                            <div className="flex justify-between items-center mb-1">
+                                <span className="text-xs font-medium text-slate-700">{label}</span>
+                                <span className="text-xs text-slate-400 font-mono w-6 text-right">{weights[key]}</span>
+                            </div>
+                            <input
+                                type="range"
+                                min={0}
+                                max={50}
+                                value={weights[key]}
+                                onChange={(e) => {
+                                    const val = parseInt(e.target.value);
+                                    const next = {...weights, [key]: val};
+                                    setLocalWeights(next);
+                                }}
+                                onMouseUp={() => saveWeights(weights)}
+                                onTouchEnd={() => saveWeights(weights)}
+                                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                            />
+                            <div className="text-[10px] text-slate-400 mt-0.5">{desc}</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
 
             {/* Input + Voice */}
             <div className="flex gap-2 items-center">
@@ -490,7 +553,13 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 )}
             </td>
             {/* Вес */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[30px] border-r border-slate-200", rowBg)} style={{left: 435}}>
+            <td
+                className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[30px] border-r border-slate-200 cursor-help", rowBg)}
+                style={{left: 435}}
+                title={aiEntry?.weight_detail
+                    ? `Сроки: ${aiEntry.weight_detail.deadline ?? '—'}\nПрогресс: ${aiEntry.weight_detail.progress ?? '—'}\nЦеха: ${aiEntry.weight_detail.dept_load ?? '—'}${aiEntry.weight_detail.adjustment ? `\nAI корр.: ${aiEntry.weight_detail.adjustment > 0 ? '+' : ''}${aiEntry.weight_detail.adjustment}` : ''}`
+                    : undefined}
+            >
                 <span className={twMerge(
                     "text-[10px] font-semibold",
                     (aiEntry?.sort_weight ?? 500) >= 900 ? "text-red-600" :

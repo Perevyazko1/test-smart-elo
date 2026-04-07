@@ -17,6 +17,8 @@ urlpatterns = [
     path('ai_plan/progress/', ai_plan_progress),
     path('ai_plan/cancel/', ai_plan_cancel),
     path('ai_plan/reset/', reset_ai_plan),
+    path('ai_plan/weights/', get_weight_coefficients),
+    path('ai_plan/weights/update/', save_weight_coefficients),
     path('ai_plan/prompt/', process_ai_prompt),
     path('ai_plan/search/', search_orders),
     path('ai_plan/update_entries/', update_ai_entries),

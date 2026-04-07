@@ -327,6 +327,7 @@ def get_ai_plan(request):
             'sort_position': entry.sort_position,
             'ai_comment': entry.ai_comment,
             'feedback': entry.feedback,
+            'weight_detail': entry.weight_detail or {},
         }
 
     config = _get_ai_config()
@@ -572,6 +573,33 @@ def ai_plan_cancel(request):
         config.save(update_fields=['task_status', 'updated_at'])
         return JsonResponse({'status': 'cancelled'})
     return JsonResponse({'status': config.task_status})
+
+
+@api_view(['GET'])
+def get_weight_coefficients(request):
+    """Получить коэффициенты слайдеров."""
+    config = _get_ai_config()
+    return JsonResponse({
+        'k_deadline': config.weight_k_deadline,
+        'k_progress': config.weight_k_progress,
+        'k_dept_load': config.weight_k_dept_load,
+        'k_feedback': config.weight_k_feedback,
+    })
+
+
+@api_view(['POST'])
+def save_weight_coefficients(request):
+    """Сохранить коэффициенты слайдеров."""
+    config = _get_ai_config()
+    fields = []
+    for key in ('k_deadline', 'k_progress', 'k_dept_load', 'k_feedback'):
+        val = request.data.get(key)
+        if val is not None:
+            setattr(config, f'weight_{key}', max(0, min(50, int(val))))
+            fields.append(f'weight_{key}')
+    if fields:
+        config.save(update_fields=fields + ['updated_at'])
+    return JsonResponse({'status': 'ok'})
 
 
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'

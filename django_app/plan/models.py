@@ -14,7 +14,8 @@ class AiPlanEntry(models.Model):
         related_name='ai_plan_entry',
         verbose_name='Позиция заказа',
     )
-    sort_weight = models.IntegerField('Важность (0-100)', default=50)
+    sort_weight = models.IntegerField('Важность (0-1000)', default=500)
+    weight_detail = models.JSONField('Разбивка веса', default=dict, blank=True)
     sort_position = models.IntegerField('Позиция в очереди', default=0)
     ai_comment = models.TextField('AI комментарий', blank=True, default='')
     feedback = models.TextField('Обратная связь', blank=True, default='')
@@ -111,6 +112,12 @@ class AiPlanConfig(models.Model):
     base_prompt = models.TextField('Базовый промпт', default='', blank=True)
     ai_summary = models.TextField('AI сводка', default='', blank=True)
     updated_at = models.DateTimeField('Обновлено', auto_now=True)
+
+    # Weight coefficients (sliders 0-50)
+    weight_k_deadline = models.IntegerField('K сроки', default=15)
+    weight_k_progress = models.IntegerField('K прогресс', default=25)
+    weight_k_dept_load = models.IntegerField('K загрузка цехов', default=40)
+    weight_k_feedback = models.IntegerField('K обратная связь', default=35)
 
     # Task tracking
     task_id = models.CharField('Celery Task ID', max_length=255, blank=True, default='')
