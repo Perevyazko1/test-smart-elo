@@ -363,6 +363,12 @@ def generate_ai_plan_full(self):
             'today': data['today'],
             'top_orders': top_orders_list,
             'dept_orders': dept_orders,
+            'priorities': {
+                'k_deadline': config.weight_k_deadline,
+                'k_progress': config.weight_k_progress,
+                'k_dept_load': config.weight_k_dept_load,
+                'k_feedback': config.weight_k_feedback,
+            },
         }
 
         resp = _request_with_retry(N8N_SUMMARY_URL, summary_payload, timeout=120)
