@@ -86,8 +86,8 @@ export const AiPlanPage = () => {
     const entries = useMemo(() => {
         const items = Object.entries(planData?.data || {});
         return items.sort((a, b) => {
-            const weightA = aiEntries[a[1].series_id]?.sort_weight ?? 50;
-            const weightB = aiEntries[b[1].series_id]?.sort_weight ?? 50;
+            const weightA = aiEntries[a[1].series_id]?.sort_weight ?? 500;
+            const weightB = aiEntries[b[1].series_id]?.sort_weight ?? 500;
             if (weightA !== weightB) return weightB - weightA;
             if (!a[1].date && !b[1].date) return 0;
             if (!a[1].date) return 1;
@@ -493,8 +493,8 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             <td className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[30px] border-r border-slate-200", rowBg)} style={{left: 435}}>
                 <span className={twMerge(
                     "text-[10px] font-semibold",
-                    (aiEntry?.sort_weight ?? 50) >= 90 ? "text-red-600" :
-                    (aiEntry?.sort_weight ?? 50) >= 70 ? "text-yellow-600" : "text-slate-400"
+                    (aiEntry?.sort_weight ?? 500) >= 900 ? "text-red-600" :
+                    (aiEntry?.sort_weight ?? 500) >= 700 ? "text-yellow-600" : "text-slate-400"
                 )}>
                     {aiEntry?.sort_weight ?? "—"}
                 </span>
