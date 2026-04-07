@@ -494,7 +494,30 @@ def generate_ai_plan(request):
     config = _get_ai_config()
     data = _collect_orders_data()
 
-    # === ЭТАП 1: План на день (сводка без отдельных заказов) ===
+    # === ЭТАП 1: План на день ===
+    # Собираем топ-заказы для конкретики в плане
+    priority_orders = sorted(
+        data['orders'],
+        key=lambda o: (
+            0 if (o['days_left'] is not None and o['days_left'] < 0) else 1,
+            o.get('urgency') or 99,
+            o.get('days_left') if o.get('days_left') is not None else 9999,
+        )
+    )[:30]  # топ-30 самых срочных
+
+    top_orders_list = []
+    for o in priority_orders:
+        top_orders_list.append({
+            'order': o['order'],
+            'product': o['product'],
+            'product_type': o['product_type'],
+            'quantity': o['quantity'],
+            'urgency': o['urgency'],
+            'deadline': o['deadline'],
+            'days_left': o['days_left'],
+            'project': o['project'],
+        })
+
     summary_payload = {
         'base_prompt': config.base_prompt,
         'department_load': data['dept_summary'],
@@ -503,6 +526,7 @@ def generate_ai_plan(request):
         'overdue_count': data['overdue_count'],
         'urgent_count': data['urgent_count'],
         'today': data['today'],
+        'top_orders': top_orders_list,
     }
 
     try:

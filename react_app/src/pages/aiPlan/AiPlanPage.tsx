@@ -170,8 +170,12 @@ export const AiPlanPage = () => {
 
             {/* AI Summary */}
             <div className="border border-slate-200 rounded-lg bg-blue-50 p-4 text-sm text-slate-700">
-                <span className="font-semibold text-slate-900">AI: </span>
-                {aiSummary || <span className="text-slate-400 italic">Нажмите "Сгенерировать план" для анализа</span>}
+                <div className="font-semibold text-slate-900 mb-2">AI план:</div>
+                {aiSummary ? (
+                    <div className="whitespace-pre-line leading-relaxed">{aiSummary}</div>
+                ) : (
+                    <span className="text-slate-400 italic">Нажмите "Сгенерировать план" для анализа</span>
+                )}
             </div>
 
             {/* Generate button */}
@@ -289,18 +293,6 @@ function OrderCard({item, index, aiEntry, onFeedbackSave}: {
                 })}
             </div>
 
-            {/* AI Comment */}
-            <div className={twMerge(
-                "flex-1 min-w-[180px] text-xs border-l pl-3",
-                item.urgency === 1 ? "text-red-700 border-red-200" :
-                    item.urgency === 2 ? "text-yellow-700 border-yellow-200" :
-                        "text-slate-600 border-slate-200"
-            )}>
-                {aiEntry?.ai_comment || (
-                    <span className="text-slate-300 italic">Нажмите "Сгенерировать"</span>
-                )}
-            </div>
-
             {/* Feedback */}
             <div className="flex-1 min-w-[150px] border-l border-slate-200 pl-3">
                 <textarea
@@ -313,6 +305,18 @@ function OrderCard({item, index, aiEntry, onFeedbackSave}: {
                         feedback ? "text-slate-700" : "text-slate-300"
                     )}
                 />
+            </div>
+
+            {/* AI Comment */}
+            <div className={twMerge(
+                "flex-1 min-w-[180px] text-xs border-l pl-3",
+                item.urgency === 1 ? "text-red-700 border-red-200" :
+                    item.urgency === 2 ? "text-yellow-700 border-yellow-200" :
+                        "text-slate-600 border-slate-200"
+            )}>
+                {aiEntry?.ai_comment || (
+                    <span className="text-slate-300 italic">Нажмите "Сгенерировать"</span>
+                )}
             </div>
         </div>
     );
