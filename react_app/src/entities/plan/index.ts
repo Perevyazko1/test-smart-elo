@@ -21,6 +21,7 @@ export interface IPlanComment {
 
 export interface IPlanDataRow {
     date: string;
+    product_id: number;
     product_name: string;
     product_picture: string;
     order: string;

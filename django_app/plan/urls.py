@@ -16,7 +16,6 @@ urlpatterns = [
     path('ai_plan/generate/', generate_ai_plan),
     path('ai_plan/progress/', ai_plan_progress),
     path('ai_plan/cancel/', ai_plan_cancel),
-    path('ai_plan/generate_batch/', generate_ai_batch),
     path('ai_plan/reset/', reset_ai_plan),
     path('ai_plan/prompt/', process_ai_prompt),
     path('ai_plan/search/', search_orders),
@@ -31,6 +30,10 @@ urlpatterns = [
     path('products/set_types/', set_product_types),
     path('products/classify/', classify_products),
 
+    path('product_norms/<int:product_id>/', get_product_norms),
+    path('product_norms/<int:product_id>/update/', update_product_norms),
+
+    path('departments/', get_departments),
     path('workers/', get_department_workers),
     path('workers/update/', update_department_workers),
 ]

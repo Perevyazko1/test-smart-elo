@@ -12,8 +12,8 @@ import {$axios} from "@/shared/api";
 import {toast} from "sonner";
 import {NormsTable} from "./NormsTable";
 import {WorkersTable} from "./WorkersTable";
+import {ProductNormsModal} from "./ProductNormsModal";
 
-const DEPARTMENTS = ["Конструктора", "Сборка", "Пошив", "Малярка", "Обивка", "Упаковка"];
 
 interface IAiEntry {
     sort_weight: number;
@@ -40,6 +40,28 @@ export const AiPlanPage = () => {
     const [generating, setGenerating] = useState(false);
     const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+    const [normsModal, setNormsModal] = useState<{productId: number; productName: string} | null>(null);
+
+    const {data: deptsData} = useQuery({
+        queryKey: ["departments"],
+        queryFn: () => $axios.get<{departments: string[]}>('/plan/departments/').then(r => r.data),
+    });
+    const allDepartments: string[] = deptsData?.departments || [];
+
+    const [hiddenDepts, setHiddenDepts] = useState<Set<string>>(new Set());
+    const visibleDepts = useMemo(
+        () => new Set(allDepartments.filter(d => !hiddenDepts.has(d))),
+        [allDepartments, hiddenDepts]
+    );
+
+    const toggleDept = useCallback((dept: string) => {
+        setHiddenDepts(prev => {
+            const next = new Set(prev);
+            if (next.has(dept)) next.delete(dept);
+            else next.add(dept);
+            return next;
+        });
+    }, []);
 
     const {data: planData, isFetching} = useQuery({
         queryKey: ["planTable", planProject, planManager, planAgent],
@@ -316,129 +338,210 @@ export const AiPlanPage = () => {
                 <div className="text-center text-slate-400 animate-pulse py-2">Загрузка...</div>
             )}
 
-            {/* Orders */}
-            <div className="flex flex-col gap-3">
-                {entries.map(([key, item], idx) => (
-                    <OrderCard
-                        key={key}
-                        item={item}
-                        index={idx + 1}
-                        aiEntry={aiEntries[item.series_id]}
-                        onFeedbackSave={saveFeedback}
-                    />
+            {/* Department toggles */}
+            <div className="flex gap-1.5 flex-wrap items-center">
+                <span className="text-xs text-slate-500 mr-1">Цеха:</span>
+                {allDepartments.map(dept => (
+                    <button
+                        key={dept}
+                        onClick={() => toggleDept(dept)}
+                        className={twMerge(
+                            "px-2.5 py-1 rounded text-xs border transition-colors",
+                            visibleDepts.has(dept)
+                                ? "bg-blue-100 border-blue-300 text-blue-800"
+                                : "bg-slate-50 border-slate-200 text-slate-400"
+                        )}
+                    >
+                        {dept}
+                    </button>
                 ))}
             </div>
+
+            {/* Orders Table */}
+            <div className="overflow-x-auto border border-slate-200 rounded-lg">
+                <table className="text-xs border-collapse min-w-full">
+                    <thead>
+                        <tr className="bg-slate-50 text-slate-600">
+                            <th className="px-2 py-2 text-left font-semibold w-8">#</th>
+                            <th className="px-2 py-2 text-left font-semibold w-[50px]">Фото</th>
+                            <th className="px-2 py-2 text-left font-semibold min-w-[180px]">Изделие</th>
+                            <th className="px-2 py-2 text-left font-semibold w-[90px]">Заказ</th>
+                            <th className="px-2 py-2 text-center font-semibold w-[40px]">Кол</th>
+                            <th className="px-2 py-2 text-center font-semibold w-[70px]">Срок</th>
+                            <th className="px-2 py-2 text-center font-semibold w-[35px]">Вес</th>
+                            {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
+                                <th key={dept} className="px-2 py-2 text-center font-semibold whitespace-nowrap">
+                                    {dept}
+                                </th>
+                            ))}
+                            <th className="px-2 py-2 text-left font-semibold min-w-[120px]">Обратная связь</th>
+                            <th className="px-2 py-2 text-left font-semibold min-w-[150px]">AI комментарий</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {entries.map(([key, item], idx) => (
+                            <OrderRow
+                                key={key}
+                                item={item}
+                                index={idx + 1}
+                                aiEntry={aiEntries[item.series_id]}
+                                onFeedbackSave={saveFeedback}
+                                visibleDepts={visibleDepts}
+                                allDepartments={allDepartments}
+                                onOpenNorms={(id, name) => setNormsModal({productId: id, productName: name})}
+                            />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <ProductNormsModal
+                productId={normsModal?.productId ?? null}
+                productName={normsModal?.productName ?? ""}
+                isOpen={normsModal !== null}
+                onClose={() => setNormsModal(null)}
+            />
         </div>
     );
 };
 
-function OrderCard({item, index, aiEntry, onFeedbackSave}: {
+function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms}: {
     item: IPlanDataRow;
     index: number;
     aiEntry?: IAiEntry;
     onFeedbackSave: (seriesId: string, feedback: string) => void;
+    visibleDepts: Set<string>;
+    allDepartments: string[];
+    onOpenNorms: (productId: number, productName: string) => void;
 }) {
     const [feedback, setFeedback] = useState(aiEntry?.feedback ?? "");
-    const urgencyMap = {
-        1: "border-red-400 bg-red-50",
-        2: "border-yellow-300 bg-yellow-50",
-        3: "border-slate-200 bg-white",
-    };
-
     const empty = {all: 0, ready: 0, await: 0};
 
+    const rowBg = item.urgency === 1 ? "bg-red-50" : item.urgency === 2 ? "bg-yellow-50" : "";
+
     return (
-        <div
-            className={twMerge(
-                "border rounded-lg p-3 flex gap-3 items-stretch",
-                urgencyMap[item.urgency]
-            )}
-        >
-            {/* Left: meta + image */}
-            <div className="flex flex-col items-center gap-1 min-w-[80px] text-[10px] text-slate-500">
-                <div>важность: <b>{aiEntry?.sort_weight ?? "—"}</b></div>
-                <div>поз: <b>#{aiEntry?.sort_position ?? index}</b></div>
-                <div className="w-[70px] h-[70px] bg-slate-200 rounded flex items-center justify-center text-[9px] text-slate-400 overflow-hidden">
+        <tr className={twMerge("border-t border-slate-100 hover:bg-slate-50/50", rowBg)}>
+            {/* # */}
+            <td className="px-2 py-1.5 text-slate-400 font-medium">{index}</td>
+
+            {/* Photo */}
+            <td className="px-2 py-1.5">
+                <div className="w-[40px] h-[40px] bg-slate-100 rounded overflow-hidden flex items-center justify-center">
                     {item.product_picture ? (
                         <img src={STATIC_URL + item.product_picture} alt="" className="w-full h-full object-cover"/>
                     ) : (
-                        "нет фото"
+                        <span className="text-[8px] text-slate-300">---</span>
                     )}
                 </div>
-            </div>
+            </td>
 
-            {/* Number */}
-            <div className="flex items-center justify-center text-2xl font-bold text-slate-700 min-w-[50px]">
-                №{index}
-            </div>
-
-            {/* Main info */}
-            <div className="flex-1 flex flex-col gap-1 min-w-[200px]">
-                <div className="font-semibold text-sm">
-                    {item.product_name}
-                    {item.fabric_name && ` + ${item.fabric_name}`}
-                </div>
-                <div className="text-xs text-slate-600">
-                    <span className={twMerge(item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold")}>
-                        {item.order}
+            {/* Product */}
+            <td className="px-2 py-1.5">
+                <div className="flex items-center gap-1">
+                    <span className="font-medium text-slate-800 leading-tight">
+                        {item.product_name}
                     </span>
-                    {item.project && (
-                        <span className={twMerge("ml-2", item.urgency === 1 && "bg-yellow-200 px-1 rounded font-semibold")}>
-                            {item.project}
-                        </span>
-                    )}
+                    <button
+                        onClick={() => onOpenNorms(item.product_id, item.product_name)}
+                        className="text-[9px] text-blue-400 hover:text-blue-600 shrink-0"
+                        title="Нормативы изделия"
+                    >
+                        [н]
+                    </button>
                 </div>
-                <div className="text-xs text-slate-500 flex gap-4">
-                    <span>Сроки: <b>{item.date || "—"}</b></span>
-                    <span>Кол-во: <b>{item.quantity}</b></span>
-                    <span>Серия: {item.series_id}</span>
-                </div>
-            </div>
+                {item.fabric_name && (
+                    <div className="text-[10px] text-slate-400 leading-tight">{item.fabric_name}</div>
+                )}
+                {item.project && (
+                    <span className={twMerge(
+                        "text-[10px]",
+                        item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-400"
+                    )}>
+                        {item.project}
+                    </span>
+                )}
+            </td>
 
-            {/* Workshops */}
-            <div className="flex gap-1 items-center flex-wrap">
-                {DEPARTMENTS.map((dept) => {
-                    const d = item.assignments[dept] || empty;
-                    return (
-                        <div
-                            key={dept}
-                            className="flex flex-col items-center border border-slate-300 rounded px-2 py-1 min-w-[60px] text-xs"
-                        >
-                            <span className="text-[10px] text-slate-500">{dept}</span>
-                            <span className="font-semibold">
-                                {d.ready}/{d.all}
-                            </span>
-                            <span className="text-[9px] text-slate-400">готовых</span>
-                        </div>
-                    );
-                })}
-            </div>
+            {/* Order number */}
+            <td className="px-2 py-1.5">
+                <span className={twMerge(
+                    "text-xs",
+                    item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
+                )}>
+                    {item.order}
+                </span>
+            </td>
+
+            {/* Quantity */}
+            <td className="px-2 py-1.5 text-center font-semibold">{item.quantity}</td>
+
+            {/* Deadline */}
+            <td className="px-2 py-1.5 text-center">
+                {item.date ? (
+                    <span className={twMerge(
+                        "text-[10px]",
+                        item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-600"
+                    )}>
+                        {item.date}
+                    </span>
+                ) : (
+                    <span className="text-slate-300">—</span>
+                )}
+            </td>
+
+            {/* Weight */}
+            <td className="px-2 py-1.5 text-center">
+                <span className={twMerge(
+                    "text-[10px] font-semibold",
+                    (aiEntry?.sort_weight ?? 50) >= 90 ? "text-red-600" :
+                    (aiEntry?.sort_weight ?? 50) >= 70 ? "text-yellow-600" : "text-slate-400"
+                )}>
+                    {aiEntry?.sort_weight ?? "—"}
+                </span>
+            </td>
+
+            {/* Department columns */}
+            {allDepartments.filter(d => visibleDepts.has(d)).map(dept => {
+                const d = item.assignments[dept] || empty;
+                if (d.all === 0) return <td key={dept} className="px-1.5 py-1.5 text-center text-slate-200">—</td>;
+                const done = d.ready === d.all;
+                return (
+                    <td key={dept} className="px-1.5 py-1.5 text-center">
+                        <span className={twMerge(
+                            "text-[11px] font-medium",
+                            done ? "text-green-600" : d.ready > 0 ? "text-yellow-600" : "text-slate-500"
+                        )}>
+                            {d.ready}/{d.all}
+                        </span>
+                    </td>
+                );
+            })}
 
             {/* Feedback */}
-            <div className="flex-1 min-w-[150px] border-l border-slate-200 pl-3">
+            <td className="px-2 py-1.5">
                 <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}
                     onBlur={() => onFeedbackSave(item.series_id, feedback)}
-                    placeholder="Комментарий обратной связи..."
+                    placeholder="..."
+                    rows={1}
                     className={twMerge(
-                        "w-full h-full text-xs outline-none resize-none bg-transparent",
+                        "w-full text-[11px] outline-none resize-none bg-transparent leading-tight",
                         feedback ? "text-slate-700" : "text-slate-300"
                     )}
                 />
-            </div>
+            </td>
 
             {/* AI Comment */}
-            <div className={twMerge(
-                "flex-1 min-w-[180px] text-xs border-l pl-3",
-                item.urgency === 1 ? "text-red-700 border-red-200" :
-                    item.urgency === 2 ? "text-yellow-700 border-yellow-200" :
-                        "text-slate-600 border-slate-200"
+            <td className={twMerge(
+                "px-2 py-1.5 text-[11px] leading-tight",
+                item.urgency === 1 ? "text-red-700" :
+                    item.urgency === 2 ? "text-yellow-700" : "text-slate-600"
             )}>
                 {aiEntry?.ai_comment || (
-                    <span className="text-slate-300 italic">Нажмите "Сгенерировать"</span>
+                    <span className="text-slate-300 italic">—</span>
                 )}
-            </div>
-        </div>
+            </td>
+        </tr>
     );
 }

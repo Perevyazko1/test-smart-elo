@@ -68,6 +68,25 @@ class ProductionNorm(models.Model):
         return f'{self.product_type} / {self.department}: {self.hours_per_unit}ч'
 
 
+class ProductNormOverride(models.Model):
+    """Переопределение норматива для конкретного изделия (Product)"""
+
+    class Meta:
+        verbose_name = 'Переопределение норматива'
+        verbose_name_plural = 'Переопределения нормативов'
+        unique_together = ('product', 'department')
+
+    product = models.ForeignKey(
+        'core.Product', on_delete=models.CASCADE,
+        related_name='norm_overrides', verbose_name='Изделие',
+    )
+    department = models.CharField('Цех', max_length=50)
+    hours_per_unit = models.FloatField('Часов на 1 шт')
+
+    def __str__(self):
+        return f'{self.product} / {self.department}: {self.hours_per_unit}ч (override)'
+
+
 class DepartmentWorkers(models.Model):
     """Количество рабочих в цехе"""
 

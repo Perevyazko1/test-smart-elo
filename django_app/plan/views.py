@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, Product
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
-from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, DepartmentWorkers
+from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, ProductNormOverride, DepartmentWorkers
 from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer
 
@@ -149,6 +149,7 @@ def get_plan_table(request):
         result[key] = {
             "date": sort_date_val,
             "urgency": urgency_val,
+            "product_id": order_product.product_id,
             "product_name": order_product.product.name,
             "product_picture": picture_url,
             "order": order_product.order.inner_number,
@@ -379,6 +380,11 @@ def _collect_orders_data():
             norms[n.product_type.name] = {}
         norms[n.product_type.name][n.department] = n.hours_per_unit
 
+    # Переопределения на уровне конкретного Product
+    overrides = {}
+    for o in ProductNormOverride.objects.all():
+        overrides[(o.product_id, o.department)] = o.hours_per_unit
+
     workers = {dw.department: dw.workers_count for dw in DepartmentWorkers.objects.all()}
 
     WORK_HOURS_PER_DAY = 8
@@ -404,13 +410,21 @@ def _collect_orders_data():
 
         product_type_name = op.product.production_type.name if op.product.production_type else None
         remaining_work = {}
-        if product_type_name and product_type_name in norms:
-            for dept_name, status in dept_status.items():
-                remaining = status['all'] - status['ready']
-                if remaining > 0 and dept_name in norms.get(product_type_name, {}):
-                    hours = remaining * norms[product_type_name][dept_name]
-                    remaining_work[dept_name] = round(hours, 1)
-                    dept_load[dept_name] = dept_load.get(dept_name, 0) + hours
+        for dept_name, status in dept_status.items():
+            remaining = status['all'] - status['ready']
+            if remaining <= 0:
+                continue
+            # Приоритет: override для Product > дефолт из ProductType
+            override_key = (op.product_id, dept_name)
+            if override_key in overrides:
+                hours_per = overrides[override_key]
+            elif product_type_name and dept_name in norms.get(product_type_name, {}):
+                hours_per = norms[product_type_name][dept_name]
+            else:
+                continue
+            hours = remaining * hours_per
+            remaining_work[dept_name] = round(hours, 1)
+            dept_load[dept_name] = dept_load.get(dept_name, 0) + hours
 
         sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
         deadline = min(sort_dates).date() if sort_dates else None
@@ -854,6 +868,72 @@ def set_product_types(request):
         updated += 1
 
     return JsonResponse({'updated': updated, 'skipped': skipped})
+
+
+@api_view(['GET'])
+def get_product_norms(request, product_id):
+    """Нормативы для конкретного изделия: дефолтные (из типа) + переопределения"""
+    try:
+        product = Product.objects.select_related('production_type').get(pk=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Изделие не найдено'}, status=404)
+
+    departments = list(Department.objects.order_by('ordering', 'name').values_list('name', flat=True))
+
+    # Дефолтные нормативы из ProductType
+    defaults = {}
+    if product.production_type:
+        for n in ProductionNorm.objects.filter(product_type=product.production_type):
+            defaults[n.department] = n.hours_per_unit
+
+    # Переопределения
+    overrides_qs = ProductNormOverride.objects.filter(product=product)
+    overrides = {o.department: o.hours_per_unit for o in overrides_qs}
+
+    rows = []
+    for dept in departments:
+        rows.append({
+            'department': dept,
+            'default': defaults.get(dept, 0),
+            'override': overrides.get(dept),
+        })
+
+    return JsonResponse({
+        'product_id': product.id,
+        'product_name': product.name,
+        'product_type': product.production_type.name if product.production_type else None,
+        'rows': rows,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_product_norms(request, product_id):
+    """Сохранить переопределения нормативов для изделия. {overrides: {dept: hours|null}}"""
+    try:
+        product = Product.objects.get(pk=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Изделие не найдено'}, status=404)
+
+    overrides_data = request.data.get('overrides', {})
+    for dept, hours in overrides_data.items():
+        if hours is None:
+            ProductNormOverride.objects.filter(product=product, department=dept).delete()
+        else:
+            ProductNormOverride.objects.update_or_create(
+                product=product, department=dept,
+                defaults={'hours_per_unit': float(hours)},
+            )
+
+    return JsonResponse({'success': True})
+
+
+@api_view(['GET'])
+def get_departments(request):
+    """Список всех цехов"""
+    departments = list(
+        Department.objects.order_by('ordering', 'name').values_list('name', flat=True)
+    )
+    return JsonResponse({'departments': departments}, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['GET'])
