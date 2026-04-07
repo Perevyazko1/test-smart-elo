@@ -93,5 +93,13 @@ class AiPlanConfig(models.Model):
     ai_summary = models.TextField('AI сводка', default='', blank=True)
     updated_at = models.DateTimeField('Обновлено', auto_now=True)
 
+    # Task tracking
+    task_id = models.CharField('Celery Task ID', max_length=255, blank=True, default='')
+    task_status = models.CharField('Статус задачи', max_length=20, default='idle')
+    task_progress = models.IntegerField('Обработано заказов', default=0)
+    task_total = models.IntegerField('Всего заказов', default=0)
+    task_phase = models.CharField('Фаза', max_length=100, blank=True, default='')
+    task_error = models.TextField('Ошибка', blank=True, default='')
+
     def __str__(self):
         return f'AI конфигурация (обновлено: {self.updated_at})'

@@ -38,6 +38,8 @@ export const AiPlanPage = () => {
 
     const [prompt, setPrompt] = useState("");
     const [generating, setGenerating] = useState(false);
+    const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
+    const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     const {data: planData, isFetching} = useQuery({
         queryKey: ["planTable", planProject, planManager, planAgent],
@@ -88,42 +90,87 @@ export const AiPlanPage = () => {
         return () => { if (debounceTimer.current) clearTimeout(debounceTimer.current); };
     }, []);
 
-    const handleGenerate = useCallback(() => {
+    const stopPolling = useCallback(() => {
+        if (pollRef.current) {
+            clearInterval(pollRef.current);
+            pollRef.current = null;
+        }
+    }, []);
+
+    const startPolling = useCallback(() => {
+        stopPolling();
         setGenerating(true);
 
-        // Этап 1: Summary
-        $axios.post('/plan/ai_plan/generate/').then(res => {
-            queryClient.invalidateQueries({queryKey: ["aiPlan"]});
-            toast.success('План на день готов!');
-            const total = res.data.total_orders || 0;
+        const poll = () => {
+            $axios.get('/plan/ai_plan/progress/').then(res => {
+                const {status, phase, current, total, error} = res.data;
 
-            // Этап 2: Батчи по 50
-            if (total > 0) {
-                const runBatch = (offset: number) => {
-                    $axios.post('/plan/ai_plan/generate_batch/', {offset}).then(batchRes => {
-                        const d = batchRes.data;
-                        toast.success(`Комментарии: ${Math.min(offset + 50, d.total)}/${d.total}`);
+                if (status === 'running') {
+                    setProgress({current, total, phase});
+                    // Обновляем данные по мере обработки
+                    if (current > 0) {
                         queryClient.invalidateQueries({queryKey: ["aiPlan"]});
-                        if (!d.batch_done) {
-                            runBatch(offset + 50);
-                        } else {
-                            setGenerating(false);
-                            toast.success('AI план полностью готов!');
-                        }
-                    }).catch(err => {
-                        toast.error(err.response?.data?.error || 'Ошибка батча');
-                        setGenerating(false);
-                    });
-                };
-                runBatch(0);
-            } else {
-                setGenerating(false);
+                    }
+                } else if (status === 'completed') {
+                    stopPolling();
+                    setGenerating(false);
+                    setProgress(null);
+                    queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                    toast.success('AI план полностью готов!');
+                } else if (status === 'failed') {
+                    stopPolling();
+                    setGenerating(false);
+                    setProgress(null);
+                    toast.error(error || 'Ошибка генерации плана');
+                } else if (status === 'cancelled') {
+                    stopPolling();
+                    setGenerating(false);
+                    setProgress(null);
+                    queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                    toast.info('Генерация отменена');
+                } else {
+                    // idle — задача не запущена
+                    stopPolling();
+                    setGenerating(false);
+                    setProgress(null);
+                }
+            });
+        };
+
+        poll(); // первый запрос сразу
+        pollRef.current = setInterval(poll, 5000);
+    }, [queryClient, stopPolling]);
+
+    // При маунте — проверяем, не идёт ли уже генерация
+    useEffect(() => {
+        $axios.get('/plan/ai_plan/progress/').then(res => {
+            if (res.data.status === 'running') {
+                startPolling();
+            }
+        });
+        return stopPolling;
+    }, [startPolling, stopPolling]);
+
+    const handleGenerate = useCallback(() => {
+        setGenerating(true);
+        setProgress({current: 0, total: 0, phase: 'Запуск...'});
+
+        $axios.post('/plan/ai_plan/generate/').then(res => {
+            if (res.data.status === 'already_running' || res.data.status === 'started') {
+                startPolling();
             }
         }).catch(err => {
-            toast.error(err.response?.data?.error || 'Ошибка генерации плана');
+            toast.error(err.response?.data?.error || 'Ошибка запуска генерации');
             setGenerating(false);
+            setProgress(null);
         });
-    }, [queryClient]);
+    }, [startPolling]);
+
+    const handleCancel = useCallback(() => {
+        $axios.post('/plan/ai_plan/cancel/').then(() => {
+            toast.info('Отмена генерации...');
+        });
+    }, []);
 
     const handlePrompt = useCallback(() => {
         if (!prompt.trim()) return;
@@ -200,17 +247,54 @@ export const AiPlanPage = () => {
                 )}
             </div>
 
-            {/* Generate button */}
-            <Btn
-                onClick={handleGenerate}
-                disabled={generating}
-                className={twMerge(
-                    "border border-blue-400 bg-blue-100 text-blue-800 rounded-lg py-2 font-semibold",
-                    generating && "opacity-50 cursor-wait"
-                )}
-            >
-                {generating ? "Генерация..." : "Сгенерировать AI план"}
-            </Btn>
+            {/* Generate / Cancel button */}
+            {generating ? (
+                <Btn
+                    onClick={handleCancel}
+                    className="border border-orange-400 bg-orange-100 text-orange-800 rounded-lg py-2 font-semibold"
+                >
+                    Отменить генерацию
+                </Btn>
+            ) : (
+                <Btn
+                    onClick={handleGenerate}
+                    className="border border-blue-400 bg-blue-100 text-blue-800 rounded-lg py-2 font-semibold"
+                >
+                    Сгенерировать AI план
+                </Btn>
+            )}
+
+            {/* Progress bar */}
+            {progress && (
+                <div className="border border-slate-200 rounded-lg p-3">
+                    <div className="flex justify-between text-xs text-slate-600 mb-1.5">
+                        <span className="font-medium">{progress.phase}</span>
+                        <span>
+                            {progress.total > 0
+                                ? `${progress.current} / ${progress.total} заказов`
+                                : 'Ожидание ответа AI...'
+                            }
+                        </span>
+                    </div>
+                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
+                        <div
+                            className="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out"
+                            style={{
+                                width: progress.total > 0
+                                    ? `${Math.round((progress.current / progress.total) * 100)}%`
+                                    : '100%',
+                                animation: progress.total === 0 ? 'pulse 2s ease-in-out infinite' : undefined,
+                                opacity: progress.total === 0 ? 0.5 : 1,
+                            }}
+                        />
+                    </div>
+                    {progress.total > 0 && (
+                        <div className="text-[10px] text-slate-400 mt-1 text-right">
+                            {Math.round((progress.current / progress.total) * 100)}%
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Reset button */}
             <Btn

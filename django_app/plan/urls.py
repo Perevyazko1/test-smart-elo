@@ -14,6 +14,8 @@ urlpatterns = [
     path('ai_plan/update_feedback/', update_ai_feedback),
     path('ai_plan/update_config/', update_ai_config),
     path('ai_plan/generate/', generate_ai_plan),
+    path('ai_plan/progress/', ai_plan_progress),
+    path('ai_plan/cancel/', ai_plan_cancel),
     path('ai_plan/generate_batch/', generate_ai_batch),
     path('ai_plan/reset/', reset_ai_plan),
     path('ai_plan/prompt/', process_ai_prompt),

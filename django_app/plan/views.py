@@ -456,6 +456,20 @@ def _collect_orders_data():
     overdue = [o for o in orders_info if o['days_left'] is not None and o['days_left'] < 0]
     urgent = [o for o in orders_info if o['urgency'] == 1]
 
+    # Дневная мощность — сколько изделий можно сделать за день в каждом цеху
+    daily_capacity = {}
+    for dept, cap in capacity.items():
+        # Средние часы на изделие в этом цеху
+        dept_norms = [n.hours_per_unit for n in ProductionNorm.objects.filter(department=dept) if n.hours_per_unit > 0]
+        avg_hours = sum(dept_norms) / len(dept_norms) if dept_norms else 1
+        daily_capacity[dept] = {
+            'items_per_day': round(cap / avg_hours) if avg_hours > 0 else 0,
+            'hours_per_day': cap,
+        }
+
+    # Общая дневная мощность — ограничена узким местом
+    bottleneck_items = min((v['items_per_day'] for v in daily_capacity.values()), default=0) if daily_capacity else 0
+
     return {
         'orders': orders_info,
         'dept_summary': dept_summary,
@@ -463,6 +477,8 @@ def _collect_orders_data():
         'total_orders': len(orders_info),
         'overdue_count': len(overdue),
         'urgent_count': len(urgent),
+        'daily_capacity': daily_capacity,
+        'bottleneck_items_per_day': bottleneck_items,
         'today': str(date.today()),
     }
 
@@ -500,103 +516,48 @@ def _save_ai_entries(entries_data):
 
 @api_view(['POST'])
 def generate_ai_plan(request):
-    """Этап 1: Генерация summary (план на день). Быстрый запрос."""
-    from datetime import date
+    """Запуск полной генерации AI плана через Celery."""
+    from django.utils import timezone
+    from plan.tasks import generate_ai_plan_full
+
     config = _get_ai_config()
-    data = _collect_orders_data()
 
-    priority_orders = sorted(
-        data['orders'],
-        key=lambda o: (
-            0 if (o['days_left'] is not None and o['days_left'] < 0) else 1,
-            o.get('urgency') or 99,
-            o.get('days_left') if o.get('days_left') is not None else 9999,
-        )
-    )[:30]
+    # Если задача уже выполняется — не запускать повторно
+    if config.task_status == 'running' and config.task_id:
+        # Защита от зависших задач (>10 минут без обновления)
+        if (timezone.now() - config.updated_at).total_seconds() > 600:
+            config.task_status = 'idle'
+            config.save(update_fields=['task_status', 'updated_at'])
+        else:
+            return JsonResponse({'status': 'already_running', 'task_id': config.task_id})
 
-    top_orders_list = [{
-        'order': o['order'], 'product': o['product'], 'product_type': o['product_type'],
-        'quantity': o['quantity'], 'urgency': o['urgency'], 'deadline': o['deadline'],
-        'days_left': o['days_left'], 'project': o['project'],
-    } for o in priority_orders]
+    result = generate_ai_plan_full.delay()
 
-    summary_payload = {
-        'base_prompt': config.base_prompt,
-        'department_load': data['dept_summary'],
-        'type_counts': data['type_counts'],
-        'total_orders': data['total_orders'],
-        'overdue_count': data['overdue_count'],
-        'urgent_count': data['urgent_count'],
-        'today': data['today'],
-        'top_orders': top_orders_list,
-    }
+    return JsonResponse({'status': 'started', 'task_id': result.id})
 
-    try:
-        resp = requests.post(N8N_SUMMARY_URL, json=summary_payload, timeout=120)
-        resp.raise_for_status()
-        summary_data = resp.json()
-        summary = summary_data.get('summary', '')
-    except Exception as e:
-        logger.error(f'AI summary error: {e}')
-        return JsonResponse({'error': f'Ошибка генерации плана: {e}'}, status=500)
 
-    config.ai_summary = summary
-    config.save(update_fields=['ai_summary', 'updated_at'])
-
+@api_view(['GET'])
+def ai_plan_progress(request):
+    """Прогресс выполнения AI задачи."""
+    config = _get_ai_config()
     return JsonResponse({
-        'success': True,
-        'summary': summary,
-        'total_orders': data['total_orders'],
-    }, json_dumps_params={"ensure_ascii": False})
+        'status': config.task_status,
+        'phase': config.task_phase,
+        'current': config.task_progress,
+        'total': config.task_total,
+        'error': config.task_error,
+    })
 
 
 @api_view(['POST'])
-def generate_ai_batch(request):
-    """Этап 2: Обработка одного батча заказов. Вызывается фронтом последовательно."""
-    from datetime import date
+def ai_plan_cancel(request):
+    """Отмена текущей AI задачи."""
     config = _get_ai_config()
-    data = _collect_orders_data()
-
-    offset = int(request.data.get('offset', 0))
-    BATCH_SIZE = 50
-    orders = data['orders']
-    total = len(orders)
-    batch = orders[offset:offset + BATCH_SIZE]
-
-    if not batch:
-        return JsonResponse({
-            'success': True, 'updated': 0, 'total': total,
-            'remaining': 0, 'batch_done': True,
-        })
-
-    batch_payload = {
-        'base_prompt': config.base_prompt,
-        'orders': batch,
-        'department_load': data['dept_summary'],
-        'today': data['today'],
-        'batch_number': offset // BATCH_SIZE + 1,
-        'total_batches': (total + BATCH_SIZE - 1) // BATCH_SIZE,
-        'position_offset': offset,
-    }
-
-    try:
-        resp = requests.post(N8N_BATCH_URL, json=batch_payload, timeout=180)
-        resp.raise_for_status()
-        batch_data = resp.json()
-        entries = batch_data.get('entries', [])
-        updated = _save_ai_entries(entries)
-    except Exception as e:
-        logger.error(f'AI batch error (offset={offset}): {e}')
-        return JsonResponse({'error': str(e)}, status=500)
-
-    remaining = max(0, total - offset - BATCH_SIZE)
-    return JsonResponse({
-        'success': True,
-        'updated': updated,
-        'total': total,
-        'remaining': remaining,
-        'batch_done': remaining == 0,
-    }, json_dumps_params={"ensure_ascii": False})
+    if config.task_status == 'running':
+        config.task_status = 'cancelled'
+        config.save(update_fields=['task_status', 'updated_at'])
+        return JsonResponse({'status': 'cancelled'})
+    return JsonResponse({'status': config.task_status})
 
 
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
