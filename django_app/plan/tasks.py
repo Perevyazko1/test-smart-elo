@@ -116,6 +116,13 @@ def generate_ai_plan_full(self):
 
         # Маппинг series_id → order data для обогащения
         order_by_series = {o['series_id']: o for o in orders}
+
+        # Загрузить feedback из БД
+        from plan.models import AiPlanEntry
+        feedback_map = {}
+        for e in AiPlanEntry.objects.exclude(feedback='').values('series_id', 'feedback'):
+            feedback_map[e['series_id']] = e['feedback']
+
         top_orders_list = []
         for entry in top_by_weight:
             sid = entry.get('series_id', '')
@@ -131,6 +138,7 @@ def generate_ai_plan_full(self):
                 'project': o.get('project', ''),
                 'sort_weight': entry.get('sort_weight', 0),
                 'ai_comment': entry.get('ai_comment', ''),
+                'feedback': feedback_map.get(sid, ''),
             })
 
         summary_payload = {
