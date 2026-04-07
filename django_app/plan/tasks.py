@@ -1,4 +1,5 @@
 import logging
+import time
 import requests
 from celery import shared_task
 
@@ -7,6 +8,22 @@ logger = logging.getLogger(__name__)
 N8N_SUMMARY_URL = 'http://n8n:5678/webhook/ai-plan-summary'
 N8N_BATCH_URL = 'http://n8n:5678/webhook/ai-plan-batch'
 BATCH_SIZE = 50
+MAX_RETRIES = 3
+RETRY_DELAY = 10  # секунд
+
+
+def _request_with_retry(url, payload, timeout=180):
+    """POST запрос с retry при сетевых ошибках."""
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            resp = requests.post(url, json=payload, timeout=timeout)
+            resp.raise_for_status()
+            return resp
+        except (requests.ConnectionError, requests.Timeout) as e:
+            if attempt == MAX_RETRIES:
+                raise
+            logger.warning(f'Request to {url} failed (attempt {attempt}/{MAX_RETRIES}): {e}. Retrying in {RETRY_DELAY}s...')
+            time.sleep(RETRY_DELAY)
 
 
 def _update_config(**fields):
@@ -75,7 +92,7 @@ def generate_ai_plan_full(self):
                 'position_offset': offset,
             }
 
-            resp = requests.post(N8N_BATCH_URL, json=batch_payload, timeout=180)
+            resp = _request_with_retry(N8N_BATCH_URL, batch_payload, timeout=180)
             resp.raise_for_status()
             entries = resp.json().get('entries', [])
             _save_ai_entries(entries)
@@ -129,7 +146,7 @@ def generate_ai_plan_full(self):
             'top_orders': top_orders_list,
         }
 
-        resp = requests.post(N8N_SUMMARY_URL, json=summary_payload, timeout=120)
+        resp = _request_with_retry(N8N_SUMMARY_URL, summary_payload, timeout=120)
         resp.raise_for_status()
         summary = resp.json().get('summary', '')
 
