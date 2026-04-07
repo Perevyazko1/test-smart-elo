@@ -90,17 +90,39 @@ export const AiPlanPage = () => {
 
     const handleGenerate = useCallback(() => {
         setGenerating(true);
-        toast.promise(
-            $axios.post('/plan/ai_plan/generate/').then(res => {
-                queryClient.invalidateQueries({queryKey: ["aiPlan"]});
-                return res;
-            }).finally(() => setGenerating(false)),
-            {
-                loading: 'AI анализирует заказы... (может занять до 2 минут)',
-                success: (res) => `Готово! Обработано ${res.data.entries_count} заказов`,
-                error: (err) => err.response?.data?.error || 'Ошибка генерации',
+
+        // Этап 1: Summary
+        $axios.post('/plan/ai_plan/generate/').then(res => {
+            queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+            toast.success('План на день готов!');
+            const total = res.data.total_orders || 0;
+
+            // Этап 2: Батчи по 50
+            if (total > 0) {
+                const runBatch = (offset: number) => {
+                    $axios.post('/plan/ai_plan/generate_batch/', {offset}).then(batchRes => {
+                        const d = batchRes.data;
+                        toast.success(`Комментарии: ${Math.min(offset + 50, d.total)}/${d.total}`);
+                        queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                        if (!d.batch_done) {
+                            runBatch(offset + 50);
+                        } else {
+                            setGenerating(false);
+                            toast.success('AI план полностью готов!');
+                        }
+                    }).catch(err => {
+                        toast.error(err.response?.data?.error || 'Ошибка батча');
+                        setGenerating(false);
+                    });
+                };
+                runBatch(0);
+            } else {
+                setGenerating(false);
             }
-        );
+        }).catch(err => {
+            toast.error(err.response?.data?.error || 'Ошибка генерации плана');
+            setGenerating(false);
+        });
     }, [queryClient]);
 
     const handlePrompt = useCallback(() => {
@@ -188,6 +210,21 @@ export const AiPlanPage = () => {
                 )}
             >
                 {generating ? "Генерация..." : "Сгенерировать AI план"}
+            </Btn>
+
+            {/* Reset button */}
+            <Btn
+                onClick={() => {
+                    if (!confirm('Сбросить все AI комментарии, веса и план?')) return;
+                    $axios.post('/plan/ai_plan/reset/').then(res => {
+                        queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                        toast.success(`Сброшено ${res.data.reset} записей`);
+                    }).catch(() => toast.error('Ошибка сброса'));
+                }}
+                disabled={generating}
+                className="border border-red-300 bg-red-50 text-red-600 rounded-lg py-2 text-sm"
+            >
+                Сбросить AI данные
             </Btn>
 
             {/* Loading */}

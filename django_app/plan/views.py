@@ -467,6 +467,17 @@ def _collect_orders_data():
     }
 
 
+@api_view(['POST'])
+def reset_ai_plan(request):
+    """Сброс всех AI-данных: комментарии, веса, summary"""
+    AiPlanEntry.objects.all().update(sort_weight=50, sort_position=0, ai_comment='')
+    config = _get_ai_config()
+    config.ai_summary = ''
+    config.save(update_fields=['ai_summary', 'updated_at'])
+    count = AiPlanEntry.objects.count()
+    return JsonResponse({'success': True, 'reset': count})
+
+
 def _save_ai_entries(entries_data):
     """Сохранить AI-записи в БД"""
     count = 0
@@ -489,13 +500,11 @@ def _save_ai_entries(entries_data):
 
 @api_view(['POST'])
 def generate_ai_plan(request):
-    """Двухэтапная генерация AI-плана: 1) сводка/план на день 2) батчи по 50 заказов"""
+    """Этап 1: Генерация summary (план на день). Быстрый запрос."""
     from datetime import date
     config = _get_ai_config()
     data = _collect_orders_data()
 
-    # === ЭТАП 1: План на день ===
-    # Собираем топ-заказы для конкретики в плане
     priority_orders = sorted(
         data['orders'],
         key=lambda o: (
@@ -503,20 +512,13 @@ def generate_ai_plan(request):
             o.get('urgency') or 99,
             o.get('days_left') if o.get('days_left') is not None else 9999,
         )
-    )[:30]  # топ-30 самых срочных
+    )[:30]
 
-    top_orders_list = []
-    for o in priority_orders:
-        top_orders_list.append({
-            'order': o['order'],
-            'product': o['product'],
-            'product_type': o['product_type'],
-            'quantity': o['quantity'],
-            'urgency': o['urgency'],
-            'deadline': o['deadline'],
-            'days_left': o['days_left'],
-            'project': o['project'],
-        })
+    top_orders_list = [{
+        'order': o['order'], 'product': o['product'], 'product_type': o['product_type'],
+        'quantity': o['quantity'], 'urgency': o['urgency'], 'deadline': o['deadline'],
+        'days_left': o['days_left'], 'project': o['project'],
+    } for o in priority_orders]
 
     summary_payload = {
         'base_prompt': config.base_prompt,
@@ -536,43 +538,64 @@ def generate_ai_plan(request):
         summary = summary_data.get('summary', '')
     except Exception as e:
         logger.error(f'AI summary error: {e}')
-        summary = ''
+        return JsonResponse({'error': f'Ошибка генерации плана: {e}'}, status=500)
 
     config.ai_summary = summary
     config.save(update_fields=['ai_summary', 'updated_at'])
 
-    # === ЭТАП 2: Батчи по 50 заказов — приоритеты + комментарии ===
-    BATCH_SIZE = 50
-    orders = data['orders']
-    total_entries = 0
-    position_offset = 0
-
-    for i in range(0, len(orders), BATCH_SIZE):
-        batch = orders[i:i + BATCH_SIZE]
-        batch_payload = {
-            'base_prompt': config.base_prompt,
-            'orders': batch,
-            'department_load': data['dept_summary'],
-            'today': data['today'],
-            'batch_number': i // BATCH_SIZE + 1,
-            'total_batches': (len(orders) + BATCH_SIZE - 1) // BATCH_SIZE,
-            'position_offset': position_offset,
-        }
-
-        try:
-            resp = requests.post(N8N_BATCH_URL, json=batch_payload, timeout=180)
-            resp.raise_for_status()
-            batch_data = resp.json()
-            entries = batch_data.get('entries', [])
-            total_entries += _save_ai_entries(entries)
-            position_offset += len(batch)
-        except Exception as e:
-            logger.error(f'AI batch {i // BATCH_SIZE + 1} error: {e}')
-
     return JsonResponse({
         'success': True,
         'summary': summary,
-        'entries_count': total_entries,
+        'total_orders': data['total_orders'],
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def generate_ai_batch(request):
+    """Этап 2: Обработка одного батча заказов. Вызывается фронтом последовательно."""
+    from datetime import date
+    config = _get_ai_config()
+    data = _collect_orders_data()
+
+    offset = int(request.data.get('offset', 0))
+    BATCH_SIZE = 50
+    orders = data['orders']
+    total = len(orders)
+    batch = orders[offset:offset + BATCH_SIZE]
+
+    if not batch:
+        return JsonResponse({
+            'success': True, 'updated': 0, 'total': total,
+            'remaining': 0, 'batch_done': True,
+        })
+
+    batch_payload = {
+        'base_prompt': config.base_prompt,
+        'orders': batch,
+        'department_load': data['dept_summary'],
+        'today': data['today'],
+        'batch_number': offset // BATCH_SIZE + 1,
+        'total_batches': (total + BATCH_SIZE - 1) // BATCH_SIZE,
+        'position_offset': offset,
+    }
+
+    try:
+        resp = requests.post(N8N_BATCH_URL, json=batch_payload, timeout=180)
+        resp.raise_for_status()
+        batch_data = resp.json()
+        entries = batch_data.get('entries', [])
+        updated = _save_ai_entries(entries)
+    except Exception as e:
+        logger.error(f'AI batch error (offset={offset}): {e}')
+        return JsonResponse({'error': str(e)}, status=500)
+
+    remaining = max(0, total - offset - BATCH_SIZE)
+    return JsonResponse({
+        'success': True,
+        'updated': updated,
+        'total': total,
+        'remaining': remaining,
+        'batch_done': remaining == 0,
     }, json_dumps_params={"ensure_ascii": False})
 
 
