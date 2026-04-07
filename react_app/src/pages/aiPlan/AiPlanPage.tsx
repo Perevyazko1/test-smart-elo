@@ -357,25 +357,33 @@ export const AiPlanPage = () => {
                 ))}
             </div>
 
-            {/* Orders Table */}
-            <div className="overflow-x-auto border border-slate-200 rounded-lg">
-                <table className="text-xs border-collapse min-w-full">
+            {/* Orders Table — sticky left/right columns, scrollable departments */}
+            <div className="border border-slate-200 rounded-lg text-xs overflow-x-auto">
+                <table className="w-full border-collapse" style={{minWidth: 420 + allDepartments.filter(d => visibleDepts.has(d)).length * 70 + 220}}>
                     <thead>
-                        <tr className="bg-slate-50 text-slate-600">
-                            <th className="px-2 py-2 text-left font-semibold w-8">#</th>
-                            <th className="px-2 py-2 text-left font-semibold w-[50px]">Фото</th>
-                            <th className="px-2 py-2 text-left font-semibold min-w-[180px]">Изделие</th>
-                            <th className="px-2 py-2 text-left font-semibold w-[90px]">Заказ</th>
-                            <th className="px-2 py-2 text-center font-semibold w-[40px]">Кол</th>
-                            <th className="px-2 py-2 text-center font-semibold w-[70px]">Срок</th>
-                            <th className="px-2 py-2 text-center font-semibold w-[35px]">Вес</th>
+                        <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+                            <th className="sticky left-0 z-10 bg-slate-50 text-left" style={{minWidth: 420}}>
+                                <div className="flex">
+                                    <div className="w-8 px-1 py-2 text-center">#</div>
+                                    <div className="w-[50px] px-1 py-2">Фото</div>
+                                    <div className="flex-1 px-1 py-2">Изделие</div>
+                                    <div className="w-[70px] px-1 py-2">Заказ</div>
+                                    <div className="w-[35px] px-1 py-2 text-center">Кол</div>
+                                    <div className="w-[60px] px-1 py-2 text-center">Срок</div>
+                                    <div className="w-[30px] px-1 py-2 text-center">Вес</div>
+                                </div>
+                            </th>
                             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
-                                <th key={dept} className="px-2 py-2 text-center font-semibold whitespace-nowrap">
+                                <th key={dept} className="px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
                                     {dept}
                                 </th>
                             ))}
-                            <th className="px-2 py-2 text-left font-semibold min-w-[120px]">Обратная связь</th>
-                            <th className="px-2 py-2 text-left font-semibold min-w-[150px]">AI комментарий</th>
+                            <th className="sticky right-0 z-10 bg-slate-50 text-left border-l border-slate-200" style={{minWidth: 220}}>
+                                <div className="flex">
+                                    <div className="flex-1 px-2 py-2 min-w-[100px]">Обр. связь</div>
+                                    <div className="flex-1 px-2 py-2 min-w-[120px]">AI комментарий</div>
+                                </div>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -417,96 +425,90 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
     const [feedback, setFeedback] = useState(aiEntry?.feedback ?? "");
     const empty = {all: 0, ready: 0, await: 0};
 
-    const rowBg = item.urgency === 1 ? "bg-red-50" : item.urgency === 2 ? "bg-yellow-50" : "";
+    const rowBg = item.urgency === 1 ? "bg-red-50" : item.urgency === 2 ? "bg-yellow-50" : "bg-white";
 
     return (
-        <tr className={twMerge("border-t border-slate-100 hover:bg-slate-50/50", rowBg)}>
-            {/* # */}
-            <td className="px-2 py-1.5 text-slate-400 font-medium">{index}</td>
-
-            {/* Photo */}
-            <td className="px-2 py-1.5">
-                <div className="w-[40px] h-[40px] bg-slate-100 rounded overflow-hidden flex items-center justify-center">
-                    {item.product_picture ? (
-                        <img src={STATIC_URL + item.product_picture} alt="" className="w-full h-full object-cover"/>
-                    ) : (
-                        <span className="text-[8px] text-slate-300">---</span>
-                    )}
+        <tr className="border-t border-slate-100">
+            {/* Left sticky */}
+            <td className={twMerge("sticky left-0 z-10", rowBg)} style={{minWidth: 420}}>
+                <div className="flex items-center">
+                    <div className="w-8 px-1 py-1.5 text-slate-400 font-medium text-center">{index}</div>
+                    <div className="w-[50px] px-1 py-1.5">
+                        <div className="w-[40px] h-[40px] bg-slate-100 rounded overflow-hidden flex items-center justify-center">
+                            {item.product_picture ? (
+                                <img src={STATIC_URL + item.product_picture} alt="" className="w-full h-full object-cover"/>
+                            ) : (
+                                <span className="text-[8px] text-slate-300">---</span>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex-1 px-1 py-1.5 min-w-0">
+                        <div className="flex items-center gap-1">
+                            <span className="font-medium text-slate-800 leading-tight truncate">
+                                {item.product_name}
+                            </span>
+                            <button
+                                onClick={() => onOpenNorms(item.product_id, item.product_name)}
+                                className="text-[9px] text-blue-400 hover:text-blue-600 shrink-0"
+                                title="Нормативы изделия"
+                            >
+                                [н]
+                            </button>
+                        </div>
+                        {item.fabric_name && (
+                            <div className="text-[10px] text-slate-400 leading-tight truncate">{item.fabric_name}</div>
+                        )}
+                        {item.project && (
+                            <span className={twMerge(
+                                "text-[10px]",
+                                item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-400"
+                            )}>
+                                {item.project}
+                            </span>
+                        )}
+                    </div>
+                    <div className="w-[70px] px-1 py-1.5">
+                        <span className={twMerge(
+                            "text-xs",
+                            item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
+                        )}>
+                            {item.order}
+                        </span>
+                    </div>
+                    <div className="w-[35px] px-1 py-1.5 text-center font-semibold">{item.quantity}</div>
+                    <div className="w-[60px] px-1 py-1.5 text-center">
+                        {item.date ? (
+                            <span className={twMerge(
+                                "text-[10px]",
+                                item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-600"
+                            )}>
+                                {item.date}
+                            </span>
+                        ) : (
+                            <span className="text-slate-300">—</span>
+                        )}
+                    </div>
+                    <div className="w-[30px] px-1 py-1.5 text-center">
+                        <span className={twMerge(
+                            "text-[10px] font-semibold",
+                            (aiEntry?.sort_weight ?? 50) >= 90 ? "text-red-600" :
+                            (aiEntry?.sort_weight ?? 50) >= 70 ? "text-yellow-600" : "text-slate-400"
+                        )}>
+                            {aiEntry?.sort_weight ?? "—"}
+                        </span>
+                    </div>
                 </div>
             </td>
 
-            {/* Product */}
-            <td className="px-2 py-1.5">
-                <div className="flex items-center gap-1">
-                    <span className="font-medium text-slate-800 leading-tight">
-                        {item.product_name}
-                    </span>
-                    <button
-                        onClick={() => onOpenNorms(item.product_id, item.product_name)}
-                        className="text-[9px] text-blue-400 hover:text-blue-600 shrink-0"
-                        title="Нормативы изделия"
-                    >
-                        [н]
-                    </button>
-                </div>
-                {item.fabric_name && (
-                    <div className="text-[10px] text-slate-400 leading-tight">{item.fabric_name}</div>
-                )}
-                {item.project && (
-                    <span className={twMerge(
-                        "text-[10px]",
-                        item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-400"
-                    )}>
-                        {item.project}
-                    </span>
-                )}
-            </td>
-
-            {/* Order number */}
-            <td className="px-2 py-1.5">
-                <span className={twMerge(
-                    "text-xs",
-                    item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
-                )}>
-                    {item.order}
-                </span>
-            </td>
-
-            {/* Quantity */}
-            <td className="px-2 py-1.5 text-center font-semibold">{item.quantity}</td>
-
-            {/* Deadline */}
-            <td className="px-2 py-1.5 text-center">
-                {item.date ? (
-                    <span className={twMerge(
-                        "text-[10px]",
-                        item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-600"
-                    )}>
-                        {item.date}
-                    </span>
-                ) : (
-                    <span className="text-slate-300">—</span>
-                )}
-            </td>
-
-            {/* Weight */}
-            <td className="px-2 py-1.5 text-center">
-                <span className={twMerge(
-                    "text-[10px] font-semibold",
-                    (aiEntry?.sort_weight ?? 50) >= 90 ? "text-red-600" :
-                    (aiEntry?.sort_weight ?? 50) >= 70 ? "text-yellow-600" : "text-slate-400"
-                )}>
-                    {aiEntry?.sort_weight ?? "—"}
-                </span>
-            </td>
-
-            {/* Department columns */}
+            {/* Department cells — these scroll */}
             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => {
                 const d = item.assignments[dept] || empty;
-                if (d.all === 0) return <td key={dept} className="px-1.5 py-1.5 text-center text-slate-200">—</td>;
+                if (d.all === 0) return (
+                    <td key={dept} className={twMerge("px-2 py-1.5 text-center text-slate-200 border-l border-slate-200", rowBg)} style={{minWidth: 70}}>—</td>
+                );
                 const done = d.ready === d.all;
                 return (
-                    <td key={dept} className="px-1.5 py-1.5 text-center">
+                    <td key={dept} className={twMerge("px-2 py-1.5 text-center border-l border-slate-200", rowBg)} style={{minWidth: 70}}>
                         <span className={twMerge(
                             "text-[11px] font-medium",
                             done ? "text-green-600" : d.ready > 0 ? "text-yellow-600" : "text-slate-500"
@@ -517,30 +519,32 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 );
             })}
 
-            {/* Feedback */}
-            <td className="px-2 py-1.5">
-                <textarea
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    onBlur={() => onFeedbackSave(item.series_id, feedback)}
-                    placeholder="..."
-                    rows={1}
-                    className={twMerge(
-                        "w-full text-[11px] outline-none resize-none bg-transparent leading-tight",
-                        feedback ? "text-slate-700" : "text-slate-300"
-                    )}
-                />
-            </td>
-
-            {/* AI Comment */}
-            <td className={twMerge(
-                "px-2 py-1.5 text-[11px] leading-tight",
-                item.urgency === 1 ? "text-red-700" :
-                    item.urgency === 2 ? "text-yellow-700" : "text-slate-600"
-            )}>
-                {aiEntry?.ai_comment || (
-                    <span className="text-slate-300 italic">—</span>
-                )}
+            {/* Right sticky */}
+            <td className={twMerge("sticky right-0 z-10 border-l border-slate-200", rowBg)} style={{minWidth: 220}}>
+                <div className="flex items-stretch">
+                    <div className="flex-1 px-2 py-1.5 min-w-[100px]">
+                        <textarea
+                            value={feedback}
+                            onChange={(e) => setFeedback(e.target.value)}
+                            onBlur={() => onFeedbackSave(item.series_id, feedback)}
+                            placeholder="..."
+                            rows={1}
+                            className={twMerge(
+                                "w-full text-[11px] outline-none resize-none bg-transparent leading-tight",
+                                feedback ? "text-slate-700" : "text-slate-300"
+                            )}
+                        />
+                    </div>
+                    <div className={twMerge(
+                        "flex-1 px-2 py-1.5 text-[11px] leading-tight min-w-[120px] border-l border-slate-100",
+                        item.urgency === 1 ? "text-red-700" :
+                            item.urgency === 2 ? "text-yellow-700" : "text-slate-600"
+                    )}>
+                        {aiEntry?.ai_comment || (
+                            <span className="text-slate-300 italic">—</span>
+                        )}
+                    </div>
+                </div>
             </td>
         </tr>
     );

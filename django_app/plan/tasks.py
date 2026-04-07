@@ -46,58 +46,15 @@ def generate_ai_plan_full(self):
         config = _get_ai_config()
         total = len(data['orders'])
 
-        _update_config(task_phase='Генерация плана на день...', task_total=total)
+        _update_config(task_phase='Комментарии к заказам...', task_total=total)
 
         if _is_cancelled():
             _update_config(task_status='cancelled', task_phase='')
             return
 
-        # --- Этап 1: Summary ---
-        priority_orders = sorted(
-            data['orders'],
-            key=lambda o: (
-                0 if (o['days_left'] is not None and o['days_left'] < 0) else 1,
-                o.get('urgency') or 99,
-                o.get('days_left') if o.get('days_left') is not None else 9999,
-            )
-        )[:30]
-
-        top_orders_list = [{
-            'order': o['order'], 'product': o['product'], 'product_type': o['product_type'],
-            'quantity': o['quantity'], 'urgency': o['urgency'], 'deadline': o['deadline'],
-            'days_left': o['days_left'], 'project': o['project'],
-        } for o in priority_orders]
-
-        summary_payload = {
-            'base_prompt': config.base_prompt,
-            'department_load': data['dept_summary'],
-            'type_counts': data['type_counts'],
-            'total_orders': data['total_orders'],
-            'overdue_count': data['overdue_count'],
-            'urgent_count': data['urgent_count'],
-            'daily_capacity': data['daily_capacity'],
-            'bottleneck_items_per_day': data['bottleneck_items_per_day'],
-            'today': data['today'],
-            'top_orders': top_orders_list,
-        }
-
-        resp = requests.post(N8N_SUMMARY_URL, json=summary_payload, timeout=120)
-        resp.raise_for_status()
-        summary = resp.json().get('summary', '')
-
-        _update_config(task_phase='Комментарии к заказам')
-
-        from plan.models import AiPlanConfig as ConfigModel
-        cfg = ConfigModel.objects.get(pk=1)
-        cfg.ai_summary = summary
-        cfg.save(update_fields=['ai_summary', 'updated_at'])
-
-        if _is_cancelled():
-            _update_config(task_status='cancelled', task_phase='')
-            return
-
-        # --- Этап 2: Батчи ---
+        # --- Этап 1: Батчи (расставляем веса и комментарии) ---
         orders = data['orders']
+        all_entries = []
         offset = 0
         while offset < total:
             if _is_cancelled():
@@ -122,11 +79,64 @@ def generate_ai_plan_full(self):
             resp.raise_for_status()
             entries = resp.json().get('entries', [])
             _save_ai_entries(entries)
+            all_entries.extend(entries)
 
             processed = min(offset + BATCH_SIZE, total)
             _update_config(task_progress=processed)
 
             offset += BATCH_SIZE
+
+        if _is_cancelled():
+            _update_config(task_status='cancelled', task_phase='')
+            return
+
+        # --- Этап 2: Summary (общий план на основе результатов batch) ---
+        _update_config(task_phase='Генерация плана на день...')
+
+        # Топ заказы по весу из batch результатов
+        sorted_entries = sorted(all_entries, key=lambda e: e.get('sort_weight', 0), reverse=True)
+        top_by_weight = sorted_entries[:30]
+
+        # Маппинг series_id → order data для обогащения
+        order_by_series = {o['series_id']: o for o in orders}
+        top_orders_list = []
+        for entry in top_by_weight:
+            sid = entry.get('series_id', '')
+            o = order_by_series.get(sid, {})
+            top_orders_list.append({
+                'order': o.get('order', ''),
+                'product': o.get('product', ''),
+                'product_type': o.get('product_type', ''),
+                'quantity': o.get('quantity', 0),
+                'urgency': o.get('urgency', 3),
+                'deadline': o.get('deadline', ''),
+                'days_left': o.get('days_left'),
+                'project': o.get('project', ''),
+                'sort_weight': entry.get('sort_weight', 0),
+                'ai_comment': entry.get('ai_comment', ''),
+            })
+
+        summary_payload = {
+            'base_prompt': config.base_prompt,
+            'department_load': data['dept_summary'],
+            'type_counts': data['type_counts'],
+            'total_orders': data['total_orders'],
+            'overdue_count': data['overdue_count'],
+            'urgent_count': data['urgent_count'],
+            'daily_capacity': data['daily_capacity'],
+            'bottleneck_items_per_day': data['bottleneck_items_per_day'],
+            'today': data['today'],
+            'top_orders': top_orders_list,
+        }
+
+        resp = requests.post(N8N_SUMMARY_URL, json=summary_payload, timeout=120)
+        resp.raise_for_status()
+        summary = resp.json().get('summary', '')
+
+        from plan.models import AiPlanConfig as ConfigModel
+        cfg = ConfigModel.objects.get(pk=1)
+        cfg.ai_summary = summary
+        cfg.save(update_fields=['ai_summary', 'updated_at'])
 
         _update_config(task_status='completed', task_phase='', task_progress=total)
 
