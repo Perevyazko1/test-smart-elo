@@ -365,38 +365,31 @@ def update_ai_config(request):
     return JsonResponse({'success': True})
 
 
-N8N_GENERATE_URL = 'http://n8n:5678/webhook/ai-plan-generate'
+N8N_SUMMARY_URL = 'http://n8n:5678/webhook/ai-plan-summary'
+N8N_BATCH_URL = 'http://n8n:5678/webhook/ai-plan-batch'
 
 
-@api_view(['POST'])
-def generate_ai_plan(request):
-    """Собрать данные о производстве, отправить в n8n/GPT, сохранить AI-план"""
-    from datetime import date, timedelta
-    config = _get_ai_config()
+def _collect_orders_data():
+    """Собрать все данные о заказах, нормативах, загрузке цехов"""
+    from datetime import date
 
-    # --- Собираем нормативы ---
     norms = {}
     for n in ProductionNorm.objects.select_related('product_type').all():
         if n.product_type.name not in norms:
             norms[n.product_type.name] = {}
         norms[n.product_type.name][n.department] = n.hours_per_unit
 
-    # --- Рабочие по цехам ---
     workers = {dw.department: dw.workers_count for dw in DepartmentWorkers.objects.all()}
 
-    # --- Мощность цехов (изделий в день) ---
     WORK_HOURS_PER_DAY = 8
-    capacity = {}
-    for dept, count in workers.items():
-        capacity[dept] = count * WORK_HOURS_PER_DAY  # часов в день
+    capacity = {dept: count * WORK_HOURS_PER_DAY for dept, count in workers.items()}
 
-    # --- Заказы ---
     order_products = OrderProduct.objects.filter(
         status='0'
     ).select_related('product', 'product__production_type', 'order', 'main_fabric')
 
     orders_info = []
-    dept_load = {}  # суммарная загрузка цехов в часах
+    dept_load = {}
 
     for op in order_products:
         assignments = Assignment.objects.filter(order_product=op)
@@ -409,7 +402,6 @@ def generate_ai_plan(request):
             if a.status == 'ready' and a.inspector is not None:
                 dept_status[dept_name]['ready'] += 1
 
-        # Расчёт оставшейся работы
         product_type_name = op.product.production_type.name if op.product.production_type else None
         remaining_work = {}
         if product_type_name and product_type_name in norms:
@@ -420,15 +412,12 @@ def generate_ai_plan(request):
                     remaining_work[dept_name] = round(hours, 1)
                     dept_load[dept_name] = dept_load.get(dept_name, 0) + hours
 
-        # Срок
         sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
         deadline = min(sort_dates).date() if sort_dates else None
         days_left = (deadline - date.today()).days if deadline else None
 
-        # Feedback
         try:
-            ai_entry = op.ai_plan_entry
-            feedback = ai_entry.feedback
+            feedback = op.ai_plan_entry.feedback
         except AiPlanEntry.DoesNotExist:
             feedback = ''
 
@@ -447,67 +436,120 @@ def generate_ai_plan(request):
             'feedback': feedback,
         })
 
-    # --- Загрузка цехов ---
     dept_summary = {}
     for dept, total_hours in dept_load.items():
         cap = capacity.get(dept, WORK_HOURS_PER_DAY)
-        days_needed = round(total_hours / cap, 1) if cap > 0 else 999
         dept_summary[dept] = {
             'total_hours': round(total_hours, 1),
             'workers': workers.get(dept, 1),
             'hours_per_day': cap,
-            'days_needed': days_needed,
+            'days_needed': round(total_hours / cap, 1) if cap > 0 else 999,
         }
 
-    payload = {
-        'base_prompt': config.base_prompt,
+    # Сводка по типам
+    type_counts = {}
+    for o in orders_info:
+        t = o['product_type'] or 'Без типа'
+        type_counts[t] = type_counts.get(t, 0) + o['quantity']
+
+    # Сводка по срокам
+    overdue = [o for o in orders_info if o['days_left'] is not None and o['days_left'] < 0]
+    urgent = [o for o in orders_info if o['urgency'] == 1]
+
+    return {
         'orders': orders_info,
-        'department_load': dept_summary,
+        'dept_summary': dept_summary,
+        'type_counts': type_counts,
+        'total_orders': len(orders_info),
+        'overdue_count': len(overdue),
+        'urgent_count': len(urgent),
         'today': str(date.today()),
     }
 
+
+def _save_ai_entries(entries_data):
+    """Сохранить AI-записи в БД"""
+    count = 0
+    for entry_data in entries_data:
+        sid = entry_data.get('series_id')
+        if not sid:
+            continue
+        try:
+            op = OrderProduct.objects.get(series_id=sid)
+            entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
+            entry.sort_weight = entry_data.get('sort_weight', 50)
+            entry.sort_position = entry_data.get('sort_position', 0)
+            entry.ai_comment = entry_data.get('ai_comment', '')
+            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
+            count += 1
+        except OrderProduct.DoesNotExist:
+            pass
+    return count
+
+
+@api_view(['POST'])
+def generate_ai_plan(request):
+    """Двухэтапная генерация AI-плана: 1) сводка/план на день 2) батчи по 50 заказов"""
+    from datetime import date
+    config = _get_ai_config()
+    data = _collect_orders_data()
+
+    # === ЭТАП 1: План на день (сводка без отдельных заказов) ===
+    summary_payload = {
+        'base_prompt': config.base_prompt,
+        'department_load': data['dept_summary'],
+        'type_counts': data['type_counts'],
+        'total_orders': data['total_orders'],
+        'overdue_count': data['overdue_count'],
+        'urgent_count': data['urgent_count'],
+        'today': data['today'],
+    }
+
     try:
-        response = requests.post(N8N_GENERATE_URL, json=payload, timeout=300)
-        response.raise_for_status()
-        if not response.text.strip():
-            return JsonResponse({'error': 'n8n вернул пустой ответ'}, status=502)
+        resp = requests.post(N8N_SUMMARY_URL, json=summary_payload, timeout=120)
+        resp.raise_for_status()
+        summary_data = resp.json()
+        summary = summary_data.get('summary', '')
+    except Exception as e:
+        logger.error(f'AI summary error: {e}')
+        summary = ''
 
-        ai_data = response.json()
+    config.ai_summary = summary
+    config.save(update_fields=['ai_summary', 'updated_at'])
 
-        # Сохраняем сводку
-        config.ai_summary = ai_data.get('summary', '')
-        config.save(update_fields=['ai_summary', 'updated_at'])
+    # === ЭТАП 2: Батчи по 50 заказов — приоритеты + комментарии ===
+    BATCH_SIZE = 50
+    orders = data['orders']
+    total_entries = 0
+    position_offset = 0
 
-        # Сохраняем записи
-        entries_count = 0
-        for entry_data in ai_data.get('entries', []):
-            sid = entry_data.get('series_id')
-            if not sid:
-                continue
-            try:
-                op = OrderProduct.objects.get(series_id=sid)
-                entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
-                entry.sort_weight = entry_data.get('sort_weight', 50)
-                entry.sort_position = entry_data.get('sort_position', 0)
-                entry.ai_comment = entry_data.get('ai_comment', '')
-                entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
-                entries_count += 1
-            except OrderProduct.DoesNotExist:
-                logger.warning(f'OrderProduct с series_id={sid} не найден')
+    for i in range(0, len(orders), BATCH_SIZE):
+        batch = orders[i:i + BATCH_SIZE]
+        batch_payload = {
+            'base_prompt': config.base_prompt,
+            'orders': batch,
+            'department_load': data['dept_summary'],
+            'today': data['today'],
+            'batch_number': i // BATCH_SIZE + 1,
+            'total_batches': (len(orders) + BATCH_SIZE - 1) // BATCH_SIZE,
+            'position_offset': position_offset,
+        }
 
-        return JsonResponse({
-            'success': True,
-            'summary': ai_data.get('summary', ''),
-            'entries_count': entries_count,
-        }, json_dumps_params={"ensure_ascii": False})
+        try:
+            resp = requests.post(N8N_BATCH_URL, json=batch_payload, timeout=180)
+            resp.raise_for_status()
+            batch_data = resp.json()
+            entries = batch_data.get('entries', [])
+            total_entries += _save_ai_entries(entries)
+            position_offset += len(batch)
+        except Exception as e:
+            logger.error(f'AI batch {i // BATCH_SIZE + 1} error: {e}')
 
-    except requests.exceptions.Timeout:
-        return JsonResponse({'error': 'GPT не ответил вовремя (таймаут 5 мин)'}, status=504)
-    except json.JSONDecodeError as e:
-        logger.error(f'Ошибка парсинга JSON: {e}')
-        return JsonResponse({'error': 'AI вернул некорректный JSON'}, status=500)
-    except requests.exceptions.ConnectionError:
-        return JsonResponse({'error': 'Не удалось подключиться к n8n'}, status=503)
+    return JsonResponse({
+        'success': True,
+        'summary': summary,
+        'entries_count': total_entries,
+    }, json_dumps_params={"ensure_ascii": False})
 
 
 N8N_WEBHOOK_URL = 'http://n8n:5678/webhook/ai-plan-prompt'
