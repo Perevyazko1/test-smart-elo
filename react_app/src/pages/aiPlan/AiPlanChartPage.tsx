@@ -3,7 +3,7 @@ import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {$axios} from "@/shared/api";
 import {twMerge} from "tailwind-merge";
 import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
-import toast from "react-hot-toast";
+import {toast} from "sonner";
 
 /* ─── Типы данных графика ──────────────────────────────────────── */
 
