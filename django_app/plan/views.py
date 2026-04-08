@@ -1008,6 +1008,273 @@ def update_target_load(request):
     return JsonResponse({'success': True})
 
 
+# ─── Chart ────────────────────────────────────────────────────────
+
+def _invert_graph(graph):
+    """Из 'A → [B, C]' получить {B: [A], C: [A]} (зависимости)."""
+    deps = {}
+    for src, targets in graph.items():
+        for tgt in targets:
+            if tgt not in deps:
+                deps[tgt] = []
+            deps[tgt].append(src)
+    return deps
+
+
+@api_view(['GET'])
+def get_chart_data(request):
+    """Сетка загрузки цехов с раскладкой заказов по дням и учётом графа зависимостей."""
+    import math
+
+    departments = list(
+        Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True)
+    )
+
+    # Нормативы
+    norms = {}
+    for n in ProductionNorm.objects.select_related('product_type').all():
+        if n.product_type.name not in norms:
+            norms[n.product_type.name] = {}
+        norms[n.product_type.name][n.department] = n.hours_per_unit
+
+    overrides = {}
+    for o in ProductNormOverride.objects.all():
+        overrides[(o.product_id, o.department)] = o.hours_per_unit
+
+    # Workers → capacity
+    workers = {dw.department: dw.workers_count for dw in DepartmentWorkers.objects.all()}
+    WORK_HOURS = 8
+    capacity = {dept: workers.get(dept, 1) * WORK_HOURS for dept in departments}
+
+    # Графы
+    workflows = {}
+    for pt in ProductType.objects.all():
+        if pt.workflow_graph:
+            workflows[pt.name] = pt.workflow_graph
+
+    # Weights для сортировки
+    weights = {}
+    for e in AiPlanEntry.objects.all():
+        weights[e.order_product_id] = e.sort_weight
+
+    # Заказы
+    order_products = OrderProduct.objects.filter(
+        status='0'
+    ).select_related('product', 'product__production_type', 'order').prefetch_related('product__product_pictures')
+
+    # Собрать данные по каждому заказу: по каждому цеху — remaining и hours
+    order_dept_data = []  # [{op, series_id, product_type, weight, depts: {dept: {remaining, hours, picture, order_num, name}}}]
+
+    for op in order_products:
+        assignments = Assignment.objects.filter(order_product=op)
+        product_type_name = op.product.production_type.name if op.product.production_type else None
+        pic = op.product.product_pictures.first()
+        picture_url = pic.thumbnail.url if pic else None
+        weight = weights.get(op.id, 500)
+
+        dept_info = {}
+        for a in assignments:
+            dept_name = a.department.name if a.department else None
+            if not dept_name or dept_name not in departments:
+                continue
+            if dept_name not in dept_info:
+                dept_info[dept_name] = {'all': 0, 'ready': 0}
+            dept_info[dept_name]['all'] += 1
+            if a.status == 'ready' and a.inspector is not None:
+                dept_info[dept_name]['ready'] += 1
+
+        depts = {}
+        for dept_name, status in dept_info.items():
+            remaining = status['all'] - status['ready']
+            if remaining <= 0:
+                continue
+            # Часы
+            override_key = (op.product_id, dept_name)
+            if override_key in overrides:
+                hours_per = overrides[override_key]
+            elif product_type_name and dept_name in norms.get(product_type_name, {}):
+                hours_per = norms[product_type_name][dept_name]
+            else:
+                hours_per = 1  # fallback
+            hours = remaining * hours_per
+            depts[dept_name] = {
+                'remaining': remaining,
+                'hours': hours,
+            }
+
+        if depts:
+            order_dept_data.append({
+                'op_id': op.id,
+                'series_id': op.series_id,
+                'name': op.product.name,
+                'order': op.order.inner_number if op.order else '',
+                'picture': picture_url,
+                'product_type': product_type_name,
+                'weight': weight,
+                'depts': depts,
+            })
+
+    # Сортировка по весу (высший приоритет первый)
+    order_dept_data.sort(key=lambda x: x['weight'], reverse=True)
+
+    # --- Раскладка по дням с учётом графа ---
+    # Для каждого заказа: finish_day[series_id][dept] = день когда заказ закончится в этом цехе
+    finish_day = {}  # {series_id: {dept: int}}
+
+    # Для каждого цеха: текущий день и оставшийся capacity на текущий день
+    dept_state = {}
+    for dept in departments:
+        dept_state[dept] = {
+            'current_day': 0,
+            'remaining_cap': capacity.get(dept, WORK_HOURS),
+            'days': [],  # [{orders: [...], hours: float}]
+        }
+
+    def ensure_day(dept, day_idx):
+        """Убедиться что день существует в массиве."""
+        state = dept_state[dept]
+        while len(state['days']) <= day_idx:
+            state['days'].append({'orders': [], 'hours': 0})
+
+    def get_earliest_start(order, dept):
+        """Определить самый ранний день когда заказ может начаться в цехе (по графу)."""
+        sid = order['series_id']
+        pt = order['product_type']
+        wf = workflows.get(pt)
+        if not wf:
+            return 0
+        # Инвертировать граф: найти от кого зависит dept
+        deps = _invert_graph(wf)
+        dep_depts = deps.get(dept, [])
+        earliest = 0
+        for dep_dept in dep_depts:
+            if dep_dept in ('Старт', 'Готово'):
+                continue
+            # Проверить: когда заказ закончится в dep_dept
+            if sid in finish_day and dep_dept in finish_day[sid]:
+                earliest = max(earliest, finish_day[sid][dep_dept])
+        return earliest
+
+    # Проходим по цехам в порядке графа (topological order)
+    # Чтобы зависимости были уже рассчитаны
+    def get_topo_order(depts, workflows):
+        """Топологическая сортировка цехов по всем графам."""
+        all_edges = {}
+        for wf in workflows.values():
+            for src, targets in wf.items():
+                for tgt in targets:
+                    if tgt not in all_edges:
+                        all_edges[tgt] = set()
+                    all_edges[tgt].add(src)
+
+        # Kahn's algorithm
+        in_degree = {d: 0 for d in depts}
+        adj = {d: [] for d in depts}
+        for d in depts:
+            for dep in all_edges.get(d, []):
+                if dep in depts:
+                    in_degree[d] += 1
+                    adj[dep].append(d)
+
+        queue = [d for d in depts if in_degree[d] == 0]
+        result = []
+        while queue:
+            queue.sort()  # стабильность
+            node = queue.pop(0)
+            result.append(node)
+            for neighbor in adj[node]:
+                in_degree[neighbor] -= 1
+                if in_degree[neighbor] == 0:
+                    queue.append(neighbor)
+
+        # Добавить цеха, которых нет в графах
+        for d in depts:
+            if d not in result:
+                result.append(d)
+        return result
+
+    topo_depts = get_topo_order(departments, workflows)
+
+    for dept in topo_depts:
+        cap = capacity.get(dept, WORK_HOURS)
+        # Заказы для этого цеха, отсортированные по весу
+        dept_orders = [(o, o['depts'][dept]) for o in order_dept_data if dept in o['depts']]
+
+        # Группируем по earliest_start_day и внутри — по весу
+        for order, info in dept_orders:
+            earliest = get_earliest_start(order, dept)
+            hours_left = info['hours']
+            sid = order['series_id']
+
+            # Начинаем с earliest day
+            day = earliest
+            while hours_left > 0:
+                ensure_day(dept, day)
+                day_data = dept_state[dept]['days'][day]
+
+                # Сколько часов можно вместить в этот день
+                day_used = day_data['hours']
+                day_free = cap - day_used
+                if day_free <= 0:
+                    day += 1
+                    continue
+
+                take = min(hours_left, day_free)
+                # Добавить заказ в ячейку
+                day_data['orders'].append({
+                    'name': order['name'],
+                    'order': order['order'],
+                    'picture': order['picture'],
+                    'count': info['remaining'],
+                })
+                day_data['hours'] += take
+                hours_left -= take
+
+                if hours_left <= 0:
+                    # Заказ закончился в этом цехе на этом дне
+                    if sid not in finish_day:
+                        finish_day[sid] = {}
+                    finish_day[sid][dept] = day + 1  # следующий день — можно начинать зависимый цех
+                else:
+                    day += 1
+
+    # Построить grid
+    total_days = max((len(s['days']) for s in dept_state.values()), default=1)
+
+    grid = {}
+    for dept in departments:
+        state = dept_state[dept]
+        cap = capacity.get(dept, WORK_HOURS)
+        row = []
+        for d in range(total_days):
+            if d < len(state['days']):
+                cell = state['days'][d]
+                hours = cell['hours']
+                # Определить load
+                if hours >= cap * 1.2:
+                    load = 'overload'
+                elif hours >= cap * 0.5:
+                    load = 'full'
+                elif hours > 0:
+                    load = 'light'
+                else:
+                    load = 'empty'
+                row.append({
+                    'orders': cell['orders'],
+                    'load': load,
+                    'hours': round(hours, 1),
+                })
+            else:
+                row.append({'orders': [], 'load': 'empty', 'hours': 0})
+        grid[dept] = row
+
+    return JsonResponse({
+        'departments': departments,
+        'total_days': total_days,
+        'grid': grid,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
 # ─── Workflow graph ───────────────────────────────────────────────
 
 WORKFLOW_FULL = {

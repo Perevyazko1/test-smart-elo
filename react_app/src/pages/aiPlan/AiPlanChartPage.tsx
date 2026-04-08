@@ -2,10 +2,25 @@ import {useMemo} from "react";
 import {useQuery} from "@tanstack/react-query";
 import {$axios} from "@/shared/api";
 import {twMerge} from "tailwind-merge";
+import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 
-interface DeptDayCell {
-    orders: {name: string; picture: string; count: number}[];
+interface ChartOrder {
+    name: string;
+    order: string;
+    picture: string | null;
+    count: number;
+}
+
+interface ChartCell {
+    orders: ChartOrder[];
     load: "overload" | "full" | "light" | "empty";
+    hours: number;
+}
+
+interface ChartData {
+    departments: string[];
+    total_days: number;
+    grid: Record<string, ChartCell[]>;
 }
 
 const LOAD_COLORS: Record<string, string> = {
@@ -14,31 +29,6 @@ const LOAD_COLORS: Record<string, string> = {
     light: "bg-green-200",
     empty: "bg-white",
 };
-
-const DEMO_DEPTS = [
-    "Пила", "Сборка", "Крой", "Пошив", "ППУ", "Обивка", "Малярка", "Конструктора",
-];
-
-function generateDemoData(departments: string[], days: number) {
-    const grid: Record<string, DeptDayCell[]> = {};
-    for (const dept of departments) {
-        const row: DeptDayCell[] = [];
-        // Each dept has a "loaded" range and then tapers off
-        const loadDays = Math.floor(Math.random() * 15) + 3;
-        for (let d = 0; d < days; d++) {
-            let load: DeptDayCell["load"] = "empty";
-            if (d < loadDays) {
-                if (d < 2 && Math.random() > 0.7) load = "overload";
-                else load = "full";
-            } else if (d < loadDays + 2) {
-                load = "light";
-            }
-            row.push({orders: [], load});
-        }
-        grid[dept] = row;
-    }
-    return grid;
-}
 
 function formatDate(date: Date): string {
     const d = date.getDate();
@@ -52,24 +42,31 @@ function getDayOfWeek(date: Date): string {
 }
 
 export const AiPlanChartPage = () => {
-    const {data: deptsData} = useQuery({
-        queryKey: ["departments"],
-        queryFn: () => $axios.get<{departments: string[]}>('/plan/departments/').then(r => r.data),
+    const {data, isLoading} = useQuery<ChartData>({
+        queryKey: ["chartData"],
+        queryFn: () => $axios.get<ChartData>('/plan/chart/').then(r => r.data),
     });
-    const departments = deptsData?.departments || DEMO_DEPTS;
 
-    const DAYS = 30;
+    const departments = data?.departments || [];
+    const totalDays = data?.total_days || 0;
+    const grid = data?.grid || {};
 
     const dates = useMemo(() => {
         const today = new Date();
-        return Array.from({length: DAYS}, (_, i) => {
+        return Array.from({length: totalDays}, (_, i) => {
             const d = new Date(today);
             d.setDate(today.getDate() + i);
             return d;
         });
-    }, []);
+    }, [totalDays]);
 
-    const grid = useMemo(() => generateDemoData(departments, DAYS), [departments]);
+    if (isLoading) {
+        return (
+            <div className="bg-white p-4 flex items-center justify-center h-64">
+                <div className="text-slate-400 text-sm">Загрузка графика...</div>
+            </div>
+        );
+    }
 
     return (
         <div className="bg-white p-4 flex flex-col gap-4">
@@ -94,68 +91,91 @@ export const AiPlanChartPage = () => {
                 </div>
             </div>
 
-            <div className="border border-slate-200 rounded-lg overflow-x-auto">
-                <table className="border-collapse w-full" style={{minWidth: 120 + DAYS * 80}}>
-                    <thead>
-                        <tr className="bg-slate-50">
-                            <th className="sticky left-0 z-10 bg-slate-50 border-r border-b border-slate-200 px-3 py-2 text-left text-xs font-semibold text-slate-600 w-[120px]">
-                                Цех
-                            </th>
-                            {dates.map((date, i) => {
-                                const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-                                const isToday = i === 0;
-                                return (
-                                    <th
-                                        key={i}
-                                        className={twMerge(
-                                            "border-b border-l border-slate-200 px-1 py-1.5 text-center text-[10px] min-w-[80px]",
-                                            isWeekend ? "bg-slate-100 text-slate-400" : "text-slate-600",
-                                            isToday && "bg-blue-50 text-blue-700 font-bold"
-                                        )}
-                                    >
-                                        <div className="font-semibold">{formatDate(date)}</div>
-                                        <div className={twMerge("text-[9px]", isWeekend && "text-red-400")}>
-                                            {getDayOfWeek(date)}
-                                        </div>
-                                    </th>
-                                );
-                            })}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {departments.map(dept => (
-                            <tr key={dept}>
-                                <td className="sticky left-0 z-10 bg-white border-r border-b border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 w-[120px]">
-                                    {dept}
-                                </td>
-                                {(grid[dept] || []).map((cell, i) => {
-                                    const isWeekend = dates[i]?.getDay() === 0 || dates[i]?.getDay() === 6;
+            {totalDays === 0 ? (
+                <div className="text-slate-400 text-sm py-8 text-center">Нет данных для отображения</div>
+            ) : (
+                <div className="border border-slate-200 rounded-lg overflow-x-auto">
+                    <table className="border-collapse w-full" style={{minWidth: 120 + totalDays * 90}}>
+                        <thead>
+                            <tr className="bg-slate-50">
+                                <th className="sticky left-0 z-10 bg-slate-50 border-r border-b border-slate-200 px-3 py-2 text-left text-xs font-semibold text-slate-600 w-[120px]">
+                                    Цех
+                                </th>
+                                {dates.map((date, i) => {
+                                    const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+                                    const isToday = i === 0;
                                     return (
-                                        <td
+                                        <th
                                             key={i}
                                             className={twMerge(
-                                                "border-b border-l border-slate-200 h-[70px] align-top p-1",
-                                                LOAD_COLORS[cell.load],
-                                                isWeekend && cell.load === "empty" && "bg-slate-50"
+                                                "border-b border-l border-slate-200 px-1 py-1.5 text-center text-[10px] min-w-[90px]",
+                                                isWeekend ? "bg-slate-100 text-slate-400" : "text-slate-600",
+                                                isToday && "bg-blue-50 text-blue-700 font-bold"
                                             )}
                                         >
-                                            {cell.orders.length > 0 && (
-                                                <div className="flex flex-wrap gap-0.5">
-                                                    {cell.orders.map((o, j) => (
-                                                        <div key={j} className="text-[8px] text-slate-600 truncate max-w-[70px]">
-                                                            {o.name}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </td>
+                                            <div className="font-semibold">{formatDate(date)}</div>
+                                            <div className={twMerge("text-[9px]", isWeekend && "text-red-400")}>
+                                                {getDayOfWeek(date)}
+                                            </div>
+                                        </th>
                                     );
                                 })}
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {departments.map(dept => (
+                                <tr key={dept}>
+                                    <td className="sticky left-0 z-10 bg-white border-r border-b border-slate-200 px-3 py-2 text-xs font-medium text-slate-700 w-[120px]">
+                                        {dept}
+                                    </td>
+                                    {(grid[dept] || []).map((cell, i) => {
+                                        const isWeekend = dates[i]?.getDay() === 0 || dates[i]?.getDay() === 6;
+                                        return (
+                                            <td
+                                                key={i}
+                                                className={twMerge(
+                                                    "border-b border-l border-slate-200 align-top p-0.5",
+                                                    LOAD_COLORS[cell.load],
+                                                    isWeekend && cell.load === "empty" && "bg-slate-50"
+                                                )}
+                                                style={{minHeight: 70}}
+                                            >
+                                                <div className="flex flex-wrap gap-0.5">
+                                                    {cell.orders.map((o, j) => (
+                                                        <div
+                                                            key={j}
+                                                            className="relative w-[42px] h-[50px] rounded overflow-hidden border border-slate-300 bg-slate-100"
+                                                            title={`${o.order} — ${o.name} (${o.count} шт)`}
+                                                        >
+                                                            {o.picture ? (
+                                                                <img
+                                                                    src={STATIC_URL + o.picture}
+                                                                    alt=""
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-[7px] text-slate-400 p-0.5 text-center leading-tight">
+                                                                    {o.name.slice(0, 15)}
+                                                                </div>
+                                                            )}
+                                                            <div className="absolute top-0 left-0 right-0 bg-black/60 text-white text-[7px] px-0.5 truncate leading-tight">
+                                                                {o.order}
+                                                            </div>
+                                                            <div className="absolute bottom-0 right-0 bg-red-600 text-white text-[9px] font-bold px-1 rounded-tl leading-tight">
+                                                                {o.count}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                        );
+                                    })}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };
