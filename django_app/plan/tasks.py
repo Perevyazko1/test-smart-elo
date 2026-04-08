@@ -39,7 +39,7 @@ def _request_with_retry(url, payload, timeout=180):
         except (requests.ConnectionError, requests.Timeout) as e:
             if attempt == MAX_RETRIES:
                 raise
-            logger.warning(f'Request to {url} failed (attempt {attempt}/{MAX_RETRIES}): {e}. Retrying in {RETRY_DELAY}s...')
+            logger.warning(f'Запрос к {url} не удался (попытка {attempt}/{MAX_RETRIES}): {e}. Повтор через {RETRY_DELAY}с...')
             time.sleep(RETRY_DELAY)
 
 
@@ -167,9 +167,11 @@ def _score_dept_load(departments, dept_load_days, workflow=None, target_loads=No
 
     Логика:
     1. Для каждого цеха заказа — сравниваем текущую загрузку с target:
-       - загрузка < target → бонус (дефицит / target × 60), до 60 баллов
+       - загрузка < target → бонус (дефицит / target × 60 × коэфф.объёма), до ~60 баллов
        - загрузка > target × 2 → штраф -20 (цех и так перегружен)
-    2. Если есть граф — проверяем потомков: если цех-потомок голодает,
+    2. Объём заказа влияет на бонус: заказ на 34 шт загружает цех сильнее,
+       чем заказ на 2 шт, и поэтому получает больший приоритет в голодающем цехе.
+    3. Если есть граф — проверяем потомков: если цех-потомок голодает,
        нужно подгрузить его зависимости (этот цех), бонус до 40 баллов
     """
     score = 0
@@ -183,14 +185,23 @@ def _score_dept_load(departments, dept_load_days, workflow=None, target_loads=No
         load = dept_load_days.get(dept, 999)
         target = (target_loads or {}).get(dept, 7)  # Дефолт 7 дней если не задано
 
+        # Коэффициент объёма: заказ на 34 шт (factor=3.0) получает бонус в 3 раза больше,
+        # чем заказ на 2 шт (factor=0.2). Это даёт дифференциацию между заказами —
+        # без этого все заказы в одном цехе получали бы одинаковый бонус.
+        # Ограничиваем от 0.2 (мин. 1 шт) до 3.0 (макс. 30+ шт).
+        volume_factor = min(remaining / 10.0, 3.0)
+        volume_factor = max(volume_factor, 0.2)
+
         if load < target:
             # Цех загружен меньше целевого — нужно подгрузить.
-            # Чем больше дефицит — тем выше бонус (до 60 баллов).
+            # Чем больше дефицит и объём заказа — тем выше бонус.
             deficit = target - load
-            score += int((deficit / max(target, 1)) * 60)
+            base_bonus = (deficit / max(target, 1)) * 60
+            score += int(base_bonus * volume_factor)
         elif load > target * 2:
             # Цех перегружен в 2+ раза — штраф, не стоит добавлять ещё работу.
-            score -= 20
+            # Большие заказы получают больший штраф (не надо нагружать перегруженный цех).
+            score -= int(20 * volume_factor)
 
     # Учёт зависимостей по графу: если цех-потомок голодает — подгрузить этот цех
     if workflow:
@@ -297,7 +308,7 @@ def _save_weights_to_db(weight_results):
             entry.weight_detail = r['detail']
             entry.save(update_fields=['sort_weight', 'weight_detail', 'updated_at'])
         except Exception as e:
-            logger.warning(f'Failed to save weight for {sid}: {e}')
+            logger.warning(f'Не удалось сохранить вес для {sid}: {e}')
 
 
 # ─── Chart: раскладка заказов по цехам и дням ────────────────────
@@ -401,7 +412,7 @@ def _build_chart_grid():
             elif product_type_name and dept_name in norms.get(product_type_name, {}):
                 hours_per = norms[product_type_name][dept_name]
             else:
-                hours_per = 1  # Fallback если норматив не задан
+                hours_per = 1  # Запасное значение если норматив не задан
 
             depts[dept_name] = {
                 'remaining': remaining,
@@ -585,9 +596,37 @@ def _build_grid_summary(chart_data):
     - loaded_days: сколько дней с работой
     - overloaded_days: сколько дней с перегрузкой
     - runs_out_day: через сколько дней цех останется без работы
+    - is_terminal: терминальный ли цех (последний в графе, например Упаковка)
 
-    Это помогает GPT давать рекомендации и предупреждения.
+    Терминальные цеха (Упаковка, Обивка) по определению ждут все предыдущие.
+    Их простой — это штатная ситуация, а не проблема. GPT не должен
+    предупреждать о простое терминальных цехов.
     """
+    from plan.models import ProductType
+
+    # Определить терминальные цеха — те, которые являются листьями графа.
+    # Цех терминальный, если он не является источником ни для одного другого цеха
+    # (кроме виртуального узла "Готово").
+    terminal_depts = set()
+    all_sources = set()  # Цеха, от которых идут стрелки к другим цехам
+    all_targets = set()  # Цеха, куда входят стрелки
+
+    for pt in ProductType.objects.all():
+        if not pt.workflow_graph:
+            continue
+        for src, targets in pt.workflow_graph.items():
+            if src in ('Старт', 'Готово'):
+                continue
+            for tgt in targets:
+                if tgt in ('Старт', 'Готово'):
+                    continue
+                all_sources.add(src)
+                all_targets.add(tgt)
+
+    # Терминальные = цеха-цели, которые сами никуда не передают
+    # (не являются источниками для других рабочих цехов)
+    terminal_depts = all_targets - all_sources
+
     summary = {}
     for dept, days in chart_data.get('grid', {}).items():
         loaded_days = sum(1 for d in days if d['load'] != 'empty')
@@ -598,6 +637,7 @@ def _build_grid_summary(chart_data):
             'loaded_days': loaded_days,
             'overloaded_days': overloaded_days,
             'runs_out_day': runs_out,
+            'is_terminal': dept in terminal_depts,
         }
     return summary
 
@@ -676,11 +716,11 @@ def generate_ai_plan_full(self):
             _update_config(task_status='cancelled', task_phase='')
             return
 
-        # ──── Этап 3: GPT batch — комментарии + adjustment (только топ-50) ────
+        # ──── Этап 3: GPT batch — комментарии + корректировка (только топ-50) ────
         # GPT получает топ-50 заказов и для каждого:
         # - Пишет ai_comment (почему этот заказ в приоритете)
-        # - Даёт weight_adjustment (-100 до +100) на основе feedback менеджера
-        # Adjustment применяется с коэффициентом K4 (обратная связь)
+        # - Даёт weight_adjustment (-100 до +100) на основе обратной связи менеджера
+        # Корректировка применяется с коэффициентом K4 (обратная связь)
 
         sorted_by_weight = sorted(weight_results, key=lambda x: x['weight'], reverse=True)
         top_series_ids = {r['series_id'] for r in sorted_by_weight[:BATCH_SIZE]}
@@ -704,7 +744,7 @@ def generate_ai_plan_full(self):
         resp.raise_for_status()
         gpt_entries = resp.json().get('entries', [])
 
-        # Применить GPT adjustment и сохранить комментарии
+        # Применить GPT корректировку и сохранить комментарии
         from plan.models import AiPlanEntry
         from core.models import OrderProduct
 
@@ -722,14 +762,14 @@ def generate_ai_plan_full(self):
                 ai_entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
                 ai_entry.ai_comment = comment
 
-                # Применить adjustment: нормализуем по K4 (0-50).
+                # Применить корректировку: нормализуем по K4 (0-50).
                 # adj=100 при K4=50 даёт +100, при K4=25 даёт +50.
                 base_weight = weight_map.get(sid, {}).get('weight', 500)
                 adj_value = int(adj * k4 / 50)
                 final_weight = max(0, min(1000, base_weight + adj_value))
                 ai_entry.sort_weight = final_weight
 
-                # Сохранить детали для tooltip на фронте
+                # Сохранить детали для всплывающей подсказки на фронте
                 detail = weight_map.get(sid, {}).get('detail', {})
                 detail['adjustment'] = adj
                 detail['adj_reason'] = comment
@@ -737,11 +777,11 @@ def generate_ai_plan_full(self):
 
                 ai_entry.save(update_fields=['ai_comment', 'sort_weight', 'weight_detail', 'updated_at'])
             except Exception as e:
-                logger.warning(f'Failed to save GPT entry for {sid}: {e}')
+                logger.warning(f'Не удалось сохранить GPT запись для {sid}: {e}')
 
         _update_config(task_progress=total)
 
-        # Гарантия уникальности финальных весов (после GPT adjustment могли появиться дубли)
+        # Гарантия уникальности финальных весов (после GPT корректировки могли появиться дубли)
         all_entries_db = list(AiPlanEntry.objects.all().values('id', 'sort_weight'))
         all_entries_db.sort(key=lambda x: x['sort_weight'], reverse=True)
         seen = set()
@@ -778,11 +818,11 @@ def generate_ai_plan_full(self):
 
         _update_config(task_phase='Генерация плана на день...')
 
-        # Загрузить финальные данные из БД (с учётом GPT adjustment)
+        # Загрузить финальные данные из БД (с учётом GPT корректировки)
         order_by_series = {o['series_id']: o for o in orders}
         final_entries = AiPlanEntry.objects.order_by('-sort_weight')[:30]
 
-        # Загрузить feedback менеджеров
+        # Загрузить обратную связь менеджеров
         feedback_map = {}
         for e in AiPlanEntry.objects.exclude(feedback='').values('order_product__series_id', 'feedback'):
             feedback_map[e['order_product__series_id']] = e['feedback']
@@ -856,5 +896,5 @@ def generate_ai_plan_full(self):
         _update_config(task_status='completed', task_phase='', task_progress=total)
 
     except Exception as e:
-        logger.error(f'AI plan generation failed: {e}', exc_info=True)
+        logger.error(f'Ошибка генерации AI плана: {e}', exc_info=True)
         _update_config(task_status='failed', task_phase='', task_error=str(e))

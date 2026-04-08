@@ -180,7 +180,7 @@ def set_target_date(request):
     old_urgency = request.data.get('old_urgency')
 
     if target_date:
-        # Normalize target_date to YYYY-MM-DD format
+        # Нормализация target_date к формату YYYY-MM-DD
         target_datetime = parse_datetime(target_date).date()
     else:
         target_datetime = None
@@ -471,10 +471,10 @@ def _collect_orders_data():
     overdue = [o for o in orders_info if o['days_left'] is not None and o['days_left'] < 0]
     urgent = [o for o in orders_info if o['urgency'] == 1]
 
-    # Дневная мощность — сколько изделий можно сделать за день в каждом цеху
+    # Дневная мощность — сколько изделий можно сделать за день в каждом цеху.
+    # avg_hours считается как средний норматив по всем типам изделий для этого цеха.
     daily_capacity = {}
     for dept, cap in capacity.items():
-        # Средние часы на изделие в этом цеху
         dept_norms = [n.hours_per_unit for n in ProductionNorm.objects.filter(department=dept) if n.hours_per_unit > 0]
         avg_hours = sum(dept_norms) / len(dept_norms) if dept_norms else 1
         daily_capacity[dept] = {
@@ -482,8 +482,17 @@ def _collect_orders_data():
             'hours_per_day': cap,
         }
 
-    # Общая дневная мощность — ограничена узким местом
-    bottleneck_items = min((v['items_per_day'] for v in daily_capacity.values()), default=0) if daily_capacity else 0
+    # Общая дневная мощность — ограничена узким местом.
+    # Считаем ТОЛЬКО по цехам, у которых реально есть работа (total_hours > 0).
+    # Иначе пустой цех с 1 рабочим (например Конструктора) занижает bottleneck до 2,
+    # хотя реальное узкое место — цех с большой загрузкой вроде ППУ или Обивки.
+    active_capacity = {
+        dept: info for dept, info in daily_capacity.items()
+        if dept_load.get(dept, 0) > 0
+    }
+    bottleneck_items = min(
+        (v['items_per_day'] for v in active_capacity.values()), default=0
+    ) if active_capacity else 0
 
     # Графы цехов по типам изделий
     workflows = {}
