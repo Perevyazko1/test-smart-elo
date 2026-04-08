@@ -22,13 +22,24 @@ export function NormsTable() {
     });
 
     const [rows, setRows] = useState<INormRow[]>([]);
+    const [schemas, setSchemas] = useState<Record<number, number>>({});
     const [newTypeName, setNewTypeName] = useState("");
     const [collapsed, setCollapsed] = useState(true);
     const [classifying, setClassifying] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => {
-        if (data?.rows) setRows(data.rows);
+        if (data?.rows) {
+            setRows(data.rows);
+            // Загрузить схемы для всех типов
+            for (const row of data.rows) {
+                if (row.id) {
+                    $axios.get(`/plan/workflow/${row.id}/`).then(res => {
+                        setSchemas(prev => ({...prev, [row.id!]: res.data.schema || 0}));
+                    }).catch(() => {});
+                }
+            }
+        }
     }, [data]);
 
     const departments = data?.departments || [];
@@ -79,6 +90,14 @@ export function NormsTable() {
         );
     }, [queryClient]);
 
+    const handleSchemaChange = useCallback((id: number | undefined, schema: number) => {
+        if (!id) return;
+        $axios.post(`/plan/workflow/${id}/update/`, {schema}).then(
+            () => toast.success('Схема сохранена'),
+            () => toast.error('Ошибка сохранения схемы')
+        );
+    }, []);
+
     const handleClassify = useCallback(() => {
         setClassifying(true);
         const runBatch = (offset: number) => {
@@ -122,6 +141,7 @@ export function NormsTable() {
                                     {departments.map(d => (
                                         <th key={d} className="px-2 py-2 text-center font-semibold min-w-[70px]">{d}</th>
                                     ))}
+                                    <th className="px-2 py-2 text-center font-semibold min-w-[120px]">Схема</th>
                                     <th className="px-2 py-2 w-8"></th>
                                 </tr>
                             </thead>
@@ -147,6 +167,21 @@ export function NormsTable() {
                                                 />
                                             </td>
                                         ))}
+                                        <td className="px-1 py-1 text-center">
+                                            <select
+                                                value={schemas[row.id!] || 0}
+                                                onChange={e => {
+                                                    const val = parseInt(e.target.value);
+                                                    setSchemas(prev => ({...prev, [row.id!]: val}));
+                                                    if (val > 0) handleSchemaChange(row.id, val);
+                                                }}
+                                                className="text-[10px] border border-slate-200 rounded px-1 py-0.5 bg-white outline-none"
+                                            >
+                                                <option value={0}>—</option>
+                                                <option value={1}>Полный цикл</option>
+                                                <option value={2}>Без столярки</option>
+                                            </select>
+                                        </td>
                                         <td className="px-1 py-1 text-center">
                                             <button
                                                 onClick={() => handleDeleteType(row.id, row.name)}

@@ -34,6 +34,7 @@ class ProductType(models.Model):
         ordering = ['name']
 
     name = models.CharField('Название', max_length=100, unique=True)
+    workflow_graph = models.JSONField('Граф цехов', default=dict, blank=True)
 
     def __str__(self):
         return self.name
@@ -47,22 +48,11 @@ class ProductionNorm(models.Model):
         verbose_name_plural = 'Нормативы производства'
         unique_together = ('product_type', 'department')
 
-    DEPARTMENTS = [
-        ('Обивка', 'Обивка'),
-        ('Крой', 'Крой'),
-        ('Пила', 'Пила'),
-        ('Сборка', 'Сборка'),
-        ('Пошив', 'Пошив'),
-        ('Поролон', 'Поролон'),
-        ('Лазер', 'Лазер'),
-        ('Массив', 'Массив'),
-    ]
-
     product_type = models.ForeignKey(
         ProductType, on_delete=models.CASCADE,
         related_name='norms', verbose_name='Тип изделия',
     )
-    department = models.CharField('Цех', max_length=50, choices=DEPARTMENTS)
+    department = models.CharField('Цех', max_length=50)
     hours_per_unit = models.FloatField('Часов на 1 шт', default=0)
 
     def __str__(self):

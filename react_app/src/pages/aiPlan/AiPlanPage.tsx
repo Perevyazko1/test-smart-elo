@@ -269,9 +269,9 @@ export const AiPlanPage = () => {
             <WorkersTable />
 
             {/* Priority + Dept Load — side by side */}
-            <div className="flex gap-4">
+            <div className="flex gap-4" style={{display: 'grid', gridTemplateColumns: '1fr 1fr'}}>
                 {/* Weight Coefficients Sliders */}
-                <div className="border border-slate-200 rounded-lg p-4 flex-1">
+                <div className="border border-slate-200 rounded-lg p-4">
                     <div className="text-xs text-slate-500 font-semibold mb-3">Настройка приоритетов</div>
                     <div className="grid grid-cols-2 gap-4">
                         {([

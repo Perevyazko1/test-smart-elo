@@ -97,10 +97,27 @@ def _score_progress(departments):
     return 0
 
 
-def _score_dept_load(departments, dept_load_days):
+def _invert_workflow(workflow):
+    """Инвертировать граф: из 'A → [B, C]' получить {B: [A], C: [A]} (зависимости).
+    Пропускает Старт и Готово."""
+    deps = {}
+    for src, targets in workflow.items():
+        if src in ('Старт', 'Готово'):
+            continue
+        for tgt in targets:
+            if tgt in ('Старт', 'Готово'):
+                continue
+            if tgt not in deps:
+                deps[tgt] = []
+            deps[tgt].append(src)
+    return deps
+
+
+def _score_dept_load(departments, dept_load_days, workflow=None):
     """Загрузка цехов: 0-100. Заказы для голодающих цехов — выше.
     departments: dict {dept: {ready, all}} — что нужно этому заказу
     dept_load_days: dict {dept: float} — сколько дней работы у цеха
+    workflow: dict граф цехов (формат "куда передаёт") или None
     """
     score = 0
     for dept, status in departments.items():
@@ -123,12 +140,31 @@ def _score_dept_load(departments, dept_load_days):
             if done_pct >= 0.7:
                 score += 30  # >70% сделано в перегруженном — дожать
 
+    # Учёт зависимостей по графу: если цех-потомок голодает — подгрузить этот цех
+    if workflow:
+        deps = _invert_workflow(workflow)
+        for dept, status in departments.items():
+            remaining = status.get('all', 0) - status.get('ready', 0)
+            if remaining <= 0:
+                continue
+            # Проверить: кто зависит от этого цеха? Если они голодают — бонус
+            targets = workflow.get(dept, [])
+            for tgt in targets:
+                if tgt in ('Старт', 'Готово'):
+                    continue
+                tgt_load = dept_load_days.get(tgt, 999)
+                if tgt_load < 1:
+                    score += 40  # цех-потомок простаивает — срочно подгрузить!
+                elif tgt_load < 3:
+                    score += 20  # цех-потомок скоро будет голодать
+
     return min(score, 100)
 
 
-def _calculate_all_weights(orders, dept_summary, config):
+def _calculate_all_weights(orders, dept_summary, config, workflows=None):
     """Рассчитать веса всех заказов на основе формулы и коэффициентов.
     Returns: list of {series_id, weight, detail: {deadline, progress, dept_load}}
+    workflows: dict {product_type_name: workflow_graph}
     """
     k1 = config.weight_k_deadline
     k2 = config.weight_k_progress
@@ -143,7 +179,9 @@ def _calculate_all_weights(orders, dept_summary, config):
     for order in orders:
         s_deadline = _score_deadline(order.get('days_left'))
         s_progress = _score_progress(order.get('departments', {}))
-        s_dept_load = _score_dept_load(order.get('departments', {}), dept_load_days)
+        # Получить граф для типа изделия этого заказа
+        wf = (workflows or {}).get(order.get('product_type', ''))
+        s_dept_load = _score_dept_load(order.get('departments', {}), dept_load_days, wf)
 
         raw_weight = (s_deadline * k1 + s_progress * k2 + s_dept_load * k3)
         # Нормализуем к 0-1000
@@ -218,7 +256,7 @@ def generate_ai_plan_full(self):
         # --- Этап 2: Python считает веса всем заказам ---
         _update_config(task_phase='Расчёт весов...', task_total=total)
 
-        weight_results = _calculate_all_weights(orders, data['dept_summary'], config)
+        weight_results = _calculate_all_weights(orders, data['dept_summary'], config, data.get('workflows'))
         weight_map = {r['series_id']: r for r in weight_results}
 
         # Сохранить веса в БД

@@ -485,6 +485,12 @@ def _collect_orders_data():
     # Общая дневная мощность — ограничена узким местом
     bottleneck_items = min((v['items_per_day'] for v in daily_capacity.values()), default=0) if daily_capacity else 0
 
+    # Графы цехов по типам изделий
+    workflows = {}
+    for pt in ProductType.objects.all():
+        if pt.workflow_graph:
+            workflows[pt.name] = pt.workflow_graph
+
     return {
         'orders': orders_info,
         'dept_summary': dept_summary,
@@ -495,6 +501,7 @@ def _collect_orders_data():
         'daily_capacity': daily_capacity,
         'bottleneck_items_per_day': bottleneck_items,
         'today': str(date.today()),
+        'workflows': workflows,
     }
 
 
@@ -762,7 +769,7 @@ def classify_products(request):
 def get_production_norms(request):
     """Таблица нормативов: типы изделий × цеха → часы"""
     product_types = ProductType.objects.prefetch_related('norms').all()
-    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
 
     data = []
     for pt in product_types:
@@ -782,7 +789,7 @@ def get_production_norms(request):
 def update_production_norms(request):
     """Обновить нормативы. Принимает {rows: [{id?, name, Обивка: 1, Крой: 0.5, ...}]}"""
     rows = request.data.get('rows', [])
-    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
 
     for row in rows:
         name = row.get('name', '').strip()
@@ -822,7 +829,7 @@ def add_product_type(request):
     if not created:
         return JsonResponse({'error': 'Тип уже существует'}, status=400)
 
-    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
     for dept in departments:
         ProductionNorm.objects.create(product_type=pt, department=dept, hours_per_unit=0)
 
@@ -967,7 +974,7 @@ def get_departments(request):
 @api_view(['GET'])
 def get_department_workers(request):
     """Количество рабочих по цехам"""
-    departments = [d[0] for d in ProductionNorm.DEPARTMENTS]
+    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
     # Создаём записи для новых цехов
     for dept in departments:
         DepartmentWorkers.objects.get_or_create(department=dept, defaults={'workers_count': 1})
@@ -987,4 +994,77 @@ def update_department_workers(request):
             DepartmentWorkers.objects.update_or_create(
                 department=dept, defaults={'workers_count': max(count, 0)}
             )
+    return JsonResponse({'success': True})
+
+
+# ─── Workflow graph ───────────────────────────────────────────────
+
+WORKFLOW_FULL = {
+    "Старт": ["Пила", "Лазер", "Крой", "ППУ", "Столярка"],
+    "Пила": ["Сборка"],
+    "Лазер": ["Сборка"],
+    "Крой": ["Пошив"],
+    "ППУ": ["Обивка"],
+    "Столярка": ["Малярка"],
+    "Сборка": ["Обивка"],
+    "Пошив": ["Обивка"],
+    "Малярка": ["Обивка"],
+    "Обивка": ["Упаковка"],
+    "Упаковка": ["Готово"],
+}
+
+WORKFLOW_NO_STOL = {
+    "Старт": ["Пила", "Лазер", "Крой", "ППУ"],
+    "Пила": ["Сборка"],
+    "Лазер": ["Сборка"],
+    "Крой": ["Пошив"],
+    "ППУ": ["Обивка"],
+    "Сборка": ["Обивка"],
+    "Пошив": ["Обивка"],
+    "Обивка": ["Упаковка"],
+    "Упаковка": ["Готово"],
+}
+
+WORKFLOW_SCHEMAS = {1: WORKFLOW_FULL, 2: WORKFLOW_NO_STOL}
+
+
+@api_view(['GET'])
+def get_workflow(request, product_type_id):
+    """Получить граф цехов для типа изделия"""
+    try:
+        pt = ProductType.objects.get(pk=product_type_id)
+    except ProductType.DoesNotExist:
+        return JsonResponse({'error': 'Тип не найден'}, status=404)
+
+    current_schema = 0
+    if pt.workflow_graph == WORKFLOW_FULL:
+        current_schema = 1
+    elif pt.workflow_graph == WORKFLOW_NO_STOL:
+        current_schema = 2
+
+    return JsonResponse({
+        'product_type_id': pt.id,
+        'product_type_name': pt.name,
+        'graph': pt.workflow_graph,
+        'schema': current_schema,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_workflow(request, product_type_id):
+    """Привязать схему графа к типу изделия. Body: {schema: 1|2} или {graph: {...}}"""
+    try:
+        pt = ProductType.objects.get(pk=product_type_id)
+    except ProductType.DoesNotExist:
+        return JsonResponse({'error': 'Тип не найден'}, status=404)
+
+    schema = request.data.get('schema')
+    if schema and int(schema) in WORKFLOW_SCHEMAS:
+        pt.workflow_graph = WORKFLOW_SCHEMAS[int(schema)]
+    elif 'graph' in request.data:
+        pt.workflow_graph = request.data['graph']
+    else:
+        return JsonResponse({'error': 'Укажите schema (1 или 2) или graph'}, status=400)
+
+    pt.save(update_fields=['workflow_graph'])
     return JsonResponse({'success': True})
