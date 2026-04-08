@@ -517,6 +517,10 @@ def _build_chart_grid():
             hours_left = info['hours']
             sid = order['series_id']
 
+            # Часы на 1 штуку — нужно для расчёта сколько штук влезает в день.
+            # Пример: Бокс 34шт × 0.5ч = 17ч → hours_per_unit = 0.5
+            hours_per_unit = info['hours'] / info['remaining'] if info['remaining'] > 0 else 1
+
             day = earliest
             while hours_left > 0:
                 # Создать день если его ещё нет
@@ -533,12 +537,20 @@ def _build_chart_grid():
 
                 take = min(hours_left, day_free)
 
-                # Добавить заказ в ячейку дня
+                # Сколько штук обрабатывается именно в ЭТОТ день.
+                # Пример: Пила, 1 рабочий, 8ч/день, Бокс 0.5ч/шт:
+                #   День 1: take=8ч → 8/0.5 = 16 шт
+                #   День 2: take=8ч → 16 шт
+                #   День 3: take=1ч → 2 шт
+                # Итого 34 шт за ~2.1 дня — корректно.
+                units_today = max(1, round(take / hours_per_unit))
+
+                # Добавить заказ в ячейку дня с количеством на ЭТОТ день
                 day_data['orders'].append({
                     'name': order['name'],
                     'order': order['order'],
                     'picture': order['picture'],
-                    'count': info['remaining'],
+                    'count': units_today,
                 })
                 day_data['hours'] += take
                 hours_left -= take
