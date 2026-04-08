@@ -9,6 +9,7 @@ import {CashPage} from "@/pages/cash/CashPage.tsx";
 import {ShipmentPage} from "@/pages/shipment/ShipmentPage.tsx";
 import {PlanPage} from "@/pages/plan/PlanPage.tsx";
 import {AiPlanPage} from "@/pages/aiPlan/AiPlanPage.tsx";
+import {AiPlanChartPage} from "@/pages/aiPlan/AiPlanChartPage.tsx";
 import {SkladPage} from "@/pages/skladPage/SkladPage.tsx";
 import {ShipmentDetailPage} from "@/pages/shipmentDetail/ShipmentDetailPage.tsx";
 import {UserWage} from "@/pages/userWage/UserWage.tsx";
@@ -65,6 +66,7 @@ createRoot(document.getElementById('root')!).render(
                             }>
                             <Route path="/plan" element={<PlanPage/>}/>
                             <Route path="/ai-plan" element={<AiPlanPage/>}/>
+                            <Route path="/ai-plan-chart" element={<AiPlanChartPage/>}/>
                         </Route>
                     </Route>
 
