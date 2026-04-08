@@ -3,7 +3,7 @@ from django.db import migrations, models
 
 def set_has_norms(apps, schema_editor):
     Department = apps.get_model('staff', 'Department')
-    norms_depts = ['Пила', 'Лазер', 'Сборка', 'Столярка', 'Малярка', 'Крой', 'Пошив', 'ППУ', 'Обивка', 'Упаковка']
+    norms_depts = ['Конструктора', 'Пила', 'Лазер', 'Сборка', 'Столярка', 'Малярка', 'Крой', 'Пошив', 'ППУ', 'Обивка', 'Упаковка']
     Department.objects.filter(name__in=norms_depts).update(has_norms=True)
 
 
