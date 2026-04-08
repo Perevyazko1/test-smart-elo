@@ -77,6 +77,12 @@ export const AiPlanPage = () => {
     });
     const allDepartments: string[] = deptsData?.departments || [];
 
+    const {data: normDeptsData} = useQuery({
+        queryKey: ["departments-norms"],
+        queryFn: () => $axios.get<{departments: string[]}>('/plan/departments/?norms=1').then(r => r.data),
+    });
+    const normDepartments: string[] = normDeptsData?.departments || [];
+
     const [hiddenDepts, setHiddenDepts] = useState<Set<string>>(new Set());
     const visibleDepts = useMemo(
         () => new Set(allDepartments.filter(d => !hiddenDepts.has(d))),
@@ -306,7 +312,7 @@ export const AiPlanPage = () => {
                 </div>
 
                 {/* Dept Load Equalizer */}
-                <DeptLoadEqualizer departments={allDepartments} />
+                <DeptLoadEqualizer departments={normDepartments} />
             </div>
 
             {/* Input + Voice */}

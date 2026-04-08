@@ -769,7 +769,7 @@ def classify_products(request):
 def get_production_norms(request):
     """Таблица нормативов: типы изделий × цеха → часы"""
     product_types = ProductType.objects.prefetch_related('norms').all()
-    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
 
     data = []
     for pt in product_types:
@@ -789,7 +789,7 @@ def get_production_norms(request):
 def update_production_norms(request):
     """Обновить нормативы. Принимает {rows: [{id?, name, Обивка: 1, Крой: 0.5, ...}]}"""
     rows = request.data.get('rows', [])
-    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
 
     for row in rows:
         name = row.get('name', '').strip()
@@ -829,7 +829,7 @@ def add_product_type(request):
     if not created:
         return JsonResponse({'error': 'Тип уже существует'}, status=400)
 
-    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
     for dept in departments:
         ProductionNorm.objects.create(product_type=pt, department=dept, hours_per_unit=0)
 
@@ -964,22 +964,23 @@ def update_product_norms(request, product_id):
 
 @api_view(['GET'])
 def get_departments(request):
-    """Список всех цехов"""
-    departments = list(
-        Department.objects.order_by('ordering', 'name').values_list('name', flat=True)
-    )
+    """Список цехов. ?norms=1 — только участвующие в нормативах"""
+    qs = Department.objects.order_by('ordering', 'name')
+    if request.query_params.get('norms'):
+        qs = qs.filter(has_norms=True)
+    departments = list(qs.values_list('name', flat=True))
     return JsonResponse({'departments': departments}, json_dumps_params={"ensure_ascii": False})
 
 
 @api_view(['GET'])
 def get_department_workers(request):
     """Количество рабочих по цехам"""
-    departments = list(Department.objects.filter(is_industrial=True).order_by('ordering', 'name').values_list('name', flat=True))
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
     # Создаём записи для новых цехов
     for dept in departments:
         DepartmentWorkers.objects.get_or_create(department=dept, defaults={'workers_count': 1})
 
-    rows = list(DepartmentWorkers.objects.filter(department__in=departments).values('department', 'workers_count'))
+    rows = list(DepartmentWorkers.objects.filter(department__in=departments).values('department', 'workers_count', 'target_load_days'))
     return JsonResponse({'rows': rows}, json_dumps_params={"ensure_ascii": False})
 
 
@@ -994,6 +995,16 @@ def update_department_workers(request):
             DepartmentWorkers.objects.update_or_create(
                 department=dept, defaults={'workers_count': max(count, 0)}
             )
+    return JsonResponse({'success': True})
+
+
+@api_view(['POST'])
+def update_target_load(request):
+    """Обновить целевую загрузку цехов. {loads: {department: days, ...}}"""
+    loads = request.data.get('loads', {})
+    for dept, days in loads.items():
+        days = max(1, min(14, int(days)))
+        DepartmentWorkers.objects.filter(department=dept).update(target_load_days=days)
     return JsonResponse({'success': True})
 
 

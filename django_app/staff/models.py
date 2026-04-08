@@ -18,6 +18,7 @@ class Department(models.Model):
     piecework_wages = models.BooleanField('В отделе установлена сдельная оплата труда', default=False)
     color = models.CharField(max_length=9, validators=[validate_color], default='#ffffff')
     is_industrial = models.BooleanField('Отдел производственный', blank=True, default=True)
+    has_norms = models.BooleanField('Участвует в нормативах', default=False)
 
     def __str__(self):
         return '{}'.format(f'№{self.number} - {self.name}')

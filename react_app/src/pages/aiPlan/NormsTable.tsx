@@ -179,7 +179,7 @@ export function NormsTable() {
                                             >
                                                 <option value={0}>—</option>
                                                 <option value={1}>Полный цикл</option>
-                                                <option value={2}>Без столярки</option>
+                                                <option value={2}>Без столярки/малярки</option>
                                             </select>
                                         </td>
                                         <td className="px-1 py-1 text-center">
