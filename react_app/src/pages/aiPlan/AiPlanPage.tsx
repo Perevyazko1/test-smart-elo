@@ -13,6 +13,7 @@ import {toast} from "sonner";
 import {NormsTable} from "./NormsTable";
 import {WorkersTable} from "./WorkersTable";
 import {ProductNormsModal} from "./ProductNormsModal";
+import {DeptLoadEqualizer} from "./DeptLoadEqualizer";
 
 
 interface IAiEntry {
@@ -267,39 +268,45 @@ export const AiPlanPage = () => {
             {/* Workers Table */}
             <WorkersTable />
 
-            {/* Weight Coefficients Sliders */}
-            <div className="border border-slate-200 rounded-lg p-4">
-                <div className="text-xs text-slate-500 font-semibold mb-3">Настройка приоритетов</div>
-                <div className="grid grid-cols-2 gap-4">
-                    {([
-                        {key: 'k_deadline' as const, label: 'Сроки', desc: 'Влияние дедлайнов и просрочки'},
-                        {key: 'k_progress' as const, label: 'Прогресс', desc: 'Дожимать почти готовые заказы'},
-                        {key: 'k_dept_load' as const, label: 'Загрузка цехов', desc: 'Не давать цехам простаивать'},
-                        {key: 'k_feedback' as const, label: 'Обратная связь', desc: 'Влияние комментариев менеджеров'},
-                    ]).map(({key, label, desc}) => (
-                        <div key={key}>
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs font-medium text-slate-700">{label}</span>
-                                <span className="text-xs text-slate-400 font-mono w-6 text-right">{weights[key]}</span>
+            {/* Priority + Dept Load — side by side */}
+            <div className="flex gap-4">
+                {/* Weight Coefficients Sliders */}
+                <div className="border border-slate-200 rounded-lg p-4 flex-1">
+                    <div className="text-xs text-slate-500 font-semibold mb-3">Настройка приоритетов</div>
+                    <div className="grid grid-cols-2 gap-4">
+                        {([
+                            {key: 'k_deadline' as const, label: 'Сроки', desc: 'Влияние дедлайнов и просрочки'},
+                            {key: 'k_progress' as const, label: 'Прогресс', desc: 'Дожимать почти готовые заказы'},
+                            {key: 'k_dept_load' as const, label: 'Загрузка цехов', desc: 'Не давать цехам простаивать'},
+                            {key: 'k_feedback' as const, label: 'Обратная связь', desc: 'Влияние комментариев менеджеров'},
+                        ]).map(({key, label, desc}) => (
+                            <div key={key}>
+                                <div className="flex justify-between items-center mb-1">
+                                    <span className="text-xs font-medium text-slate-700">{label}</span>
+                                    <span className="text-xs text-slate-400 font-mono w-6 text-right">{weights[key]}</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min={0}
+                                    max={50}
+                                    value={weights[key]}
+                                    onChange={(e) => {
+                                        const val = parseInt(e.target.value);
+                                        const next = {...weights, [key]: val};
+                                        setLocalWeights(next);
+                                    }}
+                                    onMouseUp={() => saveWeights(weights)}
+                                    onTouchEnd={() => saveWeights(weights)}
+                                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                                />
+                                <div className="text-[10px] text-slate-400 mt-0.5">{desc}</div>
                             </div>
-                            <input
-                                type="range"
-                                min={0}
-                                max={50}
-                                value={weights[key]}
-                                onChange={(e) => {
-                                    const val = parseInt(e.target.value);
-                                    const next = {...weights, [key]: val};
-                                    setLocalWeights(next);
-                                }}
-                                onMouseUp={() => saveWeights(weights)}
-                                onTouchEnd={() => saveWeights(weights)}
-                                className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-                            />
-                            <div className="text-[10px] text-slate-400 mt-0.5">{desc}</div>
-                        </div>
-                    ))}
+                        ))}
+                    </div>
                 </div>
+
+                {/* Dept Load Equalizer */}
+                <DeptLoadEqualizer departments={allDepartments} />
             </div>
 
             {/* Input + Voice */}
