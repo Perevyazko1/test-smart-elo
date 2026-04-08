@@ -110,6 +110,10 @@ class AiPlanConfig(models.Model):
     weight_k_dept_load = models.IntegerField('K загрузка цехов', default=40)
     weight_k_feedback = models.IntegerField('K обратная связь', default=35)
 
+    # Кэш данных для графика загрузки цехов (ai-plan-chart).
+    # Заполняется при генерации AI-плана в Celery, фронт забирает готовое.
+    chart_data = models.JSONField('Данные графика', default=dict, blank=True)
+
     # Task tracking
     task_id = models.CharField('Celery Task ID', max_length=255, blank=True, default='')
     task_status = models.CharField('Статус задачи', max_length=20, default='idle')

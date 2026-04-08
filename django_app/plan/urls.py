@@ -36,6 +36,7 @@ urlpatterns = [
     path('product_norms/<int:product_id>/update/', update_product_norms),
 
     path('chart/', get_chart_data),
+    path('chart/refresh/', refresh_chart),
     path('departments/', get_departments),
     path('workers/', get_department_workers),
     path('workers/update/', update_department_workers),

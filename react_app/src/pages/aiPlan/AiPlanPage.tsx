@@ -55,6 +55,8 @@ export const AiPlanPage = () => {
     const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [normsModal, setNormsModal] = useState<{productId: number; productName: string} | null>(null);
+    // Ошибка генерации (например: "Не задан граф для типов: X") — показывается как баннер
+    const [genError, setGenError] = useState<string | null>(null);
 
     const {data: weightsData} = useQuery({
         queryKey: ["weightCoefficients"],
@@ -178,7 +180,11 @@ export const AiPlanPage = () => {
                     stopPolling();
                     setGenerating(false);
                     setProgress(null);
-                    toast.error(error || 'Ошибка генерации плана');
+                    // Сохраняем ошибку в стейт для отображения баннером
+                    // (например: "Не задан граф для типов: Стол, Подушка")
+                    const errMsg = error || 'Ошибка генерации плана';
+                    setGenError(errMsg);
+                    toast.error(errMsg);
                 } else if (status === 'cancelled') {
                     stopPolling();
                     setGenerating(false);
@@ -210,6 +216,7 @@ export const AiPlanPage = () => {
 
     const handleGenerate = useCallback(() => {
         setGenerating(true);
+        setGenError(null);  // Сбросить предыдущую ошибку при новом запуске
         setProgress({current: 0, total: 0, phase: 'Запуск...'});
 
         $axios.post('/plan/ai_plan/generate/').then(res => {
@@ -391,6 +398,19 @@ export const AiPlanPage = () => {
                             {Math.round((progress.current / progress.total) * 100)}%
                         </div>
                     )}
+                </div>
+            )}
+
+            {/* Баннер ошибки генерации (например: не задан граф для типов) */}
+            {genError && (
+                <div className="border border-red-300 bg-red-50 rounded-lg p-3 flex items-start gap-2">
+                    <span className="text-red-600 text-sm flex-1">{genError}</span>
+                    <button
+                        onClick={() => setGenError(null)}
+                        className="text-red-400 hover:text-red-600 text-xs font-bold shrink-0"
+                    >
+                        x
+                    </button>
                 </div>
             )}
 
