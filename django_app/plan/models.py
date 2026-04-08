@@ -87,6 +87,7 @@ class DepartmentWorkers(models.Model):
 
     department = models.CharField('Цех', max_length=50, unique=True)
     workers_count = models.IntegerField('Количество рабочих', default=1)
+    target_load_days = models.IntegerField('Целевая загрузка (дни)', default=7)
 
     def __str__(self):
         return f'{self.department}: {self.workers_count} чел.'

@@ -1,15 +1,40 @@
-import {useState} from "react";
+import {useState, useEffect, useRef, useCallback} from "react";
+import {useQuery} from "@tanstack/react-query";
+import {$axios} from "@/shared/api";
 
 interface Props {
     departments: string[];
 }
 
+interface WorkerRow {
+    department: string;
+    workers_count: number;
+    target_load_days: number;
+}
+
 export function DeptLoadEqualizer({departments}: Props) {
-    const [values, setValues] = useState<Record<string, number>>(() => {
-        const init: Record<string, number> = {};
-        for (const d of departments) init[d] = 7;
-        return init;
+    const {data} = useQuery<{rows: WorkerRow[]}>({
+        queryKey: ["departmentWorkers"],
+        queryFn: () => $axios.get('/plan/workers/').then(r => r.data),
     });
+
+    const [values, setValues] = useState<Record<string, number>>({});
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    useEffect(() => {
+        if (data?.rows) {
+            const init: Record<string, number> = {};
+            for (const r of data.rows) init[r.department] = r.target_load_days ?? 7;
+            setValues(init);
+        }
+    }, [data]);
+
+    const saveLoads = useCallback((loads: Record<string, number>) => {
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            $axios.post('/plan/workers/load/', {loads});
+        }, 800);
+    }, []);
 
     if (!departments.length) return null;
 
@@ -32,8 +57,10 @@ export function DeptLoadEqualizer({departments}: Props) {
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const y = e.clientY - rect.top;
                                     const ratio = 1 - y / rect.height;
-                                    const newVal = Math.round(ratio * 13 + 1);
-                                    setValues(prev => ({...prev, [dept]: Math.max(1, Math.min(14, newVal))}));
+                                    const newVal = Math.max(1, Math.min(14, Math.round(ratio * 13 + 1)));
+                                    const next = {...values, [dept]: newVal};
+                                    setValues(next);
+                                    saveLoads(next);
                                 }}
                             >
                                 <div
