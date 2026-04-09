@@ -53,6 +53,19 @@ export const AiPlanPage = () => {
     const [prompt, setPrompt] = useState("");
     const [generating, setGenerating] = useState(false);
     const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
+    // Этапы генерации — фиксированный список фаз, которые проходит задача
+    const GENERATION_PHASES = [
+        {key: 'Сбор данных...', label: 'Сбор данных'},
+        {key: 'Расчёт весов...', label: 'Расчёт весов'},
+        {key: 'Комментарии AI...', label: 'Комментарии AI'},
+        {key: 'Построение графика...', label: 'Построение графика'},
+        {key: 'Анализ настроек...', label: 'Анализ настроек'},
+        {key: 'Генерация плана на день...', label: 'Генерация плана'},
+    ] as const;
+    // completedPhases — множество ключей фаз, которые завершены
+    const [completedPhases, setCompletedPhases] = useState<Set<string>>(new Set());
+    // failedPhase — ключ фазы, на которой произошла ошибка
+    const [failedPhase, setFailedPhase] = useState<string | null>(null);
     const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const [normsModal, setNormsModal] = useState<{productId: number; productName: string} | null>(null);
     // Ошибка генерации (например: "Не задан граф для типов: X") — показывается как баннер
@@ -166,6 +179,19 @@ export const AiPlanPage = () => {
 
                 if (status === 'running') {
                     setProgress({current, total, phase});
+
+                    // Отмечаем все фазы до текущей как завершённые
+                    if (phase) {
+                        setCompletedPhases(prev => {
+                            const next = new Set(prev);
+                            for (const p of GENERATION_PHASES) {
+                                if (p.key === phase) break;
+                                next.add(p.key);
+                            }
+                            return next;
+                        });
+                    }
+
                     // Обновляем данные по мере обработки
                     if (current > 0) {
                         queryClient.invalidateQueries({queryKey: ["aiPlan"]});
@@ -173,15 +199,18 @@ export const AiPlanPage = () => {
                 } else if (status === 'completed') {
                     stopPolling();
                     setGenerating(false);
+                    // Отмечаем все фазы как завершённые, через 5с скрываем
+                    setCompletedPhases(new Set(GENERATION_PHASES.map(p => p.key)));
                     setProgress(null);
                     queryClient.invalidateQueries({queryKey: ["aiPlan"]});
                     toast.success('AI план полностью готов!');
+                    setTimeout(() => setCompletedPhases(new Set()), 5000);
                 } else if (status === 'failed') {
                     stopPolling();
                     setGenerating(false);
+                    // Запоминаем на какой фазе упало
+                    setFailedPhase(phase || null);
                     setProgress(null);
-                    // Сохраняем ошибку в стейт для отображения баннером
-                    // (например: "Не задан граф для типов: Стол, Подушка")
                     const errMsg = error || 'Ошибка генерации плана';
                     setGenError(errMsg);
                     toast.error(errMsg);
@@ -216,7 +245,9 @@ export const AiPlanPage = () => {
 
     const handleGenerate = useCallback(() => {
         setGenerating(true);
-        setGenError(null);  // Сбросить предыдущую ошибку при новом запуске
+        setGenError(null);
+        setCompletedPhases(new Set());
+        setFailedPhase(null);
         setProgress({current: 0, total: 0, phase: 'Запуск...'});
 
         $axios.post('/plan/ai_plan/generate/').then(res => {
@@ -369,33 +400,57 @@ export const AiPlanPage = () => {
                 </Btn>
             )}
 
-            {/* Progress bar */}
-            {progress && (
-                <div className="border border-slate-200 rounded-lg p-3">
-                    <div className="flex justify-between text-xs text-slate-600 mb-1.5">
-                        <span className="font-medium">{progress.phase}</span>
-                        <span>
-                            {progress.total > 0
-                                ? `${progress.current} / ${progress.total} заказов`
-                                : 'Ожидание ответа AI...'
-                            }
-                        </span>
+            {/* Этапы генерации — "связка сосисок" */}
+            {(generating || completedPhases.size > 0 || failedPhase) && (
+                <div className="border border-slate-200 rounded-lg p-4">
+                    <div className="flex items-center gap-0">
+                        {GENERATION_PHASES.map((phase, idx) => {
+                            const isCompleted = completedPhases.has(phase.key);
+                            const isCurrent = generating && progress?.phase === phase.key;
+                            const isFailed = failedPhase === phase.key;
+                            // Ожидает — ещё не дошли до этого этапа
+                            const isPending = !isCompleted && !isCurrent && !isFailed;
+
+                            return (
+                                <div key={phase.key} className="flex items-center flex-1 min-w-0">
+                                    {/* Сосиска — этап */}
+                                    <div
+                                        className={twMerge(
+                                            "flex-1 h-9 rounded-full flex items-center justify-center px-2 transition-all duration-500 relative overflow-hidden",
+                                            isCompleted && "bg-green-500 text-white",
+                                            isCurrent && "bg-blue-500 text-white",
+                                            isFailed && "bg-red-500 text-white",
+                                            isPending && "bg-slate-100 text-slate-400",
+                                        )}
+                                    >
+                                        {/* Пульсация для текущего этапа */}
+                                        {isCurrent && (
+                                            <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse opacity-30" />
+                                        )}
+                                        <div className="flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                            {/* Иконка статуса */}
+                                            {isCompleted && <span className="text-xs">&#10003;</span>}
+                                            {isCurrent && <span className="text-xs animate-spin">&#9696;</span>}
+                                            {isFailed && <span className="text-xs">&#10007;</span>}
+                                            {isPending && <span className="text-xs text-slate-300">&#9679;</span>}
+                                            <span className="text-[11px] font-medium truncate">{phase.label}</span>
+                                        </div>
+                                    </div>
+                                    {/* Соединитель между сосисками */}
+                                    {idx < GENERATION_PHASES.length - 1 && (
+                                        <div className={twMerge(
+                                            "w-2 h-1 shrink-0",
+                                            isCompleted ? "bg-green-400" : "bg-slate-200"
+                                        )} />
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
-                    <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                        <div
-                            className="bg-blue-500 h-full rounded-full transition-all duration-500 ease-out"
-                            style={{
-                                width: progress.total > 0
-                                    ? `${Math.round((progress.current / progress.total) * 100)}%`
-                                    : '100%',
-                                animation: progress.total === 0 ? 'pulse 2s ease-in-out infinite' : undefined,
-                                opacity: progress.total === 0 ? 0.5 : 1,
-                            }}
-                        />
-                    </div>
-                    {progress.total > 0 && (
-                        <div className="text-[10px] text-slate-400 mt-1 text-right">
-                            {Math.round((progress.current / progress.total) * 100)}%
+                    {/* Детали текущего этапа — количество обработанных заказов */}
+                    {progress && progress.phase === 'Комментарии AI...' && progress.total > 0 && (
+                        <div className="mt-2 text-xs text-slate-500 text-center">
+                            Заказы прокомментированы: {progress.current} / {progress.total}
                         </div>
                     )}
                 </div>

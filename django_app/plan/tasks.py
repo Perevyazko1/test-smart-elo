@@ -6,7 +6,8 @@ AI-планирование производства.
   Этап 2: Python рассчитывает веса всех заказов (формула: сроки × K1 + прогресс × K2 + загрузка × K3)
   Этап 3: GPT batch — комментарии и корректировка весов для топ-50
   Этап 4: Построение chart-таблицы (раскладка заказов по цехам и дням с учётом графа зависимостей)
-  Этап 5: GPT summary — план на день + рекомендации + предупреждения
+  Этап 5а: GPT settings — рекомендации по настройкам слайдеров и эквалайзера
+  Этап 5б: GPT summary — план на день + рекомендации (включая настройки) + предупреждения
 """
 
 import logging
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 # URL-ы n8n вебхуков для вызова GPT
 N8N_SUMMARY_URL = 'http://n8n:5678/webhook/ai-plan-summary'
 N8N_BATCH_URL = 'http://n8n:5678/webhook/ai-plan-batch'
+N8N_SETTINGS_URL = 'http://n8n:5678/webhook/ai-plan-settings'
 
 BATCH_SIZE = 50       # Сколько топ-заказов отправлять GPT для комментариев
 MAX_RETRIES = 3       # Количество попыток при сетевых ошибках
@@ -836,7 +838,7 @@ def generate_ai_plan_full(self):
         # GPT получает: топ-30 заказов, разбивку по цехам, прогноз загрузки (grid_summary).
         # Пишет: план на день + рекомендации по улучшению + предупреждения о проблемах.
 
-        _update_config(task_phase='Генерация плана на день...')
+        _update_config(task_phase='Подготовка данных для плана...')
 
         # Загрузить финальные данные из БД (с учётом GPT корректировки)
         order_by_series = {o['series_id']: o for o in orders}
@@ -884,6 +886,112 @@ def generate_ai_plan_full(self):
         # Прогноз загрузки из chart — для рекомендаций и предупреждений
         grid_summary = _build_grid_summary(chart_data)
 
+        # ──── Аналитика настроек — для рекомендаций GPT по слайдерам ────
+        # Считаем метрики, которые помогут GPT понять, какие настройки стоит изменить:
+        # - сколько просроченных/почти готовых заказов
+        # - какие цеха простаивают/перегружены
+        # - как компоненты формулы влияют на топ-30
+        # - целевая vs фактическая загрузка
+        from plan.models import DepartmentWorkers
+
+        near_complete = 0
+        for o in orders:
+            depts = o.get('departments', {})
+            total = 0
+            done = 0
+            for d, s in depts.items():
+                if s.get('all', 0) > 0:
+                    total += 1
+                    if s.get('ready', 0) >= s.get('all', 0):
+                        done += 1
+            if total > 0 and done / total >= 0.8 and done / total < 1.0:
+                near_complete += 1
+
+        idle_depts = []
+        overloaded_depts = []
+        target_vs_actual = {}
+        target_loads_map = {dw.department: dw.target_load_days for dw in DepartmentWorkers.objects.all()}
+        for dept, info in data['dept_summary'].items():
+            days = info.get('days_needed', 0)
+            target = target_loads_map.get(dept, 7)
+            target_vs_actual[dept] = {'target': target, 'actual': round(days, 1)}
+            if days < 1:
+                idle_depts.append(dept)
+            elif days > 10:
+                overloaded_depts.append(dept)
+
+        # Средний вклад компонентов формулы в топ-30 заказов
+        avg_components = {'deadline': 0, 'progress': 0, 'dept_load': 0}
+        top_details_count = 0
+        for entry in final_entries:
+            detail = entry.weight_detail or {}
+            if detail.get('deadline') is not None:
+                avg_components['deadline'] += abs(detail.get('deadline', 0))
+                avg_components['progress'] += abs(detail.get('progress', 0))
+                avg_components['dept_load'] += abs(detail.get('dept_load', 0))
+                top_details_count += 1
+        if top_details_count > 0:
+            total_avg = (avg_components['deadline'] + avg_components['progress'] + avg_components['dept_load']) or 1
+            avg_components = {
+                'deadline': round(avg_components['deadline'] / total_avg * 100),
+                'progress': round(avg_components['progress'] / total_avg * 100),
+                'dept_load': round(avg_components['dept_load'] / total_avg * 100),
+            }
+
+        feedbacks_count = AiPlanEntry.objects.exclude(feedback='').count()
+
+        settings_analysis = {
+            'overdue_count': data.get('overdue_count', 0),
+            'near_complete_count': near_complete,
+            'idle_depts': idle_depts,
+            'overloaded_depts': overloaded_depts,
+            'feedbacks_count': feedbacks_count,
+            'avg_weight_components': avg_components if top_details_count > 0 else None,
+            'target_vs_actual': target_vs_actual,
+        }
+
+        # ── Этап 5а: Рекомендации по настройкам (отдельный GPT вызов) ──
+        # Специализированный промпт анализирует настройки слайдеров и эквалайзера,
+        # понимает формулу расчёта и даёт конкретные рекомендации по значениям.
+        # Результат подставляется в summary как готовый текст.
+        _update_config(task_phase='Анализ настроек...')
+        settings_recs = {'settings_recommendations': '', 'equalizer_recommendations': ''}
+        try:
+            # Добавляем weight_detail в top_orders для анализа влияния компонентов
+            top_orders_with_detail = []
+            for o in top_orders_list:
+                o_copy = dict(o)
+                sid = o.get('order', '')
+                # Найти detail из entry
+                for entry in final_entries:
+                    if entry.order_product.series_id == o_copy.get('series_id', ''):
+                        o_copy['weight_detail'] = entry.weight_detail or {}
+                        break
+                top_orders_with_detail.append(o_copy)
+
+            settings_payload = {
+                'priorities': {
+                    'k_deadline': config.weight_k_deadline,
+                    'k_progress': config.weight_k_progress,
+                    'k_dept_load': config.weight_k_dept_load,
+                    'k_feedback': config.weight_k_feedback,
+                },
+                'settings_analysis': settings_analysis,
+                'department_load': data['dept_summary'],
+                'grid_summary': grid_summary,
+                'total_orders': data['total_orders'],
+                'urgent_count': data['urgent_count'],
+                'top_orders': top_orders_with_detail[:10],
+            }
+            settings_resp = _request_with_retry(N8N_SETTINGS_URL, settings_payload, timeout=60)
+            settings_resp.raise_for_status()
+            settings_recs = settings_resp.json()
+            logger.info(f'Рекомендации по настройкам получены: {len(settings_recs.get("settings_recommendations", ""))} символов')
+        except Exception as e:
+            logger.warning(f'Не удалось получить рекомендации по настройкам: {e}')
+
+        # ── Этап 5б: Summary — план на день (использует готовые рекомендации) ──
+        _update_config(task_phase='Генерация плана на день...')
         summary_payload = {
             'base_prompt': config.base_prompt,
             'department_load': data['dept_summary'],
@@ -903,6 +1011,8 @@ def generate_ai_plan_full(self):
                 'k_dept_load': config.weight_k_dept_load,
                 'k_feedback': config.weight_k_feedback,
             },
+            'settings_recommendations': settings_recs.get('settings_recommendations', ''),
+            'equalizer_recommendations': settings_recs.get('equalizer_recommendations', ''),
         }
 
         resp = _request_with_retry(N8N_SUMMARY_URL, summary_payload, timeout=120)
