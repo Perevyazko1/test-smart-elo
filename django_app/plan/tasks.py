@@ -324,10 +324,10 @@ def _build_chart_grid():
     2. Цеха обрабатываются в топологическом порядке (сначала Пила, потом Сборка)
     3. Сортировка заказов зависит от слайдера "Загрузка цехов":
        - Загрузка низкая → по весу (сроки, прогресс, обр.связь решают)
-       - Загрузка высокая → по feed_score (быстро тут / много дальше)
+       - Загрузка высокая → по bottleneck_score (быстрые заказы первыми)
     4. Стартовые цеха: фиксированная сортировка, заказы последовательно
     5. Зависимые цеха: день-по-день раскладка — каждый день берём что готово,
-       с приоритетом по готовности + feed_score + weight
+       с приоритетом по готовности + bottleneck_score + weight
     6. Потоковая передача: штуки передаются ежедневно (мин. партия = 1)
 
     Returns: dict {departments, total_days, grid: {dept: [{orders, load, hours}]}}
@@ -439,7 +439,7 @@ def _build_chart_grid():
 
     # --- load_factor: насколько слайдер "Загрузка цехов" доминирует ---
     # load_factor = 0.0 → чистый вес (сроки/прогресс/обр.связь решают)
-    # load_factor = 1.0 → максимальная эффективность конвейера (feed_score)
+    # load_factor = 1.0 → максимальная эффективность конвейера (bottleneck_score)
     # Считается как доля K_загрузка в сумме всех коэффициентов.
     from plan.models import AiPlanConfig
     _cfg = AiPlanConfig.objects.filter(pk=1).first()
@@ -452,51 +452,120 @@ def _build_chart_grid():
     )
     load_factor = k_load / k_sum if k_sum > 0 else 0.25
 
-    # --- feed_score: "быстро тут / много дальше по цепочке" ---
-    # Для каждого заказа в каждом цехе считаем: сколько часов работы
-    # осталось НИЖЕ по графу зависимостей. Заказ который быстро проходит
-    # текущий цех, но имеет много работы дальше → выгоднее пустить первым,
-    # чтобы зависимые цеха не простаивали (конвейерная логика).
-    # feed_score = downstream_hours / this_dept_hours
-    # Пример: Кресло в Пиле — 2ч тут, 15ч дальше → feed_score=7.5
-    #         Диван в Пиле  — 12ч тут, 38ч дальше → feed_score=3.2
-    #         → Кресло первым, чтобы Сборка получила работу через 1 день.
+    # --- bottleneck_score: координация ВСЕХ стартовых цехов ---
+    #
+    # Проблема feed_score (старый подход):
+    #   Каждый стартовый цех сортировал заказы по СВОЕМУ feed_score.
+    #   Пила могла делать Бокс первым, а Крой — Диван первым.
+    #   В итоге Обивка ждала: для Бокса Пошив не готов, для Дивана Сборка не готова.
+    #   Детали от разных цехов приходили ВРАЗНОБОЙ → дырки в Обивке.
+    #
+    # Решение — bottleneck_score (ОДИН скор на весь заказ):
+    #   Для каждого заказа считаем самый ДЛИННЫЙ путь через все параллельные
+    #   цепочки до воронки (Обивка). Это «бутылочное горлышко» — сколько часов
+    #   пройдёт, прежде чем ВСЕ детали сойдутся в Обивке.
+    #
+    #   Все стартовые цеха используют ОДИНАКОВУЮ сортировку по этому скору.
+    #   Результат: все цеха делают один и тот же заказ первым → все детали
+    #   приходят в Обивку одновременно → нет простоев.
+    #
+    # Аналогия: ресторан. Повар (Обивка) делает бургер — нужна котлета (Пила),
+    #   булка (Крой), соус (ППУ). Если все три станции делают бургер первым —
+    #   повар получает всё сразу. Если каждая станция делает разное — повар стоит.
+    #
+    # Чем МЕНЬШЕ bottleneck — тем РАНЬШЕ заказ пролетает конвейер насквозь.
+    # Маленькие/быстрые заказы идут первыми, загружая Обивку пока большие готовятся.
 
-    def calc_downstream_hours(order, dept):
-        """Рекурсивно посчитать суммарные часы работы ниже по графу."""
+    def calc_path_hours(order, dept):
+        """Рекурсивно посчитать САМЫЙ ДЛИННЫЙ путь от цеха до конца графа.
+
+        Для каждого узла графа считаем: часы в этом цехе + max(часы по всем
+        исходящим путям). Берём max, а не sum, потому что параллельные пути
+        идут ОДНОВРЕМЕННО — bottleneck определяется самым медленным.
+
+        Пример для Бокса (34 шт), схема "Полный цикл":
+          Пила: 17ч → Сборка: 85ч → [конец пути = 102ч]
+          Лазер: 20.4ч → Сборка: уже учтён
+          Крой: 15.3ч → Пошив: 20.4ч → [конец пути = 35.7ч]
+          Столярка: 85ч → Малярка: 85ч → [конец пути = 170ч]
+          ППУ: 20.4ч → [конец пути = 20.4ч]
+
+        Результат: max(102, 35.7, 170, 20.4) = 170ч (Столярка→Малярка — bottleneck)
+
+        Args:
+            order: данные заказа с 'depts' и 'product_type'
+            dept: цех, от которого считаем путь вниз
+
+        Returns:
+            Часы самого длинного пути от dept до конца графа.
+            Включает часы самого dept.
+        """
         pt = order.get('product_type', '')
         wf = workflows.get(pt)
+
+        # Часы этого заказа в текущем цехе (0 если заказ не проходит через этот цех)
+        dept_info = order['depts'].get(dept)
+        my_hours = dept_info['hours'] if dept_info else 0
+
         if not wf:
-            return 0
-        # Куда передаёт этот цех?
+            return my_hours
+
+        # Куда передаёт этот цех? (например Пила → ["Сборка"])
         next_depts = wf.get(dept, [])
-        total = 0
+        if not next_depts:
+            return my_hours
+
+        # Считаем самый длинный путь через все исходящие рёбра.
+        # Берём max потому что параллельные пути идут одновременно —
+        # bottleneck = самый медленный из них.
+        max_downstream = 0
         for nd in next_depts:
             if nd in ('Готово',):
                 continue
-            # Часы этого заказа в следующем цехе
-            nd_info = order['depts'].get(nd)
-            if nd_info:
-                total += nd_info['hours']
-            # Плюс всё что ещё дальше (рекурсия)
-            total += calc_downstream_hours(order, nd)
-        return total
+            # Рекурсивно считаем путь от следующего цеха
+            path = calc_path_hours(order, nd)
+            if path > max_downstream:
+                max_downstream = path
 
-    # Рассчитать feed_score для каждого заказа × цех
+        return my_hours + max_downstream
+
+    # --- Рассчитать bottleneck_score для каждого заказа ---
+    # Один скор на весь заказ (не per-dept как feed_score).
+    # Все стартовые цеха будут сортировать по нему одинаково.
     for order in order_dept_data:
-        order['feed_scores'] = {}
-        for dept, info in order['depts'].items():
-            downstream = calc_downstream_hours(order, dept)
-            this_hours = info['hours']
-            # feed_score: чем больше работы дальше и чем меньше тут — тем выгоднее пустить первым
-            order['feed_scores'][dept] = downstream / this_hours if this_hours > 0 else 0
+        pt = order.get('product_type', '')
+        wf = workflows.get(pt)
 
-    # Нормализуем feed_score к шкале 0-1000 (как weight) для корректного смешивания
-    max_feed = max((fs for o in order_dept_data for fs in o['feed_scores'].values()), default=1)
-    if max_feed > 0:
-        for order in order_dept_data:
-            for dept in order['feed_scores']:
-                order['feed_scores'][dept] = order['feed_scores'][dept] / max_feed * 1000
+        if wf:
+            # Находим стартовые цеха из графа (те, куда указывает "Старт")
+            start_depts = wf.get('Старт', [])
+
+            # bottleneck = самый длинный путь через ВСЕ параллельные цепочки.
+            # Пример: Старт → [Пила, Лазер, Крой, ППУ, Столярка]
+            #   Путь через Пилу→Сборку = 102ч
+            #   Путь через Столярку→Малярку = 170ч
+            #   bottleneck = max(102, ..., 170) = 170ч
+            bottleneck = 0
+            for sd in start_depts:
+                if sd in ('Готово',):
+                    continue
+                path = calc_path_hours(order, sd)
+                if path > bottleneck:
+                    bottleneck = path
+            order['bottleneck_hours'] = bottleneck
+        else:
+            # Нет графа — просто сумма часов по всем цехам
+            order['bottleneck_hours'] = sum(info['hours'] for info in order['depts'].values())
+
+    # Нормализуем bottleneck к шкале 0-1000 (как weight).
+    # ИНВЕРТИРУЕМ: маленький bottleneck → высокий скор (быстрые заказы первые).
+    # Пример: Диван bottleneck=170ч → скор низкий, Кресло bottleneck=12ч → скор высокий.
+    max_bn = max((o['bottleneck_hours'] for o in order_dept_data), default=1) or 1
+    for order in order_dept_data:
+        # Инверсия: (1 - bottleneck/max) × 1000
+        # bottleneck=0 → скор=1000 (мгновенно пролетает)
+        # bottleneck=max → скор=0 (самый долгий)
+        order['bottleneck_score'] = (1 - order['bottleneck_hours'] / max_bn) * 1000
 
     # Приоритетные заказы первые (базовая сортировка по весу)
     order_dept_data.sort(key=lambda x: x['weight'], reverse=True)
@@ -712,17 +781,26 @@ def _build_chart_grid():
             # ═══════════════════════════════════════════════════════════════
             # СТАРТОВЫЕ ЦЕХА (Пила, Лазер, Крой, ППУ, Столярка)
             # Обрабатывают заказы последовательно в порядке приоритета.
-            # Сортировка: смесь weight и feed_score с учётом load_factor.
-            # При высокой Загрузке → feed_score доминирует: заказы которые
-            # быстро проходят тут, но имеют много работы дальше, идут первыми.
+            #
+            # Ключевая идея: ВСЕ стартовые цеха сортируют заказы ОДИНАКОВО
+            # по bottleneck_score. Это гарантирует что все цеха делают один
+            # и тот же заказ первым → детали от разных цехов сходятся к
+            # воронке (Обивка) СИНХРОННО → нет дырок в Обивке.
+            #
+            # Смешанная сортировка с учётом load_factor:
+            #   При высокой Загрузке → bottleneck_score доминирует
+            #     (маленькие/быстрые заказы первыми — пролетают конвейер насквозь)
+            #   При низкой Загрузке → weight доминирует
+            #     (приоритетные по срокам/прогрессу заказы первыми)
             # ═══════════════════════════════════════════════════════════════
             dept_orders = [o for o in order_dept_data if dept in o['depts']]
 
-            # Смешанная сортировка: weight × (1 - load_factor) + feed_score × load_factor
+            # weight × (1 - load_factor) + bottleneck_score × load_factor
+            # bottleneck_score одинаковый для всех цехов → единый порядок
             dept_orders.sort(
                 key=lambda o: (
                     o['weight'] * (1 - load_factor) +
-                    o.get('feed_scores', {}).get(dept, 0) * load_factor
+                    o.get('bottleneck_score', 0) * load_factor
                 ),
                 reverse=True,
             )
@@ -759,7 +837,7 @@ def _build_chart_grid():
             # пока другие уже доступны.
             #
             # Каждый день пересортировываем заказы по смешанному приоритету:
-            #   score = weight × (1-lf) + (feed_score + readiness) × lf
+            #   score = weight × (1-lf) + (bottleneck_score + readiness) × lf
             # где readiness = доступные штуки (нормализованные 0-1000).
             # При высокой Загрузке → берём что готово + что быстрее пройдёт дальше.
             # При низкой Загрузке → по весу как обычно.
@@ -833,11 +911,19 @@ def _build_chart_grid():
 
                 # Нормализуем readiness к шкале 0-1000 для корректного смешивания
                 max_readiness = max(r for _, _, r in scorable) or 1
-                # Сортировка: смесь weight, feed_score и readiness
+
+                # Сортировка зависимых цехов: weight + bottleneck_score + readiness
+                # При высокой Загрузке:
+                #   bottleneck_score — заказы с маленьким bottleneck первыми
+                #     (быстро пролетают, загружают следующие цеха)
+                #   readiness — заказы с готовыми деталями от предшественников первыми
+                #     (не ждать, брать что есть)
+                # При низкой Загрузке:
+                #   weight доминирует (приоритетные по срокам/прогрессу первыми)
                 scorable.sort(
                     key=lambda x: (
                         x[0]['weight'] * (1 - load_factor) +
-                        (x[0].get('feed_scores', {}).get(dept, 0) +
+                        (x[0].get('bottleneck_score', 0) +
                          x[2] / max_readiness * 1000) * load_factor
                     ),
                     reverse=True,
