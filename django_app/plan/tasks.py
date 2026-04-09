@@ -544,6 +544,15 @@ def _build_chart_grid():
             # Нет предшественников (это стартовый цех типа Пилы) — лимита нет
             return None
 
+        # Фильтруем предшественников: учитываем только те цеха, через которые
+        # этот заказ РЕАЛЬНО проходит (есть в depts). Если заказ не проходит через Пилу
+        # (нулевой норматив), Пила не должна блокировать Сборку.
+        order_depts = set(order['depts'].keys())
+        actual_deps = [d for d in dep_depts if d in order_depts]
+        if not actual_deps:
+            # Все предшественники по графу не участвуют в этом заказе — лимита нет
+            return None
+
         # Считаем сколько штук доступно от КАЖДОГО предшественника к ПРЕДЫДУЩЕМУ дню.
         # Берём предыдущий день (day - 1), потому что штуки выпущенные сегодня
         # в Пиле поступят в Сборку только ЗАВТРА (передача в конце дня).
@@ -553,7 +562,7 @@ def _build_chart_grid():
             return 0
 
         min_produced = None
-        for dep_dept in dep_depts:
+        for dep_dept in actual_deps:
             # Сколько штук dep_dept выпустил к концу prev_day?
             dep_produced = 0
             if sid in produced_by_day and dep_dept in produced_by_day[sid]:
@@ -598,8 +607,11 @@ def _build_chart_grid():
             # Для стартовых цехов (без зависимостей) — всегда = remaining (всё доступно).
             # Для зависимых — пересчитывается каждый день через get_available_units().
             day = 0
+            # Защита от бесконечного цикла: максимум 365 дней.
+            # Если за 365 дней работа не уложилась — что-то пошло не так.
+            MAX_DAYS = 365
 
-            while hours_left > 0:
+            while hours_left > 0 and day < MAX_DAYS:
                 # --- Проверка потоковой доступности ---
                 # Сколько штук заказа доступно от предшественников к этому дню?
                 available = get_available_units(order, dept, day)
