@@ -611,6 +611,7 @@ def _build_grid_summary(chart_data):
     - overloaded_days: сколько дней с перегрузкой
     - runs_out_day: через сколько дней цех останется без работы
     - is_terminal: терминальный ли цех (последний в графе, например Упаковка)
+    - gap_days: количество пустых дней ПОСЕРЕДИНЕ загруженных (дырки из-за ожидания)
 
     Терминальные цеха (Упаковка, Обивка) по определению ждут все предыдущие.
     Их простой — это штатная ситуация, а не проблема. GPT не должен
@@ -647,13 +648,126 @@ def _build_grid_summary(chart_data):
         overloaded_days = sum(1 for d in days if d['load'] == 'overload')
         # День когда цех впервые остаётся без работы
         runs_out = next((i for i, d in enumerate(days) if d['load'] == 'empty'), len(days))
+
+        # Количество "дырок" — пустых дней МЕЖДУ загруженными.
+        # Это простой из-за ожидания предшественников по графу зависимостей.
+        # Пример: [full, full, empty, empty, full, full, empty] → gap_days=2 (два пустых посередине)
+        # Пустые дни в конце — это не дырки, а просто конец работы.
+        gap_days = 0
+        if loaded_days > 0:
+            # Найти последний загруженный день
+            last_loaded = 0
+            for i in range(len(days) - 1, -1, -1):
+                if days[i]['load'] != 'empty':
+                    last_loaded = i
+                    break
+            # Считать пустые дни до last_loaded (это именно дырки-ожидания)
+            for i in range(last_loaded):
+                if days[i]['load'] == 'empty':
+                    gap_days += 1
+
         summary[dept] = {
             'loaded_days': loaded_days,
             'overloaded_days': overloaded_days,
             'runs_out_day': runs_out,
             'is_terminal': dept in terminal_depts,
+            'gap_days': gap_days,
         }
     return summary
+
+
+def _calc_equalizer_suggestions(grid_summary, dept_dependencies, target_loads, dept_summary):
+    """Рассчитать рекомендуемые значения эквалайзера на основе дырок в графике.
+
+    Логика:
+    1. Для каждого цеха с дырками (gap_days > 0) — это простой из-за ожидания предшественников.
+    2. Чтобы закрыть дырки, нужно чтобы предшественники отдавали работу быстрее.
+    3. Увеличение эквалайзера предшественника → он притягивает больше заказов → быстрее передаёт.
+    4. Рекомендуемое увеличение = текущий_эквалайзер + gap_days зависимого цеха
+       (но не больше 14 — максимум слайдера).
+
+    Также учитываем перегрузку: если цех перегружен (факт > цель×2), можно
+    уменьшить его эквалайзер, чтобы снять штраф и перераспределить.
+
+    Returns: list of {dept, current, suggested, reason, dependent_dept, gap_days}
+    """
+    suggestions = []
+    seen_depts = set()  # Не дублировать рекомендации для одного предшественника
+
+    for dept, info in grid_summary.items():
+        gap_days = info.get('gap_days', 0)
+        if gap_days < 2:
+            # Меньше 2 дырок — не критично, не рекомендуем
+            continue
+        if info.get('is_terminal'):
+            # Терминальные цеха всегда ждут — это штатно
+            continue
+
+        # Кого этот цех ждёт?
+        predecessors = dept_dependencies.get(dept, [])
+        if not predecessors:
+            continue
+
+        for pred in predecessors:
+            if pred in seen_depts:
+                continue
+
+            pred_target = target_loads.get(pred, 7)
+            pred_info = dept_summary.get(pred, {})
+            pred_days = pred_info.get('days_needed', 0)
+
+            # Рекомендация: увеличить эквалайзер предшественника на кол-во дырок зависимого,
+            # но ограничить 14 (максимум слайдера) и не рекомендовать если уже >= 14
+            suggested = min(pred_target + gap_days, 14)
+            if suggested <= pred_target:
+                continue
+
+            seen_depts.add(pred)
+            suggestions.append({
+                'dept': pred,
+                'current': pred_target,
+                'suggested': suggested,
+                'dependent_dept': dept,
+                'gap_days': gap_days,
+                'pred_fact': round(pred_days, 1),
+                'reason': (
+                    f'{dept} простаивает {gap_days} дн. из-за ожидания {pred}. '
+                    f'Увеличить эквалайзер {pred} с {pred_target} до {suggested} дн. — '
+                    f'{pred} получит бонус к приоритету заказов и быстрее передаст работу в {dept}.'
+                ),
+            })
+
+    # Рекомендации по снижению эквалайзера перегруженных цехов
+    for dept, info in grid_summary.items():
+        if dept in seen_depts:
+            continue
+        dept_target = target_loads.get(dept, 7)
+        dept_info = dept_summary.get(dept, {})
+        dept_days = dept_info.get('days_needed', 0)
+
+        # Если факт > цель × 3 и цех перегружен — можно снизить эквалайзер
+        # чтобы штраф начинался раньше и заказы перетекали в другие цеха
+        if dept_days > dept_target * 3 and dept_target > 2:
+            suggested = max(2, round(dept_days / 3))
+            if suggested < dept_target:
+                seen_depts.add(dept)
+                suggestions.append({
+                    'dept': dept,
+                    'current': dept_target,
+                    'suggested': suggested,
+                    'dependent_dept': None,
+                    'gap_days': 0,
+                    'pred_fact': round(dept_days, 1),
+                    'reason': (
+                        f'{dept} сильно перегружен: факт={round(dept_days, 1)} дн. при эквалайзере {dept_target} дн. '
+                        f'Снизить эквалайзер до {suggested} дн. — штраф -20 начнётся при {suggested * 2} днях '
+                        f'(сейчас при {dept_target * 2}), заказы сильнее перетекут в другие цеха.'
+                    ),
+                })
+
+    # Сортируем по количеству дырок (самые критичные первые)
+    suggestions.sort(key=lambda s: s['gap_days'], reverse=True)
+    return suggestions[:5]
 
 
 # ─── Основная Celery-задача ──────────────────────────────────────
@@ -969,6 +1083,33 @@ def generate_ai_plan_full(self):
                         break
                 top_orders_with_detail.append(o_copy)
 
+            # Собрать единый граф зависимостей из всех workflow
+            # (объединение всех типов изделий — для GPT достаточно общей картины)
+            dept_dependencies = {}  # {цех: [от кого зависит]}
+            dept_feeds = {}  # {цех: [кому передаёт работу]}
+            for wf in workflows.values():
+                for src, targets in wf.items():
+                    if src in ('Старт', 'Готово'):
+                        continue
+                    for tgt in targets:
+                        if tgt in ('Старт', 'Готово'):
+                            continue
+                        if tgt not in dept_dependencies:
+                            dept_dependencies[tgt] = set()
+                        dept_dependencies[tgt].add(src)
+                        if src not in dept_feeds:
+                            dept_feeds[src] = set()
+                        dept_feeds[src].add(tgt)
+            # Конвертируем set → list для JSON-сериализации
+            dept_dependencies = {k: sorted(v) for k, v in dept_dependencies.items()}
+            dept_feeds = {k: sorted(v) for k, v in dept_feeds.items()}
+
+            # Рассчитать рекомендации по эквалайзеру на основе дырок в графике
+            # (Python считает конкретные числа — GPT только форматирует текст)
+            equalizer_suggestions = _calc_equalizer_suggestions(
+                grid_summary, dept_dependencies, target_loads_map, data['dept_summary']
+            )
+
             settings_payload = {
                 'priorities': {
                     'k_deadline': config.weight_k_deadline,
@@ -982,6 +1123,9 @@ def generate_ai_plan_full(self):
                 'total_orders': data['total_orders'],
                 'urgent_count': data['urgent_count'],
                 'top_orders': top_orders_with_detail[:10],
+                'dept_dependencies': dept_dependencies,
+                'dept_feeds': dept_feeds,
+                'equalizer_suggestions': equalizer_suggestions,
             }
             settings_resp = _request_with_retry(N8N_SETTINGS_URL, settings_payload, timeout=60)
             settings_resp.raise_for_status()
