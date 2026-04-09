@@ -461,7 +461,7 @@ export const AiPlanPage = () => {
                             <th className="sticky left-0 z-10 bg-slate-50 px-1 py-2 text-center w-[30px]">#</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[45px]" style={{left: 30}}>Фото</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[200px]" style={{left: 75}}>Изделие</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[65px]" style={{left: 275}}>Заказ</th>
+                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 435}}>Вес</th>
@@ -560,9 +560,9 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 </div>
             </td>
             {/* Заказ */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px]", rowBg)} style={{left: 275}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px] min-w-[65px] max-w-[65px]", rowBg)} style={{left: 275}}>
                 <span className={twMerge(
-                    "text-xs",
+                    "text-xs truncate block",
                     item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
                 )}>
                     {item.order}

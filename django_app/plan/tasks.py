@@ -745,11 +745,19 @@ def generate_ai_plan_full(self):
                 o_copy['calculated_weight'] = weight_map[o['series_id']]['weight']
                 top_orders.append(o_copy)
 
+        # Передаём настройки приоритетов, чтобы GPT писал комментарии
+        # исходя из того что реально важно (а не всегда про просрочку)
         batch_payload = {
             'base_prompt': config.base_prompt,
             'orders': top_orders,
             'department_load': data['dept_summary'],
             'today': data['today'],
+            'priorities': {
+                'k_deadline': config.weight_k_deadline,
+                'k_progress': config.weight_k_progress,
+                'k_dept_load': config.weight_k_dept_load,
+                'k_feedback': config.weight_k_feedback,
+            },
         }
 
         resp = _request_with_retry(N8N_BATCH_URL, batch_payload, timeout=180)
