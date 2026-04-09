@@ -76,7 +76,49 @@ export const AiPlanPage = () => {
         queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
     });
     const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
-    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 40, k_feedback: 35};
+    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 35, k_feedback: 25};
+
+    // Бюджет слайдеров: сумма всех 4 коэффициентов = 100.
+    // При движении одного слайдера остальные пропорционально уменьшаются.
+    // Принцип "Быстро, Качественно, Недорого — выбери два":
+    // нельзя выкрутить всё на максимум, нужно расставлять приоритеты.
+    const BUDGET = 100;
+    const SLIDER_KEYS: (keyof IWeightCoefficients)[] = ['k_deadline', 'k_progress', 'k_dept_load', 'k_feedback'];
+
+    const redistributeWeights = useCallback((changedKey: keyof IWeightCoefficients, newValue: number, current: IWeightCoefficients): IWeightCoefficients => {
+        const clamped = Math.max(0, Math.min(BUDGET, newValue));
+        const remaining = BUDGET - clamped;
+        const otherKeys = SLIDER_KEYS.filter(k => k !== changedKey);
+
+        // Сумма остальных слайдеров ДО изменения
+        const othersSum = otherKeys.reduce((s, k) => s + current[k], 0);
+
+        const result = {...current, [changedKey]: clamped};
+
+        if (othersSum > 0) {
+            // Пропорционально уменьшаем/увеличиваем остальные
+            let distributed = 0;
+            otherKeys.forEach((k, i) => {
+                if (i === otherKeys.length - 1) {
+                    // Последний забирает остаток (чтобы сумма была точно 100)
+                    result[k] = remaining - distributed;
+                } else {
+                    const share = Math.round((current[k] / othersSum) * remaining);
+                    result[k] = share;
+                    distributed += share;
+                }
+            });
+        } else {
+            // Все остальные на нуле — делим поровну
+            const each = Math.floor(remaining / otherKeys.length);
+            const extra = remaining - each * otherKeys.length;
+            otherKeys.forEach((k, i) => {
+                result[k] = each + (i < extra ? 1 : 0);
+            });
+        }
+
+        return result;
+    }, []);
 
     const saveWeights = useCallback((w: IWeightCoefficients) => {
         setLocalWeights(w);
@@ -332,11 +374,11 @@ export const AiPlanPage = () => {
                                 <input
                                     type="range"
                                     min={0}
-                                    max={50}
+                                    max={100}
                                     value={weights[key]}
                                     onChange={(e) => {
                                         const val = parseInt(e.target.value);
-                                        const next = {...weights, [key]: val};
+                                        const next = redistributeWeights(key, val, weights);
                                         setLocalWeights(next);
                                     }}
                                     onMouseUp={() => saveWeights(weights)}

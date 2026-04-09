@@ -322,9 +322,13 @@ def _build_chart_grid():
     Алгоритм:
     1. Для каждого заказа в каждом цехе рассчитать hours_needed = remaining × hours_per_unit
     2. Цеха обрабатываются в топологическом порядке (сначала Пила, потом Сборка)
-    3. Заказы внутри цеха сортируются по sort_weight (приоритетные первые)
-    4. Заказ в цехе B начинается не раньше, чем закончится во всех цехах-зависимостях
-    5. Дни заполняются до исчерпания capacity (рабочие × 8ч), потом следующий день
+    3. Сортировка заказов зависит от слайдера "Загрузка цехов":
+       - Загрузка низкая → по весу (сроки, прогресс, обр.связь решают)
+       - Загрузка высокая → по feed_score (быстро тут / много дальше)
+    4. Стартовые цеха: фиксированная сортировка, заказы последовательно
+    5. Зависимые цеха: день-по-день раскладка — каждый день берём что готово,
+       с приоритетом по готовности + feed_score + weight
+    6. Потоковая передача: штуки передаются ежедневно (мин. партия = 1)
 
     Returns: dict {departments, total_days, grid: {dept: [{orders, load, hours}]}}
     """
@@ -433,7 +437,68 @@ def _build_chart_grid():
                 'depts': depts,
             })
 
-    # Приоритетные заказы первые
+    # --- load_factor: насколько слайдер "Загрузка цехов" доминирует ---
+    # load_factor = 0.0 → чистый вес (сроки/прогресс/обр.связь решают)
+    # load_factor = 1.0 → максимальная эффективность конвейера (feed_score)
+    # Считается как доля K_загрузка в сумме всех коэффициентов.
+    from plan.models import AiPlanConfig
+    _cfg = AiPlanConfig.objects.filter(pk=1).first()
+    k_load = _cfg.weight_k_dept_load if _cfg else 25
+    k_sum = (
+        (_cfg.weight_k_deadline if _cfg else 25) +
+        (_cfg.weight_k_progress if _cfg else 25) +
+        k_load +
+        (_cfg.weight_k_feedback if _cfg else 25)
+    )
+    load_factor = k_load / k_sum if k_sum > 0 else 0.25
+
+    # --- feed_score: "быстро тут / много дальше по цепочке" ---
+    # Для каждого заказа в каждом цехе считаем: сколько часов работы
+    # осталось НИЖЕ по графу зависимостей. Заказ который быстро проходит
+    # текущий цех, но имеет много работы дальше → выгоднее пустить первым,
+    # чтобы зависимые цеха не простаивали (конвейерная логика).
+    # feed_score = downstream_hours / this_dept_hours
+    # Пример: Кресло в Пиле — 2ч тут, 15ч дальше → feed_score=7.5
+    #         Диван в Пиле  — 12ч тут, 38ч дальше → feed_score=3.2
+    #         → Кресло первым, чтобы Сборка получила работу через 1 день.
+
+    def calc_downstream_hours(order, dept):
+        """Рекурсивно посчитать суммарные часы работы ниже по графу."""
+        pt = order.get('product_type', '')
+        wf = workflows.get(pt)
+        if not wf:
+            return 0
+        # Куда передаёт этот цех?
+        next_depts = wf.get(dept, [])
+        total = 0
+        for nd in next_depts:
+            if nd in ('Готово',):
+                continue
+            # Часы этого заказа в следующем цехе
+            nd_info = order['depts'].get(nd)
+            if nd_info:
+                total += nd_info['hours']
+            # Плюс всё что ещё дальше (рекурсия)
+            total += calc_downstream_hours(order, nd)
+        return total
+
+    # Рассчитать feed_score для каждого заказа × цех
+    for order in order_dept_data:
+        order['feed_scores'] = {}
+        for dept, info in order['depts'].items():
+            downstream = calc_downstream_hours(order, dept)
+            this_hours = info['hours']
+            # feed_score: чем больше работы дальше и чем меньше тут — тем выгоднее пустить первым
+            order['feed_scores'][dept] = downstream / this_hours if this_hours > 0 else 0
+
+    # Нормализуем feed_score к шкале 0-1000 (как weight) для корректного смешивания
+    max_feed = max((fs for o in order_dept_data for fs in o['feed_scores'].values()), default=1)
+    if max_feed > 0:
+        for order in order_dept_data:
+            for dept in order['feed_scores']:
+                order['feed_scores'][dept] = order['feed_scores'][dept] / max_feed * 1000
+
+    # Приоритетные заказы первые (базовая сортировка по весу)
     order_dept_data.sort(key=lambda x: x['weight'], reverse=True)
 
     # --- Топологическая сортировка цехов ---
@@ -581,107 +646,231 @@ def _build_chart_grid():
 
         return min_produced if min_produced is not None else 0
 
+    # --- Определяем какие цеха зависимые (имеют предшественников) ---
+    # Зависимые цеха: Сборка, Обивка, Упаковка и т.д. — те, у которых есть входящие
+    # рёбра в графе зависимостей. Для них используется день-по-день раскладка.
+    # Стартовые цеха: Пила, Лазер, Крой и т.д. — обрабатывают заказы последовательно.
+    dependent_depts = set()
+    for wf in workflows.values():
+        inverted = _invert_workflow(wf)
+        for dept_name, deps_list in inverted.items():
+            if deps_list:
+                dependent_depts.add(dept_name)
+
+    # --- Вспомогательная функция: записать produced_by_day ---
+    def _record_production(sid, dept, day, units_produced_total):
+        """Записать кумулятивный выпуск для потоковой передачи.
+        Зависимые цеха проверяют эти данные чтобы узнать сколько штук
+        предшественники уже выпустили."""
+        if sid not in produced_by_day:
+            produced_by_day[sid] = {}
+        if dept not in produced_by_day[sid]:
+            produced_by_day[sid][dept] = {}
+        produced_by_day[sid][dept][day] = units_produced_total
+
+    # --- Вспомогательная функция: разложить часы заказа в день ---
+    def _fill_order_in_day(order, dept, day, hours_this_batch, hours_per_unit, cap):
+        """Заполнить один день работой над заказом.
+        Возвращает (take, units_today) — сколько часов взято и штук обработано.
+        Возвращает (0, 0) если день полностью занят."""
+        # Создать день если его ещё нет
+        while len(dept_state[dept]) <= day:
+            dept_state[dept].append({'orders': [], 'hours': 0})
+
+        day_data = dept_state[dept][day]
+        day_free = cap - day_data['hours']
+
+        if day_free <= 0:
+            return 0, 0
+
+        # Сколько часов реально возьмём: минимум из (свободное время, доступная работа)
+        take = min(hours_this_batch, day_free)
+
+        # Сколько штук обрабатывается именно в ЭТОТ день
+        units_today = max(1, round(take / hours_per_unit))
+
+        # Добавить заказ в ячейку дня
+        day_data['orders'].append({
+            'name': order['name'],
+            'order': order['order'],
+            'picture': order['picture'],
+            'count': units_today,
+        })
+        day_data['hours'] += take
+        return take, units_today
+
     # --- Обходим цеха в топологическом порядке ---
     # Сначала стартовые цеха (Пила, Лазер) — чтобы заполнить produced_by_day,
     # потом зависимые (Сборка) — которые используют эти данные для потоковой передачи.
+    MAX_DAYS = 365
+
     for dept in topo_depts:
         cap = capacity.get(dept, WORK_HOURS)
+        is_dependent = dept in dependent_depts
 
-        # Заказы для этого цеха, отсортированные по весу (приоритетные первые)
-        dept_orders = [(o, o['depts'][dept]) for o in order_dept_data if dept in o['depts']]
+        if not is_dependent:
+            # ═══════════════════════════════════════════════════════════════
+            # СТАРТОВЫЕ ЦЕХА (Пила, Лазер, Крой, ППУ, Столярка)
+            # Обрабатывают заказы последовательно в порядке приоритета.
+            # Сортировка: смесь weight и feed_score с учётом load_factor.
+            # При высокой Загрузке → feed_score доминирует: заказы которые
+            # быстро проходят тут, но имеют много работы дальше, идут первыми.
+            # ═══════════════════════════════════════════════════════════════
+            dept_orders = [o for o in order_dept_data if dept in o['depts']]
 
-        for order, info in dept_orders:
-            hours_left = info['hours']
-            remaining = info['remaining']
-            sid = order['series_id']
+            # Смешанная сортировка: weight × (1 - load_factor) + feed_score × load_factor
+            dept_orders.sort(
+                key=lambda o: (
+                    o['weight'] * (1 - load_factor) +
+                    o.get('feed_scores', {}).get(dept, 0) * load_factor
+                ),
+                reverse=True,
+            )
 
-            # Часы на 1 штуку — базовая единица расчёта.
-            # Пример: Бокс 34шт × 0.5ч = 17ч → hours_per_unit = 0.5ч/шт
-            hours_per_unit = hours_left / remaining if remaining > 0 else 1
+            for order in dept_orders:
+                info = order['depts'][dept]
+                hours_left = info['hours']
+                remaining = info['remaining']
+                sid = order['series_id']
+                hours_per_unit = hours_left / remaining if remaining > 0 else 1
+                units_produced_total = 0
+                day = 0
 
-            # Сколько штук этот цех УЖЕ обработал в рамках этой раскладки
-            # (нарастающий итог для записи в produced_by_day)
-            units_produced_total = 0
-
-            # Сколько штук предшественники уже выпустили и этот цех ещё не обработал.
-            # Для стартовых цехов (без зависимостей) — всегда = remaining (всё доступно).
-            # Для зависимых — пересчитывается каждый день через get_available_units().
-            day = 0
-            # Защита от бесконечного цикла: максимум 365 дней.
-            # Если за 365 дней работа не уложилась — что-то пошло не так.
-            MAX_DAYS = 365
-
-            while hours_left > 0 and day < MAX_DAYS:
-                # --- Проверка потоковой доступности ---
-                # Сколько штук заказа доступно от предшественников к этому дню?
-                available = get_available_units(order, dept, day)
-
-                if available is not None:
-                    # Это зависимый цех (Сборка, Упаковка и т.д.)
-                    # available = сколько штук ВСЕ предшественники уже выпустили к вчерашнему дню
-                    # units_produced_total = сколько этот цех уже обработал
-                    # can_do = сколько НОВЫХ штук можно взять в работу
-                    can_do = available - units_produced_total
-
-                    if can_do <= 0:
-                        # Нечего обрабатывать — предшественники ещё не выпустили новых штук.
-                        # Переходим на следующий день и проверяем снова.
+                while hours_left > 0 and day < MAX_DAYS:
+                    take, units_today = _fill_order_in_day(
+                        order, dept, day, hours_left, hours_per_unit, cap
+                    )
+                    if take <= 0:
                         day += 1
                         continue
 
-                    # Ограничиваем hours_left тем, что реально доступно.
-                    # Пример: осталось 17ч работы (34 шт), но доступно только 16 шт (8ч).
-                    # Берём min(17ч, 16шт × 0.5ч = 8ч) = 8ч на этот "цикл".
-                    hours_for_available = can_do * hours_per_unit
-                    hours_this_batch = min(hours_left, hours_for_available)
-                else:
-                    # Стартовый цех (Пила, Лазер) — нет зависимостей, всё доступно
-                    hours_this_batch = hours_left
+                    hours_left -= take
+                    units_produced_total += units_today
+                    _record_production(sid, dept, day, units_produced_total)
 
-                # --- Заполнение дня ---
+                    if hours_left > 0:
+                        day += 1
+
+        else:
+            # ═══════════════════════════════════════════════════════════════
+            # ЗАВИСИМЫЕ ЦЕХА (Сборка, Обивка, Упаковка)
+            # День-по-день раскладка: каждый день берём ВСЁ что готово.
+            # Это устраняет дырки — цех не ждёт один высокоприоритетный заказ,
+            # пока другие уже доступны.
+            #
+            # Каждый день пересортировываем заказы по смешанному приоритету:
+            #   score = weight × (1-lf) + (feed_score + readiness) × lf
+            # где readiness = доступные штуки (нормализованные 0-1000).
+            # При высокой Загрузке → берём что готово + что быстрее пройдёт дальше.
+            # При низкой Загрузке → по весу как обычно.
+            # ═══════════════════════════════════════════════════════════════
+
+            # Инициализация состояния для каждого заказа в этом цехе
+            # remaining_state: {series_id: {hours_left, remaining, hours_per_unit, units_produced}}
+            remaining_state = {}
+            dept_order_list = []
+            for order in order_dept_data:
+                if dept not in order['depts']:
+                    continue
+                info = order['depts'][dept]
+                sid = order['series_id']
+                hours_left = info['hours']
+                remaining = info['remaining']
+                remaining_state[sid] = {
+                    'hours_left': hours_left,
+                    'remaining': remaining,
+                    'hours_per_unit': hours_left / remaining if remaining > 0 else 1,
+                    'units_produced': 0,
+                }
+                dept_order_list.append(order)
+
+            day = 0
+            while day < MAX_DAYS:
+                # Проверяем есть ли вообще незавершённые заказы
+                has_work = any(
+                    remaining_state[o['series_id']]['hours_left'] > 0
+                    for o in dept_order_list
+                )
+                if not has_work:
+                    break
+
                 # Создать день если его ещё нет
                 while len(dept_state[dept]) <= day:
                     dept_state[dept].append({'orders': [], 'hours': 0})
 
                 day_data = dept_state[dept][day]
                 day_free = cap - day_data['hours']
-
                 if day_free <= 0:
-                    # День полностью занят другими заказами — переходим на следующий
                     day += 1
                     continue
 
-                # Сколько часов реально возьмём: минимум из (свободное время, доступная работа)
-                take = min(hours_this_batch, day_free)
+                # --- Пересортировка заказов на ЭТОТ день ---
+                # Для каждого заказа считаем: сколько штук доступно от предшественников?
+                scorable = []
+                for order in dept_order_list:
+                    sid = order['series_id']
+                    state = remaining_state[sid]
+                    if state['hours_left'] <= 0:
+                        continue
 
-                # Сколько штук обрабатывается именно в ЭТОТ день.
-                # Пример: Пила, 1 рабочий, 8ч/день, Бокс 0.5ч/шт:
-                #   take=8ч → 8/0.5 = 16 шт
-                units_today = max(1, round(take / hours_per_unit))
+                    available = get_available_units(order, dept, day)
+                    if available is not None:
+                        can_do = available - state['units_produced']
+                        if can_do <= 0:
+                            # Предшественники ещё не выпустили новых штук — пропускаем
+                            continue
+                        readiness = can_do  # Сколько штук готово к обработке
+                    else:
+                        can_do = state['remaining']
+                        readiness = can_do
 
-                # Добавить заказ в ячейку дня с количеством на ЭТОТ день
-                day_data['orders'].append({
-                    'name': order['name'],
-                    'order': order['order'],
-                    'picture': order['picture'],
-                    'count': units_today,
-                })
-                day_data['hours'] += take
-                hours_left -= take
-                units_produced_total += units_today
+                    scorable.append((order, can_do, readiness))
 
-                # --- Записываем кумулятивный выпуск для потоковой передачи ---
-                # Это позволяет зависимым цехам узнать: "К концу дня X
-                # цех Y выпустил Z штук заказа — значит я могу взять их в работу с дня X+1".
-                if sid not in produced_by_day:
-                    produced_by_day[sid] = {}
-                if dept not in produced_by_day[sid]:
-                    produced_by_day[sid][dept] = {}
-                produced_by_day[sid][dept][day] = units_produced_total
-
-                if hours_left > 0:
-                    # Ещё есть работа — переходим на следующий день
+                if not scorable:
+                    # Ни один заказ не готов сегодня — переходим на завтра
                     day += 1
+                    continue
+
+                # Нормализуем readiness к шкале 0-1000 для корректного смешивания
+                max_readiness = max(r for _, _, r in scorable) or 1
+                # Сортировка: смесь weight, feed_score и readiness
+                scorable.sort(
+                    key=lambda x: (
+                        x[0]['weight'] * (1 - load_factor) +
+                        (x[0].get('feed_scores', {}).get(dept, 0) +
+                         x[2] / max_readiness * 1000) * load_factor
+                    ),
+                    reverse=True,
+                )
+
+                # --- Заполняем день заказами по приоритету ---
+                for order, can_do, readiness in scorable:
+                    sid = order['series_id']
+                    state = remaining_state[sid]
+
+                    if day_free <= 0:
+                        break
+
+                    hours_per_unit = state['hours_per_unit']
+
+                    # Часы доступные по потоковой модели
+                    hours_for_available = can_do * hours_per_unit
+                    hours_this_batch = min(state['hours_left'], hours_for_available)
+
+                    take, units_today = _fill_order_in_day(
+                        order, dept, day, hours_this_batch, hours_per_unit, cap
+                    )
+                    if take <= 0:
+                        continue
+
+                    state['hours_left'] -= take
+                    state['units_produced'] += units_today
+                    _record_production(sid, dept, day, state['units_produced'])
+
+                    # Обновить свободное время дня
+                    day_free = cap - dept_state[dept][day]['hours']
+
+                day += 1
 
     # --- Формирование результата ---
 

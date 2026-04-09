@@ -611,7 +611,7 @@ def save_weight_coefficients(request):
     for key in ('k_deadline', 'k_progress', 'k_dept_load', 'k_feedback'):
         val = request.data.get(key)
         if val is not None:
-            setattr(config, f'weight_{key}', max(0, min(50, int(val))))
+            setattr(config, f'weight_{key}', max(0, min(100, int(val))))
             fields.append(f'weight_{key}')
     if fields:
         config.save(update_fields=fields + ['updated_at'])
