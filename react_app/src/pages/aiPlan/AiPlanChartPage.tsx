@@ -37,6 +37,8 @@ interface ChartData {
     total_days: number;
     grid: Record<string, ChartCell[]>;
     forecast_periods?: ForecastPeriod[];
+    already_overdue?: number;
+    already_overdue_sum?: number;
 }
 
 /* ─── Цвета загрузки ячеек ─────────────────────────────────────── */
@@ -90,6 +92,8 @@ export const AiPlanChartPage = () => {
     const totalDays = data?.total_days || 0;
     const grid = data?.grid || {};
     const forecastPeriods = data?.forecast_periods || [];
+    const alreadyOverdue = data?.already_overdue || 0;
+    const alreadyOverdueSum = data?.already_overdue_sum || 0;
 
     /* Массив дат начиная с сегодня — для заголовков колонок */
     const dates = useMemo(() => {
@@ -184,6 +188,16 @@ export const AiPlanChartPage = () => {
                     Пусто
                 </div>
             </div>
+
+            {/* Плашка: уже просрочено на сегодня */}
+            {alreadyOverdue > 0 && (
+                <div className="flex items-center gap-3 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-sm">
+                    <span className="text-red-600 font-semibold">На сегодня уже просрочено:</span>
+                    <span className="text-red-700 font-bold">{alreadyOverdue} заказов</span>
+                    <span className="text-red-400">на сумму</span>
+                    <span className="text-red-700 font-bold">{formatMoney(alreadyOverdueSum)}</span>
+                </div>
+            )}
 
             {/* Прогноз выручки по 30-дневным периодам */}
             {forecastPeriods.length > 0 && (

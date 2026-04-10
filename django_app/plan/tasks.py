@@ -1157,11 +1157,24 @@ def _build_chart_grid():
     while forecast_periods and forecast_periods[-1]['orders_count'] == 0:
         forecast_periods.pop()
 
+    # Подсчёт заказов, уже просроченных на сегодня (дедлайн в прошлом).
+    # Это НЕ прогноз, а факт — сколько заказов уже не успели к сроку.
+    from datetime import date as _today_cls
+    already_overdue = 0
+    already_overdue_sum = 0.0
+    for oid, positions in order_positions.items():
+        deadlines = [p['deadline_days_left'] for p in positions if p['deadline_days_left'] is not None]
+        if deadlines and min(deadlines) < 0:
+            already_overdue += 1
+            already_overdue_sum += sum(p['price'] for p in positions)
+
     return {
         'departments': departments,
         'total_days': total_days,
         'grid': grid,
         'forecast_periods': forecast_periods,
+        'already_overdue': already_overdue,
+        'already_overdue_sum': round(already_overdue_sum, 2),
     }
 
 

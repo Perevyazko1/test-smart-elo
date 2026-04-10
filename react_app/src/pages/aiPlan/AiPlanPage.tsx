@@ -79,47 +79,9 @@ export const AiPlanPage = () => {
     const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
     const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 35, k_feedback: 25, k_revenue: 0};
 
-    // Бюджет слайдеров: сумма всех 4 коэффициентов = 100.
-    // При движении одного слайдера остальные пропорционально уменьшаются.
-    // Принцип "Быстро, Качественно, Недорого — выбери два":
-    // нельзя выкрутить всё на максимум, нужно расставлять приоритеты.
-    const BUDGET = 100;
-    const SLIDER_KEYS: (keyof IWeightCoefficients)[] = ['k_deadline', 'k_progress', 'k_dept_load', 'k_feedback', 'k_revenue'];
-
-    const redistributeWeights = useCallback((changedKey: keyof IWeightCoefficients, newValue: number, current: IWeightCoefficients): IWeightCoefficients => {
-        const clamped = Math.max(0, Math.min(BUDGET, newValue));
-        const remaining = BUDGET - clamped;
-        const otherKeys = SLIDER_KEYS.filter(k => k !== changedKey);
-
-        // Сумма остальных слайдеров ДО изменения
-        const othersSum = otherKeys.reduce((s, k) => s + current[k], 0);
-
-        const result = {...current, [changedKey]: clamped};
-
-        if (othersSum > 0) {
-            // Пропорционально уменьшаем/увеличиваем остальные
-            let distributed = 0;
-            otherKeys.forEach((k, i) => {
-                if (i === otherKeys.length - 1) {
-                    // Последний забирает остаток (чтобы сумма была точно 100)
-                    result[k] = remaining - distributed;
-                } else {
-                    const share = Math.round((current[k] / othersSum) * remaining);
-                    result[k] = share;
-                    distributed += share;
-                }
-            });
-        } else {
-            // Все остальные на нуле — делим поровну
-            const each = Math.floor(remaining / otherKeys.length);
-            const extra = remaining - each * otherKeys.length;
-            otherKeys.forEach((k, i) => {
-                result[k] = each + (i < extra ? 1 : 0);
-            });
-        }
-
-        return result;
-    }, []);
+    // Слайдеры приоритетов — каждый независим (0-100).
+    // Формула нормализует: weight = (S1×K1 + S2×K2 + ...) / (100 × сумма_K),
+    // поэтому важно соотношение слайдеров, а не абсолютные значения.
 
     const saveWeights = useCallback((w: IWeightCoefficients) => {
         setLocalWeights(w);
@@ -379,9 +341,8 @@ export const AiPlanPage = () => {
                                     max={100}
                                     value={weights[key]}
                                     onChange={(e) => {
-                                        const val = parseInt(e.target.value);
-                                        const next = redistributeWeights(key, val, weights);
-                                        setLocalWeights(next);
+                                        const val = Math.max(0, Math.min(100, parseInt(e.target.value)));
+                                        setLocalWeights({...weights, [key]: val});
                                     }}
                                     onMouseUp={() => saveWeights(weights)}
                                     onTouchEnd={() => saveWeights(weights)}
