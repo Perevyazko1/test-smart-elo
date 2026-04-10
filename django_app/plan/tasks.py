@@ -1363,7 +1363,12 @@ def generate_ai_plan_full(self):
 
         resp = _request_with_retry(N8N_BATCH_URL, batch_payload, timeout=180)
         resp.raise_for_status()
-        gpt_entries = resp.json().get('entries', [])
+        # n8n может вернуть пустой ответ если workflow упал — обрабатываем gracefully
+        try:
+            gpt_entries = resp.json().get('entries', [])
+        except Exception:
+            logger.warning('n8n вернул пустой/некорректный ответ для batch, пропускаем AI комментарии')
+            gpt_entries = []
 
         # Применить GPT корректировку и сохранить комментарии
         from plan.models import AiPlanEntry
