@@ -7,6 +7,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8443:8443"
     volumes:
       - ./django_app/media/:/usr/share/nginx/html/media
       - ./django_app/static/:/usr/share/nginx/html/static
