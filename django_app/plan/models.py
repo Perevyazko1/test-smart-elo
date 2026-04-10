@@ -109,6 +109,7 @@ class AiPlanConfig(models.Model):
     weight_k_progress = models.IntegerField('K прогресс', default=25)
     weight_k_dept_load = models.IntegerField('K загрузка цехов', default=40)
     weight_k_feedback = models.IntegerField('K обратная связь', default=35)
+    weight_k_revenue = models.IntegerField('K выручка', default=0)  # Приоритет дорогих заказов
 
     # Кэш данных для графика загрузки цехов (ai-plan-chart).
     # Заполняется при генерации AI-плана в Celery, фронт забирает готовое.

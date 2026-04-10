@@ -227,23 +227,45 @@ def _score_dept_load(departments, dept_load_days, workflow=None, target_loads=No
     return min(max(score, -50), 100)
 
 
+def _score_revenue(price, max_price):
+    """Компонент ВЫРУЧКА: 0-100.
+    Нормализует стоимость позиции (OrderProduct.price) к шкале 0-100.
+    Самый дорогой заказ = 100, бесплатный = 0.
+
+    Используется для приоритизации дорогих заказов — чтобы прибыль
+    приходила быстрее. При k_revenue > 0 дорогие заказы получают
+    более высокий вес и производятся раньше.
+
+    Args:
+        price:     стоимость этой позиции (float)
+        max_price: максимальная стоимость среди всех позиций (для нормализации)
+
+    Returns:
+        Скор 0-100 (int). 100 = самый дорогой, 0 = бесплатный.
+    """
+    if max_price <= 0 or price <= 0:
+        return 0
+    return int((price / max_price) * 100)
+
+
 # ─── Расчёт весов ────────────────────────────────────────────────
 
 def _calculate_all_weights(orders, dept_summary, config, workflows=None):
     """Рассчитать веса (приоритеты) всех заказов.
 
-    Формула: weight = (S_deadline × K1 + S_progress × K2 + S_dept_load × K3) / max → 0-1000
+    Формула: weight = (S_deadline×K1 + S_progress×K2 + S_dept_load×K3 + S_revenue×K5) / max → 0-1000
 
-    K1, K2, K3 — коэффициенты из настроек (слайдеры 0-50 на фронте).
-    S_deadline, S_progress, S_dept_load — компоненты 0-100 из функций выше.
+    K1-K5 — коэффициенты из настроек (слайдеры на фронте, бюджет 100 на все 5).
+    S_deadline, S_progress, S_dept_load, S_revenue — компоненты 0-100.
 
-    Returns: list of {series_id, weight, detail: {deadline, progress, dept_load}}
+    Returns: list of {series_id, weight, detail: {deadline, progress, dept_load, revenue}}
     """
     from plan.models import DepartmentWorkers
 
     k1 = config.weight_k_deadline
     k2 = config.weight_k_progress
     k3 = config.weight_k_dept_load
+    k5 = config.weight_k_revenue  # Приоритет дорогих заказов
 
     # Загруженность цехов в днях (рассчитана в _collect_orders_data)
     dept_load_days = {}
@@ -252,6 +274,16 @@ def _calculate_all_weights(orders, dept_summary, config, workflows=None):
 
     # Целевая загрузка из эквалайзера — "сколько дней работы хочу видеть в каждом цехе"
     target_loads = {dw.department: dw.target_load_days for dw in DepartmentWorkers.objects.all()}
+
+    # Максимальная стоимость позиции — для нормализации s_revenue.
+    # Группируем позиции по заказу (order_db_id) и берём сумму цен позиций,
+    # чтобы оценивать стоимость ЗАКАЗА, а не отдельной позиции.
+    from collections import defaultdict
+    order_prices = defaultdict(float)
+    for order in orders:
+        oid = order.get('order_db_id') or order.get('series_id')
+        order_prices[oid] += order.get('price', 0)
+    max_order_price = max(order_prices.values(), default=1) or 1
 
     results = []
     for order in orders:
@@ -264,11 +296,16 @@ def _calculate_all_weights(orders, dept_summary, config, workflows=None):
             order.get('departments', {}), dept_load_days, wf, target_loads
         )
 
+        # Скор выручки: стоимость всего заказа (сумма позиций) → 0-100
+        oid = order.get('order_db_id') or order.get('series_id')
+        s_revenue = _score_revenue(order_prices[oid], max_order_price)
+
         # Взвешенная сумма компонентов
-        raw_weight = (s_deadline * k1 + s_progress * k2 + s_dept_load * k3)
+        raw_weight = (s_deadline * k1 + s_progress * k2 + s_dept_load * k3 + s_revenue * k5)
 
         # Нормализация к шкале 0-1000
-        max_possible = 100 * (k1 + k2 + k3) if (k1 + k2 + k3) > 0 else 1
+        k_sum = k1 + k2 + k3 + k5
+        max_possible = 100 * k_sum if k_sum > 0 else 1
         weight = int(raw_weight / max_possible * 1000)
         weight = max(0, min(1000, weight))
 
@@ -279,6 +316,7 @@ def _calculate_all_weights(orders, dept_summary, config, workflows=None):
                 'deadline': s_deadline,
                 'progress': s_progress,
                 'dept_load': s_dept_load,
+                'revenue': s_revenue,
             },
         })
 
@@ -451,7 +489,8 @@ def _build_chart_grid():
         (_cfg.weight_k_deadline if _cfg else 25) +
         (_cfg.weight_k_progress if _cfg else 25) +
         k_load +
-        (_cfg.weight_k_feedback if _cfg else 25)
+        (_cfg.weight_k_feedback if _cfg else 25) +
+        (_cfg.weight_k_revenue if _cfg else 0)
     )
     load_factor = k_load / k_sum if k_sum > 0 else 0.25
 
@@ -1311,8 +1350,8 @@ def generate_ai_plan_full(self):
             return
 
         # ──── Этап 2: Python считает веса всем заказам ────
-        # Формула: weight = (S_deadline × K1 + S_progress × K2 + S_dept_load × K3) / max → 0-1000
-        # K1-K3 — из настроек приоритетов (слайдеры на фронте)
+        # Формула: weight = (S_deadline×K1 + S_progress×K2 + S_dept_load×K3 + S_revenue×K5) / max → 0-1000
+        # K1-K5 — из настроек приоритетов (слайдеры на фронте, бюджет 100)
         # target_load_days — из эквалайзера загрузки цехов
 
         _update_config(task_phase='Расчёт весов...', task_total=total)
@@ -1358,6 +1397,7 @@ def generate_ai_plan_full(self):
                 'k_progress': config.weight_k_progress,
                 'k_dept_load': config.weight_k_dept_load,
                 'k_feedback': config.weight_k_feedback,
+                'k_revenue': config.weight_k_revenue,
             },
         }
 
@@ -1525,7 +1565,7 @@ def generate_ai_plan_full(self):
                 overloaded_depts.append(dept)
 
         # Средний вклад компонентов формулы в топ-30 заказов
-        avg_components = {'deadline': 0, 'progress': 0, 'dept_load': 0}
+        avg_components = {'deadline': 0, 'progress': 0, 'dept_load': 0, 'revenue': 0}
         top_details_count = 0
         for entry in final_entries:
             detail = entry.weight_detail or {}
@@ -1533,13 +1573,18 @@ def generate_ai_plan_full(self):
                 avg_components['deadline'] += abs(detail.get('deadline', 0))
                 avg_components['progress'] += abs(detail.get('progress', 0))
                 avg_components['dept_load'] += abs(detail.get('dept_load', 0))
+                avg_components['revenue'] += abs(detail.get('revenue', 0))
                 top_details_count += 1
         if top_details_count > 0:
-            total_avg = (avg_components['deadline'] + avg_components['progress'] + avg_components['dept_load']) or 1
+            total_avg = (
+                avg_components['deadline'] + avg_components['progress'] +
+                avg_components['dept_load'] + avg_components['revenue']
+            ) or 1
             avg_components = {
                 'deadline': round(avg_components['deadline'] / total_avg * 100),
                 'progress': round(avg_components['progress'] / total_avg * 100),
                 'dept_load': round(avg_components['dept_load'] / total_avg * 100),
+                'revenue': round(avg_components['revenue'] / total_avg * 100),
             }
 
         feedbacks_count = AiPlanEntry.objects.exclude(feedback='').count()
@@ -1644,6 +1689,7 @@ def generate_ai_plan_full(self):
                 'k_progress': config.weight_k_progress,
                 'k_dept_load': config.weight_k_dept_load,
                 'k_feedback': config.weight_k_feedback,
+                'k_revenue': config.weight_k_revenue,
             },
             'settings_recommendations': settings_recs.get('settings_recommendations', ''),
             'equalizer_recommendations': settings_recs.get('equalizer_recommendations', ''),

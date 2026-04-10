@@ -34,6 +34,7 @@ interface IWeightCoefficients {
     k_progress: number;
     k_dept_load: number;
     k_feedback: number;
+    k_revenue: number;
 }
 
 interface IAiPlanData {
@@ -76,14 +77,14 @@ export const AiPlanPage = () => {
         queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
     });
     const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
-    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 35, k_feedback: 25};
+    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 35, k_feedback: 25, k_revenue: 0};
 
     // Бюджет слайдеров: сумма всех 4 коэффициентов = 100.
     // При движении одного слайдера остальные пропорционально уменьшаются.
     // Принцип "Быстро, Качественно, Недорого — выбери два":
     // нельзя выкрутить всё на максимум, нужно расставлять приоритеты.
     const BUDGET = 100;
-    const SLIDER_KEYS: (keyof IWeightCoefficients)[] = ['k_deadline', 'k_progress', 'k_dept_load', 'k_feedback'];
+    const SLIDER_KEYS: (keyof IWeightCoefficients)[] = ['k_deadline', 'k_progress', 'k_dept_load', 'k_feedback', 'k_revenue'];
 
     const redistributeWeights = useCallback((changedKey: keyof IWeightCoefficients, newValue: number, current: IWeightCoefficients): IWeightCoefficients => {
         const clamped = Math.max(0, Math.min(BUDGET, newValue));
@@ -365,6 +366,7 @@ export const AiPlanPage = () => {
                             {key: 'k_progress' as const, label: 'Прогресс', desc: 'Дожимать почти готовые заказы'},
                             {key: 'k_dept_load' as const, label: 'Загрузка цехов', desc: 'Не давать цехам простаивать'},
                             {key: 'k_feedback' as const, label: 'Обратная связь', desc: 'Влияние комментариев менеджеров'},
+                            {key: 'k_revenue' as const, label: 'Выручка', desc: 'Дорогие заказы первыми — быстрее прибыль'},
                         ]).map(({key, label, desc}) => (
                             <div key={key}>
                                 <div className="flex justify-between items-center mb-1">

@@ -441,8 +441,10 @@ def _collect_orders_data():
             'product': op.product.name,
             'product_type': product_type_name,
             'order': op.order.inner_number if op.order else '',
+            'order_db_id': op.order_id,  # FK к Order для группировки позиций
             'project': op.order.project if op.order else '',
             'quantity': op.quantity,
+            'price': float(op.price or 0),  # Стоимость позиции для приоритета выручки
             'urgency': op.urgency,
             'deadline': str(deadline) if deadline else None,
             'days_left': days_left,
@@ -600,6 +602,7 @@ def get_weight_coefficients(request):
         'k_progress': config.weight_k_progress,
         'k_dept_load': config.weight_k_dept_load,
         'k_feedback': config.weight_k_feedback,
+        'k_revenue': config.weight_k_revenue,
     })
 
 
@@ -608,7 +611,7 @@ def save_weight_coefficients(request):
     """Сохранить коэффициенты слайдеров."""
     config = _get_ai_config()
     fields = []
-    for key in ('k_deadline', 'k_progress', 'k_dept_load', 'k_feedback'):
+    for key in ('k_deadline', 'k_progress', 'k_dept_load', 'k_feedback', 'k_revenue'):
         val = request.data.get(key)
         if val is not None:
             setattr(config, f'weight_{key}', max(0, min(100, int(val))))
