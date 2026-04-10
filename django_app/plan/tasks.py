@@ -432,6 +432,8 @@ def _build_chart_grid():
                 'series_id': op.series_id,
                 'name': op.product.name,
                 'order': op.order.inner_number if op.order else '',
+                'order_db_id': op.order_id,  # FK к Order для группировки позиций в заказ
+                'price': float(op.price or 0),  # Стоимость позиции для прогноза выручки
                 'picture': picture_url,
                 'product_type': product_type_name,
                 'weight': weight,
@@ -990,10 +992,99 @@ def _build_chart_grid():
                 row.append({'orders': [], 'load': 'empty', 'hours': 0})
         grid[dept] = row
 
+    # --- Прогноз выручки по 30-дневным периодам ---
+    # Для каждой позиции (order_product) определяем последний день появления в grid.
+    # Заказ (Order) считается полностью завершённым, когда ВСЕ его позиции
+    # прошли все цеха (последний день последней позиции).
+    # Группируем по 30-дневным периодам и суммируем стоимости.
+
+    # Шаг 1: Для каждой позиции найти последний день в расписании.
+    # series_id → последний день в любом цехе
+    op_last_day = {}
+    for order_data in order_dept_data:
+        sid = order_data['series_id']
+        # Ищем по всем цехам — последний день, когда эта позиция упоминается
+        if sid in produced_by_day:
+            for dept_days in produced_by_day[sid].values():
+                if dept_days:
+                    max_day = max(dept_days.keys())
+                    op_last_day[sid] = max(op_last_day.get(sid, 0), max_day)
+
+    # Шаг 2: Группируем позиции по Order (order_db_id).
+    # Для каждого заказа: все позиции, их цены, последние дни.
+    from collections import defaultdict
+    order_positions = defaultdict(list)
+    for od in order_dept_data:
+        oid = od.get('order_db_id')
+        if oid:
+            order_positions[oid].append({
+                'series_id': od['series_id'],
+                'price': od['price'],
+                'product_type': od['product_type'],
+                'last_day': op_last_day.get(od['series_id'], 0),
+                'order_number': od['order'],
+            })
+
+    # Шаг 3: Заказ завершён когда ВСЕ его позиции завершены.
+    # Дата завершения заказа = max(last_day) по всем его позициям.
+    completed_orders = []
+    for oid, positions in order_positions.items():
+        # Пропускаем если какая-то позиция не попала в расписание
+        if not all(p['last_day'] > 0 or p['series_id'] in op_last_day for p in positions):
+            continue
+        completion_day = max(p['last_day'] for p in positions)
+        total_price = sum(p['price'] for p in positions)
+        # Собираем типы изделий для сводки
+        type_counts = defaultdict(int)
+        for p in positions:
+            pt = p['product_type'] or 'Другое'
+            type_counts[pt] += 1
+        completed_orders.append({
+            'order_number': positions[0]['order_number'],
+            'completion_day': completion_day,
+            'total_price': total_price,
+            'type_counts': dict(type_counts),
+        })
+
+    # Шаг 4: Группируем по 30-дневным периодам
+    PERIOD_DAYS = 30
+    num_periods = (total_days + PERIOD_DAYS - 1) // PERIOD_DAYS
+    forecast_periods = []
+    for period_idx in range(num_periods):
+        day_from = period_idx * PERIOD_DAYS
+        day_to = min((period_idx + 1) * PERIOD_DAYS - 1, total_days - 1)
+
+        # Заказы завершающиеся в этом периоде
+        period_orders = [
+            o for o in completed_orders
+            if day_from <= o['completion_day'] <= day_to
+        ]
+        period_sum = sum(o['total_price'] for o in period_orders)
+        orders_count = len(period_orders)
+
+        # Агрегация типов мебели за период
+        period_types = defaultdict(int)
+        for o in period_orders:
+            for pt, cnt in o['type_counts'].items():
+                period_types[pt] += cnt
+
+        forecast_periods.append({
+            'day_from': day_from,
+            'day_to': day_to,
+            'total_sum': round(period_sum, 2),
+            'orders_count': orders_count,
+            'product_types': dict(period_types),
+        })
+
+    # Убираем пустые периоды в конце (после последнего заказа)
+    while forecast_periods and forecast_periods[-1]['orders_count'] == 0:
+        forecast_periods.pop()
+
     return {
         'departments': departments,
         'total_days': total_days,
         'grid': grid,
+        'forecast_periods': forecast_periods,
     }
 
 

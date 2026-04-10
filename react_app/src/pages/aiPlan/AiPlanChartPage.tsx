@@ -20,10 +20,19 @@ interface ChartCell {
     hours: number;
 }
 
+interface ForecastPeriod {
+    day_from: number;
+    day_to: number;
+    total_sum: number;
+    orders_count: number;
+    product_types: Record<string, number>;
+}
+
 interface ChartData {
     departments: string[];
     total_days: number;
     grid: Record<string, ChartCell[]>;
+    forecast_periods?: ForecastPeriod[];
 }
 
 /* ─── Цвета загрузки ячеек ─────────────────────────────────────── */
@@ -48,6 +57,19 @@ function getDayOfWeek(date: Date): string {
     return days[date.getDay()];
 }
 
+/** Форматирование суммы: 1234567.89 → "1 234 568 ₽" */
+function formatMoney(value: number): string {
+    return Math.round(value).toLocaleString("ru-RU") + " ₽";
+}
+
+/** Дата + N дней → "10 апр 2026" */
+function formatFullDate(daysFromNow: number): string {
+    const d = new Date();
+    d.setDate(d.getDate() + daysFromNow);
+    const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
 export const AiPlanChartPage = () => {
     const queryClient = useQueryClient();
     const [refreshing, setRefreshing] = useState(false);
@@ -63,6 +85,7 @@ export const AiPlanChartPage = () => {
     const departments = data?.departments || [];
     const totalDays = data?.total_days || 0;
     const grid = data?.grid || {};
+    const forecastPeriods = data?.forecast_periods || [];
 
     /* Массив дат начиная с сегодня — для заголовков колонок */
     const dates = useMemo(() => {
@@ -157,6 +180,73 @@ export const AiPlanChartPage = () => {
                     Пусто
                 </div>
             </div>
+
+            {/* Прогноз выручки по 30-дневным периодам */}
+            {forecastPeriods.length > 0 && (
+                <div className="border border-slate-200 rounded-lg overflow-hidden">
+                    <table className="w-full border-collapse text-xs">
+                        <thead>
+                            <tr className="bg-slate-50">
+                                <th className="border-b border-slate-200 px-3 py-2 text-left font-semibold text-slate-600 w-[200px]">Период</th>
+                                <th className="border-b border-l border-slate-200 px-3 py-2 text-right font-semibold text-slate-600 w-[120px]">Заказов</th>
+                                <th className="border-b border-l border-slate-200 px-3 py-2 text-right font-semibold text-slate-600 w-[150px]">Сумма</th>
+                                <th className="border-b border-l border-slate-200 px-3 py-2 text-left font-semibold text-slate-600">Типы изделий</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {forecastPeriods.map((period, idx) => {
+                                const dateFrom = formatFullDate(period.day_from);
+                                const dateTo = formatFullDate(period.day_to);
+                                const types = Object.entries(period.product_types)
+                                    .sort((a, b) => b[1] - a[1])
+                                    .map(([name, count]) => `${name}: ${count}`)
+                                    .join(", ");
+                                return (
+                                    <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-slate-50"}>
+                                        <td className="border-b border-slate-100 px-3 py-1.5 text-slate-700 whitespace-nowrap">
+                                            {dateFrom} — {dateTo}
+                                        </td>
+                                        <td className="border-b border-l border-slate-100 px-3 py-1.5 text-right text-slate-700 font-medium">
+                                            {period.orders_count}
+                                        </td>
+                                        <td className="border-b border-l border-slate-100 px-3 py-1.5 text-right font-medium whitespace-nowrap"
+                                            style={{color: period.total_sum > 0 ? '#16a34a' : '#94a3b8'}}>
+                                            {period.total_sum > 0 ? formatMoney(period.total_sum) : "—"}
+                                        </td>
+                                        <td className="border-b border-l border-slate-100 px-3 py-1.5 text-slate-500">
+                                            {types || "—"}
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                            {/* Строка-итог */}
+                            <tr className="bg-slate-100 font-semibold">
+                                <td className="border-t border-slate-300 px-3 py-2 text-slate-700">Итого</td>
+                                <td className="border-t border-l border-slate-300 px-3 py-2 text-right text-slate-700">
+                                    {forecastPeriods.reduce((s, p) => s + p.orders_count, 0)}
+                                </td>
+                                <td className="border-t border-l border-slate-300 px-3 py-2 text-right text-green-700 whitespace-nowrap">
+                                    {formatMoney(forecastPeriods.reduce((s, p) => s + p.total_sum, 0))}
+                                </td>
+                                <td className="border-t border-l border-slate-300 px-3 py-2 text-slate-500">
+                                    {(() => {
+                                        const totals: Record<string, number> = {};
+                                        forecastPeriods.forEach(p => {
+                                            Object.entries(p.product_types).forEach(([name, count]) => {
+                                                totals[name] = (totals[name] || 0) + count;
+                                            });
+                                        });
+                                        return Object.entries(totals)
+                                            .sort((a, b) => b[1] - a[1])
+                                            .map(([name, count]) => `${name}: ${count}`)
+                                            .join(", ");
+                                    })()}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            )}
 
             {totalDays === 0 ? (
                 <div className="text-slate-400 text-sm py-8 text-center">Нет данных для отображения</div>
