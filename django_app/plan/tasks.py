@@ -464,6 +464,12 @@ def _build_chart_grid():
                 'hours': remaining * hours_per,
             }
 
+        # Дедлайн позиции: минимальный sort_date среди заданий → дней от сегодня
+        from datetime import date as _date_cls
+        sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
+        deadline_date = min(sort_dates).date() if sort_dates else None
+        deadline_days_left = (deadline_date - _date_cls.today()).days if deadline_date else None
+
         if depts:
             order_dept_data.append({
                 'op_id': op.id,
@@ -472,6 +478,7 @@ def _build_chart_grid():
                 'order': op.order.inner_number if op.order else '',
                 'order_db_id': op.order_id,  # FK к Order для группировки позиций в заказ
                 'price': float(op.price or 0),  # Стоимость позиции для прогноза выручки
+                'deadline_days_left': deadline_days_left,  # Дней до дедлайна (None = нет дедлайна)
                 'picture': picture_url,
                 'product_type': product_type_name,
                 'weight': weight,
@@ -1062,6 +1069,7 @@ def _build_chart_grid():
                 'product_type': od['product_type'],
                 'last_day': op_last_day.get(od['series_id'], 0),
                 'order_number': od['order'],
+                'deadline_days_left': od.get('deadline_days_left'),
             })
 
     # Шаг 3: Заказ завершён когда ВСЕ его позиции завершены.
@@ -1078,11 +1086,31 @@ def _build_chart_grid():
         for p in positions:
             pt = p['product_type'] or 'Другое'
             type_counts[pt] += 1
+
+        # Статус по дедлайну: сравниваем день завершения с дедлайном.
+        # Дедлайн заказа = минимальный дедлайн среди всех его позиций (самый жёсткий).
+        # deadline_days_left — дней от сегодня до дедлайна (отрицательное = просрочен).
+        # completion_day — через сколько дней заказ будет готов (от сегодня).
+        # Если completion_day <= deadline_days_left → в срок или раньше.
+        deadlines = [p['deadline_days_left'] for p in positions if p['deadline_days_left'] is not None]
+        if deadlines:
+            order_deadline = min(deadlines)  # Самый жёсткий дедлайн
+            diff = completion_day - order_deadline  # >0 = опоздание, <0 = раньше, 0 = в срок
+            if diff > 1:
+                deadline_status = 'late'       # Опоздание (>1 дня после дедлайна)
+            elif diff < -1:
+                deadline_status = 'early'      # Раньше срока (>1 дня до дедлайна)
+            else:
+                deadline_status = 'on_time'    # В срок (±1 день)
+        else:
+            deadline_status = 'no_deadline'     # Без дедлайна
+
         completed_orders.append({
             'order_number': positions[0]['order_number'],
             'completion_day': completion_day,
             'total_price': total_price,
             'type_counts': dict(type_counts),
+            'deadline_status': deadline_status,
         })
 
     # Шаг 4: Группируем по 30-дневным периодам
@@ -1107,12 +1135,22 @@ def _build_chart_grid():
             for pt, cnt in o['type_counts'].items():
                 period_types[pt] += cnt
 
+        # Статистика по дедлайнам: сколько заказов опоздает / в срок / раньше
+        late_count = sum(1 for o in period_orders if o['deadline_status'] == 'late')
+        on_time_count = sum(1 for o in period_orders if o['deadline_status'] == 'on_time')
+        early_count = sum(1 for o in period_orders if o['deadline_status'] == 'early')
+        no_deadline_count = sum(1 for o in period_orders if o['deadline_status'] == 'no_deadline')
+
         forecast_periods.append({
             'day_from': day_from,
             'day_to': day_to,
             'total_sum': round(period_sum, 2),
             'orders_count': orders_count,
             'product_types': dict(period_types),
+            'late': late_count,
+            'on_time': on_time_count,
+            'early': early_count,
+            'no_deadline': no_deadline_count,
         })
 
     # Убираем пустые периоды в конце (после последнего заказа)

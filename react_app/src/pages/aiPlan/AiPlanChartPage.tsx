@@ -26,6 +26,10 @@ interface ForecastPeriod {
     total_sum: number;
     orders_count: number;
     product_types: Record<string, number>;
+    late: number;
+    on_time: number;
+    early: number;
+    no_deadline: number;
 }
 
 interface ChartData {
@@ -188,7 +192,8 @@ export const AiPlanChartPage = () => {
                         <thead>
                             <tr className="bg-slate-50">
                                 <th className="border-b border-slate-200 px-3 py-2 text-left font-semibold text-slate-600 w-[200px]">Период</th>
-                                <th className="border-b border-l border-slate-200 px-3 py-2 text-right font-semibold text-slate-600 w-[120px]">Заказов</th>
+                                <th className="border-b border-l border-slate-200 px-3 py-2 text-right font-semibold text-slate-600 w-[80px]">Заказов</th>
+                                <th className="border-b border-l border-slate-200 px-3 py-2 text-center font-semibold text-slate-600 w-[200px]">Сроки</th>
                                 <th className="border-b border-l border-slate-200 px-3 py-2 text-right font-semibold text-slate-600 w-[150px]">Сумма</th>
                                 <th className="border-b border-l border-slate-200 px-3 py-2 text-left font-semibold text-slate-600">Типы изделий</th>
                             </tr>
@@ -209,6 +214,16 @@ export const AiPlanChartPage = () => {
                                         <td className="border-b border-l border-slate-100 px-3 py-1.5 text-right text-slate-700 font-medium">
                                             {period.orders_count}
                                         </td>
+                                        <td className="border-b border-l border-slate-100 px-3 py-1.5 text-center whitespace-nowrap">
+                                            {period.orders_count > 0 ? (
+                                                <span className="inline-flex gap-2 text-[11px]">
+                                                    {period.late > 0 && <span className="text-red-600" title="С опозданием">{period.late} опозд.</span>}
+                                                    {period.on_time > 0 && <span className="text-slate-600" title="В срок">{period.on_time} в срок</span>}
+                                                    {period.early > 0 && <span className="text-green-600" title="Раньше срока">{period.early} раньше</span>}
+                                                    {period.no_deadline > 0 && <span className="text-slate-400" title="Без дедлайна">{period.no_deadline} без срока</span>}
+                                                </span>
+                                            ) : "—"}
+                                        </td>
                                         <td className="border-b border-l border-slate-100 px-3 py-1.5 text-right font-medium whitespace-nowrap"
                                             style={{color: period.total_sum > 0 ? '#16a34a' : '#94a3b8'}}>
                                             {period.total_sum > 0 ? formatMoney(period.total_sum) : "—"}
@@ -224,6 +239,22 @@ export const AiPlanChartPage = () => {
                                 <td className="border-t border-slate-300 px-3 py-2 text-slate-700">Итого</td>
                                 <td className="border-t border-l border-slate-300 px-3 py-2 text-right text-slate-700">
                                     {forecastPeriods.reduce((s, p) => s + p.orders_count, 0)}
+                                </td>
+                                <td className="border-t border-l border-slate-300 px-3 py-2 text-center whitespace-nowrap">
+                                    <span className="inline-flex gap-2 text-[11px]">
+                                        {(() => {
+                                            const totLate = forecastPeriods.reduce((s, p) => s + p.late, 0);
+                                            const totOnTime = forecastPeriods.reduce((s, p) => s + p.on_time, 0);
+                                            const totEarly = forecastPeriods.reduce((s, p) => s + p.early, 0);
+                                            const totNoDl = forecastPeriods.reduce((s, p) => s + p.no_deadline, 0);
+                                            return <>
+                                                {totLate > 0 && <span className="text-red-600">{totLate} опозд.</span>}
+                                                {totOnTime > 0 && <span className="text-slate-600">{totOnTime} в срок</span>}
+                                                {totEarly > 0 && <span className="text-green-600">{totEarly} раньше</span>}
+                                                {totNoDl > 0 && <span className="text-slate-400">{totNoDl} без срока</span>}
+                                            </>;
+                                        })()}
+                                    </span>
                                 </td>
                                 <td className="border-t border-l border-slate-300 px-3 py-2 text-right text-green-700 whitespace-nowrap">
                                     {formatMoney(forecastPeriods.reduce((s, p) => s + p.total_sum, 0))}
