@@ -44,8 +44,8 @@ export function DeptLoadEqualizer({departments}: Props) {
             <div className="flex items-end justify-between gap-0.5" style={{height: 140}}>
                 {departments.map(dept => {
                     const val = values[dept] ?? 7;
-                    const pct = ((val - 1) / 13) * 100;
-                    const color = val >= 11 ? "bg-red-400" : val >= 7 ? "bg-yellow-400" : "bg-green-400";
+                    const pct = ((val - 1) / 29) * 100;
+                    const color = val >= 21 ? "bg-red-400" : val >= 14 ? "bg-yellow-400" : "bg-green-400";
 
                     return (
                         <div key={dept} className="flex flex-col items-center gap-1 flex-1 min-w-0">
@@ -57,7 +57,7 @@ export function DeptLoadEqualizer({departments}: Props) {
                                     const rect = e.currentTarget.getBoundingClientRect();
                                     const y = e.clientY - rect.top;
                                     const ratio = 1 - y / rect.height;
-                                    const newVal = Math.max(1, Math.min(14, Math.round(ratio * 13 + 1)));
+                                    const newVal = Math.max(1, Math.min(30, Math.round(ratio * 29 + 1)));
                                     const next = {...values, [dept]: newVal};
                                     setValues(next);
                                     saveLoads(next);
