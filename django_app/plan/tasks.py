@@ -1013,6 +1013,18 @@ def _build_chart_grid():
 
     total_days = max((len(days) for days in dept_state.values()), default=1)
 
+    # Маппинг рабочий день → реальная дата (пропускаем сб/вс)
+    from datetime import date as _date_cls, timedelta
+    today = _date_cls.today()
+    work_day_dates = []  # work_day_dates[i] = реальная дата для рабочего дня i
+    current_date = today
+    for _ in range(total_days):
+        # Пропускаем выходные: сб=5, вс=6
+        while current_date.weekday() in (5, 6):
+            current_date += timedelta(days=1)
+        work_day_dates.append(current_date)
+        current_date += timedelta(days=1)
+
     grid = {}
     for dept in departments:
         cap = capacity.get(dept, WORK_HOURS)
@@ -1034,9 +1046,13 @@ def _build_chart_grid():
                     'orders': cell['orders'],
                     'load': load,
                     'hours': round(hours, 1),
+                    'date': work_day_dates[d].isoformat() if d < len(work_day_dates) else None,
                 })
             else:
-                row.append({'orders': [], 'load': 'empty', 'hours': 0})
+                row.append({
+                    'orders': [], 'load': 'empty', 'hours': 0,
+                    'date': work_day_dates[d].isoformat() if d < len(work_day_dates) else None,
+                })
         grid[dept] = row
 
     # --- Прогноз выручки по 30-дневным периодам ---
@@ -1114,13 +1130,17 @@ def _build_chart_grid():
             'deadline_status': deadline_status,
         })
 
-    # Шаг 4: Группируем по 30-дневным периодам
+    # Шаг 4: Группируем по 30-дневным периодам (рабочие дни → реальные даты)
     PERIOD_DAYS = 30
     num_periods = (total_days + PERIOD_DAYS - 1) // PERIOD_DAYS
     forecast_periods = []
     for period_idx in range(num_periods):
         day_from = period_idx * PERIOD_DAYS
         day_to = min((period_idx + 1) * PERIOD_DAYS - 1, total_days - 1)
+
+        # Реальные даты начала и конца периода
+        date_from = work_day_dates[day_from] if day_from < len(work_day_dates) else None
+        date_to = work_day_dates[day_to] if day_to < len(work_day_dates) else None
 
         # Заказы завершающиеся в этом периоде
         period_orders = [
@@ -1145,6 +1165,8 @@ def _build_chart_grid():
         forecast_periods.append({
             'day_from': day_from,
             'day_to': day_to,
+            'date_from': date_from.isoformat() if date_from else None,
+            'date_to': date_to.isoformat() if date_to else None,
             'total_sum': round(period_sum, 2),
             'orders_count': orders_count,
             'product_types': dict(period_types),
@@ -1173,6 +1195,7 @@ def _build_chart_grid():
         'departments': departments,
         'total_days': total_days,
         'grid': grid,
+        'dates': [d.isoformat() for d in work_day_dates],  # Реальные даты рабочих дней
         'forecast_periods': forecast_periods,
         'already_overdue': already_overdue,
         'already_overdue_sum': round(already_overdue_sum, 2),
