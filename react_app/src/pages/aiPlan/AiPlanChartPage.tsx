@@ -296,12 +296,12 @@ export const AiPlanChartPage = () => {
             {totalDays === 0 ? (
                 <div className="text-slate-400 text-sm py-8 text-center">Нет данных для отображения</div>
             ) : (
-                <div className="border border-slate-200 rounded-lg overflow-x-auto">
-                    <table className="border-collapse w-full" style={{minWidth: 120 + totalDays * 90}}>
+                <div className="border border-slate-200 rounded-lg overflow-auto max-h-[80vh]">
+                    <table className="border-collapse w-full" style={{minWidth: 120 + totalDays * 134}}>
                         <thead>
                             <tr className="bg-slate-50">
-                                {/* Фиксированная колонка с названиями цехов */}
-                                <th className="sticky left-0 z-10 bg-slate-50 border-r border-b border-slate-200 px-3 py-2 text-left text-xs font-semibold text-slate-600 w-[120px]">
+                                {/* Угловая ячейка: фиксирована и по горизонтали, и по вертикали */}
+                                <th className="sticky left-0 top-0 z-20 bg-slate-50 border-r border-b border-slate-200 px-3 py-2 text-left text-xs font-semibold text-slate-600 w-[120px]">
                                     Цех
                                 </th>
                                 {/* Колонки дат — выходные подсвечены, сегодня выделен */}
@@ -312,9 +312,9 @@ export const AiPlanChartPage = () => {
                                         <th
                                             key={i}
                                             className={twMerge(
-                                                "border-b border-l border-slate-200 px-1 py-1.5 text-center text-[10px] min-w-[90px]",
-                                                isWeekend ? "bg-slate-100 text-slate-400" : "text-slate-600",
-                                                isToday && "bg-blue-50 text-blue-700 font-bold"
+                                                "sticky top-0 z-10 border-b border-l border-slate-200 px-1 py-1.5 text-center text-[10px] min-w-[134px]",
+                                                isWeekend ? "bg-slate-100 text-slate-400" : "bg-slate-50 text-slate-600",
+                                                isToday && "!bg-blue-50 text-blue-700 font-bold"
                                             )}
                                         >
                                             <div className="font-semibold">{formatDate(date)}</div>
@@ -343,10 +343,11 @@ export const AiPlanChartPage = () => {
                                                     LOAD_COLORS[cell.load],
                                                     isWeekend && cell.load === "empty" && "bg-slate-50"
                                                 )}
-                                                style={{minHeight: 70}}
+                                                /* Фиксированная высота ячейки: 3 ряда карточек (50px) + промежутки (2px) + отступы */
+                                                style={{height: 160, width: 134}}
                                             >
-                                                {/* Карточки заказов в два столбца */}
-                                                <div className="grid grid-cols-2 gap-0.5">
+                                                {/* Карточки заказов в три столбца, прокрутка если больше 9 */}
+                                                <div className="grid grid-cols-3 gap-0.5 overflow-y-auto h-full">
                                                     {cell.orders.map((o, j) => (
                                                         <div
                                                             key={j}
