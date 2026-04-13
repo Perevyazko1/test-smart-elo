@@ -599,7 +599,6 @@ def get_weight_coefficients(request):
     config = _get_ai_config()
     return JsonResponse({
         'k_deadline': config.weight_k_deadline,
-        'k_progress': config.weight_k_progress,
         'k_dept_load': config.weight_k_dept_load,
         'k_feedback': config.weight_k_feedback,
         'k_revenue': config.weight_k_revenue,
@@ -611,7 +610,7 @@ def save_weight_coefficients(request):
     """Сохранить коэффициенты слайдеров."""
     config = _get_ai_config()
     fields = []
-    for key in ('k_deadline', 'k_progress', 'k_dept_load', 'k_feedback', 'k_revenue'):
+    for key in ('k_deadline', 'k_dept_load', 'k_feedback', 'k_revenue'):
         val = request.data.get(key)
         if val is not None:
             setattr(config, f'weight_{key}', max(0, min(100, int(val))))

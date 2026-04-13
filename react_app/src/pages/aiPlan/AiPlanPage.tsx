@@ -31,7 +31,6 @@ interface IAiEntry {
 
 interface IWeightCoefficients {
     k_deadline: number;
-    k_progress: number;
     k_dept_load: number;
     k_feedback: number;
     k_revenue: number;
@@ -77,7 +76,7 @@ export const AiPlanPage = () => {
         queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
     });
     const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
-    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_progress: 25, k_dept_load: 35, k_feedback: 25, k_revenue: 0};
+    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_dept_load: 35, k_feedback: 25, k_revenue: 50};
 
     // Слайдеры приоритетов — каждый независим (0-100).
     // Формула нормализует: weight = (S1×K1 + S2×K2 + ...) / (100 × сумма_K),
@@ -325,10 +324,9 @@ export const AiPlanPage = () => {
                     <div className="grid grid-cols-2 gap-4">
                         {([
                             {key: 'k_deadline' as const, label: 'Сроки', desc: 'Влияние дедлайнов и просрочки'},
-                            {key: 'k_progress' as const, label: 'Прогресс', desc: 'Дожимать почти готовые заказы'},
                             {key: 'k_dept_load' as const, label: 'Загрузка цехов', desc: 'Не давать цехам простаивать'},
                             {key: 'k_feedback' as const, label: 'Обратная связь', desc: 'Влияние комментариев менеджеров'},
-                            {key: 'k_revenue' as const, label: 'Выручка', desc: 'Дорогие заказы первыми — быстрее прибыль'},
+                            {key: 'k_revenue' as const, label: 'Выручка', desc: '← прогресс (дожимать готовые) | выручка (дорогие первыми) →'},
                         ]).map(({key, label, desc}) => (
                             <div key={key}>
                                 <div className="flex justify-between items-center mb-1">

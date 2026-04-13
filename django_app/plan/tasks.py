@@ -263,9 +263,9 @@ def _calculate_all_weights(orders, dept_summary, config, workflows=None):
     from plan.models import DepartmentWorkers
 
     k1 = config.weight_k_deadline
-    k2 = config.weight_k_progress
     k3 = config.weight_k_dept_load
-    k5 = config.weight_k_revenue  # Приоритет дорогих заказов
+    k5 = config.weight_k_revenue  # Слайдер "Выручка" — баланс прогресс/выручка
+    k2 = 100 - k5  # Прогресс = инверсия выручки (один слайдер управляет обоими)
 
     # Загруженность цехов в днях (рассчитана в _collect_orders_data)
     dept_load_days = {}
@@ -492,12 +492,13 @@ def _build_chart_grid():
     from plan.models import AiPlanConfig
     _cfg = AiPlanConfig.objects.filter(pk=1).first()
     k_load = _cfg.weight_k_dept_load if _cfg else 25
+    _k_revenue = _cfg.weight_k_revenue if _cfg else 0
     k_sum = (
         (_cfg.weight_k_deadline if _cfg else 25) +
-        (_cfg.weight_k_progress if _cfg else 25) +
+        (100 - _k_revenue) +  # k_progress = инверсия k_revenue
         k_load +
         (_cfg.weight_k_feedback if _cfg else 25) +
-        (_cfg.weight_k_revenue if _cfg else 0)
+        _k_revenue
     )
     load_factor = k_load / k_sum if k_sum > 0 else 0.25
 
@@ -1445,7 +1446,7 @@ def generate_ai_plan_full(self):
             'today': data['today'],
             'priorities': {
                 'k_deadline': config.weight_k_deadline,
-                'k_progress': config.weight_k_progress,
+                'k_progress': 100 - config.weight_k_revenue,
                 'k_dept_load': config.weight_k_dept_load,
                 'k_feedback': config.weight_k_feedback,
                 'k_revenue': config.weight_k_revenue,
@@ -1699,9 +1700,10 @@ def generate_ai_plan_full(self):
             settings_payload = {
                 'priorities': {
                     'k_deadline': config.weight_k_deadline,
-                    'k_progress': config.weight_k_progress,
+                    'k_progress': 100 - config.weight_k_revenue,
                     'k_dept_load': config.weight_k_dept_load,
                     'k_feedback': config.weight_k_feedback,
+                    'k_revenue': config.weight_k_revenue,
                 },
                 'settings_analysis': settings_analysis,
                 'department_load': data['dept_summary'],
@@ -1737,7 +1739,7 @@ def generate_ai_plan_full(self):
             'grid_summary': grid_summary,
             'priorities': {
                 'k_deadline': config.weight_k_deadline,
-                'k_progress': config.weight_k_progress,
+                'k_progress': 100 - config.weight_k_revenue,
                 'k_dept_load': config.weight_k_dept_load,
                 'k_feedback': config.weight_k_feedback,
                 'k_revenue': config.weight_k_revenue,
