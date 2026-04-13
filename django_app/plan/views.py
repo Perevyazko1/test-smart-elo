@@ -1014,7 +1014,7 @@ def update_target_load(request):
     """Обновить целевую загрузку цехов. {loads: {department: days, ...}}"""
     loads = request.data.get('loads', {})
     for dept, days in loads.items():
-        days = max(1, min(14, int(days)))
+        days = max(1, min(30, int(days)))
         DepartmentWorkers.objects.filter(department=dept).update(target_load_days=days)
     return JsonResponse({'success': True})
 

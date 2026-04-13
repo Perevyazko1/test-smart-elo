@@ -590,7 +590,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 </div>
             </td>
             {/* Изделие */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[200px] max-w-[200px]", rowBg)} style={{left: 75}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[300px] max-w-[300px]", rowBg)} style={{left: 75}}>
                 <div className="overflow-x-auto">
                     <div className="flex items-center gap-1 whitespace-nowrap">
                         <span className="font-medium text-slate-800 leading-tight">
