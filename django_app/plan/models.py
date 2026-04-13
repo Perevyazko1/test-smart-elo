@@ -59,6 +59,11 @@ class ProductionNorm(models.Model):
         help_text='Доля ускорения при серии одинаковых изделий (0.0-0.5). '
                   'Например 0.30 = на 30% быстрее когда подряд идут одинаковые изделия.',
     )
+    setup_minutes = models.FloatField(
+        'Время переключения (мин)', default=0,
+        help_text='Минуты на подготовку при смене типа изделия в цехе. '
+                  'Если тот же тип идёт подряд — 0. При смене типа — платим это время.',
+    )
 
     def __str__(self):
         return f'{self.product_type} / {self.department}: {self.hours_per_unit}ч'

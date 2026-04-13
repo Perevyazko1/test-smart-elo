@@ -390,12 +390,15 @@ def _build_chart_grid():
     # + коэффициент настила (batch_bonus): ускорение при серии одинаковых изделий
     norms = {}
     batch_bonuses = {}  # {(product_type_name, dept): bonus}
+    setup_times = {}    # {(product_type_name, dept): minutes} — время переключения при смене типа
     for n in ProductionNorm.objects.select_related('product_type').all():
         if n.product_type.name not in norms:
             norms[n.product_type.name] = {}
         norms[n.product_type.name][n.department] = n.hours_per_unit
         if n.batch_bonus > 0:
             batch_bonuses[(n.product_type.name, n.department)] = n.batch_bonus
+        if n.setup_minutes > 0:
+            setup_times[(n.product_type.name, n.department)] = n.setup_minutes
 
     # Переопределения нормативов для конкретных изделий (приоритет выше чем тип)
     overrides = {}
@@ -734,6 +737,11 @@ def _build_chart_grid():
     # Трекинг последнего product_id обработанного в каждом цехе (для настила)
     dept_last_product = {dept: None for dept in departments}
 
+    # Трекинг последнего product_type в каждом цехе (для setup time / переключения).
+    # Отличие от dept_last_product: настил работает по product_id (одинаковые изделия),
+    # setup time работает по product_type (одинаковый ТИП = не нужна переналадка).
+    dept_last_type = {dept: None for dept in departments}
+
     # Order-aware grouping: трекинг какие заказы (order_db_id) уже запущены в каждом цехе.
     # Если одна позиция заказа уже обрабатывается/обработана — другие позиции того же
     # заказа получают бонус +25% к скору. Цель: заказ завершается быстрее целиком,
@@ -750,6 +758,24 @@ def _build_chart_grid():
         if dept_last_product[dept] == order.get('product_id'):
             return bonus
         return 0
+
+    def get_setup_hours(order, dept):
+        """Получить время переключения (в часах) при смене типа изделия в цехе.
+
+        Логика: если предыдущий заказ в цехе был того же типа (Диван→Диван) — 0.
+        Если тип сменился (Диван→Подушка) — возвращаем setup_minutes нового типа в часах.
+        Если цех ещё пустой (dept_last_type = None) — тоже 0 (первый заказ, нет переключения).
+
+        Returns: время в часах (float). Например 10 минут = 0.1667 часа.
+        """
+        pt = order.get('product_type', '')
+        last_type = dept_last_type[dept]
+        # Первый заказ в цехе или тот же тип — нет переключения
+        if last_type is None or last_type == pt:
+            return 0
+        # Тип сменился — берём setup_minutes нового типа
+        minutes = setup_times.get((pt, dept), 0)
+        return minutes / 60.0  # Переводим минуты → часы
 
     def get_available_units(order, dept, day):
         """Определить сколько ШТУК заказа доступно для цеха на данный день.
@@ -964,6 +990,12 @@ def _build_chart_grid():
                 if bonus > 0:
                     hours_left = hours_left * (1 - bonus)
 
+                # Setup time: время переключения при смене типа изделия.
+                # Добавляется к часам работы как накладные расходы.
+                # Если тот же тип идёт подряд (Диван→Диван) — 0.
+                setup_hours = get_setup_hours(order, dept)
+                hours_left += setup_hours
+
                 hours_per_unit = hours_left / remaining if remaining > 0 else 1
                 units_produced_total = 0
                 day = 0
@@ -983,8 +1015,9 @@ def _build_chart_grid():
                     if hours_left > 0:
                         day += 1
 
-                # Обновить last_product — следующий заказ того же изделия получит бонус
+                # Обновить last_product и last_type для настила и переключения
                 dept_last_product[dept] = order.get('product_id')
+                dept_last_type[dept] = order.get('product_type')
 
         else:
             # ═══════════════════════════════════════════════════════════════
@@ -1104,6 +1137,14 @@ def _build_chart_grid():
                     if oid:
                         dept_started_orders[dept].add(oid)
 
+                    # Setup time: при смене типа изделия добавляем время переключения.
+                    # Считаем один раз при первом взятии заказа (не каждый день).
+                    if not state.get('setup_applied'):
+                        setup_hours = get_setup_hours(order, dept)
+                        if setup_hours > 0:
+                            state['hours_left'] += setup_hours
+                        state['setup_applied'] = True
+
                     # Настил: уменьшаем hours_per_unit если то же изделие
                     bonus = get_batch_bonus(order, dept)
                     hours_per_unit = state['hours_per_unit'] * (1 - bonus) if bonus > 0 else state['hours_per_unit']
@@ -1122,8 +1163,9 @@ def _build_chart_grid():
                     state['units_produced'] += units_today
                     _record_production(sid, dept, day, state['units_produced'])
 
-                    # Обновить last_product для настила
+                    # Обновить last_product и last_type для настила и переключения
                     dept_last_product[dept] = order.get('product_id')
+                    dept_last_type[dept] = order.get('product_type')
 
                     # Обновить свободное время дня
                     day_free = cap - dept_state[dept][day]['hours']

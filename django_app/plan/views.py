@@ -786,11 +786,14 @@ def get_production_norms(request):
     for pt in product_types:
         norms_map = {n.department: n.hours_per_unit for n in pt.norms.all()}
         batch_map = {n.department: n.batch_bonus for n in pt.norms.all()}
+        setup_map = {n.department: n.setup_minutes for n in pt.norms.all()}
         row = {'id': pt.id, 'name': pt.name}
         for dept in departments:
             row[dept] = norms_map.get(dept, 0)
-        # Настил (batch_bonus) по цехам — отдельный ключ "batch_{dept}"
+        # Настил (batch_bonus) по цехам
         row['batch'] = {dept: batch_map.get(dept, 0) for dept in departments}
+        # Время переключения (setup_minutes) по цехам
+        row['setup'] = {dept: setup_map.get(dept, 0) for dept in departments}
         data.append(row)
 
     return JsonResponse({
@@ -823,6 +826,7 @@ def update_production_norms(request):
             pt, _ = ProductType.objects.get_or_create(name=name)
 
         batch = row.get('batch', {})
+        setup = row.get('setup', {})
         for dept in departments:
             if dept in row:
                 val = float(row[dept] or 0)
@@ -830,6 +834,9 @@ def update_production_norms(request):
                 # Сохраняем batch_bonus если передан
                 if dept in batch:
                     defaults['batch_bonus'] = max(0.0, min(0.5, float(batch[dept] or 0)))
+                # Сохраняем setup_minutes если передан (минуты переключения, 0-120)
+                if dept in setup:
+                    defaults['setup_minutes'] = max(0.0, min(120.0, float(setup[dept] or 0)))
                 ProductionNorm.objects.update_or_create(
                     product_type=pt, department=dept,
                     defaults=defaults,
