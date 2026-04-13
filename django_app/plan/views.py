@@ -201,7 +201,6 @@ def add_comment(request):
     """Добавить комментарий к позиции (OrderProductComment), заказу (OrderComment) или заказчику (AgentComment).
     Body: {type: 'product'|'order'|'agent', target_id: int, text: str}
     """
-    from staff.models import Employee
     comment_type = request.data.get('type')
     target_id = request.data.get('target_id')
     text = request.data.get('text', '').strip()
@@ -209,14 +208,8 @@ def add_comment(request):
     if not text or not target_id or not comment_type:
         return JsonResponse({'error': 'Не указаны обязательные поля'}, status=400)
 
-    # Определяем автора — текущий сотрудник
-    try:
-        author = Employee.objects.get(user=request.user)
-    except Employee.DoesNotExist:
-        # Если нет привязки к Employee — берём первого админа как фоллбэк
-        author = Employee.objects.first()
-        if not author:
-            return JsonResponse({'error': 'Не найден сотрудник'}, status=400)
+    # request.user уже является Employee (кастомная User модель)
+    author = request.user
 
     if comment_type == 'product':
         # Комментарий к позиции заказа (OrderProduct)
