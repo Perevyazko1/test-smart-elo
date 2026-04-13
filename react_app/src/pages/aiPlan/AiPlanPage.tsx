@@ -518,7 +518,7 @@ export const AiPlanPage = () => {
                         <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                             <th className="sticky left-0 z-10 bg-slate-50 px-1 py-2 text-center w-[30px]">#</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[45px]" style={{left: 30}}>Фото</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[200px]" style={{left: 75}}>Изделие</th>
+                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[300px]" style={{left: 75}}>Изделие</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
                             <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
