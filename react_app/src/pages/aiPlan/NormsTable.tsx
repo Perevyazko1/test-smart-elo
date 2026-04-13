@@ -185,7 +185,7 @@ export function NormsTable() {
                                                     type="number"
                                                     step="0.05"
                                                     min="0"
-                                                    value={row[dept] ?? 0}
+                                                    value={(row[dept] as number) ?? 0}
                                                     onChange={e => handleCellChange(rowIdx, dept, e.target.value)}
                                                     className="w-full px-2 py-1 text-xs text-center outline-none border border-transparent focus:border-blue-300 rounded bg-transparent"
                                                 />
