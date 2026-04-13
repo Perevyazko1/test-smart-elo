@@ -621,6 +621,45 @@ def _build_chart_grid():
         # downstream=0 → скор=0 (мгновенный, последний при высоком load_factor)
         order['downstream_path_score'] = (order['downstream_hours'] / max_dh) * 1000
 
+    # --- Price density: "плотность денег" — сколько рублей приносит час работы ---
+    #
+    # Заказы с высокой плотностью (много денег, быстро делаются) получают приоритет,
+    # чтобы максимизировать выручку в первые 30 дней.
+    # Формула: price_density = сумма цен ВСЕХ позиций заказа / downstream_hours
+    # Нормализуем к шкале 0-1000.
+    #
+    # Почему считаем по заказу а не по позиции:
+    #   Заказ завершён когда ВСЕ позиции готовы. Если в заказе на 2М есть 1 диван
+    #   (170ч пути) и 5 подушек (12ч пути) — bottleneck = 170ч.
+    #   price_density = 2М/170ч = 11765 ₽/ч. Дешёвый длинный заказ = низкая плотность.
+    #
+    # Группируем позиции по заказу — считаем суммарную стоимость и макс. путь.
+    from collections import defaultdict as _defaultdict
+    _order_total_price = _defaultdict(float)
+    _order_max_path = _defaultdict(float)
+    for order in order_dept_data:
+        oid = order.get('order_db_id') or order.get('series_id')
+        _order_total_price[oid] += order.get('price', 0)
+        dh = order.get('downstream_hours', 0)
+        if dh > _order_max_path[oid]:
+            _order_max_path[oid] = dh
+
+    # Рассчитываем price_density для каждого заказа
+    _order_density = {}
+    for oid in _order_total_price:
+        path = _order_max_path[oid]
+        if path > 0:
+            _order_density[oid] = _order_total_price[oid] / path
+        else:
+            # Нулевой путь = мгновенный заказ, максимальная плотность
+            _order_density[oid] = _order_total_price[oid] * 100 if _order_total_price[oid] > 0 else 0
+
+    # Нормализуем к 0-1000
+    max_density = max(_order_density.values(), default=1) or 1
+    for order in order_dept_data:
+        oid = order.get('order_db_id') or order.get('series_id')
+        order['price_density_score'] = (_order_density.get(oid, 0) / max_density) * 1000
+
     # Приоритетные заказы первые (базовая сортировка по весу)
     order_dept_data.sort(key=lambda x: x['weight'], reverse=True)
 
@@ -694,6 +733,12 @@ def _build_chart_grid():
 
     # Трекинг последнего product_id обработанного в каждом цехе (для настила)
     dept_last_product = {dept: None for dept in departments}
+
+    # Order-aware grouping: трекинг какие заказы (order_db_id) уже запущены в каждом цехе.
+    # Если одна позиция заказа уже обрабатывается/обработана — другие позиции того же
+    # заказа получают бонус +25% к скору. Цель: заказ завершается быстрее целиком,
+    # а выручка считается по заказу (все позиции готовы → деньги).
+    dept_started_orders = {dept: set() for dept in departments}
 
     def get_batch_bonus(order, dept):
         """Получить коэффициент настила для заказа в цехе.
@@ -841,6 +886,11 @@ def _build_chart_grid():
     # потом зависимые (Сборка) — которые используют эти данные для потоковой передачи.
     MAX_DAYS = 365
 
+    # Доля выручки в балансе (0.0-1.0). Управляет силой price_density бонуса.
+    # При k_revenue=0 → _revenue_factor=0 → price density не влияет на сортировку.
+    # При k_revenue=100 → _revenue_factor=1.0 → максимальное влияние плотности денег.
+    _revenue_factor = _k_revenue / 100.0
+
     for dept in topo_depts:
         cap = capacity.get(dept, WORK_HOURS)
         is_dependent = dept in dependent_depts
@@ -867,24 +917,47 @@ def _build_chart_grid():
             # чтобы все пути были синхронизированы.
             # ═══════════════════════════════════════════════════════════════
             dept_orders = [o for o in order_dept_data if dept in o['depts']]
+            remaining_orders = set(range(len(dept_orders)))  # Индексы необработанных заказов
 
-            # Blend: при load_factor=0 → чистый weight, при load_factor=1 → чистый downstream_path
-            # + бонус настила: заказы с тем же product_id что последний обработанный → +20% к скору
-            dept_orders.sort(
-                key=lambda o: (
-                    (o['weight'] * (1 - load_factor) +
-                     o.get('downstream_path_score', 0) * load_factor)
-                    * (1.2 if dept_last_product[dept] == o.get('product_id') and
-                       batch_bonuses.get((o.get('product_type', ''), dept), 0) > 0 else 1.0)
-                ),
-                reverse=True,
-            )
+            # Жадный алгоритм: после каждого заказа пересчитываем приоритеты
+            # с учётом настила, price density и order-aware grouping.
+            #
+            # Формула скоринга стартовых цехов:
+            #   base = weight × (1-lf) + downstream_path × lf
+            #   + price_density бонус: при k_revenue > 0 добавляем плотность денег
+            #   × настил бонус: +20% если то же изделие (batch continuation)
+            #   × order grouping бонус: +25% если другая позиция того же заказа
+            #     уже обрабатывается в этом цехе (завершить заказ быстрее → выручка)
+            while remaining_orders:
+                # Пересортировка с учётом текущего состояния цеха
+                best_idx = max(remaining_orders, key=lambda i: (
+                    # Базовый скор: blend weight + downstream_path по load_factor
+                    (dept_orders[i]['weight'] * (1 - load_factor) +
+                     dept_orders[i].get('downstream_path_score', 0) * load_factor
+                     # Price density бонус: до +30% от базы при максимальном k_revenue.
+                     # Чем выше k_revenue тем сильнее влияние плотности денег.
+                     # Заказы с высокой плотностью (много ₽, короткий путь) идут первыми.
+                     + dept_orders[i].get('price_density_score', 0) * _revenue_factor * 0.3)
+                    # Настил бонус: +20% если то же изделие что и предыдущий
+                    * (1.2 if dept_last_product[dept] == dept_orders[i].get('product_id') and
+                       batch_bonuses.get((dept_orders[i].get('product_type', ''), dept), 0) > 0 else 1.0)
+                    # Order grouping бонус: +25% если другая позиция того же заказа
+                    # уже запущена в этом цехе. Цель: завершить заказ целиком быстрее,
+                    # т.к. выручка считается по заказу (все позиции готовы → деньги).
+                    * (1.25 if dept_orders[i].get('order_db_id') in dept_started_orders[dept] else 1.0)
+                ))
+                remaining_orders.remove(best_idx)
+                order = dept_orders[best_idx]
 
-            for order in dept_orders:
                 info = order['depts'][dept]
                 hours_left = info['hours']
                 remaining = info['remaining']
                 sid = order['series_id']
+
+                # Запомнить что этот заказ (Order) запущен в этом цехе
+                oid = order.get('order_db_id')
+                if oid:
+                    dept_started_orders[dept].add(oid)
 
                 # Настил: если то же изделие что и предыдущий — уменьшаем часы
                 bonus = get_batch_bonus(order, dept)
@@ -910,7 +983,7 @@ def _build_chart_grid():
                     if hours_left > 0:
                         day += 1
 
-                # Обновить last_product для настила — следующий заказ того же изделия получит бонус
+                # Обновить last_product — следующий заказ того же изделия получит бонус
                 dept_last_product[dept] = order.get('product_id')
 
         else:
@@ -993,23 +1066,27 @@ def _build_chart_grid():
                     day += 1
                     continue
 
-                # Сортировка зависимых цехов: blend weight + downstream_path + readiness
-                #
-                # Базовый приоритет: weight × (1-lf) + downstream_path × lf
-                #   (та же формула что в стартовых цехах — единый порядок)
-                # Readiness бонус: +30% к базовому скору за готовые детали
-                #   (не ждать заказ без деталей, брать что есть)
+                # Сортировка зависимых цехов:
+                #   base = weight × (1-lf) + downstream_path × lf + price_density бонус
+                #   × readiness бонус (+30% за готовые детали)
+                #   × настил бонус (+20% за то же изделие)
+                #   × order grouping бонус (+25% если другая позиция того же заказа
+                #     уже в этом цехе — чтобы заказ завершился быстрее целиком)
                 max_readiness = max(r for _, _, r in scorable) or 1
                 scorable.sort(
                     key=lambda x: (
-                        # Базовый приоритет: blend weight + downstream_path
+                        # Базовый приоритет: blend weight + downstream_path + price density
                         (x[0]['weight'] * (1 - load_factor) +
-                         x[0].get('downstream_path_score', 0) * load_factor)
+                         x[0].get('downstream_path_score', 0) * load_factor
+                         + x[0].get('price_density_score', 0) * _revenue_factor * 0.3)
                         # Readiness бонус: до +30% от базового скора
                         * (1 + 0.3 * x[2] / max_readiness * load_factor)
                         # Настил бонус: +20% если то же изделие что и предыдущий в цехе
                         * (1.2 if dept_last_product[dept] == x[0].get('product_id') and
                            batch_bonuses.get((x[0].get('product_type', ''), dept), 0) > 0 else 1.0)
+                        # Order grouping бонус: +25% если другая позиция того же заказа
+                        # уже обрабатывается в этом цехе
+                        * (1.25 if x[0].get('order_db_id') in dept_started_orders[dept] else 1.0)
                     ),
                     reverse=True,
                 )
@@ -1021,6 +1098,11 @@ def _build_chart_grid():
 
                     if day_free <= 0:
                         break
+
+                    # Запомнить что этот заказ (Order) запущен в этом цехе
+                    oid = order.get('order_db_id')
+                    if oid:
+                        dept_started_orders[dept].add(oid)
 
                     # Настил: уменьшаем hours_per_unit если то же изделие
                     bonus = get_batch_bonus(order, dept)
