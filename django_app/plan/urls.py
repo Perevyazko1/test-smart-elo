@@ -44,4 +44,6 @@ urlpatterns = [
 
     path('workflow/<int:product_type_id>/', get_workflow),
     path('workflow/<int:product_type_id>/update/', update_workflow),
+
+    path('comments/add/', add_comment),
 ]

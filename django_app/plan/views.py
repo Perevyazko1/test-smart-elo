@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from django.utils.dateparse import parse_datetime
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
-from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, Product
+from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, OrderComment, AgentComment, Product
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
 from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, ProductNormOverride, DepartmentWorkers
@@ -85,12 +85,30 @@ def get_plan_table(request):
     order_products = OrderProduct.objects.filter(
         id__in=order_product_ids
     ).select_related(
-        'product', 'order', 'main_fabric', 'order__owner'
+        'product', 'order', 'order__agent', 'main_fabric', 'order__owner'
     ).prefetch_related(
         'product__product_pictures', 'main_fabric__fabric_pictures'
     )
 
     order_products_map = {op.id: op for op in order_products}
+
+    # Комментарии к заказам (OrderComment)
+    order_ids = set(op.order_id for op in order_products if op.order_id)
+    order_comments_qs = OrderComment.objects.filter(order_id__in=order_ids, deleted=False)
+    order_comments_map = {}
+    for c in order_comments_qs:
+        order_comments_map.setdefault(c.order_id, []).append({
+            'id': c.id, 'text': c.text, 'add_date': c.add_date.isoformat(),
+        })
+
+    # Комментарии к заказчикам (AgentComment)
+    agent_ids = set(op.order.agent_id for op in order_products if op.order and op.order.agent_id)
+    agent_comments_qs = AgentComment.objects.filter(agent_id__in=agent_ids, deleted=False)
+    agent_comments_map = {}
+    for c in agent_comments_qs:
+        agent_comments_map.setdefault(c.agent_id, []).append({
+            'id': c.id, 'text': c.text, 'add_date': c.add_date.isoformat(),
+        })
 
     result = {}
     for group in assignment_groups:
@@ -153,21 +171,88 @@ def get_plan_table(request):
             "product_name": order_product.product.name,
             "product_picture": picture_url,
             "order": order_product.order.inner_number,
+            "order_id": order_product.order_id,
             "series_id": order_product.series_id,
+            "order_product_id": order_product.id,
             "price": order_product.price,
             "fabric_name": order_product.main_fabric.name if order_product.main_fabric else "-",
             "fabric_picture": fabric_url,
             "fabric_stock": order_product.main_fabric.quantity if order_product.main_fabric and order_product.main_fabric.is_actual else None,
             "project": order_product.order.project,
+            "agent_name": order_product.order.agent.name if order_product.order.agent else None,
+            "agent_id": order_product.order.agent_id,
             "quantity": max((data["all"] for data in assignments_data.values()), default=0),
             "all_quantity": order_product.quantity,
             "shipped": order_product.shipped,
             "final_waiting": final_waiting,
             "comments": comments_map.get(order_product.id, []),
+            "order_comments": order_comments_map.get(order_product.order_id, []),
+            "agent_comments": agent_comments_map.get(order_product.order.agent_id, []) if order_product.order.agent_id else [],
             "assignments": assignments_data
         }
 
     return JsonResponse(result)
+
+
+# ─── Комментарии (3 уровня: позиция, заказ, заказчик) ────────────
+
+@api_view(['POST'])
+def add_comment(request):
+    """Добавить комментарий к позиции (OrderProductComment), заказу (OrderComment) или заказчику (AgentComment).
+    Body: {type: 'product'|'order'|'agent', target_id: int, text: str}
+    """
+    from staff.models import Employee
+    comment_type = request.data.get('type')
+    target_id = request.data.get('target_id')
+    text = request.data.get('text', '').strip()
+
+    if not text or not target_id or not comment_type:
+        return JsonResponse({'error': 'Не указаны обязательные поля'}, status=400)
+
+    # Определяем автора — текущий сотрудник
+    try:
+        author = Employee.objects.get(user=request.user)
+    except Employee.DoesNotExist:
+        # Если нет привязки к Employee — берём первого админа как фоллбэк
+        author = Employee.objects.first()
+        if not author:
+            return JsonResponse({'error': 'Не найден сотрудник'}, status=400)
+
+    if comment_type == 'product':
+        # Комментарий к позиции заказа (OrderProduct)
+        try:
+            op = OrderProduct.objects.get(pk=target_id)
+        except OrderProduct.DoesNotExist:
+            return JsonResponse({'error': 'Позиция не найдена'}, status=404)
+        comment = OrderProductComment.objects.create(
+            author=author, order_product=op, text=text
+        )
+        return JsonResponse({'id': comment.id, 'text': comment.text})
+
+    elif comment_type == 'order':
+        # Комментарий к заказу (Order)
+        try:
+            order = Order.objects.get(pk=target_id)
+        except Order.DoesNotExist:
+            return JsonResponse({'error': 'Заказ не найден'}, status=404)
+        comment = OrderComment.objects.create(
+            author=author, order=order, text=text
+        )
+        return JsonResponse({'id': comment.id, 'text': comment.text})
+
+    elif comment_type == 'agent':
+        # Комментарий к заказчику (Agent)
+        from core.models import Agent
+        try:
+            agent = Agent.objects.get(pk=target_id)
+        except Agent.DoesNotExist:
+            return JsonResponse({'error': 'Заказчик не найден'}, status=404)
+        comment = AgentComment.objects.create(
+            author=author, agent=agent, text=text
+        )
+        return JsonResponse({'id': comment.id, 'text': comment.text})
+
+    return JsonResponse({'error': f'Неизвестный тип комментария: {comment_type}'}, status=400)
 
 
 @api_view(['POST'])

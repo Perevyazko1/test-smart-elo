@@ -543,6 +543,7 @@ export const AiPlanPage = () => {
                                 visibleDepts={visibleDepts}
                                 allDepartments={allDepartments}
                                 onOpenNorms={(id, name) => setNormsModal({productId: id, productName: name})}
+                                onCommentAdded={() => queryClient.invalidateQueries({queryKey: ["planTable"]})}
                             />
                         ))}
                     </tbody>
@@ -559,7 +560,7 @@ export const AiPlanPage = () => {
     );
 };
 
-function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms}: {
+function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms, onCommentAdded}: {
     item: IPlanDataRow;
     index: number;
     aiEntry?: IAiEntry;
@@ -567,9 +568,30 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
     visibleDepts: Set<string>;
     allDepartments: string[];
     onOpenNorms: (productId: number, productName: string) => void;
+    onCommentAdded: () => void;
 }) {
     const [feedback, setFeedback] = useState(aiEntry?.feedback ?? "");
     const empty = {all: 0, ready: 0, await: 0};
+
+    // Инпуты комментариев: какой тип сейчас открыт (null = все закрыты)
+    const [commentInput, setCommentInput] = useState<'product' | 'order' | 'agent' | null>(null);
+    const [commentText, setCommentText] = useState("");
+
+    const submitComment = useCallback(() => {
+        if (!commentText.trim() || !commentInput) return;
+        const targetId = commentInput === 'product' ? item.order_product_id
+            : commentInput === 'order' ? item.order_id
+            : item.agent_id;
+        if (!targetId) return;
+        $axios.post('/plan/comments/add/', {
+            type: commentInput, target_id: targetId, text: commentText.trim()
+        }).then(() => {
+            setCommentText("");
+            setCommentInput(null);
+            onCommentAdded();
+            toast.success('Комментарий добавлен');
+        }).catch(() => toast.error('Ошибка'));
+    }, [commentInput, commentText, item, onCommentAdded]);
 
     const rowBg = item.urgency === 1 ? "bg-red-50" : item.urgency === 2 ? "bg-yellow-50" : "bg-white";
 
@@ -592,8 +614,13 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             {/* Изделие */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 w-[300px] max-w-[300px]", rowBg)} style={{left: 75}}>
                 <div className="overflow-x-auto">
+                    {/* Название изделия — клик открывает инпут комментария к позиции */}
                     <div className="flex items-center gap-1 whitespace-nowrap">
-                        <span className="font-medium text-slate-800 leading-tight">
+                        <span
+                            className="font-medium text-slate-800 leading-tight cursor-pointer hover:text-blue-600"
+                            onClick={() => setCommentInput(commentInput === 'product' ? null : 'product')}
+                            title="Добавить комментарий к изделию"
+                        >
                             {item.product_name}
                         </span>
                         <button
@@ -615,16 +642,78 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                             {item.project}
                         </span>
                     )}
+                    {/* Комментарии к позиции (OrderProductComment) */}
+                    {item.comments?.length > 0 && (
+                        <div className="mt-0.5">
+                            {item.comments.map(c => (
+                                <div key={c.id} className="text-[9px] text-green-700 leading-tight">◉ {c.text}</div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Комментарии к заказу (OrderComment) */}
+                    {item.order_comments?.length > 0 && (
+                        <div className="mt-0.5">
+                            {item.order_comments.map(c => (
+                                <div key={c.id} className="text-[9px] text-blue-600 leading-tight">▪ {c.text}</div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Комментарии к заказчику (AgentComment) */}
+                    {item.agent_comments?.length > 0 && (
+                        <div className="mt-0.5">
+                            {item.agent_comments.map(c => (
+                                <div key={c.id} className="text-[9px] text-purple-600 leading-tight">★ {c.text}</div>
+                            ))}
+                        </div>
+                    )}
+                    {/* Инпут для добавления комментария */}
+                    {commentInput && (
+                        <div className="mt-1 flex gap-1">
+                            <input
+                                autoFocus
+                                value={commentText}
+                                onChange={e => setCommentText(e.target.value)}
+                                onKeyDown={e => e.key === 'Enter' && submitComment()}
+                                placeholder={
+                                    commentInput === 'product' ? 'Комментарий к изделию...' :
+                                    commentInput === 'order' ? 'Комментарий к заказу...' :
+                                    'Комментарий к заказчику...'
+                                }
+                                className={twMerge(
+                                    "flex-1 text-[10px] px-1.5 py-0.5 border rounded outline-none",
+                                    commentInput === 'product' ? "border-green-300 focus:border-green-500" :
+                                    commentInput === 'order' ? "border-blue-300 focus:border-blue-500" :
+                                    "border-purple-300 focus:border-purple-500"
+                                )}
+                            />
+                            <button onClick={submitComment} className="text-[9px] px-1.5 py-0.5 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200">↵</button>
+                            <button onClick={() => { setCommentInput(null); setCommentText(""); }} className="text-[9px] px-1 py-0.5 text-slate-400 hover:text-red-500">✕</button>
+                        </div>
+                    )}
                 </div>
             </td>
-            {/* Заказ */}
+            {/* Заказ — клик открывает инпут комментария к заказу */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px] min-w-[65px] max-w-[65px]", rowBg)} style={{left: 275}}>
-                <span className={twMerge(
-                    "text-xs truncate block",
-                    item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
-                )}>
+                <span
+                    className={twMerge(
+                        "text-xs truncate block cursor-pointer hover:text-blue-600",
+                        item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
+                    )}
+                    onClick={() => setCommentInput(commentInput === 'order' ? null : 'order')}
+                    title="Добавить комментарий к заказу"
+                >
                     {item.order}
                 </span>
+                {/* Заказчик — клик открывает инпут комментария к заказчику */}
+                {item.agent_name && (
+                    <span
+                        className="text-[9px] text-purple-500 truncate block cursor-pointer hover:text-purple-700"
+                        onClick={() => item.agent_id && setCommentInput(commentInput === 'agent' ? null : 'agent')}
+                        title="Добавить комментарий к заказчику"
+                    >
+                        {item.agent_name}
+                    </span>
+                )}
             </td>
             {/* Кол */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold w-[35px]", rowBg)} style={{left: 340}}>

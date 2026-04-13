@@ -346,6 +346,42 @@ class OrderProductComment(models.Model):
         return '{}'.format(f'{self.author}: {self.order_product.series_id} - {self.text[:50]}')
 
 
+class OrderComment(models.Model):
+    """Комментарий к заказу (Order). Виден для всех позиций этого заказа."""
+
+    class Meta:
+        verbose_name = 'Комментарий к заказу'
+        verbose_name_plural = 'Комментарии к заказам'
+        ordering = ['-add_date']
+
+    author = models.ForeignKey(Employee, verbose_name='Автор', on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, verbose_name='Заказ', on_delete=models.CASCADE, related_name='order_comments')
+    add_date = models.DateTimeField('Дата добавления', auto_now_add=True, blank=True)
+    deleted = models.BooleanField('Удалено', default=False)
+    text = models.CharField('Комментарий', max_length=255)
+
+    def __str__(self):
+        return f'{self.author}: заказ {self.order.inner_number} - {self.text[:50]}'
+
+
+class AgentComment(models.Model):
+    """Комментарий к заказчику (Agent/клиент). Виден для всех заказов этого клиента."""
+
+    class Meta:
+        verbose_name = 'Комментарий к заказчику'
+        verbose_name_plural = 'Комментарии к заказчикам'
+        ordering = ['-add_date']
+
+    author = models.ForeignKey(Employee, verbose_name='Автор', on_delete=models.CASCADE)
+    agent = models.ForeignKey(Agent, verbose_name='Заказчик', on_delete=models.CASCADE, related_name='agent_comments')
+    add_date = models.DateTimeField('Дата добавления', auto_now_add=True, blank=True)
+    deleted = models.BooleanField('Удалено', default=False)
+    text = models.CharField('Комментарий', max_length=255)
+
+    def __str__(self):
+        return f'{self.author}: клиент {self.agent.name} - {self.text[:50]}'
+
+
 class Tariff(models.Model):
     """Class for different tariffs. """
     amount = models.IntegerField("Сумма", default=0)
