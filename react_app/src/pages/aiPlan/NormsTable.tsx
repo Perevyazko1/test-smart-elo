@@ -6,7 +6,8 @@ import {toast} from "sonner";
 interface INormRow {
     id?: number;
     name: string;
-    [dept: string]: string | number | undefined;
+    batch?: Record<string, number>;
+    [dept: string]: string | number | Record<string, number> | undefined;
 }
 
 interface INormsData {
@@ -25,6 +26,7 @@ export function NormsTable() {
     const [schemas, setSchemas] = useState<Record<number, number>>({});
     const [newTypeName, setNewTypeName] = useState("");
     const [collapsed, setCollapsed] = useState(true);
+    const [showBatch, setShowBatch] = useState(false);
     const [classifying, setClassifying] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -61,6 +63,18 @@ export function NormsTable() {
                 ...updated[rowIdx],
                 [field]: field === 'name' ? value : (value === '' ? 0 : parseFloat(value) || 0),
             };
+            saveRows(updated);
+            return updated;
+        });
+    }, [saveRows]);
+
+    // Изменение коэффициента настила для конкретного цеха
+    const handleBatchChange = useCallback((rowIdx: number, dept: string, value: string) => {
+        setRows(prev => {
+            const updated = [...prev];
+            const batch = {...(updated[rowIdx].batch || {})};
+            batch[dept] = value === '' ? 0 : Math.max(0, Math.min(0.5, parseFloat(value) || 0));
+            updated[rowIdx] = {...updated[rowIdx], batch};
             saveRows(updated);
             return updated;
         });
@@ -128,11 +142,21 @@ export function NormsTable() {
                 className="w-full px-4 py-2 bg-slate-50 text-left text-sm font-semibold text-slate-700 hover:bg-slate-100 flex justify-between items-center"
             >
                 <span>Таблица нормативов (часов на 1 изделие)</span>
-                <span className="text-slate-400">{collapsed ? "▼" : "▲"}</span>
+                <span className="text-slate-400">{collapsed ? "▸" : "▾"}</span>
             </button>
 
             {!collapsed && (
                 <div className="p-3">
+                    {/* Переключатель отображения настила */}
+                    <div className="flex items-center gap-2 mb-2">
+                        <button
+                            onClick={() => setShowBatch(!showBatch)}
+                            className={`text-[10px] px-2 py-1 rounded border ${showBatch ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
+                        >
+                            {showBatch ? 'Скрыть настил' : 'Показать настил'}
+                        </button>
+                        {showBatch && <span className="text-[10px] text-slate-400">Коэффициент ускорения при серии одинаковых изделий (0 — 0.5)</span>}
+                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-xs border-collapse">
                             <thead>
@@ -146,9 +170,9 @@ export function NormsTable() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row, rowIdx) => (
+                                {rows.map((row, rowIdx) => (<>
                                     <tr key={row.id || rowIdx} className="border-b border-slate-100 hover:bg-slate-50">
-                                        <td className="px-1 py-1">
+                                        <td className="px-1 py-1" rowSpan={showBatch ? 2 : 1}>
                                             <input
                                                 value={row.name}
                                                 onChange={e => handleCellChange(rowIdx, 'name', e.target.value)}
@@ -167,7 +191,7 @@ export function NormsTable() {
                                                 />
                                             </td>
                                         ))}
-                                        <td className="px-1 py-1 text-center">
+                                        <td className="px-1 py-1 text-center" rowSpan={showBatch ? 2 : 1}>
                                             <select
                                                 value={schemas[row.id!] || 0}
                                                 onChange={e => {
@@ -182,7 +206,7 @@ export function NormsTable() {
                                                 <option value={2}>Без столярки/малярки</option>
                                             </select>
                                         </td>
-                                        <td className="px-1 py-1 text-center">
+                                        <td className="px-1 py-1 text-center" rowSpan={showBatch ? 2 : 1}>
                                             <button
                                                 onClick={() => handleDeleteType(row.id, row.name)}
                                                 className="text-slate-300 hover:text-red-500 text-sm"
@@ -192,7 +216,29 @@ export function NormsTable() {
                                             </button>
                                         </td>
                                     </tr>
-                                ))}
+                                    {/* Строка настила — коэффициенты batch_bonus по цехам */}
+                                    {showBatch && (
+                                        <tr key={`batch-${row.id || rowIdx}`} className="border-b border-slate-200 bg-amber-50/50">
+                                            {departments.map(dept => {
+                                                const batchVal = row.batch?.[dept] ?? 0;
+                                                return (
+                                                    <td key={dept} className="px-1 py-0.5">
+                                                        <input
+                                                            type="number"
+                                                            step="0.05"
+                                                            min="0"
+                                                            max="0.5"
+                                                            value={batchVal}
+                                                            onChange={e => handleBatchChange(rowIdx, dept, e.target.value)}
+                                                            className="w-full px-2 py-0.5 text-[10px] text-center outline-none border border-transparent focus:border-amber-400 rounded bg-transparent text-amber-700"
+                                                            title={`Настил: ${Math.round(batchVal * 100)}% ускорение при серии`}
+                                                        />
+                                                    </td>
+                                                );
+                                            })}
+                                        </tr>
+                                    )}
+                                </>))}
                             </tbody>
                         </table>
                     </div>

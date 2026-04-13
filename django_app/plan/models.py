@@ -54,6 +54,11 @@ class ProductionNorm(models.Model):
     )
     department = models.CharField('Цех', max_length=50)
     hours_per_unit = models.FloatField('Часов на 1 шт', default=0)
+    batch_bonus = models.FloatField(
+        'Настил (бонус серии)', default=0,
+        help_text='Доля ускорения при серии одинаковых изделий (0.0-0.5). '
+                  'Например 0.30 = на 30% быстрее когда подряд идут одинаковые изделия.',
+    )
 
     def __str__(self):
         return f'{self.product_type} / {self.department}: {self.hours_per_unit}ч'

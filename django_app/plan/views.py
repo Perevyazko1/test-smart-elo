@@ -785,9 +785,12 @@ def get_production_norms(request):
     data = []
     for pt in product_types:
         norms_map = {n.department: n.hours_per_unit for n in pt.norms.all()}
+        batch_map = {n.department: n.batch_bonus for n in pt.norms.all()}
         row = {'id': pt.id, 'name': pt.name}
         for dept in departments:
             row[dept] = norms_map.get(dept, 0)
+        # Настил (batch_bonus) по цехам — отдельный ключ "batch_{dept}"
+        row['batch'] = {dept: batch_map.get(dept, 0) for dept in departments}
         data.append(row)
 
     return JsonResponse({
@@ -819,12 +822,17 @@ def update_production_norms(request):
         else:
             pt, _ = ProductType.objects.get_or_create(name=name)
 
+        batch = row.get('batch', {})
         for dept in departments:
             if dept in row:
                 val = float(row[dept] or 0)
+                defaults = {'hours_per_unit': val}
+                # Сохраняем batch_bonus если передан
+                if dept in batch:
+                    defaults['batch_bonus'] = max(0.0, min(0.5, float(batch[dept] or 0)))
                 ProductionNorm.objects.update_or_create(
                     product_type=pt, department=dept,
-                    defaults={'hours_per_unit': val},
+                    defaults=defaults,
                 )
 
     return JsonResponse({'success': True})

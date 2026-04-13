@@ -387,11 +387,15 @@ def _build_chart_grid():
     )
 
     # Нормативы: сколько часов нужно на 1 изделие в каждом цехе
+    # + коэффициент настила (batch_bonus): ускорение при серии одинаковых изделий
     norms = {}
+    batch_bonuses = {}  # {(product_type_name, dept): bonus}
     for n in ProductionNorm.objects.select_related('product_type').all():
         if n.product_type.name not in norms:
             norms[n.product_type.name] = {}
         norms[n.product_type.name][n.department] = n.hours_per_unit
+        if n.batch_bonus > 0:
+            batch_bonuses[(n.product_type.name, n.department)] = n.batch_bonus
 
     # Переопределения нормативов для конкретных изделий (приоритет выше чем тип)
     overrides = {}
@@ -474,6 +478,7 @@ def _build_chart_grid():
             order_dept_data.append({
                 'op_id': op.id,
                 'series_id': op.series_id,
+                'product_id': op.product_id,  # ID изделия для группировки настила
                 'name': op.product.name,
                 'order': op.order.inner_number if op.order else '',
                 'order_db_id': op.order_id,  # FK к Order для группировки позиций в заказ
@@ -687,6 +692,20 @@ def _build_chart_grid():
     # Состояние каждого цеха: массив дней с заказами и часами
     dept_state = {dept: [] for dept in departments}
 
+    # Трекинг последнего product_id обработанного в каждом цехе (для настила)
+    dept_last_product = {dept: None for dept in departments}
+
+    def get_batch_bonus(order, dept):
+        """Получить коэффициент настила для заказа в цехе.
+        Возвращает bonus (0.0-0.5) если последний заказ в цехе — то же изделие."""
+        pt = order.get('product_type', '')
+        bonus = batch_bonuses.get((pt, dept), 0)
+        if bonus <= 0:
+            return 0
+        if dept_last_product[dept] == order.get('product_id'):
+            return bonus
+        return 0
+
     def get_available_units(order, dept, day):
         """Определить сколько ШТУК заказа доступно для цеха на данный день.
 
@@ -850,10 +869,13 @@ def _build_chart_grid():
             dept_orders = [o for o in order_dept_data if dept in o['depts']]
 
             # Blend: при load_factor=0 → чистый weight, при load_factor=1 → чистый downstream_path
+            # + бонус настила: заказы с тем же product_id что последний обработанный → +20% к скору
             dept_orders.sort(
                 key=lambda o: (
-                    o['weight'] * (1 - load_factor) +
-                    o.get('downstream_path_score', 0) * load_factor
+                    (o['weight'] * (1 - load_factor) +
+                     o.get('downstream_path_score', 0) * load_factor)
+                    * (1.2 if dept_last_product[dept] == o.get('product_id') and
+                       batch_bonuses.get((o.get('product_type', ''), dept), 0) > 0 else 1.0)
                 ),
                 reverse=True,
             )
@@ -863,6 +885,12 @@ def _build_chart_grid():
                 hours_left = info['hours']
                 remaining = info['remaining']
                 sid = order['series_id']
+
+                # Настил: если то же изделие что и предыдущий — уменьшаем часы
+                bonus = get_batch_bonus(order, dept)
+                if bonus > 0:
+                    hours_left = hours_left * (1 - bonus)
+
                 hours_per_unit = hours_left / remaining if remaining > 0 else 1
                 units_produced_total = 0
                 day = 0
@@ -881,6 +909,9 @@ def _build_chart_grid():
 
                     if hours_left > 0:
                         day += 1
+
+                # Обновить last_product для настила — следующий заказ того же изделия получит бонус
+                dept_last_product[dept] = order.get('product_id')
 
         else:
             # ═══════════════════════════════════════════════════════════════
@@ -976,6 +1007,9 @@ def _build_chart_grid():
                          x[0].get('downstream_path_score', 0) * load_factor)
                         # Readiness бонус: до +30% от базового скора
                         * (1 + 0.3 * x[2] / max_readiness * load_factor)
+                        # Настил бонус: +20% если то же изделие что и предыдущий в цехе
+                        * (1.2 if dept_last_product[dept] == x[0].get('product_id') and
+                           batch_bonuses.get((x[0].get('product_type', ''), dept), 0) > 0 else 1.0)
                     ),
                     reverse=True,
                 )
@@ -988,7 +1022,9 @@ def _build_chart_grid():
                     if day_free <= 0:
                         break
 
-                    hours_per_unit = state['hours_per_unit']
+                    # Настил: уменьшаем hours_per_unit если то же изделие
+                    bonus = get_batch_bonus(order, dept)
+                    hours_per_unit = state['hours_per_unit'] * (1 - bonus) if bonus > 0 else state['hours_per_unit']
 
                     # Часы доступные по потоковой модели
                     hours_for_available = can_do * hours_per_unit
@@ -1003,6 +1039,9 @@ def _build_chart_grid():
                     state['hours_left'] -= take
                     state['units_produced'] += units_today
                     _record_production(sid, dept, day, state['units_produced'])
+
+                    # Обновить last_product для настила
+                    dept_last_product[dept] = order.get('product_id')
 
                     # Обновить свободное время дня
                     day_free = cap - dept_state[dept][day]['hours']
