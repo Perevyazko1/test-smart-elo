@@ -926,10 +926,13 @@ def update_ai_entries(request):
                 entry.sort_position = entry_data['sort_position']
             if 'ai_comment' in entry_data:
                 entry.ai_comment = entry_data['ai_comment']
+            # Обратная связь от пользователя через промпт
+            if 'feedback' in entry_data:
+                entry.feedback = entry_data['feedback']
             # Дедлайн от пользователя через промпт ("сделать сегодня", "до 20 апреля")
             if 'ai_deadline' in entry_data:
                 entry.ai_deadline = entry_data['ai_deadline'] or None
-            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'ai_deadline', 'updated_at'])
+            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'feedback', 'ai_deadline', 'updated_at'])
 
             # Действие над позицией: удалить комменты, сбросить приоритет и т.д.
             action = entry_data.get('action')
