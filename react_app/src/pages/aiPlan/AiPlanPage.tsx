@@ -93,16 +93,11 @@ export const AiPlanPage = () => {
     }, []);
 
     const {data: deptsData} = useQuery({
-        queryKey: ["departments"],
-        queryFn: () => $axios.get<{departments: string[]}>('/plan/departments/').then(r => r.data),
-    });
-    const allDepartments: string[] = deptsData?.departments || [];
-
-    const {data: normDeptsData} = useQuery({
         queryKey: ["departments-norms"],
         queryFn: () => $axios.get<{departments: string[]}>('/plan/departments/?norms=1').then(r => r.data),
     });
-    const normDepartments: string[] = normDeptsData?.departments || [];
+    const allDepartments: string[] = deptsData?.departments || [];
+    const normDepartments = allDepartments;
 
     const [hiddenDepts, setHiddenDepts] = useState<Set<string>>(new Set());
     const visibleDepts = useMemo(
@@ -573,7 +568,8 @@ export const AiPlanPage = () => {
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 435}}>Вес</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[85px]" style={{left: 435}}>Ткань</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 520}}>Вес</th>
                             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
                                 <th key={dept} className="sticky top-0 z-10 bg-slate-50 px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
                                     {dept}
@@ -783,10 +779,32 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                     <span className="text-slate-300">—</span>
                 )}
             </td>
+            {/* Ткань — дата получения */}
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[85px]", rowBg)} style={{left: 435}}>
+                <input
+                    type="date"
+                    value={item.fabric_available_date ?? ''}
+                    onChange={e => {
+                        const val = e.target.value || null;
+                        $axios.post('/plan/fabric_date/', {
+                            order_product_id: item.order_product_id,
+                            date: val,
+                        }).then(() => toast.success('Дата ткани сохранена'))
+                          .catch(() => toast.error('Ошибка сохранения'));
+                    }}
+                    className={twMerge(
+                        "w-full text-[10px] px-0.5 py-0.5 outline-none border rounded bg-transparent text-center",
+                        item.fabric_available_date
+                            ? "border-orange-300 text-orange-600 bg-orange-50"
+                            : "border-transparent text-slate-300"
+                    )}
+                    title={item.fabric_available_date ? `Ткань ожидается: ${item.fabric_available_date}` : 'Ткань в наличии (нажмите чтобы указать дату)'}
+                />
+            </td>
             {/* Вес */}
             <td
                 className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[30px] border-r border-slate-200 cursor-help", rowBg)}
-                style={{left: 435}}
+                style={{left: 520}}
                 title={aiEntry?.weight_detail
                     ? `Сроки: ${aiEntry.weight_detail.deadline ?? '—'}\nПрогресс: ${aiEntry.weight_detail.progress ?? '—'}\nЦеха: ${aiEntry.weight_detail.dept_load ?? '—'}${aiEntry.weight_detail.adjustment ? `\nAI корр.: ${aiEntry.weight_detail.adjustment > 0 ? '+' : ''}${aiEntry.weight_detail.adjustment}` : ''}`
                     : undefined}

@@ -480,6 +480,16 @@ def _build_chart_grid():
         deadline_date = min(sort_dates).date() if sort_dates else None
         deadline_days_left = (deadline_date - _date_cls.today()).days if deadline_date else None
 
+        # Дата получения ткани: если задана и в будущем — позиция заблокирована
+        fabric_date = op.fabric_available_date  # DateField, nullable
+        fabric_blocked = False
+        fabric_available_day = 0  # День (от сегодня) когда ткань будет доступна
+        if fabric_date:
+            days_until = (fabric_date - _date_cls.today()).days
+            if days_until > 0:
+                fabric_blocked = True
+                fabric_available_day = days_until
+
         if depts:
             order_dept_data.append({
                 'op_id': op.id,
@@ -494,6 +504,8 @@ def _build_chart_grid():
                 'product_type': product_type_name,
                 'weight': weight,
                 'depts': depts,
+                'fabric_blocked': fabric_blocked,  # True = ткань ещё не получена
+                'fabric_available_day': fabric_available_day,  # День доступности (0 = сейчас)
             })
 
     # --- load_factor: насколько слайдер "Загрузка цехов" доминирует ---
@@ -955,23 +967,32 @@ def _build_chart_grid():
             #   × настил бонус: +20% если то же изделие (batch continuation)
             #   × order grouping бонус: +25% если другая позиция того же заказа
             #     уже обрабатывается в этом цехе (завершить заказ быстрее → выручка)
+            # Определяем заказы (order_db_id) у которых есть хотя бы одна
+            # позиция с заблокированной тканью — такие заказы депиоритизируем.
+            _orders_with_fabric_wait = set()
+            for o in dept_orders:
+                if o.get('fabric_blocked'):
+                    oid = o.get('order_db_id')
+                    if oid:
+                        _orders_with_fabric_wait.add(oid)
+
             while remaining_orders:
                 # Пересортировка с учётом текущего состояния цеха
                 best_idx = max(remaining_orders, key=lambda i: (
                     # Базовый скор: blend weight + downstream_path по load_factor
                     (dept_orders[i]['weight'] * (1 - load_factor) +
                      dept_orders[i].get('downstream_path_score', 0) * load_factor
-                     # Price density бонус: до +30% от базы при максимальном k_revenue.
-                     # Чем выше k_revenue тем сильнее влияние плотности денег.
-                     # Заказы с высокой плотностью (много ₽, короткий путь) идут первыми.
                      + dept_orders[i].get('price_density_score', 0) * _revenue_factor * 0.3)
                     # Настил бонус: +20% если то же изделие что и предыдущий
                     * (1.2 if dept_last_product[dept] == dept_orders[i].get('product_id') and
                        batch_bonuses.get(dept, 0) > 0 else 1.0)
                     # Order grouping бонус: +25% если другая позиция того же заказа
-                    # уже запущена в этом цехе. Цель: завершить заказ целиком быстрее,
-                    # т.к. выручка считается по заказу (все позиции готовы → деньги).
                     * (1.25 if dept_orders[i].get('order_db_id') in dept_started_orders[dept] else 1.0)
+                    # Ткань: позиция заблокирована → скор почти 0 (уходит в конец)
+                    * (0.01 if dept_orders[i].get('fabric_blocked') else 1.0)
+                    # Заказ содержит позицию без ткани → депиоритизация -30%
+                    * (0.7 if dept_orders[i].get('order_db_id') in _orders_with_fabric_wait
+                       and not dept_orders[i].get('fabric_blocked') else 1.0)
                 ))
                 remaining_orders.remove(best_idx)
                 order = dept_orders[best_idx]
@@ -992,14 +1013,13 @@ def _build_chart_grid():
                     hours_left = hours_left * (1 - bonus)
 
                 # Setup time: время переключения при смене типа изделия.
-                # Добавляется к часам работы как накладные расходы.
-                # Если тот же тип идёт подряд (Диван→Диван) — 0.
                 setup_hours = get_setup_hours(order, dept)
                 hours_left += setup_hours
 
                 hours_per_unit = hours_left / remaining if remaining > 0 else 1
                 units_produced_total = 0
-                day = 0
+                # Ткань заблокирована → начинаем с дня доступности ткани
+                day = order.get('fabric_available_day', 0)
 
                 while hours_left > 0 and day < MAX_DAYS:
                     take, units_today = _fill_order_in_day(
@@ -1080,6 +1100,10 @@ def _build_chart_grid():
                     sid = order['series_id']
                     state = remaining_state[sid]
                     if state['hours_left'] <= 0:
+                        continue
+
+                    # Ткань ещё не получена — пропускаем до дня доступности
+                    if order.get('fabric_blocked') and day < order.get('fabric_available_day', 0):
                         continue
 
                     available = get_available_units(order, dept, day)

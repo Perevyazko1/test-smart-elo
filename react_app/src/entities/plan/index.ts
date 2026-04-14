@@ -49,6 +49,7 @@ export interface IPlanDataRow {
     comments: IPlanComment[];
     order_comments: ISimpleComment[];
     agent_comments: ISimpleComment[];
+    fabric_available_date: string | null;
     assignments: {
         [key: string]: {
             all: number;

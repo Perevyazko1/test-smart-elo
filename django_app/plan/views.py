@@ -44,14 +44,23 @@ def get_plan_table(request):
 
     assignments_query = Assignment.objects.filter(**query_filter)
 
-    dept_map = {
-        "Конструктора": "konstruktora",
-        "Обивка": "obivka",
-        "Пошив": "poshiv",
-        "Малярка": "malyarka",
-        "Сборка": "sborka",
-        "Упаковка": "upakovka",
-    }
+    # Цеха из справочника (те же что в ai-plan-chart и нормативах)
+    import re as _re
+    def _transliterate(name):
+        """Транслитерация названия цеха в латинский ключ для агрегации."""
+        _map = {'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ё':'yo','ж':'zh',
+                'з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o',
+                'п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'h','ц':'ts',
+                'ч':'ch','ш':'sh','щ':'sch','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'}
+        result = ''.join(_map.get(c, c) for c in name.lower())
+        return _re.sub(r'[^a-z0-9]', '_', result)
+
+    dept_names = list(
+        Department.objects.filter(has_norms=True)
+        .order_by('ordering', 'name')
+        .values_list('name', flat=True)
+    )
+    dept_map = {name: _transliterate(name) for name in dept_names}
     department_aggregates = {}
     for dept_name, dept_key in dept_map.items():
         department_aggregates[f'{dept_key}_all'] = Count('id', filter=Q(department__name=dept_name))
@@ -188,10 +197,37 @@ def get_plan_table(request):
             "comments": comments_map.get(order_product.id, []),
             "order_comments": order_comments_map.get(order_product.order_id, []),
             "agent_comments": agent_comments_map.get(order_product.order.agent_id, []) if order_product.order.agent_id else [],
+            "fabric_available_date": str(order_product.fabric_available_date) if order_product.fabric_available_date else None,
             "assignments": assignments_data
         }
 
     return JsonResponse(result)
+
+
+@api_view(['POST'])
+def set_fabric_date(request):
+    """Установить/сбросить дату получения ткани для позиции заказа.
+    Body: {order_product_id: int, date: 'YYYY-MM-DD' | null}
+    """
+    op_id = request.data.get('order_product_id')
+    date_str = request.data.get('date')
+    if not op_id:
+        return JsonResponse({'error': 'order_product_id обязателен'}, status=400)
+    try:
+        op = OrderProduct.objects.get(pk=op_id)
+    except OrderProduct.DoesNotExist:
+        return JsonResponse({'error': 'Позиция не найдена'}, status=404)
+
+    if date_str:
+        from datetime import date as _date
+        try:
+            op.fabric_available_date = _date.fromisoformat(date_str)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Неверный формат даты'}, status=400)
+    else:
+        op.fabric_available_date = None
+    op.save(update_fields=['fabric_available_date'])
+    return JsonResponse({'success': True, 'date': str(op.fabric_available_date) if op.fabric_available_date else None})
 
 
 @api_view(['GET'])

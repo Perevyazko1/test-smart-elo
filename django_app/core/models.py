@@ -313,6 +313,10 @@ class OrderProduct(models.Model):
     # Индивидуальное назначение срочности производства
     urgency = models.SmallIntegerField('Срочность', default=3)
 
+    # Дата получения ткани. Null = ткань в наличии, можно начинать.
+    # Если дата в будущем — позиция заблокирована до этой даты.
+    fabric_available_date = models.DateField('Дата получения ткани', null=True, blank=True)
+
     tariff_checked = models.BooleanField('Тариф проверен', default=False)
     tariff_checked_at = models.DateTimeField('Дата проверки тарифа', null=True, blank=True)
     tariff_checked_by = models.ForeignKey(
