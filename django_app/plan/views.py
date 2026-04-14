@@ -203,7 +203,7 @@ def get_product_detail(request, product_id):
     op = (OrderProduct.objects
           .filter(product_id=product_id)
           .select_related('order__agent', 'product__production_type')
-          .order_by('-order__date')
+          .order_by('-order__moment')
           .first())
     if not op:
         return JsonResponse({'error': 'Изделие не найдено в заказах'}, status=404)
