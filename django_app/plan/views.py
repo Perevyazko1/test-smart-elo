@@ -194,6 +194,55 @@ def get_plan_table(request):
     return JsonResponse(result)
 
 
+@api_view(['GET'])
+def get_product_detail(request, product_id):
+    """Детали изделия для модалки на графике: инфа по заказу, заказчику, комментарии.
+    Находит первую активную позицию заказа с этим product_id для получения контекста.
+    """
+    # Ищем позицию заказа с этим изделием (берём первую по дате — самую актуальную)
+    op = (OrderProduct.objects
+          .filter(product_id=product_id)
+          .select_related('order__agent', 'product__production_type')
+          .order_by('-order__date')
+          .first())
+    if not op:
+        return JsonResponse({'error': 'Изделие не найдено в заказах'}, status=404)
+
+    # Комментарии к позиции (OrderProductComment)
+    product_comments = list(
+        OrderProductComment.objects.filter(order_product=op, deleted=False)
+        .order_by('-add_date')
+        .values('id', 'text', 'add_date')[:20]
+    )
+    # Комментарии к заказу (OrderComment)
+    order_comments = list(
+        OrderComment.objects.filter(order=op.order, deleted=False)
+        .order_by('-add_date')
+        .values('id', 'text', 'add_date')[:20]
+    ) if op.order else []
+    # Комментарии к заказчику (AgentComment)
+    agent_comments = list(
+        AgentComment.objects.filter(agent=op.order.agent, deleted=False)
+        .order_by('-add_date')
+        .values('id', 'text', 'add_date')[:20]
+    ) if op.order and op.order.agent else []
+
+    return JsonResponse({
+        'product_id': op.product_id,
+        'product_name': op.product.name if op.product else '',
+        'product_type': op.product.production_type.name if op.product and op.product.production_type else None,
+        'order_id': op.order_id,
+        'order_number': op.order.inner_number if op.order else '',
+        'agent_id': op.order.agent_id if op.order else None,
+        'agent_name': op.order.agent.name if op.order and op.order.agent else None,
+        'quantity': op.quantity,
+        'price': str(op.price or 0),
+        'product_comments': product_comments,
+        'order_comments': order_comments,
+        'agent_comments': agent_comments,
+    }, json_dumps_params={"ensure_ascii": False})
+
+
 # ─── Комментарии (3 уровня: позиция, заказ, заказчик) ────────────
 
 @api_view(['POST'])

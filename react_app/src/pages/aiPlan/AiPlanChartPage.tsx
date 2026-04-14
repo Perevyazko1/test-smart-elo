@@ -4,6 +4,7 @@ import {$axios} from "@/shared/api";
 import {twMerge} from "tailwind-merge";
 import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 import {toast} from "sonner";
+import {ChartProductModal} from "./ChartProductModal";
 
 /* ─── Типы данных графика ──────────────────────────────────────── */
 
@@ -12,6 +13,8 @@ interface ChartOrder {
     order: string;
     picture: string | null;
     count: number;
+    product_id?: number;
+    order_id?: number;
 }
 
 interface ChartCell {
@@ -82,6 +85,7 @@ function formatFullDate(daysFromNow: number): string {
 export const AiPlanChartPage = () => {
     const queryClient = useQueryClient();
     const [refreshing, setRefreshing] = useState(false);
+    const [modal, setModal] = useState<{productId: number; name: string; picture: string | null} | null>(null);
 
     /* Загрузка данных графика из кэша (AiPlanConfig.chart_data).
        Если 404 — значит график ещё не был сгенерирован. */
@@ -359,8 +363,9 @@ export const AiPlanChartPage = () => {
                                                     {cell.orders.map((o, j) => (
                                                         <div
                                                             key={j}
-                                                            className="relative w-[42px] h-[50px] rounded overflow-hidden border border-slate-300 bg-slate-100"
+                                                            className="relative w-[42px] h-[50px] rounded overflow-hidden border border-slate-300 bg-slate-100 cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all"
                                                             title={`${o.order} — ${o.name} (${o.count} шт)`}
+                                                            onClick={() => o.product_id && setModal({productId: o.product_id, name: o.name, picture: o.picture})}
                                                         >
                                                             {/* Фото изделия или название-заглушка */}
                                                             {o.picture ? (
@@ -394,6 +399,15 @@ export const AiPlanChartPage = () => {
                     </table>
                 </div>
             )}
+
+            {/* Модалка с деталями изделия и нормативами */}
+            <ChartProductModal
+                productId={modal?.productId ?? null}
+                productName={modal?.name ?? ""}
+                picture={modal?.picture ?? null}
+                isOpen={modal !== null}
+                onClose={() => setModal(null)}
+            />
         </div>
     );
 };

@@ -817,7 +817,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                                 setLocalNorms(prev => ({...prev, [dept]: v}));
                                 onNormChange(item.product_id, dept, v);
                             }}
-                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none border-t border-dashed border-slate-200 mt-0.5 pt-0.5"
+                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none mt-0.5"
                             placeholder="—"
                         />
                     </td>
@@ -841,7 +841,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                                 setLocalNorms(prev => ({...prev, [dept]: v}));
                                 onNormChange(item.product_id, dept, v);
                             }}
-                            className="w-full text-[9px] text-center text-blue-400 bg-transparent outline-none border-t border-dashed border-slate-200 mt-0.5 pt-0.5"
+                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none mt-0.5"
                             placeholder="—"
                         />
                     </td>

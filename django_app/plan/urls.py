@@ -32,6 +32,7 @@ urlpatterns = [
     path('products/set_types/', set_product_types),
     path('products/classify/', classify_products),
 
+    path('product_detail/<int:product_id>/', get_product_detail),
     path('product_norms/batch/', get_product_norms_batch),
     path('product_norms/<int:product_id>/', get_product_norms),
     path('product_norms/<int:product_id>/update/', update_product_norms),

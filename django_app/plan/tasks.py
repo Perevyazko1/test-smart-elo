@@ -902,6 +902,8 @@ def _build_chart_grid():
             'order': order['order'],
             'picture': order['picture'],
             'count': units_today,
+            'product_id': order.get('product_id'),
+            'order_id': order.get('order_db_id'),
         })
         day_data['hours'] += take
         return take, units_today
