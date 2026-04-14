@@ -1377,11 +1377,30 @@ def recalculate_with_batch(request):
         # 2. Python считает базовые веса
         weight_results = _calculate_all_weights(orders, data['dept_summary'], config, workflows)
         weight_map = {r['series_id']: r for r in weight_results}
+
+        # Позиции с ai_deadline (установленным через промпт) сохраняют свой вес —
+        # промпт уже задал sort_weight=1000, Python-формула не должна его затирать.
+        # Для таких позиций берём MAX(промпт-вес, формульный вес).
+        pinned_sids = set()
+        for entry in AiPlanEntry.objects.filter(ai_deadline__isnull=False).values('order_product__series_id', 'sort_weight'):
+            sid = entry['order_product__series_id']
+            pinned_sids.add(sid)
+            if sid in weight_map:
+                # Берём максимум: промпт мог поставить 1000, формула — 154
+                weight_map[sid]['weight'] = max(entry['sort_weight'], weight_map[sid]['weight'])
+                # Обновляем в списке результатов тоже
+                for r in weight_results:
+                    if r['series_id'] == sid:
+                        r['weight'] = weight_map[sid]['weight']
+                        break
+
         _save_weights_to_db(weight_results)
 
         # 3. GPT Batch — корректировка по обратной связи (топ заказов)
+        # Гарантируем что позиции с ai_deadline попадают в batch (они приоритетные)
         sorted_by_weight = sorted(weight_results, key=lambda x: x['weight'], reverse=True)
         top_series_ids = {r['series_id'] for r in sorted_by_weight[:BATCH_SIZE]}
+        top_series_ids |= pinned_sids  # Всегда включаем pinned позиции
 
         top_orders = []
         for o in orders:
