@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from core.models import Assignment, OrderProduct, Order, AgentTag, ProductionStep, OrderProductComment, OrderComment, AgentComment, Product
 from core.pages.orders_page.serializers import OrderProductCommentSerializer
 from core.serializers import AgentTagSerializer
-from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, ProductNormOverride, DepartmentWorkers
+from plan.models import AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm, ProductNormOverride, DepartmentWorkers, DepartmentBatchBonus
 from staff.models import Employee, Department
 from staff.serializers import EmployeeSerializer
 
@@ -673,19 +673,20 @@ def ai_plan_cancel(request):
 
 @api_view(['GET'])
 def get_weight_coefficients(request):
-    """Получить коэффициенты слайдеров."""
+    """Получить коэффициенты слайдеров + глобальное время переключения."""
     config = _get_ai_config()
     return JsonResponse({
         'k_deadline': config.weight_k_deadline,
         'k_dept_load': config.weight_k_dept_load,
         'k_feedback': config.weight_k_feedback,
         'k_revenue': config.weight_k_revenue,
+        'setup_minutes': config.setup_minutes,
     })
 
 
 @api_view(['POST'])
 def save_weight_coefficients(request):
-    """Сохранить коэффициенты слайдеров."""
+    """Сохранить коэффициенты слайдеров + глобальное время переключения."""
     config = _get_ai_config()
     fields = []
     for key in ('k_deadline', 'k_dept_load', 'k_feedback', 'k_revenue'):
@@ -693,6 +694,11 @@ def save_weight_coefficients(request):
         if val is not None:
             setattr(config, f'weight_{key}', max(0, min(100, int(val))))
             fields.append(f'weight_{key}')
+    # Глобальное время переключения (мин)
+    setup_val = request.data.get('setup_minutes')
+    if setup_val is not None:
+        config.setup_minutes = max(0.0, min(120.0, float(setup_val)))
+        fields.append('setup_minutes')
     if fields:
         config.save(update_fields=fields + ['updated_at'])
     return JsonResponse({'status': 'ok'})
@@ -863,15 +869,9 @@ def get_production_norms(request):
     data = []
     for pt in product_types:
         norms_map = {n.department: n.hours_per_unit for n in pt.norms.all()}
-        batch_map = {n.department: n.batch_bonus for n in pt.norms.all()}
-        setup_map = {n.department: n.setup_minutes for n in pt.norms.all()}
         row = {'id': pt.id, 'name': pt.name}
         for dept in departments:
             row[dept] = norms_map.get(dept, 0)
-        # Настил (batch_bonus) по цехам
-        row['batch'] = {dept: batch_map.get(dept, 0) for dept in departments}
-        # Время переключения (setup_minutes) по цехам
-        row['setup'] = {dept: setup_map.get(dept, 0) for dept in departments}
         data.append(row)
 
     return JsonResponse({
@@ -903,21 +903,12 @@ def update_production_norms(request):
         else:
             pt, _ = ProductType.objects.get_or_create(name=name)
 
-        batch = row.get('batch', {})
-        setup = row.get('setup', {})
         for dept in departments:
             if dept in row:
                 val = float(row[dept] or 0)
-                defaults = {'hours_per_unit': val}
-                # Сохраняем batch_bonus если передан
-                if dept in batch:
-                    defaults['batch_bonus'] = max(0.0, min(0.5, float(batch[dept] or 0)))
-                # Сохраняем setup_minutes если передан (минуты переключения, 0-120)
-                if dept in setup:
-                    defaults['setup_minutes'] = max(0.0, min(120.0, float(setup[dept] or 0)))
                 ProductionNorm.objects.update_or_create(
                     product_type=pt, department=dept,
-                    defaults=defaults,
+                    defaults={'hours_per_unit': val},
                 )
 
     return JsonResponse({'success': True})
@@ -1109,6 +1100,32 @@ def update_target_load(request):
     for dept, days in loads.items():
         days = max(1, min(30, int(days)))
         DepartmentWorkers.objects.filter(department=dept).update(target_load_days=days)
+    return JsonResponse({'success': True})
+
+
+@api_view(['GET'])
+def get_batch_bonuses(request):
+    """Настил по цехам — одно значение на цех, не зависит от типа изделия."""
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
+    # Создаём записи для цехов, у которых ещё нет настила
+    for dept in departments:
+        DepartmentBatchBonus.objects.get_or_create(department=dept, defaults={'batch_bonus': 0})
+    bonuses = {b.department: b.batch_bonus for b in DepartmentBatchBonus.objects.filter(department__in=departments)}
+    return JsonResponse({
+        'departments': departments,
+        'bonuses': {dept: bonuses.get(dept, 0) for dept in departments},
+    }, json_dumps_params={"ensure_ascii": False})
+
+
+@api_view(['POST'])
+def update_batch_bonuses(request):
+    """Обновить настил по цехам. {bonuses: {department: value, ...}}"""
+    bonuses = request.data.get('bonuses', {})
+    for dept, val in bonuses.items():
+        val = max(0.0, min(0.5, float(val or 0)))
+        DepartmentBatchBonus.objects.update_or_create(
+            department=dept, defaults={'batch_bonus': val}
+        )
     return JsonResponse({'success': True})
 
 

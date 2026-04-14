@@ -11,6 +11,7 @@ import {STATIC_URL} from "@/shared/consts/serverConfig.ts";
 import {$axios} from "@/shared/api";
 import {toast} from "sonner";
 import {NormsTable} from "./NormsTable";
+import {BatchBonusTable} from "./BatchBonusTable";
 import {WorkersTable} from "./WorkersTable";
 import {ProductNormsModal} from "./ProductNormsModal";
 import {DeptLoadEqualizer} from "./DeptLoadEqualizer";
@@ -34,6 +35,7 @@ interface IWeightCoefficients {
     k_dept_load: number;
     k_feedback: number;
     k_revenue: number;
+    setup_minutes: number;
 }
 
 interface IAiPlanData {
@@ -76,7 +78,7 @@ export const AiPlanPage = () => {
         queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
     });
     const [localWeights, setLocalWeights] = useState<IWeightCoefficients | null>(null);
-    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_dept_load: 35, k_feedback: 25, k_revenue: 50};
+    const weights = localWeights ?? weightsData ?? {k_deadline: 15, k_dept_load: 35, k_feedback: 25, k_revenue: 50, setup_minutes: 0};
 
     // Слайдеры приоритетов — каждый независим (0-100).
     // Формула нормализует: weight = (S1×K1 + S2×K2 + ...) / (100 × сумма_K),
@@ -313,6 +315,9 @@ export const AiPlanPage = () => {
             {/* Norms Table */}
             <NormsTable />
 
+            {/* Batch Bonus Table — настил по цехам */}
+            <BatchBonusTable />
+
             {/* Workers Table */}
             <WorkersTable />
 
@@ -349,6 +354,26 @@ export const AiPlanPage = () => {
                                 <div className="text-[10px] text-slate-400 mt-0.5">{desc}</div>
                             </div>
                         ))}
+                    </div>
+                    {/* Глобальное время переключения */}
+                    <div className="mt-4 pt-3 border-t border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <span className="text-xs font-medium text-violet-700">Переключение (мин)</span>
+                            <input
+                                type="number"
+                                step="1"
+                                min="0"
+                                max="120"
+                                value={weights.setup_minutes ?? 0}
+                                onChange={(e) => {
+                                    const val = Math.max(0, Math.min(120, parseFloat(e.target.value) || 0));
+                                    setLocalWeights({...weights, setup_minutes: val});
+                                }}
+                                onBlur={() => saveWeights(weights)}
+                                className="w-20 px-2 py-1 text-xs text-center border border-violet-200 rounded outline-none focus:border-violet-400 bg-violet-50/50 text-violet-700"
+                            />
+                            <span className="text-[10px] text-slate-400">Время на подготовку при смене типа изделия в цехе (единое для всех цехов)</span>
+                        </div>
                     </div>
                 </div>
 

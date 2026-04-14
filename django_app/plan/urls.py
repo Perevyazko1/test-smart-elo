@@ -42,6 +42,9 @@ urlpatterns = [
     path('workers/update/', update_department_workers),
     path('workers/load/', update_target_load),
 
+    path('batch_bonuses/', get_batch_bonuses),
+    path('batch_bonuses/update/', update_batch_bonuses),
+
     path('workflow/<int:product_type_id>/', get_workflow),
     path('workflow/<int:product_type_id>/update/', update_workflow),
 

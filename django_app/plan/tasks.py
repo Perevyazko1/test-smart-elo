@@ -372,8 +372,8 @@ def _build_chart_grid():
     Returns: dict {departments, total_days, grid: {dept: [{orders, load, hours}]}}
     """
     from plan.models import (
-        AiPlanEntry, ProductType, ProductionNorm,
-        ProductNormOverride, DepartmentWorkers
+        AiPlanEntry, AiPlanConfig, ProductType, ProductionNorm,
+        ProductNormOverride, DepartmentWorkers, DepartmentBatchBonus
     )
     from core.models import OrderProduct, Assignment
     from staff.models import Department
@@ -387,18 +387,21 @@ def _build_chart_grid():
     )
 
     # Нормативы: сколько часов нужно на 1 изделие в каждом цехе
-    # + коэффициент настила (batch_bonus): ускорение при серии одинаковых изделий
     norms = {}
-    batch_bonuses = {}  # {(product_type_name, dept): bonus}
-    setup_times = {}    # {(product_type_name, dept): minutes} — время переключения при смене типа
     for n in ProductionNorm.objects.select_related('product_type').all():
         if n.product_type.name not in norms:
             norms[n.product_type.name] = {}
         norms[n.product_type.name][n.department] = n.hours_per_unit
-        if n.batch_bonus > 0:
-            batch_bonuses[(n.product_type.name, n.department)] = n.batch_bonus
-        if n.setup_minutes > 0:
-            setup_times[(n.product_type.name, n.department)] = n.setup_minutes
+
+    # Настил по цехам (не зависит от типа изделия) — ускорение при серии одинаковых изделий
+    batch_bonuses = {}  # {dept: bonus}
+    for b in DepartmentBatchBonus.objects.all():
+        if b.batch_bonus > 0:
+            batch_bonuses[b.department] = b.batch_bonus
+
+    # Глобальное время переключения (мин) — единое для всех цехов
+    _ai_config = AiPlanConfig.objects.first()
+    global_setup_minutes = _ai_config.setup_minutes if _ai_config else 0
 
     # Переопределения нормативов для конкретных изделий (приоритет выше чем тип)
     overrides = {}
@@ -750,9 +753,9 @@ def _build_chart_grid():
 
     def get_batch_bonus(order, dept):
         """Получить коэффициент настила для заказа в цехе.
+        Настил привязан к цеху (не к типу изделия).
         Возвращает bonus (0.0-0.5) если последний заказ в цехе — то же изделие."""
-        pt = order.get('product_type', '')
-        bonus = batch_bonuses.get((pt, dept), 0)
+        bonus = batch_bonuses.get(dept, 0)
         if bonus <= 0:
             return 0
         if dept_last_product[dept] == order.get('product_id'):
@@ -762,20 +765,16 @@ def _build_chart_grid():
     def get_setup_hours(order, dept):
         """Получить время переключения (в часах) при смене типа изделия в цехе.
 
-        Логика: если предыдущий заказ в цехе был того же типа (Диван→Диван) — 0.
-        Если тип сменился (Диван→Подушка) — возвращаем setup_minutes нового типа в часах.
-        Если цех ещё пустой (dept_last_type = None) — тоже 0 (первый заказ, нет переключения).
-
-        Returns: время в часах (float). Например 10 минут = 0.1667 часа.
+        Глобальное значение: одно setup_minutes на все цеха.
+        Если предыдущий заказ в цехе был того же типа — 0.
+        Если тип сменился — возвращаем global_setup_minutes в часах.
+        Если цех ещё пустой (dept_last_type = None) — тоже 0.
         """
         pt = order.get('product_type', '')
         last_type = dept_last_type[dept]
-        # Первый заказ в цехе или тот же тип — нет переключения
         if last_type is None or last_type == pt:
             return 0
-        # Тип сменился — берём setup_minutes нового типа
-        minutes = setup_times.get((pt, dept), 0)
-        return minutes / 60.0  # Переводим минуты → часы
+        return global_setup_minutes / 60.0  # Переводим минуты → часы
 
     def get_available_units(order, dept, day):
         """Определить сколько ШТУК заказа доступно для цеха на данный день.
@@ -966,7 +965,7 @@ def _build_chart_grid():
                      + dept_orders[i].get('price_density_score', 0) * _revenue_factor * 0.3)
                     # Настил бонус: +20% если то же изделие что и предыдущий
                     * (1.2 if dept_last_product[dept] == dept_orders[i].get('product_id') and
-                       batch_bonuses.get((dept_orders[i].get('product_type', ''), dept), 0) > 0 else 1.0)
+                       batch_bonuses.get(dept, 0) > 0 else 1.0)
                     # Order grouping бонус: +25% если другая позиция того же заказа
                     # уже запущена в этом цехе. Цель: завершить заказ целиком быстрее,
                     # т.к. выручка считается по заказу (все позиции готовы → деньги).
@@ -1116,7 +1115,7 @@ def _build_chart_grid():
                         * (1 + 0.3 * x[2] / max_readiness * load_factor)
                         # Настил бонус: +20% если то же изделие что и предыдущий в цехе
                         * (1.2 if dept_last_product[dept] == x[0].get('product_id') and
-                           batch_bonuses.get((x[0].get('product_type', ''), dept), 0) > 0 else 1.0)
+                           batch_bonuses.get(dept, 0) > 0 else 1.0)
                         # Order grouping бонус: +25% если другая позиция того же заказа
                         # уже обрабатывается в этом цехе
                         * (1.25 if x[0].get('order_db_id') in dept_started_orders[dept] else 1.0)

@@ -88,6 +88,25 @@ class ProductNormOverride(models.Model):
         return f'{self.product} / {self.department}: {self.hours_per_unit}ч (override)'
 
 
+class DepartmentBatchBonus(models.Model):
+    """Настил (бонус серии) по цеху — ускорение при серии одинаковых изделий.
+    Привязан только к цеху, не зависит от типа изделия."""
+
+    class Meta:
+        verbose_name = 'Настил по цеху'
+        verbose_name_plural = 'Настил по цехам'
+
+    department = models.CharField('Цех', max_length=50, unique=True)
+    batch_bonus = models.FloatField(
+        'Настил (0.0-0.5)', default=0,
+        help_text='Доля ускорения при серии одинаковых изделий. '
+                  'Например 0.30 = на 30% быстрее когда подряд одинаковые.',
+    )
+
+    def __str__(self):
+        return f'{self.department}: настил {self.batch_bonus}'
+
+
 class DepartmentWorkers(models.Model):
     """Количество рабочих в цехе"""
 
@@ -120,6 +139,11 @@ class AiPlanConfig(models.Model):
     weight_k_dept_load = models.IntegerField('K загрузка цехов', default=40)
     weight_k_feedback = models.IntegerField('K обратная связь', default=35)
     weight_k_revenue = models.IntegerField('K выручка', default=0)  # Приоритет дорогих заказов
+
+    # Глобальное время переключения (мин) — единое значение для всех цехов.
+    # Применяется когда тип изделия в цехе меняется (Диван→Подушка).
+    # Если тот же тип идёт подряд — 0.
+    setup_minutes = models.FloatField('Время переключения (мин)', default=0)
 
     # Кэш данных для графика загрузки цехов (ai-plan-chart).
     # Заполняется при генерации AI-плана в Celery, фронт забирает готовое.

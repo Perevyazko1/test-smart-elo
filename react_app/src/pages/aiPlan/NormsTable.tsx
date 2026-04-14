@@ -6,9 +6,7 @@ import {toast} from "sonner";
 interface INormRow {
     id?: number;
     name: string;
-    batch?: Record<string, number>;
-    setup?: Record<string, number>;
-    [dept: string]: string | number | Record<string, number> | undefined;
+    [dept: string]: string | number | undefined;
 }
 
 interface INormsData {
@@ -27,8 +25,6 @@ export function NormsTable() {
     const [schemas, setSchemas] = useState<Record<number, number>>({});
     const [newTypeName, setNewTypeName] = useState("");
     const [collapsed, setCollapsed] = useState(true);
-    const [showBatch, setShowBatch] = useState(false);
-    const [showSetup, setShowSetup] = useState(false);
     const [classifying, setClassifying] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -65,30 +61,6 @@ export function NormsTable() {
                 ...updated[rowIdx],
                 [field]: field === 'name' ? value : (value === '' ? 0 : parseFloat(value) || 0),
             };
-            saveRows(updated);
-            return updated;
-        });
-    }, [saveRows]);
-
-    // Изменение коэффициента настила для конкретного цеха
-    const handleBatchChange = useCallback((rowIdx: number, dept: string, value: string) => {
-        setRows(prev => {
-            const updated = [...prev];
-            const batch = {...(updated[rowIdx].batch || {})};
-            batch[dept] = value === '' ? 0 : Math.max(0, Math.min(0.5, parseFloat(value) || 0));
-            updated[rowIdx] = {...updated[rowIdx], batch};
-            saveRows(updated);
-            return updated;
-        });
-    }, [saveRows]);
-
-    // Изменение времени переключения для конкретного цеха (в минутах)
-    const handleSetupChange = useCallback((rowIdx: number, dept: string, value: string) => {
-        setRows(prev => {
-            const updated = [...prev];
-            const setup = {...(updated[rowIdx].setup || {})};
-            setup[dept] = value === '' ? 0 : Math.max(0, Math.min(120, parseFloat(value) || 0));
-            updated[rowIdx] = {...updated[rowIdx], setup};
             saveRows(updated);
             return updated;
         });
@@ -161,23 +133,6 @@ export function NormsTable() {
 
             {!collapsed && (
                 <div className="p-3">
-                    {/* Переключатель отображения настила */}
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <button
-                            onClick={() => setShowBatch(!showBatch)}
-                            className={`text-[10px] px-2 py-1 rounded border ${showBatch ? 'bg-blue-50 border-blue-300 text-blue-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                        >
-                            {showBatch ? 'Скрыть настил' : 'Показать настил'}
-                        </button>
-                        <button
-                            onClick={() => setShowSetup(!showSetup)}
-                            className={`text-[10px] px-2 py-1 rounded border ${showSetup ? 'bg-violet-50 border-violet-300 text-violet-700' : 'border-slate-200 text-slate-500 hover:bg-slate-50'}`}
-                        >
-                            {showSetup ? 'Скрыть переключение' : 'Показать переключение'}
-                        </button>
-                        {showBatch && <span className="text-[10px] text-slate-400">Настил: коэффициент ускорения при серии одинаковых изделий (0 — 0.5)</span>}
-                        {showSetup && <span className="text-[10px] text-slate-400">Переключение: минуты на подготовку при смене типа изделия (0 — 120)</span>}
-                    </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-xs border-collapse">
                             <thead>
@@ -191,12 +146,9 @@ export function NormsTable() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {rows.map((row, rowIdx) => {
-                                    const extraRows = (showBatch ? 1 : 0) + (showSetup ? 1 : 0);
-                                    const span = 1 + extraRows;
-                                    return (<>
+                                {rows.map((row, rowIdx) => (
                                     <tr key={row.id || rowIdx} className="border-b border-slate-100 hover:bg-slate-50">
-                                        <td className="px-1 py-1" rowSpan={span}>
+                                        <td className="px-1 py-1">
                                             <input
                                                 value={row.name}
                                                 onChange={e => handleCellChange(rowIdx, 'name', e.target.value)}
@@ -215,7 +167,7 @@ export function NormsTable() {
                                                 />
                                             </td>
                                         ))}
-                                        <td className="px-1 py-1 text-center" rowSpan={span}>
+                                        <td className="px-1 py-1 text-center">
                                             <select
                                                 value={schemas[row.id!] || 0}
                                                 onChange={e => {
@@ -230,7 +182,7 @@ export function NormsTable() {
                                                 <option value={2}>Без столярки/малярки</option>
                                             </select>
                                         </td>
-                                        <td className="px-1 py-1 text-center" rowSpan={span}>
+                                        <td className="px-1 py-1 text-center">
                                             <button
                                                 onClick={() => handleDeleteType(row.id, row.name)}
                                                 className="text-slate-300 hover:text-red-500 text-sm"
@@ -240,51 +192,7 @@ export function NormsTable() {
                                             </button>
                                         </td>
                                     </tr>
-                                    {/* Строка настила — коэффициенты batch_bonus по цехам */}
-                                    {showBatch && (
-                                        <tr key={`batch-${row.id || rowIdx}`} className="border-b border-slate-200 bg-amber-50/50">
-                                            {departments.map(dept => {
-                                                const batchVal = row.batch?.[dept] ?? 0;
-                                                return (
-                                                    <td key={dept} className="px-1 py-0.5">
-                                                        <input
-                                                            type="number"
-                                                            step="0.05"
-                                                            min="0"
-                                                            max="0.5"
-                                                            value={batchVal}
-                                                            onChange={e => handleBatchChange(rowIdx, dept, e.target.value)}
-                                                            className="w-full px-2 py-0.5 text-[10px] text-center outline-none border border-transparent focus:border-amber-400 rounded bg-transparent text-amber-700"
-                                                            title={`Настил: ${Math.round(batchVal * 100)}% ускорение при серии`}
-                                                        />
-                                                    </td>
-                                                );
-                                            })}
-                                        </tr>
-                                    )}
-                                    {/* Строка переключения — минуты setup при смене типа изделия */}
-                                    {showSetup && (
-                                        <tr key={`setup-${row.id || rowIdx}`} className="border-b border-slate-200 bg-violet-50/50">
-                                            {departments.map(dept => {
-                                                const setupVal = row.setup?.[dept] ?? 0;
-                                                return (
-                                                    <td key={dept} className="px-1 py-0.5">
-                                                        <input
-                                                            type="number"
-                                                            step="1"
-                                                            min="0"
-                                                            max="120"
-                                                            value={setupVal}
-                                                            onChange={e => handleSetupChange(rowIdx, dept, e.target.value)}
-                                                            className="w-full px-2 py-0.5 text-[10px] text-center outline-none border border-transparent focus:border-violet-400 rounded bg-transparent text-violet-700"
-                                                            title={`Переключение: ${setupVal} мин при смене на ${row.name}`}
-                                                        />
-                                                    </td>
-                                                );
-                                            })}
-                                        </tr>
-                                    )}
-                                </>);})}
+                                ))}
                             </tbody>
                         </table>
                     </div>
