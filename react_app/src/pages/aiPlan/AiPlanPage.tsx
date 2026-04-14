@@ -139,6 +139,32 @@ export const AiPlanPage = () => {
     const aiSummary = aiData?.config?.ai_summary || "";
     const aiEntries = aiData?.entries || {};
 
+    // Нормативы по изделиям: {product_id: {dept: hours}} — загружаются батчем
+    const productIds = useMemo(() => {
+        return Object.values(planData?.data || {}).map(r => r.product_id).filter(Boolean);
+    }, [planData]);
+    const {data: batchNormsData} = useQuery<{norms: Record<number, Record<string, number>>}>({
+        queryKey: ["productNormsBatch", productIds],
+        queryFn: () => $axios.post<{norms: Record<number, Record<string, number>>}>('/plan/product_norms/batch/', {product_ids: productIds}).then(r => r.data),
+        enabled: productIds.length > 0,
+    });
+    const productNorms = batchNormsData?.norms || {};
+
+    // Сохранение переопределения норматива для конкретного изделия
+    const normSaveTimers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+    const saveProductNorm = useCallback((productId: number, dept: string, value: number) => {
+        const key = `${productId}-${dept}`;
+        if (normSaveTimers.current[key]) clearTimeout(normSaveTimers.current[key]);
+        normSaveTimers.current[key] = setTimeout(() => {
+            $axios.post(`/plan/product_norms/${productId}/update/`, {
+                overrides: {[dept]: value}
+            }).then(
+                () => toast.success('Норматив сохранён'),
+                () => toast.error('Ошибка сохранения')
+            );
+        }, 1000);
+    }, []);
+
     const entries = useMemo(() => {
         const items = Object.entries(planData?.data || {});
         return items.sort((a, b) => {
@@ -569,6 +595,8 @@ export const AiPlanPage = () => {
                                 allDepartments={allDepartments}
                                 onOpenNorms={(id, name) => setNormsModal({productId: id, productName: name})}
                                 onCommentAdded={() => queryClient.invalidateQueries({queryKey: ["planTable"]})}
+                                norms={productNorms[item.product_id] || {}}
+                                onNormChange={saveProductNorm}
                             />
                         ))}
                     </tbody>
@@ -585,7 +613,7 @@ export const AiPlanPage = () => {
     );
 };
 
-function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms, onCommentAdded}: {
+function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms, onCommentAdded, norms, onNormChange}: {
     item: IPlanDataRow;
     index: number;
     aiEntry?: IAiEntry;
@@ -594,8 +622,13 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
     allDepartments: string[];
     onOpenNorms: (productId: number, productName: string) => void;
     onCommentAdded: () => void;
+    norms: Record<string, number>;
+    onNormChange: (productId: number, dept: string, value: number) => void;
 }) {
     const [feedback, setFeedback] = useState(aiEntry?.feedback ?? "");
+    const [localNorms, setLocalNorms] = useState<Record<string, number>>(norms);
+    // Синхронизируем при обновлении пропса (новая загрузка данных)
+    useEffect(() => { setLocalNorms(norms); }, [norms]);
     const empty = {all: 0, ready: 0, await: 0};
 
     // Инпуты комментариев: какой тип сейчас открыт (null = все закрыты)
@@ -648,13 +681,6 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                         >
                             {item.product_name}
                         </span>
-                        <button
-                            onClick={() => onOpenNorms(item.product_id, item.product_name)}
-                            className="text-[9px] text-blue-400 hover:text-blue-600 shrink-0"
-                            title="Нормативы изделия"
-                        >
-                            [н]
-                        </button>
                     </div>
                     {item.fabric_name && (
                         <div className="text-[10px] text-slate-400 leading-tight whitespace-nowrap">{item.fabric_name}</div>
@@ -774,21 +800,50 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 </span>
             </td>
 
-            {/* Department cells — these scroll */}
+            {/* Department cells — assignment counts + inline norm input */}
             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => {
                 const d = item.assignments[dept] || empty;
+                const normVal = localNorms[dept] ?? 0;
                 if (d.all === 0) return (
-                    <td key={dept} className={twMerge("px-2 py-1.5 text-center text-slate-200 border-l border-slate-200", rowBg)} style={{minWidth: 70}}>—</td>
+                    <td key={dept} className={twMerge("px-1 py-1 text-center border-l border-slate-200", rowBg)} style={{minWidth: 70}}>
+                        <div className="text-slate-200">—</div>
+                        <input
+                            type="number"
+                            step="0.05"
+                            min="0"
+                            value={normVal || ''}
+                            onChange={e => {
+                                const v = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                                setLocalNorms(prev => ({...prev, [dept]: v}));
+                                onNormChange(item.product_id, dept, v);
+                            }}
+                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none border-t border-dashed border-slate-200 mt-0.5 pt-0.5"
+                            placeholder="—"
+                        />
+                    </td>
                 );
                 const done = d.ready === d.all;
                 return (
-                    <td key={dept} className={twMerge("px-2 py-1.5 text-center border-l border-slate-200", rowBg)} style={{minWidth: 70}}>
+                    <td key={dept} className={twMerge("px-1 py-1 text-center border-l border-slate-200", rowBg)} style={{minWidth: 70}}>
                         <span className={twMerge(
                             "text-[11px] font-medium",
                             done ? "text-green-600" : d.ready > 0 ? "text-yellow-600" : "text-slate-500"
                         )}>
                             {d.ready}/{d.all}
                         </span>
+                        <input
+                            type="number"
+                            step="0.05"
+                            min="0"
+                            value={normVal || ''}
+                            onChange={e => {
+                                const v = e.target.value === '' ? 0 : parseFloat(e.target.value) || 0;
+                                setLocalNorms(prev => ({...prev, [dept]: v}));
+                                onNormChange(item.product_id, dept, v);
+                            }}
+                            className="w-full text-[9px] text-center text-blue-400 bg-transparent outline-none border-t border-dashed border-slate-200 mt-0.5 pt-0.5"
+                            placeholder="—"
+                        />
                     </td>
                 );
             })}

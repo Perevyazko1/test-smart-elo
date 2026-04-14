@@ -1000,6 +1000,50 @@ def set_product_types(request):
     return JsonResponse({'updated': updated, 'skipped': skipped})
 
 
+@api_view(['POST'])
+def get_product_norms_batch(request):
+    """Эффективные нормативы для списка изделий — default (из типа) + override.
+    Body: {product_ids: [1,2,3]}
+    Response: {norms: {product_id: {dept: hours, ...}, ...}}
+    """
+    product_ids = request.data.get('product_ids', [])
+    if not product_ids:
+        return JsonResponse({'norms': {}})
+
+    products = Product.objects.filter(pk__in=product_ids).select_related('production_type')
+    departments = list(Department.objects.filter(has_norms=True).order_by('ordering', 'name').values_list('name', flat=True))
+
+    # Загрузить все нормативы по типам
+    type_norms = {}  # {type_id: {dept: hours}}
+    for n in ProductionNorm.objects.select_related('product_type').all():
+        if n.product_type_id not in type_norms:
+            type_norms[n.product_type_id] = {}
+        type_norms[n.product_type_id][n.department] = n.hours_per_unit
+
+    # Загрузить все переопределения для запрошенных продуктов
+    overrides = {}  # {product_id: {dept: hours}}
+    for o in ProductNormOverride.objects.filter(product_id__in=product_ids):
+        if o.product_id not in overrides:
+            overrides[o.product_id] = {}
+        overrides[o.product_id][o.department] = o.hours_per_unit
+
+    result = {}
+    for product in products:
+        defaults = type_norms.get(product.production_type_id, {}) if product.production_type_id else {}
+        product_overrides = overrides.get(product.id, {})
+        # Эффективные нормативы: override если есть, иначе default
+        effective = {}
+        for dept in departments:
+            if dept in product_overrides:
+                effective[dept] = product_overrides[dept]
+            elif dept in defaults:
+                effective[dept] = defaults[dept]
+            # Если нет ни override ни default — не включаем (0)
+        result[product.id] = effective
+
+    return JsonResponse({'norms': result}, json_dumps_params={"ensure_ascii": False})
+
+
 @api_view(['GET'])
 def get_product_norms(request, product_id):
     """Нормативы для конкретного изделия: дефолтные (из типа) + переопределения"""
