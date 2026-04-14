@@ -1292,6 +1292,8 @@ def get_chart_data(request):
 
 
 @api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
 def refresh_chart(request):
     """Пересчитать только график загрузки цехов (без GPT).
 
