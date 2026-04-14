@@ -330,6 +330,8 @@ export const AiPlanPage = () => {
         recognition.interimResults = true;
         recognitionRef.current = recognition;
 
+        // Сохраняем текущий текст инпута как префикс — голос дополняет, а не заменяет
+        const prefix = prompt ? prompt.trim() + ' ' : '';
         let finalText = '';
         recognition.onresult = (event: any) => {
             let interim = '';
@@ -340,7 +342,7 @@ export const AiPlanPage = () => {
                     interim += event.results[i][0].transcript;
                 }
             }
-            setPrompt((finalText + interim).trim());
+            setPrompt((prefix + finalText + interim).trim());
         };
         recognition.onend = () => setListening(false);
         recognition.onerror = (e: any) => {
@@ -349,7 +351,7 @@ export const AiPlanPage = () => {
         };
         recognition.start();
         setListening(true);
-    }, [listening]);
+    }, [listening, prompt]);
 
     const saveFeedback = useCallback((seriesId: string, feedback: string) => {
         $axios.post('/plan/ai_plan/update_feedback/', {series_id: seriesId, feedback});
