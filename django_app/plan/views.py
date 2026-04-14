@@ -592,6 +592,14 @@ def _collect_orders_data():
 
         sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
         deadline = min(sort_dates).date() if sort_dates else None
+        # ai_deadline — дедлайн от пользователя через промпт ("сделать сегодня", "до 20 апреля").
+        # Берём более жёсткий (раннюю дату) из двух дедлайнов.
+        try:
+            ai_dl = op.ai_plan_entry.ai_deadline
+            if ai_dl and (deadline is None or ai_dl < deadline):
+                deadline = ai_dl
+        except AiPlanEntry.DoesNotExist:
+            pass
         days_left = (deadline - date.today()).days if deadline else None
 
         try:
@@ -922,6 +930,21 @@ def update_ai_entries(request):
             if 'ai_deadline' in entry_data:
                 entry.ai_deadline = entry_data['ai_deadline'] or None
             entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'ai_deadline', 'updated_at'])
+
+            # Действие над позицией: удалить комменты, сбросить приоритет и т.д.
+            action = entry_data.get('action')
+            if action == 'delete_comments':
+                # Мягкое удаление всех комментариев к позиции (deleted=True)
+                OrderProductComment.objects.filter(order_product=op, deleted=False).update(deleted=True)
+            elif action == 'reset_priority':
+                entry.sort_weight = 500
+                entry.ai_deadline = None
+                entry.ai_comment = ''
+                entry.save(update_fields=['sort_weight', 'ai_deadline', 'ai_comment', 'updated_at'])
+            elif action == 'reset_deadline':
+                entry.ai_deadline = None
+                entry.save(update_fields=['ai_deadline', 'updated_at'])
+
             updated += 1
         except OrderProduct.DoesNotExist:
             pass
