@@ -918,7 +918,10 @@ def update_ai_entries(request):
                 entry.sort_position = entry_data['sort_position']
             if 'ai_comment' in entry_data:
                 entry.ai_comment = entry_data['ai_comment']
-            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'updated_at'])
+            # Дедлайн от пользователя через промпт ("сделать сегодня", "до 20 апреля")
+            if 'ai_deadline' in entry_data:
+                entry.ai_deadline = entry_data['ai_deadline'] or None
+            entry.save(update_fields=['sort_weight', 'sort_position', 'ai_comment', 'ai_deadline', 'updated_at'])
             updated += 1
         except OrderProduct.DoesNotExist:
             pass

@@ -474,10 +474,18 @@ def _build_chart_grid():
                 'hours': remaining * hours_per,
             }
 
-        # Дедлайн позиции: минимальный sort_date среди заданий → дней от сегодня
+        # Дедлайн позиции: минимальный sort_date среди заданий → дней от сегодня.
+        # Если пользователь указал ai_deadline через промпт — он имеет приоритет
+        # (берётся самый жёсткий из двух дедлайнов).
         from datetime import date as _date_cls
         sort_dates = assignments.filter(sort_date__isnull=False).values_list('sort_date', flat=True)
         deadline_date = min(sort_dates).date() if sort_dates else None
+        # ai_deadline — дедлайн от пользователя ("сделать сегодня", "до 20 апреля")
+        ai_entry_obj = AiPlanEntry.objects.filter(order_product=op).first()
+        if ai_entry_obj and ai_entry_obj.ai_deadline:
+            # Берём более жёсткий дедлайн (раньшую дату)
+            if deadline_date is None or ai_entry_obj.ai_deadline < deadline_date:
+                deadline_date = ai_entry_obj.ai_deadline
         deadline_days_left = (deadline_date - _date_cls.today()).days if deadline_date else None
 
         # Дата получения ткани: если задана и в будущем — позиция заблокирована

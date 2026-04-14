@@ -19,6 +19,8 @@ class AiPlanEntry(models.Model):
     sort_position = models.IntegerField('Позиция в очереди', default=0)
     ai_comment = models.TextField('AI комментарий', blank=True, default='')
     feedback = models.TextField('Обратная связь', blank=True, default='')
+    # Дедлайн, установленный пользователем через промпт ("сделать до 20 апреля")
+    ai_deadline = models.DateField('AI дедлайн', null=True, blank=True)
     updated_at = models.DateTimeField('Обновлено', auto_now=True)
 
     def __str__(self):
