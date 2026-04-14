@@ -53,6 +53,8 @@ export const AiPlanPage = () => {
     const queryClient = useQueryClient();
 
     const [prompt, setPrompt] = useState("");
+    const [listening, setListening] = useState(false);
+    const recognitionRef = useRef<any>(null);
     const [generating, setGenerating] = useState(false);
     const [progress, setProgress] = useState<{current: number; total: number; phase: string} | null>(null);
     // Этапы генерации — фиксированный список фаз, которые проходит задача
@@ -311,6 +313,44 @@ export const AiPlanPage = () => {
         );
     }, [prompt, queryClient]);
 
+    // Голосовой ввод через Web Speech API (Chrome/Edge)
+    const toggleVoice = useCallback(() => {
+        if (listening) {
+            recognitionRef.current?.stop();
+            return;
+        }
+        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            toast.error('Голосовой ввод не поддерживается в этом браузере (нужен Chrome или Edge)');
+            return;
+        }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'ru-RU';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognitionRef.current = recognition;
+
+        let finalText = '';
+        recognition.onresult = (event: any) => {
+            let interim = '';
+            for (let i = 0; i < event.results.length; i++) {
+                if (event.results[i].isFinal) {
+                    finalText += event.results[i][0].transcript + ' ';
+                } else {
+                    interim += event.results[i][0].transcript;
+                }
+            }
+            setPrompt((finalText + interim).trim());
+        };
+        recognition.onend = () => setListening(false);
+        recognition.onerror = (e: any) => {
+            if (e.error !== 'aborted') toast.error('Ошибка микрофона: ' + e.error);
+            setListening(false);
+        };
+        recognition.start();
+        setListening(true);
+    }, [listening]);
+
     const saveFeedback = useCallback((seriesId: string, feedback: string) => {
         $axios.post('/plan/ai_plan/update_feedback/', {series_id: seriesId, feedback});
     }, []);
@@ -404,15 +444,36 @@ export const AiPlanPage = () => {
 
             {/* Input + Voice */}
             <div className="flex gap-2 items-center">
-                <input
-                    type="text"
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handlePrompt()}
-                    disabled={generating}
-                    placeholder="Например: заказ для Рыжий очень важен, поднять приоритет..."
-                    className="flex-1 border border-slate-300 rounded-lg px-4 py-3 text-sm outline-none focus:border-blue-400 disabled:opacity-50"
-                />
+                <div className={twMerge(
+                    "flex-1 flex items-center border rounded-lg px-4 py-3 gap-2",
+                    listening ? "border-red-400 bg-red-50" : "border-slate-300 focus-within:border-blue-400"
+                )}>
+                    <input
+                        type="text"
+                        value={prompt}
+                        onChange={(e) => setPrompt(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handlePrompt()}
+                        disabled={generating}
+                        placeholder="Например: заказ для Рыжий очень важен, поднять приоритет..."
+                        className="flex-1 text-sm outline-none bg-transparent disabled:opacity-50"
+                    />
+                    <button
+                        onClick={toggleVoice}
+                        disabled={generating}
+                        className={twMerge(
+                            "shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors",
+                            listening
+                                ? "bg-red-500 text-white animate-pulse"
+                                : "bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
+                        )}
+                        title={listening ? "Остановить запись" : "Голосовой ввод"}
+                    >
+                        <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                            <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                            <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                        </svg>
+                    </button>
+                </div>
                 <Btn
                     onClick={handlePrompt}
                     disabled={generating || !prompt.trim()}
@@ -562,14 +623,14 @@ export const AiPlanPage = () => {
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                            <th className="sticky left-0 top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px]">#</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[45px]" style={{left: 30}}>Фото</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[300px]" style={{left: 75}}>Изделие</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[85px]" style={{left: 435}}>Ткань</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 520}}>Вес</th>
+                            <th className="sticky left-0 top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[30px] w-[30px]">#</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[45px] w-[45px]" style={{left: 30}}>Фото</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[200px] w-[200px]" style={{left: 75}}>Изделие</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[65px] w-[65px]" style={{left: 275}}>Заказ</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px]" style={{left: 340}}>Кол</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[60px] w-[60px]" style={{left: 375}}>Срок</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[85px] w-[85px]" style={{left: 435}}>Ткань</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px] border-r border-slate-200" style={{left: 520}}>Вес</th>
                             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
                                 <th key={dept} className="sticky top-0 z-10 bg-slate-50 px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
                                     {dept}
@@ -652,11 +713,11 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
     return (
         <tr className="border-t border-slate-100">
             {/* # */}
-            <td className={twMerge("sticky left-0 z-10 px-1 py-1.5 text-slate-400 font-medium text-center w-[30px]", rowBg)}>
+            <td className={twMerge("sticky left-0 z-10 px-1 py-1.5 text-slate-400 font-medium text-center min-w-[30px] w-[30px]", rowBg)}>
                 {index}
             </td>
             {/* Фото */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[45px]", rowBg)} style={{left: 30}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 min-w-[45px] w-[45px]", rowBg)} style={{left: 30}}>
                 <div className="w-[36px] h-[36px] bg-slate-100 rounded overflow-hidden flex items-center justify-center">
                     {item.product_picture ? (
                         <img src={STATIC_URL + item.product_picture} alt="" className="w-full h-full object-cover"/>
@@ -666,7 +727,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 </div>
             </td>
             {/* Изделие */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[300px] max-w-[300px]", rowBg)} style={{left: 75}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 min-w-[200px] w-[200px] max-w-[200px]", rowBg)} style={{left: 75}}>
                 <div className="overflow-x-auto">
                     {/* Название изделия — клик открывает инпут комментария к позиции */}
                     <div className="flex items-center gap-1 whitespace-nowrap">
@@ -763,11 +824,11 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 )}
             </td>
             {/* Кол */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold w-[35px]", rowBg)} style={{left: 340}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold min-w-[35px] w-[35px]", rowBg)} style={{left: 340}}>
                 {item.quantity}
             </td>
             {/* Срок */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[60px]", rowBg)} style={{left: 375}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[60px] w-[60px]", rowBg)} style={{left: 375}}>
                 {item.date ? (
                     <span className={twMerge(
                         "text-[10px]",
@@ -780,7 +841,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 )}
             </td>
             {/* Ткань — дата получения */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[85px]", rowBg)} style={{left: 435}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[85px] w-[85px]", rowBg)} style={{left: 435}}>
                 <input
                     type="date"
                     value={item.fabric_available_date ?? ''}
@@ -803,7 +864,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             </td>
             {/* Вес */}
             <td
-                className={twMerge("sticky z-10 px-1 py-1.5 text-center w-[30px] border-r border-slate-200 cursor-help", rowBg)}
+                className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[35px] w-[35px] border-r border-slate-200 cursor-help", rowBg)}
                 style={{left: 520}}
                 title={aiEntry?.weight_detail
                     ? `Сроки: ${aiEntry.weight_detail.deadline ?? '—'}\nПрогресс: ${aiEntry.weight_detail.progress ?? '—'}\nЦеха: ${aiEntry.weight_detail.dept_load ?? '—'}${aiEntry.weight_detail.adjustment ? `\nAI корр.: ${aiEntry.weight_detail.adjustment > 0 ? '+' : ''}${aiEntry.weight_detail.adjustment}` : ''}`
