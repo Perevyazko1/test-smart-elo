@@ -562,25 +562,25 @@ export const AiPlanPage = () => {
                 ))}
             </div>
 
-            {/* Orders Table — sticky left/right columns, scrollable departments */}
-            <div className="border border-slate-200 rounded-lg text-xs overflow-x-auto">
+            {/* Orders Table — sticky left/right columns + sticky header, scrollable */}
+            <div className="border border-slate-200 rounded-lg text-xs overflow-auto max-h-[80vh]">
                 <table className="w-full border-collapse">
                     <thead>
                         <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
-                            <th className="sticky left-0 z-10 bg-slate-50 px-1 py-2 text-center w-[30px]">#</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[45px]" style={{left: 30}}>Фото</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[300px]" style={{left: 75}}>Изделие</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
-                            <th className="sticky z-10 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 435}}>Вес</th>
+                            <th className="sticky left-0 top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px]">#</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[45px]" style={{left: 30}}>Фото</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[300px]" style={{left: 75}}>Изделие</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left w-[65px] min-w-[65px] max-w-[65px]" style={{left: 275}}>Заказ</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[35px]" style={{left: 340}}>Кол</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[60px]" style={{left: 375}}>Срок</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center w-[30px] border-r border-slate-200" style={{left: 435}}>Вес</th>
                             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
-                                <th key={dept} className="px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
+                                <th key={dept} className="sticky top-0 z-10 bg-slate-50 px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
                                     {dept}
                                 </th>
                             ))}
-                            <th className="sticky right-[120px] z-10 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 100}}>Обр. связь</th>
-                            <th className="sticky right-0 z-10 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 120}}>AI комментарий</th>
+                            <th className="sticky right-[120px] top-0 z-20 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 100}}>Обр. связь</th>
+                            <th className="sticky right-0 top-0 z-20 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 120}}>AI комментарий</th>
                         </tr>
                     </thead>
                     <tbody>
