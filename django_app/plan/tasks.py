@@ -257,6 +257,7 @@ def _calculate_all_weights(orders, dept_summary, config, workflows=None):
 
     K1-K5 — коэффициенты из настроек (слайдеры на фронте, бюджет 100 на все 5).
     S_deadline, S_progress, S_dept_load, S_revenue — компоненты 0-100.
+    Обратная связь (feedback) учитывается на этапе GPT Batch через weight_adjustment.
 
     Returns: list of {series_id, weight, detail: {deadline, progress, dept_load, revenue}}
     """

@@ -79,8 +79,10 @@ export const AiPlanPage = () => {
     const PROMPT_PHASES = [
         {key: 'gpt', label: 'Анализ запроса (GPT)'},
         {key: 'search', label: 'Поиск заказов'},
-        {key: 'update', label: 'Обновление приоритетов'},
-        {key: 'refresh', label: 'Пересчёт таблиц'},
+        {key: 'update', label: 'Сохранение'},
+        {key: 'weights', label: 'Расчёт весов'},
+        {key: 'batch', label: 'AI корректировка'},
+        {key: 'chart', label: 'Пересчёт графика'},
     ] as const;
     // promptPhase — текущий этап обработки промпта (null = не обрабатывается)
     const [promptPhase, setPromptPhase] = useState<string | null>(null);
@@ -323,8 +325,9 @@ export const AiPlanPage = () => {
             setPromptCompletedPhases(prev => new Set([...prev, PROMPT_PHASES[phaseIndex - 1].key]));
         }
         setPromptPhase(phase.key);
-        // Задержка между этапами: GPT-анализ дольше, остальные быстрее
-        const delay = phaseIndex === 0 ? 3000 : phaseIndex === 3 ? 4000 : 1500;
+        // Задержка между этапами: GPT-анализ и AI корректировка дольше, остальные быстрее
+        const delays: Record<string, number> = {gpt: 3000, search: 1500, update: 1000, weights: 2000, batch: 5000, chart: 3000};
+        const delay = delays[phase.key] || 2000;
         promptTimerRef.current = setTimeout(() => advancePromptPhases(phaseIndex + 1, resolve), delay);
     }, []);
 

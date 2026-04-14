@@ -39,6 +39,7 @@ urlpatterns = [
 
     path('chart/', get_chart_data),
     path('chart/refresh/', refresh_chart),
+    path('chart/recalculate/', recalculate_with_batch),
     path('departments/', get_departments),
     path('workers/', get_department_workers),
     path('workers/update/', update_department_workers),

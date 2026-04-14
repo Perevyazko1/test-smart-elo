@@ -1347,6 +1347,121 @@ def refresh_chart(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([])
+def recalculate_with_batch(request):
+    """Лёгкий пересчёт: Python веса → GPT Batch (корректировка по feedback) → chart.
+
+    Вызывается из n8n AI Plan Prompt после сохранения обратной связи.
+    Не генерирует AI summary — только пересчитывает приоритеты и график.
+    """
+    from plan.tasks import (
+        _calculate_all_weights, _save_weights_to_db, _build_chart_grid,
+        _request_with_retry, N8N_BATCH_URL, BATCH_SIZE
+    )
+    from plan.models import ProductType
+
+    try:
+        # 1. Собираем данные
+        data = _collect_orders_data()
+        config = _get_ai_config()
+        orders = data['orders']
+
+        # Графы зависимостей цехов
+        workflows = {}
+        for pt in ProductType.objects.all():
+            if pt.workflow_graph:
+                workflows[pt.name] = pt.workflow_graph
+
+        # 2. Python считает базовые веса
+        weight_results = _calculate_all_weights(orders, data['dept_summary'], config, workflows)
+        weight_map = {r['series_id']: r for r in weight_results}
+        _save_weights_to_db(weight_results)
+
+        # 3. GPT Batch — корректировка по обратной связи (топ заказов)
+        sorted_by_weight = sorted(weight_results, key=lambda x: x['weight'], reverse=True)
+        top_series_ids = {r['series_id'] for r in sorted_by_weight[:BATCH_SIZE]}
+
+        top_orders = []
+        for o in orders:
+            if o['series_id'] in top_series_ids:
+                o_copy = dict(o)
+                o_copy['calculated_weight'] = weight_map[o['series_id']]['weight']
+                top_orders.append(o_copy)
+
+        batch_payload = {
+            'base_prompt': config.base_prompt,
+            'orders': top_orders,
+            'department_load': data['dept_summary'],
+            'today': data['today'],
+            'priorities': {
+                'k_deadline': config.weight_k_deadline,
+                'k_progress': 100 - config.weight_k_revenue,
+                'k_dept_load': config.weight_k_dept_load,
+                'k_feedback': config.weight_k_feedback,
+                'k_revenue': config.weight_k_revenue,
+            },
+        }
+
+        resp = _request_with_retry(N8N_BATCH_URL, batch_payload, timeout=180)
+        resp.raise_for_status()
+        try:
+            gpt_entries = resp.json().get('entries', [])
+        except Exception:
+            gpt_entries = []
+
+        # 4. Применить GPT корректировку
+        k4 = config.weight_k_feedback
+
+        for entry in gpt_entries:
+            sid = entry.get('series_id', '')
+            adj = entry.get('weight_adjustment', 0)
+            comment = entry.get('ai_comment', '')
+
+            try:
+                op = OrderProduct.objects.filter(series_id=sid).first()
+                if not op:
+                    continue
+                ai_entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
+                ai_entry.ai_comment = comment
+
+                base_weight = weight_map.get(sid, {}).get('weight', 500)
+                adj_value = int(adj * k4 / 50)
+                final_weight = max(0, min(1000, base_weight + adj_value))
+                ai_entry.sort_weight = final_weight
+
+                detail = weight_map.get(sid, {}).get('detail', {})
+                detail['adjustment'] = adj
+                detail['adj_reason'] = comment
+                ai_entry.weight_detail = detail
+
+                ai_entry.save(update_fields=['ai_comment', 'sort_weight', 'weight_detail', 'updated_at'])
+            except Exception as e:
+                logger.warning(f'recalculate_with_batch: ошибка для {sid}: {e}')
+
+        # 5. Гарантия уникальности весов
+        all_entries_db = list(AiPlanEntry.objects.all().values('id', 'sort_weight'))
+        all_entries_db.sort(key=lambda x: x['sort_weight'], reverse=True)
+        seen = set()
+        for e in all_entries_db:
+            while e['sort_weight'] in seen:
+                e['sort_weight'] -= 1
+            seen.add(e['sort_weight'])
+            AiPlanEntry.objects.filter(id=e['id']).update(sort_weight=e['sort_weight'])
+
+        # 6. Пересчитать график
+        chart = _build_chart_grid()
+        cfg, _ = AiPlanConfig.objects.get_or_create(pk=1)
+        cfg.chart_data = chart
+        cfg.save(update_fields=['chart_data', 'updated_at'])
+
+        return JsonResponse({'success': True, 'recalculated': len(weight_results), 'batch_adjusted': len(gpt_entries)})
+    except Exception as e:
+        logger.exception('Ошибка recalculate_with_batch')
+        return JsonResponse({'error': str(e)}, status=500)
+
+
 # ─── Workflow graph ───────────────────────────────────────────────
 
 WORKFLOW_FULL = {
