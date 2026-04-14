@@ -75,6 +75,21 @@ export const AiPlanPage = () => {
     // Ошибка генерации (например: "Не задан граф для типов: X") — показывается как баннер
     const [genError, setGenError] = useState<string | null>(null);
 
+    // Этапы обработки промпт-запроса через n8n (GPT → поиск → обновление → пересчёт)
+    const PROMPT_PHASES = [
+        {key: 'gpt', label: 'Анализ запроса (GPT)'},
+        {key: 'search', label: 'Поиск заказов'},
+        {key: 'update', label: 'Обновление приоритетов'},
+        {key: 'refresh', label: 'Пересчёт таблиц'},
+    ] as const;
+    // promptPhase — текущий этап обработки промпта (null = не обрабатывается)
+    const [promptPhase, setPromptPhase] = useState<string | null>(null);
+    // promptCompletedPhases — завершённые этапы промпт-обработки
+    const [promptCompletedPhases, setPromptCompletedPhases] = useState<Set<string>>(new Set());
+    // promptFailed — этап на котором упала обработка промпта
+    const [promptFailed, setPromptFailed] = useState<string | null>(null);
+    const promptTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
     const {data: weightsData} = useQuery({
         queryKey: ["weightCoefficients"],
         queryFn: () => $axios.get<IWeightCoefficients>('/plan/ai_plan/weights/').then(r => r.data),
@@ -296,22 +311,60 @@ export const AiPlanPage = () => {
         });
     }, []);
 
+    // Вспомогательная функция: последовательно переключает этапы промпт-обработки по таймеру
+    const advancePromptPhases = useCallback((phaseIndex: number, resolve: () => void) => {
+        if (phaseIndex >= PROMPT_PHASES.length) {
+            resolve();
+            return;
+        }
+        const phase = PROMPT_PHASES[phaseIndex];
+        // Отмечаем предыдущий этап как завершённый
+        if (phaseIndex > 0) {
+            setPromptCompletedPhases(prev => new Set([...prev, PROMPT_PHASES[phaseIndex - 1].key]));
+        }
+        setPromptPhase(phase.key);
+        // Задержка между этапами: GPT-анализ дольше, остальные быстрее
+        const delay = phaseIndex === 0 ? 3000 : phaseIndex === 3 ? 4000 : 1500;
+        promptTimerRef.current = setTimeout(() => advancePromptPhases(phaseIndex + 1, resolve), delay);
+    }, []);
+
     const handlePrompt = useCallback(() => {
         if (!prompt.trim()) return;
         setGenerating(true);
-        toast.promise(
-            $axios.post('/plan/ai_plan/prompt/', {prompt: prompt.trim()}).then(res => {
-                queryClient.invalidateQueries({queryKey: ["aiPlan"]});
-                setPrompt("");
-                return res;
-            }).finally(() => setGenerating(false)),
-            {
-                loading: 'AI обрабатывает запрос...',
-                success: (res) => res.data.ai_response || `Обновлено ${res.data.updated} заказов`,
-                error: (err) => err.response?.data?.error || 'Ошибка обработки',
-            }
-        );
-    }, [prompt, queryClient]);
+        setPromptPhase(null);
+        setPromptCompletedPhases(new Set());
+        setPromptFailed(null);
+
+        // Запускаем имитацию этапов параллельно с реальным запросом
+        const phasesDone = new Promise<void>(resolve => advancePromptPhases(0, resolve));
+
+        $axios.post('/plan/ai_plan/prompt/', {prompt: prompt.trim()}).then(async (res) => {
+            // Ждём пока анимация этапов догонит реальный ответ
+            await phasesDone;
+            // Отмечаем все этапы как завершённые
+            setPromptCompletedPhases(new Set(PROMPT_PHASES.map(p => p.key)));
+            setPromptPhase(null);
+            queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+            setPrompt("");
+            toast.success(res.data.ai_response || `Обновлено ${res.data.updated} заказов`);
+            // Скрываем индикатор через 3 секунды
+            setTimeout(() => {
+                setPromptCompletedPhases(new Set());
+            }, 3000);
+        }).catch(async (err) => {
+            // Останавливаем таймер этапов при ошибке
+            if (promptTimerRef.current) clearTimeout(promptTimerRef.current);
+            // Отмечаем текущий этап как failed
+            setPromptFailed(promptPhase || 'gpt');
+            toast.error(err.response?.data?.error || 'Ошибка обработки');
+            // Скрываем индикатор через 5 секунд
+            setTimeout(() => {
+                setPromptFailed(null);
+                setPromptCompletedPhases(new Set());
+                setPromptPhase(null);
+            }, 5000);
+        }).finally(() => setGenerating(false));
+    }, [prompt, queryClient, advancePromptPhases, promptPhase]);
 
     // Голосовой ввод через Web Speech API (Chrome/Edge)
     const toggleVoice = useCallback(() => {
@@ -484,6 +537,51 @@ export const AiPlanPage = () => {
                     {generating ? "..." : "Отправить"}
                 </Btn>
             </div>
+
+            {/* Этапы обработки промпт-запроса — "сосиски" как у генерации */}
+            {(promptPhase || promptCompletedPhases.size > 0 || promptFailed) && (
+                <div className="border border-violet-200 bg-violet-50/50 rounded-lg p-3">
+                    <div className="flex items-center gap-0">
+                        {PROMPT_PHASES.map((phase, idx) => {
+                            const isCompleted = promptCompletedPhases.has(phase.key);
+                            const isCurrent = promptPhase === phase.key && !promptFailed;
+                            const isFailed = promptFailed === phase.key;
+                            const isPending = !isCompleted && !isCurrent && !isFailed;
+
+                            return (
+                                <div key={phase.key} className="flex items-center flex-1 min-w-0">
+                                    <div
+                                        className={twMerge(
+                                            "flex-1 h-8 rounded-full flex items-center justify-center px-2 transition-all duration-500 relative overflow-hidden",
+                                            isCompleted && "bg-green-500 text-white",
+                                            isCurrent && "bg-violet-500 text-white",
+                                            isFailed && "bg-red-500 text-white",
+                                            isPending && "bg-slate-100 text-slate-400",
+                                        )}
+                                    >
+                                        {isCurrent && (
+                                            <div className="absolute inset-0 bg-violet-400 rounded-full animate-pulse opacity-30" />
+                                        )}
+                                        <div className="flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                            {isCompleted && <span className="text-xs">&#10003;</span>}
+                                            {isCurrent && <span className="text-xs animate-spin">&#9696;</span>}
+                                            {isFailed && <span className="text-xs">&#10007;</span>}
+                                            {isPending && <span className="text-xs text-slate-300">&#9679;</span>}
+                                            <span className="text-[11px] font-medium truncate">{phase.label}</span>
+                                        </div>
+                                    </div>
+                                    {idx < PROMPT_PHASES.length - 1 && (
+                                        <div className={twMerge(
+                                            "w-2 h-1 shrink-0",
+                                            isCompleted ? "bg-green-400" : "bg-slate-200"
+                                        )} />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* AI Summary */}
             <div className="border border-slate-200 rounded-lg bg-blue-50 p-4 text-sm text-slate-700">
