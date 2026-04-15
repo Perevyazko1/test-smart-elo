@@ -227,7 +227,41 @@ def set_fabric_date(request):
     else:
         op.fabric_available_date = None
     op.save(update_fields=['fabric_available_date'])
+    _mark_needs_recalculation()
     return JsonResponse({'success': True, 'date': str(op.fabric_available_date) if op.fabric_available_date else None})
+
+
+@api_view(['POST'])
+def set_position_deadline(request):
+    """Изменить срок (sort_date) у всех заданий позиции.
+    Body: {order_product_id: int, date: 'YYYY-MM-DD' | null}
+    """
+    op_id = request.data.get('order_product_id')
+    date_str = request.data.get('date')
+    if not op_id:
+        return JsonResponse({'error': 'order_product_id обязателен'}, status=400)
+    try:
+        op = OrderProduct.objects.get(pk=op_id)
+    except OrderProduct.DoesNotExist:
+        return JsonResponse({'error': 'Позиция не найдена'}, status=404)
+
+    if date_str:
+        from datetime import datetime as _dt
+        try:
+            new_date = _dt.fromisoformat(date_str)
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Неверный формат даты'}, status=400)
+    else:
+        new_date = None
+
+    # Обновить sort_date у всех заданий этой позиции
+    updated = Assignment.objects.filter(order_product=op).update(sort_date=new_date)
+    _mark_needs_recalculation()
+    return JsonResponse({
+        'success': True,
+        'updated_assignments': updated,
+        'date': date_str,
+    })
 
 
 @api_view(['GET'])
@@ -476,6 +510,11 @@ def _get_ai_config():
     return config
 
 
+def _mark_needs_recalculation():
+    """Пометить что данные изменились и таблицу нужно пересчитать."""
+    AiPlanConfig.objects.update_or_create(pk=1, defaults={'needs_recalculation': True})
+
+
 @api_view(['GET'])
 def get_ai_plan(request):
     """Получить AI-данные для всех активных позиций заказов"""
@@ -500,7 +539,8 @@ def get_ai_plan(request):
         'config': {
             'base_prompt': config.base_prompt,
             'ai_summary': config.ai_summary,
-        }
+        },
+        'needs_recalculation': config.needs_recalculation,
     }, json_dumps_params={"ensure_ascii": False})
 
 
@@ -514,6 +554,7 @@ def update_ai_feedback(request):
     entry, _ = AiPlanEntry.objects.get_or_create(order_product=order_product)
     entry.feedback = feedback
     entry.save(update_fields=['feedback', 'updated_at'])
+    _mark_needs_recalculation()
 
     return JsonResponse({'success': True})
 
@@ -794,6 +835,7 @@ def save_weight_coefficients(request):
         fields.append('setup_minutes')
     if fields:
         config.save(update_fields=fields + ['updated_at'])
+        _mark_needs_recalculation()
     return JsonResponse({'status': 'ok'})
 
 
@@ -1025,6 +1067,7 @@ def update_production_norms(request):
                     defaults={'hours_per_unit': val},
                 )
 
+    _mark_needs_recalculation()
     return JsonResponse({'success': True})
 
 
@@ -1212,6 +1255,7 @@ def update_product_norms(request, product_id):
                 defaults={'hours_per_unit': float(hours)},
             )
 
+    _mark_needs_recalculation()
     return JsonResponse({'success': True})
 
 
@@ -1248,6 +1292,7 @@ def update_department_workers(request):
             DepartmentWorkers.objects.update_or_create(
                 department=dept, defaults={'workers_count': max(count, 0)}
             )
+    _mark_needs_recalculation()
     return JsonResponse({'success': True})
 
 
@@ -1258,6 +1303,7 @@ def update_target_load(request):
     for dept, days in loads.items():
         days = max(1, min(30, int(days)))
         DepartmentWorkers.objects.filter(department=dept).update(target_load_days=days)
+    _mark_needs_recalculation()
     return JsonResponse({'success': True})
 
 
@@ -1284,6 +1330,7 @@ def update_batch_bonuses(request):
         DepartmentBatchBonus.objects.update_or_create(
             department=dept, defaults={'batch_bonus': val}
         )
+    _mark_needs_recalculation()
     return JsonResponse({'success': True})
 
 
@@ -1443,7 +1490,8 @@ def recalculate_with_batch(request):
                 if not op:
                     continue
                 ai_entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
-                ai_entry.ai_comment = comment
+                # ai_comment НЕ перезаписываем — пересчёт не должен затирать комментарии.
+                # Берём только weight_adjustment для корректировки веса.
 
                 base_weight = weight_map.get(sid, {}).get('weight', 500)
                 adj_value = int(adj * k4 / 50)
@@ -1455,7 +1503,7 @@ def recalculate_with_batch(request):
                 detail['adj_reason'] = comment
                 ai_entry.weight_detail = detail
 
-                ai_entry.save(update_fields=['ai_comment', 'sort_weight', 'weight_detail', 'updated_at'])
+                ai_entry.save(update_fields=['sort_weight', 'weight_detail', 'updated_at'])
             except Exception as e:
                 logger.warning(f'recalculate_with_batch: ошибка для {sid}: {e}')
 
@@ -1473,7 +1521,11 @@ def recalculate_with_batch(request):
         chart = _build_chart_grid()
         cfg, _ = AiPlanConfig.objects.get_or_create(pk=1)
         cfg.chart_data = chart
-        cfg.save(update_fields=['chart_data', 'updated_at'])
+        # Сбросить флаг пересчёта и запомнить время
+        from django.utils import timezone as tz
+        cfg.needs_recalculation = False
+        cfg.last_recalculated_at = tz.now()
+        cfg.save(update_fields=['chart_data', 'needs_recalculation', 'last_recalculated_at', 'updated_at'])
 
         return JsonResponse({'success': True, 'recalculated': len(weight_results), 'batch_adjusted': len(gpt_entries)})
     except Exception as e:

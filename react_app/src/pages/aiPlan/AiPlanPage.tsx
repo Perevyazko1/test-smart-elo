@@ -44,6 +44,7 @@ interface IAiPlanData {
         base_prompt: string;
         ai_summary: string;
     };
+    needs_recalculation?: boolean;
 }
 
 export const AiPlanPage = () => {
@@ -312,6 +313,23 @@ export const AiPlanPage = () => {
             toast.info('Отмена генерации...');
         });
     }, []);
+
+    // Флаг необходимости пересчёта (из API)
+    const needsRecalculation = aiData?.needs_recalculation ?? false;
+    // Состояние пересчёта таблицы (кнопка "Пересчитать")
+    const [recalculating, setRecalculating] = useState(false);
+
+    const handleRecalculate = useCallback(() => {
+        setRecalculating(true);
+        $axios.post('/plan/chart/recalculate/').then(() => {
+            setRecalculating(false);
+            queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+            toast.success('Таблица пересчитана');
+        }).catch(err => {
+            setRecalculating(false);
+            toast.error(err.response?.data?.error || 'Ошибка пересчёта');
+        });
+    }, [queryClient]);
 
     // Вспомогательная функция: последовательно переключает этапы промпт-обработки по таймеру
     const advancePromptPhases = useCallback((phaseIndex: number, resolve: () => void) => {
@@ -596,22 +614,47 @@ export const AiPlanPage = () => {
                 )}
             </div>
 
-            {/* Generate / Cancel button */}
-            {generating ? (
-                <Btn
-                    onClick={handleCancel}
-                    className="border border-orange-400 bg-orange-100 text-orange-800 rounded-lg py-2 font-semibold"
-                >
-                    Отменить генерацию
-                </Btn>
-            ) : (
-                <Btn
-                    onClick={handleGenerate}
-                    className="border border-blue-400 bg-blue-100 text-blue-800 rounded-lg py-2 font-semibold"
-                >
-                    Сгенерировать AI план
-                </Btn>
-            )}
+            {/* Generate / Cancel / Recalculate buttons */}
+            <div className="flex gap-3">
+                {generating ? (
+                    <Btn
+                        onClick={handleCancel}
+                        className="border border-orange-400 bg-orange-100 text-orange-800 rounded-lg py-2 font-semibold"
+                    >
+                        Отменить генерацию
+                    </Btn>
+                ) : (
+                    <Btn
+                        onClick={handleGenerate}
+                        className="border border-blue-400 bg-blue-100 text-blue-800 rounded-lg py-2 font-semibold"
+                    >
+                        Сгенерировать AI план
+                    </Btn>
+                )}
+
+                {/* Кнопка пересчёта — активна если данные изменились */}
+                {!generating && (
+                    <Btn
+                        onClick={handleRecalculate}
+                        disabled={!needsRecalculation || recalculating}
+                        className={twMerge(
+                            "border rounded-lg py-2 font-semibold transition-colors",
+                            needsRecalculation && !recalculating
+                                ? "border-green-400 bg-green-100 text-green-800 hover:bg-green-200"
+                                : "border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed"
+                        )}
+                    >
+                        {recalculating ? (
+                            <span className="flex items-center gap-2">
+                                <span className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+                                Пересчёт...
+                            </span>
+                        ) : (
+                            'Пересчитать таблицу'
+                        )}
+                    </Btn>
+                )}
+            </div>
 
             {/* Этапы генерации — "связка сосисок" */}
             {(generating || completedPhases.size > 0 || failedPhase) && (
@@ -772,6 +815,70 @@ export const AiPlanPage = () => {
         </div>
     );
 };
+
+// Ячейка AI-комментария: клик → редактирование, крестик → удаление
+function AiCommentCell({seriesId, comment, urgency, rowBg}: {seriesId: string; comment: string; urgency: 1|2|3; rowBg: string}) {
+    const [editing, setEditing] = useState(false);
+    const [value, setValue] = useState(comment);
+    const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    // Синхронизация при обновлении данных извне
+    useEffect(() => { setValue(comment); }, [comment]);
+
+    const save = useCallback((text: string) => {
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        saveTimer.current = setTimeout(() => {
+            $axios.post('/plan/ai_plan/update_entries/', {
+                entries: [{series_id: seriesId, ai_comment: text}],
+            }).catch(() => toast.error('Ошибка сохранения'));
+        }, 800);
+    }, [seriesId]);
+
+    const handleDelete = () => {
+        setValue('');
+        setEditing(false);
+        if (saveTimer.current) clearTimeout(saveTimer.current);
+        $axios.post('/plan/ai_plan/update_entries/', {
+            entries: [{series_id: seriesId, ai_comment: ''}],
+        }).catch(() => toast.error('Ошибка удаления'));
+    };
+
+    return (
+        <td className={twMerge(
+            "sticky right-0 z-10 border-l border-slate-200 px-2 py-1.5 text-[11px] leading-tight",
+            rowBg,
+            urgency === 1 ? "text-red-700" : urgency === 2 ? "text-yellow-700" : "text-slate-600"
+        )} style={{minWidth: 120}}>
+            {editing ? (
+                <div className="flex items-start gap-1">
+                    <textarea
+                        autoFocus
+                        value={value}
+                        onChange={(e) => { setValue(e.target.value); save(e.target.value); }}
+                        onBlur={() => setTimeout(() => setEditing(false), 200)}
+                        onKeyDown={(e) => e.key === 'Escape' && setEditing(false)}
+                        className="flex-1 text-[11px] bg-white border border-blue-300 rounded px-1 py-0.5 outline-none resize-none leading-tight"
+                        rows={2}
+                    />
+                    <button
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={handleDelete}
+                        className="shrink-0 text-slate-400 hover:text-red-500 text-xs mt-0.5"
+                        title="Удалить AI комментарий"
+                    >✕</button>
+                </div>
+            ) : (
+                <span
+                    className="cursor-pointer hover:text-blue-600 block"
+                    onClick={() => setEditing(true)}
+                    title="Клик для редактирования"
+                >
+                    {value || <span className="text-slate-300 italic">—</span>}
+                </span>
+            )}
+        </td>
+    );
+}
 
 function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepartments, onOpenNorms, onCommentAdded, norms, onNormChange}: {
     item: IPlanDataRow;
@@ -980,18 +1087,26 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold min-w-[35px] w-[35px]", rowBg)} style={{left: 440}}>
                 {item.quantity}
             </td>
-            {/* Срок */}
+            {/* Срок — datepicker для изменения sort_date всех заданий позиции */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[60px] w-[60px]", rowBg)} style={{left: 475}}>
-                {item.date ? (
-                    <span className={twMerge(
-                        "text-[10px]",
+                <input
+                    type="date"
+                    value={item.date || ''}
+                    onChange={(e) => {
+                        const val = e.target.value || null;
+                        $axios.post('/plan/position_deadline/', {
+                            order_product_id: item.order_product_id,
+                            date: val,
+                        }).then(() => {
+                            onCommentAdded();
+                            toast.success('Срок обновлён');
+                        }).catch(() => toast.error('Ошибка обновления срока'));
+                    }}
+                    className={twMerge(
+                        "w-full text-[9px] bg-transparent border-0 outline-none cursor-pointer p-0",
                         item.urgency === 1 ? "text-red-600 font-semibold" : "text-slate-600"
-                    )}>
-                        {item.date}
-                    </span>
-                ) : (
-                    <span className="text-slate-300">—</span>
-                )}
+                    )}
+                />
             </td>
             {/* Ткань — дата получения */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[85px] w-[85px]", rowBg)} style={{left: 535}}>
@@ -1049,20 +1164,38 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                                 setLocalNorms(prev => ({...prev, [dept]: v}));
                                 onNormChange(item.product_id, dept, v);
                             }}
-                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none mt-0.5"
+                            className="w-full text-[11px] text-center text-slate-600 bg-transparent outline-none mt-0.5"
                             placeholder="—"
                         />
                     </td>
                 );
                 const done = d.ready === d.all;
+                const pct = d.all > 0 ? Math.round(d.ready / d.all * 100) : 0;
                 return (
                     <td key={dept} className={twMerge("px-1 py-1 text-center border-l border-slate-200", rowBg)} style={{minWidth: 70}}>
-                        <span className={twMerge(
-                            "text-[11px] font-medium",
-                            done ? "text-green-600" : d.ready > 0 ? "text-yellow-600" : "text-slate-500"
-                        )}>
-                            {d.ready}/{d.all}
-                        </span>
+                        {/* Прогресс-бар с цифрами внутри */}
+                        <div className="relative h-5 rounded-md overflow-hidden bg-slate-100 flex items-center">
+                            {/* Заливка прогресса */}
+                            <div
+                                className={twMerge(
+                                    "absolute inset-y-0 left-0 rounded-md transition-all duration-300",
+                                    done ? "bg-green-400/40" : pct > 0 ? "bg-amber-400/30" : ""
+                                )}
+                                style={{width: `${pct}%`}}
+                            />
+                            {/* Цифры поверх бара */}
+                            <div className="relative z-10 flex items-center justify-center w-full gap-0.5">
+                                <span className={twMerge(
+                                    "text-[11px] font-semibold",
+                                    done ? "text-green-700" : d.ready > 0 ? "text-green-600" : "text-slate-400"
+                                )}>{d.ready}</span>
+                                <span className="text-[9px] text-slate-300">/</span>
+                                <span className={twMerge(
+                                    "text-[11px] font-semibold",
+                                    done ? "text-green-700" : "text-slate-500"
+                                )}>{d.all}</span>
+                            </div>
+                        </div>
                         <input
                             type="number"
                             step="0.05"
@@ -1073,7 +1206,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                                 setLocalNorms(prev => ({...prev, [dept]: v}));
                                 onNormChange(item.product_id, dept, v);
                             }}
-                            className="w-full text-[9px] text-center text-slate-400 bg-transparent outline-none mt-0.5"
+                            className="w-full text-[11px] text-center text-slate-600 bg-transparent outline-none mt-0.5"
                             placeholder="—"
                         />
                     </td>
@@ -1094,17 +1227,13 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                     )}
                 />
             </td>
-            {/* AI комментарий */}
-            <td className={twMerge(
-                "sticky right-0 z-10 border-l border-slate-200 px-2 py-1.5 text-[11px] leading-tight",
-                rowBg,
-                item.urgency === 1 ? "text-red-700" :
-                    item.urgency === 2 ? "text-yellow-700" : "text-slate-600"
-            )} style={{minWidth: 120}}>
-                {aiEntry?.ai_comment || (
-                    <span className="text-slate-300 italic">—</span>
-                )}
-            </td>
+            {/* AI комментарий — редактируемый по клику, с кнопкой удаления */}
+            <AiCommentCell
+                seriesId={item.series_id}
+                comment={aiEntry?.ai_comment || ''}
+                urgency={item.urgency}
+                rowBg={rowBg}
+            />
         </tr>
     );
 }

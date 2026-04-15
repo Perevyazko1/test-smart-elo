@@ -1990,7 +1990,12 @@ def generate_ai_plan_full(self):
         cfg.ai_summary = summary
         cfg.save(update_fields=['ai_summary', 'updated_at'])
 
-        _update_config(task_status='completed', task_phase='', task_progress=total)
+        # Сбросить флаг пересчёта — полная генерация включает всё
+        from django.utils import timezone as tz
+        _update_config(
+            task_status='completed', task_phase='', task_progress=total,
+            needs_recalculation=False, last_recalculated_at=tz.now(),
+        )
 
     except Exception as e:
         logger.error(f'Ошибка генерации AI плана: {e}', exc_info=True)

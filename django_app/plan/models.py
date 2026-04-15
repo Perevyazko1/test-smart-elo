@@ -159,5 +159,9 @@ class AiPlanConfig(models.Model):
     task_phase = models.CharField('Фаза', max_length=100, blank=True, default='')
     task_error = models.TextField('Ошибка', blank=True, default='')
 
+    # Флаг необходимости пересчёта: True если изменились данные (feedback, сроки, нормы и т.д.)
+    needs_recalculation = models.BooleanField('Требуется пересчёт', default=False)
+    last_recalculated_at = models.DateTimeField('Последний пересчёт', null=True, blank=True)
+
     def __str__(self):
         return f'AI конфигурация (обновлено: {self.updated_at})'
