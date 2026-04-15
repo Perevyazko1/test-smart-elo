@@ -173,12 +173,12 @@ export const AiPlanPage = () => {
         normSaveTimers.current[key] = setTimeout(() => {
             $axios.post(`/plan/product_norms/${productId}/update/`, {
                 overrides: {[dept]: value}
-            }).then(
-                () => toast.success('Норматив сохранён'),
-                () => toast.error('Ошибка сохранения')
-            );
+            }).then(() => {
+                toast.success('Норматив сохранён');
+                queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+            }, () => toast.error('Ошибка сохранения'));
         }, 1000);
-    }, []);
+    }, [queryClient]);
 
     const entries = useMemo(() => {
         const items = Object.entries(planData?.data || {});
@@ -387,12 +387,10 @@ export const AiPlanPage = () => {
     // Фазы, уникальные для пересчёта (не встречаются при генерации)
     const RECALC_ONLY_PHASE = 'AI корректировка...';
 
-    // При маунте — проверяем, не идёт ли уже задача (генерация или пересчёт)
+    // При открытии страницы — проверяем не идёт ли уже задача
     useEffect(() => {
         $axios.get('/plan/ai_plan/progress/').then(res => {
             if (res.data.status === 'running') {
-                // "AI корректировка..." — фаза уникальная для пересчёта
-                // Общие фазы (Сбор данных, Расчёт весов, Построение графика) — при пересчёте total=4
                 if (res.data.phase === RECALC_ONLY_PHASE || res.data.total === 4) {
                     startRecalcPolling();
                 } else {

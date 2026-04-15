@@ -1,4 +1,4 @@
-import {useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {$axios} from "@/shared/api";
 import {twMerge} from "tailwind-merge";
@@ -95,6 +95,99 @@ export const AiPlanChartPage = () => {
         retry: false,  // не повторять при 404
     });
 
+    /* Флаг необходимости пересчёта (из AiPlanConfig) */
+    const {data: aiData} = useQuery<{needs_recalculation?: boolean}>({
+        queryKey: ["aiPlanRecalcFlag"],
+        queryFn: () => $axios.get('/plan/ai_plan/').then(r => r.data),
+    });
+    const needsRecalculation = aiData?.needs_recalculation ?? false;
+
+    /* ─── Пересчёт через Celery с отображением этапов ─── */
+    const RECALC_PHASES = [
+        {key: 'Сбор данных...', label: 'Сбор данных'},
+        {key: 'Расчёт весов...', label: 'Расчёт весов'},
+        {key: 'AI корректировка...', label: 'AI корректировка'},
+        {key: 'Построение графика...', label: 'Построение графика'},
+    ] as const;
+    const [recalculating, setRecalculating] = useState(false);
+    const [recalcCompletedPhases, setRecalcCompletedPhases] = useState<Set<string>>(new Set());
+    const [recalcFailedPhase, setRecalcFailedPhase] = useState<string | null>(null);
+    const [recalcCurrentPhase, setRecalcCurrentPhase] = useState<string>('');
+    const recalcPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const stopRecalcPolling = useCallback(() => {
+        if (recalcPollRef.current) { clearInterval(recalcPollRef.current); recalcPollRef.current = null; }
+    }, []);
+
+    const startRecalcPolling = useCallback(() => {
+        stopRecalcPolling();
+        setRecalculating(true);
+        setRecalcCompletedPhases(new Set());
+        setRecalcFailedPhase(null);
+
+        const poll = () => {
+            $axios.get('/plan/ai_plan/progress/').then(res => {
+                const {status, phase, error: err} = res.data;
+                setRecalcCurrentPhase(phase || '');
+                if (status === 'running') {
+                    if (phase) {
+                        setRecalcCompletedPhases(prev => {
+                            const next = new Set(prev);
+                            for (const p of RECALC_PHASES) {
+                                if (p.key === phase) break;
+                                next.add(p.key);
+                            }
+                            return next;
+                        });
+                    }
+                } else if (status === 'completed') {
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                    setRecalcCompletedPhases(new Set(RECALC_PHASES.map(p => p.key)));
+                    queryClient.invalidateQueries({queryKey: ["chartData"]});
+                    queryClient.invalidateQueries({queryKey: ["aiPlanRecalcFlag"]});
+                    toast.success('Таблица пересчитана');
+                    setTimeout(() => setRecalcCompletedPhases(new Set()), 5000);
+                } else if (status === 'failed') {
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                    setRecalcFailedPhase(phase || null);
+                    toast.error(err || 'Ошибка пересчёта');
+                    setTimeout(() => { setRecalcCompletedPhases(new Set()); setRecalcFailedPhase(null); }, 8000);
+                } else {
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                }
+            });
+        };
+        recalcPollRef.current = setInterval(poll, 2000);
+        poll();
+    }, [stopRecalcPolling, queryClient]);
+
+    const handleRecalculate = useCallback(() => {
+        setRecalculating(true);
+        setRecalcCompletedPhases(new Set());
+        setRecalcFailedPhase(null);
+        $axios.post('/plan/ai_plan/recalculate/').then(res => {
+            if (res.data.status === 'already_running' || res.data.status === 'started') {
+                startRecalcPolling();
+            }
+        }).catch(err => {
+            setRecalculating(false);
+            toast.error(err.response?.data?.error || 'Ошибка запуска пересчёта');
+        });
+    }, [startRecalcPolling]);
+
+    /* При открытии страницы — проверяем не идёт ли уже пересчёт */
+    useEffect(() => {
+        $axios.get('/plan/ai_plan/progress/').then(res => {
+            if (res.data.status === 'running' && (res.data.phase === 'AI корректировка...' || res.data.total === 4)) {
+                startRecalcPolling();
+            }
+        });
+        return stopRecalcPolling;
+    }, [startRecalcPolling, stopRecalcPolling]);
+
     const departments = data?.departments || [];
     const totalDays = data?.total_days || 0;
     const grid = data?.grid || {};
@@ -160,25 +253,86 @@ export const AiPlanChartPage = () => {
 
     return (
         <div className="bg-white p-4 flex flex-col gap-4">
-            {/* Заголовок и кнопка обновления */}
+            {/* Заголовок и кнопки */}
             <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold text-slate-800">AI Plan — График загрузки цехов</h1>
-                <button
-                    onClick={handleRefresh}
-                    disabled={refreshing}
-                    className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1.5"
-                >
-                    {refreshing ? (
-                        <>
-                            <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                            </svg>
-                            Обновление...
-                        </>
-                    ) : 'Обновить таблицу'}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={handleRefresh}
+                        disabled={refreshing || recalculating}
+                        className="px-3 py-1.5 bg-blue-600 text-white text-xs rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                        {refreshing ? (
+                            <>
+                                <svg className="animate-spin h-3.5 w-3.5" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                </svg>
+                                Обновление...
+                            </>
+                        ) : 'Обновить график'}
+                    </button>
+                    {/* Кнопка полного пересчёта (веса + GPT + график) */}
+                    {!recalculating ? (
+                        <button
+                            onClick={handleRecalculate}
+                            disabled={!needsRecalculation}
+                            className={twMerge(
+                                "px-3 py-1.5 text-xs rounded-lg font-semibold transition-colors flex items-center gap-1.5",
+                                needsRecalculation
+                                    ? "bg-green-100 text-green-800 border border-green-400 hover:bg-green-200"
+                                    : "bg-slate-100 text-slate-400 border border-slate-300 cursor-not-allowed"
+                            )}
+                        >
+                            Пересчитать таблицу
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => { $axios.post('/plan/ai_plan/cancel/'); toast.info('Отмена пересчёта...'); }}
+                            className="px-3 py-1.5 text-xs rounded-lg font-semibold bg-orange-100 text-orange-800 border border-orange-400"
+                        >
+                            Отменить пересчёт
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* Этапы пересчёта — "связка сосисок" */}
+            {(recalculating || recalcCompletedPhases.size > 0 || recalcFailedPhase) && (
+                <div className="border border-slate-200 rounded-lg p-3">
+                    <div className="flex items-center gap-0">
+                        {RECALC_PHASES.map((phase, idx) => {
+                            const isCompleted = recalcCompletedPhases.has(phase.key);
+                            const isCurrent = recalculating && recalcCurrentPhase === phase.key;
+                            const isFailed = recalcFailedPhase === phase.key;
+                            const isPending = !isCompleted && !isCurrent && !isFailed;
+                            return (
+                                <div key={phase.key} className="flex items-center flex-1 min-w-0">
+                                    <div className={twMerge(
+                                        "flex-1 h-8 rounded-full flex items-center justify-center px-2 transition-all duration-500 relative overflow-hidden",
+                                        isCompleted && "bg-green-500 text-white",
+                                        isCurrent && "bg-green-500 text-white",
+                                        isFailed && "bg-red-500 text-white",
+                                        isPending && "bg-slate-100 text-slate-400",
+                                    )}>
+                                        {isCurrent && <div className="absolute inset-0 bg-green-400 rounded-full animate-pulse opacity-30" />}
+                                        <div className="flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                            {isCompleted && <span className="text-xs">&#10003;</span>}
+                                            {isCurrent && <span className="text-xs animate-spin">&#9696;</span>}
+                                            {isFailed && <span className="text-xs">&#10007;</span>}
+                                            {isPending && <span className="text-xs text-slate-300">&#9679;</span>}
+                                            <span className="text-[11px] font-medium truncate">{phase.label}</span>
+                                        </div>
+                                    </div>
+                                    {idx < RECALC_PHASES.length - 1 && (
+                                        <div className={twMerge("w-2 h-1 shrink-0", isCompleted ? "bg-green-400" : "bg-slate-200")} />
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
 
             {/* Легенда цветов загрузки */}
             <div className="flex gap-4 text-xs text-slate-500">
@@ -406,7 +560,11 @@ export const AiPlanChartPage = () => {
                 productName={modal?.name ?? ""}
                 picture={modal?.picture ?? null}
                 isOpen={modal !== null}
-                onClose={() => setModal(null)}
+                onClose={() => {
+                    setModal(null);
+                    // После закрытия модалки проверяем не изменились ли нормативы → обновить флаг
+                    queryClient.invalidateQueries({queryKey: ["aiPlanRecalcFlag"]});
+                }}
             />
         </div>
     );
