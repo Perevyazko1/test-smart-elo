@@ -729,11 +729,11 @@ export const AiPlanPage = () => {
                             <th className="sticky left-0 top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[30px] w-[30px]">#</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[45px] w-[45px]" style={{left: 30}}>Фото</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[300px] w-[300px]" style={{left: 75}}>Изделие</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[65px] w-[65px]" style={{left: 275}}>Заказ</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px]" style={{left: 340}}>Кол</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[60px] w-[60px]" style={{left: 375}}>Срок</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[85px] w-[85px]" style={{left: 435}}>Ткань</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px] border-r border-slate-200" style={{left: 520}}>Вес</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[65px] w-[65px]" style={{left: 375}}>Заказ</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px]" style={{left: 440}}>Кол</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[60px] w-[60px]" style={{left: 475}}>Срок</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[85px] w-[85px]" style={{left: 535}}>Ткань</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px] border-r border-slate-200" style={{left: 620}}>Вес</th>
                             {allDepartments.filter(d => visibleDepts.has(d)).map(dept => (
                                 <th key={dept} className="sticky top-0 z-10 bg-slate-50 px-2 py-2 text-center whitespace-nowrap font-semibold border-l border-slate-200" style={{minWidth: 70}}>
                                     {dept}
@@ -924,7 +924,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 </div>
             </td>
             {/* Заказ — клик открывает инпут комментария к заказу */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px] min-w-[65px] max-w-[65px]", rowBg)} style={{left: 275}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px] min-w-[65px] max-w-[65px]", rowBg)} style={{left: 375}}>
                 <div className="flex items-center gap-0.5">
                     <button
                         className="shrink-0 w-3.5 h-3.5 flex items-center justify-center text-slate-300 hover:text-blue-500 transition-colors"
@@ -977,11 +977,11 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 )}
             </td>
             {/* Кол */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold min-w-[35px] w-[35px]", rowBg)} style={{left: 340}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center font-semibold min-w-[35px] w-[35px]", rowBg)} style={{left: 440}}>
                 {item.quantity}
             </td>
             {/* Срок */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[60px] w-[60px]", rowBg)} style={{left: 375}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[60px] w-[60px]", rowBg)} style={{left: 475}}>
                 {item.date ? (
                     <span className={twMerge(
                         "text-[10px]",
@@ -994,7 +994,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
                 )}
             </td>
             {/* Ткань — дата получения */}
-            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[85px] w-[85px]", rowBg)} style={{left: 435}}>
+            <td className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[85px] w-[85px]", rowBg)} style={{left: 535}}>
                 <input
                     type="date"
                     value={item.fabric_available_date ?? ''}
@@ -1018,7 +1018,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             {/* Вес */}
             <td
                 className={twMerge("sticky z-10 px-1 py-1.5 text-center min-w-[35px] w-[35px] border-r border-slate-200 cursor-help", rowBg)}
-                style={{left: 520}}
+                style={{left: 620}}
                 title={aiEntry?.weight_detail
                     ? `Сроки: ${aiEntry.weight_detail.deadline ?? '—'}\nПрогресс: ${aiEntry.weight_detail.progress ?? '—'}\nЦеха: ${aiEntry.weight_detail.dept_load ?? '—'}${aiEntry.weight_detail.adjustment ? `\nAI корр.: ${aiEntry.weight_detail.adjustment > 0 ? '+' : ''}${aiEntry.weight_detail.adjustment}` : ''}`
                     : undefined}
