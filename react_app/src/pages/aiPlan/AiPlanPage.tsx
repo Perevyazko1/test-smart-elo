@@ -728,7 +728,7 @@ export const AiPlanPage = () => {
                         <tr className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
                             <th className="sticky left-0 top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[30px] w-[30px]">#</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[45px] w-[45px]" style={{left: 30}}>Фото</th>
-                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[200px] w-[200px]" style={{left: 75}}>Изделие</th>
+                            <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[300px] w-[300px]" style={{left: 75}}>Изделие</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-left min-w-[65px] w-[65px]" style={{left: 275}}>Заказ</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[35px] w-[35px]" style={{left: 340}}>Кол</th>
                             <th className="sticky top-0 z-20 bg-slate-50 px-1 py-2 text-center min-w-[60px] w-[60px]" style={{left: 375}}>Срок</th>
@@ -739,7 +739,7 @@ export const AiPlanPage = () => {
                                     {dept}
                                 </th>
                             ))}
-                            <th className="sticky right-[120px] top-0 z-20 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 100}}>Обр. связь</th>
+                            <th className="sticky right-[120px] top-0 z-20 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 200}}>Обр. связь</th>
                             <th className="sticky right-0 top-0 z-20 bg-slate-50 px-2 py-2 text-left border-l border-slate-200" style={{minWidth: 120}}>AI комментарий</th>
                         </tr>
                     </thead>
@@ -925,25 +925,55 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             </td>
             {/* Заказ — клик открывает инпут комментария к заказу */}
             <td className={twMerge("sticky z-10 px-1 py-1.5 w-[65px] min-w-[65px] max-w-[65px]", rowBg)} style={{left: 275}}>
-                <span
-                    className={twMerge(
-                        "text-xs truncate block cursor-pointer hover:text-blue-600",
-                        item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
-                    )}
-                    onClick={() => setCommentInput(commentInput === 'order' ? null : 'order')}
-                    title="Добавить комментарий к заказу"
-                >
-                    {item.order}
-                </span>
+                <div className="flex items-center gap-0.5">
+                    <button
+                        className="shrink-0 w-3.5 h-3.5 flex items-center justify-center text-slate-300 hover:text-blue-500 transition-colors"
+                        title="Копировать заказ"
+                        onClick={() => {
+                            navigator.clipboard.writeText(item.order);
+                            toast.success('Заказ скопирован');
+                        }}
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                            <rect x="9" y="9" width="13" height="13" rx="2" />
+                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                        </svg>
+                    </button>
+                    <span
+                        className={twMerge(
+                            "text-xs truncate block cursor-pointer hover:text-blue-600",
+                            item.urgency === 1 && "bg-red-200 px-1 rounded font-semibold text-red-800"
+                        )}
+                        onClick={() => setCommentInput(commentInput === 'order' ? null : 'order')}
+                        title="Добавить комментарий к заказу"
+                    >
+                        {item.order}
+                    </span>
+                </div>
                 {/* Заказчик — клик открывает инпут комментария к заказчику */}
                 {item.agent_name && (
-                    <span
-                        className="text-[9px] text-purple-500 truncate block cursor-pointer hover:text-purple-700"
-                        onClick={() => item.agent_id && setCommentInput(commentInput === 'agent' ? null : 'agent')}
-                        title="Добавить комментарий к заказчику"
-                    >
-                        {item.agent_name}
-                    </span>
+                    <div className="flex items-center gap-0.5">
+                        <button
+                            className="shrink-0 w-3.5 h-3.5 flex items-center justify-center text-slate-300 hover:text-purple-500 transition-colors"
+                            title="Копировать заказчика"
+                            onClick={() => {
+                                navigator.clipboard.writeText(item.agent_name!);
+                                toast.success('Заказчик скопирован');
+                            }}
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-2.5 h-2.5">
+                                <rect x="9" y="9" width="13" height="13" rx="2" />
+                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+                            </svg>
+                        </button>
+                        <span
+                            className="text-[9px] text-purple-500 truncate block cursor-pointer hover:text-purple-700"
+                            onClick={() => item.agent_id && setCommentInput(commentInput === 'agent' ? null : 'agent')}
+                            title="Добавить комментарий к заказчику"
+                        >
+                            {item.agent_name}
+                        </span>
+                    </div>
                 )}
             </td>
             {/* Кол */}
@@ -1051,7 +1081,7 @@ function OrderRow({item, index, aiEntry, onFeedbackSave, visibleDepts, allDepart
             })}
 
             {/* Обр. связь */}
-            <td className={twMerge("sticky right-[120px] z-10 border-l border-slate-200 px-2 py-1.5", rowBg)} style={{minWidth: 100}}>
+            <td className={twMerge("sticky right-[120px] z-10 border-l border-slate-200 px-2 py-1.5", rowBg)} style={{minWidth: 200}}>
                 <textarea
                     value={feedback}
                     onChange={(e) => setFeedback(e.target.value)}

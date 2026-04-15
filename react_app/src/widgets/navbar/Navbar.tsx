@@ -100,6 +100,22 @@ export const Navbar = (props: NavbarProps) => {
         />
     )
 
+    const AiPlanLink = (props: { border: boolean }) => (
+        <AppLink
+            path={"/ai-plan"}
+            name={"AI План"}
+            border={props.border}
+        />
+    )
+
+    const AiPlanChartLink = (props: { border: boolean }) => (
+        <AppLink
+            path={"/ai-plan-chart"}
+            name={"AI График"}
+            border={props.border}
+        />
+    )
+
     const TariffingLink = (props: { border: boolean }) => (
         <AppLink
             path={"/tariffing"}
@@ -173,6 +189,14 @@ export const Navbar = (props: NavbarProps) => {
 
                         {planPage && (
                             <PlanLink border={true}/>
+                        )}
+
+                        {planPage && (
+                            <AiPlanLink border={true}/>
+                        )}
+
+                        {planPage && (
+                            <AiPlanChartLink border={true}/>
                         )}
 
                         {shipmentPage && (

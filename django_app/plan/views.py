@@ -179,7 +179,7 @@ def get_plan_table(request):
             "product_id": order_product.product_id,
             "product_name": order_product.product.name,
             "product_picture": picture_url,
-            "order": order_product.order.inner_number,
+            "order": order_product.order.number,
             "order_id": order_product.order_id,
             "series_id": order_product.series_id,
             "order_product_id": order_product.id,
