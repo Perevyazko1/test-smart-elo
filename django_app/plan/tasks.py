@@ -1610,9 +1610,13 @@ def recalculate_ai_plan(self):
         weight_results = _calculate_all_weights(orders, data['dept_summary'], config, workflows)
         weight_map = {r['series_id']: r for r in weight_results}
 
-        # Pinned weights (ai_deadline) — берём MAX(промпт-вес, формульный вес)
+        # Pinned weights (ai_deadline или feedback) — берём MAX(промпт-вес, формульный вес)
+        from django.db.models import Q
         pinned_sids = set()
-        for entry in AiPlanEntry.objects.filter(ai_deadline__isnull=False).values('order_product__series_id', 'sort_weight'):
+        pinned_qs = AiPlanEntry.objects.filter(
+            Q(ai_deadline__isnull=False) | ~Q(feedback='')
+        ).values('order_product__series_id', 'sort_weight')
+        for entry in pinned_qs:
             sid = entry['order_product__series_id']
             pinned_sids.add(sid)
             if sid in weight_map:
@@ -1782,10 +1786,14 @@ def generate_ai_plan_full(self):
         weight_results = _calculate_all_weights(orders, data['dept_summary'], config, workflows)
         weight_map = {r['series_id']: r for r in weight_results}
 
-        # Позиции с ai_deadline (установленным через промпт) сохраняют свой вес —
+        # Позиции с ai_deadline или feedback (обратной связью) сохраняют свой вес —
         # промпт уже задал sort_weight, Python-формула не должна его затирать.
+        from django.db.models import Q as _Q
         pinned_sids = set()
-        for entry in AiPlanEntry.objects.filter(ai_deadline__isnull=False).values('order_product__series_id', 'sort_weight'):
+        pinned_qs = AiPlanEntry.objects.filter(
+            _Q(ai_deadline__isnull=False) | ~_Q(feedback='')
+        ).values('order_product__series_id', 'sort_weight')
+        for entry in pinned_qs:
             sid = entry['order_product__series_id']
             pinned_sids.add(sid)
             if sid in weight_map:
