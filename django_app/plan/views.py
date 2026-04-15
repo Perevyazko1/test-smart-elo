@@ -781,6 +781,27 @@ def generate_ai_plan(request):
     return JsonResponse({'status': 'started', 'task_id': result.id})
 
 
+@api_view(['POST'])
+def start_recalculation(request):
+    """Запуск пересчёта таблицы через Celery (без регенерации комментариев)."""
+    from django.utils import timezone
+    from plan.tasks import recalculate_ai_plan
+
+    config = _get_ai_config()
+
+    # Если задача уже выполняется — не запускать повторно
+    if config.task_status == 'running' and config.task_id:
+        if (timezone.now() - config.updated_at).total_seconds() > 600:
+            config.task_status = 'idle'
+            config.save(update_fields=['task_status', 'updated_at'])
+        else:
+            return JsonResponse({'status': 'already_running', 'task_id': config.task_id})
+
+    result = recalculate_ai_plan.delay()
+
+    return JsonResponse({'status': 'started', 'task_id': result.id})
+
+
 @api_view(['GET'])
 def ai_plan_progress(request):
     """Прогресс выполнения AI задачи."""

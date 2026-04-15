@@ -280,16 +280,6 @@ export const AiPlanPage = () => {
         pollRef.current = setInterval(poll, 5000);
     }, [queryClient, stopPolling]);
 
-    // При маунте — проверяем, не идёт ли уже генерация
-    useEffect(() => {
-        $axios.get('/plan/ai_plan/progress/').then(res => {
-            if (res.data.status === 'running') {
-                startPolling();
-            }
-        });
-        return stopPolling;
-    }, [startPolling, stopPolling]);
-
     const handleGenerate = useCallback(() => {
         setGenerating(true);
         setGenError(null);
@@ -316,20 +306,102 @@ export const AiPlanPage = () => {
 
     // Флаг необходимости пересчёта (из API)
     const needsRecalculation = aiData?.needs_recalculation ?? false;
-    // Состояние пересчёта таблицы (кнопка "Пересчитать")
+    // Пересчёт использует тот же polling что и генерация — task_status/task_phase в AiPlanConfig
+    const RECALC_PHASES = [
+        {key: 'Сбор данных...', label: 'Сбор данных'},
+        {key: 'Расчёт весов...', label: 'Расчёт весов'},
+        {key: 'AI корректировка...', label: 'AI корректировка'},
+        {key: 'Построение графика...', label: 'Построение графика'},
+    ] as const;
     const [recalculating, setRecalculating] = useState(false);
+    const [recalcCompletedPhases, setRecalcCompletedPhases] = useState<Set<string>>(new Set());
+    const [recalcFailedPhase, setRecalcFailedPhase] = useState<string | null>(null);
+    const recalcPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    const stopRecalcPolling = useCallback(() => {
+        if (recalcPollRef.current) {
+            clearInterval(recalcPollRef.current);
+            recalcPollRef.current = null;
+        }
+    }, []);
+
+    const startRecalcPolling = useCallback(() => {
+        stopRecalcPolling();
+        setRecalculating(true);
+        setRecalcCompletedPhases(new Set());
+        setRecalcFailedPhase(null);
+
+        const poll = () => {
+            $axios.get('/plan/ai_plan/progress/').then(res => {
+                const {status, phase, error} = res.data;
+                if (status === 'running') {
+                    // Отмечаем все фазы до текущей как завершённые
+                    if (phase) {
+                        setRecalcCompletedPhases(prev => {
+                            const next = new Set(prev);
+                            for (const p of RECALC_PHASES) {
+                                if (p.key === phase) break;
+                                next.add(p.key);
+                            }
+                            return next;
+                        });
+                    }
+                } else if (status === 'completed') {
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                    setRecalcCompletedPhases(new Set(RECALC_PHASES.map(p => p.key)));
+                    queryClient.invalidateQueries({queryKey: ["aiPlan"]});
+                    toast.success('Таблица пересчитана');
+                    setTimeout(() => setRecalcCompletedPhases(new Set()), 5000);
+                } else if (status === 'failed') {
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                    setRecalcFailedPhase(phase || null);
+                    toast.error(error || 'Ошибка пересчёта');
+                    setTimeout(() => { setRecalcCompletedPhases(new Set()); setRecalcFailedPhase(null); }, 8000);
+                } else {
+                    // idle/cancelled
+                    stopRecalcPolling();
+                    setRecalculating(false);
+                }
+            });
+        };
+        recalcPollRef.current = setInterval(poll, 2000);
+        poll();
+    }, [stopRecalcPolling, queryClient]);
 
     const handleRecalculate = useCallback(() => {
         setRecalculating(true);
-        $axios.post('/plan/chart/recalculate/').then(() => {
-            setRecalculating(false);
-            queryClient.invalidateQueries({queryKey: ["aiPlan"]});
-            toast.success('Таблица пересчитана');
+        setRecalcCompletedPhases(new Set());
+        setRecalcFailedPhase(null);
+        $axios.post('/plan/ai_plan/recalculate/').then(res => {
+            if (res.data.status === 'already_running' || res.data.status === 'started') {
+                startRecalcPolling();
+            }
         }).catch(err => {
             setRecalculating(false);
-            toast.error(err.response?.data?.error || 'Ошибка пересчёта');
+            toast.error(err.response?.data?.error || 'Ошибка запуска пересчёта');
         });
-    }, [queryClient]);
+    }, [startRecalcPolling]);
+
+    // Фазы, уникальные для пересчёта (не встречаются при генерации)
+    const RECALC_ONLY_PHASE = 'AI корректировка...';
+
+    // При маунте — проверяем, не идёт ли уже задача (генерация или пересчёт)
+    useEffect(() => {
+        $axios.get('/plan/ai_plan/progress/').then(res => {
+            if (res.data.status === 'running') {
+                // "AI корректировка..." — фаза уникальная для пересчёта
+                // Общие фазы (Сбор данных, Расчёт весов, Построение графика) — при пересчёте total=4
+                if (res.data.phase === RECALC_ONLY_PHASE || res.data.total === 4) {
+                    startRecalcPolling();
+                } else {
+                    startPolling();
+                }
+            }
+        });
+        return () => { stopPolling(); stopRecalcPolling(); };
+    }, [startPolling, stopPolling, startRecalcPolling, stopRecalcPolling]);
 
     // Вспомогательная функция: последовательно переключает этапы промпт-обработки по таймеру
     const advancePromptPhases = useCallback((phaseIndex: number, resolve: () => void) => {
@@ -636,84 +708,95 @@ export const AiPlanPage = () => {
                 )}
 
                 {/* Кнопка пересчёта — активна если данные изменились */}
-                {!generating && (
+                {!generating && !recalculating && (
                     <Btn
                         onClick={handleRecalculate}
-                        disabled={!needsRecalculation || recalculating}
+                        disabled={!needsRecalculation}
                         className={twMerge(
                             "border rounded-lg py-2 font-semibold transition-colors",
-                            needsRecalculation && !recalculating
+                            needsRecalculation
                                 ? "border-green-400 bg-green-100 text-green-800 hover:bg-green-200"
                                 : "border-slate-300 bg-slate-100 text-slate-400 cursor-not-allowed"
                         )}
                     >
-                        {recalculating ? (
-                            <span className="flex items-center gap-2">
-                                <span className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
-                                Пересчёт...
-                            </span>
-                        ) : (
-                            'Пересчитать таблицу'
-                        )}
+                        Пересчитать таблицу
+                    </Btn>
+                )}
+                {recalculating && (
+                    <Btn
+                        onClick={() => { $axios.post('/plan/ai_plan/cancel/'); toast.info('Отмена пересчёта...'); }}
+                        className="border border-orange-400 bg-orange-100 text-orange-800 rounded-lg py-2 font-semibold"
+                    >
+                        Отменить пересчёт
                     </Btn>
                 )}
             </div>
 
-            {/* Этапы генерации — "связка сосисок" */}
-            {(generating || completedPhases.size > 0 || failedPhase) && (
-                <div className="border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-0">
-                        {GENERATION_PHASES.map((phase, idx) => {
-                            const isCompleted = completedPhases.has(phase.key);
-                            const isCurrent = generating && progress?.phase === phase.key;
-                            const isFailed = failedPhase === phase.key;
-                            // Ожидает — ещё не дошли до этого этапа
-                            const isPending = !isCompleted && !isCurrent && !isFailed;
+            {/* Этапы — "связка сосисок" (генерация или пересчёт) */}
+            {(() => {
+                // Определяем какой набор фаз и состояние показывать
+                const isRecalc = recalculating || recalcCompletedPhases.size > 0 || recalcFailedPhase;
+                const isGen = generating || completedPhases.size > 0 || failedPhase;
+                const phases = isRecalc ? RECALC_PHASES : GENERATION_PHASES;
+                const completed = isRecalc ? recalcCompletedPhases : completedPhases;
+                const failed = isRecalc ? recalcFailedPhase : failedPhase;
+                const isRunning = isRecalc ? recalculating : generating;
+                const currentPhase = progress?.phase || '';
+                // Цветовая тема: пересчёт — зелёный, генерация — синий
+                const activeColor = isRecalc ? 'bg-green-500' : 'bg-blue-500';
+                const pulseColor = isRecalc ? 'bg-green-400' : 'bg-blue-400';
 
-                            return (
-                                <div key={phase.key} className="flex items-center flex-1 min-w-0">
-                                    {/* Сосиска — этап */}
-                                    <div
-                                        className={twMerge(
-                                            "flex-1 h-9 rounded-full flex items-center justify-center px-2 transition-all duration-500 relative overflow-hidden",
-                                            isCompleted && "bg-green-500 text-white",
-                                            isCurrent && "bg-blue-500 text-white",
-                                            isFailed && "bg-red-500 text-white",
-                                            isPending && "bg-slate-100 text-slate-400",
-                                        )}
-                                    >
-                                        {/* Пульсация для текущего этапа */}
-                                        {isCurrent && (
-                                            <div className="absolute inset-0 bg-blue-400 rounded-full animate-pulse opacity-30" />
-                                        )}
-                                        <div className="flex items-center gap-1.5 z-10 whitespace-nowrap">
-                                            {/* Иконка статуса */}
-                                            {isCompleted && <span className="text-xs">&#10003;</span>}
-                                            {isCurrent && <span className="text-xs animate-spin">&#9696;</span>}
-                                            {isFailed && <span className="text-xs">&#10007;</span>}
-                                            {isPending && <span className="text-xs text-slate-300">&#9679;</span>}
-                                            <span className="text-[11px] font-medium truncate">{phase.label}</span>
+                if (!isRecalc && !isGen) return null;
+
+                return (
+                    <div className="border border-slate-200 rounded-lg p-4">
+                        <div className="flex items-center gap-0">
+                            {phases.map((phase, idx) => {
+                                const isCompleted = completed.has(phase.key);
+                                const isCurrent = isRunning && currentPhase === phase.key;
+                                const isFailed = failed === phase.key;
+                                const isPending = !isCompleted && !isCurrent && !isFailed;
+
+                                return (
+                                    <div key={phase.key} className="flex items-center flex-1 min-w-0">
+                                        <div
+                                            className={twMerge(
+                                                "flex-1 h-9 rounded-full flex items-center justify-center px-2 transition-all duration-500 relative overflow-hidden",
+                                                isCompleted && "bg-green-500 text-white",
+                                                isCurrent && `${activeColor} text-white`,
+                                                isFailed && "bg-red-500 text-white",
+                                                isPending && "bg-slate-100 text-slate-400",
+                                            )}
+                                        >
+                                            {isCurrent && (
+                                                <div className={`absolute inset-0 ${pulseColor} rounded-full animate-pulse opacity-30`} />
+                                            )}
+                                            <div className="flex items-center gap-1.5 z-10 whitespace-nowrap">
+                                                {isCompleted && <span className="text-xs">&#10003;</span>}
+                                                {isCurrent && <span className="text-xs animate-spin">&#9696;</span>}
+                                                {isFailed && <span className="text-xs">&#10007;</span>}
+                                                {isPending && <span className="text-xs text-slate-300">&#9679;</span>}
+                                                <span className="text-[11px] font-medium truncate">{phase.label}</span>
+                                            </div>
                                         </div>
+                                        {idx < phases.length - 1 && (
+                                            <div className={twMerge(
+                                                "w-2 h-1 shrink-0",
+                                                isCompleted ? "bg-green-400" : "bg-slate-200"
+                                            )} />
+                                        )}
                                     </div>
-                                    {/* Соединитель между сосисками */}
-                                    {idx < GENERATION_PHASES.length - 1 && (
-                                        <div className={twMerge(
-                                            "w-2 h-1 shrink-0",
-                                            isCompleted ? "bg-green-400" : "bg-slate-200"
-                                        )} />
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-                    {/* Детали текущего этапа — количество обработанных заказов */}
-                    {progress && progress.phase === 'Комментарии AI...' && progress.total > 0 && (
-                        <div className="mt-2 text-xs text-slate-500 text-center">
-                            Заказы прокомментированы: {progress.current} / {progress.total}
+                                );
+                            })}
                         </div>
-                    )}
-                </div>
-            )}
+                        {progress && progress.phase === 'Комментарии AI...' && progress.total > 0 && (
+                            <div className="mt-2 text-xs text-slate-500 text-center">
+                                Заказы прокомментированы: {progress.current} / {progress.total}
+                            </div>
+                        )}
+                    </div>
+                );
+            })()}
 
             {/* Баннер ошибки генерации (например: не задан граф для типов) */}
             {genError && (

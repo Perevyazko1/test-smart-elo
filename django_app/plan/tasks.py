@@ -1566,6 +1566,157 @@ def _calc_equalizer_suggestions(grid_summary, dept_dependencies, target_loads, d
     return suggestions[:5]
 
 
+# ─── Celery-задача пересчёта (без регенерации комментариев) ──────
+
+@shared_task(name="recalculate_ai_plan", bind=True, max_retries=0, time_limit=600, soft_time_limit=580)
+def recalculate_ai_plan(self):
+    """Лёгкий пересчёт: Python веса → GPT Batch (корректировка по feedback) → chart.
+
+    Не генерирует AI summary и комментарии — только пересчитывает приоритеты и график.
+    Использует те же task_status/task_phase поля для отслеживания прогресса.
+    """
+    from django.utils import timezone as tz
+    from core.models import OrderProduct
+    from plan.models import AiPlanEntry, AiPlanConfig, ProductType
+    from plan.views import _collect_orders_data
+
+    _update_config(
+        task_id=self.request.id or '',
+        task_status='running',
+        task_phase='Сбор данных...',
+        task_progress=0,
+        task_total=4,
+        task_error='',
+    )
+
+    try:
+        # 1. Сбор данных
+        data = _collect_orders_data()
+        config, _ = AiPlanConfig.objects.get_or_create(pk=1)
+        orders = data['orders']
+
+        workflows = {}
+        for pt in ProductType.objects.all():
+            if pt.workflow_graph:
+                workflows[pt.name] = pt.workflow_graph
+
+        if _is_cancelled():
+            _update_config(task_status='cancelled', task_phase='')
+            return
+
+        # 2. Python веса
+        _update_config(task_phase='Расчёт весов...', task_progress=1)
+
+        weight_results = _calculate_all_weights(orders, data['dept_summary'], config, workflows)
+        weight_map = {r['series_id']: r for r in weight_results}
+
+        # Pinned weights (ai_deadline) — берём MAX(промпт-вес, формульный вес)
+        pinned_sids = set()
+        for entry in AiPlanEntry.objects.filter(ai_deadline__isnull=False).values('order_product__series_id', 'sort_weight'):
+            sid = entry['order_product__series_id']
+            pinned_sids.add(sid)
+            if sid in weight_map:
+                weight_map[sid]['weight'] = max(entry['sort_weight'], weight_map[sid]['weight'])
+                for r in weight_results:
+                    if r['series_id'] == sid:
+                        r['weight'] = weight_map[sid]['weight']
+                        break
+
+        _save_weights_to_db(weight_results)
+
+        if _is_cancelled():
+            _update_config(task_status='cancelled', task_phase='')
+            return
+
+        # 3. GPT Batch — корректировка по обратной связи
+        _update_config(task_phase='AI корректировка...', task_progress=2)
+
+        sorted_by_weight = sorted(weight_results, key=lambda x: x['weight'], reverse=True)
+        top_series_ids = {r['series_id'] for r in sorted_by_weight[:BATCH_SIZE]}
+        top_series_ids |= pinned_sids
+
+        top_orders = []
+        for o in orders:
+            if o['series_id'] in top_series_ids:
+                o_copy = dict(o)
+                o_copy['calculated_weight'] = weight_map[o['series_id']]['weight']
+                top_orders.append(o_copy)
+
+        batch_payload = {
+            'base_prompt': config.base_prompt,
+            'orders': top_orders,
+            'department_load': data['dept_summary'],
+            'today': data['today'],
+            'priorities': {
+                'k_deadline': config.weight_k_deadline,
+                'k_progress': 100 - config.weight_k_revenue,
+                'k_dept_load': config.weight_k_dept_load,
+                'k_feedback': config.weight_k_feedback,
+                'k_revenue': config.weight_k_revenue,
+            },
+        }
+
+        resp = _request_with_retry(N8N_BATCH_URL, batch_payload, timeout=180)
+        resp.raise_for_status()
+        try:
+            gpt_entries = resp.json().get('entries', [])
+        except Exception:
+            gpt_entries = []
+
+        # 4. Применить GPT корректировку
+        k4 = config.weight_k_feedback
+        for entry in gpt_entries:
+            sid = entry.get('series_id', '')
+            adj = entry.get('weight_adjustment', 0)
+            comment = entry.get('ai_comment', '')
+            try:
+                op = OrderProduct.objects.filter(series_id=sid).first()
+                if not op:
+                    continue
+                ai_entry, _ = AiPlanEntry.objects.get_or_create(order_product=op)
+                base_weight = weight_map.get(sid, {}).get('weight', 500)
+                adj_value = int(adj * k4 / 50)
+                final_weight = max(0, min(1000, base_weight + adj_value))
+                ai_entry.sort_weight = final_weight
+                detail = weight_map.get(sid, {}).get('detail', {})
+                detail['adjustment'] = adj
+                detail['adj_reason'] = comment
+                ai_entry.weight_detail = detail
+                ai_entry.save(update_fields=['sort_weight', 'weight_detail', 'updated_at'])
+            except Exception as e:
+                logger.warning(f'recalculate_ai_plan: ошибка для {sid}: {e}')
+
+        if _is_cancelled():
+            _update_config(task_status='cancelled', task_phase='')
+            return
+
+        # 5. Уникальность весов
+        _update_config(task_phase='Построение графика...', task_progress=3)
+
+        all_entries_db = list(AiPlanEntry.objects.all().values('id', 'sort_weight'))
+        all_entries_db.sort(key=lambda x: x['sort_weight'], reverse=True)
+        seen = set()
+        for e in all_entries_db:
+            while e['sort_weight'] in seen:
+                e['sort_weight'] -= 1
+            seen.add(e['sort_weight'])
+            AiPlanEntry.objects.filter(id=e['id']).update(sort_weight=e['sort_weight'])
+
+        # 6. Пересчитать график
+        chart = _build_chart_grid()
+        cfg, _ = AiPlanConfig.objects.get_or_create(pk=1)
+        cfg.chart_data = chart
+        cfg.needs_recalculation = False
+        cfg.last_recalculated_at = tz.now()
+        cfg.save(update_fields=['chart_data', 'needs_recalculation', 'last_recalculated_at', 'updated_at'])
+
+        _update_config(task_status='completed', task_phase='', task_progress=4)
+
+    except Exception as e:
+        logger.error(f'Ошибка пересчёта AI плана: {e}', exc_info=True)
+        _update_config(task_status='failed', task_phase='', task_error=str(e))
+
+
 # ─── Основная Celery-задача ──────────────────────────────────────
 
 @shared_task(name="generate_ai_plan_full", bind=True, max_retries=0, time_limit=3600, soft_time_limit=3500)
